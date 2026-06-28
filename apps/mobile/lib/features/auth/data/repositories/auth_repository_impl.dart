@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/app_user.dart';
+import '../../domain/entities/mfa_enrollment.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
@@ -80,6 +81,32 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> hasPermission(String permissionKey) async {
     try {
       return await _remote.hasPermission(permissionKey);
+    } catch (e) {
+      throw _map(e);
+    }
+  }
+
+  @override
+  Future<MfaEnrollment> startTotpEnrollment() async {
+    try {
+      final res = await _remote.enrollTotp();
+      return MfaEnrollment(
+        factorId: res.id,
+        secret: res.totp.secret,
+        uri: res.totp.uri,
+      );
+    } catch (e) {
+      throw _map(e);
+    }
+  }
+
+  @override
+  Future<void> confirmTotpEnrollment({
+    required String factorId,
+    required String code,
+  }) async {
+    try {
+      await _remote.verifyTotp(factorId, code);
     } catch (e) {
       throw _map(e);
     }

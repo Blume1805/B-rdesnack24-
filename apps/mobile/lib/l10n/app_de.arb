@@ -17,5 +17,22 @@
   "fieldRequired": "Pflichtfeld",
   "emailInvalid": "Bitte eine gültige E-Mail eingeben.",
   "passwordTooShort": "Mindestens 10 Zeichen.",
-  "welcome": "Willkommen bei Bördesnack24"
+  "welcome": "Willkommen bei Bördesnack24",
+  "registerTitle": "Kundenkonto erstellen",
+  "fullName": "Name",
+  "confirmPassword": "Passwort bestätigen",
+  "passwordsDontMatch": "Die Passwörter stimmen nicht überein.",
+  "registerSuccess": "Konto erstellt. Bitte bestätige deine E-Mail-Adresse.",
+  "backToSignIn": "Zurück zur Anmeldung",
+  "resetTitle": "Passwort zurücksetzen",
+  "sendResetLink": "Link senden",
+  "resetSent": "Falls die Adresse existiert, wurde ein Link versendet.",
+  "consentAnalytics": "Anonyme Nutzungsanalyse erlauben",
+  "consentAnalyticsHint": "Hilft uns, die App zu verbessern. Jederzeit widerrufbar.",
+  "mfaTitle": "Zwei-Faktor-Authentifizierung",
+  "mfaScanHint": "Scanne den Code mit deiner Authenticator-App und gib den 6-stelligen Code ein.",
+  "mfaCode": "6-stelliger Code",
+  "mfaActivate": "Aktivieren",
+  "mfaActivated": "Zwei-Faktor-Authentifizierung aktiviert.",
+  "secretManual": "Manueller Schlüssel"
 }

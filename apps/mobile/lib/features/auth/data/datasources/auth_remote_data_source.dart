@@ -58,4 +58,18 @@ class AuthRemoteDataSource {
     );
     return result == true;
   }
+
+  // ── MFA (TOTP) ────────────────────────────────────────────────────────
+  Future<AuthMFAEnrollResponse> enrollTotp() {
+    return _auth.mfa.enroll(factorType: FactorType.totp);
+  }
+
+  Future<void> verifyTotp(String factorId, String code) async {
+    final challenge = await _auth.mfa.challenge(factorId: factorId);
+    await _auth.mfa.verify(
+      factorId: factorId,
+      challengeId: challenge.id,
+      code: code,
+    );
+  }
 }

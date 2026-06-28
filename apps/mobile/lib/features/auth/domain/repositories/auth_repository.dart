@@ -1,4 +1,5 @@
 import '../entities/app_user.dart';
+import '../entities/mfa_enrollment.dart';
 
 /// Vertrag der Authentifizierung. Implementierung in der Data-Schicht.
 /// Wirft bei Fehlern eine [Failure] (siehe core/error/failures.dart).
@@ -24,4 +25,13 @@ abstract interface class AuthRepository {
 
   /// Permission-Prüfung serverseitig (RPC auth_has_permission).
   Future<bool> hasPermission(String permissionKey);
+
+  /// MFA: TOTP-Einrichtung starten (liefert Secret/URI zur App-Kopplung).
+  Future<MfaEnrollment> startTotpEnrollment();
+
+  /// MFA: TOTP-Einrichtung mit 6-stelligem Code bestätigen.
+  Future<void> confirmTotpEnrollment({
+    required String factorId,
+    required String code,
+  });
 }

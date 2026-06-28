@@ -73,3 +73,6 @@ jobs:
         run: |
           supabase db start || supabase start || true
           supabase db reset --debug || true
+      - name: RLS-/Permission-Tests (pgTAP)
+        # Vorerst nicht-blockierend, bis gegen ein Live-Projekt verifiziert.
+        run: supabase test db || true

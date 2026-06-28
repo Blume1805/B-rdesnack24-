@@ -7,34 +7,53 @@ import '../../../../core/utils/validators.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../controllers/auth_providers.dart';
 
-class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key});
+/// Self-Signup ausschließlich für Kunden. Interne Nutzer werden eingeladen.
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<SignInScreen> createState() => _SignInScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SignInScreenState extends ConsumerState<SignInScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
 
   @override
   void dispose() {
+    _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final ok = await ref
-        .read(authControllerProvider.notifier)
-        .signIn(_emailCtrl.text, _passwordCtrl.text);
-    if (!ok && mounted) {
-      final l10n = AppLocalizations.of(context);
+    if (_passwordCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorInvalidCredentials)),
+        SnackBar(content: Text(l10n.passwordsDontMatch)),
+      );
+      return;
+    }
+    final ok = await ref.read(authControllerProvider.notifier).registerCustomer(
+          _emailCtrl.text,
+          _passwordCtrl.text,
+          fullName: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+        );
+    if (!mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.registerSuccess)),
+      );
+      context.go(AppRoutes.signIn);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGeneric)),
       );
     }
   }
@@ -42,10 +61,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(authControllerProvider);
-    final isLoading = state.isLoading;
+    final isLoading = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
+      appBar: AppBar(title: Text(l10n.registerTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -57,22 +76,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    l10n.appTitle,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
+                  TextFormField(
+                    controller: _nameCtrl,
+                    decoration: InputDecoration(labelText: l10n.fullName),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.signInTitle,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(labelText: l10n.email),
                     validator: (v) => switch (Validators.email(v)) {
                       'required' => l10n.fieldRequired,
@@ -84,14 +95,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   TextFormField(
                     controller: _passwordCtrl,
                     obscureText: true,
-                    autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(labelText: l10n.password),
-                    onFieldSubmitted: (_) => _submit(),
                     validator: (v) => switch (Validators.password(v)) {
                       'required' => l10n.fieldRequired,
                       'tooShort' => l10n.passwordTooShort,
                       _ => null,
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _confirmCtrl,
+                    obscureText: true,
+                    decoration:
+                        InputDecoration(labelText: l10n.confirmPassword),
+                    onFieldSubmitted: (_) => _submit(),
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
@@ -102,20 +119,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(l10n.signIn),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () => context.go(AppRoutes.forgotPassword),
-                    child: Text(l10n.forgotPassword),
+                        : Text(l10n.register),
                   ),
                   TextButton(
-                    onPressed: isLoading
-                        ? null
-                        : () => context.go(AppRoutes.register),
-                    child: Text(l10n.register),
+                    onPressed: () => context.go(AppRoutes.signIn),
+                    child: Text(l10n.backToSignIn),
                   ),
                 ],
               ),

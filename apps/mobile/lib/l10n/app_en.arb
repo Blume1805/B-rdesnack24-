@@ -17,5 +17,22 @@
   "fieldRequired": "Required",
   "emailInvalid": "Please enter a valid email.",
   "passwordTooShort": "At least 10 characters.",
-  "welcome": "Welcome to Bördesnack24"
+  "welcome": "Welcome to Bördesnack24",
+  "registerTitle": "Create customer account",
+  "fullName": "Name",
+  "confirmPassword": "Confirm password",
+  "passwordsDontMatch": "Passwords do not match.",
+  "registerSuccess": "Account created. Please confirm your email address.",
+  "backToSignIn": "Back to sign in",
+  "resetTitle": "Reset password",
+  "sendResetLink": "Send link",
+  "resetSent": "If the address exists, a link has been sent.",
+  "consentAnalytics": "Allow anonymous usage analytics",
+  "consentAnalyticsHint": "Helps us improve the app. Revocable at any time.",
+  "mfaTitle": "Two-factor authentication",
+  "mfaScanHint": "Scan the code with your authenticator app and enter the 6-digit code.",
+  "mfaCode": "6-digit code",
+  "mfaActivate": "Activate",
+  "mfaActivated": "Two-factor authentication activated.",
+  "secretManual": "Manual key"
 }
