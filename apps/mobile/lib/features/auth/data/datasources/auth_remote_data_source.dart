@@ -59,6 +59,13 @@ class AuthRemoteDataSource {
     return result == true;
   }
 
+  /// Effektive Permissions des aktuellen Nutzers (für UI-Gating).
+  Future<List<String>> myPermissions() async {
+    final result = await _client.rpc('my_permissions');
+    if (result is List) return result.map((e) => e.toString()).toList();
+    return const [];
+  }
+
   // ── MFA (TOTP) ────────────────────────────────────────────────────────
   Future<AuthMFAEnrollResponse> enrollTotp() {
     return _auth.mfa.enroll(factorType: FactorType.totp);

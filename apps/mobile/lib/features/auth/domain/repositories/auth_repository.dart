@@ -26,6 +26,9 @@ abstract interface class AuthRepository {
   /// Permission-Prüfung serverseitig (RPC auth_has_permission).
   Future<bool> hasPermission(String permissionKey);
 
+  /// Effektive Permissions des aktuellen Nutzers (für UI-Gating).
+  Future<Set<String>> myPermissions();
+
   /// MFA: TOTP-Einrichtung starten (liefert Secret/URI zur App-Kopplung).
   Future<MfaEnrollment> startTotpEnrollment();
 

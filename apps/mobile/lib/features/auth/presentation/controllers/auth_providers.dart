@@ -21,6 +21,13 @@ final currentUserProvider = FutureProvider<AppUser?>((ref) async {
   return ref.watch(authRepositoryProvider).currentUser();
 });
 
+/// Effektive Permissions des aktuellen Nutzers (für UI-Gating).
+final currentPermissionsProvider = FutureProvider<Set<String>>((ref) async {
+  final user = await ref.watch(currentUserProvider.future);
+  if (user == null) return <String>{};
+  return ref.watch(authRepositoryProvider).myPermissions();
+});
+
 /// Controller für Anmelde-/Registrierungsaktionen.
 class AuthController extends StateNotifier<AsyncValue<void>> {
   AuthController(this._ref) : super(const AsyncData(null));

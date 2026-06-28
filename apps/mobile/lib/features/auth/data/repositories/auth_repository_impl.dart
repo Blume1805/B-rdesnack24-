@@ -87,6 +87,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Set<String>> myPermissions() async {
+    try {
+      return (await _remote.myPermissions()).toSet();
+    } catch (e) {
+      throw _map(e);
+    }
+  }
+
+  @override
   Future<MfaEnrollment> startTotpEnrollment() async {
     try {
       final res = await _remote.enrollTotp();
