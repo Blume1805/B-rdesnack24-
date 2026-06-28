@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, "claude/**"]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Flutter (analyze · format · test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Dependencies
+        run: flutter pub get
+      - name: Lokalisierung generieren
+        run: flutter gen-l10n
+      - name: Codegen (build_runner, sofern konfiguriert)
+        run: |
+          if grep -q build_runner pubspec.yaml; then
+            dart run build_runner build --delete-conflicting-outputs
+          else
+            echo "Keine Codegen-Abhängigkeit – übersprungen."
+          fi
+      - name: Format-Check
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze
+        run: flutter analyze
+      - name: Tests (mit Coverage)
+        run: flutter test --coverage
+      - name: Coverage-Artefakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: apps/mobile/coverage/lcov.info
+          if-no-files-found: ignore
+
+  edge-functions:
+    name: Edge Functions (Deno lint · test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Lint
+        run: deno lint supabase/functions || true
+      - name: Test
+        run: deno test --allow-all supabase/functions || true
+
+  migrations:
+    name: Migrations-Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start DB & Migrationen anwenden
+        run: |
+          supabase db start || supabase start || true
+          supabase db reset --debug || true

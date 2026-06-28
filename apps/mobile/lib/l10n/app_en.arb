@@ -1,0 +1,21 @@
+{
+  "@@locale": "en",
+  "appTitle": "Bördesnack24",
+  "navFinance": "Finance",
+  "navManagement": "Management",
+  "navCustomer": "Customer area",
+  "signInTitle": "Sign in",
+  "email": "Email",
+  "password": "Password",
+  "signIn": "Sign in",
+  "signOut": "Sign out",
+  "forgotPassword": "Forgot password?",
+  "register": "Create account",
+  "loading": "Please wait …",
+  "errorGeneric": "Something went wrong.",
+  "errorInvalidCredentials": "Email or password is incorrect.",
+  "fieldRequired": "Required",
+  "emailInvalid": "Please enter a valid email.",
+  "passwordTooShort": "At least 10 characters.",
+  "welcome": "Welcome to Bördesnack24"
+}
