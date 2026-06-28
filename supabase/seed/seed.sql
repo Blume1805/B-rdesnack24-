@@ -68,3 +68,17 @@ on conflict do nothing;
 -- Mitarbeiter & Kunde: KEINE pauschalen Rollenrechte.
 -- Mitarbeiter erhalten Rechte ausschließlich über user_permissions (ABAC).
 -- Kunden-Zugriff wird über kundenspezifische RLS-Policies (Kategorie 3) geregelt.
+
+-- SKR-03-Konten (Verfahrensdokumentation Abschnitt 9.4) ----------------------
+insert into public.finance_accounts(code, name, direction, default_tax, sort_order) values
+  ('1000', 'Kasse',                        'asset',     null, 10),
+  ('1200', 'Bank (Geschäftskonto)',        'asset',     null, 20),
+  ('3300', 'Wareneinkauf 7 %',             'expense',   7.0,  30),
+  ('3400', 'Wareneinkauf 19 %',            'expense',   19.0, 40),
+  ('4805', 'Reparatur/Instandhaltung BGA', 'expense',   19.0, 50),
+  ('4980', 'Sonstige betr. Aufwendungen',  'expense',   19.0, 60),
+  ('8300', 'Erlöse 7 %',                   'revenue',   7.0,  70),
+  ('8400', 'Erlöse 19 %',                  'revenue',   19.0, 80)
+on conflict (code) do update
+  set name = excluded.name, direction = excluded.direction,
+      default_tax = excluded.default_tax, sort_order = excluded.sort_order;

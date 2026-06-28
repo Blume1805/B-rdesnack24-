@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,6 +17,8 @@ import 'core/di/providers.dart';
 /// Consent-Flow, nicht hier.
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('de_DE');
 
   final config = AppConfig.fromEnvironment();
   assert(config.isValid, 'SUPABASE_URL/ANON_KEY fehlen (--dart-define).');

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/approvals/presentation/screens/approvals_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
@@ -16,6 +17,7 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
+  static const approvals = '/finance/approvals';
 }
 
 /// Öffentlich erreichbare Routen (ohne Anmeldung).
@@ -59,6 +61,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.mfaEnroll,
         builder: (context, state) => const MfaEnrollScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.approvals,
+        builder: (context, state) => const ApprovalsScreen(),
       ),
     ],
   );

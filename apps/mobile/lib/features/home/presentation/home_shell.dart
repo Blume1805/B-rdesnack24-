@@ -5,7 +5,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../../customer/presentation/customer_screen.dart';
-import '../../../finance/presentation/finance_screen.dart';
+import '../../../finance/presentation/screens/finance_screen.dart';
 import '../../../management/presentation/management_screen.dart';
 
 /// Rollenabhängige Hauptnavigation. Sichtbarkeit der Bereiche richtet sich
