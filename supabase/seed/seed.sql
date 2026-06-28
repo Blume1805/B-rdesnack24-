@@ -82,3 +82,11 @@ insert into public.finance_accounts(code, name, direction, default_tax, sort_ord
 on conflict (code) do update
   set name = excluded.name, direction = excluded.direction,
       default_tax = excluded.default_tax, sort_order = excluded.sort_order;
+
+-- Automaten (3 Stück lt. HACCP-Konzept) -- ANPASSEN: echte Standorte/Koordinaten
+-- und Nayax-Terminal-IDs eintragen.
+insert into public.machines(code, name, type, is_cooled, location_name, city, status) values
+  ('A1', 'Automat 1', 'snack', false, 'Standort 1 (ANPASSEN)', 'Sülzetal OT Osterweddingen', 'active'),
+  ('A2', 'Automat 2', 'combi', true,  'Standort 2 (ANPASSEN)', 'Sülzetal OT Osterweddingen', 'active'),
+  ('A3', 'Automat 3', 'drink', true,  'Standort 3 (ANPASSEN)', 'Sülzetal OT Osterweddingen', 'active')
+on conflict (code) do nothing;
