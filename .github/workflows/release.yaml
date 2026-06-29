@@ -1,0 +1,78 @@
+name: Release
+
+# Manuell oder per Version-Tag. Erstellt signierte Store-Builds.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  android:
+    name: Android (App Bundle)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      # Plattform-Ordner erzeugen, falls nicht eingecheckt.
+      - run: flutter create --platforms=android .
+      # Keystore + key.properties aus Secrets bereitstellen.
+      - name: Keystore einrichten
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+            printf '%s' "$KEY_PROPERTIES" > android/key.properties
+          else
+            echo "Keine Signing-Secrets gesetzt – baue unsigniert (nur Verifikation)."
+          fi
+      - name: Build App Bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=APP_ENV=prod
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: apps/mobile/build/app/outputs/bundle/release/*.aab
+          if-no-files-found: warn
+
+  ios:
+    name: iOS (IPA)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter create --platforms=ios .
+      # Signierung erfordert Apple-Zertifikate/Provisioning (Secrets/Fastlane match).
+      # Ohne Secrets: nur No-Codesign-Build zur Verifikation.
+      - name: Build (no codesign Fallback)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=APP_ENV=prod
