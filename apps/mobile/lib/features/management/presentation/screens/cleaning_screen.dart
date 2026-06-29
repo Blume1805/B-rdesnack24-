@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/machine_dropdown.dart';
+import '../widgets/photo_picker_button.dart';
 import '../widgets/protocol_scaffold.dart';
 
 /// Reinigungsprotokoll (Anlage E).
@@ -50,6 +51,7 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
   final _notesCtrl = TextEditingController();
   String? _machineId;
   String _type = 'exterior';
+  String? _photoPath;
 
   @override
   void dispose() {
@@ -65,6 +67,7 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
       'cleaning_type': _type,
       'agent': _agentCtrl.text.trim().isEmpty ? null : _agentCtrl.text.trim(),
       'notes': _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      'photo_path': _photoPath,
       'cleaned_at': DateTime.now().toIso8601String(),
     });
   }
@@ -110,6 +113,8 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
                 decoration: const InputDecoration(labelText: 'Bemerkung'),
                 maxLines: 2,
               ),
+              const SizedBox(height: 12),
+              PhotoPickerButton(onUploaded: (p) => _photoPath = p),
               const SizedBox(height: 16),
               FilledButton(onPressed: _submit, child: const Text('Speichern')),
             ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/management_providers.dart';
 import '../widgets/machine_dropdown.dart';
+import '../widgets/photo_picker_button.dart';
 import '../widgets/protocol_scaffold.dart';
 
 /// Vernichtungsprotokoll (Anlage I) — MHD/Verderb. Koppelt bei Stammprodukt
@@ -55,6 +56,7 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
   String? _productId;
   String _reason = 'mhd';
   DateTime? _mhdDate;
+  String? _photoPath;
 
   @override
   void dispose() {
@@ -73,6 +75,7 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
       'quantity': int.parse(_qtyCtrl.text),
       'reason': _reason,
       'mhd_date': _mhdDate?.toIso8601String().substring(0, 10),
+      'photo_path': _photoPath,
       'disposed_at': DateTime.now().toIso8601String(),
     });
   }
@@ -171,6 +174,8 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
                   if (picked != null) setState(() => _mhdDate = picked);
                 },
               ),
+              const SizedBox(height: 8),
+              PhotoPickerButton(onUploaded: (p) => _photoPath = p),
               const SizedBox(height: 8),
               FilledButton(onPressed: _submit, child: const Text('Speichern')),
             ],

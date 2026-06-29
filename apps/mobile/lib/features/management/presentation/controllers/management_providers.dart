@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/services/outbox_service.dart';
 import '../../data/management_remote_data_source.dart';
 import '../../data/management_repository_impl.dart';
 import '../../domain/entities/machine.dart';
@@ -69,9 +70,19 @@ class ManagementActionsController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   ManagementRepository get _repo => _ref.read(managementRepositoryProvider);
 
+  /// Speichert einen Protokolleintrag. Bei fehlender Verbindung wird der Eintrag
+  /// offline in die Outbox gestellt und später automatisch synchronisiert.
   Future<bool> addProtocol(String table, Map<String, dynamic> data) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _repo.addProtocol(table, data));
+    if (state.hasError) {
+      final outbox = _ref.read(outboxServiceProvider);
+      if (!await outbox.isOnline()) {
+        await outbox.enqueue(table, data);
+        state = const AsyncData(null);
+        return true; // offline vorgemerkt
+      }
+    }
     return !state.hasError;
   }
 

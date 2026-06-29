@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/app_config.dart';
+import '../services/push_service.dart';
 
 /// Globale Konfiguration. Wird in main() via overrideWithValue gesetzt.
 final appConfigProvider = Provider<AppConfig>(
@@ -23,4 +24,20 @@ final currentSessionProvider = Provider<Session?>((ref) {
   // Reagiert auf Auth-Änderungen.
   ref.watch(authStateChangesProvider);
   return ref.watch(supabaseClientProvider).auth.currentSession;
+});
+
+/// FCM-Push-Dienst.
+final pushServiceProvider = Provider<PushService>(
+  (ref) => PushService(ref.watch(supabaseClientProvider)),
+);
+
+/// Registriert das Gerätetoken automatisch nach Anmeldung (no-op ohne Firebase).
+final pushRegistrationProvider = Provider<void>((ref) {
+  ref.listen<Session?>(
+    currentSessionProvider,
+    (prev, next) {
+      if (next != null) ref.read(pushServiceProvider).registerCurrentDevice();
+    },
+    fireImmediately: true,
+  );
 });

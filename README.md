@@ -63,4 +63,14 @@ Versionen; lückenloser Audit-Trail. Siehe [`docs/BERECHTIGUNGSKONZEPT.md`](docs
 
 ## Status
 
-In aktiver Entwicklung — **Phase 0 (Fundament)**. Roadmap im freigegebenen Pflichtenheft.
+Alle Phasen des Pflichtenhefts code-/schemaseitig umgesetzt:
+
+- ✅ **Phase 0** — Fundament (Auth, RBAC/ABAC, Audit, RLS, CI/CD)
+- ✅ **Phase 1** — Finanzdashboard (sevDesk, Zeitraum-Auswertung, PDF, Dual-Control)
+- ✅ **Phase 2** — Unternehmensverwaltung (Inventur/Realtime, HACCP-Protokolle, Nayax, Dokumente)
+- ✅ **Phase 3** — Kundenbereich (Angebote, Automatenfinder, Echtzeit-Verfügbarkeit, Profil/Consent)
+- ✅ **Phase 4** — Go-Live (FCM-Push, Foto-/Datei-Upload, Offline-Outbox, Release-Pipeline, Store/Privacy-Doku)
+
+Ausstehend: Live-Verifikation gegen ein Supabase-Projekt (RLS-/Integrationstests scharf schalten),
+Bereitstellung der Zugänge (sevDesk, Nayax, Firebase, Apple/Google) und finale Store-Assets.
+Siehe `docs/` (ARCHITECTURE, FINANCE, MANAGEMENT, CUSTOMER, PRIVACY, OPERATIONS, DEPLOYMENT).

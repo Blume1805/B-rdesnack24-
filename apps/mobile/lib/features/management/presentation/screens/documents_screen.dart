@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 
 final _documentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
@@ -52,11 +54,48 @@ class DocumentsScreen extends ConsumerWidget {
                     subtitle: Text(
                       '${d['category'] ?? '—'} · v${d['current_version']} · ${d['status']}',
                     ),
+                    trailing: canEdit
+                        ? IconButton(
+                            tooltip: 'Neue Version hochladen',
+                            icon: const Icon(Icons.upload_file),
+                            onPressed: () =>
+                                _addVersion(context, ref, d['id'] as String),
+                          )
+                        : null,
                   );
                 },
               ),
       ),
     );
+  }
+
+  Future<void> _addVersion(BuildContext context, WidgetRef ref, String docId) async {
+    final picked = await FilePicker.platform.pickFiles(withData: true);
+    if (picked == null || picked.files.isEmpty) return;
+    final file = picked.files.first;
+    if (file.bytes == null) return;
+    try {
+      final path = await ref.read(storageServiceProvider).upload(
+            bucket: 'documents',
+            filename: file.name,
+            bytes: file.bytes!,
+          );
+      await ref.read(supabaseClientProvider).rpc('add_document_version', params: {
+        'p_document': docId,
+        'p_file_path': path,
+        'p_notes': file.name,
+      });
+      if (!context.mounted) return;
+      ref.invalidate(_documentsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Neue Version gespeichert.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload fehlgeschlagen: $e')),
+      );
+    }
   }
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {

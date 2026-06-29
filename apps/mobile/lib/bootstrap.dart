@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -9,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
+import 'core/services/push_service.dart';
 
 /// Initialisiert Infrastruktur (Supabase, optional Sentry) und startet die App.
 ///
@@ -27,6 +29,15 @@ Future<void> bootstrap() async {
     url: config.supabaseUrl,
     anonKey: config.supabaseAnonKey,
   );
+
+  // Firebase ist optional: nur wenn nativ konfiguriert (google-services.json /
+  // GoogleService-Info.plist). Schlägt es fehl, bleibt Push deaktiviert.
+  try {
+    await Firebase.initializeApp();
+    PushService.available = true;
+  } catch (_) {
+    PushService.available = false;
+  }
 
   final app = ProviderScope(
     overrides: [appConfigProvider.overrideWithValue(config)],
