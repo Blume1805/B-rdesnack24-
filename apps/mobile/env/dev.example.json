@@ -4,5 +4,6 @@
   "APP_ENV": "dev",
   "SENTRY_DSN": "",
   "POSTHOG_API_KEY": "",
-  "POSTHOG_HOST": "https://eu.posthog.com"
+  "POSTHOG_HOST": "https://eu.posthog.com",
+  "GOOGLE_REVIEW_URL": ""
 }

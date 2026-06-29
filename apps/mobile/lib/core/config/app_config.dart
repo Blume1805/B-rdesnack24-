@@ -10,6 +10,7 @@ class AppConfig {
     this.sentryDsn = '',
     this.posthogApiKey = '',
     this.posthogHost = 'https://eu.posthog.com',
+    this.googleReviewUrl = '',
     this.environment = 'dev',
   });
 
@@ -18,6 +19,7 @@ class AppConfig {
   final String sentryDsn;
   final String posthogApiKey;
   final String posthogHost;
+  final String googleReviewUrl;
   final String environment;
 
   bool get hasSentry => sentryDsn.isNotEmpty;
@@ -34,6 +36,7 @@ class AppConfig {
         'POSTHOG_HOST',
         defaultValue: 'https://eu.posthog.com',
       ),
+      googleReviewUrl: String.fromEnvironment('GOOGLE_REVIEW_URL'),
       environment: String.fromEnvironment('APP_ENV', defaultValue: 'dev'),
     );
   }
