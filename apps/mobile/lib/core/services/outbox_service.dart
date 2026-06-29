@@ -47,7 +47,9 @@ class OutboxService {
     for (final item in list) {
       try {
         final m = jsonDecode(item) as Map<String, dynamic>;
-        await _client.from(m['table'] as String).insert(m['data']);
+        await _client
+            .from(m['table'] as String)
+            .insert(m['data'] as Map<String, dynamic>);
         sent++;
       } catch (_) {
         remaining.add(item); // bei Fehler erneut versuchen

@@ -99,10 +99,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<MfaEnrollment> startTotpEnrollment() async {
     try {
       final res = await _remote.enrollTotp();
+      final totp = res.totp;
+      if (totp == null) {
+        throw const ServerFailure('MFA-Einrichtung nicht verfügbar.');
+      }
       return MfaEnrollment(
         factorId: res.id,
-        secret: res.totp.secret,
-        uri: res.totp.uri,
+        secret: totp.secret,
+        uri: totp.uri,
       );
     } catch (e) {
       throw _map(e);

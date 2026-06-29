@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/machine.dart';
-import '../../domain/entities/stock_item.dart';
-import '../../domain/repositories/management_repository.dart';
+import '../domain/entities/machine.dart';
+import '../domain/entities/stock_item.dart';
+import '../domain/repositories/management_repository.dart';
 import 'management_remote_data_source.dart';
 
 class ManagementRepositoryImpl implements ManagementRepository {
