@@ -26,6 +26,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     super.dispose();
   }
 
+  void _fillDemo(String email, String password) {
+    _emailCtrl.text = email;
+    _passwordCtrl.text = password;
+    _submit();
+  }
+
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final ok = await ref
@@ -116,6 +122,46 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ? null
                         : () => context.go(AppRoutes.register),
                     child: Text(l10n.register),
+                  ),
+                  const Divider(height: 32),
+                  Text(
+                    'Demo-Zugänge',
+                    style: Theme.of(context).textTheme.labelMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      OutlinedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => _fillDemo(
+                                  'demo-admin@boerdesnack24.app',
+                                  'Demo!Boerde24',
+                                ),
+                        child: const Text('Admin'),
+                      ),
+                      OutlinedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => _fillDemo(
+                                  'demo-gs@boerdesnack24.app',
+                                  'Demo!Boerde24',
+                                ),
+                        child: const Text('Gesellschafter'),
+                      ),
+                      OutlinedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => _fillDemo(
+                                  'demo-kunde@boerdesnack24.app',
+                                  'Demo!Boerde24',
+                                ),
+                        child: const Text('Kunde'),
+                      ),
+                    ],
                   ),
                 ],
               ),

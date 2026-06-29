@@ -20,6 +20,7 @@ revoke all on schema app from anon, authenticated;
 create or replace function app.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public, app
 as $$
 begin
   new.updated_at := now();
@@ -42,6 +43,7 @@ comment on function app.set_updated_at() is
 create or replace function app.set_created_by()
 returns trigger
 language plpgsql
+set search_path = public, app
 as $$
 begin
   if new.created_by is null then

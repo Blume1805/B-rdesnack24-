@@ -111,7 +111,7 @@ create index if not exists idx_shapprovals_status on public.shareholder_approval
 -- ============================================================================
 
 -- Rolle des aktuellen (oder angegebenen) aktiven Nutzers.
-create or replace function public.current_role(uid uuid default auth.uid())
+create or replace function public.app_role(uid uuid default auth.uid())
 returns app.role_key
 language sql
 stable
@@ -133,7 +133,7 @@ stable
 security definer
 set search_path = public, app
 as $$
-  select public.current_role(uid) = 'system_admin';
+  select public.app_role(uid) = 'system_admin';
 $$;
 
 -- Ist der aktuelle Nutzer aktiver Gesellschafter (Rechte nur nach Freigabe)?
@@ -217,8 +217,8 @@ begin
     -- Rolle aus Einladungs-Metadaten, sonst Self-Signup = customer
     coalesce((new.raw_user_meta_data->>'role')::app.role_key, 'customer'),
     -- Kunden sind nach E-Mail-Bestätigung sofort aktiv; eingeladene interne Nutzer bleiben 'invited'
-    case when coalesce(new.raw_user_meta_data->>'role','customer') = 'customer'
-         then 'active' else 'invited' end,
+    (case when coalesce(new.raw_user_meta_data->>'role','customer') = 'customer'
+         then 'active' else 'invited' end)::app.profile_status,
     case when coalesce(new.raw_user_meta_data->>'role','customer') = 'customer'
          then now() else null end
   )
