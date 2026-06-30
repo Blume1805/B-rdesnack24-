@@ -1,46 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Bördesnack24 — Unternehmensplattform">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="boerdesnack24">
+  <meta name="apple-mobile-web-app-title" content="Bördesnack24">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>boerdesnack24</title>
+  <title>Bördesnack24</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    html, body { margin:0; padding:0; height:100%; background:#14110E; color:#FDC102;
+                  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #loader { position:fixed; inset:0; display:flex; flex-direction:column;
+              align-items:center; justify-content:center; gap:18px; z-index:9999; }
+    #loader .logo { width:64px; height:64px; border:3px solid #FDC102; border-top-color:transparent;
+                    border-radius:50%; animation:spin 1s linear infinite; }
+    #loader .title { font-weight:700; letter-spacing:2px; font-size:18px; }
+    #loader .hint { color:#a89876; font-size:12px; max-width:80%; text-align:center; }
+    #err { display:none; position:fixed; inset:24px; background:#1d1813; border:1px solid #FDC102;
+           color:#fff; padding:16px; border-radius:12px; font:13px/1.5 monospace; overflow:auto; z-index:10000;
+           white-space:pre-wrap; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="loader">
+    <div class="logo"></div>
+    <div class="title">BÖRDESNACK24</div>
+    <div class="hint" id="hint">App wird geladen …</div>
+  </div>
+  <pre id="err"></pre>
+  <script>
+    // Sichtbarer Status während Boot:
+    const hint = document.getElementById('hint');
+    const err  = document.getElementById('err');
+    const showErr = (msg) => {
+      err.style.display = 'block';
+      err.textContent = String(msg);
+      document.getElementById('loader').style.display = 'none';
+    };
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+    // Globale Fehler sichtbar machen.
+    window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
+    window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
+
+    // Alte Service Worker entfernen (Cache-Probleme nach Updates vermeiden).
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
+    }
+
+    // Wenn nach 25s noch nichts gerendert ist: Hinweis statt weiße Seite.
+    setTimeout(() => {
+      hint.textContent = 'Lade noch … (falls dauerhaft hängt: Strg+Umschalt+R drücken).';
+    }, 25000);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
