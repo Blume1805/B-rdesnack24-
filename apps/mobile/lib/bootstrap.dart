@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -30,13 +31,17 @@ Future<void> bootstrap() async {
     anonKey: config.supabaseAnonKey,
   );
 
-  // Firebase ist optional: nur wenn nativ konfiguriert (google-services.json /
-  // GoogleService-Info.plist). Schlägt es fehl, bleibt Push deaktiviert.
-  try {
-    await Firebase.initializeApp();
-    PushService.available = true;
-  } catch (_) {
-    PushService.available = false;
+  // Firebase ist optional: im Web grundsätzlich überspringen (Push gibt es nur
+  // nativ; ohne firebase_options.dart würde der Web-Init hängen). Auf Android/
+  // iOS wird Firebase ausschließlich initialisiert, wenn ein nativer Eintrag
+  // (google-services.json / GoogleService-Info.plist) vorhanden ist.
+  if (!kIsWeb) {
+    try {
+      await Firebase.initializeApp();
+      PushService.available = true;
+    } catch (_) {
+      PushService.available = false;
+    }
   }
 
   final app = ProviderScope(
