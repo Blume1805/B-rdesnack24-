@@ -123,6 +123,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         : () => context.go(AppRoutes.register),
                     child: Text(l10n.register),
                   ),
+                  const SizedBox(height: 8),
+                  // Rechtsseiten öffentlich zugänglich (§ 5 DDG, Art. 12 DSGVO).
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.imprint),
+                        child: const Text('Impressum'),
+                      ),
+                      const Text('·'),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.privacy),
+                        child: const Text('Datenschutz'),
+                      ),
+                      const Text('·'),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.terms),
+                        child: const Text('AGB'),
+                      ),
+                    ],
+                  ),
                   const Divider(height: 32),
                   Text(
                     'Demo-Zugänge',

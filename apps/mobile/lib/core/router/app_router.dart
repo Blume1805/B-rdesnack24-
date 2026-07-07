@@ -8,6 +8,7 @@ import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
+import '../../features/legal/presentation/legal_screens.dart';
 import '../di/providers.dart';
 
 /// Routenpfade als Konstanten (vermeidet Tippfehler/Magic-Strings).
@@ -18,6 +19,9 @@ abstract final class AppRoutes {
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
   static const approvals = '/finance/approvals';
+  static const imprint = '/legal/imprint';
+  static const privacy = '/legal/privacy';
+  static const terms = '/legal/terms';
 }
 
 /// Öffentlich erreichbare Routen (ohne Anmeldung).
@@ -25,6 +29,9 @@ const _publicRoutes = {
   AppRoutes.signIn,
   AppRoutes.register,
   AppRoutes.forgotPassword,
+  AppRoutes.imprint,
+  AppRoutes.privacy,
+  AppRoutes.terms,
 };
 
 /// go_router mit Auth-Guard: nicht angemeldete Nutzer landen auf /signin.
@@ -65,6 +72,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.approvals,
         builder: (context, state) => const ApprovalsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.imprint,
+        builder: (context, state) => const ImprintScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.terms,
+        builder: (context, state) => const TermsScreen(),
       ),
     ],
   );

@@ -1,17 +1,13 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
-import 'core/services/push_service.dart';
 
 /// Initialisiert Infrastruktur (Supabase, optional Sentry) und startet die App.
 ///
@@ -31,36 +27,16 @@ Future<void> bootstrap() async {
     anonKey: config.supabaseAnonKey,
   );
 
-  // Firebase ist optional: im Web grundsätzlich überspringen (Push gibt es nur
-  // nativ; ohne firebase_options.dart würde der Web-Init hängen). Auf Android/
-  // iOS wird Firebase ausschließlich initialisiert, wenn ein nativer Eintrag
-  // (google-services.json / GoogleService-Info.plist) vorhanden ist.
-  if (!kIsWeb) {
-    try {
-      await Firebase.initializeApp();
-      PushService.available = true;
-    } catch (_) {
-      PushService.available = false;
-    }
-  }
+  // Firebase wird in dieser Demo (Web-Build) nicht eingebunden. Für native
+  // Builds aktivieren — siehe pubspec.yaml-Kommentar.
 
   final app = ProviderScope(
     overrides: [appConfigProvider.overrideWithValue(config)],
     child: const BoerdesnackApp(),
   );
 
-  if (config.hasSentry) {
-    await SentryFlutter.init(
-      (options) {
-        options.dsn = config.sentryDsn;
-        options.environment = config.environment;
-        options.tracesSampleRate = config.isProduction ? 0.2 : 1.0;
-        // Keine personenbezogenen Rohdaten an Sentry senden.
-        options.sendDefaultPii = false;
-      },
-      appRunner: () => runApp(app),
-    );
-  } else {
-    runApp(app);
-  }
+  // Sentry/PostHog werden im Web-Demo-Build bewusst nicht eingebunden
+  // (Web-Plugins initialisieren sich beim Import selbst → Start-Fehler).
+  // Für native Builds wieder aktivieren (siehe pubspec.yaml-Kommentar).
+  runApp(app);
 }

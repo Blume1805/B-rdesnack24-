@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
@@ -59,9 +64,131 @@ class ProfileTab extends ConsumerWidget {
             title: const Text('Bei Google bewerten'),
             onTap: () => _review(context, ref),
           ),
+          const Divider(),
+          // ── Rechte betroffener Personen (DSGVO Art. 15/17/20) ─────────────
+          ListTile(
+            leading: const Icon(Icons.download),
+            title: const Text('Meine Daten exportieren'),
+            subtitle: const Text('DSGVO Art. 15 / 20 – Auskunft und Übertragbarkeit'),
+            onTap: () => _exportMyData(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: Colors.red),
+            title: const Text('Konto löschen (Antrag)'),
+            subtitle: const Text('DSGVO Art. 17 – Recht auf Löschung'),
+            onTap: () => _requestDeletion(context, ref),
+          ),
+          const Divider(),
+          // ── Pflicht-Rechtsseiten (§ 5 DDG, Art. 12/13 DSGVO) ─────────────
+          ListTile(
+            leading: const Icon(Icons.gavel),
+            title: const Text('Impressum'),
+            onTap: () => context.push(AppRoutes.imprint),
+          ),
+          ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: const Text('Datenschutzerklärung'),
+            onTap: () => context.push(AppRoutes.privacy),
+          ),
+          ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: const Text('Nutzungsbedingungen'),
+            onTap: () => context.push(AppRoutes.terms),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _exportMyData(BuildContext context, WidgetRef ref) async {
+    try {
+      final client = ref.read(supabaseClientProvider);
+      final result = await client.rpc('export_my_data');
+      final jsonStr = const JsonEncoder.withIndent('  ').convert(result);
+      await Clipboard.setData(ClipboardData(text: jsonStr));
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Datenauskunft'),
+          content: SizedBox(
+            width: 480,
+            child: SingleChildScrollView(
+              child: SelectableText(
+                jsonStr,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Schließen'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export fehlgeschlagen: $e')),
+      );
+    }
+  }
+
+  Future<void> _requestDeletion(BuildContext context, WidgetRef ref) async {
+    final reasonCtrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Konto zur Löschung anmelden'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Wir bearbeiten deinen Antrag manuell. Wegen steuer- und '
+              'lebensmittelrechtlicher Aufbewahrungspflichten (§ 147 AO, HACCP) '
+              'werden Daten teilweise erst nach Ablauf der Frist gelöscht; bis '
+              'dahin werden sie gesperrt oder anonymisiert.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonCtrl,
+              decoration: const InputDecoration(labelText: 'Grund (optional)'),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Antrag stellen'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(supabaseClientProvider).rpc(
+        'request_account_deletion',
+        params: {'p_reason': reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim()},
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Antrag gestellt. Wir melden uns per E-Mail.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehlgeschlagen: $e')),
+      );
+    }
   }
 
   Future<void> _editProfile(BuildContext context, WidgetRef ref) async {
@@ -223,8 +350,17 @@ class _ConsentSectionState extends ConsumerState<_ConsentSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Text('Einwilligungen (DSGVO)'),
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text('Einwilligungen (Art. 6 (1) a DSGVO · § 25 TDDDG)'),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(
+            'Diese Verarbeitungen erfolgen nur nach deiner ausdrücklichen '
+            'Einwilligung und sind jederzeit widerrufbar. Der Widerruf '
+            'berührt die Rechtmäßigkeit vergangener Verarbeitungen nicht.',
+            style: TextStyle(fontSize: 12),
+          ),
         ),
         for (final e in _labels.entries)
           SwitchListTile(
@@ -318,6 +454,12 @@ class _ContactFormState extends State<_ContactForm> {
                 maxLines: 4,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Bitte Nachricht eingeben' : null,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Deine Angaben werden zur Bearbeitung der Anfrage verarbeitet '
+                '(Art. 6 (1) b DSGVO). Details siehe Datenschutzerklärung.',
+                style: TextStyle(fontSize: 11),
               ),
               const SizedBox(height: 16),
               FilledButton(onPressed: _submit, child: const Text('Senden')),

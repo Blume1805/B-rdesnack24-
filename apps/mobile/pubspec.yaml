@@ -22,9 +22,12 @@ dependencies:
   # Backend
   supabase_flutter: ^2.8.0
 
-  # Observability (consent-gated initialisiert)
-  sentry_flutter: ^8.12.0
-  posthog_flutter: ^4.10.0
+  # Observability (consent-gated initialisiert; nur nativ).
+  # Hinweis: PostHog/Sentry werden in der Web-Demo nicht eingebunden, da deren
+  # Web-Plugins sich beim Import selbst initialisieren und im Demo-Build sonst
+  # zu Start-Fehlern führen. Für native Builds wieder aktivieren.
+  # sentry_flutter: ^8.12.0
+  # posthog_flutter: ^4.10.0
 
   # PDF teilen/drucken (Export Finanzauswertung)
   printing: ^5.13.4
@@ -32,9 +35,11 @@ dependencies:
   # Externe Links (Navigation zu Maps, Google-Bewertung)
   url_launcher: ^6.3.1
 
-  # Push-Benachrichtigungen (FCM)
-  firebase_core: ^3.8.0
-  firebase_messaging: ^15.1.5
+  # Push-Benachrichtigungen (FCM) — nur native Builds; für die Web-Demo
+  # deaktiviert, weil firebase_messaging_web sich beim Plugin-Register ohne
+  # firebase_options.dart synchron initialisiert und crasht.
+  # firebase_core: ^3.8.0
+  # firebase_messaging: ^15.1.5
 
   # Medien/Dateien (Foto-/Signatur-/Dokument-Upload)
   image_picker: ^1.1.2
