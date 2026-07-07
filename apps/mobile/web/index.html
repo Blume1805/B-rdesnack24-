@@ -52,6 +52,27 @@
     window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
     window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
 
+    // Stub für Corbado-Passkeys-SDK. `passkeys_web` kommt transitiv über
+    // supabase_flutter und ruft beim Start unconditionell
+    // window.PasskeyAuthenticator.init() auf — ohne das SDK crashed die App
+    // ("Null check operator on a null value"). In der Demo brauchen wir keine
+    // Passkeys, daher ein leerer Stub, der die API-Kontrakte erfüllt.
+    (function () {
+      const noop = () => {};
+      const resolved = () => Promise.resolve();
+      const stub = {
+        init: noop,
+        setRpId: noop,
+        setRelyingPartyServer: noop,
+        register: resolved,
+        authenticate: resolved,
+        canAuthenticate: () => Promise.resolve(false),
+        isAvailable: () => Promise.resolve(false),
+      };
+      if (!window.PasskeyAuthenticator) window.PasskeyAuthenticator = stub;
+      if (!window.corbadoPasskeys) window.corbadoPasskeys = stub;
+    })();
+
     // Alle bestehenden Service Worker + Caches (auch aus früheren Deploys) entfernen.
     (async () => {
       try {
