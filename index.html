@@ -9,6 +9,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Bördesnack24">
+  <!-- Aggressiv gegen alten Browser-Cache (v. a. iOS Safari): -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="icon" type="image/png" href="favicon.png"/>
   <title>Bördesnack24</title>
@@ -45,20 +49,34 @@
       document.getElementById('loader').style.display = 'none';
     };
 
-    // Globale Fehler sichtbar machen.
     window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
     window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
 
-    // Alte Service Worker entfernen (Cache-Probleme nach Updates vermeiden).
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
-    }
+    // Alle bestehenden Service Worker + Caches (auch aus früheren Deploys) entfernen.
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+        }
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map((n) => caches.delete(n)));
+        }
+      } catch (_) {}
+    })();
 
-    // Wenn nach 25s noch nichts gerendert ist: Hinweis statt weiße Seite.
     setTimeout(() => {
-      hint.textContent = 'Lade noch … (falls dauerhaft hängt: Strg+Umschalt+R drücken).';
+      hint.textContent = 'Lade noch … (falls dauerhaft hängt: Seite neu laden mit Cache-Umgehung).';
     }, 25000);
+
+    // Cache-Buster: erzwingt frisches Laden aller JS/WASM-Assets bei jedem Deploy.
+    // Wert wird beim Deploy durch den echten Build-Zeitstempel ersetzt.
+    const V = '1783418934';
+    const s = document.createElement('script');
+    s.src = 'flutter_bootstrap.js?v=' + V;
+    s.async = true;
+    document.body.appendChild(s);
   </script>
-  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
