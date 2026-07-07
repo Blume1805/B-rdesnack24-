@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <base href="/B-rdesnack24-/app-live/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Bördesnack24 — Unternehmensplattform">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Bördesnack24">
+  <!-- Aggressiv gegen alten Browser-Cache (v. a. iOS Safari): -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Bördesnack24</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    html, body { margin:0; padding:0; height:100%; background:#14110E; color:#FDC102;
+                  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #loader { position:fixed; inset:0; display:flex; flex-direction:column;
+              align-items:center; justify-content:center; gap:18px; z-index:9999; }
+    #loader .logo { width:64px; height:64px; border:3px solid #FDC102; border-top-color:transparent;
+                    border-radius:50%; animation:spin 1s linear infinite; }
+    #loader .title { font-weight:700; letter-spacing:2px; font-size:18px; }
+    #loader .hint { color:#a89876; font-size:12px; max-width:80%; text-align:center; }
+    #err { display:none; position:fixed; inset:24px; background:#1d1813; border:1px solid #FDC102;
+           color:#fff; padding:16px; border-radius:12px; font:13px/1.5 monospace; overflow:auto; z-index:10000;
+           white-space:pre-wrap; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="loader">
+    <div class="logo"></div>
+    <div class="title">BÖRDESNACK24</div>
+    <div class="hint" id="hint">App wird geladen …</div>
+  </div>
+  <pre id="err"></pre>
+  <script>
+    // Sichtbarer Status während Boot:
+    const hint = document.getElementById('hint');
+    const err  = document.getElementById('err');
+    const showErr = (msg) => {
+      err.style.display = 'block';
+      err.textContent = String(msg);
+      document.getElementById('loader').style.display = 'none';
+    };
+
+    window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
+    window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
+
+    // Alle bestehenden Service Worker + Caches (auch aus früheren Deploys) entfernen.
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+        }
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map((n) => caches.delete(n)));
+        }
+      } catch (_) {}
+    })();
+
+    setTimeout(() => {
+      hint.textContent = 'Lade noch … (falls dauerhaft hängt: Seite neu laden mit Cache-Umgehung).';
+    }, 25000);
+
+    // Cache-Buster: erzwingt frisches Laden aller JS/WASM-Assets bei jedem Deploy.
+    // Wert wird beim Deploy durch den echten Build-Zeitstempel ersetzt.
+    const V = '1783419311';
+    const s = document.createElement('script');
+    s.src = 'flutter_bootstrap.js?v=' + V;
+    s.async = true;
+    document.body.appendChild(s);
+  </script>
+</body>
+</html>
