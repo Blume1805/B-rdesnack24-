@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <base href="/app/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Bördesnack24 — Unternehmensplattform">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Bördesnack24">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Bördesnack24</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!--
+    Kritische Downloads bereits während des Head-Parsings anstoßen.
+    So sind main.dart.js, flutter.js und der CanvasKit-CDN-Handshake
+    schon im Gange, bevor der Body überhaupt gerendert ist.
+  -->
+  <link rel="preload" as="script" href="flutter.js">
+  <link rel="preload" as="script" href="main.dart.js">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <!--
+    Passkeys-SDK-Stub MUSS vor jedem Skript existieren, das dart2js-Code
+    ausführt. supabase_flutter zieht das Corbado-Passkey-Plugin transitiv
+    ein; ohne installierten Stub wirft der erste JS-Interop-Aufruf einen
+    Null-Check-Fehler und die Flutter-Engine erreicht nie den ersten
+    Frame — die Loader-UI bleibt hängen. Deshalb: als synchrones
+    Inline-Script im <head>, VOR flutter_bootstrap.js.
+  -->
+  <script>
+    (function () {
+      var noop = function () {};
+      var resolved = function () { return Promise.resolve(); };
+      var stub = {
+        init: noop, setRpId: noop, setRelyingPartyServer: noop,
+        register: resolved, authenticate: resolved,
+        canAuthenticate: function () { return Promise.resolve(false); },
+        isAvailable: function () { return Promise.resolve(false); }
+      };
+      if (!window.PasskeyAuthenticator) window.PasskeyAuthenticator = stub;
+      if (!window.corbadoPasskeys) window.corbadoPasskeys = stub;
+    })();
+  </script>
+
+  <style>
+    html, body { margin:0; padding:0; height:100%; background:#14110E; color:#FDC102;
+                  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #loader { position:fixed; inset:0; display:flex; flex-direction:column;
+              align-items:center; justify-content:center; gap:14px; z-index:9999; padding:32px; }
+    #loader .logo { width:64px; height:64px; border:3px solid #FDC102; border-top-color:transparent;
+                    border-radius:50%; animation:spin 1s linear infinite; }
+    #loader .title { font-weight:700; letter-spacing:2px; font-size:18px; }
+    #loader .hint  { color:#a89876; font-size:12px; max-width:80%; text-align:center; }
+    #loader .bar   { width:min(240px,60vw); height:6px; background:#332a1e; border-radius:6px; overflow:hidden; }
+    #loader .bar > i { display:block; height:100%; width:5%; background:#FDC102; transition:width .35s ease; }
+    #err { display:none; position:fixed; inset:24px; background:#1d1813; border:1px solid #FDC102;
+           color:#fff; padding:16px; border-radius:12px; font:13px/1.5 monospace; overflow:auto; z-index:10000;
+           white-space:pre-wrap; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="loader">
+    <div class="logo"></div>
+    <div class="title">BÖRDESNACK24</div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="hint" id="hint">App wird geladen …</div>
+  </div>
+  <pre id="err"></pre>
+
+  <script>
+    (function () {
+      var hint = document.getElementById('hint');
+      var err  = document.getElementById('err');
+      var bar  = document.getElementById('bar');
+      var showErr = function (msg) {
+        err.style.display = 'block';
+        err.textContent = String(msg);
+        var l = document.getElementById('loader'); if (l) l.style.display = 'none';
+      };
+
+      window.addEventListener('error', function (e) { showErr('Fehler: ' + (e.message || e.error)); });
+      window.addEventListener('unhandledrejection', function (e) { showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())); });
+
+      // Alte Service-Worker + Caches einmalig entfernen.
+      (async function () {
+        try {
+          if ('serviceWorker' in navigator) {
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }
+          if ('caches' in window) {
+            var names = await caches.keys();
+            await Promise.all(names.map(function (n) { return caches.delete(n); }));
+          }
+        } catch (_) {}
+      })();
+
+      // Simulierter Progress — springt auf 100 %, sobald Flutter rendert.
+      var done = false;
+      var sim = 8;
+      var setBar = function (p) { if (!done) bar.style.width = Math.min(90, p) + '%'; };
+      var tick = setInterval(function () { sim = Math.min(90, sim + 2); setBar(sim); }, 400);
+
+      var observer = new MutationObserver(function () {
+        var glass = document.querySelector('flutter-view, flt-glass-pane, flt-scene-host');
+        if (glass) {
+          done = true; clearInterval(tick);
+          bar.style.width = '100%';
+          setTimeout(function () {
+            var l = document.getElementById('loader'); if (l) l.style.display = 'none';
+          }, 200);
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      setTimeout(function () { if (!done) hint.textContent = 'Der erste Aufruf über Mobilfunk kann 10–20 Sekunden dauern …'; }, 8000);
+      setTimeout(function () { if (!done) hint.textContent = 'Sollte die Seite länger als 30 Sekunden hängen, bitte einmal neu laden.'; }, 25000);
+    })();
+  </script>
+
+  <!--
+    Bootstrap am Ende des Bodies (Flutter-Default) — garantiert, dass der
+    Passkeys-Stub bereits installiert und das DOM bereit ist, bevor
+    Flutter startet.
+  -->
+  <script src="flutter_bootstrap.js?v=1783512466" async></script>
+</body>
+</html>
