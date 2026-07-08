@@ -18,15 +18,37 @@
   <link rel="manifest" href="manifest.json">
 
   <!--
-    Kritischer Pfad: alles, was für den Start nötig ist, wird sofort
-    vorgeladen — parallel zum HTML-Parser. Preconnect zum CanvasKit-CDN
-    beschleunigt den TLS-Handshake auf mobilen Netzen deutlich.
+    Kritische Downloads bereits während des Head-Parsings anstoßen.
+    So sind main.dart.js, flutter.js und der CanvasKit-CDN-Handshake
+    schon im Gange, bevor der Body überhaupt gerendert ist.
   -->
-  <link rel="preload" as="script" href="flutter_bootstrap.js?v=__BUILD_V__">
-  <link rel="preload" as="script" href="main.dart.js">
   <link rel="preload" as="script" href="flutter.js">
+  <link rel="preload" as="script" href="main.dart.js">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <!--
+    Passkeys-SDK-Stub MUSS vor jedem Skript existieren, das dart2js-Code
+    ausführt. supabase_flutter zieht das Corbado-Passkey-Plugin transitiv
+    ein; ohne installierten Stub wirft der erste JS-Interop-Aufruf einen
+    Null-Check-Fehler und die Flutter-Engine erreicht nie den ersten
+    Frame — die Loader-UI bleibt hängen. Deshalb: als synchrones
+    Inline-Script im <head>, VOR flutter_bootstrap.js.
+  -->
+  <script>
+    (function () {
+      var noop = function () {};
+      var resolved = function () { return Promise.resolve(); };
+      var stub = {
+        init: noop, setRpId: noop, setRelyingPartyServer: noop,
+        register: resolved, authenticate: resolved,
+        canAuthenticate: function () { return Promise.resolve(false); },
+        isAvailable: function () { return Promise.resolve(false); }
+      };
+      if (!window.PasskeyAuthenticator) window.PasskeyAuthenticator = stub;
+      if (!window.corbadoPasskeys) window.corbadoPasskeys = stub;
+    })();
+  </script>
 
   <style>
     html, body { margin:0; padding:0; height:100%; background:#14110E; color:#FDC102;
@@ -44,12 +66,6 @@
            white-space:pre-wrap; }
     @keyframes spin { to { transform:rotate(360deg); } }
   </style>
-
-  <!--
-    Bootstrap so früh wie möglich starten — main.dart.js lädt parallel zum
-    Rest der Seite. `async` verhindert, dass der Parser blockiert.
-  -->
-  <script async src="flutter_bootstrap.js?v=__BUILD_V__"></script>
 </head>
 <body>
   <div id="loader">
@@ -59,78 +75,64 @@
     <div class="hint" id="hint">App wird geladen …</div>
   </div>
   <pre id="err"></pre>
+
   <script>
     (function () {
-      const hint = document.getElementById('hint');
-      const err  = document.getElementById('err');
-      const bar  = document.getElementById('bar');
-      const showErr = (msg) => {
+      var hint = document.getElementById('hint');
+      var err  = document.getElementById('err');
+      var bar  = document.getElementById('bar');
+      var showErr = function (msg) {
         err.style.display = 'block';
         err.textContent = String(msg);
-        const l = document.getElementById('loader'); if (l) l.style.display = 'none';
+        var l = document.getElementById('loader'); if (l) l.style.display = 'none';
       };
 
-      window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
-      window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
+      window.addEventListener('error', function (e) { showErr('Fehler: ' + (e.message || e.error)); });
+      window.addEventListener('unhandledrejection', function (e) { showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())); });
 
-      // ── Passkeys-SDK-Stub (Corbado wird transitiv referenziert) ──────────
-      const noop = () => {};
-      const resolved = () => Promise.resolve();
-      const stub = {
-        init: noop, setRpId: noop, setRelyingPartyServer: noop,
-        register: resolved, authenticate: resolved,
-        canAuthenticate: () => Promise.resolve(false),
-        isAvailable: () => Promise.resolve(false),
-      };
-      if (!window.PasskeyAuthenticator) window.PasskeyAuthenticator = stub;
-      if (!window.corbadoPasskeys) window.corbadoPasskeys = stub;
-
-      // ── Alte Service-Worker + Caches einmalig entfernen ──────────────────
-      (async () => {
+      // Alte Service-Worker + Caches einmalig entfernen.
+      (async function () {
         try {
           if ('serviceWorker' in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map((r) => r.unregister()));
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
           }
           if ('caches' in window) {
-            const names = await caches.keys();
-            await Promise.all(names.map((n) => caches.delete(n)));
+            var names = await caches.keys();
+            await Promise.all(names.map(function (n) { return caches.delete(n); }));
           }
         } catch (_) {}
       })();
 
-      // ── Simulierter Progress ──────────────────────────────────────────────
-      // Kein zusätzlicher fetch() für main.dart.js mehr — der ehemalige
-      // Progress-Fetch hat das 4-MB-Bundle DOPPELT über die Leitung gejagt
-      // (einmal für den Loader, einmal für flutter_bootstrap) und die
-      // Startzeit auf mobilen Netzen effektiv verdoppelt. Wir zeigen
-      // stattdessen einen gleichmäßig laufenden Balken und verstecken den
-      // Loader, sobald Flutter den ersten Frame gezeichnet hat.
-      let done = false;
-      let sim = 8;
-      const setBar = (p) => { if (!done) bar.style.width = Math.min(90, p) + '%'; };
-      const tick = setInterval(() => { sim = Math.min(90, sim + 2); setBar(sim); }, 400);
+      // Simulierter Progress — springt auf 100 %, sobald Flutter rendert.
+      var done = false;
+      var sim = 8;
+      var setBar = function (p) { if (!done) bar.style.width = Math.min(90, p) + '%'; };
+      var tick = setInterval(function () { sim = Math.min(90, sim + 2); setBar(sim); }, 400);
 
-      const observer = new MutationObserver(() => {
-        const glass = document.querySelector('flutter-view, flt-glass-pane, flt-scene-host');
+      var observer = new MutationObserver(function () {
+        var glass = document.querySelector('flutter-view, flt-glass-pane, flt-scene-host');
         if (glass) {
           done = true; clearInterval(tick);
           bar.style.width = '100%';
-          setTimeout(() => {
-            const l = document.getElementById('loader'); if (l) l.style.display = 'none';
+          setTimeout(function () {
+            var l = document.getElementById('loader'); if (l) l.style.display = 'none';
           }, 200);
           observer.disconnect();
         }
       });
       observer.observe(document.body, { childList: true, subtree: true });
 
-      setTimeout(() => {
-        if (!done) hint.textContent = 'Der erste Aufruf über Mobilfunk kann 10–20 Sekunden dauern …';
-      }, 8000);
-      setTimeout(() => {
-        if (!done) hint.textContent = 'Sollte die Seite länger als 30 Sekunden hängen, bitte einmal neu laden.';
-      }, 25000);
+      setTimeout(function () { if (!done) hint.textContent = 'Der erste Aufruf über Mobilfunk kann 10–20 Sekunden dauern …'; }, 8000);
+      setTimeout(function () { if (!done) hint.textContent = 'Sollte die Seite länger als 30 Sekunden hängen, bitte einmal neu laden.'; }, 25000);
     })();
   </script>
+
+  <!--
+    Bootstrap am Ende des Bodies (Flutter-Default) — garantiert, dass der
+    Passkeys-Stub bereits installiert und das DOM bereit ist, bevor
+    Flutter startet.
+  -->
+  <script src="flutter_bootstrap.js?v=__BUILD_V__" async></script>
 </body>
 </html>
