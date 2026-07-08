@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <base href="/B-rdesnack24-/app-live/">
+  <base href="/B-rdesnack24-/">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,6 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Bördesnack24">
+  <!-- Aggressiv gegen alten Browser-Cache (v. a. iOS Safari): -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -16,24 +17,15 @@
   <link rel="icon" type="image/png" href="favicon.png"/>
   <title>Bördesnack24</title>
   <link rel="manifest" href="manifest.json">
-  <!-- Preload: Safari lädt die großen Dateien schon parallel, bevor
-       flutter_bootstrap.js sie referenziert. -->
-  <link rel="preload" as="script" href="main.dart.js">
-  <link rel="preload" as="script" href="flutter.js">
-  <!-- CanvasKit vom Google-CDN vorwärmen: die Datei ist meist im Browser-
-       Cache, weil sie viele Flutter-Web-Apps teilen. -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <style>
     html, body { margin:0; padding:0; height:100%; background:#14110E; color:#FDC102;
                   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     #loader { position:fixed; inset:0; display:flex; flex-direction:column;
-              align-items:center; justify-content:center; gap:14px; z-index:9999; padding:32px; }
+              align-items:center; justify-content:center; gap:18px; z-index:9999; }
     #loader .logo { width:64px; height:64px; border:3px solid #FDC102; border-top-color:transparent;
                     border-radius:50%; animation:spin 1s linear infinite; }
     #loader .title { font-weight:700; letter-spacing:2px; font-size:18px; }
-    #loader .hint  { color:#a89876; font-size:12px; max-width:80%; text-align:center; }
-    #loader .bar   { width:min(240px,60vw); height:6px; background:#332a1e; border-radius:6px; overflow:hidden; }
-    #loader .bar > i { display:block; height:100%; width:5%; background:#FDC102; transition:width .25s ease; }
+    #loader .hint { color:#a89876; font-size:12px; max-width:80%; text-align:center; }
     #err { display:none; position:fixed; inset:24px; background:#1d1813; border:1px solid #FDC102;
            color:#fff; padding:16px; border-radius:12px; font:13px/1.5 monospace; overflow:auto; z-index:10000;
            white-space:pre-wrap; }
@@ -44,14 +36,13 @@
   <div id="loader">
     <div class="logo"></div>
     <div class="title">BÖRDESNACK24</div>
-    <div class="bar"><i id="bar"></i></div>
-    <div class="hint" id="hint">App wird geladen … (beim ersten Aufruf kann das 5–10 Sekunden dauern)</div>
+    <div class="hint" id="hint">App wird geladen …</div>
   </div>
   <pre id="err"></pre>
   <script>
+    // Sichtbarer Status während Boot:
     const hint = document.getElementById('hint');
     const err  = document.getElementById('err');
-    const bar  = document.getElementById('bar');
     const showErr = (msg) => {
       err.style.display = 'block';
       err.textContent = String(msg);
@@ -61,21 +52,7 @@
     window.addEventListener('error', (e) => showErr('Fehler: ' + (e.message || e.error)));
     window.addEventListener('unhandledrejection', (e) => showErr('Promise-Fehler: ' + (e.reason && e.reason.toString())));
 
-    // ── Passkeys-SDK-Stub (siehe vorherige Analyse) ────────────────────────
-    (function () {
-      const noop = () => {};
-      const resolved = () => Promise.resolve();
-      const stub = {
-        init: noop, setRpId: noop, setRelyingPartyServer: noop,
-        register: resolved, authenticate: resolved,
-        canAuthenticate: () => Promise.resolve(false),
-        isAvailable: () => Promise.resolve(false),
-      };
-      if (!window.PasskeyAuthenticator) window.PasskeyAuthenticator = stub;
-      if (!window.corbadoPasskeys) window.corbadoPasskeys = stub;
-    })();
-
-    // ── Alte Service-Worker und Caches entfernen ──────────────────────────
+    // Alle bestehenden Service Worker + Caches (auch aus früheren Deploys) entfernen.
     (async () => {
       try {
         if ('serviceWorker' in navigator) {
@@ -89,55 +66,13 @@
       } catch (_) {}
     })();
 
-    // ── Sichtbarer Ladefortschritt für main.dart.js ────────────────────────
-    // Läuft parallel zum Bootstrap. Sobald das Bundle-Fetch fertig ist,
-    // springt die Anzeige auf 100 %.
-    (function () {
-      let done = false;
-      const setBar = (p) => { if (!done) bar.style.width = Math.min(95, p) + '%'; };
-      // Optimistische Simulation, falls Content-Length fehlt.
-      let sim = 5;
-      const tick = setInterval(() => { sim = Math.min(85, sim + 3); setBar(sim); }, 250);
+    setTimeout(() => {
+      hint.textContent = 'Lade noch … (falls dauerhaft hängt: Seite neu laden mit Cache-Umgehung).';
+    }, 25000);
 
-      // Echtes Progress-Tracking per fetch – lädt die Datei einmalig in den
-      // HTTP-Cache; Safari/Bootstrap greifen dann auf denselben Cache-Eintrag zu.
-      (async () => {
-        try {
-          const url = 'main.dart.js';
-          const resp = await fetch(url, { cache: 'no-cache' });
-          if (!resp.ok || !resp.body) return;
-          const total = Number(resp.headers.get('content-length') || 0);
-          if (!total) { const b = await resp.blob(); if (b.size) setBar(85); return; }
-          const reader = resp.body.getReader();
-          let received = 0;
-          while (true) {
-            const { done: rd, value } = await reader.read();
-            if (rd) break;
-            received += value.length;
-            setBar(Math.round((received / total) * 90));
-          }
-        } catch (_) {}
-      })();
-
-      // Sobald der erste Flutter-Frame kommt, verschwindet der Loader.
-      const observer = new MutationObserver(() => {
-        const glass = document.querySelector('flutter-view, flt-glass-pane, flt-scene-host');
-        if (glass) {
-          done = true; clearInterval(tick);
-          bar.style.width = '100%';
-          setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 200);
-          observer.disconnect();
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-
-      setTimeout(() => {
-        if (!done) hint.textContent = 'Fast fertig … (bei sehr langer Dauer: Seite neu laden).';
-      }, 20000);
-    })();
-
-    // Cache-Buster (wird beim Deploy durch echten Zeitstempel ersetzt)
-    const V = '1783435848';
+    // Cache-Buster: erzwingt frisches Laden aller JS/WASM-Assets bei jedem Deploy.
+    // Wert wird beim Deploy durch den echten Build-Zeitstempel ersetzt.
+    const V = '1783418934';
     const s = document.createElement('script');
     s.src = 'flutter_bootstrap.js?v=' + V;
     s.async = true;
