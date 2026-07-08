@@ -33,22 +33,49 @@ echo "▶︎ Flutter Web-Build ($ENV_FILE, base=/$SUBPATH/)"
 BUILD_DIR="$MOBILE/build/web"
 BOOT="$BUILD_DIR/flutter_bootstrap.js"
 
-echo "▶︎ Post-Build-Patch: lokales CanvasKit erzwingen"
+echo "▶︎ Post-Build-Patch: lokales CanvasKit + Service-Worker deaktivieren"
 python3 - <<PY
-import sys
+import re, sys
 p = "$BOOT"
 s = open(p).read()
-needle = "_flutter.loader.load({\n  serviceWorkerSettings: {"
-replacement = "_flutter.loader.load({\n  config: { canvasKitBaseUrl: 'canvaskit/' },\n  serviceWorkerSettings: {"
-if needle not in s:
+# 1) Aufruf des Loaders mit unserem config-Block ersetzen — inklusive
+#    komplettem Entfernen der serviceWorkerSettings.  Der bisher registrierte
+#    Flutter-Service-Worker cached HTML/JS aggressiv und liefert nach einem
+#    Deploy auf zukünftigen Besuchen immer noch die alte Version aus, bevor
+#    unser HTML-Loader ihn wieder abmelden kann → Safari zeigt Ghost-Inhalte.
+#    Für die Demo brauchen wir keinen Offline-Cache — deshalb ganz raus.
+pattern = re.compile(r"_flutter\.loader\.load\(\{[^}]*serviceWorkerSettings[^}]*\}[^)]*\}\);", re.S)
+replacement = "_flutter.loader.load({ config: { canvasKitBaseUrl: 'canvaskit/' } });"
+if not pattern.search(s):
     if "canvasKitBaseUrl" in s:
         print("  (bereits gepatcht)")
     else:
-        sys.exit("  ! Muster nicht gefunden — Flutter-Version prüfen")
+        sys.exit("  ! _flutter.loader.load-Muster nicht gefunden — Flutter-Version prüfen")
 else:
-    open(p, "w").write(s.replace(needle, replacement, 1))
-    print("  ✓ canvasKitBaseUrl gesetzt")
+    s2 = pattern.sub(replacement, s, count=1)
+    open(p, "w").write(s2)
+    print("  ✓ canvasKitBaseUrl gesetzt, serviceWorkerSettings entfernt")
 PY
+
+echo "▶︎ flutter_service_worker.js entschärfen (harte Auto-Deregistrierung)"
+cat > "$BUILD_DIR/flutter_service_worker.js" <<'JS'
+// Kein aktives Service-Worker-Caching in der Web-Demo. Wenn Safari diese
+// Datei aus altem Cache lädt, meldet sie den Worker sofort ab und leert
+// den Cache — die nächste Navigation kommt garantiert vom Server.
+self.addEventListener('install', (event) => { self.skipWaiting(); });
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+      await self.registration.unregister();
+      const clients = await self.clients.matchAll();
+      for (const c of clients) c.navigate(c.url);
+    } catch (_) {}
+  })());
+});
+JS
+echo "  ✓ neutralisiert"
 
 TS=$(date +%s)
 echo "▶︎ Cache-Buster: $TS"
