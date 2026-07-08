@@ -32,6 +32,9 @@ dependencies:
   # PDF teilen/drucken (Export Finanzauswertung)
   printing: ^5.13.4
 
+  # Design-System-Fonts (Bricolage Grotesque + Hanken Grotesk)
+  google_fonts: ^6.2.1
+
   # Externe Links (Navigation zu Maps, Google-Bewertung)
   url_launcher: ^6.3.1
 

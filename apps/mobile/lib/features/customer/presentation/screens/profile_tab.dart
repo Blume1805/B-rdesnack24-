@@ -8,6 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
@@ -20,84 +23,155 @@ class ProfileTab extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final repo = ref.read(customerRepositoryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil'),
-        actions: [
-          IconButton(
-            tooltip: 'Abmelden',
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-          ),
-        ],
+    final u = user.valueOrNull;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.s5,
+        AppSpacing.s5,
+        AppSpacing.s5,
+        AppSpacing.s8,
       ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.account_circle, size: 36),
-            title: Text(user.valueOrNull?.fullName ?? 'Kunde'),
-            subtitle: Text(user.valueOrNull?.email ?? ''),
+      children: [
+        AppCard(
+          color: AppColors.ink,
+          borderColor: AppColors.ink,
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.brand,
+                  borderRadius: BorderRadius.circular(AppRadii.md),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  (u?.fullName ?? u?.email ?? 'K').substring(0, 1).toUpperCase(),
+                  style: AppTypography.display(
+                    size: 20,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Eyebrow('mein konto', onDark: true),
+                    const SizedBox(height: 2),
+                    Text(
+                      u?.fullName ?? 'Kunde',
+                      style: AppTypography.display(
+                        size: 18,
+                        weight: FontWeight.w800,
+                        color: AppColors.onDark,
+                      ),
+                    ),
+                    Text(
+                      u?.email ?? '',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.brandLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Stammdaten bearbeiten'),
-            onTap: () => _editProfile(context, ref),
-          ),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Passwort ändern'),
-            onTap: () => _changePassword(context, repo),
-          ),
-          const Divider(),
-          _NotificationSection(),
-          const Divider(),
-          _ConsentSection(),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.mail),
-            title: const Text('Kontakt / Feedback'),
-            onTap: () => _contact(context, repo),
-          ),
-          ListTile(
-            leading: const Icon(Icons.star, color: Colors.amber),
-            title: const Text('Bei Google bewerten'),
-            onTap: () => _review(context, ref),
-          ),
-          const Divider(),
-          // ── Rechte betroffener Personen (DSGVO Art. 15/17/20) ─────────────
-          ListTile(
-            leading: const Icon(Icons.download),
-            title: const Text('Meine Daten exportieren'),
-            subtitle: const Text('DSGVO Art. 15 / 20 – Auskunft und Übertragbarkeit'),
-            onTap: () => _exportMyData(context, ref),
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text('Konto löschen (Antrag)'),
-            subtitle: const Text('DSGVO Art. 17 – Recht auf Löschung'),
-            onTap: () => _requestDeletion(context, ref),
-          ),
-          const Divider(),
-          // ── Pflicht-Rechtsseiten (§ 5 DDG, Art. 12/13 DSGVO) ─────────────
-          ListTile(
-            leading: const Icon(Icons.gavel),
-            title: const Text('Impressum'),
-            onTap: () => context.push(AppRoutes.imprint),
-          ),
-          ListTile(
-            leading: const Icon(Icons.shield_outlined),
-            title: const Text('Datenschutzerklärung'),
-            onTap: () => context.push(AppRoutes.privacy),
-          ),
-          ListTile(
-            leading: const Icon(Icons.article_outlined),
-            title: const Text('Nutzungsbedingungen'),
-            onTap: () => context.push(AppRoutes.terms),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppSpacing.s5),
+        _ProfileGroup(
+          eyebrow: 'zugang & profil',
+          children: [
+            _ProfileRow(
+              icon: Icons.edit_outlined,
+              title: 'Stammdaten bearbeiten',
+              onTap: () => _editProfile(context, ref),
+            ),
+            _ProfileRow(
+              icon: Icons.lock_outline,
+              title: 'Passwort ändern',
+              onTap: () => _changePassword(context, repo),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        _ProfileGroup(
+          eyebrow: 'benachrichtigungen',
+          children: [_NotificationSection()],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        _ProfileGroup(
+          eyebrow: 'einwilligungen',
+          children: [_ConsentSection()],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        _ProfileGroup(
+          eyebrow: 'kontakt',
+          children: [
+            _ProfileRow(
+              icon: Icons.mail_outline,
+              title: 'Kontakt / Feedback',
+              onTap: () => _contact(context, repo),
+            ),
+            _ProfileRow(
+              icon: Icons.star_outline,
+              title: 'Bei Google bewerten',
+              iconColor: AppColors.brandDark,
+              onTap: () => _review(context, ref),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        _ProfileGroup(
+          eyebrow: 'meine daten (DSGVO)',
+          children: [
+            _ProfileRow(
+              icon: Icons.download_outlined,
+              title: 'Meine Daten exportieren',
+              subtitle: 'Art. 15 / 20 – Auskunft & Übertragbarkeit',
+              onTap: () => _exportMyData(context, ref),
+            ),
+            _ProfileRow(
+              icon: Icons.delete_outline,
+              title: 'Konto löschen (Antrag)',
+              subtitle: 'Art. 17 – Recht auf Löschung',
+              iconColor: AppColors.statusCritical,
+              onTap: () => _requestDeletion(context, ref),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        _ProfileGroup(
+          eyebrow: 'rechtliches',
+          children: [
+            _ProfileRow(
+              icon: Icons.gavel_outlined,
+              title: 'Impressum',
+              onTap: () => context.push(AppRoutes.imprint),
+            ),
+            _ProfileRow(
+              icon: Icons.shield_outlined,
+              title: 'Datenschutzerklärung',
+              onTap: () => context.push(AppRoutes.privacy),
+            ),
+            _ProfileRow(
+              icon: Icons.article_outlined,
+              title: 'Nutzungsbedingungen',
+              onTap: () => context.push(AppRoutes.terms),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s5),
+        OutlinedButton.icon(
+          onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+          icon: const Icon(Icons.logout, size: 18),
+          label: const Text('Abmelden'),
+        ),
+      ],
     );
   }
 
@@ -281,6 +355,99 @@ class ProfileTab extends ConsumerWidget {
       return;
     }
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+}
+
+class _ProfileGroup extends StatelessWidget {
+  const _ProfileGroup({required this.eyebrow, required this.children});
+  final String eyebrow;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.s2),
+          child: Eyebrow(eyebrow),
+        ),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i < children.length - 1)
+                  const Divider(height: 1, color: AppColors.borderSubtle),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s4,
+          vertical: AppSpacing.s3,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: iconColor ?? AppColors.brandDark),
+            const SizedBox(width: AppSpacing.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.body(
+                      size: 14,
+                      weight: FontWeight.w700,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        subtitle!,
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textMuted),
+          ],
+        ),
+      ),
+    );
   }
 }
 

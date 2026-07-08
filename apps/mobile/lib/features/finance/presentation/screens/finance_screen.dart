@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
@@ -20,44 +23,39 @@ class FinanceScreen extends ConsumerWidget {
     final actions = ref.watch(financeActionsProvider);
     final busy = actions.isLoading;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Finanzdashboard'),
-        actions: [
-          IconButton(
-            tooltip: 'Gesellschafter-Freigaben',
-            icon: const Icon(Icons.verified_user),
-            onPressed: () => context.push(AppRoutes.approvals),
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(financeSummaryProvider),
+      color: AppColors.brand,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s5,
+          AppSpacing.s5,
+          AppSpacing.s5,
+          AppSpacing.s8,
+        ),
+        children: [
+          SectionHeader(
+            eyebrow: 'finanzen',
+            title: 'Dashboard',
+            action: _ActionCluster(
+              busy: busy,
+              onSync: () => _sync(context, ref),
+              onExport: () => _export(context, ref),
+              onApprovals: () => context.push(AppRoutes.approvals),
+            ),
           ),
-          IconButton(
-            tooltip: 'sevDesk synchronisieren',
-            icon: const Icon(Icons.sync),
-            onPressed: busy ? null : () => _sync(context, ref),
-          ),
-          IconButton(
-            tooltip: 'PDF exportieren',
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: busy ? null : () => _export(context, ref),
+          const SizedBox(height: AppSpacing.s5),
+          _PeriodSelector(period: period),
+          const SizedBox(height: AppSpacing.s6),
+          summary.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(48),
+              child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
+            ),
+            error: (e, _) => _ErrorCard(message: '$e'),
+            data: (s) => _SummaryContent(summary: s),
           ),
         ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(financeSummaryProvider),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _PeriodSelector(period: period),
-            const SizedBox(height: 16),
-            summary.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(48),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, _) => _ErrorCard(message: '$e'),
-              data: (s) => _SummaryContent(summary: s),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -88,45 +86,138 @@ class FinanceScreen extends ConsumerWidget {
   }
 }
 
+class _ActionCluster extends StatelessWidget {
+  const _ActionCluster({
+    required this.busy,
+    required this.onSync,
+    required this.onExport,
+    required this.onApprovals,
+  });
+
+  final bool busy;
+  final VoidCallback onSync;
+  final VoidCallback onExport;
+  final VoidCallback onApprovals;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _IconAction(
+          icon: Icons.verified_user_outlined,
+          tooltip: 'Freigaben',
+          onTap: onApprovals,
+        ),
+        const SizedBox(width: 6),
+        _IconAction(
+          icon: Icons.sync,
+          tooltip: 'sevDesk synchronisieren',
+          onTap: busy ? null : onSync,
+        ),
+        const SizedBox(width: 6),
+        _IconAction(
+          icon: Icons.picture_as_pdf_outlined,
+          tooltip: 'PDF-Export',
+          onTap: busy ? null : onExport,
+          emphasize: true,
+        ),
+      ],
+    );
+  }
+}
+
+class _IconAction extends StatelessWidget {
+  const _IconAction({
+    required this.icon,
+    required this.tooltip,
+    this.onTap,
+    this.emphasize = false,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onTap;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: emphasize ? AppColors.brand : AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(
+                color: emphasize ? AppColors.brand : AppColors.borderSubtle,
+              ),
+            ),
+            child: Icon(icon, size: 20, color: AppColors.ink),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PeriodSelector extends ConsumerWidget {
   const _PeriodSelector({required this.period});
   final FinancePeriod period;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${Formatters.date(period.from)} – ${Formatters.date(period.to)}',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                ActionChip(
-                  label: const Text('Aktueller Monat'),
-                  onPressed: () => ref.read(selectedPeriodProvider.notifier).state =
-                      FinancePeriod.currentMonth(),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Eyebrow('zeitraum'),
+          const SizedBox(height: AppSpacing.s2),
+          Row(
+            children: [
+              const Icon(Icons.date_range_outlined, size: 20, color: AppColors.ink),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${Formatters.date(period.from)} – ${Formatters.date(period.to)}',
+                  style: AppTypography.body(
+                    size: 16,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
                 ),
-                ActionChip(
-                  label: const Text('Jahr (YTD)'),
-                  onPressed: () => ref.read(selectedPeriodProvider.notifier).state =
-                      FinancePeriod.yearToDate(),
-                ),
-                ActionChip(
-                  label: const Text('Zeitraum wählen'),
-                  avatar: const Icon(Icons.date_range, size: 18),
-                  onPressed: () => _pickRange(context, ref),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _RangeChip(
+                label: 'Monat',
+                onTap: () => ref.read(selectedPeriodProvider.notifier).state =
+                    FinancePeriod.currentMonth(),
+              ),
+              _RangeChip(
+                label: 'Jahr (YTD)',
+                onTap: () => ref.read(selectedPeriodProvider.notifier).state =
+                    FinancePeriod.yearToDate(),
+              ),
+              _RangeChip(
+                label: 'Zeitraum wählen …',
+                icon: Icons.tune,
+                onTap: () => _pickRange(context, ref),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -139,11 +230,66 @@ class _PeriodSelector extends ConsumerWidget {
       lastDate: DateTime(now.year + 1),
       initialDateRange: DateTimeRange(start: period.from, end: period.to),
       locale: const Locale('de'),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: AppColors.brand,
+                onPrimary: AppColors.ink,
+              ),
+        ),
+        child: child!,
+      ),
     );
     if (picked != null) {
       ref.read(selectedPeriodProvider.notifier).state =
           FinancePeriod(from: picked.start, to: picked.end);
     }
+  }
+}
+
+class _RangeChip extends StatelessWidget {
+  const _RangeChip({required this.label, this.onTap, this.icon});
+  final String label;
+  final VoidCallback? onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceAlt,
+      borderRadius: BorderRadius.circular(AppRadii.pill),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s3,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(color: AppColors.borderSubtle),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 14, color: AppColors.ink),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -156,95 +302,167 @@ class _SummaryContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.7,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          children: [
-            _KpiCard(label: 'Umsatz netto (7 %)', value: summary.revenueNet7),
-            _KpiCard(label: 'Umsatz netto (19 %)', value: summary.revenueNet19),
-            _KpiCard(
-              label: 'Umsatz netto gesamt',
-              value: summary.revenueNet,
-              emphasize: true,
-            ),
-            _KpiCard(label: 'Aufwand netto', value: summary.expenseNet),
-            _KpiCard(
-              label: 'Ergebnis (netto)',
-              value: summary.resultNet,
-              emphasize: true,
-              signColor: true,
-            ),
-            _KpiCard(label: 'USt-Saldo', value: summary.vatCollected - summary.vatPaid),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final cols = constraints.maxWidth < 380 ? 1 : 2;
+            return GridView.count(
+              crossAxisCount: cols,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              childAspectRatio: 1.7,
+              mainAxisSpacing: AppSpacing.s3,
+              crossAxisSpacing: AppSpacing.s3,
+              children: [
+                KpiCard(
+                  label: 'umsatz 7 %',
+                  value: Formatters.euro(summary.revenueNet7),
+                  icon: Icons.percent,
+                ),
+                KpiCard(
+                  label: 'umsatz 19 %',
+                  value: Formatters.euro(summary.revenueNet19),
+                  icon: Icons.percent,
+                ),
+                KpiCard(
+                  label: 'umsatz netto',
+                  value: Formatters.euro(summary.revenueNet),
+                  emphasize: true,
+                  icon: Icons.trending_up,
+                ),
+                KpiCard(
+                  label: 'aufwand',
+                  value: Formatters.euro(summary.expenseNet),
+                  icon: Icons.trending_down,
+                ),
+                KpiCard(
+                  label: 'ergebnis',
+                  value: Formatters.euro(summary.resultNet),
+                  emphasize: true,
+                  valueColor: summary.resultNet < 0
+                      ? AppColors.statusCritical
+                      : AppColors.statusPositive,
+                  icon: Icons.euro_symbol,
+                ),
+                KpiCard(
+                  label: 'ust-saldo',
+                  value: Formatters.euro(summary.vatCollected - summary.vatPaid),
+                  icon: Icons.receipt_long_outlined,
+                ),
+              ],
+            );
+          },
         ),
-        const SizedBox(height: 24),
-        Text('Konten (SKR 03)', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.s6),
+        const Eyebrow('konten (SKR 03)'),
+        const SizedBox(height: AppSpacing.s3),
         if (summary.accounts.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: Text('Keine Buchungen im Zeitraum.')),
+          AppCard(
+            color: AppColors.surfaceAlt,
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: AppColors.textMuted),
+                const SizedBox(width: AppSpacing.s3),
+                Expanded(
+                  child: Text(
+                    'Keine Buchungen im gewählten Zeitraum.',
+                    style: AppTypography.body(size: 14, color: AppColors.textMuted),
+                  ),
+                ),
+              ],
+            ),
           )
         else
-          ...summary.accounts.map(
-            (a) => Card(
-              child: ListTile(
-                dense: true,
-                leading: CircleAvatar(child: Text(a.code.substring(0, 1))),
-                title: Text('${a.code} · ${a.name}'),
-                subtitle: Text(a.isRevenue ? 'Erlös' : 'Aufwand'),
-                trailing: Text(
-                  Formatters.euro(a.net),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+          Column(
+            children: [
+              for (final a in summary.accounts) ...[
+                _AccountRow(
+                  code: a.code,
+                  name: a.name,
+                  isRevenue: a.isRevenue,
+                  amount: a.net,
                 ),
-              ),
-            ),
+                const SizedBox(height: AppSpacing.s2),
+              ],
+            ],
           ),
       ],
     );
   }
 }
 
-class _KpiCard extends StatelessWidget {
-  const _KpiCard({
-    required this.label,
-    required this.value,
-    this.emphasize = false,
-    this.signColor = false,
+class _AccountRow extends StatelessWidget {
+  const _AccountRow({
+    required this.code,
+    required this.name,
+    required this.isRevenue,
+    required this.amount,
   });
 
-  final String label;
-  final double value;
-  final bool emphasize;
-  final bool signColor;
+  final String code;
+  final String name;
+  final bool isRevenue;
+  final double amount;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    Color? color;
-    if (signColor) {
-      color = value < 0 ? theme.colorScheme.error : Colors.green.shade700;
-    }
-    return Card(
-      color: emphasize ? theme.colorScheme.primaryContainer : null,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(label, style: theme.textTheme.labelMedium),
-            const SizedBox(height: 6),
-            Text(
-              Formatters.euro(value),
-              style: theme.textTheme.titleLarge?.copyWith(color: color),
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s4,
+        vertical: AppSpacing.s3,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isRevenue ? AppColors.brandLight : AppColors.surfaceAlt,
+              border: Border.all(
+                color: isRevenue ? AppColors.brand : AppColors.borderSubtle,
+              ),
+              borderRadius: BorderRadius.circular(AppRadii.sm),
             ),
-          ],
-        ),
+            alignment: Alignment.center,
+            child: Text(
+              code.substring(0, 1),
+              style: AppTypography.display(
+                size: 14,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$code · $name',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  isRevenue ? 'Erlös' : 'Aufwand',
+                  style: AppTypography.body(size: 12, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            Formatters.euro(amount),
+            style: AppTypography.body(
+              size: 15,
+              weight: FontWeight.w700,
+              color: isRevenue ? AppColors.statusPositive : AppColors.ink,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -256,17 +474,20 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
+    return AppCard(
+      color: const Color(0xFFF7DBDB),
+      borderColor: AppColors.statusCritical,
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.statusCritical),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.body(size: 14, color: AppColors.ink),
+            ),
+          ),
+        ],
       ),
     );
   }

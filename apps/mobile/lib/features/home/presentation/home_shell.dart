@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
@@ -42,16 +44,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         final safeIndex = _index.clamp(0, tabs.length - 1).toInt();
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.appTitle),
-            actions: [
-              IconButton(
-                tooltip: l10n.signOut,
-                icon: const Icon(Icons.logout),
-                onPressed: () =>
-                    ref.read(authControllerProvider.notifier).signOut(),
-              ),
-            ],
+          appBar: _BrandAppBar(
+            user: user,
+            onSignOut: () => ref.read(authControllerProvider.notifier).signOut(),
           ),
           body: tabs[safeIndex].screen,
           bottomNavigationBar: tabs.length > 1
@@ -74,16 +69,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       case UserRole.systemAdmin:
       case UserRole.shareholder:
         return [
-          _Tab(l10n.navFinance, Icons.insights, const FinanceScreen()),
-          _Tab(l10n.navManagement, Icons.inventory_2, const ManagementScreen()),
+          _Tab(l10n.navFinance, Icons.trending_up_outlined, const FinanceScreen()),
+          _Tab(l10n.navManagement, Icons.inventory_2_outlined, const ManagementScreen()),
         ];
       case UserRole.employee:
         return [
-          _Tab(l10n.navManagement, Icons.inventory_2, const ManagementScreen()),
+          _Tab(l10n.navManagement, Icons.inventory_2_outlined, const ManagementScreen()),
         ];
       case UserRole.customer:
         return [
-          _Tab(l10n.navCustomer, Icons.storefront, const CustomerScreen()),
+          _Tab(l10n.navCustomer, Icons.storefront_outlined, const CustomerScreen()),
         ];
     }
   }
@@ -94,4 +89,109 @@ class _Tab {
   final String label;
   final IconData icon;
   final Widget screen;
+}
+
+class _BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _BrandAppBar({required this.user, required this.onSignOut});
+
+  final AppUser user;
+  final VoidCallback onSignOut;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(64);
+
+  String _roleLabel(UserRole role) => switch (role) {
+        UserRole.systemAdmin => 'Systemadmin',
+        UserRole.shareholder => 'Gesellschafter',
+        UserRole.employee => 'Mitarbeiter',
+        UserRole.customer => 'Kunde',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      toolbarHeight: 64,
+      backgroundColor: AppColors.surfaceCard,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      title: Row(
+        children: [
+          // Kompakter Wortmark-Anker
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.ink,
+              borderRadius: BorderRadius.circular(AppRadii.sm),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'BÖRDE',
+                  style: AppTypography.display(
+                    size: 12,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ).copyWith(letterSpacing: 0.5, height: 1),
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  'SNACK',
+                  style: AppTypography.display(
+                    size: 12,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ).copyWith(letterSpacing: 0.5, height: 1),
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  '24',
+                  style: AppTypography.display(
+                    size: 12,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ).copyWith(letterSpacing: 0.5, height: 1),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  user.fullName ?? user.email,
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  _roleLabel(user.role),
+                  style: AppTypography.body(
+                    size: 11,
+                    weight: FontWeight.w600,
+                    color: AppColors.brandDark,
+                  ).copyWith(letterSpacing: 0.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          tooltip: AppLocalizations.of(context).signOut,
+          icon: const Icon(Icons.logout, size: 20),
+          onPressed: onSignOut,
+        ),
+        const SizedBox(width: AppSpacing.s2),
+      ],
+    );
+  }
 }
