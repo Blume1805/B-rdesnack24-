@@ -62,6 +62,10 @@ class CustomerRepositoryImpl implements CustomerRepository {
       });
 
   @override
+  Future<void> updateGender(String? gender) =>
+      _guard(() => _remote.updateGender(gender));
+
+  @override
   Future<void> submitContact({
     required String category,
     String? subject,

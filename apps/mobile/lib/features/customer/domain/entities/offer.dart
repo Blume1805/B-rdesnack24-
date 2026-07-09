@@ -60,6 +60,31 @@ class Offer extends Equatable {
 /// Individuelles, kundenspezifisches Angebot mit Einlösecode. Max 3 Tage
 /// gültig; nach Einlösung wird `redeemedAt` gesetzt und ein neues Angebot
 /// vom Backend erzeugt.
+/// Quelle eines individuellen Angebots.  Bestimmt UI-Styling und
+/// Sortierung im Angebote-Tab.
+enum PersonalOfferSource {
+  /// Basis-Angebot ('auto'): 10 % auf ein Produkt aus dem Konsumverhalten,
+  /// max. 1 aktives pro Kunde.
+  auto,
+
+  /// Loyalty-Bonus für erreichten Meilenstein (5/10/15/25 %).
+  loyalty,
+
+  /// 50 %-Rabatt zum Geburtstag, 14 Tage gültig, „Produkt deiner Wahl".
+  birthday,
+
+  /// 30 %-Rabatt zum Jahrestag der Registrierung, 14 Tage gültig,
+  /// „Produkt deiner Wahl".
+  anniversary;
+
+  static PersonalOfferSource fromString(String? s) => switch (s) {
+        'loyalty' => PersonalOfferSource.loyalty,
+        'birthday' => PersonalOfferSource.birthday,
+        'anniversary' => PersonalOfferSource.anniversary,
+        _ => PersonalOfferSource.auto,
+      };
+}
+
 class PersonalOffer extends Equatable {
   const PersonalOffer({
     required this.id,
@@ -70,6 +95,7 @@ class PersonalOffer extends Equatable {
     required this.redemptionCode,
     required this.validFrom,
     required this.validTo,
+    required this.source,
     this.redeemedAt,
     this.imageUrl,
   });
@@ -84,10 +110,14 @@ class PersonalOffer extends Equatable {
   final DateTime validTo;
   final DateTime? redeemedAt;
   final String? imageUrl;
+  final PersonalOfferSource source;
 
   bool get isRedeemed => redeemedAt != null;
   bool get isExpired => DateTime.now().isAfter(validTo);
   bool get isActive => !isRedeemed && !isExpired;
+  bool get isSpecial =>
+      source == PersonalOfferSource.birthday ||
+      source == PersonalOfferSource.anniversary;
 
   factory PersonalOffer.fromJson(Map<String, dynamic> j) => PersonalOffer(
         id: j['id'] as String,
@@ -104,6 +134,7 @@ class PersonalOffer extends Equatable {
             ? DateTime.tryParse(j['redeemed_at'].toString())
             : null,
         imageUrl: j['image_url'] as String?,
+        source: PersonalOfferSource.fromString(j['source'] as String?),
       );
 
   @override
@@ -116,5 +147,6 @@ class PersonalOffer extends Equatable {
         redemptionCode,
         validTo,
         redeemedAt,
+        source,
       ];
 }

@@ -25,6 +25,9 @@ abstract interface class CustomerRepository {
   /// Löst einen Zahlencode ein.  Wirft bei ungültigem/abgelaufenem Code.
   Future<PersonalOffer> redeemPersonalOffer(String code);
 
+  /// Setzt/aktualisiert das Geschlecht (m|w|d|null).
+  Future<void> updateGender(String? gender);
+
   Future<void> submitContact({
     required String category,
     String? subject,

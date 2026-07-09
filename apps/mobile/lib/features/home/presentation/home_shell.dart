@@ -101,7 +101,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback onSignOut;
 
   @override
-  Size get preferredSize => const Size.fromHeight(96);
+  Size get preferredSize => const Size.fromHeight(88);
 
   String _roleLabel(UserRole role) => switch (role) {
         UserRole.systemAdmin => 'Systemadmin',
@@ -109,6 +109,13 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         UserRole.employee => 'Mitarbeiter',
         UserRole.customer => 'Kunde',
       };
+
+  String _initial() {
+    final src = (user.fullName?.trim().isNotEmpty ?? false)
+        ? user.fullName!.trim()
+        : user.email.trim();
+    return src.isEmpty ? '?' : src.substring(0, 1).toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -118,116 +125,106 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       final row = ref.watch(myCustomerProvider).valueOrNull;
       customerNumber = row?['customer_number'] as String?;
     }
-    final loyalty = isCustomer ? ref.watch(myLoyaltyStatusProvider).valueOrNull : null;
 
+    // Ganzen Header wie eine „Mein Konto"-Card gestalten:
+    // Ink-Hintergrund, Gold-Label, Avatar mit Anfangsbuchstaben.
     return AppBar(
-      toolbarHeight: 96,
-      // Cream-Header hebt sich vom weißen Content ab.
-      backgroundColor: AppColors.surfaceAlt,
+      toolbarHeight: 88,
+      backgroundColor: AppColors.ink,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      shape: const Border(
-        bottom: BorderSide(color: AppColors.ink, width: 2),
-      ),
+      iconTheme: const IconThemeData(color: AppColors.onDark),
       titleSpacing: AppSpacing.s5,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              // Marken-Icon größer und mit Ink-Ring drum
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: AppColors.ink,
-                  borderRadius: BorderRadius.circular(AppRadii.pill),
-                ),
-                child: const BrandIcon(size: 34),
-              ),
-              const SizedBox(width: AppSpacing.s3),
-              // Wortmarke — Ink groß + fett
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    'BÖRDESNACK',
-                    style: AppTypography.display(
-                      size: 18,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink,
-                    ).copyWith(letterSpacing: 0.3, height: 1),
+          // Avatar — Gold-Kachel mit Anfangsbuchstaben (für Kunden),
+          // Marken-Icon (sonst).
+          isCustomer
+              ? Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.brand,
+                    borderRadius: BorderRadius.circular(AppRadii.md),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '24',
+                  alignment: Alignment.center,
+                  child: Text(
+                    _initial(),
                     style: AppTypography.display(
-                      size: 18,
-                      weight: FontWeight.w800,
-                      color: AppColors.brand,
-                    ).copyWith(letterSpacing: 0.3, height: 1),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              // Punkte-Chip rechts (nur Kunden)
-              if (isCustomer && loyalty != null)
-                LoyaltyMeter(
-                  points: loyalty.points,
-                  nextTier: loyalty.nextTier,
-                  pointsToNext: loyalty.pointsToNext,
-                  progress: loyalty.progressToNext,
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              // Name in Ink + Kundennummer prominent
-              Expanded(
-                child: RichText(
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    style: AppTypography.body(
-                      size: 13,
+                      size: 24,
                       weight: FontWeight.w800,
                       color: AppColors.ink,
                     ),
-                    children: [
-                      TextSpan(text: user.fullName ?? user.email),
-                      if (customerNumber != null)
-                        TextSpan(
-                          text: '  ·  Kd.-Nr. $customerNumber',
-                          style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w800,
-                            color: AppColors.brandDark,
-                          ),
-                        )
-                      else
-                        TextSpan(
-                          text: '  ·  ${_roleLabel(user.role)}',
-                          style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w800,
-                            color: AppColors.brandDark,
-                          ),
-                        ),
-                    ],
                   ),
+                )
+              : Container(
+                  width: 48,
+                  height: 48,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand,
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                  ),
+                  child: const BrandIcon(size: 40, color: AppColors.ink),
                 ),
-              ),
-            ],
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  isCustomer ? 'Mein Konto' : _roleLabel(user.role),
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ).copyWith(letterSpacing: 0.3),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user.fullName ?? user.email,
+                  style: AppTypography.display(
+                    size: 18,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (customerNumber != null)
+                  Text(
+                    'Kd.-Nr. $customerNumber',
+                    style: AppTypography.body(
+                      size: 12,
+                      weight: FontWeight.w700,
+                      color: AppColors.brandLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                else
+                  Text(
+                    user.email,
+                    style: AppTypography.body(
+                      size: 12,
+                      weight: FontWeight.w600,
+                      color: AppColors.brandLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
           ),
         ],
       ),
       actions: [
         IconButton(
           tooltip: AppLocalizations.of(context).signOut,
-          icon: const Icon(Icons.logout, size: 22, color: AppColors.ink),
+          icon: const Icon(Icons.logout, size: 22, color: AppColors.onDark),
           onPressed: onSignOut,
         ),
         const SizedBox(width: AppSpacing.s2),

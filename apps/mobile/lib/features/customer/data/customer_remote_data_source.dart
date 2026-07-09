@@ -28,6 +28,10 @@ class CustomerRemoteDataSource {
   }
 
   Future<List<Map<String, dynamic>>> myActivePersonalOffers() async {
+    // Falls heute Geburtstag oder Registrierungs-Jubiläum ist: erzeugen.
+    try {
+      await _client.rpc('ensure_my_special_offers');
+    } catch (_) {}
     final rows = await _client.rpc('my_active_personal_offers');
     if (rows is List) return rows.cast<Map<String, dynamic>>();
     return const [];
@@ -108,12 +112,13 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myCustomer() async {
     if (_uid == null) return null;
-    // Join Profil, damit birth_date + full_name direkt mitkommen.
+    // Join Profil, damit Stammdaten direkt mitkommen (full_name, birth_date,
+    // email, gender, created_at/Registrierungsdatum).
     final row = await _client
         .from('customers')
         .select(
           'customer_number, notify_email, notify_push, billing_city, '
-          'profiles!inner(full_name, birth_date)',
+          'profiles!inner(full_name, birth_date, email, gender, created_at)',
         )
         .eq('id', _uid!)
         .maybeSingle();
@@ -126,7 +131,18 @@ class CustomerRemoteDataSource {
       'billing_city': row['billing_city'],
       'full_name': profile?['full_name'],
       'birth_date': profile?['birth_date'],
+      'email': profile?['email'],
+      'gender': profile?['gender'],
+      'registered_at': profile?['created_at'],
     };
+  }
+
+  Future<void> updateGender(String? gender) async {
+    if (_uid == null) return;
+    await _client
+        .from('profiles')
+        .update({'gender': gender})
+        .eq('id', _uid!);
   }
 
   Future<void> updateProfileName(String fullName, String? phone) async {

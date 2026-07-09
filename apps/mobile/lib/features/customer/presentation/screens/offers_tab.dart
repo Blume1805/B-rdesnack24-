@@ -45,30 +45,44 @@ class OffersTab extends ConsumerWidget {
           if (loyalty.valueOrNull != null)
             const SizedBox(height: AppSpacing.s5),
 
-          // ── Individuelle Angebote (Basis + Loyalty-Bonusse) ──────────
+          // ── Individuelle Angebote (Special / Loyalty / Basis) ────────
           personals.when(
             loading: () => const _PersonalLoading(),
             error: (_, __) => const SizedBox.shrink(),
             data: (list) {
-              final loyaltyBonus = list
-                  .where((o) => o.discountPercent > 10)
+              final specials = list.where((o) => o.isSpecial).toList();
+              final loyalty = list
+                  .where((o) => o.source == PersonalOfferSource.loyalty)
                   .toList();
               final basis = list
-                  .where((o) => !loyaltyBonus.contains(o))
+                  .where((o) => o.source == PersonalOfferSource.auto)
                   .toList();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (loyaltyBonus.isNotEmpty) ...[
+                  if (specials.isNotEmpty) ...[
+                    const SectionHeader(
+                      eyebrow: 'Für dich persönlich',
+                      title: 'Sonderangebote',
+                    ),
+                    const SizedBox(height: AppSpacing.s4),
+                    for (final o in specials)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                        child: _PersonalOfferCard(offer: o),
+                      ),
+                    const SizedBox(height: AppSpacing.s5),
+                  ],
+                  if (loyalty.isNotEmpty) ...[
                     const SectionHeader(
                       eyebrow: 'Belohnung',
                       title: 'Bonus-Angebote',
                     ),
                     const SizedBox(height: AppSpacing.s4),
-                    for (final o in loyaltyBonus)
+                    for (final o in loyalty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                        child: _PersonalOfferCard(offer: o, isBonus: true),
+                        child: _PersonalOfferCard(offer: o),
                       ),
                     const SizedBox(height: AppSpacing.s5),
                   ],
@@ -164,13 +178,23 @@ class _PersonalLoading extends StatelessWidget {
 }
 
 /// Personalisiertes Angebot — dunkle Ink-Karte, prominenter Preisunterschied,
-/// 6-stelliger Code, „Einlösen"-Button.  Loyalty-Bonus bekommt einen Krönchen-
-/// Marker in Gold.
+/// 6-stelliger Code, „Einlösen"-Button.  Styling wird durch `source` bestimmt.
 class _PersonalOfferCard extends ConsumerWidget {
-  const _PersonalOfferCard({required this.offer, this.isBonus = false});
-
+  const _PersonalOfferCard({required this.offer});
   final PersonalOffer offer;
-  final bool isBonus;
+
+  ({String label, IconData icon}) get _header {
+    switch (offer.source) {
+      case PersonalOfferSource.birthday:
+        return (label: 'Herzlichen Glückwunsch', icon: Icons.celebration);
+      case PersonalOfferSource.anniversary:
+        return (label: 'Dein Jahres-Angebot', icon: Icons.emoji_events);
+      case PersonalOfferSource.loyalty:
+        return (label: 'Meilenstein-Bonus', icon: Icons.workspace_premium);
+      case PersonalOfferSource.auto:
+        return (label: 'Nur für dich', icon: Icons.card_giftcard);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -182,6 +206,8 @@ class _PersonalOfferCard extends ConsumerWidget {
         : hours >= 1
             ? 'noch $hours Std.'
             : 'endet bald';
+    final h = _header;
+    final isWildcard = offer.isSpecial;
 
     return AppCard(
       color: AppColors.ink,
@@ -202,14 +228,10 @@ class _PersonalOfferCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      isBonus ? Icons.workspace_premium : Icons.card_giftcard,
-                      color: AppColors.brand,
-                      size: 20,
-                    ),
+                    Icon(h.icon, color: AppColors.brand, size: 20),
                     const SizedBox(width: 6),
                     Text(
-                      isBonus ? 'Meilenstein-Bonus' : 'Nur für dich',
+                      h.label,
                       style: AppTypography.body(
                         size: 16,
                         weight: FontWeight.w800,
@@ -235,23 +257,63 @@ class _PersonalOfferCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: AppSpacing.s3),
                     Expanded(
-                      child: Text(
-                        offer.title,
-                        style: AppTypography.display(
-                          size: 20,
-                          weight: FontWeight.w800,
-                          color: AppColors.onDark,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            offer.title,
+                            style: AppTypography.display(
+                              size: 20,
+                              weight: FontWeight.w800,
+                              color: AppColors.onDark,
+                            ),
+                          ),
+                          if (isWildcard)
+                            Text(
+                              'Auf ein Produkt deiner Wahl',
+                              style: AppTypography.body(
+                                size: 13,
+                                weight: FontWeight.w600,
+                                color: AppColors.brandLight,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.s4),
-                _DarkPriceRow(
-                  regular: offer.regularPriceNet,
-                  discounted: offer.offerPriceNet,
-                  percent: offer.discountPercent,
-                ),
+                if (isWildcard)
+                  Row(
+                    children: [
+                      Text(
+                        '-${offer.discountPercent.toStringAsFixed(0)} %',
+                        style: AppTypography.display(
+                          size: 40,
+                          weight: FontWeight.w800,
+                          color: AppColors.brand,
+                        ).copyWith(height: 1),
+                      ),
+                      const SizedBox(width: AppSpacing.s3),
+                      Expanded(
+                        child: Text(
+                          'am Automaten einlösen',
+                          style: AppTypography.body(
+                            size: 13,
+                            weight: FontWeight.w700,
+                            color: AppColors.brandLight,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  _DarkPriceRow(
+                    regular: offer.regularPriceNet,
+                    discounted: offer.offerPriceNet,
+                    percent: offer.discountPercent,
+                  ),
               ],
             ),
           ),

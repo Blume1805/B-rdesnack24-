@@ -12,6 +12,7 @@ import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
 import 'consent_screen.dart';
+import 'master_data_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -85,9 +86,11 @@ class ProfileTab extends ConsumerWidget {
           eyebrow: 'Zugang & Profil',
           children: [
             _ProfileRow(
-              icon: Icons.edit_outlined,
-              title: 'Stammdaten bearbeiten',
-              onTap: () => _editProfile(context, ref),
+              icon: Icons.badge_outlined,
+              title: 'Stammdaten',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MasterDataScreen()),
+              ),
             ),
             _ProfileRow(
               icon: Icons.lock_outline,
@@ -222,39 +225,6 @@ class ProfileTab extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehlgeschlagen: $e')),
-      );
-    }
-  }
-
-  Future<void> _editProfile(BuildContext context, WidgetRef ref) async {
-    final user = ref.read(currentUserProvider).valueOrNull;
-    final nameCtrl = TextEditingController(text: user?.fullName ?? '');
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Stammdaten'),
-        content: TextField(
-          controller: nameCtrl,
-          decoration: const InputDecoration(labelText: 'Name'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Speichern')),
-        ],
-      ),
-    );
-    if (ok != true) return;
-    await ref
-        .read(customerRepositoryProvider)
-        .updateProfileName(nameCtrl.text.trim(), null);
-    ref.invalidate(currentUserProvider);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gespeichert.')),
       );
     }
   }
