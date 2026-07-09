@@ -36,7 +36,7 @@ class FinderTab extends ConsumerWidget {
           ),
           children: [
             const SectionHeader(
-              eyebrow: 'unsere standorte',
+              eyebrow: 'Unsere Standorte',
               title: 'Automaten in der Börde',
             ),
             const SizedBox(height: AppSpacing.s5),
@@ -121,7 +121,7 @@ class FinderTab extends ConsumerWidget {
                       IconButton(
                         tooltip: 'Navigation starten',
                         icon: const Icon(Icons.directions_outlined),
-                        color: AppColors.brandDark,
+                        color: AppColors.brand,
                         onPressed: () => _navigate(m.name, m.city),
                       ),
                     ],

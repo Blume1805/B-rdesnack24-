@@ -50,7 +50,7 @@
   "accountDeletionDialogTitle": "Konto zur Löschung anmelden",
   "accountDeletionDialogBody": "Wir verarbeiten deinen Antrag manuell. Aufgrund gesetzlicher Aufbewahrungsfristen (Steuer, HACCP) werden Daten teilweise erst nach Ablauf gelöscht; bis dahin werden sie gesperrt oder anonymisiert.",
   "accountDeletionRequested": "Antrag gestellt. Wir melden uns per E-Mail.",
-  "contactDataProtectionHint": "Deine Angaben werden zur Bearbeitung deiner Anfrage genutzt (Art. 6 (1) b DSGVO). Weitere Informationen in der Datenschutzerklärung.",
+  "contactDataProtectionHint": "Deine Angaben werden zur Bearbeitung deiner Anfrage genutzt. Weitere Informationen in der Datenschutzerklärung.",
   "cancel": "Abbrechen",
   "delete": "Löschen"
 }

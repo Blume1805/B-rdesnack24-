@@ -128,7 +128,7 @@ class _ModuleGrid extends StatelessWidget {
       ),
       children: [
         const SectionHeader(
-          eyebrow: 'verwaltung',
+          eyebrow: 'Verwaltung',
           title: 'Betriebsprotokolle',
         ),
         const SizedBox(height: AppSpacing.s2),

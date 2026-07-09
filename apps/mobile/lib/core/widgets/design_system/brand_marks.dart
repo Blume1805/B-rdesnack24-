@@ -178,47 +178,38 @@ class _VendingMachinePainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.background != background;
 }
 
-/// Bördesnack24-Wortmarke — Bricolage Grotesque, extrabold, 2 Zeilen.
+/// Bördesnack24-Wortmarke — Bricolage Grotesque, extrabold, eine Zeile:
+/// „BÖRDESNACK 24" mit dem 24 in Gold hervorgehoben.
 class WordmarkLarge extends StatelessWidget {
   const WordmarkLarge({
     super.key,
+    this.size = 32,
     this.color = AppColors.onDark,
     this.accent = AppColors.brand,
   });
 
+  final double size;
   final Color color;
   final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'BÖRDE',
-          style: AppTypography.display(size: 40, weight: FontWeight.w800, color: color)
+          'BÖRDESNACK',
+          style: AppTypography.display(size: size, weight: FontWeight.w800, color: color)
               .copyWith(height: 1.0, letterSpacing: -0.5),
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              'SNACK',
-              style: AppTypography.display(size: 40, weight: FontWeight.w800, color: color)
-                  .copyWith(height: 1.0, letterSpacing: -0.5),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '24',
-              style: AppTypography.display(size: 40, weight: FontWeight.w800, color: accent)
-                  .copyWith(height: 1.0, letterSpacing: -0.5),
-            ),
-          ],
+        SizedBox(width: size * 0.18),
+        Text(
+          '24',
+          style: AppTypography.display(size: size, weight: FontWeight.w800, color: accent)
+              .copyWith(height: 1.0, letterSpacing: -0.5),
         ),
-        const SizedBox(height: 6),
-        Container(width: 56, height: 3, color: accent),
       ],
     );
   }

@@ -127,30 +127,21 @@ class _BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'BÖRDE',
+                  'BÖRDESNACK',
                   style: AppTypography.display(
                     size: 12,
                     weight: FontWeight.w800,
                     color: AppColors.onDark,
-                  ).copyWith(letterSpacing: 0.5, height: 1),
+                  ).copyWith(letterSpacing: 0.4, height: 1),
                 ),
-                const SizedBox(width: 3),
-                Text(
-                  'SNACK',
-                  style: AppTypography.display(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
-                  ).copyWith(letterSpacing: 0.5, height: 1),
-                ),
-                const SizedBox(width: 3),
+                const SizedBox(width: 4),
                 Text(
                   '24',
                   style: AppTypography.display(
                     size: 12,
                     weight: FontWeight.w800,
                     color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.5, height: 1),
+                  ).copyWith(letterSpacing: 0.4, height: 1),
                 ),
               ],
             ),
@@ -175,8 +166,8 @@ class _BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _roleLabel(user.role),
                   style: AppTypography.body(
                     size: 11,
-                    weight: FontWeight.w600,
-                    color: AppColors.brandDark,
+                    weight: FontWeight.w700,
+                    color: AppColors.brand,
                   ).copyWith(letterSpacing: 0.4),
                 ),
               ],

@@ -59,7 +59,7 @@ class ProfileTab extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Eyebrow('mein konto', onDark: true),
+                    const Eyebrow('Mein Konto', onDark: true),
                     const SizedBox(height: 2),
                     Text(
                       u?.fullName ?? 'Kunde',
@@ -84,7 +84,7 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.s5),
         _ProfileGroup(
-          eyebrow: 'zugang & profil',
+          eyebrow: 'Zugang & Profil',
           children: [
             _ProfileRow(
               icon: Icons.edit_outlined,
@@ -100,17 +100,17 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'benachrichtigungen',
+          eyebrow: 'Benachrichtigungen',
           children: [_NotificationSection()],
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'einwilligungen',
+          eyebrow: 'Einwilligungen',
           children: [_ConsentSection()],
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'kontakt',
+          eyebrow: 'Kontakt',
           children: [
             _ProfileRow(
               icon: Icons.mail_outline,
@@ -120,25 +120,25 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.star_outline,
               title: 'Bei Google bewerten',
-              iconColor: AppColors.brandDark,
+              iconColor: AppColors.brand,
               onTap: () => _review(context, ref),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'meine daten (DSGVO)',
+          eyebrow: 'Meine Daten',
           children: [
             _ProfileRow(
               icon: Icons.download_outlined,
               title: 'Meine Daten exportieren',
-              subtitle: 'Art. 15 / 20 – Auskunft & Übertragbarkeit',
+              subtitle: 'Auskunft und Übertragbarkeit',
               onTap: () => _exportMyData(context, ref),
             ),
             _ProfileRow(
               icon: Icons.delete_outline,
               title: 'Konto löschen (Antrag)',
-              subtitle: 'Art. 17 – Recht auf Löschung',
+              subtitle: 'Recht auf Löschung',
               iconColor: AppColors.statusCritical,
               onTap: () => _requestDeletion(context, ref),
             ),
@@ -146,7 +146,7 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'rechtliches',
+          eyebrow: 'Rechtliches',
           children: [
             _ProfileRow(
               icon: Icons.gavel_outlined,
@@ -222,9 +222,9 @@ class ProfileTab extends ConsumerWidget {
           children: [
             const Text(
               'Wir bearbeiten deinen Antrag manuell. Wegen steuer- und '
-              'lebensmittelrechtlicher Aufbewahrungspflichten (§ 147 AO, HACCP) '
-              'werden Daten teilweise erst nach Ablauf der Frist gelöscht; bis '
-              'dahin werden sie gesperrt oder anonymisiert.',
+              'lebensmittelrechtlicher Aufbewahrungspflichten werden Daten '
+              'teilweise erst nach Ablauf der Frist gelöscht; bis dahin '
+              'werden sie gesperrt oder anonymisiert.',
             ),
             const SizedBox(height: 12),
             TextField(
@@ -415,7 +415,7 @@ class _ProfileRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 22, color: iconColor ?? AppColors.brandDark),
+            Icon(icon, size: 22, color: iconColor ?? AppColors.brand),
             const SizedBox(width: AppSpacing.s3),
             Expanded(
               child: Column(
@@ -516,10 +516,6 @@ class _ConsentSectionState extends ConsumerState<_ConsentSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Text('Einwilligungen (Art. 6 (1) a DSGVO · § 25 TDDDG)'),
-        ),
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(
@@ -624,8 +620,8 @@ class _ContactFormState extends State<_ContactForm> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Deine Angaben werden zur Bearbeitung der Anfrage verarbeitet '
-                '(Art. 6 (1) b DSGVO). Details siehe Datenschutzerklärung.',
+                'Deine Angaben werden zur Bearbeitung der Anfrage verarbeitet. '
+                'Details siehe Datenschutzerklärung.',
                 style: TextStyle(fontSize: 11),
               ),
               const SizedBox(height: 16),

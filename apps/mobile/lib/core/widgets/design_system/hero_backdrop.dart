@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
-import 'brand_marks.dart';
+import '../../theme/app_typography.dart';
 
-/// Ink-farbener „Hero"-Bereich mit Wortmarke, Automat-Glyph und
-/// Bördekreis-Umriss als flächigem Hintergrund-Motiv.
+/// Ink-farbener „Hero"-Bereich mit Marken-Foto (Automat + leuchtender
+/// Bördekreis-Umriss + Wortmarke).  Das Foto liegt als Asset unter
+/// `assets/images/brand_hero.jpg` und wird passend zugeschnitten
+/// eingeblendet; ein dunkler Gradient sorgt dafür, dass später
+/// darübergelegte Inhalte (Tagline, Formularübergang) lesbar bleiben.
 class HeroBackdrop extends StatelessWidget {
   const HeroBackdrop({
     super.key,
-    this.height = 340,
-    this.showVending = true,
-    this.showOutline = true,
+    this.height = 320,
     this.tagline,
   });
 
   final double height;
-  final bool showVending;
-  final bool showOutline;
   final String? tagline;
 
   @override
@@ -26,69 +25,42 @@ class HeroBackdrop extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Ink-Hintergrund mit dezentem Gold-Gradient
-          Container(
-            decoration: const BoxDecoration(
+          // Ink-Basis, damit an den Rändern nie ein weißer Blitz durchkommt.
+          Container(color: AppColors.ink),
+          // Marken-Foto (Bördekreis-Umriss + Automat + Wortmarke).
+          Image.asset(
+            'assets/images/brand_hero.jpg',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+          ),
+          // Unten leichter Dunkel-Verlauf, damit die Tagline lesbar bleibt
+          // und der Übergang zum Cream-Formular sanft wirkt.
+          const DecoratedBox(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.ink, Color(0xFF14110E)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.55, 1.0],
+                colors: [Color(0x00000000), Color(0xCC14110E)],
               ),
             ),
           ),
-          // Bördekreis-Outline dezent im Hintergrund
-          if (showOutline)
+          if (tagline != null)
             Positioned(
-              right: -40,
-              top: -20,
-              child: SizedBox(
-                width: 280,
-                height: 280,
-                child: CustomPaint(
-                  painter: BoerdeOutlinePainter(
-                    color: AppColors.brand.withValues(alpha: 0.35),
-                  ),
+              left: AppSpacing.s5,
+              right: AppSpacing.s5,
+              bottom: AppSpacing.s4,
+              child: Text(
+                tagline!,
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: AppColors.onDark,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          // Inhalt
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s6,
-              vertical: AppSpacing.s5,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const WordmarkLarge(),
-                      if (tagline != null) ...[
-                        const SizedBox(height: AppSpacing.s3),
-                        Text(
-                          tagline!,
-                          style: const TextStyle(
-                            color: AppColors.onDark,
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (showVending) ...[
-                  const SizedBox(width: AppSpacing.s4),
-                  const VendingMachineGlyph(size: 90),
-                ],
-              ],
-            ),
-          ),
         ],
       ),
     );

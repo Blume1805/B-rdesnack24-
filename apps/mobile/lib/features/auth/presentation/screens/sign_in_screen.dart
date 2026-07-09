@@ -68,8 +68,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const HeroBackdrop(
-                      height: 300,
-                      tagline: 'Regional. Ehrlich. 24/7 — die Unternehmens­plattform für Snack- und Getränke­automaten.',
+                      height: 320,
+                      tagline: 'Immer da, wenn der Hunger kommt.',
                     ),
                     _FormPanel(
                       formKey: _formKey,
@@ -140,7 +140,7 @@ class _FormPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Eyebrow('willkommen zurück'),
+                const Eyebrow('Willkommen zurück'),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   l10n.signInTitle,
@@ -353,7 +353,7 @@ class _DemoChip extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 20, color: AppColors.brandDark),
+          Icon(icon, size: 20, color: AppColors.brand),
           const SizedBox(height: 4),
           Text(
             label,

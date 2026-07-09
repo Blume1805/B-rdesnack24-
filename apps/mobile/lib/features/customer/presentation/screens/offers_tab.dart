@@ -46,7 +46,7 @@ class OffersTab extends ConsumerWidget {
             ),
             children: [
               const SectionHeader(
-                eyebrow: 'für dich',
+                eyebrow: 'Für dich',
                 title: 'Angebote & Aktionen',
               ),
               const SizedBox(height: AppSpacing.s5),

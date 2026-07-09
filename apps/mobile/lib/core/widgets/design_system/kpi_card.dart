@@ -41,7 +41,7 @@ class KpiCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 18, color: AppColors.brandDark),
+                Icon(icon, size: 18, color: AppColors.brand),
                 const SizedBox(width: 6),
               ],
               Expanded(child: Eyebrow(label)),

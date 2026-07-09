@@ -34,11 +34,11 @@ class HistoryTab extends ConsumerWidget {
         ),
         children: [
           const SectionHeader(
-            eyebrow: 'mein konto',
+            eyebrow: 'Mein Konto',
             title: 'Verlauf & Preise',
           ),
           const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'meine preise', icon: Icons.local_offer_outlined),
+          _SectionEyebrow(eyebrow: 'Meine Preise', icon: Icons.local_offer_outlined),
           const SizedBox(height: AppSpacing.s3),
           prices.when(
             loading: () => const LinearProgressIndicator(color: AppColors.brand),
@@ -56,7 +56,7 @@ class HistoryTab extends ConsumerWidget {
                           child: Row(
                             children: [
                               const Icon(Icons.euro_symbol,
-                                  size: 20, color: AppColors.brandDark),
+                                  size: 20, color: AppColors.brand),
                               const SizedBox(width: AppSpacing.s2),
                               Expanded(
                                 child: Text(
@@ -85,7 +85,7 @@ class HistoryTab extends ConsumerWidget {
                   ),
           ),
           const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'empfehlungen', icon: Icons.recommend_outlined),
+          _SectionEyebrow(eyebrow: 'Empfehlungen', icon: Icons.recommend_outlined),
           const SizedBox(height: AppSpacing.s3),
           recos.when(
             loading: () => const LinearProgressIndicator(color: AppColors.brand),
@@ -103,7 +103,7 @@ class HistoryTab extends ConsumerWidget {
                           child: Row(
                             children: [
                               const Icon(Icons.star_outline,
-                                  size: 20, color: AppColors.brandDark),
+                                  size: 20, color: AppColors.brand),
                               const SizedBox(width: AppSpacing.s2),
                               Expanded(
                                 child: Column(
@@ -137,7 +137,7 @@ class HistoryTab extends ConsumerWidget {
                   ),
           ),
           const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'kaufhistorie', icon: Icons.receipt_long_outlined),
+          _SectionEyebrow(eyebrow: 'Kaufhistorie', icon: Icons.receipt_long_outlined),
           const SizedBox(height: AppSpacing.s3),
           purchases.when(
             loading: () => const LinearProgressIndicator(color: AppColors.brand),
@@ -166,7 +166,7 @@ class HistoryTab extends ConsumerWidget {
                                 child: const Icon(
                                   Icons.shopping_bag_outlined,
                                   size: 18,
-                                  color: AppColors.brandDark,
+                                  color: AppColors.brand,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.s3),
@@ -232,7 +232,7 @@ class _SectionEyebrow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.brandDark),
+        Icon(icon, size: 16, color: AppColors.brand),
         const SizedBox(width: 6),
         Eyebrow(eyebrow),
       ],

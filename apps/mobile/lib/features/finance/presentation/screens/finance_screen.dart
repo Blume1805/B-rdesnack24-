@@ -35,7 +35,7 @@ class FinanceScreen extends ConsumerWidget {
         ),
         children: [
           SectionHeader(
-            eyebrow: 'finanzen',
+            eyebrow: 'Finanzen',
             title: 'Dashboard',
             action: _ActionCluster(
               busy: busy,
@@ -177,7 +177,7 @@ class _PeriodSelector extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Eyebrow('zeitraum'),
+          const Eyebrow('Zeitraum'),
           const SizedBox(height: AppSpacing.s2),
           Row(
             children: [
@@ -314,28 +314,28 @@ class _SummaryContent extends StatelessWidget {
               crossAxisSpacing: AppSpacing.s3,
               children: [
                 KpiCard(
-                  label: 'umsatz 7 %',
+                  label: 'Umsatz 7 %',
                   value: Formatters.euro(summary.revenueNet7),
                   icon: Icons.percent,
                 ),
                 KpiCard(
-                  label: 'umsatz 19 %',
+                  label: 'Umsatz 19 %',
                   value: Formatters.euro(summary.revenueNet19),
                   icon: Icons.percent,
                 ),
                 KpiCard(
-                  label: 'umsatz netto',
+                  label: 'Umsatz netto',
                   value: Formatters.euro(summary.revenueNet),
                   emphasize: true,
                   icon: Icons.trending_up,
                 ),
                 KpiCard(
-                  label: 'aufwand',
+                  label: 'Aufwand',
                   value: Formatters.euro(summary.expenseNet),
                   icon: Icons.trending_down,
                 ),
                 KpiCard(
-                  label: 'ergebnis',
+                  label: 'Ergebnis',
                   value: Formatters.euro(summary.resultNet),
                   emphasize: true,
                   valueColor: summary.resultNet < 0
@@ -344,7 +344,7 @@ class _SummaryContent extends StatelessWidget {
                   icon: Icons.euro_symbol,
                 ),
                 KpiCard(
-                  label: 'ust-saldo',
+                  label: 'USt-Saldo',
                   value: Formatters.euro(summary.vatCollected - summary.vatPaid),
                   icon: Icons.receipt_long_outlined,
                 ),
@@ -353,7 +353,7 @@ class _SummaryContent extends StatelessWidget {
           },
         ),
         const SizedBox(height: AppSpacing.s6),
-        const Eyebrow('konten (SKR 03)'),
+        const Eyebrow('Konten (SKR 03)'),
         const SizedBox(height: AppSpacing.s3),
         if (summary.accounts.isEmpty)
           AppCard(
