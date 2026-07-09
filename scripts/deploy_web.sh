@@ -24,10 +24,17 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MOBILE="$ROOT/apps/mobile"
 ENV_FILE="${ENV_FILE:-$MOBILE/env/demo.json}"
 SUBPATH="${SUBPATH:-app-live}"
+# GitHub-Pages-Repo-Präfix. Ohne den zeigt <base href> ins Leere:
+# Repo liegt unter https://<user>.github.io/<REPO>/, aber Flutter würde
+# ohne Präfix z. B. https://<user>.github.io/live/… anfragen → 404 auf
+# flutter_bootstrap.js/main.dart.js/CanvasKit → App startet nie, keine
+# JS-Fehler (Script-404 werden nicht via window.onerror gemeldet).
+REPO="${REPO:-B-rdesnack24-}"
+BASE_HREF="/$REPO/$SUBPATH/"
 
-echo "▶︎ Flutter Web-Build ($ENV_FILE, base=/$SUBPATH/)"
+echo "▶︎ Flutter Web-Build ($ENV_FILE, base=$BASE_HREF)"
 ( cd "$MOBILE" && flutter build web --release \
-    --base-href="/$SUBPATH/" \
+    --base-href="$BASE_HREF" \
     --dart-define-from-file="$ENV_FILE" )
 
 BUILD_DIR="$MOBILE/build/web"
