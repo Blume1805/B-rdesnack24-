@@ -8,6 +8,16 @@ abstract interface class CustomerRepository {
   Future<List<Recommendation>> myRecommendations();
   Future<Map<String, dynamic>?> myCustomer();
 
+  /// Aktuelles individuelles Angebot (max. 1 aktives pro Kunde).
+  Future<PersonalOffer?> myPersonalOffer();
+
+  /// Falls kein aktives Angebot vorhanden ist, generiert das Backend eines
+  /// basierend auf dem Konsumverhalten des Kunden.
+  Future<PersonalOffer?> ensurePersonalOffer();
+
+  /// Löst einen Zahlencode ein.  Wirft bei ungültigem/abgelaufenem Code.
+  Future<PersonalOffer> redeemPersonalOffer(String code);
+
   Future<void> submitContact({
     required String category,
     String? subject,

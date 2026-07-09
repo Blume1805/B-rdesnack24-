@@ -31,6 +31,24 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<Map<String, dynamic>?> myCustomer() => _guard(_remote.myCustomer);
 
   @override
+  Future<PersonalOffer?> myPersonalOffer() => _guard(() async {
+        final row = await _remote.myActivePersonalOffer();
+        return row == null ? null : PersonalOffer.fromJson(row);
+      });
+
+  @override
+  Future<PersonalOffer?> ensurePersonalOffer() => _guard(() async {
+        final row = await _remote.ensurePersonalOffer();
+        return row == null ? null : PersonalOffer.fromJson(row);
+      });
+
+  @override
+  Future<PersonalOffer> redeemPersonalOffer(String code) => _guard(() async {
+        final row = await _remote.redeemPersonalOffer(code);
+        return PersonalOffer.fromJson(row);
+      });
+
+  @override
   Future<void> submitContact({
     required String category,
     String? subject,

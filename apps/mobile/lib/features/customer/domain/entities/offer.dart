@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
 
+/// Marketing-Angebot (Wochen-/Tages-/Sonderaktion).  Enthält jetzt auch die
+/// Preisdaten für den Rabattausweis (alter Preis durchgestrichen +
+/// prozentualer Rabatt).  `regularPriceNet` / `offerPriceNet` sind
+/// optional, weil ältere Datensätze ggf. noch keine Preise haben.
 class Offer extends Equatable {
   const Offer({
     required this.id,
@@ -8,6 +12,9 @@ class Offer extends Equatable {
     this.description,
     this.validTo,
     this.imageUrl,
+    this.regularPriceNet,
+    this.offerPriceNet,
+    this.discountPercent,
   });
 
   final String id;
@@ -15,12 +22,13 @@ class Offer extends Equatable {
   final String kind; // daily | weekly | special
   final String? description;
   final DateTime? validTo;
-
-  /// Optionales Produkt-/Aktionsbild.  Solange Bildpfade in der DB fehlen,
-  /// zeigt das UI einen Platzhalter (siehe `ProductImage`).  Sobald `offers`
-  /// eine Spalte `image_url` liefert, greift das Frontend ohne weitere
-  /// Änderung darauf zu.
   final String? imageUrl;
+
+  final double? regularPriceNet;
+  final double? offerPriceNet;
+  final double? discountPercent;
+
+  bool get hasPrice => regularPriceNet != null && offerPriceNet != null;
 
   factory Offer.fromJson(Map<String, dynamic> j) => Offer(
         id: j['id'] as String,
@@ -31,8 +39,82 @@ class Offer extends Equatable {
             ? DateTime.tryParse(j['valid_to'].toString())
             : null,
         imageUrl: j['image_url'] as String?,
+        regularPriceNet: (j['regular_price_net'] as num?)?.toDouble(),
+        offerPriceNet: (j['offer_price_net'] as num?)?.toDouble(),
+        discountPercent: (j['discount_percent'] as num?)?.toDouble(),
       );
 
   @override
-  List<Object?> get props => [id, title, kind, validTo, imageUrl];
+  List<Object?> get props => [
+        id,
+        title,
+        kind,
+        validTo,
+        imageUrl,
+        regularPriceNet,
+        offerPriceNet,
+        discountPercent,
+      ];
+}
+
+/// Individuelles, kundenspezifisches Angebot mit Einlösecode. Max 3 Tage
+/// gültig; nach Einlösung wird `redeemedAt` gesetzt und ein neues Angebot
+/// vom Backend erzeugt.
+class PersonalOffer extends Equatable {
+  const PersonalOffer({
+    required this.id,
+    required this.title,
+    required this.regularPriceNet,
+    required this.offerPriceNet,
+    required this.discountPercent,
+    required this.redemptionCode,
+    required this.validFrom,
+    required this.validTo,
+    this.redeemedAt,
+    this.imageUrl,
+  });
+
+  final String id;
+  final String title;
+  final double regularPriceNet;
+  final double offerPriceNet;
+  final double discountPercent;
+  final String redemptionCode;
+  final DateTime validFrom;
+  final DateTime validTo;
+  final DateTime? redeemedAt;
+  final String? imageUrl;
+
+  bool get isRedeemed => redeemedAt != null;
+  bool get isExpired => DateTime.now().isAfter(validTo);
+  bool get isActive => !isRedeemed && !isExpired;
+
+  factory PersonalOffer.fromJson(Map<String, dynamic> j) => PersonalOffer(
+        id: j['id'] as String,
+        title: j['title'] as String? ?? '',
+        regularPriceNet: (j['regular_price_net'] as num?)?.toDouble() ?? 0,
+        offerPriceNet: (j['offer_price_net'] as num?)?.toDouble() ?? 0,
+        discountPercent: (j['discount_percent'] as num?)?.toDouble() ?? 0,
+        redemptionCode: j['redemption_code'] as String? ?? '',
+        validFrom: DateTime.tryParse(j['valid_from']?.toString() ?? '') ??
+            DateTime.now(),
+        validTo: DateTime.tryParse(j['valid_to']?.toString() ?? '') ??
+            DateTime.now(),
+        redeemedAt: j['redeemed_at'] != null
+            ? DateTime.tryParse(j['redeemed_at'].toString())
+            : null,
+        imageUrl: j['image_url'] as String?,
+      );
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        regularPriceNet,
+        offerPriceNet,
+        discountPercent,
+        redemptionCode,
+        validTo,
+        redeemedAt,
+      ];
 }

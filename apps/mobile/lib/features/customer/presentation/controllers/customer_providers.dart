@@ -34,3 +34,34 @@ final myCustomerProvider =
     FutureProvider.autoDispose<Map<String, dynamic>?>(
   (ref) => ref.watch(customerRepositoryProvider).myCustomer(),
 );
+
+/// Aktives individuelles Angebot des Kunden.  Automatisch generiert
+/// (via RPC) sobald keins existiert oder das letzte abgelaufen ist.
+final myPersonalOfferProvider = FutureProvider.autoDispose<PersonalOffer?>(
+  (ref) => ref.watch(customerRepositoryProvider).ensurePersonalOffer(),
+);
+
+/// Aktionen rund um das persönliche Angebot: Einlösen per Zahlencode.
+class PersonalOfferActions extends StateNotifier<AsyncValue<void>> {
+  PersonalOfferActions(this._ref) : super(const AsyncData(null));
+  final Ref _ref;
+
+  Future<PersonalOffer?> redeem(String code) async {
+    state = const AsyncLoading();
+    try {
+      final offer =
+          await _ref.read(customerRepositoryProvider).redeemPersonalOffer(code);
+      state = const AsyncData(null);
+      _ref.invalidate(myPersonalOfferProvider);
+      return offer;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return null;
+    }
+  }
+}
+
+final personalOfferActionsProvider =
+    StateNotifierProvider.autoDispose<PersonalOfferActions, AsyncValue<void>>(
+  (ref) => PersonalOfferActions(ref),
+);

@@ -10,11 +10,39 @@ class CustomerRemoteDataSource {
     final today = DateTime.now().toIso8601String().substring(0, 10);
     final rows = await _client
         .from('offers')
-        .select('id, title, description, kind, valid_to')
+        .select(
+          'id, title, description, kind, valid_to, image_url, '
+          'regular_price_net, offer_price_net, discount_percent',
+        )
         .eq('status', 'active')
         .or('valid_to.is.null,valid_to.gte.$today')
         .order('valid_from', ascending: false);
     return (rows as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>?> myActivePersonalOffer() async {
+    final row = await _client
+        .rpc('my_active_personal_offer')
+        .maybeSingle();
+    return row as Map<String, dynamic>?;
+  }
+
+  Future<Map<String, dynamic>?> ensurePersonalOffer() async {
+    if (_uid == null) return null;
+    final existing = await myActivePersonalOffer();
+    if (existing != null) return existing;
+    final row = await _client
+        .rpc('generate_personal_offer', params: {'p_customer_id': _uid})
+        .maybeSingle();
+    return row as Map<String, dynamic>?;
+  }
+
+  Future<Map<String, dynamic>> redeemPersonalOffer(String code) async {
+    final row = await _client.rpc(
+      'redeem_personal_offer',
+      params: {'p_code': code.trim()},
+    ).single();
+    return row as Map<String, dynamic>;
   }
 
   Future<List<Map<String, dynamic>>> myPrices() async {

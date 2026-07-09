@@ -7,6 +7,7 @@ export 'eyebrow.dart';
 export 'hero_backdrop.dart';
 export 'kpi_card.dart';
 export 'module_tile.dart';
+export 'price_row.dart';
 export 'product_image.dart';
 export 'section_header.dart';
 export 'status_badge.dart';
