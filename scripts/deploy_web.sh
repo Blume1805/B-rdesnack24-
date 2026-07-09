@@ -148,4 +148,17 @@ git -C "$ROOT" push origin gh-pages
 git -C "$ROOT" checkout "$CURRENT_BRANCH"
 rm -rf "$STAGE"
 
+# Aufräumen: git checkout löscht keine untracked Files. Die Deploy-Artefakte
+# (assets/, canvaskit/, icons/, version.txt …) am Repo-Root sind aber Reste
+# vom gh-pages-Build und dürfen NICHT im Feature-Branch liegen bleiben —
+# sonst meldet der Stop-Hook untracked Files. Alles wegräumen, was der
+# Feature-Branch nicht tracked.
+if [ -z "$SUBPATH" ]; then
+  ( cd "$ROOT" && \
+    rm -rf assets canvaskit icons && \
+    rm -f  index.html 404.html main.dart.js flutter.js flutter_bootstrap.js \
+           flutter_service_worker.js manifest.json favicon.png version.json \
+           version.txt .last_build_id )
+fi
+
 echo "✓ Deploy fertig — https://blume1805.github.io/B-rdesnack24-/ (v=${TS})"
