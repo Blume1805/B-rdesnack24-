@@ -11,7 +11,15 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
 
-/// Initialisiert Infrastruktur (Supabase) und startet die App.
+/// Initialisiert Infrastruktur und startet die App.
+///
+/// **Kritisch für Web:** iOS Safari kann Supabase.initialize im
+/// eingebetteten WebView (In-App-Browser, Private Relay) unbemerkt
+/// blockieren — die Future resolvet nie, `runApp()` wird nie aufgerufen,
+/// der HTML-Loader hängt endlos.  Deshalb wickeln wir den Init in einen
+/// harten 4-Sekunden-Timeout ein und rufen `runApp()` in *jedem* Fall.
+/// Falls Supabase im Hintergrund später doch noch antwortet, ist das
+/// ok — der Auth-Provider zeigt so oder so das Login-Formular an.
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -21,23 +29,21 @@ Future<void> bootstrap() async {
     GoogleFonts.config.allowRuntimeFetching = false;
   }
 
-  await initializeDateFormatting('de_DE');
+  await _safe(() => initializeDateFormatting('de_DE'),
+      label: 'initializeDateFormatting', timeoutSeconds: 3);
 
   final config = AppConfig.fromEnvironment();
   if (!config.isValid) {
     debugPrint('AppConfig ungültig — Supabase-URL/Key fehlen (--dart-define).');
-  }
-
-  // Supabase-Init — Fehler nicht re-throwen, sonst bleibt runApp() aus und
-  // der HTML-Loader hängt endlos. Falls Init scheitert, zeigt der Login
-  // beim ersten Aufruf die reale Fehlermeldung.
-  try {
-    await Supabase.initialize(
-      url: config.supabaseUrl,
-      anonKey: config.supabaseAnonKey,
+  } else {
+    await _safe(
+      () => Supabase.initialize(
+        url: config.supabaseUrl,
+        anonKey: config.supabaseAnonKey,
+      ),
+      label: 'Supabase.initialize',
+      timeoutSeconds: 4,
     );
-  } catch (e, st) {
-    debugPrint('Supabase-Init fehlgeschlagen: $e\n$st');
   }
 
   runApp(
@@ -46,4 +52,20 @@ Future<void> bootstrap() async {
       child: const BoerdesnackApp(),
     ),
   );
+}
+
+/// Führt eine Future aus, verschluckt alle Fehler und respektiert einen
+/// harten Timeout. Nie re-throwen — sonst kommt runApp() nie zustande.
+Future<void> _safe(
+  Future<void> Function() action, {
+  required String label,
+  required int timeoutSeconds,
+}) async {
+  try {
+    await action().timeout(Duration(seconds: timeoutSeconds));
+  } on TimeoutException {
+    debugPrint('$label — Timeout nach ${timeoutSeconds}s, Boot geht weiter.');
+  } catch (e, st) {
+    debugPrint('$label fehlgeschlagen: $e\n$st');
+  }
 }
