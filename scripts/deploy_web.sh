@@ -108,10 +108,16 @@ if [ -z "$SUBPATH" ]; then
   rm -rf "$ROOT/assets" "$ROOT/canvaskit" "$ROOT/icons"
   # Neuen Build am Root ablegen.
   cp -r "$STAGE/." "$ROOT/"
-  # Cache-Buster über eine sichtbare Version-Datei (falls jemand harten
-  # Reload braucht, ist die URL /?v=$TS eindeutig):
+  # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
-  git -C "$ROOT" add -A
+  # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
+  # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
+  # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.
+  ( cd "$ROOT" && \
+    git add index.html 404.html manifest.json favicon.png flutter.js \
+      flutter_bootstrap.js flutter_service_worker.js main.dart.js \
+      version.json version.txt assets canvaskit icons .last_build_id 2>/dev/null || true; \
+    git add -u )
 else
   # Sub-Path-Deploy (Legacy / Preview).  Neben der Root-App liegen lassen.
   rm -rf "$ROOT/$SUBPATH"
