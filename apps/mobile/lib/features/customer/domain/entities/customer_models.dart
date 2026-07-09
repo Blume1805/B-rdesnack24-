@@ -5,21 +5,24 @@ class CustomerPrice extends Equatable {
   const CustomerPrice({
     required this.productName,
     required this.priceNet,
+    this.imageUrl,
   });
 
   final String productName;
   final double priceNet;
+  final String? imageUrl;
 
   factory CustomerPrice.fromJson(Map<String, dynamic> j) {
     final product = j['products'] as Map<String, dynamic>?;
     return CustomerPrice(
       productName: product?['name'] as String? ?? '—',
       priceNet: (j['price_net'] as num?)?.toDouble() ?? 0,
+      imageUrl: product?['image_url'] as String?,
     );
   }
 
   @override
-  List<Object?> get props => [productName, priceNet];
+  List<Object?> get props => [productName, priceNet, imageUrl];
 }
 
 /// Empfehlung (mit Produktname über Join).
@@ -28,11 +31,13 @@ class Recommendation extends Equatable {
     required this.productName,
     required this.score,
     this.reason,
+    this.imageUrl,
   });
 
   final String productName;
   final double score;
   final String? reason;
+  final String? imageUrl;
 
   factory Recommendation.fromJson(Map<String, dynamic> j) {
     final product = j['products'] as Map<String, dynamic>?;
@@ -40,11 +45,12 @@ class Recommendation extends Equatable {
       productName: product?['name'] as String? ?? '—',
       score: (j['score'] as num?)?.toDouble() ?? 0,
       reason: j['reason'] as String?,
+      imageUrl: product?['image_url'] as String?,
     );
   }
 
   @override
-  List<Object?> get props => [productName, score];
+  List<Object?> get props => [productName, score, imageUrl];
 }
 
 /// Kauf (Kopf).

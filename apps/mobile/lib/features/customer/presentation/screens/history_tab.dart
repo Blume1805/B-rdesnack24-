@@ -50,14 +50,17 @@ class HistoryTab extends ConsumerWidget {
                       for (final p in list) ...[
                         AppCard(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s4,
+                            horizontal: AppSpacing.s3,
                             vertical: AppSpacing.s3,
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.euro_symbol,
-                                  size: 20, color: AppColors.brand),
-                              const SizedBox(width: AppSpacing.s2),
+                              ProductImage(
+                                imageUrl: p.imageUrl,
+                                productName: p.productName,
+                                size: 44,
+                              ),
+                              const SizedBox(width: AppSpacing.s3),
                               Expanded(
                                 child: Text(
                                   p.productName,
@@ -71,8 +74,8 @@ class HistoryTab extends ConsumerWidget {
                               Text(
                                 Formatters.euro(p.priceNet),
                                 style: AppTypography.body(
-                                  size: 14,
-                                  weight: FontWeight.w700,
+                                  size: 15,
+                                  weight: FontWeight.w800,
                                   color: AppColors.ink,
                                 ),
                               ),
@@ -97,14 +100,18 @@ class HistoryTab extends ConsumerWidget {
                       for (final r in list) ...[
                         AppCard(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s4,
+                            horizontal: AppSpacing.s3,
                             vertical: AppSpacing.s3,
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.star_outline,
-                                  size: 20, color: AppColors.brand),
-                              const SizedBox(width: AppSpacing.s2),
+                              ProductImage(
+                                imageUrl: r.imageUrl,
+                                productName: r.productName,
+                                size: 44,
+                                icon: Icons.star_outline,
+                              ),
+                              const SizedBox(width: AppSpacing.s3),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

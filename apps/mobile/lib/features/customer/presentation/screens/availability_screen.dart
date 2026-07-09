@@ -161,20 +161,31 @@ class _StockRow extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  item.productName,
-                  style: AppTypography.body(
-                    size: 15,
-                    weight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              ProductImage(
+                imageUrl: item.imageUrl,
+                productName: item.productName,
+                size: 56,
               ),
               const SizedBox(width: AppSpacing.s3),
-              StatusBadge(label: s.label, tone: s.tone, icon: s.icon),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.productName,
+                      style: AppTypography.body(
+                        size: 15,
+                        weight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    StatusBadge(label: s.label, tone: s.tone, icon: s.icon),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.s3),

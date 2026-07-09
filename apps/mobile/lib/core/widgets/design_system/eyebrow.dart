@@ -20,10 +20,10 @@ class Eyebrow extends StatelessWidget {
     return Text(
       text,
       style: AppTypography.body(
-        size: 13,
-        weight: FontWeight.w700,
+        size: 16,
+        weight: FontWeight.w800,
         color: AppColors.brand,
-      ).copyWith(letterSpacing: 0.2, height: 1.2),
+      ).copyWith(letterSpacing: 0.1, height: 1.2),
     );
   }
 }

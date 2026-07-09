@@ -7,6 +7,7 @@ class Offer extends Equatable {
     required this.kind,
     this.description,
     this.validTo,
+    this.imageUrl,
   });
 
   final String id;
@@ -14,6 +15,12 @@ class Offer extends Equatable {
   final String kind; // daily | weekly | special
   final String? description;
   final DateTime? validTo;
+
+  /// Optionales Produkt-/Aktionsbild.  Solange Bildpfade in der DB fehlen,
+  /// zeigt das UI einen Platzhalter (siehe `ProductImage`).  Sobald `offers`
+  /// eine Spalte `image_url` liefert, greift das Frontend ohne weitere
+  /// Änderung darauf zu.
+  final String? imageUrl;
 
   factory Offer.fromJson(Map<String, dynamic> j) => Offer(
         id: j['id'] as String,
@@ -23,8 +30,9 @@ class Offer extends Equatable {
         validTo: j['valid_to'] != null
             ? DateTime.tryParse(j['valid_to'].toString())
             : null,
+        imageUrl: j['image_url'] as String?,
       );
 
   @override
-  List<Object?> get props => [id, title, kind, validTo];
+  List<Object?> get props => [id, title, kind, validTo, imageUrl];
 }

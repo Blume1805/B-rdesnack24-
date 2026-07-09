@@ -69,65 +69,62 @@ class OffersTab extends ConsumerWidget {
               else
                 for (final o in list) ...[
                   AppCard(
+                    padding: EdgeInsets.zero,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.brandLight,
-                                borderRadius: BorderRadius.circular(AppRadii.md),
-                                border: Border.all(color: AppColors.brand),
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                _kindIcons[o.kind] ?? Icons.local_offer_outlined,
-                                color: AppColors.ink,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.s3),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Eyebrow(_kindLabels[o.kind] ?? o.kind),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    o.title,
-                                    style: AppTypography.body(
-                                      size: 16,
-                                      weight: FontWeight.w700,
-                                      color: AppColors.ink,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        // Produkt-/Aktionsbild oben (Platzhalter bis
+                        // image_url gepflegt ist).
+                        AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: ProductImage.expand(
+                            imageUrl: o.imageUrl,
+                            productName: o.title,
+                            icon: _kindIcons[o.kind] ??
+                                Icons.local_offer_outlined,
+                          ),
                         ),
-                        if (o.description != null) ...[
-                          const SizedBox(height: AppSpacing.s3),
-                          Text(
-                            o.description!,
-                            style: AppTypography.body(size: 14, color: AppColors.textDefault),
+                        Padding(
+                          padding: const EdgeInsets.all(AppSpacing.s4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Eyebrow(_kindLabels[o.kind] ?? o.kind),
+                              const SizedBox(height: AppSpacing.s2),
+                              Text(
+                                o.title,
+                                style: AppTypography.body(
+                                  size: 18,
+                                  weight: FontWeight.w800,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                              if (o.description != null) ...[
+                                const SizedBox(height: AppSpacing.s2),
+                                Text(
+                                  o.description!,
+                                  style: AppTypography.body(
+                                    size: 14,
+                                    color: AppColors.textDefault,
+                                  ),
+                                ),
+                              ],
+                              if (o.validTo != null) ...[
+                                const SizedBox(height: AppSpacing.s3),
+                                StatusBadge(
+                                  label:
+                                      'gültig bis ${Formatters.date(o.validTo!)}',
+                                  tone: StatusTone.brand,
+                                  icon: Icons.schedule,
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                        if (o.validTo != null) ...[
-                          const SizedBox(height: AppSpacing.s3),
-                          StatusBadge(
-                            label: 'gültig bis ${Formatters.date(o.validTo!)}',
-                            tone: StatusTone.brand,
-                            icon: Icons.schedule,
-                          ),
-                        ],
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.s3),
+                  const SizedBox(height: AppSpacing.s4),
                 ],
             ],
           ),

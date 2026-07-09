@@ -68,7 +68,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const HeroBackdrop(
-                      height: 320,
                       tagline: 'Immer da, wenn der Hunger kommt.',
                     ),
                     _FormPanel(

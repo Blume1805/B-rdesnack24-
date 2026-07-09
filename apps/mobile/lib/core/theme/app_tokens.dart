@@ -15,9 +15,9 @@ abstract final class AppColors {
   static const Color textDefault = Color(0xFF4A4844);
   static const Color textMuted   = Color(0xFF7D7975);
 
-  static const Color surfaceCard = Color(0xFFFBF8F4); // Cream
-  static const Color surfaceAlt  = Color(0xFFFFFFF8);
-  static const Color borderSubtle= Color(0xFFDCD8D3); // Börde-Grau
+  static const Color surfaceCard = Color(0xFFFFFFFF); // Weiß
+  static const Color surfaceAlt  = Color(0xFFF7F5F1); // sehr leichte Creme für Layering
+  static const Color borderSubtle= Color(0xFFE3DFDA); // Börde-Grau (etwas heller wegen Weiß-BG)
 
   static const Color statusPositive = Color(0xFF5C9A3F);
   static const Color statusWarning  = Color(0xFFE8A206);
