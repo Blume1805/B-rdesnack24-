@@ -23,14 +23,17 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MOBILE="$ROOT/apps/mobile"
 ENV_FILE="${ENV_FILE:-$MOBILE/env/demo.json}"
-SUBPATH="${SUBPATH:-app-live}"
-# GitHub-Pages-Repo-Präfix. Ohne den zeigt <base href> ins Leere:
-# Repo liegt unter https://<user>.github.io/<REPO>/, aber Flutter würde
-# ohne Präfix z. B. https://<user>.github.io/live/… anfragen → 404 auf
-# flutter_bootstrap.js/main.dart.js/CanvasKit → App startet nie, keine
-# JS-Fehler (Script-404 werden nicht via window.onerror gemeldet).
+# GitHub-Pages-Repo-Präfix. Repo liegt unter https://<user>.github.io/<REPO>/.
 REPO="${REPO:-B-rdesnack24-}"
-BASE_HREF="/$REPO/$SUBPATH/"
+# Wenn SUBPATH leer/unset → App liegt am Root des Repos (empfohlen):
+# https://<user>.github.io/<REPO>/ zeigt direkt die App, kein Redirect nötig.
+# Ein Sub-Path wird nur noch benutzt, wenn explizit gesetzt (SUBPATH=demo o. ä.).
+SUBPATH="${SUBPATH-}"
+if [ -z "$SUBPATH" ]; then
+  BASE_HREF="/$REPO/"
+else
+  BASE_HREF="/$REPO/$SUBPATH/"
+fi
 
 echo "▶︎ Flutter Web-Build ($ENV_FILE, base=$BASE_HREF)"
 ( cd "$MOBILE" && flutter build web --release \
@@ -94,10 +97,26 @@ STAGE="$(mktemp -d)"
 cp -r "$BUILD_DIR"/. "$STAGE/"
 
 git -C "$ROOT" checkout gh-pages
-rm -rf "$ROOT/$SUBPATH"
-cp -r "$STAGE" "$ROOT/$SUBPATH"
 
-cat > "$ROOT/index.html" <<HTML
+if [ -z "$SUBPATH" ]; then
+  # App direkt am Repo-Root — kein Redirect nötig, kein In-App-Browser-
+  # blockiert-Redirect-Problem.  Alte Sub-Path-Deploys (app-live/app/live/
+  # go/v2/…) bleiben liegen; wir überschreiben sie nicht, damit Bookmarks
+  # zu älteren Versionen weiter funktionieren.
+  # Alte Kern-Dateien am Root wegräumen, damit unser Build sie ersetzt:
+  find "$ROOT" -maxdepth 1 -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.png' -o -name '*.ico' -o -name '*.txt' -o -name '.last_build_id' \) -delete
+  rm -rf "$ROOT/assets" "$ROOT/canvaskit" "$ROOT/icons"
+  # Neuen Build am Root ablegen.
+  cp -r "$STAGE/." "$ROOT/"
+  # Cache-Buster über eine sichtbare Version-Datei (falls jemand harten
+  # Reload braucht, ist die URL /?v=$TS eindeutig):
+  echo "$TS" > "$ROOT/version.txt"
+  git -C "$ROOT" add -A
+else
+  # Sub-Path-Deploy (Legacy / Preview).  Neben der Root-App liegen lassen.
+  rm -rf "$ROOT/$SUBPATH"
+  cp -r "$STAGE" "$ROOT/$SUBPATH"
+  cat > "$ROOT/index.html" <<HTML
 <!DOCTYPE html>
 <html lang="de"><head>
 <meta charset="UTF-8">
@@ -114,9 +133,10 @@ cat > "$ROOT/index.html" <<HTML
 <script>location.replace('./$SUBPATH/?v=${TS}');</script>
 </body></html>
 HTML
-cp "$ROOT/index.html" "$ROOT/404.html"
+  cp "$ROOT/index.html" "$ROOT/404.html"
+  git -C "$ROOT" add "index.html" "404.html" "$SUBPATH/"
+fi
 
-git -C "$ROOT" add "index.html" "404.html" "$SUBPATH/"
 git -C "$ROOT" commit -m "deploy: web build v=${TS}" || echo "  (nichts zu committen)"
 git -C "$ROOT" push origin gh-pages
 git -C "$ROOT" checkout "$CURRENT_BRANCH"
