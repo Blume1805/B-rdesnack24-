@@ -1,4 +1,5 @@
 import '../entities/customer_models.dart';
+import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
 
 abstract interface class CustomerRepository {
@@ -10,6 +11,12 @@ abstract interface class CustomerRepository {
 
   /// Aktuelles individuelles Angebot (max. 1 aktives pro Kunde).
   Future<PersonalOffer?> myPersonalOffer();
+
+  /// Alle aktiven individuellen Angebote (Basis-Angebot + Loyalty-Bonusse).
+  Future<List<PersonalOffer>> myPersonalOffers();
+
+  /// Loyalty-Punktestand des aktuellen Monats.
+  Future<LoyaltyStatus?> myLoyaltyStatus();
 
   /// Falls kein aktives Angebot vorhanden ist, generiert das Backend eines
   /// basierend auf dem Konsumverhalten des Kunden.

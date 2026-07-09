@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/error/failures.dart';
 import '../domain/entities/customer_models.dart';
+import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
 import '../domain/repositories/customer_repository.dart';
 import 'customer_remote_data_source.dart';
@@ -34,6 +35,18 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<PersonalOffer?> myPersonalOffer() => _guard(() async {
         final row = await _remote.myActivePersonalOffer();
         return row == null ? null : PersonalOffer.fromJson(row);
+      });
+
+  @override
+  Future<List<PersonalOffer>> myPersonalOffers() => _guard(() async {
+        final rows = await _remote.myActivePersonalOffers();
+        return rows.map(PersonalOffer.fromJson).toList();
+      });
+
+  @override
+  Future<LoyaltyStatus?> myLoyaltyStatus() => _guard(() async {
+        final row = await _remote.myLoyaltyStatus();
+        return row == null ? null : LoyaltyStatus.fromJson(row);
       });
 
   @override

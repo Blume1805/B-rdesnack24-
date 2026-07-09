@@ -27,6 +27,17 @@ class CustomerRemoteDataSource {
     return row as Map<String, dynamic>?;
   }
 
+  Future<List<Map<String, dynamic>>> myActivePersonalOffers() async {
+    final rows = await _client.rpc('my_active_personal_offers');
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<Map<String, dynamic>?> myLoyaltyStatus() async {
+    final row = await _client.rpc('my_loyalty_status').maybeSingle();
+    return row as Map<String, dynamic>?;
+  }
+
   Future<Map<String, dynamic>?> ensurePersonalOffer() async {
     if (_uid == null) return null;
     final existing = await myActivePersonalOffer();

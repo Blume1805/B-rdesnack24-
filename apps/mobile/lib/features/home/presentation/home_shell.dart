@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/brand_marks.dart';
+import '../../../../core/widgets/design_system/loyalty_meter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
@@ -100,7 +101,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback onSignOut;
 
   @override
-  Size get preferredSize => const Size.fromHeight(66);
+  Size get preferredSize => const Size.fromHeight(96);
 
   String _roleLabel(UserRole role) => switch (role) {
         UserRole.systemAdmin => 'Systemadmin',
@@ -111,88 +112,122 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Kundennummer nur für Kunden nachladen.
+    final isCustomer = user.role == UserRole.customer;
     String? customerNumber;
-    if (user.role == UserRole.customer) {
+    if (isCustomer) {
       final row = ref.watch(myCustomerProvider).valueOrNull;
       customerNumber = row?['customer_number'] as String?;
     }
+    final loyalty = isCustomer ? ref.watch(myLoyaltyStatusProvider).valueOrNull : null;
 
     return AppBar(
-      toolbarHeight: 66,
+      toolbarHeight: 96,
       // Cream-Header hebt sich vom weißen Content ab.
       backgroundColor: AppColors.surfaceAlt,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       shape: const Border(
-        bottom: BorderSide(color: AppColors.borderSubtle, width: 1),
+        bottom: BorderSide(color: AppColors.ink, width: 2),
       ),
-      title: Row(
+      titleSpacing: AppSpacing.s5,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Marken-Icon
-          const BrandIcon(size: 34),
-          const SizedBox(width: AppSpacing.s2),
-          // Wortmarke einzeilig — 24 in Gold
+          const SizedBox(height: 6),
           Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                'BÖRDESNACK',
-                style: AppTypography.display(
-                  size: 14,
-                  weight: FontWeight.w800,
+              // Marken-Icon größer und mit Ink-Ring drum
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
                   color: AppColors.ink,
-                ).copyWith(letterSpacing: 0.2, height: 1),
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                ),
+                child: const BrandIcon(size: 34),
               ),
-              const SizedBox(width: 4),
-              Text(
-                '24',
-                style: AppTypography.display(
-                  size: 14,
-                  weight: FontWeight.w800,
-                  color: AppColors.brand,
-                ).copyWith(letterSpacing: 0.2, height: 1),
+              const SizedBox(width: AppSpacing.s3),
+              // Wortmarke — Ink groß + fett
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    'BÖRDESNACK',
+                    style: AppTypography.display(
+                      size: 18,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ).copyWith(letterSpacing: 0.3, height: 1),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '24',
+                    style: AppTypography.display(
+                      size: 18,
+                      weight: FontWeight.w800,
+                      color: AppColors.brand,
+                    ).copyWith(letterSpacing: 0.3, height: 1),
+                  ),
+                ],
               ),
+              const Spacer(),
+              // Punkte-Chip rechts (nur Kunden)
+              if (isCustomer && loyalty != null)
+                LoyaltyMeter(
+                  points: loyalty.points,
+                  nextTier: loyalty.nextTier,
+                  pointsToNext: loyalty.pointsToNext,
+                  progress: loyalty.progressToNext,
+                ),
             ],
           ),
-          const SizedBox(width: AppSpacing.s3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  user.fullName ?? user.email,
-                  style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                  maxLines: 1,
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              // Name in Ink + Kundennummer prominent
+              Expanded(
+                child: RichText(
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
+                  text: TextSpan(
+                    style: AppTypography.body(
+                      size: 13,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                    children: [
+                      TextSpan(text: user.fullName ?? user.email),
+                      if (customerNumber != null)
+                        TextSpan(
+                          text: '  ·  Kd.-Nr. $customerNumber',
+                          style: AppTypography.body(
+                            size: 13,
+                            weight: FontWeight.w800,
+                            color: AppColors.brandDark,
+                          ),
+                        )
+                      else
+                        TextSpan(
+                          text: '  ·  ${_roleLabel(user.role)}',
+                          style: AppTypography.body(
+                            size: 13,
+                            weight: FontWeight.w800,
+                            color: AppColors.brandDark,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                Text(
-                  customerNumber != null
-                      ? 'Kd.-Nr. $customerNumber'
-                      : _roleLabel(user.role),
-                  style: AppTypography.body(
-                    size: 11,
-                    weight: FontWeight.w700,
-                    color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.3),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
       actions: [
         IconButton(
           tooltip: AppLocalizations.of(context).signOut,
-          icon: const Icon(Icons.logout, size: 20),
+          icon: const Icon(Icons.logout, size: 22, color: AppColors.ink),
           onPressed: onSignOut,
         ),
         const SizedBox(width: AppSpacing.s2),

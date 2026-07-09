@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,6 +11,7 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
+import 'consent_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -105,11 +103,6 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'Einwilligungen',
-          children: [_ConsentSection()],
-        ),
-        const SizedBox(height: AppSpacing.s4),
-        _ProfileGroup(
           eyebrow: 'Kontakt',
           children: [
             _ProfileRow(
@@ -127,34 +120,23 @@ class ProfileTab extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.s4),
         _ProfileGroup(
-          eyebrow: 'Meine Daten',
-          children: [
-            _ProfileRow(
-              icon: Icons.download_outlined,
-              title: 'Meine Daten exportieren',
-              subtitle: 'Auskunft und Übertragbarkeit',
-              onTap: () => _exportMyData(context, ref),
-            ),
-            _ProfileRow(
-              icon: Icons.delete_outline,
-              title: 'Konto löschen (Antrag)',
-              subtitle: 'Recht auf Löschung',
-              iconColor: AppColors.statusCritical,
-              onTap: () => _requestDeletion(context, ref),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s4),
-        _ProfileGroup(
           eyebrow: 'Rechtliches',
           children: [
+            _ProfileRow(
+              icon: Icons.shield_outlined,
+              title: 'Einwilligungen',
+              subtitle: 'Analyse, Marketing, Karten',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ConsentScreen()),
+              ),
+            ),
             _ProfileRow(
               icon: Icons.gavel_outlined,
               title: 'Impressum',
               onTap: () => context.push(AppRoutes.imprint),
             ),
             _ProfileRow(
-              icon: Icons.shield_outlined,
+              icon: Icons.privacy_tip_outlined,
               title: 'Datenschutzerklärung',
               onTap: () => context.push(AppRoutes.privacy),
             ),
@@ -162,6 +144,21 @@ class ProfileTab extends ConsumerWidget {
               icon: Icons.article_outlined,
               title: 'Nutzungsbedingungen',
               onTap: () => context.push(AppRoutes.terms),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        // Konto löschen — separate Gruppe ganz unten, damit man nicht
+        // versehentlich draufklickt.
+        _ProfileGroup(
+          eyebrow: 'Konto beenden',
+          children: [
+            _ProfileRow(
+              icon: Icons.delete_outline,
+              title: 'Konto löschen',
+              subtitle: 'Antrag stellen — wir bearbeiten manuell.',
+              iconColor: AppColors.statusCritical,
+              onTap: () => _requestDeletion(context, ref),
             ),
           ],
         ),
@@ -173,42 +170,6 @@ class ProfileTab extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _exportMyData(BuildContext context, WidgetRef ref) async {
-    try {
-      final client = ref.read(supabaseClientProvider);
-      final result = await client.rpc('export_my_data');
-      final jsonStr = const JsonEncoder.withIndent('  ').convert(result);
-      await Clipboard.setData(ClipboardData(text: jsonStr));
-      if (!context.mounted) return;
-      await showDialog<void>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Datenauskunft'),
-          content: SizedBox(
-            width: 480,
-            child: SingleChildScrollView(
-              child: SelectableText(
-                jsonStr,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Schließen'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export fehlgeschlagen: $e')),
-      );
-    }
   }
 
   Future<void> _requestDeletion(BuildContext context, WidgetRef ref) async {
@@ -639,48 +600,6 @@ class _NotificationSectionState extends ConsumerState<_NotificationSection> {
     });
     await ref.read(customerRepositoryProvider).updateNotifications(email: email, push: push);
     ref.invalidate(myCustomerProvider);
-  }
-}
-
-class _ConsentSection extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<_ConsentSection> createState() => _ConsentSectionState();
-}
-
-class _ConsentSectionState extends ConsumerState<_ConsentSection> {
-  final _state = <String, bool>{'analytics': false, 'marketing': false, 'maps': false};
-
-  static const _labels = {
-    'analytics': 'Anonyme Nutzungsanalyse',
-    'marketing': 'Marketing-Mitteilungen',
-    'maps': 'Karten/Standort (Google Maps)',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Text(
-            'Diese Verarbeitungen erfolgen nur nach deiner ausdrücklichen '
-            'Einwilligung und sind jederzeit widerrufbar. Der Widerruf '
-            'berührt die Rechtmäßigkeit vergangener Verarbeitungen nicht.',
-            style: TextStyle(fontSize: 12),
-          ),
-        ),
-        for (final e in _labels.entries)
-          SwitchListTile(
-            title: Text(e.value),
-            value: _state[e.key]!,
-            onChanged: (v) async {
-              setState(() => _state[e.key] = v);
-              await ref.read(customerRepositoryProvider).recordConsent(e.key, v);
-            },
-          ),
-      ],
-    );
   }
 }
 

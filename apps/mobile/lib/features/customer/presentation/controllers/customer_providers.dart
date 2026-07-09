@@ -4,6 +4,7 @@ import '../../../../core/di/providers.dart';
 import '../../data/customer_remote_data_source.dart';
 import '../../data/customer_repository_impl.dart';
 import '../../domain/entities/customer_models.dart';
+import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/repositories/customer_repository.dart';
 
@@ -35,10 +36,23 @@ final myCustomerProvider =
   (ref) => ref.watch(customerRepositoryProvider).myCustomer(),
 );
 
-/// Aktives individuelles Angebot des Kunden.  Automatisch generiert
-/// (via RPC) sobald keins existiert oder das letzte abgelaufen ist.
+/// Aktives Basis-Angebot (nicht-Loyalty).  Automatisch generiert (via RPC)
+/// sobald keins existiert oder das letzte abgelaufen ist.
 final myPersonalOfferProvider = FutureProvider.autoDispose<PersonalOffer?>(
   (ref) => ref.watch(customerRepositoryProvider).ensurePersonalOffer(),
+);
+
+/// Alle aktiven individuellen Angebote (Basis + Loyalty-Bonusse), Loyalty
+/// zuerst — Client kann daraus die Sektionen bauen.
+final myPersonalOffersProvider =
+    FutureProvider.autoDispose<List<PersonalOffer>>((ref) async {
+  // Sicherstellen, dass mindestens das Basis-Angebot existiert.
+  await ref.watch(customerRepositoryProvider).ensurePersonalOffer();
+  return ref.watch(customerRepositoryProvider).myPersonalOffers();
+});
+
+final myLoyaltyStatusProvider = FutureProvider.autoDispose<LoyaltyStatus?>(
+  (ref) => ref.watch(customerRepositoryProvider).myLoyaltyStatus(),
 );
 
 /// Aktionen rund um das persönliche Angebot: Einlösen per Zahlencode.

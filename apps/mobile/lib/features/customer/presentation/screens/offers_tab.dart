@@ -4,36 +4,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../controllers/customer_providers.dart';
 
 class OffersTab extends ConsumerWidget {
   const OffersTab({super.key});
 
-  static const _kindLabels = {
-    'daily': 'Tagesangebot',
-    'weekly': 'Wochenangebot',
-    'special': 'Sonderaktion',
-  };
-
-  static const _kindIcons = {
-    'daily': Icons.today_outlined,
-    'weekly': Icons.date_range_outlined,
-    'special': Icons.star_outline,
-  };
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final offers = ref.watch(offersProvider);
-    final personal = ref.watch(myPersonalOfferProvider);
+    final personals = ref.watch(myPersonalOffersProvider);
+    final loyalty = ref.watch(myLoyaltyStatusProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
         ref
           ..invalidate(offersProvider)
-          ..invalidate(myPersonalOfferProvider);
+          ..invalidate(myPersonalOffersProvider)
+          ..invalidate(myLoyaltyStatusProvider);
       },
       color: AppColors.brand,
       child: ListView(
@@ -44,23 +34,68 @@ class OffersTab extends ConsumerWidget {
           AppSpacing.s8,
         ),
         children: [
-          // ── Individuelles Angebot (falls vorhanden) ──────────────────
-          personal.when(
+          // ── Loyalty-Fortschritt ─────────────────────────────────────
+          loyalty.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (l) => l == null
+                ? const SizedBox.shrink()
+                : _LoyaltyProgressCard(status: l),
+          ),
+          if (loyalty.valueOrNull != null)
+            const SizedBox(height: AppSpacing.s5),
+
+          // ── Individuelle Angebote (Basis + Loyalty-Bonusse) ──────────
+          personals.when(
             loading: () => const _PersonalLoading(),
             error: (_, __) => const SizedBox.shrink(),
-            data: (p) => p == null
-                ? const SizedBox.shrink()
-                : _PersonalOfferCard(offer: p),
+            data: (list) {
+              final loyaltyBonus = list
+                  .where((o) => o.discountPercent > 10)
+                  .toList();
+              final basis = list
+                  .where((o) => !loyaltyBonus.contains(o))
+                  .toList();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (loyaltyBonus.isNotEmpty) ...[
+                    const SectionHeader(
+                      eyebrow: 'Belohnung',
+                      title: 'Bonus-Angebote',
+                    ),
+                    const SizedBox(height: AppSpacing.s4),
+                    for (final o in loyaltyBonus)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                        child: _PersonalOfferCard(offer: o, isBonus: true),
+                      ),
+                    const SizedBox(height: AppSpacing.s5),
+                  ],
+                  if (basis.isNotEmpty) ...[
+                    const SectionHeader(
+                      eyebrow: 'Nur für dich',
+                      title: 'Dein Angebot',
+                    ),
+                    const SizedBox(height: AppSpacing.s4),
+                    for (final o in basis)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                        child: _PersonalOfferCard(offer: o),
+                      ),
+                    const SizedBox(height: AppSpacing.s5),
+                  ],
+                ],
+              );
+            },
           ),
-          if (personal.valueOrNull != null)
-            const SizedBox(height: AppSpacing.s6),
 
-          // ── Wochen- und Sonderaktionen ───────────────────────────────
+          // ── Wochenangebote als horizontale Scroll-Karten ─────────────
           const SectionHeader(
             eyebrow: 'Für alle',
             title: 'Wochen­angebote',
           ),
-          const SizedBox(height: AppSpacing.s5),
+          const SizedBox(height: AppSpacing.s4),
           offers.when(
             loading: () => const Center(
               child: Padding(
@@ -80,33 +115,34 @@ class OffersTab extends ConsumerWidget {
               if (list.isEmpty) {
                 return AppCard(
                   color: AppColors.surfaceAlt,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.local_offer_outlined,
-                          color: AppColors.textMuted),
-                      const SizedBox(width: AppSpacing.s3),
-                      Expanded(
-                        child: Text(
-                          'Aktuell sind keine Wochen­angebote verfügbar. Schau bald wieder vorbei.',
-                          style: AppTypography.body(
-                              size: 14, color: AppColors.textMuted),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Aktuell sind keine Wochen­angebote verfügbar. Schau bald wieder vorbei.',
+                    style: AppTypography.body(
+                        size: 14, color: AppColors.textMuted),
                   ),
                 );
               }
-              return Column(
-                children: [
-                  for (final o in list) ...[
-                    _WeeklyOfferCard(
-                      offer: o,
-                      kindLabel: _kindLabels[o.kind] ?? o.kind,
-                      kindIcon: _kindIcons[o.kind] ?? Icons.local_offer_outlined,
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-                  ],
-                ],
+              // Horizontales Scrollen wie in gängigen Handels-Apps.
+              return SizedBox(
+                height: 380,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AppSpacing.s3),
+                  itemBuilder: (context, i) {
+                    final o = list[i];
+                    return OfferCard(
+                      title: o.title,
+                      regularPrice: o.regularPriceNet ?? 0,
+                      offerPrice: o.offerPriceNet ?? 0,
+                      discountPercent: o.discountPercent ?? 10,
+                      imageUrl: o.imageUrl,
+                      validUntil: o.validTo,
+                      width: 260,
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -118,26 +154,23 @@ class OffersTab extends ConsumerWidget {
 
 class _PersonalLoading extends StatelessWidget {
   const _PersonalLoading();
-
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      color: AppColors.ink,
-      borderColor: AppColors.ink,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s5),
-      child: const Center(child: CircularProgressIndicator(color: AppColors.brand)),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.s6),
+      child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
     );
   }
 }
 
-/// Dunkel-Ink-Karte für das individuelle Kunden-Angebot.  Zeigt Preis-
-/// unterschied prominent, den 6-stelligen Einlöse-Code und einen Button,
-/// der den Code einlöst (Demo — echter Automatenscanner erledigt das an
-/// den Terminals selbst via Nayax-Webhook).
+/// Personalisiertes Angebot — dunkle Ink-Karte, prominenter Preisunterschied,
+/// 6-stelliger Code, „Einlösen"-Button.  Loyalty-Bonus bekommt einen Krönchen-
+/// Marker in Gold.
 class _PersonalOfferCard extends ConsumerWidget {
-  const _PersonalOfferCard({required this.offer});
+  const _PersonalOfferCard({required this.offer, this.isBonus = false});
 
   final PersonalOffer offer;
+  final bool isBonus;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -169,11 +202,14 @@ class _PersonalOfferCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.workspace_premium,
-                        color: AppColors.brand, size: 20),
+                    Icon(
+                      isBonus ? Icons.workspace_premium : Icons.card_giftcard,
+                      color: AppColors.brand,
+                      size: 20,
+                    ),
                     const SizedBox(width: 6),
                     Text(
-                      'Nur für dich',
+                      isBonus ? 'Meilenstein-Bonus' : 'Nur für dich',
                       style: AppTypography.body(
                         size: 16,
                         weight: FontWeight.w800,
@@ -219,7 +255,6 @@ class _PersonalOfferCard extends ConsumerWidget {
               ],
             ),
           ),
-          // Code-Bereich (goldene Trennlinie oben).
           Container(
             decoration: const BoxDecoration(
               color: Color(0xFF14110E),
@@ -281,17 +316,13 @@ class _PersonalOfferCard extends ConsumerWidget {
     );
   }
 
-  static String _formatCode(String c) {
-    // 6-stellig: „123 456"
-    if (c.length == 6) return '${c.substring(0, 3)} ${c.substring(3)}';
-    return c;
-  }
+  static String _formatCode(String c) =>
+      c.length == 6 ? '${c.substring(0, 3)} ${c.substring(3)}' : c;
 }
 
 class _RedeemButton extends ConsumerWidget {
   const _RedeemButton({required this.code});
   final String code;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final busy = ref.watch(personalOfferActionsProvider).isLoading;
@@ -305,6 +336,7 @@ class _RedeemButton extends ConsumerWidget {
                   .redeem(code);
               if (!ctx.mounted) return;
               final err = ref.read(personalOfferActionsProvider).error;
+              ref.invalidate(myPersonalOffersProvider);
               ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
                 content: Text(
                   offer != null
@@ -335,114 +367,22 @@ class _RedeemButton extends ConsumerWidget {
   }
 }
 
-/// Wochen-/Sonderangebot-Karte mit Bild oben, Preis-Rabatt und Ablauf.
-class _WeeklyOfferCard extends StatelessWidget {
-  const _WeeklyOfferCard({
-    required this.offer,
-    required this.kindLabel,
-    required this.kindIcon,
-  });
-
-  final Offer offer;
-  final String kindLabel;
-  final IconData kindIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Bild + Rabatt-Badge overlay
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ProductImage.expand(
-                  imageUrl: offer.imageUrl,
-                  productName: offer.title,
-                  icon: kindIcon,
-                ),
-              ),
-              if (offer.discountPercent != null && offer.discountPercent! > 0)
-                Positioned(
-                  top: AppSpacing.s3,
-                  right: AppSpacing.s3,
-                  child: DiscountBadge(percent: offer.discountPercent!),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.s4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Eyebrow(kindLabel),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  offer.title,
-                  style: AppTypography.body(
-                    size: 18,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
-                ),
-                if (offer.hasPrice) ...[
-                  const SizedBox(height: AppSpacing.s3),
-                  PriceRow(
-                    regular: offer.regularPriceNet!,
-                    discounted: offer.offerPriceNet!,
-                    discountPercent: offer.discountPercent,
-                    showBadge: false,
-                  ),
-                ],
-                if (offer.description != null) ...[
-                  const SizedBox(height: AppSpacing.s3),
-                  Text(
-                    offer.description!,
-                    style: AppTypography.body(
-                      size: 14,
-                      color: AppColors.textDefault,
-                    ),
-                  ),
-                ],
-                if (offer.validTo != null) ...[
-                  const SizedBox(height: AppSpacing.s3),
-                  StatusBadge(
-                    label: 'gültig bis ${Formatters.date(offer.validTo!)}',
-                    tone: StatusTone.brand,
-                    icon: Icons.schedule,
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// PriceRow-Variante für dunklen Ink-Hintergrund (weiße Zahl statt Ink).
 class _DarkPriceRow extends StatelessWidget {
   const _DarkPriceRow({
     required this.regular,
     required this.discounted,
     required this.percent,
   });
-
   final double regular;
   final double discounted;
   final double percent;
-
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          Formatters.euro(discounted),
+          _euro(discounted),
           style: AppTypography.display(
             size: 30,
             weight: FontWeight.w800,
@@ -451,7 +391,7 @@ class _DarkPriceRow extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.s3),
         Text(
-          Formatters.euro(regular),
+          _euro(regular),
           style: AppTypography.body(
             size: 16,
             weight: FontWeight.w600,
@@ -464,6 +404,171 @@ class _DarkPriceRow extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.s3),
         DiscountBadge(percent: percent),
+      ],
+    );
+  }
+
+  static String _euro(double v) {
+    final s = v.toStringAsFixed(2).replaceAll('.', ',');
+    return '$s €';
+  }
+}
+
+/// Loyalty-Fortschritt: Punktzahl links, Meilensteine als Timeline rechts.
+class _LoyaltyProgressCard extends StatelessWidget {
+  const _LoyaltyProgressCard({required this.status});
+  final LoyaltyStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final tiers = const [400, 800, 1300, 2000];
+    final resetDay = status.nextReset.day.toString().padLeft(2, '0');
+    final resetMonth = status.nextReset.month.toString().padLeft(2, '0');
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.s5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.stars_rounded,
+                  color: AppColors.brand, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Deine Punkte',
+                  style: AppTypography.body(
+                    size: 16,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ),
+                ),
+              ),
+              Text(
+                'Reset $resetDay.$resetMonth.',
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '${status.points}',
+                style: AppTypography.display(
+                  size: 40,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ).copyWith(height: 1),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Pkt.',
+                style: AppTypography.body(
+                  size: 16,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const Spacer(),
+              if (status.nextTier != null)
+                Text(
+                  'noch ${status.pointsToNext} bis ${status.nextTier}',
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          // Meilenstein-Timeline
+          _TierTimeline(tiers: tiers, points: status.points),
+        ],
+      ),
+    );
+  }
+}
+
+class _TierTimeline extends StatelessWidget {
+  const _TierTimeline({required this.tiers, required this.points});
+  final List<int> tiers;
+  final int points;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxTier = tiers.last;
+    final progress = (points / maxTier).clamp(0.0, 1.0);
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+                border: Border.all(color: AppColors.borderSubtle),
+              ),
+            ),
+            LayoutBuilder(
+              builder: (context, c) => Container(
+                height: 6,
+                width: c.maxWidth * progress,
+                decoration: BoxDecoration(
+                  color: AppColors.brand,
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (final t in tiers)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: points >= t
+                          ? AppColors.brand
+                          : AppColors.surfaceAlt,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: points >= t
+                            ? AppColors.brand
+                            : AppColors.borderSubtle,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$t',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w700,
+                      color:
+                          points >= t ? AppColors.ink : AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
       ],
     );
   }
