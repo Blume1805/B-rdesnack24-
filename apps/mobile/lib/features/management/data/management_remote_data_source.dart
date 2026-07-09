@@ -12,7 +12,7 @@ class ManagementRemoteDataSource {
   Future<List<Map<String, dynamic>>> machines() async {
     final rows = await _client
         .from('machines')
-        .select('id, code, name, type, is_cooled, city, status')
+        .select('id, code, name, type, is_cooled, city, status, image_url')
         .order('code');
     return (rows as List).cast<Map<String, dynamic>>();
   }

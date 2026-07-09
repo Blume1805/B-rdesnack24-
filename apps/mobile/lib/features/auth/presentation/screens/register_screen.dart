@@ -30,6 +30,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
 
+  DateTime? _birthDate;
   bool _acceptPrivacy = false;
   bool _acceptTerms = false;
   bool _triedSubmit = false;
@@ -43,6 +44,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime(now.year - 25, now.month, now.day),
+      firstDate: DateTime(now.year - 120),
+      lastDate: DateTime(now.year - 14, now.month, now.day),
+      locale: const Locale('de'),
+      helpText: 'Geburtsdatum wählen',
+    );
+    if (picked != null) setState(() => _birthDate = picked);
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
   Future<void> _submit() async {
     setState(() => _triedSubmit = true);
     final l10n = AppLocalizations.of(context);
@@ -50,6 +67,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (_passwordCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.passwordsDontMatch)),
+      );
+      return;
+    }
+    if (_birthDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bitte Geburtsdatum wählen.')),
       );
       return;
     }
@@ -64,6 +87,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           _emailCtrl.text,
           _passwordCtrl.text,
           fullName: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+          birthDate: _birthDate,
         );
     if (!mounted) return;
     if (ok) {
@@ -116,6 +140,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     controller: _nameCtrl,
                     decoration: InputDecoration(labelText: l10n.fullName),
+                  ),
+                  const SizedBox(height: 16),
+                  // Geburtsdatum — DSGVO Art. 8 (Kinder-Schutz): unter 14
+                  // schließt der DatePicker automatisch aus.
+                  InkWell(
+                    onTap: _pickBirthDate,
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Geburtsdatum',
+                        prefixIcon: const Icon(Icons.cake_outlined, size: 20),
+                        errorText: _triedSubmit && _birthDate == null
+                            ? 'Bitte Geburtsdatum wählen'
+                            : null,
+                      ),
+                      child: Text(
+                        _birthDate == null ? '' : _formatDate(_birthDate!),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

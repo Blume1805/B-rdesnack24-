@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/design_system/brand_marks.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
 import '../../finance/presentation/screens/finance_screen.dart';
 import '../../management/presentation/management_screen.dart';
@@ -91,14 +93,14 @@ class _Tab {
   final Widget screen;
 }
 
-class _BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
+class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _BrandAppBar({required this.user, required this.onSignOut});
 
   final AppUser user;
   final VoidCallback onSignOut;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(66);
 
   String _roleLabel(UserRole role) => switch (role) {
         UserRole.systemAdmin => 'Systemadmin',
@@ -108,67 +110,79 @@ class _BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
       };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Kundennummer nur für Kunden nachladen.
+    String? customerNumber;
+    if (user.role == UserRole.customer) {
+      final row = ref.watch(myCustomerProvider).valueOrNull;
+      customerNumber = row?['customer_number'] as String?;
+    }
+
     return AppBar(
-      toolbarHeight: 64,
-      backgroundColor: AppColors.surfaceCard,
+      toolbarHeight: 66,
+      // Cream-Header hebt sich vom weißen Content ab.
+      backgroundColor: AppColors.surfaceAlt,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+      shape: const Border(
+        bottom: BorderSide(color: AppColors.borderSubtle, width: 1),
+      ),
       title: Row(
         children: [
-          // Kompakter Wortmark-Anker
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(AppRadii.sm),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'BÖRDESNACK',
-                  style: AppTypography.display(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
-                  ).copyWith(letterSpacing: 0.4, height: 1),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '24',
-                  style: AppTypography.display(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.4, height: 1),
-                ),
-              ],
-            ),
+          // Marken-Icon
+          const BrandIcon(size: 34),
+          const SizedBox(width: AppSpacing.s2),
+          // Wortmarke einzeilig — 24 in Gold
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                'BÖRDESNACK',
+                style: AppTypography.display(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ).copyWith(letterSpacing: 0.2, height: 1),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '24',
+                style: AppTypography.display(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: AppColors.brand,
+                ).copyWith(letterSpacing: 0.2, height: 1),
+              ),
+            ],
           ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   user.fullName ?? user.email,
                   style: AppTypography.body(
-                    size: 13,
+                    size: 12,
                     weight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
                 ),
                 Text(
-                  _roleLabel(user.role),
+                  customerNumber != null
+                      ? 'Kd.-Nr. $customerNumber'
+                      : _roleLabel(user.role),
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w700,
                     color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.4),
+                  ).copyWith(letterSpacing: 0.3),
                 ),
               ],
             ),

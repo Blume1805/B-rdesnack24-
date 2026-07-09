@@ -15,6 +15,7 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
     String? fullName,
+    DateTime? birthDate,
   });
 
   /// Passwort-Zurücksetzen anstoßen.

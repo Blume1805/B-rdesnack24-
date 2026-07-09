@@ -57,77 +57,83 @@ class FinderTab extends ConsumerWidget {
                           AvailabilityScreen(machineId: m.id, title: m.name),
                     ),
                   ),
-                  child: Row(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: AppColors.brandLight,
-                          borderRadius: BorderRadius.circular(AppRadii.md),
-                          border: Border.all(color: AppColors.brand),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          m.isCooled ? Icons.ac_unit : Icons.storefront_outlined,
-                          color: AppColors.ink,
-                          size: 22,
+                      // Automatenbild oben (Platzhalter bis Foto in
+                      // machines.image_url hinterlegt ist).
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: ProductImage.expand(
+                          imageUrl: m.imageUrl,
+                          productName: m.name,
+                          icon: m.isCooled
+                              ? Icons.ac_unit
+                              : Icons.storefront_outlined,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s3),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      Padding(
+                        padding: const EdgeInsets.all(AppSpacing.s4),
+                        child: Row(
                           children: [
-                            Text(
-                              m.name,
-                              style: AppTypography.body(
-                                size: 15,
-                                weight: FontWeight.w700,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                            if (m.city != null && m.city!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.place_outlined,
-                                        size: 14, color: AppColors.textMuted),
-                                    const SizedBox(width: 3),
-                                    Expanded(
-                                      child: Text(
-                                        m.city!,
-                                        style: AppTypography.body(
-                                          size: 12,
-                                          color: AppColors.textMuted,
-                                        ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    m.name,
+                                    style: AppTypography.body(
+                                      size: 16,
+                                      weight: FontWeight.w800,
+                                      color: AppColors.ink,
+                                    ),
+                                  ),
+                                  if (m.city != null && m.city!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.place_outlined,
+                                              size: 14,
+                                              color: AppColors.textMuted),
+                                          const SizedBox(width: 3),
+                                          Expanded(
+                                            child: Text(
+                                              m.city!,
+                                              style: AppTypography.body(
+                                                size: 12,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                  if (m.isCooled) ...[
+                                    const SizedBox(height: 6),
+                                    const StatusBadge(
+                                      label: 'Kühlung',
+                                      tone: StatusTone.info,
+                                      icon: Icons.ac_unit,
+                                    ),
                                   ],
-                                ),
+                                ],
                               ),
-                            if (m.isCooled) ...[
-                              const SizedBox(height: 4),
-                              const StatusBadge(
-                                label: 'Kühlung',
-                                tone: StatusTone.info,
-                                icon: Icons.ac_unit,
-                              ),
-                            ],
+                            ),
+                            IconButton(
+                              tooltip: 'Navigation starten',
+                              icon: const Icon(Icons.directions_outlined),
+                              color: AppColors.brand,
+                              onPressed: () => _navigate(m.name, m.city),
+                            ),
                           ],
                         ),
-                      ),
-                      IconButton(
-                        tooltip: 'Navigation starten',
-                        icon: const Icon(Icons.directions_outlined),
-                        color: AppColors.brand,
-                        onPressed: () => _navigate(m.name, m.city),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.s3),
+                const SizedBox(height: AppSpacing.s4),
               ],
           ],
         ),

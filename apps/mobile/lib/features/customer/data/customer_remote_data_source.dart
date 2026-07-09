@@ -97,11 +97,25 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myCustomer() async {
     if (_uid == null) return null;
-    return _client
+    // Join Profil, damit birth_date + full_name direkt mitkommen.
+    final row = await _client
         .from('customers')
-        .select('customer_number, notify_email, notify_push, billing_city')
+        .select(
+          'customer_number, notify_email, notify_push, billing_city, '
+          'profiles!inner(full_name, birth_date)',
+        )
         .eq('id', _uid!)
         .maybeSingle();
+    if (row == null) return null;
+    final profile = row['profiles'] as Map<String, dynamic>?;
+    return {
+      'customer_number': row['customer_number'],
+      'notify_email': row['notify_email'],
+      'notify_push': row['notify_push'],
+      'billing_city': row['billing_city'],
+      'full_name': profile?['full_name'],
+      'birth_date': profile?['birth_date'],
+    };
   }
 
   Future<void> updateProfileName(String fullName, String? phone) async {

@@ -178,6 +178,115 @@ class _VendingMachinePainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.background != background;
 }
 
+/// Marken-Kreis-Icon (goldener Ring + stilisierter Snackautomat innen).
+/// Nachbau des Icons aus dem Marken-Referenzbild — vektoriell gezeichnet,
+/// damit es auf jeder Pixel-Dichte scharf ist und die Marken-Gold-Farbe
+/// aus dem Designsystem übernimmt.
+class BrandIcon extends StatelessWidget {
+  const BrandIcon({
+    super.key,
+    this.size = 32,
+    this.color = AppColors.brand,
+  });
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(painter: _BrandIconPainter(color: color)),
+    );
+  }
+}
+
+class _BrandIconPainter extends CustomPainter {
+  _BrandIconPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final center = Offset(w / 2, h / 2);
+    final radius = w * 0.44;
+    final ring = w * 0.10;
+
+    // Goldener Ring
+    final ringPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = ring;
+    canvas.drawCircle(center, radius, ringPaint);
+
+    // Kleiner Automat innen — vereinfachte Silhouette.
+    final gold = Paint()..color = color;
+
+    final bodyRect = Rect.fromCenter(
+      center: center,
+      width: w * 0.36,
+      height: h * 0.52,
+    );
+    final bodyR = w * 0.03;
+
+    // Automatengehäuse (outline)
+    final bodyOutline = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.03;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(bodyRect, Radius.circular(bodyR)),
+      bodyOutline,
+    );
+
+    // Snack-Fenster 3x3 Raster als kleine Quadrate.
+    const rows = 3;
+    const cols = 3;
+    final gridRect = Rect.fromCenter(
+      center: Offset(center.dx, center.dy - h * 0.03),
+      width: w * 0.26,
+      height: h * 0.32,
+    );
+    final cellW = gridRect.width / cols;
+    final cellH = gridRect.height / rows;
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        final cellRect = Rect.fromLTWH(
+          gridRect.left + c * cellW + cellW * 0.15,
+          gridRect.top + r * cellH + cellH * 0.15,
+          cellW * 0.7,
+          cellH * 0.7,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(cellRect, Radius.circular(w * 0.008)),
+          gold,
+        );
+      }
+    }
+
+    // Ausgabefach unten (kleine Linie).
+    final trayY = bodyRect.bottom - h * 0.06;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          bodyRect.left + w * 0.04,
+          trayY,
+          bodyRect.width - w * 0.08,
+          h * 0.03,
+        ),
+        Radius.circular(w * 0.01),
+      ),
+      gold,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BrandIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
 /// Bördesnack24-Wortmarke — Bricolage Grotesque, extrabold, eine Zeile:
 /// „BÖRDESNACK 24" mit dem 24 in Gold hervorgehoben.
 class WordmarkLarge extends StatelessWidget {

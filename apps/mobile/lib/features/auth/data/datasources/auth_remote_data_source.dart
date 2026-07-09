@@ -20,6 +20,7 @@ class AuthRemoteDataSource {
     String email,
     String password, {
     String? fullName,
+    DateTime? birthDate,
   }) {
     return _auth.signUp(
       email: email,
@@ -27,6 +28,8 @@ class AuthRemoteDataSource {
       data: {
         'role': 'customer',
         if (fullName != null) 'full_name': fullName,
+        if (birthDate != null)
+          'birth_date': birthDate.toIso8601String().substring(0, 10),
       },
     );
   }

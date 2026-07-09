@@ -51,6 +51,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     String email,
     String password, {
     String? fullName,
+    DateTime? birthDate,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
@@ -58,6 +59,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         email: email.trim(),
         password: password,
         fullName: fullName,
+        birthDate: birthDate,
       ),
     );
     return !state.hasError;

@@ -94,7 +94,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.lock_outline,
               title: 'Passwort ändern',
-              onTap: () => _changePassword(context, repo),
+              onTap: () => _changePassword(context, ref, repo),
             ),
           ],
         ),
@@ -268,29 +268,28 @@ class ProfileTab extends ConsumerWidget {
   Future<void> _editProfile(BuildContext context, WidgetRef ref) async {
     final user = ref.read(currentUserProvider).valueOrNull;
     final nameCtrl = TextEditingController(text: user?.fullName ?? '');
-    final phoneCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Stammdaten'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: phoneCtrl, decoration: const InputDecoration(labelText: 'Telefon')),
-          ],
+        content: TextField(
+          controller: nameCtrl,
+          decoration: const InputDecoration(labelText: 'Name'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Abbrechen')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Speichern')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Speichern')),
         ],
       ),
     );
     if (ok != true) return;
-    await ref.read(customerRepositoryProvider).updateProfileName(
-          nameCtrl.text.trim(),
-          phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
-        );
+    await ref
+        .read(customerRepositoryProvider)
+        .updateProfileName(nameCtrl.text.trim(), null);
     ref.invalidate(currentUserProvider);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -299,29 +298,175 @@ class ProfileTab extends ConsumerWidget {
     }
   }
 
-  Future<void> _changePassword(BuildContext context, CustomerRepository repo) async {
-    final ctrl = TextEditingController();
+  Future<void> _changePassword(
+      BuildContext context, WidgetRef ref, CustomerRepository repo) async {
+    final currentCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    String? error;
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (_, setDialog) => AlertDialog(
+          title: const Text('Passwort ändern'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: currentCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Aktuelles Passwort',
+                    prefixIcon: Icon(Icons.lock_outline, size: 20),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: newCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Neues Passwort',
+                    prefixIcon: Icon(Icons.password_outlined, size: 20),
+                    helperText: 'Mind. 10 Zeichen',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Neues Passwort bestätigen',
+                    prefixIcon: Icon(Icons.password_outlined, size: 20),
+                  ),
+                ),
+                if (error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(error!,
+                      style: const TextStyle(
+                          color: Colors.red, fontSize: 12)),
+                ],
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.help_outline, size: 16),
+                    onPressed: () async {
+                      Navigator.pop(dialogCtx, false);
+                      await _forgotPassword(context, ref);
+                    },
+                    label: const Text('Passwort vergessen?'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(dialogCtx, false),
+                child: const Text('Abbrechen')),
+            FilledButton(
+              onPressed: () async {
+                if (newCtrl.text.length < 10) {
+                  setDialog(() => error = 'Neues Passwort mind. 10 Zeichen.');
+                  return;
+                }
+                if (newCtrl.text != confirmCtrl.text) {
+                  setDialog(() => error = 'Passwörter stimmen nicht überein.');
+                  return;
+                }
+                if (currentCtrl.text.isEmpty) {
+                  setDialog(() => error = 'Aktuelles Passwort erforderlich.');
+                  return;
+                }
+                Navigator.pop(dialogCtx, true);
+              },
+              child: const Text('Ändern'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (ok != true) return;
+
+    // 1) Re-Auth mit aktuellem Passwort → verifiziert, dass es der Kunde
+    //    ist, bevor wir das Passwort setzen.
+    final client = ref.read(supabaseClientProvider);
+    final email = ref.read(currentUserProvider).valueOrNull?.email;
+    if (email == null) return;
+
+    try {
+      await client.auth.signInWithPassword(
+        email: email,
+        password: currentCtrl.text,
+      );
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aktuelles Passwort falsch.')),
+        );
+      }
+      return;
+    }
+
+    // 2) Neues Passwort setzen.
+    try {
+      await repo.changePassword(newCtrl.text);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Passwort geändert. Eine Bestätigungs-Mail ist unterwegs.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehlgeschlagen: $e')),
+        );
+      }
+    }
+  }
+
+  /// „Passwort vergessen" — Kunde bekommt eine standardisierte Reset-Mail.
+  Future<void> _forgotPassword(BuildContext context, WidgetRef ref) async {
+    final email = ref.read(currentUserProvider).valueOrNull?.email;
+    if (email == null) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Neues Passwort'),
-        content: TextField(
-          controller: ctrl,
-          obscureText: true,
-          decoration: const InputDecoration(labelText: 'Mind. 10 Zeichen'),
+        title: const Text('Passwort zurücksetzen'),
+        content: Text(
+          'Wir senden eine Zurücksetzen-Mail an $email. '
+          'Klicke den Link, um ein neues Passwort zu vergeben.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Abbrechen')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ändern')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Mail senden')),
         ],
       ),
     );
-    if (ok != true || ctrl.text.length < 10) return;
-    await repo.changePassword(ctrl.text);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwort geändert.')),
-      );
+    if (ok != true) return;
+    try {
+      await ref.read(supabaseClientProvider).auth.resetPasswordForEmail(email);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reset-Mail versendet.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehlgeschlagen: $e')),
+        );
+      }
     }
   }
 
