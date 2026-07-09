@@ -1,1 +1,0 @@
- /home/user/B-rdesnack24-/apps/mobile/.dart_tool/flutter_build/80504a26593f05063b6154688a536a3f/dart_build_result.json:  /home/user/B-rdesnack24-/apps/mobile/.dart_tool/package_config.json /home/user/B-rdesnack24-/apps/mobile/pubspec.yaml /home/user/flutter/bin/cache/dart-sdk/version
