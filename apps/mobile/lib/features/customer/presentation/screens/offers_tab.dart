@@ -564,12 +564,17 @@ class _TierTimeline extends StatelessWidget {
   final List<int> tiers;
   final int points;
 
+  /// Rabattprozent je Meilenstein — muss mit der DB-Funktion
+  /// app.grant_loyalty_bonuses() übereinstimmen (5/10/15/25 %).
+  static const _rewards = {400: 5, 800: 10, 1300: 15, 2000: 25};
+
   @override
   Widget build(BuildContext context) {
     final maxTier = tiers.last;
     final progress = (points / maxTier).clamp(0.0, 1.0);
     return Column(
       children: [
+        // Fortschrittsbalken
         Stack(
           alignment: Alignment.centerLeft,
           children: [
@@ -593,45 +598,121 @@ class _TierTimeline extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final t in tiers)
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: points >= t
-                          ? AppColors.brand
-                          : AppColors.surfaceAlt,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: points >= t
-                            ? AppColors.brand
-                            : AppColors.borderSubtle,
-                        width: 2,
+        const SizedBox(height: AppSpacing.s3),
+        // Belohnungs-Kacheln je Meilenstein
+        LayoutBuilder(
+          builder: (context, c) {
+            final w = (c.maxWidth - AppSpacing.s2 * (tiers.length - 1)) /
+                tiers.length;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final t in tiers)
+                  _MilestoneChip(
+                    width: w,
+                    tier: t,
+                    percent: _rewards[t] ?? 0,
+                    reached: points >= t,
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Einzelne Meilenstein-Kachel: Sparbüchsen-Icon in gold gefüllter oder
+/// grauer Kachel, Rabattprozent groß, Punktzahl klein darunter.
+class _MilestoneChip extends StatelessWidget {
+  const _MilestoneChip({
+    required this.width,
+    required this.tier,
+    required this.percent,
+    required this.reached,
+  });
+
+  final double width;
+  final int tier;
+  final int percent;
+  final bool reached;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = AppColors.ink;
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: reached ? AppColors.brand : AppColors.surfaceAlt,
+              border: Border.all(
+                color: reached ? AppColors.brand : AppColors.borderSubtle,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(AppRadii.md),
+            ),
+            alignment: Alignment.center,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  reached
+                      ? Icons.card_giftcard_rounded
+                      : Icons.lock_outline,
+                  size: 24,
+                  color: reached ? ink : AppColors.textMuted,
+                ),
+                if (reached)
+                  Positioned(
+                    bottom: 4,
+                    child: Text(
+                      '-$percent %',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w800,
+                        color: ink,
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    bottom: 4,
+                    child: Text(
+                      '-$percent %',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w700,
+                        color: AppColors.textMuted,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$t',
-                    style: AppTypography.body(
-                      size: 11,
-                      weight: FontWeight.w700,
-                      color:
-                          points >= t ? AppColors.ink : AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$tier',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: reached ? AppColors.ink : AppColors.textMuted,
+            ),
+          ),
+          Text(
+            'Punkte',
+            style: AppTypography.body(
+              size: 10,
+              weight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

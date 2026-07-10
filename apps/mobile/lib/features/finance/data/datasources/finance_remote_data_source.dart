@@ -13,7 +13,32 @@ class FinanceRemoteDataSource {
       'finance_summary',
       params: {'p_from': period.fromIso, 'p_to': period.toIso},
     );
-    return Map<String, dynamic>.from(result as Map);
+    // Die RPC liefert `null`, wenn im Zeitraum weder Erlöse noch Aufwände
+    // gebucht sind — nicht als Fehler behandeln, sondern als leeres Summary.
+    if (result == null) {
+      return const {
+        'revenue_net7': 0,
+        'revenue_net19': 0,
+        'revenue_net': 0,
+        'expense_net': 0,
+        'result_net': 0,
+        'vat_collected': 0,
+        'vat_paid': 0,
+        'accounts': <Map<String, dynamic>>[],
+      };
+    }
+    if (result is Map) return Map<String, dynamic>.from(result);
+    // Fallback für andere unerwartete Formate:
+    return const {
+      'revenue_net7': 0,
+      'revenue_net19': 0,
+      'revenue_net': 0,
+      'expense_net': 0,
+      'result_net': 0,
+      'vat_collected': 0,
+      'vat_paid': 0,
+      'accounts': <Map<String, dynamic>>[],
+    };
   }
 
   Future<int> syncSevdesk(FinancePeriod period) async {

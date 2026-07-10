@@ -110,13 +110,6 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         UserRole.customer => 'Kunde',
       };
 
-  String _initial() {
-    final src = (user.fullName?.trim().isNotEmpty ?? false)
-        ? user.fullName!.trim()
-        : user.email.trim();
-    return src.isEmpty ? '?' : src.substring(0, 1).toUpperCase();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCustomer = user.role == UserRole.customer;
@@ -138,36 +131,17 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar — Gold-Kachel mit Anfangsbuchstaben (für Kunden),
-          // Marken-Icon (sonst).
-          isCustomer
-              ? Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.brand,
-                    borderRadius: BorderRadius.circular(AppRadii.md),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    _initial(),
-                    style: AppTypography.display(
-                      size: 24,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                )
-              : Container(
-                  width: 48,
-                  height: 48,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.brand,
-                    borderRadius: BorderRadius.circular(AppRadii.md),
-                  ),
-                  child: const BrandIcon(size: 40, color: AppColors.ink),
-                ),
+          // Marken-Icon in Gold-Kachel — für alle Rollen inkl. Kunde.
+          Container(
+            width: 48,
+            height: 48,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.brand,
+              borderRadius: BorderRadius.circular(AppRadii.md),
+            ),
+            child: const BrandIcon(size: 40, color: AppColors.ink),
+          ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
