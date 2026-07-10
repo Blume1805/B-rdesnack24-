@@ -352,8 +352,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       decoration: InputDecoration(
                         label: _requiredLabel('Steuernummer'),
                         prefixIcon: const Icon(Icons.receipt_long_outlined),
-                        helperText:
-                            'z. B. 102/178/01635 — Pflicht für Vorsteuerabzug § 15 UStG',
+                        helperText: 'Pflichtangabe für §§ 14, 15 UStG',
                       ),
                     ),
                     const SizedBox(height: 12),

@@ -281,6 +281,16 @@ class CustomerRemoteDataSource {
     return res as String? ?? '';
   }
 
+  Future<void> addDemoPurchase({
+    required String paymentMethod,
+    double totalGross = 4.99,
+  }) async {
+    await _client.rpc('dev_add_demo_purchase', params: {
+      'p_payment_method': paymentMethod,
+      'p_total_gross': totalGross,
+    });
+  }
+
   Future<void> updateGender(String? gender) async {
     if (_uid == null) return;
     await _client

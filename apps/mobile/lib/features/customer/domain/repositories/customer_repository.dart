@@ -81,6 +81,13 @@ abstract interface class CustomerRepository {
   /// (nur für Gesellschafter/Systemadmin).
   Future<String> businessCustomersCsv();
 
+  /// Demo-Kauf für den angemeldeten Kunden anlegen (dient dem Testen von
+  /// Zahlungsart-Icon und PDF-Rechnung).
+  Future<void> addDemoPurchase({
+    required String paymentMethod,
+    double totalGross,
+  });
+
   Future<void> submitContact({
     required String category,
     String? subject,

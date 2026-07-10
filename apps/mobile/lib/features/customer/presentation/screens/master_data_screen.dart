@@ -263,10 +263,99 @@ class MasterDataScreen extends ConsumerWidget {
                 },
                 labels: _genderLabels,
               ),
+              const SizedBox(height: AppSpacing.s6),
+              // Demo-Kauf: legt eine Test-Transaktion an, damit im Verlauf
+              // Zahlungsart-Icon und (bei Business) PDF-Download geprüft
+              // werden können.
+              Row(
+                children: [
+                  const Icon(Icons.science_outlined,
+                      size: 16, color: AppColors.ink),
+                  const SizedBox(width: 6),
+                  Eyebrow('Demo-Kauf'),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              Text(
+                'Legt einen Testkauf an, damit du Zahlungsart-Icon '
+                '${isBusiness ? 'und PDF-Rechnung ' : ''}im Verlauf '
+                'sofort prüfen kannst.',
+                style: AppTypography.body(
+                    size: 12, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: AppSpacing.s3),
+              _DemoPurchaseButtons(ref: ref),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+/// Vier kleine Buttons zum Anlegen einer Demo-Transaktion je Zahlungsart.
+class _DemoPurchaseButtons extends StatefulWidget {
+  const _DemoPurchaseButtons({required this.ref});
+  final WidgetRef ref;
+  @override
+  State<_DemoPurchaseButtons> createState() => _DemoPurchaseButtonsState();
+}
+
+class _DemoPurchaseButtonsState extends State<_DemoPurchaseButtons> {
+  bool _busy = false;
+
+  Future<void> _add(String method, String label) async {
+    setState(() => _busy = true);
+    try {
+      await widget.ref
+          .read(customerRepositoryProvider)
+          .addDemoPurchase(paymentMethod: method);
+      // Provider für Verlauf + Rechnung invalidieren
+      widget.ref.invalidate(myPurchasesProvider);
+      widget.ref.invalidate(myDonationsByPurchaseProvider);
+      widget.ref.invalidate(myDonationSummaryProvider);
+      widget.ref.invalidate(myInvoicesProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Demo-Kauf ($label) angelegt.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(String, String, IconData)>[
+      ('cash', 'Bar', Icons.euro_symbol),
+      ('card_ec', 'EC', Icons.credit_card),
+      ('card_credit', 'Kredit', Icons.credit_card_outlined),
+      ('card_contactless', 'Kontaktlos', Icons.contactless_outlined),
+    ];
+    return Wrap(
+      spacing: AppSpacing.s2,
+      runSpacing: AppSpacing.s2,
+      children: [
+        for (final e in entries)
+          OutlinedButton.icon(
+            onPressed: _busy ? null : () => _add(e.$1, e.$2),
+            icon: Icon(e.$3, size: 16, color: AppColors.ink),
+            label: Text(e.$2),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.ink,
+              side: const BorderSide(color: AppColors.brand),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s3, vertical: 10),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -486,6 +575,18 @@ class _EditBusinessDataScreenState
 
   @override
   Widget build(BuildContext context) {
+    Widget requiredLabel(String text) => Text.rich(
+          TextSpan(
+            text: text,
+            children: const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+        );
     return Scaffold(
       appBar: AppBar(title: const Text('Unternehmensangaben')),
       body: ListView(
@@ -493,26 +594,52 @@ class _EditBusinessDataScreenState
         children: [
           Text(
             'Diese Daten erscheinen auf allen künftigen Rechnungen. '
-            'Anschrift und Steuernummer sind Pflicht — sonst kann keine '
-            'ordnungsgemäße Rechnung ausgestellt werden.',
+            'Firmenname, Anschrift und Steuernummer sind Pflicht — sonst '
+            'kann keine ordnungsgemäße Rechnung ausgestellt werden.',
             style: AppTypography.body(size: 13, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s4),
-          TextField(controller: _company, decoration: const InputDecoration(labelText: 'Firmenname (optional)')),
+          TextField(
+              controller: _company,
+              decoration:
+                  InputDecoration(label: requiredLabel('Firmenname'))),
           const SizedBox(height: 12),
-          TextField(controller: _street, decoration: const InputDecoration(labelText: 'Straße + Hausnr.')),
+          TextField(
+              controller: _street,
+              decoration: InputDecoration(
+                  label: requiredLabel('Straße + Hausnr.'))),
           const SizedBox(height: 12),
           Row(children: [
-            SizedBox(width: 100, child: TextField(controller: _zip, decoration: const InputDecoration(labelText: 'PLZ'))),
+            SizedBox(
+                width: 100,
+                child: TextField(
+                    controller: _zip,
+                    decoration:
+                        InputDecoration(label: requiredLabel('PLZ')))),
             const SizedBox(width: 12),
-            Expanded(child: TextField(controller: _city, decoration: const InputDecoration(labelText: 'Ort'))),
+            Expanded(
+                child: TextField(
+                    controller: _city,
+                    decoration:
+                        InputDecoration(label: requiredLabel('Ort')))),
           ]),
           const SizedBox(height: 12),
-          TextField(controller: _country, decoration: const InputDecoration(labelText: 'Land')),
+          TextField(
+              controller: _country,
+              decoration:
+                  InputDecoration(label: requiredLabel('Land'))),
           const SizedBox(height: 12),
-          TextField(controller: _tax, decoration: const InputDecoration(labelText: 'Steuernummer')),
+          TextField(
+              controller: _tax,
+              decoration: InputDecoration(
+                label: requiredLabel('Steuernummer'),
+                helperText: 'Pflichtangabe für §§ 14, 15 UStG',
+              )),
           const SizedBox(height: 12),
-          TextField(controller: _vat, decoration: const InputDecoration(labelText: 'USt-IdNr. (optional)')),
+          TextField(
+              controller: _vat,
+              decoration: const InputDecoration(
+                  labelText: 'USt-IdNr. (optional)')),
           const SizedBox(height: AppSpacing.s4),
           FilledButton.icon(
             onPressed: _saving ? null : _save,

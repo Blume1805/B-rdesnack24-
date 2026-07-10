@@ -186,6 +186,16 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _guard(_remote.businessCustomersCsv);
 
   @override
+  Future<void> addDemoPurchase({
+    required String paymentMethod,
+    double totalGross = 4.99,
+  }) =>
+      _guard(() => _remote.addDemoPurchase(
+            paymentMethod: paymentMethod,
+            totalGross: totalGross,
+          ));
+
+  @override
   Future<void> submitContact({
     required String category,
     String? subject,
