@@ -171,7 +171,7 @@ class _DataRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 22, color: AppColors.brand),
+          Icon(icon, size: 22, color: AppColors.ink),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
@@ -201,7 +201,7 @@ class _DataRow extends StatelessWidget {
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w600,
-                      color: AppColors.brand,
+                      color: AppColors.ink,
                     ),
                   ),
                 ],

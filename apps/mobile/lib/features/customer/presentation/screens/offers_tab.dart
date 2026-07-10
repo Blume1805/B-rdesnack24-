@@ -383,14 +383,15 @@ class _PersonalActivationFooter extends ConsumerWidget {
                       height: 14,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.ink,
+                        color: AppColors.onDark,
                       ),
                     )
-                  : const Icon(Icons.add_circle_outline, size: 18),
+                  : const Icon(Icons.add_circle_outline,
+                      size: 18, color: AppColors.onDark),
               label: const Text('Aktivieren'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brand,
-                foregroundColor: AppColors.ink,
+                backgroundColor: AppColors.statusPositive,
+                foregroundColor: AppColors.onDark,
                 textStyle:
                     AppTypography.body(size: 13, weight: FontWeight.w800),
               ),
@@ -887,13 +888,13 @@ class _ActivationButton extends StatelessWidget {
                 width: 14,
                 height: 14,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppColors.ink),
+                    strokeWidth: 2, color: AppColors.onDark),
               )
             : const Icon(Icons.add_circle_outline, size: 18),
         label: const Text('Aktivieren'),
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.brand,
-          foregroundColor: AppColors.ink,
+          backgroundColor: AppColors.statusPositive,
+          foregroundColor: AppColors.onDark,
           textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
         ),
       ),
