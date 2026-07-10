@@ -16,6 +16,7 @@ class DonationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(myDonationSummaryProvider);
+    final pool = ref.watch(donationPoolSummaryProvider);
     final causes = ref.watch(donationCausesProvider);
 
     return Scaffold(
@@ -25,6 +26,7 @@ class DonationsScreen extends ConsumerWidget {
         onRefresh: () async {
           ref
             ..invalidate(myDonationSummaryProvider)
+            ..invalidate(donationPoolSummaryProvider)
             ..invalidate(donationCausesProvider);
         },
         child: ListView(
@@ -45,6 +47,12 @@ class DonationsScreen extends ConsumerWidget {
                   const LinearProgressIndicator(color: AppColors.brand),
               error: (e, _) => _errorCard('$e'),
               data: (s) => _SummaryCard(summary: s),
+            ),
+            const SizedBox(height: AppSpacing.s4),
+            pool.when(
+              loading: () => const SizedBox.shrink(),
+              error: (e, _) => _errorCard('$e'),
+              data: (p) => _PoolCard(pool: p),
             ),
             const SizedBox(height: AppSpacing.s6),
 
@@ -174,6 +182,117 @@ class _SummaryCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Zeigt den Gesamt-Spendenpool aller Kunden (App-Käufe + Automaten-Umsätze
+/// aus Nayax) und dein prozentuales Verhältnis dazu — als Zahlenpaar und
+/// als horizontaler Fortschrittsbalken.
+class _PoolCard extends StatelessWidget {
+  const _PoolCard({required this.pool});
+  final DonationPoolSummary pool;
+
+  @override
+  Widget build(BuildContext context) {
+    final share = (pool.mySharePct / 100).clamp(0.0, 1.0);
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.s5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.brandLight,
+                  border: Border.all(color: AppColors.brand),
+                  borderRadius: BorderRadius.circular(AppRadii.md),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(Icons.groups_outlined,
+                    color: AppColors.ink, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gesamt aller Kunden',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w800,
+                        color: AppColors.textMuted,
+                      ).copyWith(letterSpacing: 0.3),
+                    ),
+                    Text(
+                      Formatters.euro(pool.totalPool),
+                      style: AppTypography.display(
+                        size: 22,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Text(
+            'Enthält Automaten-Umsätze (${Formatters.euro(pool.nonAppGross)} '
+            'brutto der letzten 90 Tage) von Kunden ohne App. Datenquelle: '
+            'Nayax → Bördesnack24-Backend.',
+            style: AppTypography.body(
+                size: 11, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text('Dein Anteil: ',
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                  )),
+              Text(
+                '${pool.mySharePct.toStringAsFixed(2).replaceAll('.', ',')} %',
+                style: AppTypography.body(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: AppColors.statusPositive,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${Formatters.euro(pool.myDonated)} von '
+                '${Formatters.euro(pool.totalPool)}',
+                style: AppTypography.body(
+                  size: 11,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: share,
+              minHeight: 12,
+              backgroundColor: AppColors.borderSubtle,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.statusPositive),
             ),
           ),
         ],

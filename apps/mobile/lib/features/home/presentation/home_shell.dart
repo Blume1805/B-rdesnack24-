@@ -105,9 +105,12 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(88);
 
+  // Rollen-Labels für die UI: intern bleiben shareholder und employee als
+  // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
+  // in der Anzeige wird beides unter „Mitarbeiter" zusammengefasst.
   String _roleLabel(UserRole role) => switch (role) {
-        UserRole.systemAdmin => 'Systemadmin',
-        UserRole.shareholder => 'Gesellschafter',
+        UserRole.systemAdmin => 'Admin',
+        UserRole.shareholder => 'Mitarbeiter',
         UserRole.employee => 'Mitarbeiter',
         UserRole.customer => 'Kunde',
       };

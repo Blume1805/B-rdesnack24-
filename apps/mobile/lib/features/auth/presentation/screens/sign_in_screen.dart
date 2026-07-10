@@ -256,8 +256,8 @@ class _FormPanel extends StatelessWidget {
                     const SizedBox(width: AppSpacing.s2),
                     Expanded(
                       child: _DemoChip(
-                        icon: Icons.stars_outlined,
-                        label: 'Gesellschafter',
+                        icon: Icons.badge_outlined,
+                        label: 'Mitarbeiter',
                         onTap: isLoading
                             ? null
                             : () => onFillDemo(

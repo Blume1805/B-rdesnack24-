@@ -7,6 +7,7 @@ class StockItem extends Equatable {
     required this.productName,
     required this.quantity,
     required this.parLevel,
+    required this.capacity,
     required this.availability,
     this.imageUrl,
   });
@@ -15,7 +16,8 @@ class StockItem extends Equatable {
   final String productId;
   final String productName;
   final int quantity;
-  final int parLevel;
+  final int parLevel; // Nachfüll-Schwelle
+  final int capacity; // Fach-Kapazität = 100 %
   final String availability; // available | low | out
   final String? imageUrl;
 
@@ -25,11 +27,12 @@ class StockItem extends Equatable {
         productName: j['product_name'] as String? ?? '',
         quantity: (j['quantity'] as num?)?.toInt() ?? 0,
         parLevel: (j['par_level'] as num?)?.toInt() ?? 0,
+        capacity: (j['capacity'] as num?)?.toInt() ?? 0,
         availability: j['availability'] as String? ?? 'available',
         imageUrl: j['image_url'] as String?,
       );
 
   @override
   List<Object?> get props =>
-      [machineId, productId, quantity, availability, imageUrl];
+      [machineId, productId, quantity, capacity, availability, imageUrl];
 }

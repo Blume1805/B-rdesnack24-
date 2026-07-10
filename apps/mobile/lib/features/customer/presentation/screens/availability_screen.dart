@@ -149,7 +149,9 @@ class _StockRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = _status();
-    final total = item.parLevel;
+    // Total = Kapazität des Slots (100 % voll). parLevel ist die
+    // Nachfüllschwelle und bleibt nur für die Status-Bewertung.
+    final total = item.capacity > 0 ? item.capacity : item.parLevel;
     final qty = item.quantity;
     final ratio = total > 0 ? (qty / total).clamp(0.0, 1.0) : 0.0;
 

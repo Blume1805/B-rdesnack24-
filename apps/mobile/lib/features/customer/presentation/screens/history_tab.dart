@@ -10,14 +10,13 @@ import '../controllers/customer_providers.dart';
 import 'donations_screen.dart';
 import 'invoice_preview_screen.dart';
 
-/// Verlauf: individuelle Preise, Kaufhistorie und Empfehlungen.
+/// Verlauf: Spendenanteil, Kaufhistorie mit Zahlungsart-Icon und (bei
+/// Unternehmern) PDF-Rechnung. Preise und Empfehlungen wurden entfernt.
 class HistoryTab extends ConsumerWidget {
   const HistoryTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prices = ref.watch(myPricesProvider);
-    final recos = ref.watch(myRecommendationsProvider);
     final donations = ref.watch(myDonationsByPurchaseProvider);
     final donationSummary = ref.watch(myDonationSummaryProvider);
     // Rechnungen werden hier passiv geladen, damit die PDF-Vorschau
@@ -28,9 +27,7 @@ class HistoryTab extends ConsumerWidget {
       color: AppColors.brand,
       onRefresh: () async {
         ref
-          ..invalidate(myPricesProvider)
           ..invalidate(myPurchasesProvider)
-          ..invalidate(myRecommendationsProvider)
           ..invalidate(myDonationsByPurchaseProvider)
           ..invalidate(myDonationSummaryProvider);
       },
@@ -44,113 +41,7 @@ class HistoryTab extends ConsumerWidget {
         children: [
           const SectionHeader(
             eyebrow: 'Mein Konto',
-            title: 'Verlauf & Preise',
-          ),
-          const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'Meine Preise', icon: Icons.local_offer_outlined),
-          const SizedBox(height: AppSpacing.s3),
-          prices.when(
-            loading: () => const LinearProgressIndicator(color: AppColors.brand),
-            error: (e, _) => _errorCard('$e'),
-            data: (list) => list.isEmpty
-                ? _empty('Keine individuellen Preise hinterlegt.')
-                : Column(
-                    children: [
-                      for (final p in list) ...[
-                        AppCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s3,
-                            vertical: AppSpacing.s3,
-                          ),
-                          child: Row(
-                            children: [
-                              ProductImage(
-                                imageUrl: p.imageUrl,
-                                productName: p.productName,
-                                size: 44,
-                              ),
-                              const SizedBox(width: AppSpacing.s3),
-                              Expanded(
-                                child: Text(
-                                  p.productName,
-                                  style: AppTypography.body(
-                                    size: 14,
-                                    weight: FontWeight.w600,
-                                    color: AppColors.ink,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                Formatters.euro(p.priceNet),
-                                style: AppTypography.body(
-                                  size: 15,
-                                  weight: FontWeight.w800,
-                                  color: AppColors.ink,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s2),
-                      ],
-                    ],
-                  ),
-          ),
-          const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'Empfehlungen', icon: Icons.recommend_outlined),
-          const SizedBox(height: AppSpacing.s3),
-          recos.when(
-            loading: () => const LinearProgressIndicator(color: AppColors.brand),
-            error: (e, _) => _errorCard('$e'),
-            data: (list) => list.isEmpty
-                ? _empty('Noch keine Empfehlungen — kauf öfter, wir merken uns Trends.')
-                : Column(
-                    children: [
-                      for (final r in list) ...[
-                        AppCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s3,
-                            vertical: AppSpacing.s3,
-                          ),
-                          child: Row(
-                            children: [
-                              ProductImage(
-                                imageUrl: r.imageUrl,
-                                productName: r.productName,
-                                size: 44,
-                                icon: Icons.star_outline,
-                              ),
-                              const SizedBox(width: AppSpacing.s3),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      r.productName,
-                                      style: AppTypography.body(
-                                        size: 14,
-                                        weight: FontWeight.w700,
-                                        color: AppColors.ink,
-                                      ),
-                                    ),
-                                    if (r.reason != null)
-                                      Text(
-                                        r.reason!,
-                                        style: AppTypography.body(
-                                          size: 12,
-                                          color: AppColors.textMuted,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.s2),
-                      ],
-                    ],
-                  ),
+            title: 'Verlauf',
           ),
           const SizedBox(height: AppSpacing.s5),
 

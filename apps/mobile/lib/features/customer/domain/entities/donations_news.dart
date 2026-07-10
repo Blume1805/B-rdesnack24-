@@ -19,6 +19,42 @@ class DonationSummary extends Equatable {
   List<Object?> get props => [totalDonated, purchaseCount];
 }
 
+/// Kombinierte Spenden-Kennzahl: eigener Beitrag + Gesamtpool aller
+/// Kunden (inkl. Nayax-Automaten-Umsätze von Nicht-App-Nutzern).
+class DonationPoolSummary extends Equatable {
+  const DonationPoolSummary({
+    required this.myDonated,
+    required this.totalPool,
+    required this.mySharePct,
+    required this.nonAppGross,
+  });
+
+  /// Eigene kumulierte Spende (aus App-Käufen).
+  final double myDonated;
+
+  /// Gesamter Spendenpool aller Kunden (App + Nayax-Automaten).
+  final double totalPool;
+
+  /// Anteil in Prozent, mit dem der Kunde am Gesamtpool beteiligt ist.
+  final double mySharePct;
+
+  /// Umsatz aus Automaten-Käufen, die nicht über die App abgerechnet wurden
+  /// (dient nur der Transparenz — der abgeleitete Spendenanteil steckt
+  /// bereits in `totalPool`).
+  final double nonAppGross;
+
+  factory DonationPoolSummary.fromJson(Map<String, dynamic> j) =>
+      DonationPoolSummary(
+        myDonated: (j['my_donated'] as num?)?.toDouble() ?? 0,
+        totalPool: (j['total_pool'] as num?)?.toDouble() ?? 0,
+        mySharePct: (j['my_share_pct'] as num?)?.toDouble() ?? 0,
+        nonAppGross: (j['non_app_gross'] as num?)?.toDouble() ?? 0,
+      );
+
+  @override
+  List<Object?> get props => [myDonated, totalPool, mySharePct, nonAppGross];
+}
+
 /// Ein Kauf mit dem daraus abgeleiteten Spendenanteil, der genutzten
 /// Zahlungsmethode und einer optionalen Rechnungsverknüpfung (nur bei
 /// Unternehmer-Kunden).

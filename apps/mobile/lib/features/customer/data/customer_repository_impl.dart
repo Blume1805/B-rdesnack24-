@@ -123,6 +123,15 @@ class CustomerRepositoryImpl implements CustomerRepository {
       });
 
   @override
+  Future<DonationPoolSummary> donationPoolSummary() => _guard(() async {
+        final row = await _remote.donationPoolSummary();
+        return row == null
+            ? const DonationPoolSummary(
+                myDonated: 0, totalPool: 0, mySharePct: 0, nonAppGross: 0)
+            : DonationPoolSummary.fromJson(row);
+      });
+
+  @override
   Future<List<DonationCause>> donationCauses() => _guard(() async {
         final rows = await _remote.donationCauses();
         return rows.map(DonationCause.fromJson).toList();

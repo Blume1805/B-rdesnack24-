@@ -615,7 +615,7 @@ class _LoyaltyProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiers = const [400, 800, 1300, 2000];
+    final tiers = const [500, 1200, 2000, 3000];
     final resetDay = status.nextReset.day.toString().padLeft(2, '0');
     final resetMonth = status.nextReset.month.toString().padLeft(2, '0');
     return AppCard(
@@ -698,7 +698,7 @@ class _TierTimeline extends StatelessWidget {
 
   /// Rabattprozent je Meilenstein — muss mit der DB-Funktion
   /// app.grant_loyalty_bonuses() übereinstimmen (5/10/15/25 %).
-  static const _rewards = {400: 5, 800: 10, 1300: 15, 2000: 25};
+  static const _rewards = {500: 5, 1200: 10, 2000: 15, 3000: 25};
 
   @override
   Widget build(BuildContext context) {

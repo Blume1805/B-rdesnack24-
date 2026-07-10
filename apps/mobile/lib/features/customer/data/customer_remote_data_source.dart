@@ -120,6 +120,11 @@ class CustomerRemoteDataSource {
     return row as Map<String, dynamic>?;
   }
 
+  Future<Map<String, dynamic>?> donationPoolSummary() async {
+    final row = await _client.rpc('donation_pool_summary').maybeSingle();
+    return row as Map<String, dynamic>?;
+  }
+
   Future<List<Map<String, dynamic>>> myDonationsByPurchase() async {
     final rows = await _client.rpc('my_donations_by_purchase');
     if (rows is List) return rows.cast<Map<String, dynamic>>();

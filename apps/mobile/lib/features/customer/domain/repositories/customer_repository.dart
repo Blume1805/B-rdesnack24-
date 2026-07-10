@@ -54,6 +54,7 @@ abstract interface class CustomerRepository {
   /// kumulierte Spende des Kunden und die Aufschlüsselung je Kauf zurück.
   Future<DonationSummary> myDonationSummary();
   Future<List<PurchaseDonation>> myDonationsByPurchase();
+  Future<DonationPoolSummary> donationPoolSummary();
 
   /// Spendenempfänger + Abstimmung.
   Future<List<DonationCause>> donationCauses();

@@ -114,6 +114,11 @@ final myDonationsByPurchaseProvider =
   (ref) => ref.watch(customerRepositoryProvider).myDonationsByPurchase(),
 );
 
+final donationPoolSummaryProvider =
+    FutureProvider.autoDispose<DonationPoolSummary>(
+  (ref) => ref.watch(customerRepositoryProvider).donationPoolSummary(),
+);
+
 final donationCausesProvider =
     FutureProvider.autoDispose<List<DonationCause>>(
   (ref) => ref.watch(customerRepositoryProvider).donationCauses(),
