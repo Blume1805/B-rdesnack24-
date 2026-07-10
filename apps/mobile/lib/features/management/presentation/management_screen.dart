@@ -12,6 +12,7 @@ import 'screens/disposal_screen.dart';
 import 'screens/documents_screen.dart';
 import 'screens/employees_screen.dart';
 import 'screens/filling_screen.dart';
+import 'screens/inventory_report_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/maintenance_screen.dart';
 import 'screens/temperature_screen.dart';
@@ -116,6 +117,14 @@ class ManagementScreen extends ConsumerWidget {
         Icons.download_outlined,
         const B2bCustomersScreen(),
         // Sichtbar für alle Gesellschafter/Admins mit customers.manage.
+        visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'Inventur',
+        'PDF-Report Zeitraum',
+        Icons.inventory_2_outlined,
+        const InventoryReportScreen(),
+        // Nur Systemadministrator/Vollzugriff — Server-RPC prüft zusätzlich
         visible: p.contains('customers.manage'),
       ),
     ].where((m) => m.visible).toList();
