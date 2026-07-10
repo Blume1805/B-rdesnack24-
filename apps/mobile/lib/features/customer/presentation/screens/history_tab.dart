@@ -241,6 +241,28 @@ class HistoryTab extends ConsumerWidget {
                     ],
                   ),
           ),
+          const SizedBox(height: AppSpacing.s6),
+          // Demo-Testkäufe. Zukünftig kommt die Transaktion automatisch
+          // vom Automaten (Nayax-Webhook): Verifizierung des Kunden am
+          // Automaten → Kauf der Produkte → Automatischer Eintrag mit
+          // Datum, Produkt, Menge, Bezahlweise. Bei Unternehmern zusätzlich
+          // sevDesk-Rechnung + E-Mail. Diese Buttons hier sind reines
+          // Demo-Werkzeug für die manuelle Simulation.
+          _SectionEyebrow(
+              eyebrow: 'Demo-Testkauf', icon: Icons.science_outlined),
+          const SizedBox(height: AppSpacing.s2),
+          Text(
+            'Simuliert einen Kauf am Automaten mit der gewählten Zahlungs-'
+            'weise. Im Live-Betrieb ersetzt der Nayax-Webhook diesen '
+            'Trigger und liefert Datum, Produkt, Menge und Zahlungsart '
+            'automatisch. Bei Unternehmer-Kunden wird zusätzlich die '
+            'Rechnung erzeugt (mit sevDesk versendet, im Verlauf als '
+            'PDF verfügbar).',
+            style: AppTypography.body(
+                size: 12, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          const _DemoPurchaseButtons(),
         ],
       ),
     );
@@ -445,6 +467,74 @@ class _PurchaseDonationRow extends ConsumerWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Vier Chip-Buttons zum Anlegen einer Demo-Transaktion je Zahlungsart.
+/// Sitzt unten im Verlauf und simuliert einen Kauf am Automaten.
+class _DemoPurchaseButtons extends ConsumerStatefulWidget {
+  const _DemoPurchaseButtons();
+  @override
+  ConsumerState<_DemoPurchaseButtons> createState() =>
+      _DemoPurchaseButtonsState();
+}
+
+class _DemoPurchaseButtonsState extends ConsumerState<_DemoPurchaseButtons> {
+  bool _busy = false;
+
+  Future<void> _add(String method, String label) async {
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(customerRepositoryProvider)
+          .addDemoPurchase(paymentMethod: method);
+      ref
+        ..invalidate(myPurchasesProvider)
+        ..invalidate(myDonationsByPurchaseProvider)
+        ..invalidate(myDonationSummaryProvider)
+        ..invalidate(myInvoicesProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Demo-Kauf ($label) angelegt.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(String, String, IconData)>[
+      ('cash', 'Bar', Icons.euro_symbol),
+      ('card_ec', 'EC', Icons.credit_card),
+      ('card_credit', 'Kredit', Icons.credit_card_outlined),
+      ('card_contactless', 'Kontaktlos', Icons.contactless_outlined),
+    ];
+    return Wrap(
+      spacing: AppSpacing.s2,
+      runSpacing: AppSpacing.s2,
+      children: [
+        for (final e in entries)
+          OutlinedButton.icon(
+            onPressed: _busy ? null : () => _add(e.$1, e.$2),
+            icon: Icon(e.$3, size: 16, color: AppColors.ink),
+            label: Text(e.$2),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.ink,
+              side: const BorderSide(color: AppColors.brand),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.s3, vertical: 10),
+            ),
+          ),
+      ],
     );
   }
 }
