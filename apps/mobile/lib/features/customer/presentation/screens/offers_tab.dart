@@ -477,11 +477,31 @@ class _PersonalActivationFooter extends ConsumerWidget {
                   )
                 : const Icon(Icons.check_circle,
                     size: 18, color: AppColors.onDark),
-            label: const Text('Aktiviert · tippen zum Deaktivieren'),
+            label: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Aktiviert',
+                  style: AppTypography.body(
+                    size: 15,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ),
+                ),
+                Text(
+                  '(Tippen zum Deaktivieren)',
+                  style: AppTypography.body(
+                    size: 11,
+                    weight: FontWeight.w700,
+                    color: AppColors.onDark,
+                  ),
+                ),
+              ],
+            ),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.statusPositive,
               foregroundColor: AppColors.onDark,
-              textStyle: AppTypography.body(size: 12, weight: FontWeight.w800),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             ),
           ),
         ],
@@ -907,11 +927,31 @@ class _ActivationButton extends StatelessWidget {
                       strokeWidth: 2, color: AppColors.onDark),
                 )
               : const Icon(Icons.check_circle, size: 18),
-          label: const Text('Aktiviert · tippen zum Deaktivieren'),
+          label: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Aktiviert',
+                style: AppTypography.body(
+                  size: 15,
+                  weight: FontWeight.w800,
+                  color: AppColors.onDark,
+                ),
+              ),
+              Text(
+                '(Tippen zum Deaktivieren)',
+                style: AppTypography.body(
+                  size: 11,
+                  weight: FontWeight.w700,
+                  color: AppColors.onDark,
+                ),
+              ),
+            ],
+          ),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.statusPositive,
             foregroundColor: AppColors.onDark,
-            textStyle: AppTypography.body(size: 12, weight: FontWeight.w800),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           ),
         ),
       );
