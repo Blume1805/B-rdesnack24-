@@ -5,6 +5,7 @@ import '../../data/customer_remote_data_source.dart';
 import '../../data/customer_repository_impl.dart';
 import '../../domain/entities/customer_models.dart';
 import '../../domain/entities/donations_news.dart';
+import '../../domain/entities/invoice.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
@@ -120,4 +121,8 @@ final donationCausesProvider =
 
 final newsProvider = FutureProvider.autoDispose<List<NewsArticle>>(
   (ref) => ref.watch(customerRepositoryProvider).listNews(),
+);
+
+final myInvoicesProvider = FutureProvider.autoDispose<List<Invoice>>(
+  (ref) => ref.watch(customerRepositoryProvider).myInvoices(),
 );

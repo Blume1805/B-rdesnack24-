@@ -52,6 +52,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? fullName,
     DateTime? birthDate,
+    String customerType = 'private',
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
   }) async {
     try {
       await _remote.signUpCustomer(
@@ -59,6 +67,14 @@ class AuthRepositoryImpl implements AuthRepository {
         password,
         fullName: fullName,
         birthDate: birthDate,
+        customerType: customerType,
+        companyName: companyName,
+        billingStreet: billingStreet,
+        billingZip: billingZip,
+        billingCity: billingCity,
+        billingCountry: billingCountry,
+        taxNumber: taxNumber,
+        vatId: vatId,
       );
     } catch (e) {
       throw _map(e);

@@ -8,6 +8,7 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/donations_news.dart';
 import '../controllers/customer_providers.dart';
 import 'donations_screen.dart';
+import 'invoice_preview_screen.dart';
 
 /// Verlauf: individuelle Preise, Kaufhistorie und Empfehlungen.
 class HistoryTab extends ConsumerWidget {
@@ -19,6 +20,9 @@ class HistoryTab extends ConsumerWidget {
     final recos = ref.watch(myRecommendationsProvider);
     final donations = ref.watch(myDonationsByPurchaseProvider);
     final donationSummary = ref.watch(myDonationSummaryProvider);
+    // Rechnungen werden hier passiv geladen, damit die PDF-Vorschau
+    // sofort verfügbar ist, wenn der Kunde den Button drückt.
+    ref.watch(myInvoicesProvider);
 
     return RefreshIndicator(
       color: AppColors.brand,
@@ -278,12 +282,29 @@ class _SectionEyebrow extends StatelessWidget {
 }
 
 /// Ein Kauf mit Brutto, Netto, Spendenbetrag und relativer Quote.
-class _PurchaseDonationRow extends StatelessWidget {
+class _PurchaseDonationRow extends ConsumerWidget {
   const _PurchaseDonationRow({required this.purchase});
   final PurchaseDonation purchase;
 
+  static ({IconData icon, String label}) _paymentInfo(String method) {
+    switch (method) {
+      case 'card_ec':
+        return (icon: Icons.credit_card, label: 'EC-Karte');
+      case 'card_credit':
+        return (icon: Icons.credit_card_outlined, label: 'Kreditkarte');
+      case 'card_contactless':
+        return (icon: Icons.contactless_outlined, label: 'Kontaktlos');
+      case 'other':
+        return (icon: Icons.payments_outlined, label: 'Andere');
+      case 'cash':
+      default:
+        return (icon: Icons.euro_symbol, label: 'Bar');
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pay = _paymentInfo(purchase.paymentMethod);
     return AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s4,
@@ -329,6 +350,21 @@ class _PurchaseDonationRow extends StatelessWidget {
                         color: AppColors.textMuted,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(pay.icon, size: 14, color: AppColors.ink),
+                        const SizedBox(width: 4),
+                        Text(
+                          pay.label,
+                          style: AppTypography.body(
+                            size: 11,
+                            weight: FontWeight.w700,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -364,7 +400,6 @@ class _PurchaseDonationRow extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s2),
-          // Progress-Balken visualisiert den Anteil am Gesamtspendenpool.
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -375,6 +410,39 @@ class _PurchaseDonationRow extends StatelessWidget {
                   AppColors.statusPositive),
             ),
           ),
+          if (purchase.hasInvoice) ...[
+            const SizedBox(height: AppSpacing.s2),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+              label: Text(
+                'Rechnung ${purchase.invoiceNumber ?? ''} — PDF öffnen',
+              ),
+              onPressed: () async {
+                final invoice = ref
+                    .read(myInvoicesProvider)
+                    .valueOrNull
+                    ?.firstWhere(
+                      (i) => i.id == purchase.invoiceId,
+                      orElse: () => ref
+                          .read(myInvoicesProvider)
+                          .valueOrNull!
+                          .first,
+                    );
+                if (invoice == null) return;
+                if (!context.mounted) return;
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => InvoicePreviewScreen(invoice: invoice),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.ink,
+                side: const BorderSide(color: AppColors.brand),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ],
         ],
       ),
     );

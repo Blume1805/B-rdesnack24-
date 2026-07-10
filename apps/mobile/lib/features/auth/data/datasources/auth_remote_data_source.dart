@@ -21,15 +21,40 @@ class AuthRemoteDataSource {
     String password, {
     String? fullName,
     DateTime? birthDate,
+    // Neu: Unternehmer-Registrierung. Wenn customerType == 'business',
+    // erwartet der Trigger die Rechnungsanschrift und Steuernummer aus dem
+    // Metadata. Optional: USt-IdNr. und Firmenname.
+    String customerType = 'private',
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
   }) {
     return _auth.signUp(
       email: email,
       password: password,
       data: {
         'role': 'customer',
+        'customer_type': customerType,
         if (fullName != null) 'full_name': fullName,
         if (birthDate != null)
           'birth_date': birthDate.toIso8601String().substring(0, 10),
+        if (companyName != null && companyName.isNotEmpty)
+          'company_name': companyName,
+        if (billingStreet != null && billingStreet.isNotEmpty)
+          'billing_street': billingStreet,
+        if (billingZip != null && billingZip.isNotEmpty)
+          'billing_zip': billingZip,
+        if (billingCity != null && billingCity.isNotEmpty)
+          'billing_city': billingCity,
+        if (billingCountry != null && billingCountry.isNotEmpty)
+          'billing_country': billingCountry,
+        if (taxNumber != null && taxNumber.isNotEmpty)
+          'tax_number': taxNumber,
+        if (vatId != null && vatId.isNotEmpty) 'vat_id': vatId,
       },
     );
   }

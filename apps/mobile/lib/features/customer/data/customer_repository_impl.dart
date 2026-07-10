@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/error/failures.dart';
 import '../domain/entities/customer_models.dart';
 import '../domain/entities/donations_news.dart';
+import '../domain/entities/invoice.dart';
 import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
 import '../domain/entities/product_detail.dart';
@@ -153,6 +154,36 @@ class CustomerRepositoryImpl implements CustomerRepository {
         final rows = await _remote.listNews(limit: limit);
         return rows.map(NewsArticle.fromJson).toList();
       });
+
+  @override
+  Future<List<Invoice>> myInvoices() => _guard(() async {
+        final rows = await _remote.myInvoices();
+        return rows.map(Invoice.fromJson).toList();
+      });
+
+  @override
+  Future<void> updateBusinessData({
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
+  }) =>
+      _guard(() => _remote.updateBusinessData(
+            companyName: companyName,
+            billingStreet: billingStreet,
+            billingZip: billingZip,
+            billingCity: billingCity,
+            billingCountry: billingCountry,
+            taxNumber: taxNumber,
+            vatId: vatId,
+          ));
+
+  @override
+  Future<String> businessCustomersCsv() =>
+      _guard(_remote.businessCustomersCsv);
 
   @override
   Future<void> submitContact({

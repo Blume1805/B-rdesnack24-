@@ -11,11 +11,22 @@ abstract interface class AuthRepository {
   Future<AppUser> signIn({required String email, required String password});
 
   /// Self-Signup (nur Kundenrolle; interne Nutzer werden eingeladen).
+  /// [customerType] = 'private' (Standard) oder 'business'. Bei 'business'
+  /// müssen Anschrift und Steuernummer angegeben werden, damit § 14 UStG
+  /// erfüllt ist.
   Future<void> registerCustomer({
     required String email,
     required String password,
     String? fullName,
     DateTime? birthDate,
+    String customerType,
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
   });
 
   /// Passwort-Zurücksetzen anstoßen.

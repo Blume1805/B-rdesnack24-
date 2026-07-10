@@ -5,6 +5,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import 'screens/b2b_customers_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
 import 'screens/disposal_screen.dart';
@@ -108,6 +109,14 @@ class ManagementScreen extends ConsumerWidget {
         Icons.group_outlined,
         const EmployeesScreen(),
         visible: p.contains('employees.manage'),
+      ),
+      _Module(
+        'B2B-Kunden',
+        'sevDesk-CSV-Export',
+        Icons.download_outlined,
+        const B2bCustomersScreen(),
+        // Sichtbar für alle Gesellschafter/Admins mit customers.manage.
+        visible: p.contains('customers.manage'),
       ),
     ].where((m) => m.visible).toList();
   }

@@ -216,12 +216,13 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myCustomer() async {
     if (_uid == null) return null;
-    // Join Profil, damit Stammdaten direkt mitkommen (full_name, birth_date,
-    // email, gender, created_at/Registrierungsdatum).
     final row = await _client
         .from('customers')
         .select(
-          'customer_number, notify_email, notify_push, billing_city, '
+          'customer_number, notify_email, notify_push, '
+          'customer_type, company_name, '
+          'billing_street, billing_zip, billing_city, billing_country, '
+          'tax_number, vat_id, '
           'profiles!inner(full_name, birth_date, email, gender, created_at)',
         )
         .eq('id', _uid!)
@@ -232,13 +233,52 @@ class CustomerRemoteDataSource {
       'customer_number': row['customer_number'],
       'notify_email': row['notify_email'],
       'notify_push': row['notify_push'],
+      'customer_type': row['customer_type'],
+      'company_name': row['company_name'],
+      'billing_street': row['billing_street'],
+      'billing_zip': row['billing_zip'],
       'billing_city': row['billing_city'],
+      'billing_country': row['billing_country'],
+      'tax_number': row['tax_number'],
+      'vat_id': row['vat_id'],
       'full_name': profile?['full_name'],
       'birth_date': profile?['birth_date'],
       'email': profile?['email'],
       'gender': profile?['gender'],
       'registered_at': profile?['created_at'],
     };
+  }
+
+  Future<List<Map<String, dynamic>>> myInvoices() async {
+    final rows = await _client.rpc('my_invoices');
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<void> updateBusinessData({
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
+  }) async {
+    if (_uid == null) return;
+    await _client.from('customers').update({
+      if (companyName != null) 'company_name': companyName,
+      if (billingStreet != null) 'billing_street': billingStreet,
+      if (billingZip != null) 'billing_zip': billingZip,
+      if (billingCity != null) 'billing_city': billingCity,
+      if (billingCountry != null) 'billing_country': billingCountry,
+      if (taxNumber != null) 'tax_number': taxNumber,
+      if (vatId != null) 'vat_id': vatId,
+    }).eq('id', _uid!);
+  }
+
+  Future<String> businessCustomersCsv() async {
+    final res = await _client.rpc('business_customers_csv');
+    return res as String? ?? '';
   }
 
   Future<void> updateGender(String? gender) async {

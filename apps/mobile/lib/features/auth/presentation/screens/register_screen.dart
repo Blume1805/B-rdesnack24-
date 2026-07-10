@@ -30,6 +30,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
 
+  // Neu: Kundenart + Unternehmer-Felder
+  String _customerType = 'private';
+  final _companyCtrl = TextEditingController();
+  final _streetCtrl = TextEditingController();
+  final _zipCtrl = TextEditingController();
+  final _cityCtrl = TextEditingController();
+  final _countryCtrl = TextEditingController(text: 'DE');
+  final _taxNumberCtrl = TextEditingController();
+  final _vatIdCtrl = TextEditingController();
+
   DateTime? _birthDate;
   bool _acceptPrivacy = false;
   bool _acceptTerms = false;
@@ -41,6 +51,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
+    _companyCtrl.dispose();
+    _streetCtrl.dispose();
+    _zipCtrl.dispose();
+    _cityCtrl.dispose();
+    _countryCtrl.dispose();
+    _taxNumberCtrl.dispose();
+    _vatIdCtrl.dispose();
     super.dispose();
   }
 
@@ -83,11 +100,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
+    // Bei Unternehmer: Anschrift + Steuernummer sind Pflicht.
+    if (_customerType == 'business') {
+      final missing = <String>[];
+      if (_streetCtrl.text.trim().isEmpty) missing.add('Straße + Hausnr.');
+      if (_zipCtrl.text.trim().isEmpty) missing.add('PLZ');
+      if (_cityCtrl.text.trim().isEmpty) missing.add('Ort');
+      if (_taxNumberCtrl.text.trim().isEmpty) missing.add('Steuernummer');
+      if (missing.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Bitte ausfüllen: ${missing.join(', ')}')),
+        );
+        return;
+      }
+    }
+
     final ok = await ref.read(authControllerProvider.notifier).registerCustomer(
           _emailCtrl.text,
           _passwordCtrl.text,
           fullName: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
           birthDate: _birthDate,
+          customerType: _customerType,
+          companyName: _companyCtrl.text.trim().isEmpty
+              ? null
+              : _companyCtrl.text.trim(),
+          billingStreet: _streetCtrl.text.trim().isEmpty
+              ? null
+              : _streetCtrl.text.trim(),
+          billingZip:
+              _zipCtrl.text.trim().isEmpty ? null : _zipCtrl.text.trim(),
+          billingCity:
+              _cityCtrl.text.trim().isEmpty ? null : _cityCtrl.text.trim(),
+          billingCountry: _countryCtrl.text.trim().isEmpty
+              ? null
+              : _countryCtrl.text.trim(),
+          taxNumber: _taxNumberCtrl.text.trim().isEmpty
+              ? null
+              : _taxNumberCtrl.text.trim(),
+          vatId: _vatIdCtrl.text.trim().isEmpty
+              ? null
+              : _vatIdCtrl.text.trim(),
         );
     if (!mounted) return;
     if (ok) {
@@ -137,6 +190,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Kundentyp-Umschalter — Privatperson oder Unternehmer
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'private',
+                        icon: Icon(Icons.person_outline),
+                        label: Text('Privat'),
+                      ),
+                      ButtonSegment(
+                        value: 'business',
+                        icon: Icon(Icons.business_center_outlined),
+                        label: Text('Unternehmer'),
+                      ),
+                    ],
+                    selected: {_customerType},
+                    onSelectionChanged: (s) =>
+                        setState(() => _customerType = s.first),
+                  ),
+                  const SizedBox(height: 8),
+                  if (_customerType == 'business')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Für § 14 UStG-konforme Rechnungen benötigen wir '
+                        'Anschrift + Steuernummer. USt-IdNr. ist optional.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameCtrl,
                     decoration: InputDecoration(labelText: l10n.fullName),
@@ -190,6 +272,82 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         InputDecoration(labelText: l10n.confirmPassword),
                     onFieldSubmitted: (_) => _submit(),
                   ),
+                  if (_customerType == 'business') ...[
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Unternehmensangaben',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _companyCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Firmenname (optional)',
+                        prefixIcon: Icon(Icons.business_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _streetCtrl,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Straße + Hausnr.',
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 110,
+                          child: TextFormField(
+                            controller: _zipCtrl,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(labelText: 'PLZ'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _cityCtrl,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(labelText: 'Ort'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _countryCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Land (ISO-Code, z. B. DE)',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _taxNumberCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Steuernummer',
+                        prefixIcon: Icon(Icons.receipt_long_outlined),
+                        helperText:
+                            'z. B. 102/178/01635 — Pflicht für § 14 UStG',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _vatIdCtrl,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: const InputDecoration(
+                        labelText: 'USt-IdNr. (optional)',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                        helperText:
+                            'z. B. DE123456789 — für Vorsteuerabzug § 15',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   const SizedBox(height: 16),
                   _ConsentTile(
                     checked: _acceptPrivacy,

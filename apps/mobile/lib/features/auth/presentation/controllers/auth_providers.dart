@@ -52,6 +52,14 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     String password, {
     String? fullName,
     DateTime? birthDate,
+    String customerType = 'private',
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
@@ -60,6 +68,14 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         password: password,
         fullName: fullName,
         birthDate: birthDate,
+        customerType: customerType,
+        companyName: companyName,
+        billingStreet: billingStreet,
+        billingZip: billingZip,
+        billingCity: billingCity,
+        billingCountry: billingCountry,
+        taxNumber: taxNumber,
+        vatId: vatId,
       ),
     );
     return !state.hasError;

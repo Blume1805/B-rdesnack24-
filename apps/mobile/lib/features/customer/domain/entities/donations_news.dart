@@ -19,7 +19,9 @@ class DonationSummary extends Equatable {
   List<Object?> get props => [totalDonated, purchaseCount];
 }
 
-/// Ein Kauf mit dem daraus abgeleiteten Spendenanteil.
+/// Ein Kauf mit dem daraus abgeleiteten Spendenanteil, der genutzten
+/// Zahlungsmethode und einer optionalen Rechnungsverknüpfung (nur bei
+/// Unternehmer-Kunden).
 class PurchaseDonation extends Equatable {
   const PurchaseDonation({
     required this.purchaseId,
@@ -28,6 +30,9 @@ class PurchaseDonation extends Equatable {
     required this.totalNet,
     required this.donation,
     required this.sharePct,
+    this.paymentMethod = 'cash',
+    this.invoiceId,
+    this.invoiceNumber,
   });
 
   final String purchaseId;
@@ -36,6 +41,11 @@ class PurchaseDonation extends Equatable {
   final double totalNet;
   final double donation;
   final double sharePct;
+  final String paymentMethod; // 'cash' | 'card_ec' | 'card_credit' | 'card_contactless' | 'other'
+  final String? invoiceId;
+  final String? invoiceNumber;
+
+  bool get hasInvoice => invoiceId != null;
 
   factory PurchaseDonation.fromJson(Map<String, dynamic> j) => PurchaseDonation(
         purchaseId: j['purchase_id'] as String,
@@ -44,11 +54,23 @@ class PurchaseDonation extends Equatable {
         totalNet: (j['total_net'] as num?)?.toDouble() ?? 0,
         donation: (j['donation'] as num?)?.toDouble() ?? 0,
         sharePct: (j['share_pct'] as num?)?.toDouble() ?? 0,
+        paymentMethod: j['payment_method'] as String? ?? 'cash',
+        invoiceId: j['invoice_id'] as String?,
+        invoiceNumber: j['invoice_number'] as String?,
       );
 
   @override
-  List<Object?> get props =>
-      [purchaseId, purchasedAt, totalGross, totalNet, donation, sharePct];
+  List<Object?> get props => [
+        purchaseId,
+        purchasedAt,
+        totalGross,
+        totalNet,
+        donation,
+        sharePct,
+        paymentMethod,
+        invoiceId,
+        invoiceNumber,
+      ];
 }
 
 /// Spendenzweck mit Abstimmungs-State.

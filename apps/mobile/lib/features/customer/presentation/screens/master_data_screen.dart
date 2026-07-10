@@ -56,6 +56,22 @@ class MasterDataScreen extends ConsumerWidget {
           final birthDateStr = row['birth_date'] as String?;
           final registeredStr = row['registered_at'] as String?;
           final gender = row['gender'] as String?;
+          final customerType =
+              (row['customer_type'] as String?) ?? 'private';
+          final isBusiness = customerType == 'business';
+          final companyName = row['company_name'] as String?;
+          final billingStreet = row['billing_street'] as String?;
+          final billingZip = row['billing_zip'] as String?;
+          final billingCity = row['billing_city'] as String?;
+          final billingCountry =
+              (row['billing_country'] as String?) ?? 'DE';
+          final taxNumber = row['tax_number'] as String?;
+          final vatId = row['vat_id'] as String?;
+          final businessComplete = isBusiness &&
+              (billingStreet?.isNotEmpty ?? false) &&
+              (billingZip?.isNotEmpty ?? false) &&
+              (billingCity?.isNotEmpty ?? false) &&
+              (taxNumber?.isNotEmpty ?? false);
 
           final birthDate = birthDateStr == null
               ? null
@@ -120,6 +136,112 @@ class MasterDataScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (isBusiness) ...[
+                const SizedBox(height: AppSpacing.s5),
+                Row(
+                  children: [
+                    const Icon(Icons.business_center_outlined,
+                        size: 16, color: AppColors.ink),
+                    const SizedBox(width: 6),
+                    Eyebrow('Unternehmensangaben'),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                if (!businessComplete)
+                  AppCard(
+                    color: const Color(0xFFFFF3D6),
+                    borderColor: AppColors.statusWarning,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_outlined,
+                            color: AppColors.statusWarning),
+                        const SizedBox(width: AppSpacing.s2),
+                        Expanded(
+                          child: Text(
+                            'Anschrift und Steuernummer sind erforderlich, '
+                            'damit wir dir eine ordnungsgemäße Rechnung '
+                            'nach § 14 UStG ausstellen können.',
+                            style: AppTypography.body(
+                                size: 12,
+                                weight: FontWeight.w700,
+                                color: AppColors.ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.s3),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      _DataRow(
+                        icon: Icons.business_outlined,
+                        label: 'Firmenname',
+                        value: (companyName?.isNotEmpty ?? false)
+                            ? companyName!
+                            : '—',
+                      ),
+                      const Divider(height: 1, color: AppColors.borderSubtle),
+                      _DataRow(
+                        icon: Icons.location_on_outlined,
+                        label: 'Straße + Hausnr.',
+                        value: (billingStreet?.isNotEmpty ?? false)
+                            ? billingStreet!
+                            : '—',
+                      ),
+                      const Divider(height: 1, color: AppColors.borderSubtle),
+                      _DataRow(
+                        icon: Icons.map_outlined,
+                        label: 'PLZ + Ort',
+                        value: (billingZip ?? '').isEmpty &&
+                                (billingCity ?? '').isEmpty
+                            ? '—'
+                            : '${billingZip ?? ''} ${billingCity ?? ''}'
+                                .trim(),
+                      ),
+                      const Divider(height: 1, color: AppColors.borderSubtle),
+                      _DataRow(
+                        icon: Icons.public,
+                        label: 'Land',
+                        value: billingCountry,
+                      ),
+                      const Divider(height: 1, color: AppColors.borderSubtle),
+                      _DataRow(
+                        icon: Icons.receipt_long_outlined,
+                        label: 'Steuernummer',
+                        value: (taxNumber?.isNotEmpty ?? false)
+                            ? taxNumber!
+                            : '—',
+                      ),
+                      const Divider(height: 1, color: AppColors.borderSubtle),
+                      _DataRow(
+                        icon: Icons.badge_outlined,
+                        label: 'USt-IdNr.',
+                        value: (vatId?.isNotEmpty ?? false) ? vatId! : '—',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                FilledButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => _EditBusinessDataScreen(row: row),
+                      ),
+                    );
+                    ref.invalidate(myCustomerProvider);
+                  },
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Unternehmensangaben bearbeiten'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brand,
+                    foregroundColor: AppColors.ink,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.s5),
               // Gender — editierbar
               Text(
@@ -284,6 +406,130 @@ class _GenderChoice extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Bearbeitungsformular für die Unternehmensangaben. Wird über den
+/// „Unternehmensangaben bearbeiten"-Button geöffnet, damit auch Kunden,
+/// die sich zunächst als Privatperson registriert haben oder bei der
+/// Registrierung Anschrift/Steuernummer weggelassen haben, diese nachtragen
+/// können. Ohne vollständige Angaben verweigert das Backend die Erstellung
+/// einer § 14 UStG-Rechnung.
+class _EditBusinessDataScreen extends ConsumerStatefulWidget {
+  const _EditBusinessDataScreen({required this.row});
+  final Map<String, dynamic> row;
+  @override
+  ConsumerState<_EditBusinessDataScreen> createState() =>
+      _EditBusinessDataScreenState();
+}
+
+class _EditBusinessDataScreenState
+    extends ConsumerState<_EditBusinessDataScreen> {
+  late final _company = TextEditingController(
+      text: (widget.row['company_name'] as String?) ?? '');
+  late final _street = TextEditingController(
+      text: (widget.row['billing_street'] as String?) ?? '');
+  late final _zip = TextEditingController(
+      text: (widget.row['billing_zip'] as String?) ?? '');
+  late final _city = TextEditingController(
+      text: (widget.row['billing_city'] as String?) ?? '');
+  late final _country = TextEditingController(
+      text: (widget.row['billing_country'] as String?) ?? 'DE');
+  late final _tax = TextEditingController(
+      text: (widget.row['tax_number'] as String?) ?? '');
+  late final _vat = TextEditingController(
+      text: (widget.row['vat_id'] as String?) ?? '');
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _company.dispose();
+    _street.dispose();
+    _zip.dispose();
+    _city.dispose();
+    _country.dispose();
+    _tax.dispose();
+    _vat.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(customerRepositoryProvider).updateBusinessData(
+            companyName: _company.text.trim(),
+            billingStreet: _street.text.trim(),
+            billingZip: _zip.text.trim(),
+            billingCity: _city.text.trim(),
+            billingCountry: _country.text.trim(),
+            taxNumber: _tax.text.trim(),
+            vatId: _vat.text.trim(),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unternehmensangaben gespeichert.')),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Unternehmensangaben')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.s5),
+        children: [
+          Text(
+            'Diese Daten erscheinen auf allen künftigen Rechnungen. '
+            'Anschrift und Steuernummer sind Pflicht — sonst kann keine '
+            'ordnungsgemäße Rechnung ausgestellt werden.',
+            style: AppTypography.body(size: 13, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          TextField(controller: _company, decoration: const InputDecoration(labelText: 'Firmenname (optional)')),
+          const SizedBox(height: 12),
+          TextField(controller: _street, decoration: const InputDecoration(labelText: 'Straße + Hausnr.')),
+          const SizedBox(height: 12),
+          Row(children: [
+            SizedBox(width: 100, child: TextField(controller: _zip, decoration: const InputDecoration(labelText: 'PLZ'))),
+            const SizedBox(width: 12),
+            Expanded(child: TextField(controller: _city, decoration: const InputDecoration(labelText: 'Ort'))),
+          ]),
+          const SizedBox(height: 12),
+          TextField(controller: _country, decoration: const InputDecoration(labelText: 'Land')),
+          const SizedBox(height: 12),
+          TextField(controller: _tax, decoration: const InputDecoration(labelText: 'Steuernummer')),
+          const SizedBox(height: 12),
+          TextField(controller: _vat, decoration: const InputDecoration(labelText: 'USt-IdNr. (optional)')),
+          const SizedBox(height: AppSpacing.s4),
+          FilledButton.icon(
+            onPressed: _saving ? null : _save,
+            icon: _saving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink))
+                : const Icon(Icons.save_outlined),
+            label: const Text('Speichern'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brand,
+              foregroundColor: AppColors.ink,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ],
       ),
     );
   }

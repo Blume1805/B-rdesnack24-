@@ -1,5 +1,6 @@
 import '../entities/customer_models.dart';
 import '../entities/donations_news.dart';
+import '../entities/invoice.dart';
 import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
 import '../entities/product_detail.dart';
@@ -61,6 +62,24 @@ abstract interface class CustomerRepository {
 
   /// News-Feed (veröffentlichte Artikel, jüngste zuerst).
   Future<List<NewsArticle>> listNews({int limit = 20});
+
+  /// Rechnungen des aktuellen Unternehmer-Kunden.
+  Future<List<Invoice>> myInvoices();
+
+  /// Business-Stammdaten nachtragen bzw. ändern.
+  Future<void> updateBusinessData({
+    String? companyName,
+    String? billingStreet,
+    String? billingZip,
+    String? billingCity,
+    String? billingCountry,
+    String? taxNumber,
+    String? vatId,
+  });
+
+  /// CSV-Export aller Unternehmer-Kunden im sevDesk-Import-Format
+  /// (nur für Gesellschafter/Systemadmin).
+  Future<String> businessCustomersCsv();
 
   Future<void> submitContact({
     required String category,
