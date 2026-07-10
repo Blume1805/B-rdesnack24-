@@ -32,7 +32,9 @@ abstract interface class CustomerRepository {
   /// Coupon-Aktivierung — Kunde muss ein Angebot aktivieren, bevor der
   /// Automat es beim Einlösen akzeptiert.
   Future<void> activateWeeklyOffer(String offerId);
+  Future<void> deactivateWeeklyOffer(String offerId);
   Future<void> activatePersonalOffer(String personalOfferId);
+  Future<void> deactivatePersonalOffer(String personalOfferId);
   Future<Set<String>> myActivatedWeeklyOfferIds();
 
   /// Top-3 pro Kategorie (Getränke, Snacks, Eis) — sortiert nach

@@ -71,8 +71,16 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _guard(() => _remote.activateWeeklyOffer(offerId));
 
   @override
+  Future<void> deactivateWeeklyOffer(String offerId) =>
+      _guard(() => _remote.deactivateWeeklyOffer(offerId));
+
+  @override
   Future<void> activatePersonalOffer(String personalOfferId) =>
       _guard(() => _remote.activatePersonalOffer(personalOfferId));
+
+  @override
+  Future<void> deactivatePersonalOffer(String personalOfferId) =>
+      _guard(() => _remote.deactivatePersonalOffer(personalOfferId));
 
   @override
   Future<Set<String>> myActivatedWeeklyOfferIds() => _guard(() async {

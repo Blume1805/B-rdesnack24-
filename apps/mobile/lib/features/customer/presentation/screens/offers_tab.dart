@@ -383,15 +383,15 @@ class _PersonalActivationFooter extends ConsumerWidget {
                       height: 14,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.onDark,
+                        color: AppColors.ink,
                       ),
                     )
                   : const Icon(Icons.add_circle_outline,
-                      size: 18, color: AppColors.onDark),
+                      size: 18, color: AppColors.ink),
               label: const Text('Aktivieren'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.statusPositive,
-                foregroundColor: AppColors.onDark,
+                backgroundColor: AppColors.brand,
+                foregroundColor: AppColors.ink,
                 textStyle:
                     AppTypography.body(size: 13, weight: FontWeight.w800),
               ),
@@ -410,48 +410,80 @@ class _PersonalActivationFooter extends ConsumerWidget {
         horizontal: AppSpacing.s5,
         vertical: AppSpacing.s4,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Einlöse-Code',
-                  style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w700,
-                    color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.6),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Einlöse-Code',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w700,
+                        color: AppColors.brand,
+                      ).copyWith(letterSpacing: 0.6),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _PersonalOfferCard._formatCode(offer.redemptionCode),
+                      style: AppTypography.display(
+                        size: 28,
+                        weight: FontWeight.w800,
+                        color: AppColors.onDark,
+                      ).copyWith(letterSpacing: 3),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _PersonalOfferCard._formatCode(offer.redemptionCode),
-                  style: AppTypography.display(
-                    size: 28,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
-                  ).copyWith(letterSpacing: 3),
-                ),
-              ],
+              ),
+              IconButton(
+                tooltip: 'Code kopieren',
+                icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
+                onPressed: () async {
+                  await Clipboard.setData(
+                      ClipboardData(text: offer.redemptionCode));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Code kopiert.')),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(width: 4),
+              _RedeemButton(code: offer.redemptionCode),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          FilledButton.icon(
+            onPressed: busy
+                ? null
+                : () async {
+                    await ref
+                        .read(offerActivationActionsProvider.notifier)
+                        .deactivatePersonal(offer.id);
+                    ref.invalidate(myPersonalOffersProvider);
+                  },
+            icon: busy
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.onDark),
+                  )
+                : const Icon(Icons.check_circle,
+                    size: 18, color: AppColors.onDark),
+            label: const Text('Aktiviert · tippen zum Deaktivieren'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.statusPositive,
+              foregroundColor: AppColors.onDark,
+              textStyle: AppTypography.body(size: 12, weight: FontWeight.w800),
             ),
           ),
-          IconButton(
-            tooltip: 'Code kopieren',
-            icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
-            onPressed: () async {
-              await Clipboard.setData(
-                  ClipboardData(text: offer.redemptionCode));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Code kopiert.')),
-                );
-              }
-            },
-          ),
-          const SizedBox(width: 4),
-          _RedeemButton(code: offer.redemptionCode),
         ],
       ),
     );
@@ -835,47 +867,52 @@ class _WeeklyOfferSlot extends ConsumerWidget {
               .activateWeekly(offer.id);
           ref.invalidate(activatedOfferIdsProvider);
         },
+        onDeactivate: () async {
+          await ref
+              .read(offerActivationActionsProvider.notifier)
+              .deactivateWeekly(offer.id);
+          ref.invalidate(activatedOfferIdsProvider);
+        },
       ),
     );
   }
 }
 
-/// Aktivieren-Button (wird zu „Aktiviert ✓"-Chip nach Klick).
+/// Aktivierungs-Button: gelb im inaktiven Zustand, grün wenn aktiviert.
+/// Ein Klick auf den grünen Button deaktiviert den Coupon wieder.
 class _ActivationButton extends StatelessWidget {
   const _ActivationButton({
     required this.activated,
     required this.busy,
     required this.onActivate,
+    required this.onDeactivate,
   });
   final bool activated;
   final bool busy;
   final Future<void> Function() onActivate;
+  final Future<void> Function() onDeactivate;
 
   @override
   Widget build(BuildContext context) {
     if (activated) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s3, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.brandLight,
-          border: Border.all(color: AppColors.brand),
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle, color: AppColors.ink, size: 18),
-            const SizedBox(width: 6),
-            Text(
-              'Aktiviert',
-              style: AppTypography.body(
-                size: 13,
-                weight: FontWeight.w800,
-                color: AppColors.ink,
-              ),
-            ),
-          ],
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: busy ? null : onDeactivate,
+          icon: busy
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.onDark),
+                )
+              : const Icon(Icons.check_circle, size: 18),
+          label: const Text('Aktiviert · tippen zum Deaktivieren'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.statusPositive,
+            foregroundColor: AppColors.onDark,
+            textStyle: AppTypography.body(size: 12, weight: FontWeight.w800),
+          ),
         ),
       );
     }
@@ -888,13 +925,13 @@ class _ActivationButton extends StatelessWidget {
                 width: 14,
                 height: 14,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppColors.onDark),
+                    strokeWidth: 2, color: AppColors.ink),
               )
             : const Icon(Icons.add_circle_outline, size: 18),
         label: const Text('Aktivieren'),
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.statusPositive,
-          foregroundColor: AppColors.onDark,
+          backgroundColor: AppColors.brand,
+          foregroundColor: AppColors.ink,
           textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
         ),
       ),
@@ -1069,10 +1106,30 @@ class OfferActivationActions extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<void> deactivateWeekly(String id) async {
+    state = const AsyncLoading();
+    try {
+      await _ref.read(customerRepositoryProvider).deactivateWeeklyOffer(id);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
   Future<void> activatePersonal(String id) async {
     state = const AsyncLoading();
     try {
       await _ref.read(customerRepositoryProvider).activatePersonalOffer(id);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> deactivatePersonal(String id) async {
+    state = const AsyncLoading();
+    try {
+      await _ref.read(customerRepositoryProvider).deactivatePersonalOffer(id);
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);

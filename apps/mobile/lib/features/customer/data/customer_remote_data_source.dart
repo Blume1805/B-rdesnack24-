@@ -66,8 +66,17 @@ class CustomerRemoteDataSource {
     await _client.rpc('activate_offer', params: {'p_offer_id': offerId});
   }
 
+  Future<void> deactivateWeeklyOffer(String offerId) async {
+    await _client.rpc('deactivate_offer', params: {'p_offer_id': offerId});
+  }
+
   Future<void> activatePersonalOffer(String personalOfferId) async {
     await _client.rpc('activate_personal_offer',
+        params: {'p_offer_id': personalOfferId});
+  }
+
+  Future<void> deactivatePersonalOffer(String personalOfferId) async {
+    await _client.rpc('deactivate_personal_offer',
         params: {'p_offer_id': personalOfferId});
   }
 
