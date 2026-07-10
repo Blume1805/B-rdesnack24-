@@ -90,6 +90,10 @@ echo "  ✓ neutralisiert"
 TS=$(date +%s)
 echo "▶︎ Cache-Buster: $TS"
 sed -i "s/__BUILD_V__/$TS/g" "$BUILD_DIR/index.html"
+# main.dart.js im Bootstrap versionieren, damit Safari/Chrome die neue
+# Version garantiert lädt, auch wenn die alte main.dart.js im HTTP-Cache
+# liegt. flutter_bootstrap.js selbst hat schon ?v= aus dem HTML.
+sed -i "s|\"mainJsPath\":\"main.dart.js\"|\"mainJsPath\":\"main.dart.js?v=$TS\"|g" "$BOOT"
 
 echo "▶︎ Deploy nach gh-pages"
 CURRENT_BRANCH=$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)
