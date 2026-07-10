@@ -64,51 +64,69 @@ class _NewsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.s4),
+      padding: EdgeInsets.zero,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(Icons.article_outlined,
-                  size: 16, color: AppColors.brand),
-              const SizedBox(width: 4),
-              Text(
-                Formatters.date(article.publishedAt),
-                style: AppTypography.body(
-                  size: 11,
-                  weight: FontWeight.w700,
-                  color: AppColors.textMuted,
+          // Bild-Platzhalter (16:9). Sobald `image_url` gepflegt ist, wird
+          // automatisch das echte Foto geladen.
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ProductImage.expand(
+              imageUrl: article.imageUrl,
+              productName: article.title,
+              icon: Icons.campaign,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.s4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.article_outlined,
+                        size: 16, color: AppColors.brand),
+                    const SizedBox(width: 4),
+                    Text(
+                      Formatters.date(article.publishedAt),
+                      style: AppTypography.body(
+                        size: 11,
+                        weight: FontWeight.w700,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            article.title,
-            style: AppTypography.display(
-              size: 20,
-              weight: FontWeight.w800,
-              color: AppColors.ink,
-            ),
-          ),
-          if (article.summary != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              article.summary!,
-              style: AppTypography.body(
-                size: 14,
-                weight: FontWeight.w700,
-                color: AppColors.textMuted,
-              ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.s3),
-          Text(
-            article.body,
-            style: AppTypography.body(
-              size: 14,
-              color: AppColors.ink,
+                const SizedBox(height: 6),
+                Text(
+                  article.title,
+                  style: AppTypography.display(
+                    size: 20,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                if (article.summary != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    article.summary!,
+                    style: AppTypography.body(
+                      size: 14,
+                      weight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.s3),
+                Text(
+                  article.body,
+                  style: AppTypography.body(
+                    size: 14,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

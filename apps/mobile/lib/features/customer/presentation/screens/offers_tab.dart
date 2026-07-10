@@ -43,24 +43,11 @@ class OffersTab extends ConsumerWidget {
           AppSpacing.s8,
         ),
         children: [
-          // ── News-Teaser (klick öffnet Feed) ─────────────────────────
+          // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
           const _NewsTeaser(),
           const SizedBox(height: AppSpacing.s6),
 
-          // ── Eure Favoriten (Top 3 pro Kategorie) ────────────────────
-          const SectionHeader(
-            eyebrow: 'Bewertet von der Community',
-            title: 'Eure Favoriten',
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Getränke'),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Snacks'),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Eis'),
-          const SizedBox(height: AppSpacing.s6),
-
-          // ── Loyalty-Fortschritt ─────────────────────────────────────
+          // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
           loyalty.when(
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
@@ -70,8 +57,6 @@ class OffersTab extends ConsumerWidget {
           ),
           if (loyalty.valueOrNull != null)
             const SizedBox(height: AppSpacing.s5),
-
-          // ── Individuelle Angebote (Special / Loyalty / Basis) ────────
           personals.when(
             loading: () => const _PersonalLoading(),
             error: (_, __) => const SizedBox.shrink(),
@@ -130,7 +115,7 @@ class OffersTab extends ConsumerWidget {
             },
           ),
 
-          // ── Wochenangebote als horizontale Scroll-Karten ─────────────
+          // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
           const SectionHeader(
             eyebrow: 'Für alle',
             title: 'Wochen­angebote',
@@ -162,7 +147,6 @@ class OffersTab extends ConsumerWidget {
                   ),
                 );
               }
-              // Horizontales Scrollen wie in gängigen Handels-Apps.
               return SizedBox(
                 height: 440,
                 child: ListView.separated(
@@ -175,6 +159,19 @@ class OffersTab extends ConsumerWidget {
               );
             },
           ),
+          const SizedBox(height: AppSpacing.s6),
+
+          // 4. ── Bewertung der Community (Eure Favoriten) ────────────
+          const SectionHeader(
+            eyebrow: 'Bewertet von der Community',
+            title: 'Eure Favoriten',
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Getränke'),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Snacks'),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Eis'),
         ],
       ),
     );
@@ -1287,27 +1284,42 @@ class _NewsPreviewRow extends StatelessWidget {
   final NewsArticle article;
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          Formatters.date(article.publishedAt),
-          style: AppTypography.body(
-            size: 11,
-            weight: FontWeight.w700,
-            color: AppColors.textMuted,
-          ),
+        // Bild-Platzhalter für das News-Bild (72×72)
+        ProductImage(
+          imageUrl: article.imageUrl,
+          productName: article.title,
+          size: 72,
+          icon: Icons.campaign,
         ),
-        const SizedBox(height: 2),
-        Text(
-          article.title,
-          style: AppTypography.body(
-            size: 15,
-            weight: FontWeight.w800,
-            color: AppColors.ink,
+        const SizedBox(width: AppSpacing.s3),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                Formatters.date(article.publishedAt),
+                style: AppTypography.body(
+                  size: 11,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                article.title,
+                style: AppTypography.body(
+                  size: 15,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
