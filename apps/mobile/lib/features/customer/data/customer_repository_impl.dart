@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/error/failures.dart';
 import '../domain/entities/customer_models.dart';
+import '../domain/entities/donations_news.dart';
 import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
 import '../domain/entities/product_detail.dart';
@@ -105,6 +106,53 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<void> rateProduct(String productId, int rating) =>
       _guard(() => _remote.rateProduct(productId, rating));
+
+  @override
+  Future<DonationSummary> myDonationSummary() => _guard(() async {
+        final row = await _remote.myDonationSummary();
+        return row == null
+            ? const DonationSummary(totalDonated: 0, purchaseCount: 0)
+            : DonationSummary.fromJson(row);
+      });
+
+  @override
+  Future<List<PurchaseDonation>> myDonationsByPurchase() => _guard(() async {
+        final rows = await _remote.myDonationsByPurchase();
+        return rows.map(PurchaseDonation.fromJson).toList();
+      });
+
+  @override
+  Future<List<DonationCause>> donationCauses() => _guard(() async {
+        final rows = await _remote.donationCauses();
+        return rows.map(DonationCause.fromJson).toList();
+      });
+
+  @override
+  Future<DonationCause> suggestDonationCause(
+          String title, String? description) =>
+      _guard(() async {
+        final row = await _remote.suggestDonationCause(title, description);
+        // Backend liefert die frisch angelegte Zeile ohne Vote-Count zurück
+        // → 0 Stimmen, nicht selbst gevotet, Status = 'suggested'.
+        return DonationCause(
+          id: row['id'] as String,
+          title: row['title'] as String? ?? title,
+          description: row['description'] as String?,
+          status: (row['status'] as String?) ?? 'suggested',
+          voteCount: 0,
+          votedByMe: false,
+        );
+      });
+
+  @override
+  Future<bool> voteDonationCause(String causeId) =>
+      _guard(() => _remote.voteDonationCause(causeId));
+
+  @override
+  Future<List<NewsArticle>> listNews({int limit = 20}) => _guard(() async {
+        final rows = await _remote.listNews(limit: limit);
+        return rows.map(NewsArticle.fromJson).toList();
+      });
 
   @override
   Future<void> submitContact({

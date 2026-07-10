@@ -5,7 +5,9 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../domain/entities/donations_news.dart';
 import '../controllers/customer_providers.dart';
+import 'donations_screen.dart';
 
 /// Verlauf: individuelle Preise, Kaufhistorie und Empfehlungen.
 class HistoryTab extends ConsumerWidget {
@@ -14,8 +16,9 @@ class HistoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prices = ref.watch(myPricesProvider);
-    final purchases = ref.watch(myPurchasesProvider);
     final recos = ref.watch(myRecommendationsProvider);
+    final donations = ref.watch(myDonationsByPurchaseProvider);
+    final donationSummary = ref.watch(myDonationSummaryProvider);
 
     return RefreshIndicator(
       color: AppColors.brand,
@@ -23,7 +26,9 @@ class HistoryTab extends ConsumerWidget {
         ref
           ..invalidate(myPricesProvider)
           ..invalidate(myPurchasesProvider)
-          ..invalidate(myRecommendationsProvider);
+          ..invalidate(myRecommendationsProvider)
+          ..invalidate(myDonationsByPurchaseProvider)
+          ..invalidate(myDonationSummaryProvider);
       },
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -144,64 +149,89 @@ class HistoryTab extends ConsumerWidget {
                   ),
           ),
           const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(eyebrow: 'Kaufhistorie', icon: Icons.receipt_long_outlined),
+
+          // Spenden-Übersicht mit Klick auf Detail-Screen
+          _SectionEyebrow(
+              eyebrow: 'Deine Spende', icon: Icons.volunteer_activism),
           const SizedBox(height: AppSpacing.s3),
-          purchases.when(
-            loading: () => const LinearProgressIndicator(color: AppColors.brand),
+          donationSummary.when(
+            loading: () =>
+                const LinearProgressIndicator(color: AppColors.brand),
+            error: (e, _) => _errorCard('$e'),
+            data: (s) => AppCard(
+              padding: EdgeInsets.zero,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(AppRadii.lg),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const DonationsScreen()),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.s4),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.brand,
+                            borderRadius:
+                                BorderRadius.circular(AppRadii.md),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.volunteer_activism,
+                              color: AppColors.ink, size: 26),
+                        ),
+                        const SizedBox(width: AppSpacing.s3),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '5 % Netto-Umsatz für den guten Zweck',
+                                style: AppTypography.body(
+                                  size: 12,
+                                  weight: FontWeight.w700,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                              Text(
+                                Formatters.euro(s.totalDonated),
+                                style: AppTypography.display(
+                                  size: 22,
+                                  weight: FontWeight.w800,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward,
+                            color: AppColors.brand),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.s5),
+          _SectionEyebrow(
+              eyebrow: 'Kaufhistorie', icon: Icons.receipt_long_outlined),
+          const SizedBox(height: AppSpacing.s3),
+          donations.when(
+            loading: () =>
+                const LinearProgressIndicator(color: AppColors.brand),
             error: (e, _) => _errorCard('$e'),
             data: (list) => list.isEmpty
                 ? _empty('Noch keine Käufe erfasst.')
                 : Column(
                     children: [
                       for (final p in list) ...[
-                        AppCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s4,
-                            vertical: AppSpacing.s3,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceAlt,
-                                  border: Border.all(color: AppColors.borderSubtle),
-                                  borderRadius: BorderRadius.circular(AppRadii.sm),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 18,
-                                  color: AppColors.brand,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s3),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      Formatters.euro(p.totalGross),
-                                      style: AppTypography.body(
-                                        size: 14,
-                                        weight: FontWeight.w700,
-                                        color: AppColors.ink,
-                                      ),
-                                    ),
-                                    Text(
-                                      Formatters.date(p.purchasedAt),
-                                      style: AppTypography.body(
-                                        size: 12,
-                                        color: AppColors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        _PurchaseDonationRow(purchase: p),
                         const SizedBox(height: AppSpacing.s2),
                       ],
                     ],
@@ -243,6 +273,110 @@ class _SectionEyebrow extends StatelessWidget {
         const SizedBox(width: 6),
         Eyebrow(eyebrow),
       ],
+    );
+  }
+}
+
+/// Ein Kauf mit Brutto, Netto, Spendenbetrag und relativer Quote.
+class _PurchaseDonationRow extends StatelessWidget {
+  const _PurchaseDonationRow({required this.purchase});
+  final PurchaseDonation purchase;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s4,
+        vertical: AppSpacing.s3,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceAlt,
+                  border: Border.all(color: AppColors.borderSubtle),
+                  borderRadius: BorderRadius.circular(AppRadii.sm),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 18,
+                  color: AppColors.brand,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Formatters.euro(purchase.totalGross),
+                      style: AppTypography.body(
+                        size: 15,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      Formatters.date(purchase.purchasedAt),
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.volunteer_activism,
+                          size: 14, color: AppColors.statusPositive),
+                      const SizedBox(width: 4),
+                      Text(
+                        Formatters.euro(purchase.donation),
+                        style: AppTypography.body(
+                          size: 14,
+                          weight: FontWeight.w800,
+                          color: AppColors.statusPositive,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '${purchase.sharePct.toStringAsFixed(1).replaceAll('.', ',')} % '
+                    'deiner Spende',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          // Progress-Balken visualisiert den Anteil am Gesamtspendenpool.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (purchase.sharePct / 100).clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: AppColors.borderSubtle,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.statusPositive),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

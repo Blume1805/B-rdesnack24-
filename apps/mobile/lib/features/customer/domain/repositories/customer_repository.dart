@@ -1,4 +1,5 @@
 import '../entities/customer_models.dart';
+import '../entities/donations_news.dart';
 import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
 import '../entities/product_detail.dart';
@@ -47,6 +48,19 @@ abstract interface class CustomerRepository {
   /// Produkt bewerten (1-5 Sterne).  Setzt oder aktualisiert die bestehende
   /// Bewertung des aktuellen Kunden.
   Future<void> rateProduct(String productId, int rating);
+
+  /// 5 % Netto-Umsatz wandern in einen Spendentopf. Diese Methoden geben die
+  /// kumulierte Spende des Kunden und die Aufschlüsselung je Kauf zurück.
+  Future<DonationSummary> myDonationSummary();
+  Future<List<PurchaseDonation>> myDonationsByPurchase();
+
+  /// Spendenempfänger + Abstimmung.
+  Future<List<DonationCause>> donationCauses();
+  Future<DonationCause> suggestDonationCause(String title, String? description);
+  Future<bool> voteDonationCause(String causeId);
+
+  /// News-Feed (veröffentlichte Artikel, jüngste zuerst).
+  Future<List<NewsArticle>> listNews({int limit = 20});
 
   Future<void> submitContact({
     required String category,

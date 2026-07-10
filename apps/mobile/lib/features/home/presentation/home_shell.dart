@@ -8,8 +8,10 @@ import '../../../../core/widgets/design_system/loyalty_meter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
+import '../../customer/presentation/screens/donations_screen.dart';
 import '../../finance/presentation/screens/finance_screen.dart';
 import '../../management/presentation/management_screen.dart';
 
@@ -196,6 +198,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        if (isCustomer) const _DonationChip(),
+        if (isCustomer) const SizedBox(width: AppSpacing.s2),
         IconButton(
           tooltip: AppLocalizations.of(context).signOut,
           icon: const Icon(Icons.logout, size: 22, color: AppColors.onDark),
@@ -203,6 +207,69 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
         const SizedBox(width: AppSpacing.s2),
       ],
+    );
+  }
+}
+
+/// Kleiner Chip im Header, der die kumulierte Spende des Kunden anzeigt.
+/// Klick öffnet den Spenden-Screen (eigener Beitrag + Abstimmung).
+class _DonationChip extends ConsumerWidget {
+  const _DonationChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(myDonationSummaryProvider).valueOrNull;
+    final amount = summary?.totalDonated ?? 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Material(
+        color: AppColors.brand,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const DonationsScreen(),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s3, vertical: 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.volunteer_activism,
+                    color: AppColors.ink, size: 18),
+                const SizedBox(width: 6),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Meine Spende',
+                      style: AppTypography.body(
+                        size: 9,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ).copyWith(letterSpacing: 0.3, height: 1),
+                    ),
+                    Text(
+                      Formatters.euro(amount),
+                      style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ).copyWith(height: 1.1),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

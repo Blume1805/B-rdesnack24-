@@ -113,6 +113,46 @@ class CustomerRemoteDataSource {
     return const [];
   }
 
+  // Spenden + News --------------------------------------------------------
+
+  Future<Map<String, dynamic>?> myDonationSummary() async {
+    final row = await _client.rpc('my_donation_summary').maybeSingle();
+    return row as Map<String, dynamic>?;
+  }
+
+  Future<List<Map<String, dynamic>>> myDonationsByPurchase() async {
+    final rows = await _client.rpc('my_donations_by_purchase');
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<List<Map<String, dynamic>>> donationCauses() async {
+    final rows = await _client.rpc('donation_causes_list');
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<Map<String, dynamic>> suggestDonationCause(
+      String title, String? description) async {
+    final row = await _client.rpc(
+      'suggest_donation_cause',
+      params: {'p_title': title, 'p_description': description},
+    ).single();
+    return row as Map<String, dynamic>;
+  }
+
+  Future<bool> voteDonationCause(String causeId) async {
+    final res =
+        await _client.rpc('vote_donation_cause', params: {'p_cause_id': causeId});
+    return (res as bool?) ?? false;
+  }
+
+  Future<List<Map<String, dynamic>>> listNews({int limit = 20}) async {
+    final rows = await _client.rpc('list_news', params: {'p_limit': limit});
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
   Future<Map<String, dynamic>?> productDetail(String productId) async {
     final rows = await _client.rpc(
       'product_detail',

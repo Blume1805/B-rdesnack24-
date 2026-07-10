@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../domain/entities/donations_news.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
+import 'news_screen.dart';
 import 'product_detail_screen.dart';
 
 class OffersTab extends ConsumerWidget {
@@ -40,6 +43,10 @@ class OffersTab extends ConsumerWidget {
           AppSpacing.s8,
         ),
         children: [
+          // ── News-Teaser (klick öffnet Feed) ─────────────────────────
+          const _NewsTeaser(),
+          const SizedBox(height: AppSpacing.s6),
+
           // ── Eure Favoriten (Top 3 pro Kategorie) ────────────────────
           const SectionHeader(
             eyebrow: 'Bewertet von der Community',
@@ -1181,3 +1188,128 @@ final offerActivationActionsProvider = StateNotifierProvider.autoDispose<
     OfferActivationActions, AsyncValue<void>>(
   (ref) => OfferActivationActions(ref),
 );
+
+/// News-Vorschau auf der Kunden-Startseite. Zeigt bis zu 2 aktuelle
+/// Beiträge im Titel-/Datums-Format und einen „Alle Beiträge lesen"-Button
+/// zur vollständigen News-Übersicht.
+class _NewsTeaser extends ConsumerWidget {
+  const _NewsTeaser();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final news = ref.watch(newsProvider);
+    void openAll() {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const NewsScreen()),
+      );
+    }
+
+    return news.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (list) {
+        if (list.isEmpty) return const SizedBox.shrink();
+        final preview = list.take(2).toList();
+        return AppCard(
+          padding: EdgeInsets.zero,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+              onTap: openAll,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.s4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.brand,
+                            borderRadius:
+                                BorderRadius.circular(AppRadii.sm),
+                          ),
+                          child: const Icon(Icons.campaign,
+                              color: AppColors.ink, size: 18),
+                        ),
+                        const SizedBox(width: AppSpacing.s2),
+                        Expanded(
+                          child: Text(
+                            'News',
+                            style: AppTypography.display(
+                              size: 20,
+                              weight: FontWeight.w800,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward,
+                            color: AppColors.brand),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.s3),
+                    for (final n in preview) ...[
+                      _NewsPreviewRow(article: n),
+                      if (n != preview.last) ...[
+                        const SizedBox(height: 8),
+                        const Divider(
+                            height: 1, color: AppColors.borderSubtle),
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                    const SizedBox(height: AppSpacing.s3),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'Alle Beiträge lesen →',
+                        style: AppTypography.body(
+                          size: 13,
+                          weight: FontWeight.w800,
+                          color: AppColors.brand,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _NewsPreviewRow extends StatelessWidget {
+  const _NewsPreviewRow({required this.article});
+  final NewsArticle article;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          Formatters.date(article.publishedAt),
+          style: AppTypography.body(
+            size: 11,
+            weight: FontWeight.w700,
+            color: AppColors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          article.title,
+          style: AppTypography.body(
+            size: 15,
+            weight: FontWeight.w800,
+            color: AppColors.ink,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}

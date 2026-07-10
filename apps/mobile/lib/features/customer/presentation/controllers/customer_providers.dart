@@ -4,6 +4,7 @@ import '../../../../core/di/providers.dart';
 import '../../data/customer_remote_data_source.dart';
 import '../../data/customer_repository_impl.dart';
 import '../../domain/entities/customer_models.dart';
+import '../../domain/entities/donations_news.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
@@ -98,4 +99,25 @@ class PersonalOfferActions extends StateNotifier<AsyncValue<void>> {
 final personalOfferActionsProvider =
     StateNotifierProvider.autoDispose<PersonalOfferActions, AsyncValue<void>>(
   (ref) => PersonalOfferActions(ref),
+);
+
+// ── Spenden + News ───────────────────────────────────────────────────
+
+final myDonationSummaryProvider =
+    FutureProvider.autoDispose<DonationSummary>(
+  (ref) => ref.watch(customerRepositoryProvider).myDonationSummary(),
+);
+
+final myDonationsByPurchaseProvider =
+    FutureProvider.autoDispose<List<PurchaseDonation>>(
+  (ref) => ref.watch(customerRepositoryProvider).myDonationsByPurchase(),
+);
+
+final donationCausesProvider =
+    FutureProvider.autoDispose<List<DonationCause>>(
+  (ref) => ref.watch(customerRepositoryProvider).donationCauses(),
+);
+
+final newsProvider = FutureProvider.autoDispose<List<NewsArticle>>(
+  (ref) => ref.watch(customerRepositoryProvider).listNews(),
 );
