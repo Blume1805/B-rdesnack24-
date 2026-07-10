@@ -77,6 +77,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 
+  /// Baut ein Label mit schwarzem Stern („*") für Pflichtfelder.
+  /// Der Rest des Labels erbt die normale Farbe des Formulars.
+  Widget _requiredLabel(String text) {
+    return Text.rich(
+      TextSpan(
+        text: text,
+        children: const [
+          TextSpan(
+            text: ' *',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     setState(() => _triedSubmit = true);
     final l10n = AppLocalizations.of(context);
@@ -100,9 +116,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    // Bei Unternehmer: Anschrift + Steuernummer sind Pflicht.
+    // Bei Unternehmer: Firmenname + Anschrift + Steuernummer sind Pflicht.
     if (_customerType == 'business') {
       final missing = <String>[];
+      if (_companyCtrl.text.trim().isEmpty) missing.add('Firmenname');
       if (_streetCtrl.text.trim().isEmpty) missing.add('Straße + Hausnr.');
       if (_zipCtrl.text.trim().isEmpty) missing.add('PLZ');
       if (_cityCtrl.text.trim().isEmpty) missing.add('Ort');
@@ -230,7 +247,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onTap: _pickBirthDate,
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        labelText: 'Geburtsdatum',
+                        label: _requiredLabel('Geburtsdatum'),
                         prefixIcon: const Icon(Icons.cake_outlined, size: 20),
                         errorText: _triedSubmit && _birthDate == null
                             ? 'Bitte Geburtsdatum wählen'
@@ -245,7 +262,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(labelText: l10n.email),
+                    decoration:
+                        InputDecoration(label: _requiredLabel(l10n.email)),
                     validator: (v) => switch (Validators.email(v)) {
                       'required' => l10n.fieldRequired,
                       'invalid' => l10n.emailInvalid,
@@ -256,7 +274,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     controller: _passwordCtrl,
                     obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.password),
+                    decoration:
+                        InputDecoration(label: _requiredLabel(l10n.password)),
                     validator: (v) => switch (Validators.password(v)) {
                       'required' => l10n.fieldRequired,
                       'tooShort' => l10n.passwordTooShort,
@@ -268,8 +287,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     controller: _confirmCtrl,
                     obscureText: true,
-                    decoration:
-                        InputDecoration(labelText: l10n.confirmPassword),
+                    decoration: InputDecoration(
+                        label: _requiredLabel(l10n.confirmPassword)),
                     onFieldSubmitted: (_) => _submit(),
                   ),
                   if (_customerType == 'business') ...[
@@ -283,18 +302,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _companyCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Firmenname (optional)',
-                        prefixIcon: Icon(Icons.business_outlined),
+                      decoration: InputDecoration(
+                        label: _requiredLabel('Firmenname'),
+                        prefixIcon: const Icon(Icons.business_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _streetCtrl,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Straße + Hausnr.',
-                        prefixIcon: Icon(Icons.location_on_outlined),
+                      decoration: InputDecoration(
+                        label: _requiredLabel('Straße + Hausnr.'),
+                        prefixIcon: const Icon(Icons.location_on_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -305,7 +324,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _zipCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'PLZ'),
+                            decoration:
+                                InputDecoration(label: _requiredLabel('PLZ')),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -313,7 +333,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: TextFormField(
                             controller: _cityCtrl,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(labelText: 'Ort'),
+                            decoration:
+                                InputDecoration(label: _requiredLabel('Ort')),
                           ),
                         ),
                       ],
@@ -321,18 +342,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _countryCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Land (ISO-Code, z. B. DE)',
+                      decoration: InputDecoration(
+                        label: _requiredLabel('Land (ISO-Code, z. B. DE)'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _taxNumberCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Steuernummer',
-                        prefixIcon: Icon(Icons.receipt_long_outlined),
+                      decoration: InputDecoration(
+                        label: _requiredLabel('Steuernummer'),
+                        prefixIcon: const Icon(Icons.receipt_long_outlined),
                         helperText:
-                            'z. B. 102/178/01635 — Pflicht für § 14 UStG',
+                            'z. B. 102/178/01635 — Pflicht für Vorsteuerabzug § 15 UStG',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -342,8 +363,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       decoration: const InputDecoration(
                         labelText: 'USt-IdNr. (optional)',
                         prefixIcon: Icon(Icons.badge_outlined),
-                        helperText:
-                            'z. B. DE123456789 — für Vorsteuerabzug § 15',
+                        helperText: 'z. B. DE123456789',
                       ),
                     ),
                     const SizedBox(height: 8),
