@@ -5,6 +5,7 @@ import '../../theme/app_typography.dart';
 import '../../utils/formatters.dart';
 import 'brand_marks.dart';
 import 'product_image.dart';
+import 'rating_stars.dart';
 
 /// Angebots-Karte im Bördesnack24-Style (Layout wie in gängigen Handels-Apps,
 /// aber komplett im Designsystem):
@@ -33,6 +34,8 @@ class OfferCard extends StatelessWidget {
     this.onTap,
     this.width = 260,
     this.footer,
+    this.rating,
+    this.reviewCount,
   });
 
   final String title;
@@ -44,8 +47,13 @@ class OfferCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double width;
 
-  /// Optionaler Footer (z. B. Aktions-Button, „Aktiviert"-Chip).
+  /// Optionaler Footer (z. B. Aktivieren-Button, „Aktiviert"-Chip).
   final Widget? footer;
+
+  /// Optionales Rating — wenn > 0 gesetzt, wird eine Sternchen-Zeile
+  /// unter dem Titel eingeblendet („★ 4,3 (127)").
+  final double? rating;
+  final int? reviewCount;
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +155,7 @@ class OfferCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Titel + optionaler Footer
+                // Titel + Rating + optionaler Footer
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.s3,
@@ -168,6 +176,14 @@ class OfferCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (rating != null && rating! > 0) ...[
+                        const SizedBox(height: 4),
+                        RatingStars(
+                          rating: rating!,
+                          count: reviewCount ?? 0,
+                          size: 13,
+                        ),
+                      ],
                       if (footer != null) ...[
                         const SizedBox(height: AppSpacing.s3),
                         footer!,

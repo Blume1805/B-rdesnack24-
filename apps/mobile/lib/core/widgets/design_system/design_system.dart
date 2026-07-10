@@ -11,5 +11,6 @@ export 'module_tile.dart';
 export 'offer_card.dart';
 export 'price_row.dart';
 export 'product_image.dart';
+export 'rating_stars.dart';
 export 'section_header.dart';
 export 'status_badge.dart';

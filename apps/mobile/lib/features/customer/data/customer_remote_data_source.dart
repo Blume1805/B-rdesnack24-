@@ -11,7 +11,7 @@ class CustomerRemoteDataSource {
     final rows = await _client
         .from('offers')
         .select(
-          'id, title, description, kind, valid_to, image_url, '
+          'id, title, description, kind, valid_to, image_url, product_id, '
           'regular_price_net, offer_price_net, discount_percent',
         )
         .eq('status', 'active')
@@ -58,6 +58,61 @@ class CustomerRemoteDataSource {
       params: {'p_code': code.trim()},
     ).single();
     return row as Map<String, dynamic>;
+  }
+
+  // Coupon-Aktivierung ------------------------------------------------------
+
+  Future<void> activateWeeklyOffer(String offerId) async {
+    await _client.rpc('activate_offer', params: {'p_offer_id': offerId});
+  }
+
+  Future<void> activatePersonalOffer(String personalOfferId) async {
+    await _client.rpc('activate_personal_offer',
+        params: {'p_offer_id': personalOfferId});
+  }
+
+  Future<List<String>> myActivatedOfferIds() async {
+    if (_uid == null) return const [];
+    final rows = await _client
+        .from('offer_activations')
+        .select('offer_id')
+        .eq('customer_id', _uid!)
+        .filter('redeemed_at', 'is', null);
+    return (rows as List)
+        .map((r) => (r as Map<String, dynamic>)['offer_id'] as String)
+        .toList();
+  }
+
+  // Ratings + Top-Produkte + Detail -------------------------------------
+
+  Future<void> rateProduct(String productId, int rating) async {
+    await _client.rpc('rate_product', params: {
+      'p_product_id': productId,
+      'p_rating': rating,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> topProductsByCategory(
+    String category, {
+    int limit = 3,
+  }) async {
+    final rows = await _client.rpc(
+      'top_products_by_category',
+      params: {'p_category': category, 'p_limit': limit},
+    );
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<Map<String, dynamic>?> productDetail(String productId) async {
+    final rows = await _client.rpc(
+      'product_detail',
+      params: {'p_product_id': productId},
+    );
+    if (rows is List && rows.isNotEmpty) {
+      return Map<String, dynamic>.from(rows.first as Map);
+    }
+    return null;
   }
 
   Future<List<Map<String, dynamic>>> myPrices() async {

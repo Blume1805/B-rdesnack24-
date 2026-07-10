@@ -6,6 +6,7 @@ import '../../data/customer_repository_impl.dart';
 import '../../domain/entities/customer_models.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
+import '../../domain/entities/product_detail.dart';
 import '../../domain/repositories/customer_repository.dart';
 
 final customerRepositoryProvider = Provider<CustomerRepository>(
@@ -53,6 +54,25 @@ final myPersonalOffersProvider =
 
 final myLoyaltyStatusProvider = FutureProvider.autoDispose<LoyaltyStatus?>(
   (ref) => ref.watch(customerRepositoryProvider).myLoyaltyStatus(),
+);
+
+/// IDs der aktivierten Wochenangebote — für „Aktiviert ✓"-Chip auf der Karte.
+final activatedOfferIdsProvider = FutureProvider.autoDispose<Set<String>>(
+  (ref) => ref.watch(customerRepositoryProvider).myActivatedWeeklyOfferIds(),
+);
+
+/// Eure Favoriten — Top-3 pro Kategorie.
+final topProductsProvider =
+    FutureProvider.autoDispose.family<List<RankedProduct>, String>(
+  (ref, category) =>
+      ref.watch(customerRepositoryProvider).topProducts(category, limit: 3),
+);
+
+/// Produkt-Detail (Nährwerte, Allergene, Rating).
+final productDetailProvider =
+    FutureProvider.autoDispose.family<ProductDetail?, String>(
+  (ref, productId) =>
+      ref.watch(customerRepositoryProvider).productDetail(productId),
 );
 
 /// Aktionen rund um das persönliche Angebot: Einlösen per Zahlencode.

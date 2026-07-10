@@ -4,6 +4,7 @@ import '../../../core/error/failures.dart';
 import '../domain/entities/customer_models.dart';
 import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
+import '../domain/entities/product_detail.dart';
 import '../domain/repositories/customer_repository.dart';
 import 'customer_remote_data_source.dart';
 
@@ -64,6 +65,38 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<void> updateGender(String? gender) =>
       _guard(() => _remote.updateGender(gender));
+
+  @override
+  Future<void> activateWeeklyOffer(String offerId) =>
+      _guard(() => _remote.activateWeeklyOffer(offerId));
+
+  @override
+  Future<void> activatePersonalOffer(String personalOfferId) =>
+      _guard(() => _remote.activatePersonalOffer(personalOfferId));
+
+  @override
+  Future<Set<String>> myActivatedWeeklyOfferIds() => _guard(() async {
+        final ids = await _remote.myActivatedOfferIds();
+        return ids.toSet();
+      });
+
+  @override
+  Future<List<RankedProduct>> topProducts(String category, {int limit = 3}) =>
+      _guard(() async {
+        final rows =
+            await _remote.topProductsByCategory(category, limit: limit);
+        return rows.map(RankedProduct.fromJson).toList();
+      });
+
+  @override
+  Future<ProductDetail?> productDetail(String productId) => _guard(() async {
+        final row = await _remote.productDetail(productId);
+        return row == null ? null : ProductDetail.fromJson(row);
+      });
+
+  @override
+  Future<void> rateProduct(String productId, int rating) =>
+      _guard(() => _remote.rateProduct(productId, rating));
 
   @override
   Future<void> submitContact({

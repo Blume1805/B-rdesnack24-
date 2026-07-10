@@ -12,6 +12,7 @@ class Offer extends Equatable {
     this.description,
     this.validTo,
     this.imageUrl,
+    this.productId,
     this.regularPriceNet,
     this.offerPriceNet,
     this.discountPercent,
@@ -23,6 +24,11 @@ class Offer extends Equatable {
   final String? description;
   final DateTime? validTo;
   final String? imageUrl;
+
+  /// Referenz auf das Produkt, damit die Produkt-Detailseite geöffnet werden
+  /// kann (Nährwerte, Bewertungen).  Kann null sein, wenn das Angebot nicht
+  /// direkt an ein Produkt gekoppelt ist.
+  final String? productId;
 
   final double? regularPriceNet;
   final double? offerPriceNet;
@@ -39,6 +45,7 @@ class Offer extends Equatable {
             ? DateTime.tryParse(j['valid_to'].toString())
             : null,
         imageUrl: j['image_url'] as String?,
+        productId: j['product_id'] as String?,
         regularPriceNet: (j['regular_price_net'] as num?)?.toDouble(),
         offerPriceNet: (j['offer_price_net'] as num?)?.toDouble(),
         discountPercent: (j['discount_percent'] as num?)?.toDouble(),
@@ -51,6 +58,7 @@ class Offer extends Equatable {
         kind,
         validTo,
         imageUrl,
+        productId,
         regularPriceNet,
         offerPriceNet,
         discountPercent,
@@ -97,6 +105,7 @@ class PersonalOffer extends Equatable {
     required this.validTo,
     required this.source,
     this.redeemedAt,
+    this.activatedAt,
     this.imageUrl,
   });
 
@@ -109,10 +118,12 @@ class PersonalOffer extends Equatable {
   final DateTime validFrom;
   final DateTime validTo;
   final DateTime? redeemedAt;
+  final DateTime? activatedAt;
   final String? imageUrl;
   final PersonalOfferSource source;
 
   bool get isRedeemed => redeemedAt != null;
+  bool get isActivated => activatedAt != null;
   bool get isExpired => DateTime.now().isAfter(validTo);
   bool get isActive => !isRedeemed && !isExpired;
   bool get isSpecial =>
@@ -132,6 +143,9 @@ class PersonalOffer extends Equatable {
             DateTime.now(),
         redeemedAt: j['redeemed_at'] != null
             ? DateTime.tryParse(j['redeemed_at'].toString())
+            : null,
+        activatedAt: j['activated_at'] != null
+            ? DateTime.tryParse(j['activated_at'].toString())
             : null,
         imageUrl: j['image_url'] as String?,
         source: PersonalOfferSource.fromString(j['source'] as String?),

@@ -1,6 +1,7 @@
 import '../entities/customer_models.dart';
 import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
+import '../entities/product_detail.dart';
 
 abstract interface class CustomerRepository {
   Future<List<Offer>> offers();
@@ -27,6 +28,23 @@ abstract interface class CustomerRepository {
 
   /// Setzt/aktualisiert das Geschlecht (m|w|d|null).
   Future<void> updateGender(String? gender);
+
+  /// Coupon-Aktivierung — Kunde muss ein Angebot aktivieren, bevor der
+  /// Automat es beim Einlösen akzeptiert.
+  Future<void> activateWeeklyOffer(String offerId);
+  Future<void> activatePersonalOffer(String personalOfferId);
+  Future<Set<String>> myActivatedWeeklyOfferIds();
+
+  /// Top-3 pro Kategorie (Getränke, Snacks, Eis) — sortiert nach
+  /// Durchschnittsbewertung und Reviewanzahl.
+  Future<List<RankedProduct>> topProducts(String category, {int limit = 3});
+
+  /// Produkt-Detailansicht inkl. Nährwerte, Allergene und meiner Bewertung.
+  Future<ProductDetail?> productDetail(String productId);
+
+  /// Produkt bewerten (1-5 Sterne).  Setzt oder aktualisiert die bestehende
+  /// Bewertung des aktuellen Kunden.
+  Future<void> rateProduct(String productId, int rating);
 
   Future<void> submitContact({
     required String category,

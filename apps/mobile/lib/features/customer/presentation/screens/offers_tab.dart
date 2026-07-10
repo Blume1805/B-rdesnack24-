@@ -7,7 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
+import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
+import 'product_detail_screen.dart';
 
 class OffersTab extends ConsumerWidget {
   const OffersTab({super.key});
@@ -23,7 +25,11 @@ class OffersTab extends ConsumerWidget {
         ref
           ..invalidate(offersProvider)
           ..invalidate(myPersonalOffersProvider)
-          ..invalidate(myLoyaltyStatusProvider);
+          ..invalidate(myLoyaltyStatusProvider)
+          ..invalidate(activatedOfferIdsProvider)
+          ..invalidate(topProductsProvider('Getränke'))
+          ..invalidate(topProductsProvider('Snacks'))
+          ..invalidate(topProductsProvider('Eis'));
       },
       color: AppColors.brand,
       child: ListView(
@@ -34,6 +40,19 @@ class OffersTab extends ConsumerWidget {
           AppSpacing.s8,
         ),
         children: [
+          // ── Eure Favoriten (Top 3 pro Kategorie) ────────────────────
+          const SectionHeader(
+            eyebrow: 'Bewertet von der Community',
+            title: 'Eure Favoriten',
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Getränke'),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Snacks'),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Eis'),
+          const SizedBox(height: AppSpacing.s6),
+
           // ── Loyalty-Fortschritt ─────────────────────────────────────
           loyalty.when(
             loading: () => const SizedBox.shrink(),
@@ -138,24 +157,13 @@ class OffersTab extends ConsumerWidget {
               }
               // Horizontales Scrollen wie in gängigen Handels-Apps.
               return SizedBox(
-                height: 380,
+                height: 440,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: list.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(width: AppSpacing.s3),
-                  itemBuilder: (context, i) {
-                    final o = list[i];
-                    return OfferCard(
-                      title: o.title,
-                      regularPrice: o.regularPriceNet ?? 0,
-                      offerPrice: o.offerPriceNet ?? 0,
-                      discountPercent: o.discountPercent ?? 10,
-                      imageUrl: o.imageUrl,
-                      validUntil: o.validTo,
-                      width: 260,
-                    );
-                  },
+                  itemBuilder: (context, i) => _WeeklyOfferSlot(offer: list[i]),
                 ),
               );
             },
@@ -317,62 +325,7 @@ class _PersonalOfferCard extends ConsumerWidget {
               ],
             ),
           ),
-          Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF14110E),
-              border: Border(
-                top: BorderSide(color: AppColors.brand, width: 1),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s5,
-              vertical: AppSpacing.s4,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Einlöse-Code',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w700,
-                          color: AppColors.brand,
-                        ).copyWith(letterSpacing: 0.6),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatCode(offer.redemptionCode),
-                        style: AppTypography.display(
-                          size: 28,
-                          weight: FontWeight.w800,
-                          color: AppColors.onDark,
-                        ).copyWith(letterSpacing: 3),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Code kopieren',
-                  icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
-                  onPressed: () async {
-                    await Clipboard.setData(
-                        ClipboardData(text: offer.redemptionCode));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Code kopiert.')),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(width: 4),
-                _RedeemButton(code: offer.redemptionCode),
-              ],
-            ),
-          ),
+          _PersonalActivationFooter(offer: offer),
         ],
       ),
     );
@@ -380,6 +333,128 @@ class _PersonalOfferCard extends ConsumerWidget {
 
   static String _formatCode(String c) =>
       c.length == 6 ? '${c.substring(0, 3)} ${c.substring(3)}' : c;
+}
+
+/// Footer der PersonalOfferCard: Vor Aktivierung nur Aktivieren-Button;
+/// nach Aktivierung erscheint der Einlöse-Code und der Einlösen-Button.
+class _PersonalActivationFooter extends ConsumerWidget {
+  const _PersonalActivationFooter({required this.offer});
+  final PersonalOffer offer;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final busy = ref.watch(offerActivationActionsProvider).isLoading;
+
+    if (!offer.isActivated) {
+      return Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF14110E),
+          border: Border(top: BorderSide(color: AppColors.brand, width: 1)),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s5,
+          vertical: AppSpacing.s4,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Aktiviere den Coupon, um am Automaten einzulösen.',
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w700,
+                  color: AppColors.brandLight,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s3),
+            FilledButton.icon(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      await ref
+                          .read(offerActivationActionsProvider.notifier)
+                          .activatePersonal(offer.id);
+                      ref.invalidate(myPersonalOffersProvider);
+                    },
+              icon: busy
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.ink,
+                      ),
+                    )
+                  : const Icon(Icons.add_circle_outline, size: 18),
+              label: const Text('Aktivieren'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brand,
+                foregroundColor: AppColors.ink,
+                textStyle:
+                    AppTypography.body(size: 13, weight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF14110E),
+        border: Border(top: BorderSide(color: AppColors.brand, width: 1)),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s5,
+        vertical: AppSpacing.s4,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Einlöse-Code',
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w700,
+                    color: AppColors.brand,
+                  ).copyWith(letterSpacing: 0.6),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _PersonalOfferCard._formatCode(offer.redemptionCode),
+                  style: AppTypography.display(
+                    size: 28,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ).copyWith(letterSpacing: 3),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Code kopieren',
+            icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
+            onPressed: () async {
+              await Clipboard.setData(
+                  ClipboardData(text: offer.redemptionCode));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Code kopiert.')),
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 4),
+          _RedeemButton(code: offer.redemptionCode),
+        ],
+      ),
+    );
+  }
 }
 
 class _RedeemButton extends ConsumerWidget {
@@ -716,3 +791,295 @@ class _MilestoneChip extends StatelessWidget {
     );
   }
 }
+
+/// Wochenangebots-Slot mit Rating, Aktivieren-Button und Tap→Produkt-Detail.
+class _WeeklyOfferSlot extends ConsumerWidget {
+  const _WeeklyOfferSlot({required this.offer});
+  final Offer offer;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activatedIds = ref.watch(activatedOfferIdsProvider).valueOrNull ?? const <String>{};
+    final activated = activatedIds.contains(offer.id);
+    final busy = ref.watch(offerActivationActionsProvider).isLoading;
+    final ratingSummary =
+        offer.productId == null ? null : ref.watch(productDetailProvider(offer.productId!)).valueOrNull;
+
+    Future<void> openDetail() async {
+      if (offer.productId == null) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(productId: offer.productId!),
+        ),
+      );
+    }
+
+    return OfferCard(
+      title: offer.title,
+      regularPrice: offer.regularPriceNet ?? 0,
+      offerPrice: offer.offerPriceNet ?? 0,
+      discountPercent: offer.discountPercent ?? 10,
+      imageUrl: offer.imageUrl,
+      validUntil: offer.validTo,
+      width: 260,
+      onTap: offer.productId == null ? null : openDetail,
+      rating: ratingSummary?.avgRating,
+      reviewCount: ratingSummary?.reviewCount,
+      footer: _ActivationButton(
+        activated: activated,
+        busy: busy,
+        onActivate: () async {
+          await ref
+              .read(offerActivationActionsProvider.notifier)
+              .activateWeekly(offer.id);
+          ref.invalidate(activatedOfferIdsProvider);
+        },
+      ),
+    );
+  }
+}
+
+/// Aktivieren-Button (wird zu „Aktiviert ✓"-Chip nach Klick).
+class _ActivationButton extends StatelessWidget {
+  const _ActivationButton({
+    required this.activated,
+    required this.busy,
+    required this.onActivate,
+  });
+  final bool activated;
+  final bool busy;
+  final Future<void> Function() onActivate;
+
+  @override
+  Widget build(BuildContext context) {
+    if (activated) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s3, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.brandLight,
+          border: Border.all(color: AppColors.brand),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: AppColors.ink, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'Aktiviert',
+              style: AppTypography.body(
+                size: 13,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: busy ? null : onActivate,
+        icon: busy
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: AppColors.ink),
+              )
+            : const Icon(Icons.add_circle_outline, size: 18),
+        label: const Text('Aktivieren'),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.brand,
+          foregroundColor: AppColors.ink,
+          textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
+        ),
+      ),
+    );
+  }
+}
+
+/// Eure-Favoriten-Sektion pro Kategorie — Top 3 als horizontaler Slider.
+class _FavoritesSection extends ConsumerWidget {
+  const _FavoritesSection({required this.category});
+  final String category;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final top = ref.watch(topProductsProvider(category));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(_iconFor(category), size: 18, color: AppColors.brand),
+            const SizedBox(width: 6),
+            Text(
+              category,
+              style: AppTypography.body(
+                size: 16,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s2),
+        top.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
+            child:
+                Center(child: CircularProgressIndicator(color: AppColors.brand)),
+          ),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (list) => list.isEmpty
+              ? AppCard(
+                  color: AppColors.surfaceAlt,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s4, vertical: AppSpacing.s3),
+                  child: Text(
+                    'Noch keine Bewertungen in dieser Kategorie.',
+                    style: AppTypography.body(
+                        size: 13, color: AppColors.textMuted),
+                  ),
+                )
+              : SizedBox(
+                  height: 220,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: list.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: AppSpacing.s3),
+                    itemBuilder: (context, i) => _FavoriteCard(
+                      product: list[i],
+                      rank: i + 1,
+                    ),
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  IconData _iconFor(String c) => switch (c) {
+        'Getränke' => Icons.local_drink_outlined,
+        'Snacks' => Icons.cookie_outlined,
+        'Eis' => Icons.icecream_outlined,
+        _ => Icons.category_outlined,
+      };
+}
+
+class _FavoriteCard extends StatelessWidget {
+  const _FavoriteCard({required this.product, required this.rank});
+  final int rank;
+  final RankedProduct product;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 180,
+      child: AppCard(
+        padding: EdgeInsets.zero,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(productId: product.id),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: ProductImage.expand(
+                    imageUrl: product.imageUrl,
+                    productName: product.name,
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: AppColors.brand,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$rank',
+                      style: AppTypography.display(
+                        size: 16,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.s3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: AppTypography.body(
+                      size: 13,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  RatingStars(
+                    rating: product.avgRating,
+                    count: product.reviewCount,
+                    size: 12,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Aktivierungs-Aktionen (StateNotifier) — für Loading-State beim Klick.
+class OfferActivationActions extends StateNotifier<AsyncValue<void>> {
+  OfferActivationActions(this._ref) : super(const AsyncData(null));
+  final Ref _ref;
+
+  Future<void> activateWeekly(String id) async {
+    state = const AsyncLoading();
+    try {
+      await _ref.read(customerRepositoryProvider).activateWeeklyOffer(id);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> activatePersonal(String id) async {
+    state = const AsyncLoading();
+    try {
+      await _ref.read(customerRepositoryProvider).activatePersonalOffer(id);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+final offerActivationActionsProvider = StateNotifierProvider.autoDispose<
+    OfferActivationActions, AsyncValue<void>>(
+  (ref) => OfferActivationActions(ref),
+);
