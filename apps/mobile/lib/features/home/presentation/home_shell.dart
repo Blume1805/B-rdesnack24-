@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -104,7 +105,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback onSignOut;
 
   @override
-  Size get preferredSize => const Size.fromHeight(88);
+  Size get preferredSize => const Size.fromHeight(108);
 
   // Rollen-Labels für die UI: intern bleiben shareholder und employee als
   // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
@@ -131,8 +132,11 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       customerNumber = row?['customer_number'] as String?;
     }
 
-    // Ganzen Header wie eine „Mein Konto"-Card gestalten:
-    // Ink-Hintergrund, Gold-Label, Avatar mit Anfangsbuchstaben.
+    // Kunden bekommen einen 3-Spalten-Header (Anrede + Markenbild + Bell/
+    // Spende); interne Nutzer den alten „Mein Konto"-Card-Header.
+    if (isCustomer) {
+      return _customerHeader(context, customerNumber);
+    }
     return AppBar(
       toolbarHeight: 88,
       backgroundColor: AppColors.ink,
@@ -143,7 +147,6 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Marken-Icon in Gold-Kachel — für alle Rollen inkl. Kunde.
           Container(
             width: 48,
             height: 48,
@@ -162,7 +165,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  isCustomer ? 'Willkommen' : _roleLabel(user.role),
+                  _roleLabel(user.role),
                   style: AppTypography.body(
                     size: 13,
                     weight: FontWeight.w800,
@@ -171,9 +174,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  isCustomer
-                      ? 'Hallo ${_firstName(user.fullName) ?? user.email}'
-                      : (user.fullName ?? user.email),
+                  user.fullName ?? user.email,
                   style: AppTypography.display(
                     size: 20,
                     weight: FontWeight.w800,
@@ -182,44 +183,117 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (customerNumber != null)
-                  Text(
-                    'Kd.-Nr. $customerNumber',
-                    style: AppTypography.body(
-                      size: 12,
-                      weight: FontWeight.w700,
-                      color: AppColors.brandLight,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  )
-                else
-                  Text(
-                    user.email,
-                    style: AppTypography.body(
-                      size: 12,
-                      weight: FontWeight.w600,
-                      color: AppColors.brandLight,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                Text(
+                  user.email,
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    color: AppColors.brandLight,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
         ],
       ),
       actions: [
-        if (isCustomer) const _NotificationBell(),
-        if (isCustomer) const SizedBox(width: 4),
-        if (isCustomer) const _DonationChip(),
-        if (isCustomer) const SizedBox(width: AppSpacing.s2),
         IconButton(
           tooltip: AppLocalizations.of(context).signOut,
           icon: const Icon(Icons.logout, size: 22, color: AppColors.onDark),
           onPressed: onSignOut,
         ),
         const SizedBox(width: AppSpacing.s2),
+      ],
+    );
+  }
+
+  /// Header für Kunden im 3-Spalten-Layout:
+  /// • Links: „Hallo Philipp" in handschriftlicher Skript-Schrift (Caveat),
+  ///   darunter die Kundennummer.
+  /// • Mitte: Marken-Kachel mit Automaten-Icon (später Bördekreis-Kartenumriss).
+  /// • Rechts: Notification-Bell oben, Spendenchip darunter.
+  Widget _customerHeader(BuildContext context, String? customerNumber) {
+    final firstName = _firstName(user.fullName) ?? '';
+    final hello = firstName.isEmpty ? 'Hallo' : 'Hallo $firstName';
+    return AppBar(
+      toolbarHeight: 108,
+      backgroundColor: AppColors.ink,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      automaticallyImplyLeading: false,
+      iconTheme: const IconThemeData(color: AppColors.onDark),
+      titleSpacing: 0,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Links: Skript-Anrede + Kd.-Nr.
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    hello,
+                    style: GoogleFonts.caveat(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onDark,
+                      height: 1.05,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  if (customerNumber != null)
+                    Text(
+                      'Kd.-Nr. $customerNumber',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w700,
+                        color: AppColors.brandLight,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            // Mitte: Marken-Kachel (Automat + geplante Bördekreis-Kartenkontur)
+            Container(
+              width: 68,
+              height: 68,
+              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.brand,
+                borderRadius: BorderRadius.circular(AppRadii.md),
+              ),
+              child: const BrandIcon(size: 56, color: AppColors.ink),
+            ),
+            // Rechts: Bell + Spendenchip untereinander
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: const [
+                _NotificationBell(),
+                SizedBox(height: 4),
+                _DonationChip(),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          tooltip: 'Abmelden',
+          icon: const Icon(Icons.logout, size: 20, color: AppColors.onDark),
+          onPressed: onSignOut,
+        ),
       ],
     );
   }
@@ -234,12 +308,10 @@ class _DonationChip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(myDonationSummaryProvider).valueOrNull;
     final amount = summary?.totalDonated ?? 0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Material(
-        color: AppColors.brand,
-        borderRadius: BorderRadius.circular(AppRadii.pill),
-        child: InkWell(
+    return Material(
+      color: AppColors.brand,
+      borderRadius: BorderRadius.circular(AppRadii.pill),
+      child: InkWell(
           borderRadius: BorderRadius.circular(AppRadii.pill),
           onTap: () {
             Navigator.of(context).push(
@@ -283,7 +355,6 @@ class _DonationChip extends ConsumerWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -295,11 +366,9 @@ class _NotificationBell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unread =
         ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
           IconButton(
             tooltip: 'Benachrichtigungen',
             icon: const Icon(Icons.notifications_none,
@@ -336,7 +405,6 @@ class _NotificationBell extends ConsumerWidget {
               ),
             ),
         ],
-      ),
     );
   }
 }
