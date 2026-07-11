@@ -14,6 +14,7 @@ class MaintenanceScreen extends StatelessWidget {
       title: 'Wartung',
       table: 'maintenance_logs',
       dateCol: 'reported_at',
+      exportKind: 'maintenance',
       itemTitle: (r) => '${r['issue']}',
       itemSubtitle: (r) =>
           '${_short(r['reported_at'])}${r['resolved'] == true ? ' · erledigt' : ' · offen'}'

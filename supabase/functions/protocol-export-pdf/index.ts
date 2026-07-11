@@ -63,6 +63,42 @@ const PROTOCOLS: Record<string, ProtocolDef> = {
       { key: "topic", label: "Thema" },
     ],
   },
+  filling: {
+    table: "filling_logs",
+    dateCol: "filled_at",
+    title: "Befüllungsprotokoll",
+    columns: [
+      { key: "filled_at", label: "Zeitpunkt" },
+      { key: "machine_id", label: "Automat" },
+      { key: "product_id", label: "Produkt" },
+      { key: "quantity", label: "Menge" },
+      { key: "removed_spoiled", label: "Verderb" },
+    ],
+  },
+  maintenance: {
+    table: "maintenance_logs",
+    dateCol: "reported_at",
+    title: "Wartungsprotokoll",
+    columns: [
+      { key: "reported_at", label: "Zeitpunkt" },
+      { key: "machine_id", label: "Automat" },
+      { key: "issue", label: "Meldung" },
+      { key: "action", label: "Maßnahme" },
+      { key: "resolved", label: "Erledigt" },
+    ],
+  },
+  cash: {
+    table: "cash_collection_logs",
+    dateCol: "collected_at",
+    title: "Geldentnahmeprotokoll (§ 146 AO)",
+    columns: [
+      { key: "collected_at", label: "Zeitpunkt" },
+      { key: "machine_id", label: "Automat" },
+      { key: "amount_gross", label: "Brutto EUR" },
+      { key: "change_amount", label: "Wechselgeld" },
+      { key: "net_amount", label: "Netto EUR" },
+    ],
+  },
 };
 
 const fmt = (v: unknown): string => {

@@ -15,6 +15,7 @@ class FillingScreen extends StatelessWidget {
       title: 'Befüllung',
       table: 'filling_logs',
       dateCol: 'filled_at',
+      exportKind: 'filling',
       itemTitle: (r) => 'Menge: ${r['quantity']}'
           '${(r['removed_spoiled'] ?? 0) != 0 ? ' · Verderb: ${r['removed_spoiled']}' : ''}',
       itemSubtitle: (r) =>

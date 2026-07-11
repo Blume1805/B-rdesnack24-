@@ -14,6 +14,7 @@ class CashScreen extends StatelessWidget {
       title: 'Geldentnahme',
       table: 'cash_collection_logs',
       dateCol: 'collected_at',
+      exportKind: 'cash',
       itemTitle: (r) => 'Netto: ${r['net_amount']} €',
       itemSubtitle: (r) =>
           '${_short(r['collected_at'])} · Brutto ${r['amount_gross']} € · Wechselgeld ${r['change_amount']} €',
