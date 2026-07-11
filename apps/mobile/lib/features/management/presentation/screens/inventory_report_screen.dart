@@ -25,6 +25,7 @@ class _InventoryReportScreenState
   DateTime _to = DateTime.now();
   List<Map<String, dynamic>>? _rows;
   List<Map<String, dynamic>>? _summary;
+  List<Map<String, dynamic>>? _signatures;
   bool _busy = false;
   String? _error;
 
@@ -41,9 +42,11 @@ class _InventoryReportScreenState
           'p_to': _to.toUtc().toIso8601String(),
         }),
         client.rpc('inventory_summary_by_product'),
+        client.rpc('list_partner_signatures'),
       ]);
       _rows = (results[0] as List).cast<Map<String, dynamic>>();
       _summary = (results[1] as List).cast<Map<String, dynamic>>();
+      _signatures = (results[2] as List).cast<Map<String, dynamic>>();
     } catch (e) {
       _error = e.toString();
       _rows = null;
@@ -94,6 +97,7 @@ class _InventoryReportScreenState
               onPressed: () => printInventoryReport(
                 rows: _rows!,
                 summary: _summary ?? const [],
+                signatures: _signatures ?? const [],
                 from: _from,
                 to: _to,
               ),
@@ -181,6 +185,9 @@ class _InventoryReportScreenState
             const SizedBox(height: AppSpacing.s6),
             if (_summary != null && _summary!.isNotEmpty)
               _StockSummary(summary: _summary!),
+            const SizedBox(height: AppSpacing.s6),
+            if (_signatures != null && _signatures!.isNotEmpty)
+              _SignatureBlock(signatures: _signatures!),
           ],
         ],
       ),
@@ -487,4 +494,94 @@ class _ReportTable extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Unterschriften-Block: pro Gesellschafter Name + Datum + Signaturline
+/// (bzw. Bild, wenn image_url gesetzt). Erscheint unter allen Report-
+/// Tabellen als revisionssicherer Abschluss.
+class _SignatureBlock extends StatelessWidget {
+  const _SignatureBlock({required this.signatures});
+  final List<Map<String, dynamic>> signatures;
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.draw_outlined, color: AppColors.ink, size: 18),
+              SizedBox(width: 6),
+              Eyebrow('Freigabe / Unterschriften'),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          Wrap(
+            spacing: AppSpacing.s5,
+            runSpacing: AppSpacing.s4,
+            children: [
+              for (final s in signatures) _SignatureSlot(row: s),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SignatureSlot extends StatelessWidget {
+  const _SignatureSlot({required this.row});
+  final Map<String, dynamic> row;
+  @override
+  Widget build(BuildContext context) {
+    final name = row['full_name']?.toString() ?? '';
+    final role = row['role_label']?.toString() ?? '';
+    final image = row['image_url']?.toString();
+    return SizedBox(
+      width: 260,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            padding: const EdgeInsets.all(AppSpacing.s2),
+            alignment: Alignment.bottomLeft,
+            child: image != null && image.isNotEmpty
+                ? Image.network(image, fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const _Line())
+                : const _Line(),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            style: AppTypography.body(
+                size: 13,
+                weight: FontWeight.w800,
+                color: AppColors.ink),
+          ),
+          Text(
+            '$role · Datum: ${Formatters.date(DateTime.now())}',
+            style: AppTypography.body(
+                size: 11, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Line extends StatelessWidget {
+  const _Line();
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 1,
+        margin: const EdgeInsets.only(bottom: 2),
+        color: AppColors.ink,
+      );
 }

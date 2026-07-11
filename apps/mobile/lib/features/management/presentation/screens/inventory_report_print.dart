@@ -3,6 +3,7 @@
 Future<void> printInventoryReport({
   required List<Map<String, dynamic>> rows,
   required List<Map<String, dynamic>> summary,
+  required List<Map<String, dynamic>> signatures,
   required DateTime from,
   required DateTime to,
 }) async {

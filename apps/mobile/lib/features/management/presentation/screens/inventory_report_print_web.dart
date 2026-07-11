@@ -11,6 +11,7 @@ import '../../../../core/utils/formatters.dart';
 Future<void> printInventoryReport({
   required List<Map<String, dynamic>> rows,
   required List<Map<String, dynamic>> summary,
+  required List<Map<String, dynamic>> signatures,
   required DateTime from,
   required DateTime to,
 }) async {
@@ -115,7 +116,28 @@ Future<void> printInventoryReport({
   }
   summaryHtml.write('</tbody></table>');
 
+  // Signaturen-Block (Datum aktuell)
   final now = DateTime.now();
+  final signaturesHtml = StringBuffer();
+  if (signatures.isNotEmpty) {
+    signaturesHtml.write(
+        '<h2 style="page-break-before:always">Freigabe / Unterschriften</h2>');
+    signaturesHtml.write('<div class="sigrow">');
+    for (final s in signatures) {
+      final img = (s['image_url'] as String?) ?? '';
+      final name = _esc((s['full_name'] as String?) ?? '');
+      final role = _esc((s['role_label'] as String?) ?? '');
+      final content = img.isNotEmpty
+          ? '<img src="${_esc(img)}" alt="Signatur" class="sig-img">'
+          : '<div class="sig-line"></div>';
+      signaturesHtml.write('<div class="sig-slot">'
+          '<div class="sig-box">$content</div>'
+          '<div class="sig-name"><b>$name</b></div>'
+          '<div class="sig-meta">$role · Datum: ${Formatters.date(now)}</div>'
+          '</div>');
+    }
+    signaturesHtml.write('</div>');
+  }
   final doc = '''
 <!doctype html>
 <html lang="de"><head>
@@ -142,6 +164,15 @@ Future<void> printInventoryReport({
   .kpis { display: flex; gap: 24pt; margin: 6pt 0; font-size: 10pt; color: #14110E; }
   .kpis span b { font-size: 12pt; }
   .footer { color: #6f6a5b; font-size: 8pt; margin-top: 12pt; text-align: right; }
+  .sigrow { display: flex; flex-wrap: wrap; gap: 24pt; margin-top: 6pt; }
+  .sig-slot { width: 260px; }
+  .sig-box { height: 70px; border: 1pt solid #e6e0cc; border-radius: 6pt;
+             background: #FAF6ED; padding: 6pt; display: flex;
+             align-items: flex-end; }
+  .sig-line { height: 1pt; background: #14110E; width: 100%; margin-bottom: 3pt; }
+  .sig-img { max-height: 60px; max-width: 100%; object-fit: contain; }
+  .sig-name { margin-top: 4pt; font-size: 10pt; }
+  .sig-meta { color: #6f6a5b; font-size: 8pt; }
 </style>
 </head><body onload="window.print()"><div class="wrap">
   <div class="head">
@@ -156,6 +187,7 @@ Future<void> printInventoryReport({
   </div>
   $tables
   $summaryHtml
+  $signaturesHtml
   <div class="footer">
     Warenwert = Endbestand × Verkaufspreis netto. Bei MHD &lt; 7 Tagen
     wird ein 50 %-Abschlag angesetzt. Datenquellen: Nayax-Ingest

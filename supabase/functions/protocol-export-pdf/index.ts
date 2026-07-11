@@ -181,6 +181,27 @@ Deno.serve(async (req) => {
 
   page.drawText(`Eintraege: ${(rows ?? []).length}`, { x: 40, y: 30, size: 8, font, color: ink });
 
+  // Unterschriften-Block der Gesellschafter unten. Bei fehlendem Storage-Bild
+  // wird nur die Signatur-Linie und der Name gezeichnet — der Beleg wird
+  // handschriftlich unterzeichnet oder später mit dem aus DocuSign gezogenen
+  // Bild gefuellt.
+  const { data: sigs } = await caller.from("partner_signatures")
+    .select("full_name,role_label,image_url")
+    .order("sort_order", { ascending: true });
+  const sigY = 100;
+  const slotW = 250;
+  let sx = 40;
+  page.drawText("Freigabe / Unterschriften:", { x: 40, y: sigY + 40, size: 10, font: bold, color: ink });
+  const today = new Date().toISOString().substring(0, 10);
+  for (const s of (sigs ?? [])) {
+    page.drawLine({ start: { x: sx, y: sigY + 8 }, end: { x: sx + slotW - 30, y: sigY + 8 }, thickness: 0.5, color: ink });
+    const name = String((s as { full_name?: unknown }).full_name ?? "");
+    const role = String((s as { role_label?: unknown }).role_label ?? "");
+    page.drawText(name, { x: sx, y: sigY, size: 9, font: bold, color: ink });
+    page.drawText(`${role} · Datum: ${today}`, { x: sx, y: sigY - 10, size: 7, font, color: ink });
+    sx += slotW;
+  }
+
   const bytes = await pdf.save();
   return jsonResponse({
     filename: `${kind}_${from}_${to}.pdf`,
