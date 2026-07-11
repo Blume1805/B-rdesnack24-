@@ -1,6 +1,7 @@
 import '../entities/customer_models.dart';
 import '../entities/donations_news.dart';
 import '../entities/invoice.dart';
+import '../entities/notification.dart';
 import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
 import '../entities/product_detail.dart';
@@ -63,6 +64,12 @@ abstract interface class CustomerRepository {
 
   /// News-Feed (veröffentlichte Artikel, jüngste zuerst).
   Future<List<NewsArticle>> listNews({int limit = 20});
+
+  /// Notification-Center (News, persönliche Angebote, Coupons, Rechnungen).
+  Future<List<CustomerNotification>> myNotifications({int limit});
+  Future<int> unreadNotificationsCount();
+  Future<void> markNotificationRead(String key);
+  Future<void> markAllNotificationsRead();
 
   /// Rechnungen des aktuellen Unternehmer-Kunden.
   Future<List<Invoice>> myInvoices();

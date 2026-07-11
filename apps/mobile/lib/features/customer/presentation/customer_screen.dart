@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_tokens.dart';
+import 'screens/customer_qr_screen.dart';
 import 'screens/finder_tab.dart';
 import 'screens/history_tab.dart';
 import 'screens/offers_tab.dart';
+import 'screens/onboarding_stories.dart';
 import 'screens/profile_tab.dart';
 
-/// Kategorie 3 — Kundenbereich. Eigene untere Navigation (nur für Kunden sichtbar).
+/// Kategorie 3 — Kundenbereich. Eigene untere Navigation (nur für Kunden
+/// sichtbar) mit schwebendem QR-Kundenkarten-Button in der Mitte.
 class CustomerScreen extends ConsumerStatefulWidget {
   const CustomerScreen({super.key});
 
@@ -25,18 +29,119 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Onboarding-Stories beim ersten Öffnen zeigen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      maybeShowOnboardingStories(context);
+    });
+  }
+
+  void _openQr() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CustomerQrScreen()),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _index, children: _tabs),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.local_offer), label: 'Angebote'),
-          NavigationDestination(icon: Icon(Icons.place), label: 'Automaten'),
-          NavigationDestination(icon: Icon(Icons.history), label: 'Verlauf'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profil'),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openQr,
+        backgroundColor: AppColors.brand,
+        foregroundColor: AppColors.ink,
+        elevation: 4,
+        shape: const CircleBorder(),
+        tooltip: 'Kundenkarte',
+        child: const Icon(Icons.qr_code_2, size: 30),
+      ),
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: AppColors.surfaceCard,
+        elevation: 8,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        padding: EdgeInsets.zero,
+        child: SizedBox(
+          height: 62,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(
+                icon: Icons.local_offer_outlined,
+                selectedIcon: Icons.local_offer,
+                label: 'Angebote',
+                selected: _index == 0,
+                onTap: () => setState(() => _index = 0),
+              ),
+              _NavItem(
+                icon: Icons.place_outlined,
+                selectedIcon: Icons.place,
+                label: 'Automaten',
+                selected: _index == 1,
+                onTap: () => setState(() => _index = 1),
+              ),
+              const SizedBox(width: 56), // Platz für den FAB
+              _NavItem(
+                icon: Icons.receipt_long_outlined,
+                selectedIcon: Icons.receipt_long,
+                label: 'Verlauf',
+                selected: _index == 2,
+                onTap: () => setState(() => _index = 2),
+              ),
+              _NavItem(
+                icon: Icons.person_outline,
+                selectedIcon: Icons.person,
+                label: 'Profil',
+                selected: _index == 3,
+                onTap: () => setState(() => _index = 3),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.ink : AppColors.textMuted;
+    return Expanded(
+      child: InkResponse(
+        onTap: onTap,
+        radius: 44,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(selected ? selectedIcon : icon, size: 22, color: color),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

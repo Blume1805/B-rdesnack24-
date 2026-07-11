@@ -184,7 +184,7 @@ Future<void> printInventoryReport({
       Bördesnack24 GbR<br>
       Sülldorfer Str. 3A · 39171 Sülzetal OT Osterweddingen<br>
       Steuernummer: 102/178/01635<br>
-      USt-IdNr.: (noch nicht hinterlegt)<br>
+      USt-IdNr.: DE 458804058<br>
       Erstellt am ${Formatters.date(now)}
     </div>
   </div>

@@ -158,6 +158,26 @@ class CustomerRemoteDataSource {
     return const [];
   }
 
+  Future<List<Map<String, dynamic>>> myNotifications({int limit = 30}) async {
+    final rows =
+        await _client.rpc('my_notifications', params: {'p_limit': limit});
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  Future<int> unreadNotificationsCount() async {
+    final r = await _client.rpc('my_notifications_unread_count');
+    return (r as num?)?.toInt() ?? 0;
+  }
+
+  Future<void> markNotificationRead(String key) async {
+    await _client.rpc('mark_notification_read', params: {'p_key': key});
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await _client.rpc('mark_all_notifications_read');
+  }
+
   Future<Map<String, dynamic>?> productDetail(String productId) async {
     final rows = await _client.rpc(
       'product_detail',

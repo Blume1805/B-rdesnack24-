@@ -9,12 +9,20 @@ import '../../../management/presentation/controllers/management_providers.dart';
 import 'availability_screen.dart';
 
 /// Automatenfinder: Liste aller Automaten, Navigation (Google Maps) und
-/// Echtzeit-Verfügbarkeit je Automat.
-class FinderTab extends ConsumerWidget {
+/// Echtzeit-Verfügbarkeit je Automat. Optional als Karten-Ansicht mit
+/// Standortmarkern.
+class FinderTab extends ConsumerStatefulWidget {
   const FinderTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FinderTab> createState() => _FinderTabState();
+}
+
+class _FinderTabState extends ConsumerState<FinderTab> {
+  bool _mapMode = false;
+
+  @override
+  Widget build(BuildContext context) {
     final machines = ref.watch(machinesProvider);
     return machines.when(
       loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brand)),
@@ -39,8 +47,26 @@ class FinderTab extends ConsumerWidget {
               eyebrow: 'Unsere Standorte',
               title: 'Automaten in der Börde',
             ),
+            const SizedBox(height: AppSpacing.s4),
+            // Toggle Liste ↔ Karte
+            SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(
+                    value: false,
+                    icon: Icon(Icons.list),
+                    label: Text('Liste')),
+                ButtonSegment(
+                    value: true,
+                    icon: Icon(Icons.map_outlined),
+                    label: Text('Karte')),
+              ],
+              selected: {_mapMode},
+              onSelectionChanged: (s) => setState(() => _mapMode = s.first),
+            ),
             const SizedBox(height: AppSpacing.s5),
-            if (list.isEmpty)
+            if (_mapMode)
+              _MapPreview(machines: list)
+            else if (list.isEmpty)
               AppCard(
                 color: AppColors.surfaceAlt,
                 child: Text(
@@ -148,4 +174,123 @@ class FinderTab extends ConsumerWidget {
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
+}
+
+/// Karten-Ansicht (statisch): stilisierte Vorschau + Deep-Link, öffnet
+/// Google-Maps mit allen Automaten als Suchergebnissen.
+class _MapPreview extends StatelessWidget {
+  const _MapPreview({required this.machines});
+  final List<dynamic> machines;
+
+  @override
+  Widget build(BuildContext context) {
+    Future<void> openAll() async {
+      final query = Uri.encodeComponent(
+          'Bördesnack24 Automat Sülzetal Osterweddingen');
+      final uri = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$query');
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AspectRatio(
+          aspectRatio: 4 / 3,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.brandLight,
+              border: Border.all(color: AppColors.brand),
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(painter: _GridPainter()),
+                ),
+                for (int i = 0; i < machines.length; i++)
+                  Positioned(
+                    left: 40.0 + (i * 55),
+                    top: 60.0 + ((i % 3) * 55),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.place,
+                            size: 34, color: AppColors.brand),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.ink,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'A${i + 1}',
+                            style: AppTypography.body(
+                              size: 10,
+                              weight: FontWeight.w800,
+                              color: AppColors.onDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.ink,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Karten-Vorschau',
+                      style: AppTypography.body(
+                        size: 10,
+                        weight: FontWeight.w800,
+                        color: AppColors.brand,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        FilledButton.icon(
+          onPressed: openAll,
+          icon: const Icon(Icons.directions_outlined),
+          label: const Text('In Google Maps öffnen'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brand,
+            foregroundColor: AppColors.ink,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Feines Grid-Muster als Karten-Hintergrund.
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.brand.withValues(alpha: 0.15)
+      ..strokeWidth = 0.6;
+    for (double x = 0; x < size.width; x += 24) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += 24) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

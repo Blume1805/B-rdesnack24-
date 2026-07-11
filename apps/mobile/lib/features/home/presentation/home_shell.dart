@@ -12,6 +12,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
 import '../../customer/presentation/screens/donations_screen.dart';
+import '../../customer/presentation/screens/notifications_screen.dart';
 import '../../finance/presentation/screens/finance_screen.dart';
 import '../../management/presentation/management_screen.dart';
 
@@ -115,6 +116,12 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         UserRole.customer => 'Kunde',
       };
 
+  /// Extrahiert den Vornamen für die persönliche Anrede.
+  String? _firstName(String? fullName) {
+    if (fullName == null || fullName.trim().isEmpty) return null;
+    return fullName.trim().split(RegExp(r'\s+')).first;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCustomer = user.role == UserRole.customer;
@@ -155,7 +162,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  isCustomer ? 'Mein Konto' : _roleLabel(user.role),
+                  isCustomer ? 'Willkommen' : _roleLabel(user.role),
                   style: AppTypography.body(
                     size: 13,
                     weight: FontWeight.w800,
@@ -164,9 +171,11 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  user.fullName ?? user.email,
+                  isCustomer
+                      ? 'Hallo ${_firstName(user.fullName) ?? user.email}'
+                      : (user.fullName ?? user.email),
                   style: AppTypography.display(
-                    size: 18,
+                    size: 20,
                     weight: FontWeight.w800,
                     color: AppColors.onDark,
                   ),
@@ -201,6 +210,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        if (isCustomer) const _NotificationBell(),
+        if (isCustomer) const SizedBox(width: 4),
         if (isCustomer) const _DonationChip(),
         if (isCustomer) const SizedBox(width: AppSpacing.s2),
         IconButton(
@@ -272,6 +283,59 @@ class _DonationChip extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Notification-Bell mit rotem Badge, wenn ungelesene Notifications anstehen.
+class _NotificationBell extends ConsumerWidget {
+  const _NotificationBell();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread =
+        ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            tooltip: 'Benachrichtigungen',
+            icon: const Icon(Icons.notifications_none,
+                color: AppColors.onDark, size: 24),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen()),
+              );
+            },
+          ),
+          if (unread > 0)
+            Positioned(
+              top: 6,
+              right: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 5, vertical: 2),
+                constraints:
+                    const BoxConstraints(minWidth: 18, minHeight: 18),
+                decoration: BoxDecoration(
+                  color: AppColors.statusCritical,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: AppTypography.body(
+                    size: 10,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

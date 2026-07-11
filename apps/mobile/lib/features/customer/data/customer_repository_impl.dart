@@ -4,6 +4,7 @@ import '../../../core/error/failures.dart';
 import '../domain/entities/customer_models.dart';
 import '../domain/entities/donations_news.dart';
 import '../domain/entities/invoice.dart';
+import '../domain/entities/notification.dart';
 import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
 import '../domain/entities/product_detail.dart';
@@ -163,6 +164,25 @@ class CustomerRepositoryImpl implements CustomerRepository {
         final rows = await _remote.listNews(limit: limit);
         return rows.map(NewsArticle.fromJson).toList();
       });
+
+  @override
+  Future<List<CustomerNotification>> myNotifications({int limit = 30}) =>
+      _guard(() async {
+        final rows = await _remote.myNotifications(limit: limit);
+        return rows.map(CustomerNotification.fromJson).toList();
+      });
+
+  @override
+  Future<int> unreadNotificationsCount() =>
+      _guard(_remote.unreadNotificationsCount);
+
+  @override
+  Future<void> markNotificationRead(String key) =>
+      _guard(() => _remote.markNotificationRead(key));
+
+  @override
+  Future<void> markAllNotificationsRead() =>
+      _guard(_remote.markAllNotificationsRead);
 
   @override
   Future<List<Invoice>> myInvoices() => _guard(() async {
