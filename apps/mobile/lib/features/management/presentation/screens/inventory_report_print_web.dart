@@ -182,18 +182,15 @@ Future<void> printInventoryReport({
     </div>
     <div class="meta">
       Bördesnack24 GbR<br>
+      Sülldorfer Str. 3A · 39171 Sülzetal OT Osterweddingen<br>
+      Steuernummer: 102/178/01635<br>
+      USt-IdNr.: (noch nicht hinterlegt)<br>
       Erstellt am ${Formatters.date(now)}
     </div>
   </div>
   $tables
   $summaryHtml
   $signaturesHtml
-  <div class="footer">
-    Warenwert = Endbestand × Verkaufspreis netto. Bei MHD &lt; 7 Tagen
-    wird ein 50 %-Abschlag angesetzt. Datenquellen: Nayax-Ingest
-    (Verkäufe), Lieferschein-/Nachfüll-Protokolle (Zugänge),
-    Vernichtungs- und Korrektur-Protokolle, warehouse_stock (Lager).
-  </div>
 </div></body></html>
 ''';
 
