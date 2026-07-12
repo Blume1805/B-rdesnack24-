@@ -65,7 +65,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
         notchMargin: 8,
         padding: EdgeInsets.zero,
         child: SizedBox(
-          height: 62,
+          height: 68,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -122,25 +122,45 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.ink : AppColors.textMuted;
+    // Icon-Kachel im Screen-Design: gerundetes Quadrat, aktiv gold, inaktiv
+    // creme/beige, darunter das Label.
+    final tileColor = selected ? AppColors.brand : AppColors.borderSubtle;
+    final iconColor = selected ? AppColors.ink : AppColors.textMuted;
+    final labelColor = selected ? AppColors.ink : AppColors.textMuted;
     return Expanded(
       child: InkResponse(
         onTap: onTap,
         radius: 44,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(selected ? selectedIcon : icon, size: 22, color: color),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: color,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: tileColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  selected ? selectedIcon : icon,
+                  size: 18,
+                  color: iconColor,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  color: labelColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

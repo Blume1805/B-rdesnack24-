@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../management/domain/entities/machine.dart';
 import '../../../management/presentation/controllers/management_providers.dart';
 import 'availability_screen.dart';
 
@@ -76,88 +77,15 @@ class _FinderTabState extends ConsumerState<FinderTab> {
               )
             else
               for (final m in list) ...[
-                AppCard(
-                  onTap: () => Navigator.of(context).push(
+                _MachineLocationCard(
+                  machine: m,
+                  onOpen: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) =>
                           AvailabilityScreen(machineId: m.id, title: m.name),
                     ),
                   ),
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Automatenbild oben (Platzhalter bis Foto in
-                      // machines.image_url hinterlegt ist).
-                      AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: ProductImage.expand(
-                          imageUrl: m.imageUrl,
-                          productName: m.name,
-                          icon: m.isCooled
-                              ? Icons.ac_unit
-                              : Icons.storefront_outlined,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(AppSpacing.s4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    m.name,
-                                    style: AppTypography.body(
-                                      size: 16,
-                                      weight: FontWeight.w800,
-                                      color: AppColors.ink,
-                                    ),
-                                  ),
-                                  if (m.city != null && m.city!.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 2),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.place_outlined,
-                                              size: 14,
-                                              color: AppColors.textMuted),
-                                          const SizedBox(width: 3),
-                                          Expanded(
-                                            child: Text(
-                                              m.city!,
-                                              style: AppTypography.body(
-                                                size: 12,
-                                                color: AppColors.textMuted,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  if (m.isCooled) ...[
-                                    const SizedBox(height: 6),
-                                    const StatusBadge(
-                                      label: 'Kühlung',
-                                      tone: StatusTone.info,
-                                      icon: Icons.ac_unit,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: 'Navigation starten',
-                              icon: const Icon(Icons.directions_outlined),
-                              color: AppColors.brand,
-                              onPressed: () => _navigate(m.name, m.city),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  onNavigate: () => _navigate(m.name, m.city),
                 ),
                 const SizedBox(height: AppSpacing.s4),
               ],
@@ -272,6 +200,143 @@ class _MapPreview extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Standort-Karte im Kundenbereich: weiße Karte mit gold-gelbem Streifen
+/// am oberen Rand, „offen 24/7"-Pill rechts und schwarzem Pill-Button
+/// „Sortiment ansehen". Optional darüber das Automatenbild.
+class _MachineLocationCard extends StatelessWidget {
+  const _MachineLocationCard({
+    required this.machine,
+    required this.onOpen,
+    required this.onNavigate,
+  });
+
+  final Machine machine;
+  final VoidCallback onOpen;
+  final VoidCallback onNavigate;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onOpen,
+      padding: EdgeInsets.zero,
+      topStripeColor: AppColors.brand,
+      topStripeHeight: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (machine.imageUrl != null && machine.imageUrl!.isNotEmpty)
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ProductImage.expand(
+                imageUrl: machine.imageUrl,
+                productName: machine.name,
+                icon: machine.isCooled
+                    ? Icons.ac_unit
+                    : Icons.storefront_outlined,
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.s5,
+              AppSpacing.s5,
+              AppSpacing.s5,
+              AppSpacing.s5,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        machine.name,
+                        style: AppTypography.body(
+                          size: 20,
+                          weight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s3),
+                    const StatusBadge(
+                      label: 'offen 24/7',
+                      tone: StatusTone.positive,
+                    ),
+                  ],
+                ),
+                if (machine.city != null && machine.city!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    machine.city!,
+                    style: AppTypography.body(
+                      size: 13,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+                if (machine.isCooled) ...[
+                  const SizedBox(height: AppSpacing.s3),
+                  const StatusBadge(
+                    label: 'Kühlung',
+                    tone: StatusTone.info,
+                    icon: Icons.ac_unit,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.s4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: FilledButton(
+                          onPressed: onOpen,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.ink,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadii.pill),
+                            ),
+                          ),
+                          child: Text(
+                            'Sortiment ansehen',
+                            style: AppTypography.body(
+                              size: 15,
+                              weight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s2),
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        border: Border.all(color: AppColors.borderSubtle),
+                        borderRadius: BorderRadius.circular(AppRadii.pill),
+                      ),
+                      child: IconButton(
+                        tooltip: 'Navigation starten',
+                        icon: const Icon(Icons.directions_outlined),
+                        color: AppColors.ink,
+                        onPressed: onNavigate,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

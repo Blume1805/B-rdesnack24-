@@ -13,6 +13,8 @@ class AppCard extends StatelessWidget {
     this.borderColor,
     this.color,
     this.radius = AppRadii.lg,
+    this.topStripeColor,
+    this.topStripeHeight = 3,
   });
 
   final Widget child;
@@ -21,6 +23,11 @@ class AppCard extends StatelessWidget {
   final Color? borderColor;
   final Color? color;
   final double radius;
+
+  /// Optionaler farbiger Streifen am oberen Rand (z. B. Gold für Standort-
+  /// Karten im Kundenbereich).
+  final Color? topStripeColor;
+  final double topStripeHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +38,28 @@ class AppCard extends StatelessWidget {
       border: Border.all(color: borderColor ?? AppColors.borderSubtle, width: 1),
     );
 
+    Widget stripedContent = content;
+    if (topStripeColor != null) {
+      stripedContent = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: topStripeHeight,
+            decoration: BoxDecoration(
+              color: topStripeColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+            ),
+          ),
+          content,
+        ],
+      );
+    }
+
     if (onTap == null) {
-      return DecoratedBox(decoration: decoration, child: content);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: DecoratedBox(decoration: decoration, child: stripedContent),
+      );
     }
 
     return Material(
@@ -44,7 +71,10 @@ class AppCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           splashColor: AppColors.brandLight.withValues(alpha: 0.35),
           highlightColor: AppColors.brandLight.withValues(alpha: 0.15),
-          child: content,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: stripedContent,
+          ),
         ),
       ),
     );
