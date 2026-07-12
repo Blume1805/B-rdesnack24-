@@ -110,7 +110,9 @@ class _InventoryReportScreenState
           Text(
             'Permanente Inventur — Anfangsbestand, Zugänge (Lieferschein/'
             'Nachfüllung), Verkäufe (Nayax), Vernichtungen, Korrekturen '
-            'und Endbestand je Automat/Produkt. Nur für Systemadmin.',
+            'und Endbestand je Automat/Produkt. Bewertung nach §253 HGB '
+            'zu Anschaffungskosten netto (Einkaufspreis), abzüglich '
+            'MHD-Bewertungsabschlag. Nur für Systemadmin.',
             style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s4),
@@ -241,7 +243,7 @@ class _StockSummary extends StatelessWidget {
               ),
               _KpiTile(
                 icon: Icons.euro_outlined,
-                label: 'Warenwert netto',
+                label: 'Anschaffungskosten netto',
                 value: Formatters.euro(totalValue),
               ),
             ],
@@ -263,8 +265,8 @@ class _StockSummary extends StatelessWidget {
                 DataColumn(label: Text('Automaten'), numeric: true),
                 DataColumn(label: Text('Lager'), numeric: true),
                 DataColumn(label: Text('Gesamt'), numeric: true),
-                DataColumn(label: Text('EK/VK'), numeric: true),
-                DataColumn(label: Text('Wert netto'), numeric: true),
+                DataColumn(label: Text('EK/Stk.'), numeric: true),
+                DataColumn(label: Text('AK-Wert'), numeric: true),
               ],
               rows: [
                 for (final r in summary)
@@ -282,7 +284,7 @@ class _StockSummary extends StatelessWidget {
                       ),
                     )),
                     DataCell(Text(Formatters.euro(
-                        (r['unit_price'] as num?)?.toDouble() ?? 0))),
+                        (r['unit_cost'] as num?)?.toDouble() ?? 0))),
                     DataCell(Text(Formatters.euro(
                         (r['total_value'] as num?)?.toDouble() ?? 0))),
                   ]),
@@ -391,8 +393,8 @@ class _ReportTable extends StatelessWidget {
                 DataColumn(label: Text('± Korr.'), numeric: true),
                 DataColumn(label: Text('Ende'), numeric: true),
                 DataColumn(label: Text('Kap.'), numeric: true),
-                DataColumn(label: Text('VK/Stk.'), numeric: true),
-                DataColumn(label: Text('Wert'), numeric: true),
+                DataColumn(label: Text('EK/Stk.'), numeric: true),
+                DataColumn(label: Text('AK-Wert'), numeric: true),
                 DataColumn(label: Text('MHD'), numeric: true),
                 DataColumn(label: Text('Abschlag'), numeric: true),
                 DataColumn(label: Text('Bilanz'), numeric: true),
@@ -409,7 +411,7 @@ class _ReportTable extends StatelessWidget {
   }
 
   DataRow _dataRow(Map<String, dynamic> r) {
-    final unitPrice = (r['unit_price'] as num?)?.toDouble() ?? 0;
+    final unitPrice = (r['unit_cost'] as num?)?.toDouble() ?? 0;
     final gross = (r['gross_value'] as num?)?.toDouble() ?? 0;
     final discount = (r['mhd_discount'] as num?)?.toDouble() ?? 0;
     final net = (r['net_value'] as num?)?.toDouble() ?? 0;

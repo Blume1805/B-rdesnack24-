@@ -34,7 +34,7 @@ Future<void> printInventoryReport({
         '<th>Anfang</th><th>+ Zug.</th><th>− Verk.</th>'
         '<th>− Verd.</th><th>± Korr.</th>'
         '<th>Ende</th><th>Kap.</th>'
-        '<th>VK/Stk.</th><th>Wert</th>'
+        '<th>EK/Stk.</th><th>AK-Wert</th>'
         '<th>MHD</th><th>Abschlag</th><th>Bilanz</th>'
         '</tr></thead><tbody>');
     for (final r in list) {
@@ -59,7 +59,7 @@ Future<void> printInventoryReport({
           '<td class="num">${r['correction']}</td>'
           '<td class="num strong">${r['end_qty']}</td>'
           '<td class="num muted">${r['capacity']}</td>'
-          '<td class="num">${Formatters.euro((r['unit_price'] as num?)?.toDouble() ?? 0)}</td>'
+          '<td class="num">${Formatters.euro((r['unit_cost'] as num?)?.toDouble() ?? 0)}</td>'
           '<td class="num">${Formatters.euro((r['gross_value'] as num?)?.toDouble() ?? 0)}</td>'
           '<td class="num $warnClass">${_esc(expiryLabel)}</td>'
           '<td class="num $warnClass">'
@@ -97,12 +97,12 @@ Future<void> printInventoryReport({
   summaryHtml.write('<div class="kpis">'
       '<span><b>${distinctProducts}</b> Produkte im Bestand</span>'
       '<span><b>${grandItems}</b> Einheiten gesamt</span>'
-      '<span>Warenwert netto <b>${Formatters.euro(grandValue)}</b></span>'
+      '<span>Anschaffungskosten netto <b>${Formatters.euro(grandValue)}</b></span>'
       '</div>');
   summaryHtml.write('<table class="pos"><thead><tr>'
       '<th>SKU</th><th>Produkt</th>'
       '<th>Automaten</th><th>Lager</th><th>Gesamt</th>'
-      '<th>VK/Stk.</th><th>Wert netto</th></tr></thead><tbody>');
+      '<th>EK/Stk.</th><th>AK-Wert netto</th></tr></thead><tbody>');
   for (final r in summary) {
     summaryHtml.write('<tr>'
         '<td>${_esc(r['sku']?.toString() ?? '')}</td>'
@@ -110,7 +110,7 @@ Future<void> printInventoryReport({
         '<td class="num">${r['in_machines_qty']}</td>'
         '<td class="num">${r['in_warehouse_qty']}</td>'
         '<td class="num strong">${r['total_qty']}</td>'
-        '<td class="num">${Formatters.euro((r['unit_price'] as num?)?.toDouble() ?? 0)}</td>'
+        '<td class="num">${Formatters.euro((r['unit_cost'] as num?)?.toDouble() ?? 0)}</td>'
         '<td class="num">${Formatters.euro((r['total_value'] as num?)?.toDouble() ?? 0)}</td>'
         '</tr>');
   }
@@ -219,6 +219,7 @@ Future<void> printInventoryReport({
     <div>
       <h1>INVENTUR — Bewegungs- und Wertreport</h1>
       <div class="meta">Zeitraum: ${Formatters.date(from)} – ${Formatters.date(to)}</div>
+      <div class="meta">Bewertung: Anschaffungskosten netto (§253 HGB), MHD-Abschlag von den AK</div>
     </div>
     <div class="meta">
       Bördesnack24 GbR<br>
