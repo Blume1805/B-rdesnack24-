@@ -186,6 +186,8 @@ class _InventoryReportScreenState
             if (_summary != null && _summary!.isNotEmpty)
               _StockSummary(summary: _summary!),
             const SizedBox(height: AppSpacing.s6),
+            const _MhdWritedownMatrix(),
+            const SizedBox(height: AppSpacing.s6),
             if (_signatures != null && _signatures!.isNotEmpty)
               _SignatureBlock(signatures: _signatures!),
           ],
@@ -584,4 +586,138 @@ class _Line extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 2),
         color: AppColors.ink,
       );
+}
+
+/// Transparente Übersicht der gestuften MHD-Bewertungsabschläge.  Diese
+/// Kachel erscheint direkt unter der Inventur, damit Prüfer, Steuerberater
+/// oder Wirtschaftsprüfer sofort sehen, mit welchem Ansatz jede Position
+/// bewertet wurde.  Die Bandbreiten entsprechen branchenüblichen
+/// Bewertungsansätzen für verderbliche Handelswaren; wir wenden jeweils
+/// den Mittelwert der Spanne an.
+class _MhdWritedownMatrix extends StatelessWidget {
+  const _MhdWritedownMatrix();
+
+  static const rows = <_MhdRow>[
+    _MhdRow(
+      range: '> 4 Wochen',
+      typical: '0 % Abschlag',
+      applied: '0 %',
+      reason: 'normale Verwertbarkeit',
+    ),
+    _MhdRow(
+      range: '2–4 Wochen',
+      typical: '10–30 %',
+      applied: '20 %',
+      reason: 'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen',
+    ),
+    _MhdRow(
+      range: '1–2 Wochen',
+      typical: '30–50 %',
+      applied: '40 %',
+      reason: 'erheblicher Verkaufsdruck',
+    ),
+    _MhdRow(
+      range: '< 1 Woche',
+      typical: '50–80 %',
+      applied: '65 %',
+      reason: 'Risiko des Nichtverkaufs deutlich erhöht',
+    ),
+    _MhdRow(
+      range: 'MHD überschritten',
+      typical: '100 % Abschreibung',
+      applied: '100 %',
+      reason: 'keine wirtschaftliche Verwertbarkeit',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.rule_folder_outlined, color: AppColors.ink, size: 18),
+              SizedBox(width: 6),
+              Eyebrow('Bewertungsansatz MHD-Abschlag'),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Text(
+            'Die Inventur wendet je Rest-Laufzeit am Stichtag folgende '
+            'Abschläge auf den Warenwert an. Die Bandbreite orientiert sich '
+            'an branchenüblichen Bewertungsansätzen für verderbliche '
+            'Handelswaren; angesetzt wird jeweils der Mittelwert.',
+            style: AppTypography.body(
+              size: 12,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              headingRowHeight: 34,
+              dataRowMinHeight: 32,
+              dataRowMaxHeight: 44,
+              headingRowColor:
+                  WidgetStateProperty.all(AppColors.surfaceAlt),
+              columns: const [
+                DataColumn(label: Text('Rest-MHD am Stichtag')),
+                DataColumn(label: Text('Typischer Ansatz')),
+                DataColumn(label: Text('Bördesnack24 wendet an'), numeric: true),
+                DataColumn(label: Text('Begründung')),
+              ],
+              rows: [
+                for (final r in rows)
+                  DataRow(cells: [
+                    DataCell(Text(
+                      r.range,
+                      style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    )),
+                    DataCell(Text(r.typical)),
+                    DataCell(Text(
+                      r.applied,
+                      style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w800,
+                        color: r.applied == '0 %'
+                            ? AppColors.ink
+                            : AppColors.statusCritical,
+                      ),
+                    )),
+                    DataCell(Text(
+                      r.reason,
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textDefault,
+                      ),
+                    )),
+                  ]),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MhdRow {
+  const _MhdRow({
+    required this.range,
+    required this.typical,
+    required this.applied,
+    required this.reason,
+  });
+  final String range;
+  final String typical;
+  final String applied;
+  final String reason;
 }

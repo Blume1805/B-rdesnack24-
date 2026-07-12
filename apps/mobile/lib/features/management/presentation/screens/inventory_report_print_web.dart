@@ -116,6 +116,42 @@ Future<void> printInventoryReport({
   }
   summaryHtml.write('</tbody></table>');
 
+  // Bewertungs-Matrix: transparent für Dritte, welchen Abschlag wir je
+  // Rest-MHD-Klasse ansetzen (branchenüblicher Bewertungsansatz).
+  final matrixHtml = StringBuffer();
+  matrixHtml.write('<h2 style="margin-top:14pt">'
+      'Bewertungsansatz MHD-Abschlag</h2>');
+  matrixHtml.write('<p class="matrix-intro">Die Bewertung der Bestände '
+      'orientiert sich an branchenüblichen Ansätzen für verderbliche '
+      'Handelswaren. Je Rest-Laufzeit am Bilanzstichtag wird folgender '
+      'Abschlag auf den Warenwert angesetzt:</p>');
+  matrixHtml.write('<table class="pos matrix"><thead><tr>'
+      '<th>Rest-MHD am Stichtag</th>'
+      '<th>Typischer Bewertungsansatz</th>'
+      '<th class="num">Bördesnack24 wendet an</th>'
+      '<th>Begründung</th></tr></thead><tbody>');
+  const matrix = [
+    ['> 4 Wochen', '0 % Abschlag', '0 %', 'normale Verwertbarkeit'],
+    ['2–4 Wochen', '10–30 %', '20 %',
+      'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen'],
+    ['1–2 Wochen', '30–50 %', '40 %', 'erheblicher Verkaufsdruck'],
+    ['< 1 Woche',  '50–80 %', '65 %',
+      'Risiko des Nichtverkaufs deutlich erhöht'],
+    ['MHD überschritten', '100 % Abschreibung', '100 %',
+      'keine wirtschaftliche Verwertbarkeit'],
+  ];
+  for (final r in matrix) {
+    final applied = r[2];
+    final applyClass = applied == '0 %' ? 'strong' : 'strong warn';
+    matrixHtml.write('<tr>'
+        '<td class="strong">${_esc(r[0])}</td>'
+        '<td>${_esc(r[1])}</td>'
+        '<td class="num $applyClass">${_esc(applied)}</td>'
+        '<td>${_esc(r[3])}</td>'
+        '</tr>');
+  }
+  matrixHtml.write('</tbody></table>');
+
   // Signaturen-Block (Datum aktuell)
   final now = DateTime.now();
   final signaturesHtml = StringBuffer();
@@ -173,6 +209,10 @@ Future<void> printInventoryReport({
   .sig-img { max-height: 60px; max-width: 100%; object-fit: contain; }
   .sig-name { margin-top: 4pt; font-size: 10pt; }
   .sig-meta { color: #6f6a5b; font-size: 8pt; }
+  .matrix-intro { color: #6f6a5b; font-size: 9pt; margin: 2pt 0 4pt 0;
+                  max-width: 780px; }
+  table.matrix { width: 100%; }
+  table.matrix td, table.matrix th { padding: 4pt 6pt; }
 </style>
 </head><body onload="window.print()"><div class="wrap">
   <div class="head">
@@ -190,6 +230,7 @@ Future<void> printInventoryReport({
   </div>
   $tables
   $summaryHtml
+  $matrixHtml
   $signaturesHtml
 </div></body></html>
 ''';
