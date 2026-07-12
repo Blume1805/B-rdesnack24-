@@ -209,14 +209,10 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Header für Kunden im 3-Spalten-Layout:
-  /// • Links: „Hallo Philipp" in handschriftlicher Skript-Schrift (Caveat),
-  ///   darunter die Kundennummer.
-  /// • Mitte: Marken-Kachel mit Automaten-Icon (später Bördekreis-Kartenumriss).
-  /// • Rechts: Notification-Bell oben, Spendenchip darunter.
+  /// Header für Kunden: Bördesnack24-Marken-Hero füllt die linke bis
+  /// mittlere Fläche, rechts sitzt ausschließlich die Notification-Bell.
+  /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
   Widget _customerHeader(BuildContext context, String? customerNumber) {
-    final firstName = _firstName(user.fullName) ?? '';
-    final hello = firstName.isEmpty ? 'Hallo' : 'Hallo $firstName';
     return AppBar(
       toolbarHeight: 108,
       backgroundColor: AppColors.ink,
@@ -226,75 +222,27 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       iconTheme: const IconThemeData(color: AppColors.onDark),
       titleSpacing: 0,
       title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Links: Skript-Anrede + Kd.-Nr.
+            // Links bis mittig: Marken-Hero (Bördekreis-Kontur + Wortmarke
+            // + Automat + Slogan).
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    hello,
-                    style: GoogleFonts.caveat(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.onDark,
-                      height: 1.05,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  if (customerNumber != null)
-                    Text(
-                      'Kd.-Nr. $customerNumber',
-                      style: AppTypography.body(
-                        size: 12,
-                        weight: FontWeight.w700,
-                        color: AppColors.brandLight,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
+              flex: 4,
+              child: Image.asset(
+                'assets/images/brand_hero_wide.png',
+                fit: BoxFit.contain,
+                alignment: Alignment.centerLeft,
+                height: 96,
               ),
             ),
-            // Mitte: Marken-Kachel (Automat + geplante Bördekreis-Kartenkontur)
-            Container(
-              width: 68,
-              height: 68,
-              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.brand,
-                borderRadius: BorderRadius.circular(AppRadii.md),
-              ),
-              child: const BrandIcon(size: 56, color: AppColors.ink),
-            ),
-            // Rechts: Bell + Spendenchip untereinander
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: const [
-                _NotificationBell(),
-                SizedBox(height: 4),
-                _DonationChip(),
-              ],
-            ),
+            const Spacer(),
+            // Rechts: nur die Notification-Bell.
+            const _NotificationBell(),
           ],
         ),
       ),
-      actions: [
-        IconButton(
-          tooltip: 'Abmelden',
-          icon: const Icon(Icons.logout, size: 20, color: AppColors.onDark),
-          onPressed: onSignOut,
-        ),
-      ],
     );
   }
 }
