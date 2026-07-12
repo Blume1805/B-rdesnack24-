@@ -69,6 +69,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   children: [
                     const HeroBackdrop(
                       tagline: 'Immer da, wenn der Hunger kommt.',
+                      showTaglineOverlay: true,
                     ),
                     _FormPanel(
                       formKey: _formKey,

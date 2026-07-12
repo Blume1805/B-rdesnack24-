@@ -1406,9 +1406,8 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
 }
 
 /// Vollflächige, goldgelbe Deal-Karte im Stil der Design-Mockups. Eyebrow
-/// „feierabend-deal" in Kleinschrift mit Buchstabenabstand, darunter der
-/// fette Deal-Titel und Gültigkeit. Klickbar → springt in den Automaten-
-/// Finder (dort ist der Deal 1:1 einlösbar am Kaffee/Snack-Kombi-Automaten).
+/// „FEIERABEND-DEAL" in Versalien mit Buchstabenabstand, darunter der fette
+/// Deal-Titel und Gültigkeit.
 class _FeierabendDealCard extends StatelessWidget {
   const _FeierabendDealCard();
 
@@ -1427,12 +1426,12 @@ class _FeierabendDealCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'feierabend-deal',
+            'FEIERABEND-DEAL',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
               color: AppColors.ink,
-            ).copyWith(letterSpacing: 3, height: 1),
+            ).copyWith(letterSpacing: 2, height: 1),
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(

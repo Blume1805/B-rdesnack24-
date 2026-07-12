@@ -102,7 +102,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize =>
-      Size.fromHeight(user.role == UserRole.customer ? 240 : 108);
+      Size.fromHeight(user.role == UserRole.customer ? 220 : 108);
 
   // Rollen-Labels für die UI: intern bleiben shareholder und employee als
   // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
@@ -212,23 +212,116 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   Widget _customerHeader(BuildContext context, String? customerNumber) {
     final firstName = _firstName(user.fullName) ?? 'Kunde';
     return PreferredSize(
-      preferredSize: const Size.fromHeight(240),
+      preferredSize: const Size.fromHeight(220),
       child: Container(
         color: AppColors.ink,
         child: SafeArea(
           bottom: false,
           child: SizedBox(
-            height: 240,
+            height: 220,
             child: Stack(
               children: [
-                // Marken-Hero als leicht abgeblendete Bildfläche im Hintergrund.
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.20,
-                    child: Image.asset(
-                      'assets/images/brand_hero_wide.png',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.centerRight,
+                // Rechte Hälfte: Marken-Bild (Bördekreis + Automat + Wortmarke
+                // + Slogan) von der Mitte bis zum rechten Rand.
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: MediaQuery.of(context).size.width * 0.55,
+                  child: Image.asset(
+                    'assets/images/brand_hero_wide.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerRight,
+                  ),
+                ),
+                // Linke Hälfte: Anrede-Text, sanfter Ink-Verlauf zum Bild.
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  right: MediaQuery.of(context).size.width * 0.35,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          AppColors.ink,
+                          AppColors.ink,
+                          Color(0x00202321),
+                        ],
+                        stops: [0.0, 0.6, 1.0],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.s5,
+                        AppSpacing.s5,
+                        AppSpacing.s2,
+                        AppSpacing.s5,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Gelber Punkt + Slogan (korrekte Schreibweise).
+                          Row(
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.brand,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Immer da, wenn der Hunger kommt.',
+                                  style: AppTypography.body(
+                                    size: 11,
+                                    weight: FontWeight.w700,
+                                    color: AppColors.brand,
+                                  ).copyWith(letterSpacing: 0.4),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.s3),
+                          Text(
+                            'Moin,',
+                            style: AppTypography.display(
+                              size: 26,
+                              weight: FontWeight.w800,
+                              color: AppColors.onDark,
+                            ).copyWith(height: 1.0),
+                          ),
+                          Text(
+                            '$firstName.',
+                            style: AppTypography.display(
+                              size: 26,
+                              weight: FontWeight.w800,
+                              color: AppColors.onDark,
+                            ).copyWith(height: 1.05),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Snack gefällig?',
+                            style: AppTypography.body(
+                              size: 12,
+                              weight: FontWeight.w500,
+                              color: AppColors.brandLight,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -237,69 +330,6 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   top: 4,
                   right: 4,
                   child: _NotificationBell(),
-                ),
-                // Anrede + Eyebrow + Subtitle.
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.s5,
-                    AppSpacing.s6,
-                    AppSpacing.s5,
-                    AppSpacing.s5,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Gelber Punkt + Slogan als Eyebrow (lowercase, letter-
-                      // spaced), matched das Design-Mockup.
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppColors.brand,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              'immer da, wenn der hunger kommt.',
-                              style: AppTypography.body(
-                                size: 13,
-                                weight: FontWeight.w700,
-                                color: AppColors.brand,
-                              ).copyWith(letterSpacing: 1.2),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.s3),
-                      Text(
-                        'Moin, $firstName.',
-                        style: AppTypography.display(
-                          size: 36,
-                          weight: FontWeight.w800,
-                          color: AppColors.onDark,
-                        ).copyWith(height: 1.05),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Snack gefällig? Deine Börde ist gut versorgt.',
-                        style: AppTypography.body(
-                          size: 14,
-                          weight: FontWeight.w500,
-                          color: AppColors.brandLight,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
