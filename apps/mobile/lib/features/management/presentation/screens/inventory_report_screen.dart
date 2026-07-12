@@ -93,7 +93,7 @@ class _InventoryReportScreenState
           if (_rows != null && _rows!.isNotEmpty)
             IconButton(
               tooltip: 'Als PDF drucken',
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+              icon: const Icon(Icons.picture_as_pdf, color: AppColors.statusCritical),
               onPressed: () => printInventoryReport(
                 rows: _rows!,
                 summary: _summary ?? const [],

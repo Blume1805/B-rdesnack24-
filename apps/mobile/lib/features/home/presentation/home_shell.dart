@@ -221,16 +221,19 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
             height: 220,
             child: Stack(
               children: [
-                // Rechte Hälfte: Marken-Bild (Bördekreis + Automat + Wortmarke
-                // + Slogan) von der Mitte bis zum rechten Rand.
+                // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
+                // BoxFit.contain skaliert das breite Motiv, sodass die
+                // leuchtende Bördekreis-Kontur und die BÖRDE-SNACK-24-Wortmarke
+                // sichtbar bleiben — sonst sähe man rechts nur den schwarzen
+                // Automaten auf schwarzem Grund.
                 Positioned(
-                  right: 0,
+                  right: -12,
                   top: 0,
                   bottom: 0,
-                  width: MediaQuery.of(context).size.width * 0.55,
+                  width: MediaQuery.of(context).size.width * 0.60,
                   child: Image.asset(
                     'assets/images/brand_hero_wide.png',
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
                   ),
                 ),
@@ -239,7 +242,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  right: MediaQuery.of(context).size.width * 0.35,
+                  right: MediaQuery.of(context).size.width * 0.42,
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -250,7 +253,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           AppColors.ink,
                           Color(0x00202321),
                         ],
-                        stops: [0.0, 0.6, 1.0],
+                        stops: [0.0, 0.7, 1.0],
                       ),
                     ),
                     child: Padding(

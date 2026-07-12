@@ -117,10 +117,11 @@ class _ActionCluster extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         _IconAction(
-          icon: Icons.picture_as_pdf_outlined,
+          icon: Icons.picture_as_pdf,
           tooltip: 'PDF-Export',
           onTap: busy ? null : onExport,
-          emphasize: true,
+          iconColor: AppColors.statusCritical,
+          borderColor: AppColors.statusCritical,
         ),
       ],
     );
@@ -133,12 +134,18 @@ class _IconAction extends StatelessWidget {
     required this.tooltip,
     this.onTap,
     this.emphasize = false,
+    this.iconColor,
+    this.borderColor,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback? onTap;
   final bool emphasize;
+
+  /// Optionale explizite Farbüberschreibung — z. B. Rot für PDF-Aktionen.
+  final Color? iconColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -156,10 +163,11 @@ class _IconAction extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadii.md),
               border: Border.all(
-                color: emphasize ? AppColors.brand : AppColors.borderSubtle,
+                color: borderColor ??
+                    (emphasize ? AppColors.brand : AppColors.borderSubtle),
               ),
             ),
-            child: Icon(icon, size: 20, color: AppColors.ink),
+            child: Icon(icon, size: 20, color: iconColor ?? AppColors.ink),
           ),
         ),
       ),

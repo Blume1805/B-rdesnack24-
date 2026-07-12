@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../finance/domain/entities/finance_period.dart';
 import '../controllers/management_providers.dart';
@@ -91,7 +92,7 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
           if (widget.exportKind != null)
             IconButton(
               tooltip: 'PDF-Nachweis',
-              icon: const Icon(Icons.picture_as_pdf),
+              icon: const Icon(Icons.picture_as_pdf, color: AppColors.statusCritical),
               onPressed: _export,
             ),
         ],

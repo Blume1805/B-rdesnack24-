@@ -117,8 +117,12 @@ if [ -z "$SUBPATH" ]; then
   # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
   # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
   # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.
+  # -f zwingt neue Assets an .gitignore vorbei: die .gitignore aus dem
+  # Feature-Branch trägt `/assets/`, damit Build-Artefakte dort nicht liegen
+  # bleiben — ohne -f würden neue Bilder (z. B. brand_hero_wide.png) beim
+  # gh-pages-Commit still verschluckt.
   ( cd "$ROOT" && \
-    git add index.html 404.html manifest.json favicon.png flutter.js \
+    git add -f index.html 404.html manifest.json favicon.png flutter.js \
       flutter_bootstrap.js flutter_service_worker.js main.dart.js \
       version.json version.txt assets canvaskit icons .last_build_id 2>/dev/null || true; \
     git add -u )
