@@ -156,8 +156,11 @@ Future<void> printInventoryReport({
   final now = DateTime.now();
   final signaturesHtml = StringBuffer();
   if (signatures.isNotEmpty) {
-    signaturesHtml.write(
-        '<h2 style="page-break-before:always">Freigabe / Unterschriften</h2>');
+    // Block als Ganzes einklammern — die .signatures-Regel in <style>
+    // hält Überschrift + Kacheln zusammen auf einer Seite. Kein erzwungener
+    // page-break-before mehr; der Browser bricht nur um, wenn nötig.
+    signaturesHtml.write('<section class="signatures">');
+    signaturesHtml.write('<h2>Freigabe / Unterschriften</h2>');
     signaturesHtml.write('<div class="sigrow">');
     for (final s in signatures) {
       final img = (s['image_url'] as String?) ?? '';
@@ -172,7 +175,7 @@ Future<void> printInventoryReport({
           '<div class="sig-meta">$role · Datum: ${Formatters.date(now)}</div>'
           '</div>');
     }
-    signaturesHtml.write('</div>');
+    signaturesHtml.write('</div></section>');
   }
   final doc = '''
 <!doctype html>
@@ -213,6 +216,31 @@ Future<void> printInventoryReport({
                   max-width: 780px; }
   table.matrix { width: 100%; }
   table.matrix td, table.matrix th { padding: 4pt 6pt; }
+
+  /* ── Sauberer Seitenumbruch ─────────────────────────────────────────
+     Wir vermeiden Waisen-/Witwen-Zeilen und halten zusammen­gehörige
+     Blöcke auf einer Seite. Chrome druckt Print-CSS im Save-as-PDF
+     Dialog 1:1 mit, deshalb reicht Standard-CSS für die HTML-Route. */
+  html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  p, li { orphans: 3; widows: 3; }
+  h1, h2 { page-break-after: avoid; break-after: avoid-page; }
+  /* Tabellen-Header auf jeder Seite wiederholen */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  /* Einzelne Zeilen nie mitten durchbrechen */
+  table.pos tr { page-break-inside: avoid; break-inside: avoid; }
+  /* Summenzeile darf nicht allein auf einer neuen Seite stehen */
+  table.pos tr.sum { page-break-before: avoid; break-before: avoid; }
+  /* Signatur-Kacheln bleiben komplett auf einer Seite */
+  .sig-slot { page-break-inside: avoid; break-inside: avoid; }
+  .sigrow { page-break-inside: auto; }
+  /* Kompakte Blöcke (KPI-Zeile, MHD-Matrix, Zusammenfassungs-Kachel)
+     werden nicht umgebrochen — sie sind klein genug, um zusammen­zu­
+     bleiben, und wären als Fragment schwer lesbar. */
+  .kpis, table.matrix { page-break-inside: avoid; break-inside: avoid; }
+  /* Der Freigabe-Block gehört immer zusammen. Wenn er nicht mehr auf die
+     aktuelle Seite passt, kommt er auf eine neue Seite. */
+  .signatures { page-break-inside: avoid; break-inside: avoid; }
 </style>
 </head><body onload="window.print()"><div class="wrap">
   <div class="head">

@@ -69,35 +69,67 @@ Deno.serve(async (req) => {
   const { data: rows, error } = await caller.from(def.table).select("*").gte(def.dateCol, from).lte(def.dateCol, `${to}T23:59:59`).order(def.dateCol, { ascending: true });
   if (error) return jsonResponse({ error: error.message }, 403);
   const pdf = await PDFDocument.create();
-  let page = pdf.addPage([595, 842]);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const ink = rgb(0.08, 0.07, 0.05);
   const gold = rgb(0.99, 0.76, 0.01);
   const muted = rgb(0.44, 0.42, 0.35);
-  let y = 800;
-  page.drawText(ISSUER.name, { x: 320, y, size: 9, font: bold, color: ink });
-  page.drawText(ISSUER.street, { x: 320, y: y - 11, size: 8, font, color: muted });
-  page.drawText(ISSUER.cityLine, { x: 320, y: y - 22, size: 8, font, color: muted });
-  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: y - 34, size: 8, font, color: muted });
-  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: y - 45, size: 8, font, color: muted });
-  page.drawText("Bordesnack24 - " + def.title, { x: 40, y, size: 15, font: bold, color: gold });
-  y -= 22;
-  page.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y, size: 10, font, color: ink });
-  y -= 30;
   const colX = [40, 160, 250, 340, 470];
-  def.columns.forEach((c, i) => { page.drawText(c.label, { x: colX[i] ?? 40, y, size: 9, font: bold, color: ink }); });
-  y -= 14;
+  // Räume auf jeder Seite: Header (Aussteller + Titel + Zeitraum +
+  // Spaltenköpfe) 800 -> ~720; Fußraum für "Eintraege" + Signatur-Block:
+  // Signaturen ab y=170, "Eintraege" bei y=40. Ab y < FOOT_Y_LIMIT muss
+  // eine neue Seite beginnen, damit die letzte Zeile nicht im Signatur-
+  // Bereich landet.
+  const FOOT_Y_LIMIT = 220;
+
+  // Zeichnet Aussteller-Block, Titel, Zeitraum und Spaltenköpfe.
+  // Rückgabe: aktuelles y unter dem Header (ready für Datenzeilen).
+  const drawHeader = (p: ReturnType<typeof pdf.addPage>): number => {
+    let hy = 800;
+    p.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: bold, color: ink });
+    p.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font, color: muted });
+    p.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font, color: muted });
+    p.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: muted });
+    p.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font, color: muted });
+    p.drawText("Bordesnack24 - " + def.title, { x: 40, y: hy, size: 15, font: bold, color: gold });
+    hy -= 22;
+    p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: hy, size: 10, font, color: ink });
+    hy -= 30;
+    def.columns.forEach((c, i) => {
+      p.drawText(c.label, { x: colX[i] ?? 40, y: hy, size: 9, font: bold, color: ink });
+    });
+    hy -= 14;
+    return hy;
+  };
+
+  let page = pdf.addPage([595, 842]);
+  let y = drawHeader(page);
+
   for (const row of (rows ?? [])) {
-    if (y < 200) { page = pdf.addPage([595, 842]); y = 800; }
+    // Vor jeder Zeile prüfen: reicht der Platz oberhalb des Footer-Bereichs?
+    // Wenn nicht, neue Seite + Header wiederholen. Damit steht nie eine
+    // einzelne Zeile am Seitenanfang und der Signatur-Block wird nie
+    // überschrieben.
+    if (y < FOOT_Y_LIMIT) {
+      page = pdf.addPage([595, 842]);
+      y = drawHeader(page);
+    }
     def.columns.forEach((c, i) => {
       const text = fmt((row as Record<string, unknown>)[c.key]).substring(0, 22);
       page.drawText(text, { x: colX[i] ?? 40, y, size: 8, font, color: ink });
     });
     y -= 12;
   }
-  page.drawText(`Eintraege: ${(rows ?? []).length}`, { x: 40, y: 40, size: 8, font, color: ink });
+
+  // Signatur-Block: braucht ca. 100 pt Höhe (Überschrift + Linie + Name +
+  // Datum). Wenn nicht mehr genug Platz auf der aktuellen Seite ist,
+  // wird eine neue Seite mit Header angelegt — die letzte Datenzeile
+  // bleibt aber auf ihrer Ursprungs-Seite.
   const { data: sigs } = await caller.from("partner_signatures").select("full_name,role_label,image_url").order("sort_order", { ascending: true });
+  if (y < FOOT_Y_LIMIT) {
+    page = pdf.addPage([595, 842]);
+    y = drawHeader(page);
+  }
   const sigY = 120;
   const slotW = 260;
   let sx = 40;
@@ -111,6 +143,7 @@ Deno.serve(async (req) => {
     page.drawText(`${rl} - Datum: ${today}`, { x: sx, y: sigY - 4, size: 7, font, color: ink });
     sx += slotW;
   }
+  page.drawText(`Eintraege: ${(rows ?? []).length}`, { x: 40, y: 40, size: 8, font, color: ink });
   const bytes = await pdf.save();
   return jsonResponse({ filename: `${kind}_${from}_${to}.pdf`, mime: "application/pdf", base64: encodeBase64(bytes) });
 });
