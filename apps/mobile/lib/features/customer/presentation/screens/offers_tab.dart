@@ -48,6 +48,10 @@ class OffersTab extends ConsumerWidget {
           const _ProductSearchBar(),
           const SizedBox(height: AppSpacing.s5),
 
+          // 0.3. ── Feierabend-Deal (fetter Gold-Block) ───────────────
+          const _FeierabendDealCard(),
+          const SizedBox(height: AppSpacing.s6),
+
           // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ─────────
           const _HeroCarousel(),
           const SizedBox(height: AppSpacing.s6),
@@ -1393,6 +1397,59 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Vollflächige, goldgelbe Deal-Karte im Stil der Design-Mockups. Eyebrow
+/// „feierabend-deal" in Kleinschrift mit Buchstabenabstand, darunter der
+/// fette Deal-Titel und Gültigkeit. Klickbar → springt in den Automaten-
+/// Finder (dort ist der Deal 1:1 einlösbar am Kaffee/Snack-Kombi-Automaten).
+class _FeierabendDealCard extends StatelessWidget {
+  const _FeierabendDealCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      color: AppColors.brand,
+      borderColor: AppColors.brand,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.s5,
+        AppSpacing.s5,
+        AppSpacing.s5,
+        AppSpacing.s5,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'feierabend-deal',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ).copyWith(letterSpacing: 3, height: 1),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Text(
+            'Kaffee + Snack für 2,90 €.',
+            style: AppTypography.display(
+              size: 24,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ).copyWith(height: 1.1),
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Text(
+            'Täglich von 17 bis 20 Uhr — an allen Automaten.',
+            style: AppTypography.body(
+              size: 13,
+              weight: FontWeight.w600,
+              color: AppColors.ink,
             ),
           ),
         ],

@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/brand_marks.dart';
-import '../../../../core/widgets/design_system/loyalty_meter.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
-import '../../customer/presentation/screens/donations_screen.dart';
 import '../../customer/presentation/screens/notifications_screen.dart';
 import '../../finance/presentation/screens/finance_screen.dart';
 import '../../management/presentation/management_screen.dart';
@@ -105,7 +101,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback onSignOut;
 
   @override
-  Size get preferredSize => const Size.fromHeight(108);
+  Size get preferredSize =>
+      Size.fromHeight(user.role == UserRole.customer ? 240 : 108);
 
   // Rollen-Labels für die UI: intern bleiben shareholder und employee als
   // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
@@ -213,96 +210,102 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   /// mittlere Fläche, rechts sitzt ausschließlich die Notification-Bell.
   /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
   Widget _customerHeader(BuildContext context, String? customerNumber) {
-    return AppBar(
-      toolbarHeight: 108,
-      backgroundColor: AppColors.ink,
-      elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      iconTheme: const IconThemeData(color: AppColors.onDark),
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Links bis mittig: Marken-Hero (Bördekreis-Kontur + Wortmarke
-            // + Automat + Slogan).
-            Expanded(
-              flex: 4,
-              child: Image.asset(
-                'assets/images/brand_hero_wide.png',
-                fit: BoxFit.contain,
-                alignment: Alignment.centerLeft,
-                height: 96,
-              ),
-            ),
-            const Spacer(),
-            // Rechts: nur die Notification-Bell.
-            const _NotificationBell(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Kleiner Chip im Header, der die kumulierte Spende des Kunden anzeigt.
-/// Klick öffnet den Spenden-Screen (eigener Beitrag + Abstimmung).
-class _DonationChip extends ConsumerWidget {
-  const _DonationChip();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final summary = ref.watch(myDonationSummaryProvider).valueOrNull;
-    final amount = summary?.totalDonated ?? 0;
-    return Material(
-      color: AppColors.brand,
-      borderRadius: BorderRadius.circular(AppRadii.pill),
-      child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const DonationsScreen(),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s3, vertical: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+    final firstName = _firstName(user.fullName) ?? 'Kunde';
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(240),
+      child: Container(
+        color: AppColors.ink,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 240,
+            child: Stack(
               children: [
-                const Icon(Icons.volunteer_activism,
-                    color: AppColors.ink, size: 18),
-                const SizedBox(width: 6),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Meine Spende',
-                      style: AppTypography.body(
-                        size: 9,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink,
-                      ).copyWith(letterSpacing: 0.3, height: 1),
+                // Marken-Hero als leicht abgeblendete Bildfläche im Hintergrund.
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.20,
+                    child: Image.asset(
+                      'assets/images/brand_hero_wide.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.centerRight,
                     ),
-                    Text(
-                      Formatters.euro(amount),
-                      style: AppTypography.body(
-                        size: 13,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink,
-                      ).copyWith(height: 1.1),
-                    ),
-                  ],
+                  ),
+                ),
+                // Notification-Bell oben rechts.
+                const Positioned(
+                  top: 4,
+                  right: 4,
+                  child: _NotificationBell(),
+                ),
+                // Anrede + Eyebrow + Subtitle.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.s5,
+                    AppSpacing.s6,
+                    AppSpacing.s5,
+                    AppSpacing.s5,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Gelber Punkt + Slogan als Eyebrow (lowercase, letter-
+                      // spaced), matched das Design-Mockup.
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppColors.brand,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              'immer da, wenn der hunger kommt.',
+                              style: AppTypography.body(
+                                size: 13,
+                                weight: FontWeight.w700,
+                                color: AppColors.brand,
+                              ).copyWith(letterSpacing: 1.2),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s3),
+                      Text(
+                        'Moin, $firstName.',
+                        style: AppTypography.display(
+                          size: 36,
+                          weight: FontWeight.w800,
+                          color: AppColors.onDark,
+                        ).copyWith(height: 1.05),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Snack gefällig? Deine Börde ist gut versorgt.',
+                        style: AppTypography.body(
+                          size: 14,
+                          weight: FontWeight.w500,
+                          color: AppColors.brandLight,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
     );
   }
 }
