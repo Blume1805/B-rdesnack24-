@@ -222,10 +222,6 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
             child: Stack(
               children: [
                 // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
-                // BoxFit.contain skaliert das breite Motiv, sodass die
-                // leuchtende Bördekreis-Kontur und die BÖRDE-SNACK-24-Wortmarke
-                // sichtbar bleiben — sonst sähe man rechts nur den schwarzen
-                // Automaten auf schwarzem Grund.
                 Positioned(
                   right: -12,
                   top: 0,
@@ -237,94 +233,102 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     alignment: Alignment.centerRight,
                   ),
                 ),
-                // Linke Hälfte: Anrede-Text, sanfter Ink-Verlauf zum Bild.
+                // Sanfter Verschmelzungs-Streifen an der linken Bild-Kante:
+                // der Bild-Hintergrund ist warm-schwarz, unser Header-Ink
+                // kalt-schwarz — reine Positionierung hinterlässt sonst eine
+                // sichtbare Rechteck-Kante. Der breite Gradient blendet die
+                // linken ~35 % des Bildes weich in die Ink-Fläche ein.
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  right: MediaQuery.of(context).size.width * 0.22,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            AppColors.ink,
+                            AppColors.ink,
+                            Color(0x00202321),
+                          ],
+                          stops: [0.0, 0.55, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Linke Hälfte: Anrede-Text
                 Positioned(
                   left: 0,
                   top: 0,
                   bottom: 0,
                   right: MediaQuery.of(context).size.width * 0.42,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          AppColors.ink,
-                          AppColors.ink,
-                          Color(0x00202321),
-                        ],
-                        stops: [0.0, 0.7, 1.0],
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.s5,
+                      AppSpacing.s5,
+                      AppSpacing.s2,
+                      AppSpacing.s5,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.s5,
-                        AppSpacing.s5,
-                        AppSpacing.s2,
-                        AppSpacing.s5,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Gelber Punkt + Slogan (korrekte Schreibweise).
-                          Row(
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.brand,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  'Immer da, wenn der Hunger kommt.',
-                                  style: AppTypography.body(
-                                    size: 11,
-                                    weight: FontWeight.w700,
-                                    color: AppColors.brand,
-                                  ).copyWith(letterSpacing: 0.4),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Slogan zweizeilig, ohne Punkt-Präfix.
+                        Text(
+                          'immer da, wenn der',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w700,
+                            color: AppColors.brand,
+                          ).copyWith(letterSpacing: 0.3, height: 1.2),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Hunger kommt',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w700,
+                            color: AppColors.brand,
+                          ).copyWith(letterSpacing: 0.3, height: 1.2),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: AppSpacing.s3),
+                        Text(
+                          'Moin,',
+                          style: AppTypography.display(
+                            size: 26,
+                            weight: FontWeight.w800,
+                            color: AppColors.onDark,
+                          ).copyWith(height: 1.0),
+                        ),
+                        Text(
+                          '$firstName.',
+                          style: AppTypography.display(
+                            size: 26,
+                            weight: FontWeight.w800,
+                            color: AppColors.onDark,
+                          ).copyWith(height: 1.05),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Snack gefällig?',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w500,
+                            color: AppColors.brandLight,
                           ),
-                          const SizedBox(height: AppSpacing.s3),
-                          Text(
-                            'Moin,',
-                            style: AppTypography.display(
-                              size: 26,
-                              weight: FontWeight.w800,
-                              color: AppColors.onDark,
-                            ).copyWith(height: 1.0),
-                          ),
-                          Text(
-                            '$firstName.',
-                            style: AppTypography.display(
-                              size: 26,
-                              weight: FontWeight.w800,
-                              color: AppColors.onDark,
-                            ).copyWith(height: 1.05),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Snack gefällig?',
-                            style: AppTypography.body(
-                              size: 12,
-                              weight: FontWeight.w500,
-                              color: AppColors.brandLight,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 ),
