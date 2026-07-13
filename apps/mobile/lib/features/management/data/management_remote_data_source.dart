@@ -35,6 +35,28 @@ class ManagementRemoteDataSource {
     return (rows as List).cast<Map<String, dynamic>>();
   }
 
+  /// FIFO-Bewegungen (Zugänge/Abgänge/Vernichtungen/Korrekturen) pro Produkt
+  /// im gewählten Zeitraum, chronologisch sortiert.
+  Future<List<Map<String, dynamic>>> inventoryFifoMovements(
+    DateTime from,
+    DateTime to,
+  ) async {
+    final rows = await _client.rpc('inventory_fifo_movements', params: {
+      'p_from': from.toUtc().toIso8601String(),
+      'p_to': to.toUtc().toIso8601String(),
+    });
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
+  /// Am Stichtag noch verbliebene FIFO-Lots je Produkt mit Restmenge,
+  /// EK-Preis, MHD-Abschlag und Bilanzwert.
+  Future<List<Map<String, dynamic>>> inventoryFifoLots(DateTime to) async {
+    final rows = await _client.rpc('inventory_fifo_lots', params: {
+      'p_to': to.toUtc().toIso8601String(),
+    });
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
   Future<void> correctInventory(
     String machineId,
     String productId,

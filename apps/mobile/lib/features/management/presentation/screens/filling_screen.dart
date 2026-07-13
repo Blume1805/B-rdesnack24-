@@ -43,15 +43,43 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
   final _formKey = GlobalKey<FormState>();
   final _qtyCtrl = TextEditingController();
   final _spoiledCtrl = TextEditingController(text: '0');
+  final _unitCostCtrl = TextEditingController();
+  final _invoiceNumberCtrl = TextEditingController();
   String? _machineId;
   String? _productId;
   bool _mhdChecked = true;
+  DateTime _invoiceDate = DateTime.now();
+  DateTime? _lotExpiry;
 
   @override
   void dispose() {
     _qtyCtrl.dispose();
     _spoiledCtrl.dispose();
+    _unitCostCtrl.dispose();
+    _invoiceNumberCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickInvoiceDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _invoiceDate,
+      firstDate: DateTime(2024),
+      lastDate: DateTime.now(),
+      locale: const Locale('de'),
+    );
+    if (picked != null) setState(() => _invoiceDate = picked);
+  }
+
+  Future<void> _pickLotExpiry() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _lotExpiry ?? DateTime.now().add(const Duration(days: 90)),
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+      lastDate: DateTime(2030),
+      locale: const Locale('de'),
+    );
+    if (picked != null) setState(() => _lotExpiry = picked);
   }
 
   void _submit() {
@@ -64,6 +92,12 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
       'removed_spoiled': int.tryParse(_spoiledCtrl.text) ?? 0,
       'mhd_checked': _mhdChecked,
       'filled_at': DateTime.now().toIso8601String(),
+      'unit_cost': double.tryParse(_unitCostCtrl.text.replaceAll(',', '.')),
+      'invoice_number': _invoiceNumberCtrl.text.trim().isEmpty
+          ? null
+          : _invoiceNumberCtrl.text.trim(),
+      'invoice_date': _invoiceDate.toIso8601String().substring(0, 10),
+      'lot_expiry': _lotExpiry?.toIso8601String().substring(0, 10),
     });
   }
 
@@ -121,6 +155,74 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Entnommener Verderb'),
               ),
+              const SizedBox(height: 12),
+              // ── FIFO-Lot-Metadaten (Rechnung + EK-Preis + MHD) ─────
+              TextFormField(
+                controller: _unitCostCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'EK-Preis netto €/Stück',
+                  helperText: 'Aus Lieferantenrechnung',
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Pflichtfeld';
+                  final n = double.tryParse(v.replaceAll(',', '.'));
+                  return (n == null || n <= 0) ? 'EK > 0' : null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _invoiceNumberCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Rechnungsnummer',
+                  helperText: 'Nummer der Lieferantenrechnung',
+                ),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Pflichtfeld' : null,
+              ),
+              const SizedBox(height: 12),
+              InputDecorator(
+                decoration: const InputDecoration(labelText: 'Rechnungsdatum'),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${_invoiceDate.day.toString().padLeft(2, '0')}.${_invoiceDate.month.toString().padLeft(2, '0')}.${_invoiceDate.year}',
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _pickInvoiceDate,
+                      icon: const Icon(Icons.date_range),
+                      label: const Text('ändern'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'MHD des Lots (empfohlen)',
+                  helperText:
+                      'Wird für die MHD-Bewertung im Inventurreport genutzt',
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _lotExpiry == null
+                            ? '— nicht gesetzt —'
+                            : '${_lotExpiry!.day.toString().padLeft(2, '0')}.${_lotExpiry!.month.toString().padLeft(2, '0')}.${_lotExpiry!.year}',
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _pickLotExpiry,
+                      icon: const Icon(Icons.date_range),
+                      label: const Text('setzen'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('MHD geprüft'),
