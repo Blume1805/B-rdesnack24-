@@ -211,10 +211,27 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
   Widget _customerHeader(BuildContext context, String? customerNumber) {
     final firstName = _firstName(user.fullName) ?? 'Kunde';
+    // Farbtöne aus dem brand_hero_wide.png-Hintergrund:
+    // - warm-schwarz als Grundfläche
+    // - subtiler goldener Bodennebel am unteren Rand (radial)
+    // Damit wirkt der linke Header wie eine Fortsetzung der Bild-
+    // Hintergrundatmosphäre statt eines fremden kalten Ink-Blocks.
     return PreferredSize(
       preferredSize: const Size.fromHeight(220),
       child: Container(
-        color: AppColors.ink,
+        decoration: const BoxDecoration(
+          color: Color(0xFF0C0A07),
+          gradient: RadialGradient(
+            center: Alignment(-0.4, 1.6),
+            radius: 1.4,
+            colors: [
+              Color(0xFF3A2C10),
+              Color(0xFF1A1409),
+              Color(0xFF0C0A07),
+            ],
+            stops: [0.0, 0.35, 0.85],
+          ),
+        ),
         child: SafeArea(
           bottom: false,
           child: SizedBox(
@@ -234,10 +251,10 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                 ),
                 // Sanfter Verschmelzungs-Streifen an der linken Bild-Kante:
-                // der Bild-Hintergrund ist warm-schwarz, unser Header-Ink
-                // kalt-schwarz — reine Positionierung hinterlässt sonst eine
-                // sichtbare Rechteck-Kante. Der breite Gradient blendet die
-                // linken ~35 % des Bildes weich in die Ink-Fläche ein.
+                // blendet vom warm-schwarzen Header-Grund über die linken
+                // ~30 % des Bildes weich aus. Zielfarbe matcht den
+                // Header-Hintergrund, damit die Rechteck-Kante des Bild-
+                // Layers unsichtbar wird.
                 Positioned(
                   left: 0,
                   top: 0,
@@ -250,9 +267,9 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            AppColors.ink,
-                            AppColors.ink,
-                            Color(0x00202321),
+                            Color(0xFF0C0A07),
+                            Color(0xFF0C0A07),
+                            Color(0x000C0A07),
                           ],
                           stops: [0.0, 0.55, 1.0],
                         ),
