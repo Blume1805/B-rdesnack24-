@@ -1,15 +1,14 @@
 // ============================================================================
-// Edge Function: approval-notify
+// approval-notify: E-Mail-Kanal für Freigabe-Workflow
 // ----------------------------------------------------------------------------
-// Verschickt E-Mail-Benachrichtigungen für Freigabe-Anfragen. In-App-
-// Notifications erzeugt bereits die request_document_approval-RPC; diese
-// Function ergänzt den E-Mail-Kanal.
-//
-// Aufrufmuster:
-//   POST { approval_id, phase }   phase in {"requested","approved","rejected"}
+// Anforderungen gehen an die offizielle Firmen-Adresse
+// (boerdesnack24@gmail.com). Entscheidungen (approved/rejected) gehen an
+// den Ersteller der Anfrage plus eine Kopie ins Archiv.
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+
+const OFFICIAL_EMAIL = "boerdesnack24@gmail.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -34,22 +33,14 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (aErr || !approval) return jsonResponse({ error: "Approval nicht gefunden" }, 404);
 
-  // Empfängerliste je Phase bestimmen
   let recipients: string[] = [];
   if (body.phase === "requested") {
-    // Alle Gesellschafter (E-Mail aus profiles)
-    const { data: rows } = await caller
-      .from("document_approval_decisions")
-      .select("approver:profiles(email, full_name)")
-      .eq("approval_id", body.approval_id);
-    recipients = (rows ?? [])
-      .map((r) => (r.approver as { email?: string })?.email)
-      .filter(Boolean) as string[];
+    recipients = [OFFICIAL_EMAIL];
   } else {
-    // Ersteller informieren
     const { data: prof } = await caller.from("profiles")
       .select("email").eq("id", approval.requested_by).maybeSingle();
     if (prof?.email) recipients = [prof.email as string];
+    recipients.push(OFFICIAL_EMAIL);
   }
   if (recipients.length === 0) return jsonResponse({ ok: true, sent: 0 });
 
@@ -59,19 +50,21 @@ Deno.serve(async (req) => {
     ? `Freigabe erteilt: ${approval.title}`
     : `Freigabe abgelehnt: ${approval.title}`;
 
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#14110E;max-width:600px;">
       <div style="background:#FDC102;padding:12px 20px;color:#14110E;font-weight:800;font-size:15px;letter-spacing:0.4px;">
         BÖRDESNACK24 · FREIGABE
       </div>
       <div style="padding:20px 24px;">
-        <p><b>${escape(approval.title)}</b></p>
+        <p><b>${esc(approval.title)}</b></p>
         <p>Zeitraum: ${approval.period_from} – ${approval.period_to}</p>
         <p>Status: <b>${approval.status}</b></p>
         ${body.phase === "requested"
-          ? `<p>Bitte in der App prüfen und freigeben:</p>`
+          ? `<p>Bitte in der App prüfen und freigeben. Die Anfrage geht an die offizielle Firmen-Adresse und wird von beiden Gesellschaftern in der App eingesehen.</p>`
           : body.phase === "approved"
-          ? `<p>Beide Gesellschafter haben signiert.</p>`
+          ? `<p>Beide Gesellschafter haben signiert. Das finale, signierte PDF liegt im Archiv.</p>`
           : `<p>Ein Gesellschafter hat abgelehnt. Kommentar in der App einsehen.</p>`}
         <p style="margin-top:16px">
           <a href="https://blume1805.github.io/B-rdesnack24-/"
@@ -81,13 +74,13 @@ Deno.serve(async (req) => {
           </a>
         </p>
         <p style="color:#6f6a5b;font-size:11px;margin-top:20px">
-          Bördesnack24 GbR · Sülldorfer Str. 3A · 39171 Sülzetal
+          Bördesnack24 GbR · Sülldorfer Str. 3A · 39171 Sülzetal<br>
+          Approval-ID: ${approval.id}
         </p>
       </div>
     </div>
   `;
 
-  // Über den generischen email-send-Endpoint (durchgereichter JWT)
   const res = await fetch(`${supabaseUrl}/functions/v1/email-send`, {
     method: "POST",
     headers: {
@@ -99,7 +92,3 @@ Deno.serve(async (req) => {
   const payload = await res.json();
   return jsonResponse({ ok: res.ok, recipients, payload });
 });
-
-function escape(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
