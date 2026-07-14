@@ -63,7 +63,33 @@ class ApprovalsRemoteDataSource {
   Future<List<Map<String, dynamic>>> list({bool mineOnly = false}) async {
     final rows = await _client
         .rpc('list_document_approvals', params: {'p_mine_only': mineOnly});
-    return (rows as List).cast<Map<String, dynamic>>();
+    final list = (rows as List).cast<Map<String, dynamic>>();
+
+    // Signed-URLs für freigegebene Dokumente parallel vorab holen und
+    // in die Row unter 'signed_url' schreiben. Grund: iOS Safari blockt
+    // window.open, wenn irgendein await zwischen User-Tap und dem
+    // Aufruf liegt. Wir wollen also, dass der Tap-Handler synchron
+    // aus row['signed_url'] lesen und launchUrl direkt aufrufen kann.
+    final futures = <Future<void>>[];
+    for (final row in list) {
+      final path = row['final_pdf_path']?.toString();
+      final status = row['status']?.toString();
+      if (status == 'approved' && path != null && path.isNotEmpty) {
+        futures.add(
+          _client.storage
+              .from('signed-documents')
+              .createSignedUrl(path, 3600 * 24)
+              .then((url) => row['signed_url'] = url)
+              .catchError((_) {
+            // Bei Fehler bleibt signed_url null — Tap-Handler nutzt Fallback.
+          }),
+        );
+      }
+    }
+    if (futures.isNotEmpty) {
+      await Future.wait(futures);
+    }
+    return list;
   }
 }
 
