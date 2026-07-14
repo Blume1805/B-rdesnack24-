@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -18,8 +20,8 @@ final _approvalsListProvider =
 
 /// Freigaben-Übersicht: alle offenen und erledigten Anfragen. Gesellschafter
 /// sehen ihre eigenen offenen Entscheidungen ganz oben.
-class ApprovalsScreen extends ConsumerWidget {
-  const ApprovalsScreen({super.key});
+class DocumentApprovalsScreen extends ConsumerWidget {
+  const DocumentApprovalsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -165,10 +167,39 @@ class _ApprovalCard extends ConsumerWidget {
                 ],
               ),
             ],
+            if (status == 'approved' &&
+                (row['final_pdf_path']?.toString().isNotEmpty ?? false)) ...[
+              const SizedBox(height: AppSpacing.s3),
+              FilledButton.icon(
+                onPressed: () => _openFinal(context, ref,
+                    row['final_pdf_path']?.toString() ?? ''),
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text('Signiertes PDF öffnen'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brand,
+                  foregroundColor: AppColors.ink,
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _openFinal(BuildContext context, WidgetRef ref, String path) async {
+    if (path.isEmpty) return;
+    final remote = ref.read(_approvalsRemoteProvider);
+    try {
+      final url = await remote.signedUrl(path);
+      if (url == null) throw Exception('Kein URL verfügbar');
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
   }
 
   Future<void> _decide(BuildContext context, WidgetRef ref, String decision) async {

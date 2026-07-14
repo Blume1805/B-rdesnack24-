@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../management/data/approvals_remote_data_source.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
@@ -42,6 +44,7 @@ class FinanceScreen extends ConsumerWidget {
               onSync: () => _sync(context, ref),
               onExport: () => _export(context, ref),
               onApprovals: () => context.push(AppRoutes.approvals),
+              onRequestApproval: () => _requestApproval(context, ref, period),
             ),
           ),
           const SizedBox(height: AppSpacing.s5),
@@ -84,6 +87,54 @@ class FinanceScreen extends ConsumerWidget {
     }
     await Printing.sharePdf(bytes: bytes, filename: 'finanzauswertung.pdf');
   }
+
+  Future<void> _requestApproval(
+      BuildContext context, WidgetRef ref, FinancePeriod period) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Freigabe anfordern'),
+        content: Text(
+            'Die Finanzauswertung für ${Formatters.date(period.from)} – '
+            '${Formatters.date(period.to)} wird beiden Gesellschaftern zur '
+            'Prüfung vorgelegt. Nach 2-of-2-Freigabe wird die signierte '
+            'PDF-Fassung automatisch abgelegt.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brand,
+                  foregroundColor: AppColors.ink),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Anfordern')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final remote =
+          ApprovalsRemoteDataSource(ref.read(supabaseClientProvider));
+      await remote.requestApproval(
+        documentKind: 'finance_period',
+        periodFrom: period.from,
+        periodTo: period.to,
+        title:
+            'Finanzauswertung ${Formatters.date(period.from)} – ${Formatters.date(period.to)}',
+        snapshot: {'period_from': period.from.toIso8601String()},
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Freigabe angefordert.')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
+  }
 }
 
 class _ActionCluster extends StatelessWidget {
@@ -92,12 +143,14 @@ class _ActionCluster extends StatelessWidget {
     required this.onSync,
     required this.onExport,
     required this.onApprovals,
+    required this.onRequestApproval,
   });
 
   final bool busy;
   final VoidCallback onSync;
   final VoidCallback onExport;
   final VoidCallback onApprovals;
+  final VoidCallback onRequestApproval;
 
   @override
   Widget build(BuildContext context) {
@@ -105,8 +158,16 @@ class _ActionCluster extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _IconAction(
+          icon: Icons.rule_folder_outlined,
+          tooltip: 'Freigabe für Auswertung anfordern',
+          onTap: onRequestApproval,
+          iconColor: AppColors.brand,
+          borderColor: AppColors.brand,
+        ),
+        const SizedBox(width: 6),
+        _IconAction(
           icon: Icons.verified_user_outlined,
-          tooltip: 'Freigaben',
+          tooltip: 'Gesellschafter-Freigaben',
           onTap: onApprovals,
         ),
         const SizedBox(width: 6),

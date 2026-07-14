@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../finance/domain/entities/finance_period.dart';
+import '../../data/approvals_remote_data_source.dart';
 import '../controllers/management_providers.dart';
 
 /// Generisches Gerüst für ein revisionssicheres Protokoll:
@@ -82,6 +84,75 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
     await Printing.sharePdf(bytes: bytes, filename: '${kind}_nachweis.pdf');
   }
 
+  Future<void> _requestApproval() async {
+    final kind = widget.exportKind;
+    if (kind == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Freigabe anfordern'),
+        content: Text(
+          'Das ${widget.title}-Protokoll (${Formatters.date(_period.from)} – '
+          '${Formatters.date(_period.to)}) wird beiden Gesellschaftern zur '
+          'Prüfung vorgelegt. Nach 2-of-2-Freigabe wird das signierte PDF '
+          'automatisch abgelegt.',
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brand,
+                  foregroundColor: AppColors.ink),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Anfordern')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    // Snapshot ist ein leichtes Meta-Set — der Report wird zum
+    // Finalisierungszeitpunkt aus den (revisionssicher unveränderlichen)
+    // Protokoll-Tabellen erneut geladen.
+    final rows = ref.read(protocolListProvider(_query)).valueOrNull ?? [];
+    try {
+      final remote =
+          ApprovalsRemoteDataSource(ref.read(supabaseClientProvider));
+      await remote.requestApproval(
+        documentKind: _kindMap[kind] ?? 'haccp_temperature',
+        periodFrom: _period.from,
+        periodTo: _period.to,
+        title:
+            '${widget.title} · ${Formatters.date(_period.from)} – ${Formatters.date(_period.to)}',
+        snapshot: {
+          'protocol_kind': kind,
+          'count': rows.length,
+        },
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Freigabe angefordert.')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
+  }
+
+  /// Mapping des kind aus dem Client-Export ('temperature', 'cleaning', ...)
+  /// auf das document_kind-Enum in Supabase.
+  static const Map<String, String> _kindMap = {
+    'temperature': 'haccp_temperature',
+    'cleaning':    'haccp_cleaning',
+    'disposal':    'haccp_disposal',
+    'filling':     'haccp_filling',
+    'maintenance': 'haccp_maintenance',
+    'cash':        'haccp_cash',
+    'training':    'haccp_training',
+  };
+
   @override
   Widget build(BuildContext context) {
     final list = ref.watch(protocolListProvider(_query));
@@ -89,12 +160,19 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          if (widget.exportKind != null)
+          if (widget.exportKind != null) ...[
+            IconButton(
+              tooltip: 'Freigabe anfordern',
+              icon: const Icon(Icons.rule_folder_outlined,
+                  color: AppColors.brand),
+              onPressed: _requestApproval,
+            ),
             IconButton(
               tooltip: 'PDF-Nachweis',
               icon: const Icon(Icons.picture_as_pdf, color: AppColors.statusCritical),
               onPressed: _export,
             ),
+          ],
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

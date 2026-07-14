@@ -140,7 +140,7 @@ class ManagementScreen extends ConsumerWidget {
         'Freigaben',
         'Dokumente prüfen',
         Icons.rule_folder_outlined,
-        const ApprovalsScreen(),
+        const DocumentApprovalsScreen(),
         visible: p.contains('customers.manage'),
       ),
     ].where((m) => m.visible).toList();

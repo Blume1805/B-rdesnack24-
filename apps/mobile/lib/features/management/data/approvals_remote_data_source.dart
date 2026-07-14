@@ -44,6 +44,20 @@ class ApprovalsRemoteDataSource {
       'approval_id': approvalId,
       'phase': decision == 'approved' ? 'approved' : 'rejected',
     }));
+    // Wenn beide zugestimmt haben, hat die RPC status=approved gesetzt;
+    // document-finalize erzeugt jetzt das signierte PDF (rejected/pending
+    // werden serverseitig ohnehin abgelehnt).
+    unawaited(_client.functions.invoke('document-finalize', body: {
+      'approval_id': approvalId,
+    }));
+  }
+
+  /// Neuen Signed-URL für das finale PDF beziehen (24 h gültig).
+  Future<String?> signedUrl(String path) async {
+    final res = await _client.storage
+        .from('signed-documents')
+        .createSignedUrl(path, 3600 * 24);
+    return res;
   }
 
   Future<List<Map<String, dynamic>>> list({bool mineOnly = false}) async {
