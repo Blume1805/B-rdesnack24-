@@ -72,6 +72,14 @@ class ApprovalsRemoteDataSource {
         .rpc('list_document_approvals', params: {'p_mine_only': mineOnly});
     final list = (rows as List).cast<Map<String, dynamic>>();
 
+    // Partner-Signaturen einmal holen — für die Freigabe-Ansicht der
+    // Inventur brauchen wir die Bilder je Gesellschafter.
+    List<Map<String, dynamic>> partnerSignatures = const [];
+    try {
+      final sigs = await _client.rpc('list_partner_signatures');
+      partnerSignatures = (sigs as List).cast<Map<String, dynamic>>();
+    } catch (_) { /* Fallback: leer */ }
+
     // Signed-URLs für freigegebene Dokumente parallel vorab holen und
     // in die Row unter 'signed_url' schreiben. Grund: iOS Safari blockt
     // window.open, wenn irgendein await zwischen User-Tap und dem
@@ -82,6 +90,12 @@ class ApprovalsRemoteDataSource {
       final path = row['final_pdf_path']?.toString();
       final status = row['status']?.toString();
       final id = row['id']?.toString();
+      final kind = row['document_kind']?.toString();
+
+      // Partner-Signaturen ins Row-Map durchreichen — der Tap-Handler
+      // kann sie synchron abgreifen.
+      row['partner_signatures'] = partnerSignatures;
+
       if (status == 'approved' && path != null && path.isNotEmpty) {
         futures.add(
           _client.storage
@@ -93,16 +107,24 @@ class ApprovalsRemoteDataSource {
           }),
         );
       }
-      // Auto-Refresh: für jedes freigegebene Dokument einmal pro Session
-      // im Hintergrund document-finalize erneut aufrufen. Dadurch
-      // erhalten bereits abgeschlossene Approvals das aktuellste
-      // PDF-Rendering (z. B. echter Dokument-Inhalt statt Coverpage).
-      if (status == 'approved' && id != null && id.isNotEmpty &&
-          !_refinalizedThisSession.contains(id)) {
-        _refinalizedThisSession.add(id);
-        unawaited(_client.functions.invoke(
-          'document-finalize', body: {'approval_id': id},
-        ).then((_) {}).catchError((_) {}));
+
+      // Für inventory_fifo-Approvals das Snapshot mitladen (movements
+      // + lots), damit der Tap-Handler synchron den HTML-Report bauen
+      // kann — Popup-Blocker-sicher.
+      if (status == 'approved' && kind == 'inventory_fifo' &&
+          id != null && id.isNotEmpty) {
+        futures.add(
+          _client.from('document_approvals')
+              .select('snapshot')
+              .eq('id', id)
+              .maybeSingle()
+              .then((rec) {
+            if (rec != null) {
+              final snap = rec['snapshot'];
+              if (snap is Map) row['snapshot'] = snap;
+            }
+          }).catchError((_) {}),
+        );
       }
     }
     if (futures.isNotEmpty) {

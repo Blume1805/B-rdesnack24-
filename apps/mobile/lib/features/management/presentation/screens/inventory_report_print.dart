@@ -6,6 +6,7 @@ Future<void> printInventoryReport({
   required List<Map<String, dynamic>> signatures,
   required DateTime from,
   required DateTime to,
+  List<Map<String, dynamic>>? approvalDecisions,
 }) async {
   // Kein-op.
 }

@@ -14,12 +14,16 @@ import '../../../../core/utils/formatters.dart';
 ///   • Gesamt-Bilanzwert der Vorräte
 ///   • MHD-Bewertungsmatrix (Erklärung)
 ///   • Unterschriften-Block Gesellschafter
+/// Öffnet die FIFO-Inventur als druckbare HTML-Seite. Wenn [approvalDecisions]
+/// gesetzt ist (Freigabe-Kontext), wird ein FREIGEGEBEN-Stempel oben
+/// gerendert und die Signatur-Bilder aus den Decisions genommen.
 Future<void> printInventoryReport({
   required List<Map<String, dynamic>> movements,
   required List<Map<String, dynamic>> lots,
   required List<Map<String, dynamic>> signatures,
   required DateTime from,
   required DateTime to,
+  List<Map<String, dynamic>>? approvalDecisions,
 }) async {
   // Bewegungen nach Produkt gruppieren (Reihenfolge = Server-Sort)
   final byProductMoves = <String, List<Map<String, dynamic>>>{};
@@ -207,9 +211,31 @@ Future<void> printInventoryReport({
   }
   matrixHtml.write('</tbody></table></section>');
 
-  // Signaturen
+  // Signaturen + optional FREIGEGEBEN-Stempel
   final now = DateTime.now();
   final signaturesHtml = StringBuffer();
+
+  // Im Freigabe-Kontext: FREIGEGEBEN-Stempel oberhalb der Signaturen
+  final isApproved = approvalDecisions != null &&
+      approvalDecisions.any((d) => d['decision'] == 'approved');
+  if (isApproved) {
+    signaturesHtml.write('<section class="stamp">');
+    signaturesHtml.write('<div class="stamp-badge">FREIGEGEBEN</div>');
+    signaturesHtml.write('<div class="stamp-note">Beide Gesellschafter '
+        'haben nach Prüfung digital signiert.</div>');
+    signaturesHtml.write('<ul class="stamp-list">');
+    for (final d in approvalDecisions) {
+      final name = _esc((d['approver_name']?.toString()) ?? '?');
+      final decision = d['decision']?.toString() == 'approved'
+          ? 'freigegeben' : 'abgelehnt';
+      final at = d['decided_at']?.toString();
+      final atFmt = at == null ? '' :
+          ' · ' + fmtDate(at);
+      signaturesHtml.write('<li><b>$name</b> — $decision$atFmt</li>');
+    }
+    signaturesHtml.write('</ul></section>');
+  }
+
   if (signatures.isNotEmpty) {
     signaturesHtml.write('<section class="signatures">');
     signaturesHtml.write('<h2>Freigabe / Unterschriften</h2>');
@@ -276,6 +302,26 @@ Future<void> printInventoryReport({
   .sig-meta { color: #6f6a5b; font-size: 8pt; }
   .matrix-intro { color: #6f6a5b; font-size: 9pt; margin: 2pt 0 4pt 0;
                   max-width: 780px; }
+  /* "Bewertung:" mit zwei Zeilen — Label steht neben dem Anschaffungs­
+     kosten-Text, die zweite Zeile ("MHD-Abschlag vom AK-Wert") wird auf
+     die Höhe von "Anschaffungskosten" eingerückt. */
+  .head .meta .bewertung-label { display: inline-block; vertical-align: top; }
+  .head .meta .bewertung-lines { display: inline-block; vertical-align: top;
+                                  margin-left: 4pt; }
+  .head .meta .bewertung-lines > span { display: block; }
+
+  /* Freigabe-Stempel */
+  section.stamp { margin: 8pt 0 4pt 0; padding: 6pt 10pt;
+                  border: 1pt solid #5C9A3F; border-radius: 6pt;
+                  background: #EEF6E8; }
+  section.stamp .stamp-badge {
+    display: inline-block; font-weight: 800; letter-spacing: 1px;
+    color: #3E7A25; font-size: 12pt;
+  }
+  section.stamp .stamp-note { color: #14110E; font-size: 9pt; margin-top: 2pt; }
+  section.stamp .stamp-list { margin: 4pt 0 0 14pt; padding: 0;
+                              font-size: 9pt; color: #14110E; }
+  section.stamp .stamp-list li { margin: 1pt 0; }
   table.matrix { width: 100%; }
   table.matrix td, table.matrix th { padding: 4pt 6pt; }
 
@@ -315,7 +361,13 @@ Future<void> printInventoryReport({
       <h1>INVENTUR — FIFO-Bewegungsreport</h1>
       <div class="meta">Zeitraum: ${Formatters.date(from)} – ${Formatters.date(to)}</div>
       <div class="meta">Bewertungsverfahren: <b>FIFO</b> (§256 HGB, Verbrauchsfolge)</div>
-      <div class="meta">Bewertung: Anschaffungskosten netto (§253 HGB), MHD-Abschlag vom AK-Wert</div>
+      <div class="meta">
+        <span class="bewertung-label">Bewertung:</span>
+        <span class="bewertung-lines">
+          <span>Anschaffungskosten netto (§253 HGB)</span>
+          <span>MHD-Abschlag vom AK-Wert</span>
+        </span>
+      </div>
     </div>
     <div class="meta">
       Bördesnack24 GbR<br>

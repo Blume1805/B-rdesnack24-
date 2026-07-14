@@ -14,6 +14,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../data/approvals_remote_data_source.dart';
+// Für Freigabe-Tap → gleiches Layout wie im Direkt-Export der Inventur.
+import 'inventory_report_print.dart'
+    if (dart.library.html) 'inventory_report_print_web.dart';
 
 final _approvalsRemoteProvider =
     Provider<ApprovalsRemoteDataSource>((ref) =>
@@ -114,32 +117,61 @@ class _ApprovalCard extends ConsumerWidget {
     // blockt window.open nicht.
     final signedUrl = row['signed_url']?.toString();
 
+    final documentKind = row['document_kind']?.toString();
+
     // Tap-Handler: bei approved öffnet er das finale signierte PDF; bei
-    // rejected / cancelled zeigt er den Status als SnackBar; ohne PDF-Pfad
-    // gibt es einen „wird noch erzeugt"-Hinweis.
+    // rejected / cancelled zeigt er den Status als SnackBar.
+    // Für inventory_fifo wird die gleiche HTML-Print-Ansicht wie im
+    // Direkt-Export der Inventur geöffnet — damit ist Freigabe- und
+    // Direktansicht 100 % identisch (mit zusätzlichem FREIGEGEBEN-Stempel).
     void handleTap() {
-      if (hasFinal) {
-        if (signedUrl != null && signedUrl.isNotEmpty) {
-          // Synchroner Aufruf innerhalb der User-Gesture — kein await
-          // zwischen Tap und launchUrl, damit iOS Safari nicht blockt.
-          launchUrl(
-            Uri.parse(signedUrl),
-            mode: LaunchMode.externalApplication,
-            webOnlyWindowName: '_blank',
-          );
-        } else {
-          // URL noch nicht bereit — Fallback (holt async und öffnet dann,
-          // Popup-Blocker greift eventuell). Nach Refresh sollte der URL
-          // beim nächsten Tap sofort da sein.
-          _openFinal(context, ref, finalPath);
-        }
-      } else {
+      if (!hasFinal) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(status == 'rejected'
                 ? 'Diese Freigabe wurde abgelehnt.'
                 : status == 'cancelled'
                     ? 'Diese Freigabe wurde abgebrochen.'
                     : 'Signiertes PDF wird noch erzeugt …')));
+        return;
+      }
+
+      // ─── Inventur: gleicher HTML-Print wie im Direkt-Export ───────
+      if (documentKind == 'inventory_fifo') {
+        final snap = row['snapshot'];
+        if (snap is Map) {
+          final movements = ((snap['movements'] as List?) ?? const [])
+              .cast<Map<String, dynamic>>();
+          final lots = ((snap['lots'] as List?) ?? const [])
+              .cast<Map<String, dynamic>>();
+          final signatures = ((row['partner_signatures'] as List?) ?? const [])
+              .cast<Map<String, dynamic>>();
+          final decisions = ((row['decisions'] as List?) ?? const [])
+              .cast<Map<String, dynamic>>();
+          final from = DateTime.tryParse(row['period_from']?.toString() ?? '')
+              ?? DateTime.now();
+          final to = DateTime.tryParse(row['period_to']?.toString() ?? '')
+              ?? DateTime.now();
+          // Alles ist vorgeladen → Aufruf ist synchron in der User-Gesture,
+          // window.open wird nicht vom Popup-Blocker geblockt.
+          printInventoryReport(
+            movements: movements, lots: lots, signatures: signatures,
+            from: from, to: to,
+            approvalDecisions: decisions,
+          );
+          return;
+        }
+        // Snapshot nicht vorgeladen — Fallback: PDF öffnen
+      }
+
+      // ─── Andere Dokumente: signiertes PDF aus Storage ─────────────
+      if (signedUrl != null && signedUrl.isNotEmpty) {
+        launchUrl(
+          Uri.parse(signedUrl),
+          mode: LaunchMode.externalApplication,
+          webOnlyWindowName: '_blank',
+        );
+      } else {
+        _openFinal(context, ref, finalPath);
       }
     }
 
