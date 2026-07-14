@@ -23,6 +23,18 @@ final _approvalsListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>(
         (ref) => ref.watch(_approvalsRemoteProvider).list());
 
+/// Pre-fetch für den Signed-URL des finalen PDFs. Wird gerendert, sobald
+/// die Karte sichtbar wird — dadurch steht der URL beim Tap synchron
+/// bereit, und der Aufruf von `launchUrl` läuft innerhalb der User-
+/// Gesture (kein `await` dazwischen). Notwendig, weil iOS Safari
+/// `window.open` sofort blockt, wenn irgendein Micro-Task zwischen
+/// Tap und Öffnen liegt.
+final _signedPdfUrlProvider =
+    FutureProvider.autoDispose.family<String?, String>((ref, path) async {
+  if (path.isEmpty) return null;
+  return ref.watch(_approvalsRemoteProvider).signedUrl(path);
+});
+
 /// Freigaben-Übersicht: alle offenen und erledigten Anfragen. Gesellschafter
 /// sehen ihre eigenen offenen Entscheidungen ganz oben.
 class DocumentApprovalsScreen extends ConsumerWidget {
@@ -109,12 +121,31 @@ class _ApprovalCard extends ConsumerWidget {
     final hasFinal = status == 'approved' &&
         finalPath != null && finalPath.isNotEmpty;
 
+    // Signed-URL vorab holen, damit der Tap synchron öffnet (iOS-Safari
+    // blockt window.open sonst als „nicht in User-Gesture").
+    final signedUrl = hasFinal
+        ? ref.watch(_signedPdfUrlProvider(finalPath)).valueOrNull
+        : null;
+
     // Tap-Handler: bei approved öffnet er das finale signierte PDF; bei
     // rejected / cancelled zeigt er den Status als SnackBar; ohne PDF-Pfad
     // gibt es einen „wird noch erzeugt"-Hinweis.
     void handleTap() {
       if (hasFinal) {
-        _openFinal(context, ref, finalPath);
+        if (signedUrl != null && signedUrl.isNotEmpty) {
+          // Synchroner Aufruf innerhalb der User-Gesture — kein await
+          // zwischen Tap und launchUrl, damit iOS Safari nicht blockt.
+          launchUrl(
+            Uri.parse(signedUrl),
+            mode: LaunchMode.externalApplication,
+            webOnlyWindowName: '_blank',
+          );
+        } else {
+          // URL noch nicht bereit — Fallback (holt async und öffnet dann,
+          // Popup-Blocker greift eventuell). Nach Refresh sollte der URL
+          // beim nächsten Tap sofort da sein.
+          _openFinal(context, ref, finalPath);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(status == 'rejected'
