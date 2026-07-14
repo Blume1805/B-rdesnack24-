@@ -16,6 +16,7 @@ import 'screens/inventory_report_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/maintenance_screen.dart';
 import 'screens/approvals_screen.dart';
+import 'screens/signature_management_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
 
@@ -141,6 +142,13 @@ class ManagementScreen extends ConsumerWidget {
         'Dokumente prüfen',
         Icons.rule_folder_outlined,
         const DocumentApprovalsScreen(),
+        visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'Signaturen',
+        'DocuSign · Upload',
+        Icons.draw_outlined,
+        const SignatureManagementScreen(),
         visible: p.contains('customers.manage'),
       ),
     ].where((m) => m.visible).toList();
