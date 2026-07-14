@@ -99,93 +99,138 @@ class _ApprovalCard extends ConsumerWidget {
     final to = parseDate(row['period_to']);
     final requestedAt = parseDate(row['requested_at']);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-      child: AppCard(
-        topStripeColor: _statusColor(status),
-        padding: const EdgeInsets.all(AppSpacing.s4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    // Erledigt = approved / rejected / cancelled → Karte ausgegraut
+    // dargestellt (Opacity 0.6), bleibt aber vollständig anklickbar.
+    // Bei approved öffnet der Tap direkt das finale signierte PDF.
+    final isDone =
+        status == 'approved' || status == 'rejected' || status == 'cancelled';
+    final finalPath = row['final_pdf_path']?.toString();
+    final hasFinal = status == 'approved' &&
+        finalPath != null && finalPath.isNotEmpty;
+
+    final card = AppCard(
+      topStripeColor: _statusColor(status),
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(row['title']?.toString() ?? '',
+                    style: AppTypography.body(
+                        size: 15,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink)),
+              ),
+              StatusBadge(
+                label: switch (status) {
+                  'approved' => 'freigegeben',
+                  'rejected' => 'abgelehnt',
+                  'cancelled' => 'abgebrochen',
+                  _ => 'offen',
+                },
+                tone: switch (status) {
+                  'approved' => StatusTone.positive,
+                  'rejected' => StatusTone.critical,
+                  'cancelled' => StatusTone.neutral,
+                  _ => StatusTone.warning,
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Zeitraum: ${from == null ? '?' : Formatters.date(from)} – '
+            '${to == null ? '?' : Formatters.date(to)}'
+            '${requestedAt == null ? '' : ' · angefragt ${Formatters.date(requestedAt)}'}',
+            style: AppTypography.body(size: 11, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          for (final d in decisions) _DecisionRow(row: d),
+          if (status == 'pending' && myDec == 'pending') ...[
+            const SizedBox(height: AppSpacing.s3),
             Row(
               children: [
                 Expanded(
-                  child: Text(row['title']?.toString() ?? '',
-                      style: AppTypography.body(
-                          size: 15,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  child: FilledButton.icon(
+                    onPressed: () => _decide(context, ref, 'approved'),
+                    icon: const Icon(Icons.check),
+                    label: const Text('Freigeben'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.statusPositive,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
                 ),
-                StatusBadge(
-                  label: switch (status) {
-                    'approved' => 'freigegeben',
-                    'rejected' => 'abgelehnt',
-                    'cancelled' => 'abgebrochen',
-                    _ => 'offen',
-                  },
-                  tone: switch (status) {
-                    'approved' => StatusTone.positive,
-                    'rejected' => StatusTone.critical,
-                    'cancelled' => StatusTone.neutral,
-                    _ => StatusTone.warning,
-                  },
+                const SizedBox(width: AppSpacing.s2),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _decide(context, ref, 'rejected'),
+                    icon: const Icon(Icons.close),
+                    label: const Text('Ablehnen'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.statusCritical,
+                      side: const BorderSide(color: AppColors.statusCritical),
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Zeitraum: ${from == null ? '?' : Formatters.date(from)} – '
-              '${to == null ? '?' : Formatters.date(to)}'
-              '${requestedAt == null ? '' : ' · angefragt ${Formatters.date(requestedAt)}'}',
-              style: AppTypography.body(size: 11, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: AppSpacing.s3),
-            for (final d in decisions) _DecisionRow(row: d),
-            if (status == 'pending' && myDec == 'pending') ...[
-              const SizedBox(height: AppSpacing.s3),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => _decide(context, ref, 'approved'),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Freigeben'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.statusPositive,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s2),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _decide(context, ref, 'rejected'),
-                      icon: const Icon(Icons.close),
-                      label: const Text('Ablehnen'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.statusCritical,
-                        side: const BorderSide(color: AppColors.statusCritical),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (status == 'approved' &&
-                (row['final_pdf_path']?.toString().isNotEmpty ?? false)) ...[
-              const SizedBox(height: AppSpacing.s3),
-              FilledButton.icon(
-                onPressed: () => _openFinal(context, ref,
-                    row['final_pdf_path']?.toString() ?? ''),
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Signiertes PDF öffnen'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink,
-                ),
-              ),
-            ],
           ],
+          if (hasFinal) ...[
+            const SizedBox(height: AppSpacing.s3),
+            Row(
+              children: [
+                const Icon(Icons.picture_as_pdf,
+                    size: 16, color: AppColors.brand),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Tippen zum Öffnen des signierten PDFs',
+                    style: AppTypography.body(
+                        size: 11,
+                        weight: FontWeight.w700,
+                        color: AppColors.brand),
+                  ),
+                ),
+                const Icon(Icons.chevron_right,
+                    size: 18, color: AppColors.brand),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // Ausgegrautes Erscheinungsbild für erledigte Karten, aber Tap bleibt
+    // aktiv — der Tap öffnet bei approved das finale PDF, bei rejected /
+    // cancelled zeigt er einen Info-SnackBar mit dem Status.
+    final wrapped = isDone
+        ? Opacity(opacity: 0.6, child: card)
+        : card;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.s3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          onTap: !isDone
+              ? null
+              : () {
+                  if (hasFinal) {
+                    _openFinal(context, ref, finalPath);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(status == 'rejected'
+                            ? 'Diese Freigabe wurde abgelehnt.'
+                            : status == 'cancelled'
+                                ? 'Diese Freigabe wurde abgebrochen.'
+                                : 'Signiertes PDF wird noch erzeugt …')));
+                  }
+                },
+          child: wrapped,
         ),
       ),
     );
