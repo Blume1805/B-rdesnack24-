@@ -6,6 +6,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../data/approvals_remote_data_source.dart';
 import 'inventory_report_print.dart'
     if (dart.library.html) 'inventory_report_print_web.dart';
 
@@ -91,6 +92,57 @@ class _InventoryReportScreenState
     Future.microtask(_load);
   }
 
+  Future<void> _requestApproval() async {
+    if (_movements == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Freigabe anfordern'),
+        content: Text(
+            'Die Inventur für ${Formatters.date(_from)} – ${Formatters.date(_to)} '
+            'wird beiden Gesellschaftern zur Prüfung vorgelegt.  Nach 2-of-2-'
+            'Freigabe wird der Report mit den DocuSign-Signaturen finalisiert. '
+            'Fortfahren?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brand,
+                  foregroundColor: AppColors.ink),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Anfordern')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      final remote =
+          ApprovalsRemoteDataSource(ref.read(supabaseClientProvider));
+      await remote.requestApproval(
+        documentKind: 'inventory_fifo',
+        periodFrom: _from,
+        periodTo: _to,
+        title: 'Inventur ${Formatters.date(_from)} – ${Formatters.date(_to)}',
+        snapshot: {
+          'movements': _movements,
+          'lots': _lots,
+        },
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Freigabe angefordert.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e')),
+        );
+      }
+    }
+  }
+
   /// Gruppiert Bewegungen nach Produkt in Original-Reihenfolge (Server
   /// liefert bereits nach product_name, sku, occurred_at sortiert).
   Map<String, List<Map<String, dynamic>>> _byProduct(
@@ -109,7 +161,13 @@ class _InventoryReportScreenState
       appBar: AppBar(
         title: const Text('Inventur — FIFO-Bewegungsreport'),
         actions: [
-          if (_movements != null && _movements!.isNotEmpty)
+          if (_movements != null && _movements!.isNotEmpty) ...[
+            IconButton(
+              tooltip: 'Freigabe anfordern',
+              icon: const Icon(Icons.rule_folder_outlined,
+                  color: AppColors.brand),
+              onPressed: _requestApproval,
+            ),
             IconButton(
               tooltip: 'Als PDF drucken',
               icon: const Icon(Icons.picture_as_pdf,
@@ -122,6 +180,7 @@ class _InventoryReportScreenState
                 to: _to,
               ),
             ),
+          ],
         ],
       ),
       body: ListView(

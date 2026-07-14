@@ -15,6 +15,7 @@ import 'screens/filling_screen.dart';
 import 'screens/inventory_report_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/maintenance_screen.dart';
+import 'screens/approvals_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
 
@@ -133,9 +134,13 @@ class ManagementScreen extends ConsumerWidget {
         'IoT · Live · Slots',
         Icons.sensors,
         const TelemetryHubScreen(),
-        // Provider- und Slot-Verwaltung erfordert Vollzugriff.  Der
-        // Live-View greift lesend auf machine_health und ist auch
-        // für Gesellschafter sichtbar.
+        visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'Freigaben',
+        'Dokumente prüfen',
+        Icons.rule_folder_outlined,
+        const ApprovalsScreen(),
         visible: p.contains('customers.manage'),
       ),
     ].where((m) => m.visible).toList();
