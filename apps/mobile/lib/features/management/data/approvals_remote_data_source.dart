@@ -4,6 +4,13 @@ class ApprovalsRemoteDataSource {
   ApprovalsRemoteDataSource(this._client);
   final SupabaseClient _client;
 
+  // Session-Guard: jedes Approval-PDF wird pro App-Session höchstens
+  // einmal automatisch neu erzeugt. So bekommen bereits freigegebene
+  // Dokumente ohne User-Aktion das neueste Rendering (aktualisierte
+  // Inhaltsseiten wenn sich das Template geändert hat), ohne bei jedem
+  // Listen-Load Traffic zu verursachen.
+  static final Set<String> _refinalizedThisSession = <String>{};
+
   /// Neue Freigabe-Anfrage anlegen. snapshot enthält die vollständigen
   /// Daten, aus denen später das finale PDF reproduzierbar erzeugt wird.
   Future<String> requestApproval({
@@ -74,6 +81,7 @@ class ApprovalsRemoteDataSource {
     for (final row in list) {
       final path = row['final_pdf_path']?.toString();
       final status = row['status']?.toString();
+      final id = row['id']?.toString();
       if (status == 'approved' && path != null && path.isNotEmpty) {
         futures.add(
           _client.storage
@@ -84,6 +92,17 @@ class ApprovalsRemoteDataSource {
             // Bei Fehler bleibt signed_url null — Tap-Handler nutzt Fallback.
           }),
         );
+      }
+      // Auto-Refresh: für jedes freigegebene Dokument einmal pro Session
+      // im Hintergrund document-finalize erneut aufrufen. Dadurch
+      // erhalten bereits abgeschlossene Approvals das aktuellste
+      // PDF-Rendering (z. B. echter Dokument-Inhalt statt Coverpage).
+      if (status == 'approved' && id != null && id.isNotEmpty &&
+          !_refinalizedThisSession.contains(id)) {
+        _refinalizedThisSession.add(id);
+        unawaited(_client.functions.invoke(
+          'document-finalize', body: {'approval_id': id},
+        ).then((_) {}).catchError((_) {}));
       }
     }
     if (futures.isNotEmpty) {
