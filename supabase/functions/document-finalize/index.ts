@@ -2,25 +2,16 @@
 // Edge Function: document-finalize
 // ----------------------------------------------------------------------------
 // Erzeugt das finale, signierte PDF eines freigegebenen Dokuments und legt
-// es in Supabase Storage (Bucket 'signed-documents') ab. Danach setzt es
-// document_approvals.final_pdf_path.
-//
-// Aufruf:  POST { approval_id }
-// Voraussetzung: approval.status = 'approved' und beide Decisions
-//                haben signature_url (DocuSign-Stempel-URL).
-//
-// PDF-Struktur:
-//   Seite 1..N: kompakter Deckblatt-Report je nach document_kind
-//   Letzte Seite: Freigabe-Stempel + Signaturen der Gesellschafter
+// es in Supabase Storage (Bucket 'signed-documents') ab.
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 
 const ISSUER = {
-  name: "Bordesnack24 GbR",
-  street: "Suelldorfer Str. 3A",
-  cityLine: "39171 Suelzetal OT Osterweddingen",
+  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  street: "Sülldorfer Str. 3A",
+  cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",
   vatId: "DE 458804058",
 };
@@ -43,7 +34,6 @@ Deno.serve(async (req) => {
   try { body = await req.json(); }
   catch { return jsonResponse({ error: "Invalid JSON" }, 400); }
 
-  // Approval + Decisions laden (caller: RLS prüft Zugriff)
   const { data: approval, error: aErr } = await caller
     .from("document_approvals")
     .select("id, title, document_kind, period_from, period_to, status, snapshot")
@@ -61,7 +51,6 @@ Deno.serve(async (req) => {
     .eq("approval_id", body.approval_id)
     .order("created_at");
 
-  // ── PDF erzeugen ─────────────────────────────────────────────────
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -70,28 +59,35 @@ Deno.serve(async (req) => {
   const muted = rgb(0.44, 0.42, 0.35);
   const positive = rgb(0.36, 0.60, 0.25);
 
+  // Aussteller-Block rechts oben (auf jeder Seite identisch).
+  const drawIssuer = (p: ReturnType<typeof pdf.addPage>) => {
+    const hy = 800;
+    p.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: bold, color: ink });
+    p.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font, color: muted });
+    p.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font, color: muted });
+    p.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: muted });
+    p.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font, color: muted });
+  };
+
   // Deckblatt
   let page = pdf.addPage([595, 842]);
-  let y = 800;
-  // Kopf: Aussteller
-  page.drawText(ISSUER.name, { x: 320, y, size: 9, font: bold, color: ink });
-  page.drawText(ISSUER.street, { x: 320, y: y - 11, size: 8, font, color: muted });
-  page.drawText(ISSUER.cityLine, { x: 320, y: y - 22, size: 8, font, color: muted });
-  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: y - 34, size: 8, font, color: muted });
-  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: y - 45, size: 8, font, color: muted });
-
-  page.drawText("Boerdesnack24 - Freigegebenes Dokument", { x: 40, y, size: 15, font: bold, color: gold });
-  y -= 26;
-  page.drawText(approval.title ?? "", { x: 40, y, size: 13, font: bold, color: ink });
-  y -= 18;
+  drawIssuer(page);
+  let y = 800 - 70;
+  page.drawText("Bördesnack24 – Freigegebenes Dokument", { x: 40, y, size: 15, font: bold, color: gold });
+  y -= 20;
+  page.drawText(approval.title ?? "", { x: 40, y, size: 12, font: bold, color: ink });
+  y -= 16;
   page.drawText(`Dokument-Typ: ${approval.document_kind}`, { x: 40, y, size: 10, font, color: ink });
-  y -= 14;
+  y -= 13;
   page.drawText(`Zeitraum: ${approval.period_from} bis ${approval.period_to}`, { x: 40, y, size: 10, font, color: ink });
-  y -= 14;
+  y -= 13;
   page.drawText(`Approval-ID: ${approval.id}`, { x: 40, y, size: 8, font, color: muted });
-  y -= 40;
+  y -= 14;
 
-  // Freigabe-Stempel
+  // Trennlinie zwischen Header und Inhalt
+  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 0.8, color: ink });
+  y -= 24;
+
   page.drawRectangle({
     x: 40, y: y - 90, width: 515, height: 90,
     borderColor: positive, borderWidth: 1,
@@ -105,7 +101,7 @@ Deno.serve(async (req) => {
   let lineY = y - 60;
   for (const d of decisions ?? []) {
     const name = (d.approver as { full_name?: string })?.full_name ?? "?";
-    const dec = (d.decision as string) === "approved" ? "OK" : "?";
+    const dec = (d.decision as string) === "approved" ? "freigegeben" : "abgelehnt";
     const decidedAt = d.decided_at ? String(d.decided_at).substring(0, 10) : approvedAt;
     page.drawText(`- ${name}: ${dec}  (${decidedAt})`,
       { x: 55, y: lineY, size: 9, font, color: ink });
@@ -113,7 +109,6 @@ Deno.serve(async (req) => {
   }
   y -= 110;
 
-  // Snapshot-Zusammenfassung
   page.drawText("Snapshot-Zusammenfassung", { x: 40, y, size: 11, font: bold, color: ink });
   y -= 16;
   const snap = approval.snapshot as Record<string, unknown> | null;
@@ -122,7 +117,7 @@ Deno.serve(async (req) => {
     for (const k of keys) {
       const v = (snap as Record<string, unknown>)[k];
       let vs = "";
-      if (Array.isArray(v)) vs = `${v.length} Eintraege`;
+      if (Array.isArray(v)) vs = `${v.length} Einträge`;
       else if (typeof v === "object") vs = "Objekt";
       else vs = String(v).substring(0, 60);
       page.drawText(`${k}: ${vs}`,
@@ -132,17 +127,21 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Signaturen-Seite
+  // Signaturen-Seite — gleicher Kopf, Trennlinie, dann Signatur-Karten
   page = pdf.addPage([595, 842]);
-  y = 780;
-  page.drawText("Digitale Signaturen", { x: 40, y, size: 14, font: bold, color: gold });
-  y -= 28;
-  page.drawText("Die folgenden Signaturen wurden per DocuSign eingeholt und als Freigabe-",
+  drawIssuer(page);
+  y = 800 - 70;
+  page.drawText("Bördesnack24 – Digitale Signaturen", { x: 40, y, size: 15, font: bold, color: gold });
+  y -= 20;
+  page.drawText("Die folgenden Signaturen wurden digital eingeholt und als Freigabe-Stempel",
     { x: 40, y, size: 9, font, color: muted });
-  y -= 12;
-  page.drawText("Stempel auf dieses Dokument aufgebracht.",
+  y -= 11;
+  page.drawText("auf dieses Dokument aufgebracht.",
     { x: 40, y, size: 9, font, color: muted });
-  y -= 30;
+  y -= 16;
+
+  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 0.8, color: ink });
+  y -= 24;
 
   let sy = y;
   for (const d of decisions ?? []) {
@@ -155,7 +154,6 @@ Deno.serve(async (req) => {
       borderColor: muted, borderWidth: 0.5, color: rgb(0.98, 0.96, 0.92),
     });
 
-    // Signaturbild einbetten (wenn vorhanden)
     if (sigUrl) {
       try {
         const res = await fetch(sigUrl);
@@ -191,7 +189,7 @@ Deno.serve(async (req) => {
     }
 
     page.drawText(name, { x: 60, y: sy - 100, size: 10, font: bold, color: ink });
-    page.drawText(`Gesellschafter - freigegeben am ${decidedAt}`,
+    page.drawText(`Gesellschafter – freigegeben am ${decidedAt}`,
       { x: 60, y: sy - 114, size: 8, font, color: muted });
 
     sy -= 145;
@@ -203,7 +201,6 @@ Deno.serve(async (req) => {
 
   const pdfBytes = await pdf.save();
 
-  // In Storage ablegen — Pfad: approval_id.pdf
   const path = `${approval.id}.pdf`;
   const uploadRes = await admin.storage.from("signed-documents").upload(
     path, pdfBytes,
@@ -213,12 +210,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: uploadRes.error.message }, 500);
   }
 
-  // final_pdf_path setzen
   await admin.from("document_approvals")
     .update({ final_pdf_path: path })
     .eq("id", approval.id);
 
-  // Signierte URL (24h) zurückgeben
   const { data: signed } = await admin.storage
     .from("signed-documents")
     .createSignedUrl(path, 3600 * 24);

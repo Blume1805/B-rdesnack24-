@@ -19,27 +19,27 @@ interface ProtocolDef {
 }
 
 const ISSUER = {
-  name: "Bordesnack24 GbR (Pia & Philipp Blume)",
-  street: "Suelldorfer Str. 3A",
-  cityLine: "39171 Suelzetal OT Osterweddingen",
+  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  street: "Sülldorfer Str. 3A",
+  cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",
   vatId: "DE 458804058",
 };
 
 const PROTOCOLS: Record<string, ProtocolDef> = {
-  temperature: { table: "temperature_logs", dateCol: "measured_at", title: "Temperaturkontrolle (CCP 2: <= 7 C)",
-    columns: [{ key: "measured_at", label: "Zeitpunkt" },{ key: "temperature_c", label: "Ist C" },{ key: "within_limit", label: "i.O." },{ key: "corrective_action", label: "Korrektur" }] },
+  temperature: { table: "temperature_logs", dateCol: "measured_at", title: "Temperaturkontrolle (CCP 2: ≤ 7 °C)",
+    columns: [{ key: "measured_at", label: "Zeitpunkt" },{ key: "temperature_c", label: "Ist °C" },{ key: "within_limit", label: "i.O." },{ key: "corrective_action", label: "Korrektur" }] },
   cleaning: { table: "cleaning_logs", dateCol: "cleaned_at", title: "Reinigungsprotokoll",
     columns: [{ key: "cleaned_at", label: "Zeitpunkt" },{ key: "cleaning_type", label: "Art" },{ key: "agent", label: "Mittel" },{ key: "notes", label: "Bemerkung" }] },
   disposal: { table: "disposal_logs", dateCol: "disposed_at", title: "Vernichtungsprotokoll",
     columns: [{ key: "disposed_at", label: "Zeitpunkt" },{ key: "product_label", label: "Produkt" },{ key: "quantity", label: "Menge" },{ key: "reason", label: "Grund" },{ key: "mhd_date", label: "MHD" }] },
   training: { table: "employee_trainings", dateCol: "training_date", title: "Schulungs-/Unterweisungsnachweis",
     columns: [{ key: "training_date", label: "Datum" },{ key: "topic", label: "Thema" }] },
-  filling: { table: "filling_logs", dateCol: "filled_at", title: "Befuellungsprotokoll",
+  filling: { table: "filling_logs", dateCol: "filled_at", title: "Befüllungsprotokoll",
     columns: [{ key: "filled_at", label: "Zeitpunkt" },{ key: "machine_id", label: "Automat" },{ key: "product_id", label: "Produkt" },{ key: "quantity", label: "Menge" },{ key: "removed_spoiled", label: "Verderb" }] },
   maintenance: { table: "maintenance_logs", dateCol: "reported_at", title: "Wartungsprotokoll",
-    columns: [{ key: "reported_at", label: "Zeitpunkt" },{ key: "machine_id", label: "Automat" },{ key: "issue", label: "Meldung" },{ key: "action", label: "Massnahme" },{ key: "resolved", label: "Erledigt" }] },
-  cash: { table: "cash_collection_logs", dateCol: "collected_at", title: "Geldentnahmeprotokoll (146 AO)",
+    columns: [{ key: "reported_at", label: "Zeitpunkt" },{ key: "machine_id", label: "Automat" },{ key: "issue", label: "Meldung" },{ key: "action", label: "Maßnahme" },{ key: "resolved", label: "Erledigt" }] },
+  cash: { table: "cash_collection_logs", dateCol: "collected_at", title: "Geldentnahmeprotokoll (§146 AO)",
     columns: [{ key: "collected_at", label: "Zeitpunkt" },{ key: "machine_id", label: "Automat" },{ key: "amount_gross", label: "Brutto EUR" },{ key: "change_amount", label: "Wechselgeld" },{ key: "net_amount", label: "Netto EUR" }] },
 };
 
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     kind = String(body.protocol); from = String(body.from); to = String(body.to);
     if (!PROTOCOLS[kind]) throw new Error("unknown protocol");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) throw new Error("invalid range");
-  } catch (e) { return jsonResponse({ error: `Ungueltige Anfrage: ${e}` }, 400); }
+  } catch (e) { return jsonResponse({ error: `Ungültige Anfrage: ${e}` }, 400); }
   const def = PROTOCOLS[kind];
   const { data: rows, error } = await caller.from(def.table).select("*").gte(def.dateCol, from).lte(def.dateCol, `${to}T23:59:59`).order(def.dateCol, { ascending: true });
   if (error) return jsonResponse({ error: error.message }, 403);
@@ -82,24 +82,38 @@ Deno.serve(async (req) => {
   // Bereich landet.
   const FOOT_Y_LIMIT = 220;
 
-  // Zeichnet Aussteller-Block, Titel, Zeitraum und Spaltenköpfe.
+  // Zeichnet Aussteller-Block (oben rechts), darunter Titel + Zeitraum,
+  // dann eine horizontale Trennlinie und die Spaltenköpfe.
   // Rückgabe: aktuelles y unter dem Header (ready für Datenzeilen).
   const drawHeader = (p: ReturnType<typeof pdf.addPage>): number => {
+    // Aussteller-Block rechts (5 Zeilen, y=800..755)
     let hy = 800;
     p.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: bold, color: ink });
     p.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font, color: muted });
     p.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font, color: muted });
     p.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: muted });
     p.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font, color: muted });
-    p.drawText("Bordesnack24 - " + def.title, { x: 40, y: hy, size: 15, font: bold, color: gold });
-    hy -= 22;
-    p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: hy, size: 10, font, color: ink });
-    hy -= 30;
-    def.columns.forEach((c, i) => {
-      p.drawText(c.label, { x: colX[i] ?? 40, y: hy, size: 9, font: bold, color: ink });
+
+    // Titel links, unterhalb des Aussteller-Blocks, damit nichts überlappt
+    let ty = hy - 70;
+    p.drawText("Bördesnack24 – " + def.title, { x: 40, y: ty, size: 15, font: bold, color: gold });
+    ty -= 20;
+    p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: ty, size: 10, font, color: ink });
+    ty -= 14;
+
+    // Horizontale Trennlinie zwischen Header und Tabellen-Kopf
+    p.drawLine({
+      start: { x: 40, y: ty }, end: { x: 555, y: ty },
+      thickness: 0.8, color: ink,
     });
-    hy -= 14;
-    return hy;
+    ty -= 16;
+
+    // Spaltenköpfe
+    def.columns.forEach((c, i) => {
+      p.drawText(c.label, { x: colX[i] ?? 40, y: ty, size: 9, font: bold, color: ink });
+    });
+    ty -= 14;
+    return ty;
   };
 
   let page = pdf.addPage([595, 842]);
@@ -143,7 +157,7 @@ Deno.serve(async (req) => {
     page.drawText(`${rl} - Datum: ${today}`, { x: sx, y: sigY - 4, size: 7, font, color: ink });
     sx += slotW;
   }
-  page.drawText(`Eintraege: ${(rows ?? []).length}`, { x: 40, y: 40, size: 8, font, color: ink });
+  page.drawText(`Einträge: ${(rows ?? []).length}`, { x: 40, y: 40, size: 8, font, color: ink });
   const bytes = await pdf.save();
   return jsonResponse({ filename: `${kind}_${from}_${to}.pdf`, mime: "application/pdf", base64: encodeBase64(bytes) });
 });
