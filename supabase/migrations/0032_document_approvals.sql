@@ -51,7 +51,9 @@ create table if not exists public.document_approval_decisions (
 alter table public.partner_signatures
   add column if not exists captured_via         text,
   add column if not exists docusign_envelope_id text,
-  add column if not exists captured_at          timestamptz;
+  add column if not exists captured_at          timestamptz,
+  add column if not exists profile_id           uuid references public.profiles(id);
+create index if not exists idx_ps_profile on public.partner_signatures(profile_id);
 
 alter table public.document_approvals enable row level security;
 alter table public.document_approval_decisions enable row level security;
