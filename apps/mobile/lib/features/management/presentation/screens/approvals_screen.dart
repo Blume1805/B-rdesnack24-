@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dart:typed_data';
@@ -108,7 +109,27 @@ class _ApprovalCard extends ConsumerWidget {
     final hasFinal = status == 'approved' &&
         finalPath != null && finalPath.isNotEmpty;
 
+    // Tap-Handler: bei approved öffnet er das finale signierte PDF; bei
+    // rejected / cancelled zeigt er den Status als SnackBar; ohne PDF-Pfad
+    // gibt es einen „wird noch erzeugt"-Hinweis.
+    void handleTap() {
+      if (hasFinal) {
+        _openFinal(context, ref, finalPath);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(status == 'rejected'
+                ? 'Diese Freigabe wurde abgelehnt.'
+                : status == 'cancelled'
+                    ? 'Diese Freigabe wurde abgebrochen.'
+                    : 'Signiertes PDF wird noch erzeugt …')));
+      }
+    }
+
     final card = AppCard(
+      // AppCard.onTap wird nur für erledigte Karten gesetzt — dadurch
+      // wird die gesamte Karte tappbar und das interne Ink-/InkWell-Setup
+      // von AppCard sorgt für den korrekten Splash.
+      onTap: isDone ? handleTap : null,
       topStripeColor: _statusColor(status),
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Column(
@@ -203,50 +224,48 @@ class _ApprovalCard extends ConsumerWidget {
       ),
     );
 
-    // Ausgegrautes Erscheinungsbild für erledigte Karten, aber Tap bleibt
-    // aktiv — der Tap öffnet bei approved das finale PDF, bei rejected /
-    // cancelled zeigt er einen Info-SnackBar mit dem Status.
-    final wrapped = isDone
-        ? Opacity(opacity: 0.6, child: card)
-        : card;
-
+    // Ausgegrautes Erscheinungsbild für erledigte Karten. Opacity blockt
+    // keine Hit-Tests, daher bleibt die AppCard.onTap-Fläche tappbar.
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          onTap: !isDone
-              ? null
-              : () {
-                  if (hasFinal) {
-                    _openFinal(context, ref, finalPath);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(status == 'rejected'
-                            ? 'Diese Freigabe wurde abgelehnt.'
-                            : status == 'cancelled'
-                                ? 'Diese Freigabe wurde abgebrochen.'
-                                : 'Signiertes PDF wird noch erzeugt …')));
-                  }
-                },
-          child: wrapped,
-        ),
-      ),
+      child: isDone ? Opacity(opacity: 0.6, child: card) : card,
     );
   }
 
   Future<void> _openFinal(BuildContext context, WidgetRef ref, String path) async {
     if (path.isEmpty) return;
+    final messenger = ScaffoldMessenger.of(context);
+    // Feedback anzeigen, während der Signed-URL geholt wird — sonst
+    // wirkt der Tap ins Leere, bis der Browser das neue Fenster öffnet.
+    messenger.showSnackBar(const SnackBar(
+      duration: Duration(seconds: 2),
+      content: Text('Signiertes PDF wird geöffnet …'),
+    ));
     final remote = ref.read(_approvalsRemoteProvider);
     try {
       final url = await remote.signedUrl(path);
-      if (url == null) throw Exception('Kein URL verfügbar');
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      if (url == null || url.isEmpty) {
+        throw Exception('Kein Signed-URL verfügbar');
+      }
+      // webOnlyWindowName='_blank' erzwingt einen neuen Tab auf Web und
+      // umgeht Pop-up-Blocker, weil launchUrl direkt window.open aufruft.
+      final ok = await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
+      if (!ok && context.mounted) {
+        messenger.showSnackBar(SnackBar(
+          content: const Text('PDF konnte nicht geöffnet werden.'),
+          action: SnackBarAction(
+            label: 'Link kopieren',
+            onPressed: () => Clipboard.setData(ClipboardData(text: url)),
+          ),
+        ));
+      }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+        messenger.showSnackBar(SnackBar(content: Text('Fehler: $e')));
       }
     }
   }
