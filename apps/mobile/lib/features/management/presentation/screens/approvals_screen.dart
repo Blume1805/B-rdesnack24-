@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
@@ -229,6 +233,15 @@ class _ApprovalCard extends ConsumerWidget {
         ),
       );
       if (comment == null || comment.trim().length < 3) return;
+    } else {
+      // Vor der Freigabe die Signatur bereitstellen — DocuSign holen ODER
+      // Bild hochladen ODER bewusst ohne Signatur (Italic-Platzhalter).
+      final okSig = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => const _SignatureSheet(),
+      );
+      if (okSig != true) return;
     }
     try {
       await ref.read(_approvalsRemoteProvider).decide(
@@ -236,13 +249,251 @@ class _ApprovalCard extends ConsumerWidget {
         decision: decision,
         comment: comment,
       );
-      ref.invalidate(_approvalsListProvider);
+      if (context.mounted) {
+        ref.invalidate(_approvalsListProvider);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(decision == 'approved'
+                ? 'Freigegeben — signiertes PDF wird erzeugt.'
+                : 'Abgelehnt.')));
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Fehler: $e')));
       }
     }
+  }
+}
+
+/// Bottom-Sheet zur Signaturwahl vor einer Freigabe. Findet den zu meinem
+/// Profil verknüpften Signatur-Slot (partner_signatures.profile_id =
+/// auth.uid()) und bietet:
+///   • Aus DocuSign holen — ruft docusign-fetch-signature auf (nur wenn
+///     docusign_signature_uri hinterlegt ist)
+///   • Bild hochladen — File-Picker, PNG/JPG in Storage
+///   • Ohne Signatur — decide läuft ohne Signaturbild, PDF nutzt den
+///     Italic-Platzhalter mit dem Namen
+class _SignatureSheet extends ConsumerStatefulWidget {
+  const _SignatureSheet();
+  @override
+  ConsumerState<_SignatureSheet> createState() => _SignatureSheetState();
+}
+
+class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
+  Map<String, dynamic>? _slot;
+  bool _loading = true;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSlot();
+  }
+
+  Future<void> _loadSlot() async {
+    try {
+      final client = ref.read(supabaseClientProvider);
+      final uid = client.auth.currentUser?.id;
+      if (uid == null) return;
+      final rows = await client
+          .from('partner_signatures')
+          .select('id, full_name, docusign_signature_uri, image_url, captured_via')
+          .eq('profile_id', uid);
+      final list = (rows as List).cast<Map<String, dynamic>>();
+      setState(() {
+        _slot = list.isNotEmpty ? list.first : null;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = '$e';
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _syncDocuSign() async {
+    if (_slot == null) return;
+    setState(() => _busy = true);
+    try {
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
+        'docusign-fetch-signature',
+        body: {'signature_id': _slot!['id']},
+      );
+      if (!mounted) return;
+      final data = res.data;
+      if (data is Map && data['ok'] == true) {
+        if (mounted) Navigator.pop(context, true);
+      } else {
+        final msg = data is Map ? (data['error']?.toString() ?? '$data') : '$data';
+        final hint = data is Map ? data['hint']?.toString() : null;
+        setState(() => _error = hint == null ? msg : '$msg\n$hint');
+      }
+    } catch (e) {
+      setState(() => _error = '$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_slot == null) return;
+    setState(() => _busy = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.image, withData: true);
+      if (picked == null || picked.files.isEmpty) {
+        setState(() => _busy = false);
+        return;
+      }
+      final file = picked.files.single;
+      final Uint8List? bytes = file.bytes;
+      if (bytes == null) {
+        setState(() => _busy = false);
+        return;
+      }
+      final client = ref.read(supabaseClientProvider);
+      final ext = file.extension?.toLowerCase() ?? 'png';
+      final path = '${_slot!['id']}.$ext';
+      await client.storage.from('partner-signatures').uploadBinary(
+            path, bytes,
+            fileOptions: FileOptions(
+              contentType: (ext == 'jpg' || ext == 'jpeg')
+                  ? 'image/jpeg' : 'image/png',
+              upsert: true,
+            ),
+          );
+      final signed = await client.storage
+          .from('partner-signatures')
+          .createSignedUrl(path, 60 * 60 * 24 * 365);
+      await client.rpc('set_partner_signature_image', params: {
+        'p_signature_id': _slot!['id'],
+        'p_image_url': signed,
+        'p_captured_via': 'manual',
+      });
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      setState(() => _error = '$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSlot = _slot != null;
+    final hasDs = hasSlot &&
+        (_slot!['docusign_signature_uri']?.toString().isNotEmpty ?? false);
+    final hasImage = hasSlot &&
+        (_slot!['image_url']?.toString().isNotEmpty ?? false);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.s5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Signatur für Freigabe wählen',
+                style: AppTypography.display(
+                    size: 20,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink)),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Deine Unterschrift wird im signierten PDF als Freigabe-Stempel '
+              'eingebettet.',
+              style: AppTypography.body(
+                  size: 13, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.s4),
+            if (_loading)
+              const Center(child: CircularProgressIndicator(color: AppColors.brand))
+            else if (!hasSlot)
+              AppCard(
+                color: const Color(0xFFFAE9E4),
+                borderColor: AppColors.statusCritical,
+                child: Text(
+                  'Für dein Konto ist kein Signatur-Slot verknüpft. Bitte '
+                  'einen System-Admin bitten, partner_signatures.profile_id '
+                  'auf deine Profil-ID zu setzen.',
+                  style: AppTypography.body(size: 13, color: AppColors.ink),
+                ),
+              )
+            else ...[
+              if (hasImage)
+                Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.s3),
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    border: Border.all(color: AppColors.borderSubtle),
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                  ),
+                  alignment: Alignment.center,
+                  child: Image.network(
+                    _slot!['image_url']?.toString() ?? '',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) =>
+                        const Text('Bild nicht geladen'),
+                  ),
+                ),
+              FilledButton.icon(
+                onPressed: (_busy || !hasDs) ? null : _syncDocuSign,
+                icon: const Icon(Icons.cloud_download_outlined),
+                label: const Text('Aus DocuSign holen'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brand,
+                  foregroundColor: AppColors.ink,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+              if (!hasDs)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Kein DocuSign-Signatur-Slot hinterlegt.',
+                    style: AppTypography.body(
+                        size: 10, color: AppColors.textMuted),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.s2),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _uploadImage,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Bild hochladen'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  side: const BorderSide(color: AppColors.ink),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              TextButton(
+                onPressed: _busy ? null : () => Navigator.pop(context, true),
+                child: Text(
+                  hasImage
+                      ? 'Diese Signatur verwenden'
+                      : 'Ohne Signatur freigeben (Platzhalter)',
+                ),
+              ),
+            ],
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.s3),
+              Text(_error!, style: AppTypography.body(
+                  size: 12, color: AppColors.statusCritical)),
+            ],
+            const SizedBox(height: AppSpacing.s2),
+            TextButton(
+              onPressed: _busy ? null : () => Navigator.pop(context, false),
+              child: const Text('Abbrechen'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
