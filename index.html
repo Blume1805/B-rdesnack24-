@@ -92,16 +92,26 @@
         log('rej', (e.reason && (e.reason.message || e.reason.toString())) || 'unknown');
       });
 
-      // Alte Service-Worker + Caches einmalig entfernen.
+      // Alte Service-Worker + Caches einmalig entfernen und Seite neu laden,
+      // damit der aktive SW keinen alten Content mehr serviert.
       (async function () {
         try {
+          var hadSW = false;
           if ('serviceWorker' in navigator) {
             var regs = await navigator.serviceWorker.getRegistrations();
+            if (regs.length > 0) hadSW = true;
             await Promise.all(regs.map(function (r) { return r.unregister(); }));
           }
           if ('caches' in window) {
             var names = await caches.keys();
+            if (names.length > 0) hadSW = true;
             await Promise.all(names.map(function (n) { return caches.delete(n); }));
+          }
+          if (hadSW && !sessionStorage.getItem('bs24-sw-nuked')) {
+            sessionStorage.setItem('bs24-sw-nuked', '1');
+            // Hart neu laden, damit der Browser die neuen Dateien direkt aus
+            // dem Netzwerk zieht.
+            location.reload();
           }
         } catch (_) {}
       })();
