@@ -14,7 +14,9 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 
-/// Dokumentenmanagement (versioniert, GoBD/HACCP).
+/// Feste Ordnerstruktur der Dokumente. Jeder Ordner hat oben eine
+/// Blanko-Vorlage (is_template=true), darunter kommen alle anderen
+/// Dokumente sortiert nach updated_at desc.
 final _documentsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final rows =
@@ -22,9 +24,13 @@ final _documentsProvider =
   return (rows as List).cast<Map<String, dynamic>>();
 });
 
-/// Signatur-Aufgaben eines Dokuments — nur relevant für Kategorien
-/// wie ifsg, sicherheitsunterweisung etc. Wird pro Karte on-demand
-/// geladen, wenn die Karte expandiert wird.
+final _foldersProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final rows =
+      await ref.read(supabaseClientProvider).rpc('list_document_folders');
+  return (rows as List).cast<Map<String, dynamic>>();
+});
+
 final _signatureTasksProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, docId) async {
   final data = await ref
@@ -32,6 +38,24 @@ final _signatureTasksProvider = FutureProvider.autoDispose
       .rpc('list_document_signature_tasks', params: {'p_document': docId});
   return (data as List).cast<Map<String, dynamic>>();
 });
+
+/// Material-Icon-Auswahl anhand des Icon-Slugs aus document_folders.icon
+IconData _iconFor(String? slug) {
+  switch (slug) {
+    case 'description':          return Icons.description_outlined;
+    case 'health_and_safety':    return Icons.health_and_safety_outlined;
+    case 'medical_information':  return Icons.medical_information_outlined;
+    case 'cleaning_services':    return Icons.cleaning_services_outlined;
+    case 'store':                return Icons.store_outlined;
+    case 'work':                 return Icons.work_outline;
+    case 'local_shipping':       return Icons.local_shipping_outlined;
+    case 'build':                return Icons.build_outlined;
+    case 'shield':               return Icons.shield_outlined;
+    case 'gavel':                return Icons.gavel_outlined;
+    case 'folder_open':          return Icons.folder_open_outlined;
+    default:                     return Icons.folder_outlined;
+  }
+}
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
@@ -41,12 +65,31 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   String _search = '';
-  String? _categoryFilter;
+  String? _folderFilter;
   bool _exporting = false;
+  static bool _initTriggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Idempotent: der Server prüft, ob je Ordner schon eine Vorlage
+    // existiert. Nur pro Session ein Aufruf.
+    if (!_initTriggered) {
+      _initTriggered = true;
+      Future.microtask(() async {
+        try {
+          await ref.read(supabaseClientProvider).functions.invoke(
+              'documents-init-templates', body: <String, dynamic>{});
+          if (mounted) ref.invalidate(_documentsProvider);
+        } catch (_) { /* ignore — Rolle ohne Adminrechte */ }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final docs = ref.watch(_documentsProvider);
+    final folders = ref.watch(_foldersProvider);
     final canEdit = ref.watch(currentPermissionsProvider).maybeWhen(
           data: (p) => p.contains('documents.edit'),
           orElse: () => false,
@@ -84,67 +127,63 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         error: (e, _) => Padding(
             padding: const EdgeInsets.all(AppSpacing.s5),
             child: Text('$e')),
-        data: (list) {
-          final categories = <String>{
-            for (final d in list)
-              if (d['category'] is String &&
-                  (d['category'] as String).isNotEmpty)
-                d['category'] as String
-          }.toList()
-            ..sort();
-          final filtered = list.where((d) {
-            final t = (d['title'] as String? ?? '').toLowerCase();
-            final c = (d['category'] as String? ?? '').toLowerCase();
-            final q = _search.toLowerCase();
-            final matchQ = q.isEmpty || t.contains(q) || c.contains(q);
-            final matchCat = _categoryFilter == null ||
-                d['category'] == _categoryFilter;
-            return matchQ && matchCat;
-          }).toList();
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_documentsProvider),
-            color: AppColors.brand,
-            child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.s4),
-              children: [
-                _SearchBar(
-                    onChanged: (v) => setState(() => _search = v)),
-                if (categories.isNotEmpty) ...[
+        data: (list) => folders.when(
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => Text('$e'),
+          data: (folderList) {
+            final filteredDocs = list.where((d) {
+              final t = (d['title'] as String? ?? '').toLowerCase();
+              final c = (d['category'] as String? ?? '').toLowerCase();
+              final q = _search.toLowerCase();
+              return q.isEmpty || t.contains(q) || c.contains(q);
+            }).toList();
+            final byFolder = <String, List<Map<String, dynamic>>>{};
+            for (final d in filteredDocs) {
+              final slug = (d['category'] as String?) ?? 'sonstiges';
+              byFolder.putIfAbsent(slug, () => []).add(d);
+            }
+            final visibleFolders = _folderFilter == null
+                ? folderList
+                : folderList.where((f) => f['slug'] == _folderFilter).toList();
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(_documentsProvider);
+                ref.invalidate(_foldersProvider);
+              },
+              color: AppColors.brand,
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.s4),
+                children: [
+                  _SearchBar(
+                      onChanged: (v) => setState(() => _search = v)),
                   const SizedBox(height: AppSpacing.s3),
-                  _CategoryChips(
-                    categories: categories,
-                    selected: _categoryFilter,
-                    onSelected: (c) => setState(() => _categoryFilter = c),
+                  _FolderChips(
+                    folders: folderList,
+                    selected: _folderFilter,
+                    onSelected: (slug) =>
+                        setState(() => _folderFilter = slug),
                   ),
-                ],
-                const SizedBox(height: AppSpacing.s4),
-                if (filtered.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Center(
-                      child: Text('Keine Treffer.',
-                          style: AppTypography.body(
-                              size: 13, color: AppColors.textMuted)),
-                    ),
-                  )
-                else
-                  for (final d in filtered)
-                    _DocumentCard(
-                      row: d,
+                  const SizedBox(height: AppSpacing.s4),
+                  for (final f in visibleFolders)
+                    _FolderSection(
+                      folder: f,
+                      documents: byFolder[f['slug']] ?? const [],
                       canEdit: canEdit,
-                      onOpen: () => _open(context, ref, d),
-                      onNewVersion: () =>
+                      onOpen: (d) => _open(context, ref, d),
+                      onNewVersion: (d) =>
                           _addVersion(context, ref, d['id'] as String),
-                      onSetValidUntil: () => _setValidUntil(context, ref, d),
-                      onRequestApproval: () => _requestReview(context, ref, d),
-                      onInviteEmployees: () =>
+                      onSetValidUntil: (d) => _setValidUntil(context, ref, d),
+                      onRequestApproval: (d) => _requestReview(context, ref, d),
+                      onInviteEmployees: (d) =>
                           _inviteEmployees(context, ref, d),
                     ),
-                const SizedBox(height: AppSpacing.s12),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: AppSpacing.s12),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -156,17 +195,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final path = doc['latest_file_path']?.toString();
     if (path == null || path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-            Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
+        content: Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
       ));
       return;
     }
     final lower = path.toLowerCase();
     final isPdf = lower.endsWith('.pdf');
-    final isImage = lower.endsWith('.png') ||
-        lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.gif') ||
+    final isImage = lower.endsWith('.png') || lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') || lower.endsWith('.gif') ||
         lower.endsWith('.webp');
     try {
       final url = await ref
@@ -174,11 +210,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           .storage
           .from('documents')
           .createSignedUrl(path, 3600 * 24);
-      await launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-        webOnlyWindowName: '_blank',
-      );
+      await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+          webOnlyWindowName: '_blank');
       if (!isPdf && !isImage && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           duration: const Duration(seconds: 5),
@@ -230,8 +264,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload fehlgeschlagen: $e')),
-      );
+          SnackBar(content: Text('Upload fehlgeschlagen: $e')));
     }
   }
 
@@ -277,8 +310,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         title: const Text('Freigabe anfordern'),
         content: Text(
           '„${doc['title']}" (v${doc['current_version']}) wird beiden '
-          'Gesellschaftern zur Prüfung vorgelegt. Nach 2-of-2-Freigabe '
-          'ist das Dokument revisionssicher signiert.',
+          'Gesellschaftern zur Prüfung vorgelegt.',
         ),
         actions: [
           TextButton(
@@ -404,22 +436,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     setState(() => _exporting = true);
     try {
       final res = await ref.read(supabaseClientProvider).functions.invoke(
-        'documents-zip-export',
-        body: _categoryFilter == null ? {} : {'category': _categoryFilter},
-      );
+            'documents-zip-export',
+            body: _folderFilter == null ? {} : {'category': _folderFilter},
+          );
       final data = res.data;
       if (data is Map && data['base64'] is String) {
         final bytes = base64Decode(data['base64'] as String);
         final name = (data['filename'] as String?) ?? 'export.zip';
         final url = 'data:application/zip;base64,${base64Encode(bytes)}';
-        await launchUrl(Uri.parse(url),
-            mode: LaunchMode.externalApplication);
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         await Clipboard.setData(ClipboardData(text: url));
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content:
-                Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.'),
-          ));
+              content:
+                  Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.')));
         }
       } else {
         throw Exception('Ungültige Antwort: $data');
@@ -435,43 +465,57 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
+    final folders = ref.read(_foldersProvider).valueOrNull ?? const [];
     final titleCtrl = TextEditingController();
-    final catCtrl = TextEditingController();
+    String? selectedFolder = folders.isNotEmpty
+        ? folders.first['slug'] as String
+        : 'sonstiges';
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Neues Dokument'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-                controller: titleCtrl,
-                decoration: const InputDecoration(labelText: 'Titel')),
-            TextField(
-              controller: catCtrl,
-              decoration: const InputDecoration(
-                labelText:
-                    'Kategorie (z. B. haccp, hygienekonzept, ifsg, vertrag)',
-              ),
+      builder: (dCtx) => StatefulBuilder(
+        builder: (dCtx, setState) => AlertDialog(
+          title: const Text('Neues Dokument'),
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleCtrl,
+                  decoration: const InputDecoration(labelText: 'Titel'),
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                DropdownButtonFormField<String>(
+                  value: selectedFolder,
+                  decoration: const InputDecoration(labelText: 'Ordner'),
+                  items: [
+                    for (final f in folders)
+                      DropdownMenuItem(
+                        value: f['slug'] as String,
+                        child: Text(f['label']?.toString() ?? ''),
+                      ),
+                  ],
+                  onChanged: (v) => setState(() => selectedFolder = v),
+                ),
+              ],
             ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(dCtx, false),
+                child: const Text('Abbrechen')),
+            FilledButton(
+                onPressed: () => Navigator.pop(dCtx, true),
+                child: const Text('Anlegen')),
           ],
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Anlegen')),
-        ],
       ),
     );
     if (ok != true || titleCtrl.text.trim().isEmpty) return;
     try {
       await ref.read(supabaseClientProvider).from('documents').insert({
         'title': titleCtrl.text.trim(),
-        'category':
-            catCtrl.text.trim().isEmpty ? null : catCtrl.text.trim(),
+        'category': selectedFolder ?? 'sonstiges',
       });
       if (!context.mounted) return;
       ref.invalidate(_documentsProvider);
@@ -514,13 +558,13 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _CategoryChips extends StatelessWidget {
-  const _CategoryChips({
-    required this.categories,
+class _FolderChips extends StatelessWidget {
+  const _FolderChips({
+    required this.folders,
     required this.selected,
     required this.onSelected,
   });
-  final List<String> categories;
+  final List<Map<String, dynamic>> folders;
   final String? selected;
   final ValueChanged<String?> onSelected;
   @override
@@ -529,10 +573,16 @@ class _CategoryChips extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _chip(context, 'Alle', selected == null, () => onSelected(null)),
+          _chip(context, 'Alle Ordner', selected == null,
+              () => onSelected(null)),
           const SizedBox(width: 6),
-          for (final c in categories) ...[
-            _chip(context, c, selected == c, () => onSelected(c)),
+          for (final f in folders) ...[
+            _chip(
+              context,
+              f['label']?.toString() ?? '',
+              selected == f['slug'],
+              () => onSelected(f['slug'] as String?),
+            ),
             const SizedBox(width: 6),
           ],
         ],
@@ -567,6 +617,81 @@ class _CategoryChips extends StatelessWidget {
   }
 }
 
+class _FolderSection extends StatelessWidget {
+  const _FolderSection({
+    required this.folder,
+    required this.documents,
+    required this.canEdit,
+    required this.onOpen,
+    required this.onNewVersion,
+    required this.onSetValidUntil,
+    required this.onRequestApproval,
+    required this.onInviteEmployees,
+  });
+  final Map<String, dynamic> folder;
+  final List<Map<String, dynamic>> documents;
+  final bool canEdit;
+  final void Function(Map<String, dynamic>) onOpen;
+  final void Function(Map<String, dynamic>) onNewVersion;
+  final void Function(Map<String, dynamic>) onSetValidUntil;
+  final void Function(Map<String, dynamic>) onRequestApproval;
+  final void Function(Map<String, dynamic>) onInviteEmployees;
+
+  @override
+  Widget build(BuildContext context) {
+    if (documents.isEmpty) return const SizedBox.shrink();
+    // Server-Sortierung: is_template desc, updated_at desc. Wir müssen
+    // nichts nachsortieren, verlassen uns aber trotzdem defensiv nicht
+    // vollständig darauf.
+    documents.sort((a, b) {
+      final ta = a['is_template'] == true ? 1 : 0;
+      final tb = b['is_template'] == true ? 1 : 0;
+      if (ta != tb) return tb - ta;
+      final ua = a['updated_at']?.toString() ?? '';
+      final ub = b['updated_at']?.toString() ?? '';
+      return ub.compareTo(ua);
+    });
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.s5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(_iconFor(folder['icon']?.toString()),
+                  size: 18, color: AppColors.ink),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  folder['label']?.toString() ?? '',
+                  style: AppTypography.display(
+                      size: 15,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink),
+                ),
+              ),
+              Text('${documents.length}',
+                  style: AppTypography.body(
+                      size: 11, color: AppColors.textMuted)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          for (final d in documents)
+            _DocumentCard(
+              row: d,
+              canEdit: canEdit,
+              onOpen: () => onOpen(d),
+              onNewVersion: () => onNewVersion(d),
+              onSetValidUntil: () => onSetValidUntil(d),
+              onRequestApproval: () => onRequestApproval(d),
+              onInviteEmployees: () => onInviteEmployees(d),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DocumentCard extends ConsumerWidget {
   const _DocumentCard({
     required this.row,
@@ -588,27 +713,28 @@ class _DocumentCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final title = row['title']?.toString() ?? '';
-    final category = row['category']?.toString();
     final version = row['current_version'];
     final status = row['status']?.toString() ?? 'draft';
     final validUntilRaw = row['valid_until']?.toString();
     final expiry = row['expiry_status']?.toString() ?? 'none';
     final hasFile = (row['latest_file_path']?.toString() ?? '').isNotEmpty;
+    final isTemplate = row['is_template'] == true;
+    final category = row['category']?.toString();
 
-    final stripeColor = switch (expiry) {
-      'expired' => AppColors.statusCritical,
-      'expiring' => AppColors.statusWarning,
-      _ => AppColors.brand,
-    };
+    final stripeColor = isTemplate
+        ? AppColors.brand
+        : switch (expiry) {
+            'expired' => AppColors.statusCritical,
+            'expiring' => AppColors.statusWarning,
+            _ => AppColors.borderSubtle,
+          };
 
     DateTime? validUntil;
     if (validUntilRaw != null && validUntilRaw.isNotEmpty) {
       validUntil = DateTime.tryParse(validUntilRaw);
     }
-
-    // Sign-Tasks werden nur für „ifsg"-Kategorien geladen (spart Traffic)
-    final isIfsg = (category ?? '').toLowerCase() == 'ifsg';
-    final sigTasks = isIfsg && hasFile
+    final isIfsg = category == 'ifsg';
+    final sigTasks = (isIfsg && hasFile && !isTemplate)
         ? ref.watch(_signatureTasksProvider(row['id'] as String))
         : null;
 
@@ -623,19 +749,29 @@ class _DocumentCard extends ConsumerWidget {
           children: [
             Row(
               children: [
+                if (isTemplate) ...[
+                  const Icon(Icons.push_pin, size: 14, color: AppColors.brand),
+                  const SizedBox(width: 4),
+                ],
                 Expanded(
-                  child: Text(title,
-                      style: AppTypography.body(
-                          size: 15,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  child: Text(
+                    title,
+                    style: AppTypography.body(
+                        size: 15,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink),
+                  ),
                 ),
-                _ExpiryBadge(expiry: expiry, validUntil: validUntil),
+                if (isTemplate)
+                  const StatusBadge(
+                      label: 'Vorlage', tone: StatusTone.warning)
+                else
+                  _ExpiryBadge(expiry: expiry, validUntil: validUntil),
               ],
             ),
             const SizedBox(height: 4),
             Text(
-              '${category ?? '—'} · v$version · $status'
+              'v$version · $status'
               '${validUntil == null ? '' : ' · gültig bis ${Formatters.date(validUntil)}'}',
               style: AppTypography.body(size: 11, color: AppColors.textMuted),
             ),
@@ -644,15 +780,19 @@ class _DocumentCard extends ConsumerWidget {
               children: [
                 if (hasFile)
                   Row(
-                    children: const [
-                      Icon(Icons.picture_as_pdf,
+                    children: [
+                      const Icon(Icons.picture_as_pdf,
                           size: 14, color: AppColors.brand),
-                      SizedBox(width: 4),
-                      Text('Tippen zum Öffnen',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.brand)),
+                      const SizedBox(width: 4),
+                      Text(
+                        isTemplate
+                            ? 'Vorlage herunterladen'
+                            : 'Tippen zum Öffnen',
+                        style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brand),
+                      ),
                     ],
                   )
                 else
@@ -660,7 +800,7 @@ class _DocumentCard extends ConsumerWidget {
                       style: AppTypography.body(
                           size: 11, color: AppColors.textMuted)),
                 const Spacer(),
-                if (canEdit) ...[
+                if (canEdit && !isTemplate) ...[
                   IconButton(
                     tooltip: 'Gültigkeit setzen',
                     icon: const Icon(Icons.event_available, size: 20),
@@ -693,7 +833,6 @@ class _DocumentCard extends ConsumerWidget {
                 ],
               ],
             ),
-            // Signatur-Aufgaben-Liste für IfSG-Dokumente
             if (sigTasks != null) ...[
               const SizedBox(height: AppSpacing.s3),
               const Divider(height: 1, color: AppColors.borderSubtle),
@@ -748,11 +887,9 @@ class _SigTaskRow extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Icon(
-            signed ? Icons.check_circle : Icons.hourglass_bottom,
-            size: 16,
-            color: signed ? AppColors.statusPositive : AppColors.brand,
-          ),
+          Icon(signed ? Icons.check_circle : Icons.hourglass_bottom,
+              size: 16,
+              color: signed ? AppColors.statusPositive : AppColors.brand),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
