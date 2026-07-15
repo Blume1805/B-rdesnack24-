@@ -21,7 +21,18 @@ final _documentsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final rows =
       await ref.read(supabaseClientProvider).rpc('list_documents');
-  return (rows as List).cast<Map<String, dynamic>>();
+  final docs = (rows as List).cast<Map<String, dynamic>>();
+  // Signed URLs vorziehen, damit _open() das Fenster synchron im
+  // Tap-Handler öffnen kann (sonst blockiert iOS Safari den Popup).
+  final storage = ref.read(supabaseClientProvider).storage.from('documents');
+  await Future.wait(docs.map((d) async {
+    final path = d['latest_file_path']?.toString();
+    if (path == null || path.isEmpty) return;
+    try {
+      d['signed_url'] = await storage.createSignedUrl(path, 3600 * 24);
+    } catch (_) { /* leerer Slot — Fehler beim Öffnen kommunizieren */ }
+  }));
+  return docs;
 });
 
 final _foldersProvider =
@@ -206,8 +217,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final isImage = lower.endsWith('.png') || lower.endsWith('.jpg') ||
         lower.endsWith('.jpeg') || lower.endsWith('.gif') ||
         lower.endsWith('.webp');
+    // signed_url wird im _documentsProvider vorgeladen; ist sie leer,
+    // synchron nachladen und User-Fehlermeldung zeigen.
+    var url = doc['signed_url']?.toString();
     try {
-      final url = await ref
+      url ??= await ref
           .read(supabaseClientProvider)
           .storage
           .from('documents')
