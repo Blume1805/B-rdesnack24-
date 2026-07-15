@@ -13,6 +13,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
+import '../widgets/pdf_inline_stub.dart'
+    if (dart.library.js_interop) '../widgets/pdf_inline_web.dart';
 
 /// Feste Ordnerstruktur der Dokumente. Jeder Ordner hat oben eine
 /// Blanko-Vorlage (is_template=true), darunter kommen alle anderen
@@ -212,13 +214,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       ));
       return;
     }
+    final title = doc['title']?.toString() ?? 'Dokument';
     final lower = path.toLowerCase();
     final isPdf = lower.endsWith('.pdf');
     final isImage = lower.endsWith('.png') || lower.endsWith('.jpg') ||
         lower.endsWith('.jpeg') || lower.endsWith('.gif') ||
         lower.endsWith('.webp');
-    // signed_url wird im _documentsProvider vorgeladen; ist sie leer,
-    // synchron nachladen und User-Fehlermeldung zeigen.
+    // signed_url wird im _documentsProvider vorgeladen; nur der Fallback
+    // signiert nach.
     var url = doc['signed_url']?.toString();
     try {
       url ??= await ref
@@ -226,16 +229,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           .storage
           .from('documents')
           .createSignedUrl(path, 3600 * 24);
-      await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-          webOnlyWindowName: '_blank');
-      if (!isPdf && !isImage && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          duration: const Duration(seconds: 5),
-          content: Text(
-              'Format nicht direkt anzeigbar — Datei wurde heruntergeladen. '
-              'Tipp: künftige Versionen als PDF hochladen für Inline-Vorschau.'),
-        ));
+      if (isPdf || isImage) {
+        // Inline-Viewer (auf Web: iframe im Fullscreen-Dialog; auf mobile:
+        // url_launcher). Umgeht Popup-Blocker und behält den App-State.
+        await showInlinePdf(context, url: url, title: title);
+      } else {
+        // DOCX u. ä. → Systembrowser
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            duration: const Duration(seconds: 5),
+            content: Text(
+                'Format nicht direkt anzeigbar — Datei wurde heruntergeladen. '
+                'Tipp: künftige Versionen als PDF hochladen für Inline-Vorschau.'),
+          ));
+        }
       }
     } catch (e) {
       if (context.mounted) {
@@ -763,21 +771,29 @@ class _DocumentCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Zeile 1 — Titel-Zeile: Pin-Icon (falls Vorlage), Titel, Chip
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (isTemplate) ...[
-                  const Icon(Icons.push_pin, size: 14, color: AppColors.brand),
-                  const SizedBox(width: 4),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2, right: 6),
+                    child: Icon(Icons.push_pin,
+                        size: 16, color: AppColors.brand),
+                  ),
                 ],
                 Expanded(
                   child: Text(
                     title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.body(
                         size: 15,
                         weight: FontWeight.w800,
                         color: AppColors.ink),
                   ),
                 ),
+                const SizedBox(width: 8),
                 if (isTemplate)
                   const StatusBadge(
                       label: 'Vorlage', tone: StatusTone.warning)
@@ -785,44 +801,60 @@ class _DocumentCard extends ConsumerWidget {
                   _ExpiryBadge(expiry: expiry, validUntil: validUntil),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
+            // Zeile 2 — Meta: Version, Status, Gültigkeit
             Text(
               'v$version · $status'
               '${validUntil == null ? '' : ' · gültig bis ${Formatters.date(validUntil)}'}',
               style: AppTypography.body(size: 11, color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.s3),
+            // Zeile 3 — Aktions-Zeile: „Öffnen" links, Action-Icons rechts als Wrap
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (hasFile)
-                  Row(
+                Expanded(
+                  child: hasFile
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.picture_as_pdf,
+                                size: 14, color: AppColors.brand),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                isTemplate
+                                    ? 'Vorlage herunterladen'
+                                    : 'Tippen zum Öffnen',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.brand),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text('Noch keine Version hochgeladen',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body(
+                              size: 11, color: AppColors.textMuted)),
+                ),
+                if (canEdit && !isTemplate)
+                  Wrap(
+                    spacing: 0,
                     children: [
-                      const Icon(Icons.picture_as_pdf,
-                          size: 14, color: AppColors.brand),
-                      const SizedBox(width: 4),
-                      Text(
-                        isTemplate
-                            ? 'Vorlage herunterladen'
-                            : 'Tippen zum Öffnen',
-                        style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.brand),
-                      ),
-                    ],
-                  )
-                else
-                  Text('Noch keine Version hochgeladen',
-                      style: AppTypography.body(
-                          size: 11, color: AppColors.textMuted)),
-                const Spacer(),
-                if (canEdit && !isTemplate) ...[
                   IconButton(
                     tooltip: 'Gültigkeit setzen',
                     icon: const Icon(Icons.event_available, size: 20),
                     color: AppColors.textDefault,
                     onPressed: onSetValidUntil,
                     visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 34, minHeight: 34),
+                    padding: EdgeInsets.zero,
                   ),
                   IconButton(
                     tooltip: 'Neue Version hochladen',
@@ -830,6 +862,9 @@ class _DocumentCard extends ConsumerWidget {
                     color: AppColors.textDefault,
                     onPressed: onNewVersion,
                     visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 34, minHeight: 34),
+                    padding: EdgeInsets.zero,
                   ),
                   if (isIfsg)
                     IconButton(
@@ -838,6 +873,9 @@ class _DocumentCard extends ConsumerWidget {
                       color: AppColors.brand,
                       onPressed: hasFile ? onInviteEmployees : null,
                       visualDensity: VisualDensity.compact,
+                      constraints:
+                          const BoxConstraints(minWidth: 34, minHeight: 34),
+                      padding: EdgeInsets.zero,
                     ),
                   IconButton(
                     tooltip: 'Freigabe (2-of-2 Gesellschafter)',
@@ -845,8 +883,12 @@ class _DocumentCard extends ConsumerWidget {
                     color: AppColors.brand,
                     onPressed: hasFile ? onRequestApproval : null,
                     visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 34, minHeight: 34),
+                    padding: EdgeInsets.zero,
                   ),
-                ],
+                    ],
+                  ),
               ],
             ),
             if (sigTasks != null) ...[
