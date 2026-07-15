@@ -15,28 +15,26 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 
 /// Dokumentenmanagement (versioniert, GoBD/HACCP).
-///
-/// Enthält:
-///   • Suche + Kategorie-Filter (Chips)
-///   • Ablauf-Badge (rot=abgelaufen, orange=läuft bald, grau=unbefristet)
-///   • Tap → PDF-Vorschau in neuem Tab (Signed-URL, 24 h)
-///   • Neue Version hochladen (Storage-Bucket 'documents')
-///   • Gültigkeitsende setzen (z. B. IfSG-Belehrung alle 2 Jahre)
-///   • Freigabe anfordern → 2-of-2-Gesellschafter-Signatur (document_review)
-///   • Prüfer-Export als ZIP (aktuelle Version je Dokument, optional
-///     kategorie-gefiltert; hilfreich für Betriebsprüfung/VLÜA)
-final _documentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
-  (ref) async {
-    final rows = await ref
-        .read(supabaseClientProvider)
-        .rpc('list_documents');
-    return (rows as List).cast<Map<String, dynamic>>();
-  },
-);
+final _documentsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final rows =
+      await ref.read(supabaseClientProvider).rpc('list_documents');
+  return (rows as List).cast<Map<String, dynamic>>();
+});
+
+/// Signatur-Aufgaben eines Dokuments — nur relevant für Kategorien
+/// wie ifsg, sicherheitsunterweisung etc. Wird pro Karte on-demand
+/// geladen, wenn die Karte expandiert wird.
+final _signatureTasksProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, docId) async {
+  final data = await ref
+      .read(supabaseClientProvider)
+      .rpc('list_document_signature_tasks', params: {'p_document': docId});
+  return (data as List).cast<Map<String, dynamic>>();
+});
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
-
   @override
   ConsumerState<DocumentsScreen> createState() => _DocumentsScreenState();
 }
@@ -83,14 +81,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       body: docs.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.brand)),
-        error: (e, _) => Center(
-            child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.s5),
-                child: Text('$e'))),
+        error: (e, _) => Padding(
+            padding: const EdgeInsets.all(AppSpacing.s5),
+            child: Text('$e')),
         data: (list) {
           final categories = <String>{
             for (final d in list)
-              if (d['category'] is String && (d['category'] as String).isNotEmpty)
+              if (d['category'] is String &&
+                  (d['category'] as String).isNotEmpty)
                 d['category'] as String
           }.toList()
             ..sort();
@@ -110,8 +108,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               padding: const EdgeInsets.all(AppSpacing.s4),
               children: [
                 _SearchBar(
-                  onChanged: (v) => setState(() => _search = v),
-                ),
+                    onChanged: (v) => setState(() => _search = v)),
                 if (categories.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.s3),
                   _CategoryChips(
@@ -140,6 +137,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                           _addVersion(context, ref, d['id'] as String),
                       onSetValidUntil: () => _setValidUntil(context, ref, d),
                       onRequestApproval: () => _requestReview(context, ref, d),
+                      onInviteEmployees: () =>
+                          _inviteEmployees(context, ref, d),
                     ),
                 const SizedBox(height: AppSpacing.s12),
               ],
@@ -152,15 +151,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // ─── Aktionen ────────────────────────────────────────────────────
 
-  Future<void> _open(
-      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
+  Future<void> _open(BuildContext context, WidgetRef ref,
+      Map<String, dynamic> doc) async {
     final path = doc['latest_file_path']?.toString();
     if (path == null || path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
+        content:
+            Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
       ));
       return;
     }
+    final lower = path.toLowerCase();
+    final isPdf = lower.endsWith('.pdf');
+    final isImage = lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.webp');
     try {
       final url = await ref
           .read(supabaseClientProvider)
@@ -172,6 +179,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         mode: LaunchMode.externalApplication,
         webOnlyWindowName: '_blank',
       );
+      if (!isPdf && !isImage && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          duration: const Duration(seconds: 5),
+          content: Text(
+              'Format nicht direkt anzeigbar — Datei wurde heruntergeladen. '
+              'Tipp: künftige Versionen als PDF hochladen für Inline-Vorschau.'),
+        ));
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -182,7 +197,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   Future<void> _addVersion(
       BuildContext context, WidgetRef ref, String docId) async {
-    final picked = await FilePicker.platform.pickFiles(withData: true);
+    final picked = await FilePicker.platform.pickFiles(
+      withData: true,
+      type: FileType.custom,
+      allowedExtensions: const ['pdf', 'docx', 'doc', 'jpg', 'jpeg', 'png'],
+    );
     if (picked == null || picked.files.isEmpty) return;
     final file = picked.files.first;
     if (file.bytes == null) return;
@@ -201,9 +220,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       });
       if (!context.mounted) return;
       ref.invalidate(_documentsProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Neue Version gespeichert.')),
-      );
+      final isPdf = file.name.toLowerCase().endsWith('.pdf');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(isPdf
+            ? 'Neue Version gespeichert.'
+            : 'Version gespeichert. Hinweis: Nicht-PDFs werden beim Öffnen '
+                'heruntergeladen — PDF ist ideal für Inline-Vorschau.'),
+      ));
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -276,9 +299,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     try {
       await ref
           .read(supabaseClientProvider)
-          .rpc('request_document_review', params: {
-        'p_document': doc['id'],
-      });
+          .rpc('request_document_review', params: {'p_document': doc['id']});
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Freigabe angefordert.')),
@@ -290,28 +311,115 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
+  Future<void> _inviteEmployees(BuildContext context, WidgetRef ref,
+      Map<String, dynamic> doc) async {
+    final client = ref.read(supabaseClientProvider);
+    List<Map<String, dynamic>> employees;
+    try {
+      final data = await client.rpc('list_employees_for_signature');
+      employees = (data as List).cast<Map<String, dynamic>>();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+      return;
+    }
+    if (employees.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Keine Mitarbeiter angelegt — zuerst über „Mitarbeiter" einladen.'),
+        ));
+      }
+      return;
+    }
+    final selected = <String>{};
+    if (!context.mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dCtx) => StatefulBuilder(
+        builder: (dCtx, setState) => AlertDialog(
+          title: const Text('Mitarbeiter zur Signatur einladen'),
+          content: SizedBox(
+            width: 400,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final e in employees)
+                  CheckboxListTile(
+                    value: selected.contains(e['id']),
+                    title: Text(e['full_name']?.toString() ?? '?'),
+                    subtitle: Text(e['email']?.toString() ?? ''),
+                    onChanged: (v) => setState(() {
+                      final id = e['id'] as String;
+                      if (v == true) {
+                        selected.add(id);
+                      } else {
+                        selected.remove(id);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(dCtx, false),
+                child: const Text('Abbrechen')),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brand,
+                foregroundColor: AppColors.ink,
+              ),
+              onPressed: () => Navigator.pop(dCtx, true),
+              child: const Text('Einladen'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || selected.isEmpty) return;
+    try {
+      for (final empId in selected) {
+        await client.rpc('invite_employee_signature', params: {
+          'p_document': doc['id'],
+          'p_employee': empId,
+        });
+      }
+      if (!context.mounted) return;
+      ref.invalidate(_signatureTasksProvider(doc['id'] as String));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('${selected.length} Mitarbeiter eingeladen.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+    }
+  }
+
   Future<void> _exportZip(BuildContext context, WidgetRef ref) async {
     setState(() => _exporting = true);
     try {
-      final res = await ref
-          .read(supabaseClientProvider)
-          .functions
-          .invoke(
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
         'documents-zip-export',
         body: _categoryFilter == null ? {} : {'category': _categoryFilter},
       );
       final data = res.data;
       if (data is Map && data['base64'] is String) {
-        final b64 = data['base64'] as String;
+        final bytes = base64Decode(data['base64'] as String);
         final name = (data['filename'] as String?) ?? 'export.zip';
-        // Blob-Download auslösen (Web)
-        final bytes = base64Decode(b64);
-        // ignore: avoid_web_libraries_in_flutter
-        _triggerDownload(bytes, name, 'application/zip');
+        final url = 'data:application/zip;base64,${base64Encode(bytes)}';
+        await launchUrl(Uri.parse(url),
+            mode: LaunchMode.externalApplication);
+        await Clipboard.setData(ClipboardData(text: url));
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.'),
+          ));
         }
       } else {
         throw Exception('Ungültige Antwort: $data');
@@ -326,17 +434,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  void _triggerDownload(List<int> bytes, String filename, String mime) {
-    try {
-      // Nur Web-Ziel: dart:html laden via anonymous — bei nativer Plattform
-      // wird die Zeile ignoriert (der import ist über kIsWeb geschützt).
-      final url = 'data:$mime;base64,${base64Encode(bytes)}';
-      // Copy-URL-Fallback: wenn Browser download nicht auslöst.
-      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      Clipboard.setData(ClipboardData(text: url));
-    } catch (_) { /* ignore */ }
-  }
-
   Future<void> _create(BuildContext context, WidgetRef ref) async {
     final titleCtrl = TextEditingController();
     final catCtrl = TextEditingController();
@@ -348,26 +445,24 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: titleCtrl,
-              decoration: const InputDecoration(labelText: 'Titel'),
-            ),
+                controller: titleCtrl,
+                decoration: const InputDecoration(labelText: 'Titel')),
             TextField(
               controller: catCtrl,
               decoration: const InputDecoration(
-                labelText: 'Kategorie (z. B. haccp, hygienekonzept, vertrag)',
+                labelText:
+                    'Kategorie (z. B. haccp, hygienekonzept, ifsg, vertrag)',
               ),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Abbrechen')),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Anlegen'),
-          ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Anlegen')),
         ],
       ),
     );
@@ -375,15 +470,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     try {
       await ref.read(supabaseClientProvider).from('documents').insert({
         'title': titleCtrl.text.trim(),
-        'category': catCtrl.text.trim().isEmpty ? null : catCtrl.text.trim(),
+        'category':
+            catCtrl.text.trim().isEmpty ? null : catCtrl.text.trim(),
       });
       if (!context.mounted) return;
       ref.invalidate(_documentsProvider);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehlgeschlagen: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Fehlgeschlagen: $e')));
     }
   }
 }
@@ -445,7 +540,8 @@ class _CategoryChips extends StatelessWidget {
     );
   }
 
-  Widget _chip(BuildContext context, String label, bool active, VoidCallback onTap) {
+  Widget _chip(BuildContext context, String label, bool active,
+      VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
@@ -471,7 +567,7 @@ class _CategoryChips extends StatelessWidget {
   }
 }
 
-class _DocumentCard extends StatelessWidget {
+class _DocumentCard extends ConsumerWidget {
   const _DocumentCard({
     required this.row,
     required this.canEdit,
@@ -479,6 +575,7 @@ class _DocumentCard extends StatelessWidget {
     required this.onNewVersion,
     required this.onSetValidUntil,
     required this.onRequestApproval,
+    required this.onInviteEmployees,
   });
   final Map<String, dynamic> row;
   final bool canEdit;
@@ -486,9 +583,10 @@ class _DocumentCard extends StatelessWidget {
   final VoidCallback onNewVersion;
   final VoidCallback onSetValidUntil;
   final VoidCallback onRequestApproval;
+  final VoidCallback onInviteEmployees;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final title = row['title']?.toString() ?? '';
     final category = row['category']?.toString();
     final version = row['current_version'];
@@ -498,15 +596,21 @@ class _DocumentCard extends StatelessWidget {
     final hasFile = (row['latest_file_path']?.toString() ?? '').isNotEmpty;
 
     final stripeColor = switch (expiry) {
-      'expired'  => AppColors.statusCritical,
+      'expired' => AppColors.statusCritical,
       'expiring' => AppColors.statusWarning,
-      _          => AppColors.brand,
+      _ => AppColors.brand,
     };
 
     DateTime? validUntil;
     if (validUntilRaw != null && validUntilRaw.isNotEmpty) {
       validUntil = DateTime.tryParse(validUntilRaw);
     }
+
+    // Sign-Tasks werden nur für „ifsg"-Kategorien geladen (spart Traffic)
+    final isIfsg = (category ?? '').toLowerCase() == 'ifsg';
+    final sigTasks = isIfsg && hasFile
+        ? ref.watch(_signatureTasksProvider(row['id'] as String))
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.s3),
@@ -520,13 +624,11 @@ class _DocumentCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    title,
-                    style: AppTypography.body(
-                        size: 15,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink),
-                  ),
+                  child: Text(title,
+                      style: AppTypography.body(
+                          size: 15,
+                          weight: FontWeight.w800,
+                          color: AppColors.ink)),
                 ),
                 _ExpiryBadge(expiry: expiry, validUntil: validUntil),
               ],
@@ -573,8 +675,16 @@ class _DocumentCard extends StatelessWidget {
                     onPressed: onNewVersion,
                     visualDensity: VisualDensity.compact,
                   ),
+                  if (isIfsg)
+                    IconButton(
+                      tooltip: 'Mitarbeiter zur Signatur einladen',
+                      icon: const Icon(Icons.person_add_alt_1, size: 20),
+                      color: AppColors.brand,
+                      onPressed: hasFile ? onInviteEmployees : null,
+                      visualDensity: VisualDensity.compact,
+                    ),
                   IconButton(
-                    tooltip: 'Freigabe anfordern',
+                    tooltip: 'Freigabe (2-of-2 Gesellschafter)',
                     icon: const Icon(Icons.rule_folder_outlined, size: 20),
                     color: AppColors.brand,
                     onPressed: hasFile ? onRequestApproval : null,
@@ -583,10 +693,109 @@ class _DocumentCard extends StatelessWidget {
                 ],
               ],
             ),
+            // Signatur-Aufgaben-Liste für IfSG-Dokumente
+            if (sigTasks != null) ...[
+              const SizedBox(height: AppSpacing.s3),
+              const Divider(height: 1, color: AppColors.borderSubtle),
+              const SizedBox(height: AppSpacing.s2),
+              sigTasks.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(color: AppColors.brand),
+                ),
+                error: (e, _) => Text('$e',
+                    style: AppTypography.body(
+                        size: 11, color: AppColors.statusCritical)),
+                data: (tasks) {
+                  if (tasks.isEmpty) {
+                    return Text('Noch keine Mitarbeiter eingeladen.',
+                        style: AppTypography.body(
+                            size: 11, color: AppColors.textMuted));
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Mitarbeiter-Signaturen',
+                          style: AppTypography.body(
+                              size: 11,
+                              weight: FontWeight.w800,
+                              color: AppColors.textMuted)),
+                      const SizedBox(height: 4),
+                      for (final t in tasks) _SigTaskRow(row: t),
+                    ],
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+}
+
+class _SigTaskRow extends ConsumerWidget {
+  const _SigTaskRow({required this.row});
+  final Map<String, dynamic> row;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = row['employee_name']?.toString() ?? '?';
+    final status = row['status']?.toString() ?? 'pending';
+    final signedAt = row['signed_at']?.toString();
+    final path = row['signed_pdf_path']?.toString();
+    final signed = status == 'signed';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Icon(
+            signed ? Icons.check_circle : Icons.hourglass_bottom,
+            size: 16,
+            color: signed ? AppColors.statusPositive : AppColors.brand,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              signed
+                  ? '$name — signiert' +
+                      (signedAt == null ? '' : ' · ${signedAt.substring(0, 10)}')
+                  : '$name — ausstehend',
+              style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w700,
+                  color: AppColors.ink),
+            ),
+          ),
+          if (signed && path != null && path.isNotEmpty)
+            TextButton.icon(
+              onPressed: () => _openSigned(context, ref, path),
+              icon: const Icon(Icons.picture_as_pdf,
+                  size: 16, color: AppColors.brand),
+              label: const Text('Nachweis',
+                  style: TextStyle(color: AppColors.brand)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openSigned(
+      BuildContext context, WidgetRef ref, String path) async {
+    try {
+      final url = await ref
+          .read(supabaseClientProvider)
+          .storage
+          .from('signed-documents')
+          .createSignedUrl(path, 3600 * 24);
+      await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+          webOnlyWindowName: '_blank');
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
+      }
+    }
   }
 }
 
@@ -598,9 +807,11 @@ class _ExpiryBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (expiry) {
       case 'expired':
-        return const StatusBadge(label: 'abgelaufen', tone: StatusTone.critical);
+        return const StatusBadge(
+            label: 'abgelaufen', tone: StatusTone.critical);
       case 'expiring':
-        return const StatusBadge(label: 'läuft bald', tone: StatusTone.warning);
+        return const StatusBadge(
+            label: 'läuft bald', tone: StatusTone.warning);
       case 'ok':
         return const StatusBadge(label: 'gültig', tone: StatusTone.positive);
       default:

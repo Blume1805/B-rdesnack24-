@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/approvals/presentation/screens/approvals_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/management/presentation/screens/my_signature_tasks_screen.dart';
 import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
@@ -19,6 +20,7 @@ abstract final class AppRoutes {
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
   static const approvals = '/finance/approvals';
+  static const mySignatureTasks = '/management/my-signatures';
   static const imprint = '/legal/imprint';
   static const privacy = '/legal/privacy';
   static const terms = '/legal/terms';
@@ -72,6 +74,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.approvals,
         builder: (context, state) => const ApprovalsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mySignatureTasks,
+        builder: (context, state) => const MySignatureTasksScreen(),
       ),
       GoRoute(
         path: AppRoutes.imprint,

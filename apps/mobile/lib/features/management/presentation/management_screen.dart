@@ -15,6 +15,7 @@ import 'screens/filling_screen.dart';
 import 'screens/inventory_report_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/maintenance_screen.dart';
+import 'screens/my_signature_tasks_screen.dart';
 import 'screens/approvals_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
@@ -142,6 +143,16 @@ class ManagementScreen extends ConsumerWidget {
         Icons.rule_folder_outlined,
         const DocumentApprovalsScreen(),
         visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'Zu signieren',
+        'Belehrungen & Nachweise',
+        Icons.draw_outlined,
+        const MySignatureTasksScreen(),
+        // Für alle authentifizierten Rollen sichtbar — die RPC filtert
+        // ohnehin nur die dem User zugewiesenen Aufgaben. Nützlich vor
+        // allem für Rolle 'employee'.
+        visible: true,
       ),
     ].where((m) => m.visible).toList();
   }

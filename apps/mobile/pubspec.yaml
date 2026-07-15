@@ -51,6 +51,9 @@ dependencies:
   image_picker: ^1.1.2
   file_picker: ^8.1.6
 
+  # Signatur-Draw-Pad (IfSG-Belehrung, Mitarbeiter-Signatur)
+  signature: ^5.5.0
+
   # Offline-Fähigkeit
   connectivity_plus: ^6.1.0
   shared_preferences: ^2.3.3
