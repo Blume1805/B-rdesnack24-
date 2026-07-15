@@ -40088,7 +40088,7 @@ $S:3}
 A.bby.prototype={
 $1(a){var s=A.f0().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/a10d8ac38de835021c8d2f920dbf50a920ccc030/":s)+a},
+return(s==null?"canvaskit/":s)+a},
 $S:30}
 A.a21.prototype={
 gu(a){var s=this.a
