@@ -80,6 +80,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         try {
           await ref.read(supabaseClientProvider).functions.invoke(
               'documents-init-templates', body: <String, dynamic>{});
+          await ref.read(supabaseClientProvider).functions.invoke(
+              'documents-install-branded-set', body: <String, dynamic>{});
           if (mounted) ref.invalidate(_documentsProvider);
         } catch (_) { /* ignore — Rolle ohne Adminrechte */ }
       });
