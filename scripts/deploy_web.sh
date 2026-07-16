@@ -124,7 +124,8 @@ if [ -z "$SUBPATH" ]; then
   ( cd "$ROOT" && \
     git add -f index.html 404.html manifest.json favicon.png flutter.js \
       flutter_bootstrap.js flutter_service_worker.js main.dart.js \
-      version.json version.txt assets canvaskit icons .last_build_id 2>/dev/null || true; \
+      version.json version.txt assets canvaskit icons .last_build_id \
+      roboto-regular.ttf 2>/dev/null || true; \
     git add -u )
 else
   # Sub-Path-Deploy (Legacy / Preview).  Neben der Root-App liegen lassen.
@@ -166,7 +167,7 @@ if [ -z "$SUBPATH" ]; then
     rm -rf assets canvaskit icons && \
     rm -f  index.html 404.html main.dart.js flutter.js flutter_bootstrap.js \
            flutter_service_worker.js manifest.json favicon.png version.json \
-           version.txt .last_build_id )
+           version.txt .last_build_id roboto-regular.ttf )
 fi
 
 echo "✓ Deploy fertig — https://blume1805.github.io/B-rdesnack24-/ (v=${TS})"
