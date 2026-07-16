@@ -126,18 +126,24 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Wie sammle ich Punkte?',
       'Für jeden Kauf am Automaten (Karten-QR gescannt) bekommst du 1 Punkt '
-          'pro 10 Cent Umsatz. Sonderaktionen können deinen Bonus erhöhen.',
+          'pro Cent Umsatz — 1 € Einkauf = 100 Punkte. Sonderaktionen '
+          'können deinen Bonus zusätzlich erhöhen.',
     ),
     _FaqEntry(
       'Wann werden meine Punkte zurückgesetzt?',
-      'Punkte werden jährlich zum Reset-Datum (siehe Punktekarte) '
-          'zurückgesetzt. Nicht eingelöste Meilenstein-Boni verfallen dann.',
+      'Du hast jeden Monat Zeit, deine Punkte zu sammeln. Am 1. des '
+          'Folgemonats werden die Punkte zurückgesetzt und du beginnst '
+          'von vorn. Bereits erreichte Meilenstein-Boni (Coupons) bleiben '
+          'aber trotzdem noch 2 Wochen nach Erreichen des Meilensteins '
+          'einlösbar.',
     ),
     _FaqEntry(
       'Welche Meilensteine gibt es?',
       'Es gibt vier Meilensteine: 500 Punkte = 5 % Rabatt, 1200 Punkte = 10 %, '
-          '2000 Punkte = 15 %, 3000 Punkte = 25 %. Rabatte gelten für 4 Wochen '
-          'nach Erreichen des Meilensteins.',
+          '2000 Punkte = 15 %, 3000 Punkte = 25 %. Sobald du einen Meilenstein '
+          'erreichst, ist dein Rabatt-Coupon 2 Wochen lang einlösbar — auch '
+          'wenn zwischenzeitlich der Monatswechsel deinen Punktestand '
+          'zurücksetzt.',
     ),
   ]),
   _FaqCategory('Datenschutz & KI', Icons.shield_outlined, [
