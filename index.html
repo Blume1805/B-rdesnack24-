@@ -17,8 +17,8 @@
   <title>Bördesnack24</title>
   <link rel="manifest" href="manifest.json">
 
-  <link rel="preload" as="script" href="flutter.js?v=1784207659">
-  <link rel="preload" as="script" href="main.dart.js?v=1784207659">
+  <link rel="preload" as="script" href="flutter.js?v=1784220919">
+  <link rel="preload" as="script" href="main.dart.js?v=1784220919">
 
   <!--
     Passkeys-SDK-Stub MUSS vor jedem Skript existieren, das dart2js-Code
@@ -42,29 +42,40 @@
   </script>
 
   <!--
-    FIX: Flutter Web (CanvasKit) versucht beim Boot Roboto-Fallback-Fonts
-    von https://fonts.gstatic.com/... zu laden. In iOS-In-App-Browsern
-    (WhatsApp/iMessage/Safari View Controller mit Private-Relay) wird
-    dieser Cross-Origin-Fetch weder erfolgreich noch abgebrochen — er
-    bleibt >30 s hängen und blockiert `runApp()` → Grauer Screen ohne
-    Fehlermeldung. Wir shim'en `fetch`/`XHR` so, dass Anfragen an
-    fonts.gstatic.com / fonts.googleapis.com sofort mit HTTP 504
-    fehlschlagen; die Engine loggt eine Warnung und rendert weiter mit
-    System-Fonts. Verifiziert per Headless-Chromium (iPhone-UA):
-    ohne Shim >25 s hängt, mit Shim <15 s bis flutter-view.
+    FIX: Flutter Web (CanvasKit) fetcht beim Boot Roboto- und
+    Noto-Fallback-Fonts von https://fonts.gstatic.com/. In iOS-In-App-
+    Browsern hängen diese Cross-Origin-Requests unter Private Relay
+    manchmal >30 s → runApp() wird nie erreicht (grauer Screen).
+    Ohne Font kann CanvasKit KEINEN Text rendern — d.h. die Requests
+    einfach mit 504 zu killen reicht nicht: dann startet die App zwar,
+    zeigt aber leere Karten.
+    Lösung:
+    - Roboto-Regular liegt lokal im Bundle (roboto-regular.ttf).
+    - Requests auf fonts.gstatic.com/s/roboto/... werden auf den
+      lokalen Font umgeleitet → Text rendert.
+    - Alle anderen fonts.gstatic.com-Requests (Noto Sans Symbols,
+      Emoji-Fallbacks) bekommen sofort 504 → hängen nie.
   -->
   <script>
     (function () {
       var GFONT_HOSTS = /^https?:\/\/fonts\.(?:gstatic|googleapis)\.com\//i;
+      var ROBOTO_URL = /^https?:\/\/fonts\.gstatic\.com\/s\/roboto\//i;
+      var localRobotoUrl = new URL('roboto-regular.ttf', document.baseURI).toString();
+
+      function killResp() {
+        return new Response(null, { status: 504, statusText: 'BOERDESNACK24_FONT_SHIM' });
+      }
+
       var origFetch = window.fetch && window.fetch.bind(window);
       if (origFetch) {
         window.fetch = function (input, init) {
           var u = typeof input === 'string' ? input :
                   (input && input.url) ? input.url : '';
+          if (ROBOTO_URL.test(u)) {
+            return origFetch(localRobotoUrl, init);
+          }
           if (GFONT_HOSTS.test(u)) {
-            return Promise.resolve(new Response(null, {
-              status: 504, statusText: 'BOERDESNACK24_FONT_SHIM'
-            }));
+            return Promise.resolve(killResp());
           }
           return origFetch(input, init);
         };
@@ -73,9 +84,12 @@
       if (OrigXHR) {
         var origOpen = OrigXHR.prototype.open;
         OrigXHR.prototype.open = function (method, url) {
-          if (typeof url === 'string' && GFONT_HOSTS.test(url)) {
-            this.__b24_blocked = true;
-            arguments[1] = 'data:text/plain,';
+          if (typeof url === 'string') {
+            if (ROBOTO_URL.test(url)) {
+              arguments[1] = localRobotoUrl;
+            } else if (GFONT_HOSTS.test(url)) {
+              arguments[1] = 'data:text/plain,';
+            }
           }
           return origOpen.apply(this, arguments);
         };
@@ -191,6 +205,6 @@
     Bootstrap am Ende des Bodies (Flutter-Default) — DOM ist fertig und
     Passkeys-Stub garantiert schon installiert.
   -->
-  <script src="flutter_bootstrap.js?v=1784207659" async></script>
+  <script src="flutter_bootstrap.js?v=1784220919" async></script>
 </body>
 </html>
