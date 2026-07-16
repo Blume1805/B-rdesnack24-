@@ -9,6 +9,11 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
 import '../screens/ai_info_screen.dart';
+import '../screens/customer_qr_screen.dart';
+
+/// Callback vom CustomerScreen, mit dem der Chatbot in einen bestimmten
+/// Tab (Angebote, Automaten, Verlauf, Profil) wechseln kann.
+typedef ChatbotTabSelector = void Function(int index);
 
 /// Regelbasierter Q&A-Chat-Assistent für den Kundenbereich.
 ///
@@ -21,14 +26,19 @@ import '../screens/ai_info_screen.dart';
 /// Kommt der User mit keinem der Themen zurecht, gibt es einen Handoff-
 /// Button, der seine Nachricht ins bestehende Kontaktformular übergibt.
 class ChatbotLauncherFab extends StatelessWidget {
-  const ChatbotLauncherFab({super.key});
+  const ChatbotLauncherFab({super.key, this.onSelectTab});
+
+  /// Wird gefeuert, wenn eine Chatbot-Antwort auf einen Kunden-Tab
+  /// verweist (Angebote/Automaten/Verlauf/Profil). Null-Fallback: der
+  /// Link wird dann als reine Info angezeigt, kein Tab-Wechsel möglich.
+  final ChatbotTabSelector? onSelectTab;
 
   Future<void> _open(BuildContext context) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _ChatbotSheet(),
+      builder: (_) => _ChatbotSheet(onSelectTab: onSelectTab),
     );
   }
 
@@ -56,7 +66,15 @@ class _FaqEntry {
   const _FaqEntry(this.question, this.answer, {this.deepLink});
   final String question;
   final String answer;
-  final String? deepLink; // Optionaler App-Route (z. B. AppRoutes.imprint)
+
+  /// Optionaler Deep-Link, den der „hier klicken"-Button auslöst.
+  /// Unterstützte Schemata (String-Prefix):
+  ///   * `route:<path>` — GoRouter-Push (z. B. `route:/legal/privacy`)
+  ///   * `tab:<0..3>`   — CustomerScreen-Tab wechseln
+  ///                        (0=Angebote 1=Automaten 2=Verlauf 3=Profil)
+  ///   * `qr`           — Kundenkarte öffnen (CustomerQrScreen)
+  ///   * `ai-info`      — KI-Info-Seite öffnen
+  final String? deepLink;
 }
 
 class _FaqCategory {
@@ -70,19 +88,22 @@ const _kFaq = <_FaqCategory>[
   _FaqCategory('Konto & Profil', Icons.person_outline, [
     _FaqEntry(
       'Wie ändere ich mein Passwort?',
-      'Öffne den Reiter „Profil" und wähle unter „Sicherheit" den Punkt '
-          '„Passwort ändern". Du bekommst per E-Mail einen Bestätigungs-Link.',
+      'Im Profil-Tab unter „Sicherheit" → „Passwort ändern". '
+          'Du bekommst per E-Mail einen Bestätigungs-Link.',
+      deepLink: 'tab:3',
     ),
     _FaqEntry(
       'Wo finde ich meine Kundennummer?',
       'Deine Kundennummer siehst du im Profil-Tab ganz oben unter deinem '
           'Namen. Sie beginnt mit „B24-".',
+      deepLink: 'tab:3',
     ),
     _FaqEntry(
       'Wie deaktiviere ich mein Konto?',
-      'Nutze bitte das Kontaktformular. Wir bestätigen die Deaktivierung '
-          'binnen 24 Stunden und löschen deine Daten nach 30 Tagen, falls du '
-          'nicht widerrufst.',
+      'Nutze bitte das Kontaktformular im Profil-Tab. Wir bestätigen die '
+          'Deaktivierung binnen 24 Stunden und löschen deine Daten nach '
+          '30 Tagen, falls du nicht widerrufst.',
+      deepLink: 'tab:3',
     ),
   ]),
   _FaqCategory('Coupons & Angebote', Icons.local_offer_outlined, [
@@ -94,32 +115,38 @@ const _kFaq = <_FaqCategory>[
     ),
     _FaqEntry(
       'Wo sehe ich meine aktivierten Coupons?',
-      'Alle aktivierten Coupons findest du in deiner Kundenkarte. Öffne die '
-          'Karte über den gold-schwarzen QR-Button unten in der Mitte.',
+      'Alle aktivierten Coupons findest du in deiner Kundenkarte.',
+      deepLink: 'qr',
     ),
     _FaqEntry(
       'Wie löse ich einen Coupon am Automaten ein?',
       'Halte deine Kundenkarte (QR-Code) vor den Scanner des Automaten. '
           'Der günstigste aktivierte Coupon für dein gewähltes Produkt wird '
           'automatisch verrechnet.',
+      deepLink: 'qr',
     ),
     _FaqEntry(
       'Warum sind meine Coupons plötzlich weg?',
       'Coupons haben ein Ablaufdatum, das dir auf jeder Karte angezeigt wird. '
-          'Nach Einlösung oder nach Fristablauf verschwinden sie automatisch.',
+          'Nach Einlösung oder nach Fristablauf verschwinden sie automatisch. '
+          'Aktuelle Angebote und Coupons siehst du im Angebote-Tab.',
+      deepLink: 'tab:0',
     ),
   ]),
   _FaqCategory('Automaten & Standorte', Icons.place_outlined, [
     _FaqEntry(
       'Wie finde ich den nächsten Automaten?',
-      'Wechsle in den Reiter „Automaten". Die Karte zeigt dir alle Standorte '
-          'in deiner Nähe. Tap auf einen Marker öffnet die Navigation.',
+      'Im Automaten-Tab siehst du die Karte mit allen Standorten in deiner '
+          'Nähe. Tap auf einen Marker öffnet die Navigation.',
+      deepLink: 'tab:1',
     ),
     _FaqEntry(
       'Warum sehe ich keine Produkte im Automaten?',
       'Wir aktualisieren die Bestände über die Automaten-Telemetrie mehrmals '
           'täglich. Ist ein Produkt „ausverkauft" markiert, wird beim nächsten '
-          'Auffüllen (i. d. R. binnen 48 h) wieder befüllt.',
+          'Auffüllen (i. d. R. binnen 48 h) wieder befüllt. Aktuelle Bestände '
+          'pro Automat siehst du im Automaten-Tab.',
+      deepLink: 'tab:1',
     ),
   ]),
   _FaqCategory('Loyalty-Punkte', Icons.stars_rounded, [
@@ -127,7 +154,9 @@ const _kFaq = <_FaqCategory>[
       'Wie sammle ich Punkte?',
       'Für jeden Kauf am Automaten (Karten-QR gescannt) bekommst du 1 Punkt '
           'pro Cent Umsatz — 1 € Einkauf = 100 Punkte. Sonderaktionen '
-          'können deinen Bonus zusätzlich erhöhen.',
+          'können deinen Bonus zusätzlich erhöhen. Deinen aktuellen Punkte-'
+          'stand siehst du im Angebote-Tab.',
+      deepLink: 'tab:0',
     ),
     _FaqEntry(
       'Wann werden meine Punkte zurückgesetzt?',
@@ -136,6 +165,7 @@ const _kFaq = <_FaqCategory>[
           'von vorn. Bereits erreichte Meilenstein-Boni (Coupons) bleiben '
           'aber trotzdem noch 2 Wochen nach Erreichen des Meilensteins '
           'einlösbar.',
+      deepLink: 'tab:0',
     ),
     _FaqEntry(
       'Welche Meilensteine gibt es?',
@@ -143,7 +173,8 @@ const _kFaq = <_FaqCategory>[
           '2000 Punkte = 15 %, 3000 Punkte = 25 %. Sobald du einen Meilenstein '
           'erreichst, ist dein Rabatt-Coupon 2 Wochen lang einlösbar — auch '
           'wenn zwischenzeitlich der Monatswechsel deinen Punktestand '
-          'zurücksetzt.',
+          'zurücksetzt. Deine Meilenstein-Übersicht:',
+      deepLink: 'tab:0',
     ),
   ]),
   _FaqCategory('Datenschutz & KI', Icons.shield_outlined, [
@@ -152,24 +183,27 @@ const _kFaq = <_FaqCategory>[
       'Wir speichern nur, was für den Betrieb nötig ist: Kaufhistorie, '
           'Kundennummer, freiwillig eingetragene Stammdaten. Details findest du '
           'in der Datenschutzerklärung.',
-      deepLink: AppRoutes.privacy,
+      deepLink: 'route:${AppRoutes.privacy}',
     ),
     _FaqEntry(
       'Wo lese ich die Datenschutzerklärung?',
-      'Im Profil-Tab unter „Rechtliches" oder direkt hier.',
-      deepLink: AppRoutes.privacy,
+      'Direkt hier — oder im Profil-Tab unter „Rechtliches".',
+      deepLink: 'route:${AppRoutes.privacy}',
     ),
     _FaqEntry(
       'Nutzt ihr KI, um mir Angebote zu zeigen?',
       'Ja — ein regel-basierter Empfehlungs-Generator. Alle KI-gekennzeichneten '
           'Sections tragen einen goldenen „KI"-Chip. Details, Widerspruch und '
           'Beschwerde-Wege findest du auf der KI-Info-Seite.',
+      deepLink: 'ai-info',
     ),
     _FaqEntry(
       'Wie widerspreche ich personalisierten Angeboten?',
-      'Öffne die KI-Info-Seite (über jedes „KI"-Chip erreichbar) oder schreib '
-          'uns per Kontaktformular. Wir deaktivieren dann alle '
-          'personalisierten Vorschläge für dich.',
+      'Auf der KI-Info-Seite (über jedes „KI"-Chip erreichbar) findest du '
+          'den genauen Widerspruchs-Weg. Du kannst uns auch per Kontakt-'
+          'formular schreiben — wir deaktivieren dann alle personalisierten '
+          'Vorschläge für dich.',
+      deepLink: 'ai-info',
     ),
   ]),
 ];
@@ -186,7 +220,8 @@ class _ChatbotMsg {
 }
 
 class _ChatbotSheet extends ConsumerStatefulWidget {
-  const _ChatbotSheet();
+  const _ChatbotSheet({this.onSelectTab});
+  final ChatbotTabSelector? onSelectTab;
   @override
   ConsumerState<_ChatbotSheet> createState() => _ChatbotSheetState();
 }
@@ -238,6 +273,34 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       ));
     });
     _scrollToBottom();
+  }
+
+  /// Führt einen `deepLink`-String aus einer Bot-Antwort aus.
+  /// Schließt zuerst das Bottom-Sheet und springt dann ans Ziel.
+  void _handleDeepLink(String link) {
+    // Sheet vor dem Nav-Push schließen — sonst überlagert das Modal
+    // den neuen Screen und iOS scrollt in einen leeren Zustand.
+    Navigator.of(context).pop();
+    final nav = Navigator.of(context, rootNavigator: true);
+    if (link == 'qr') {
+      nav.push(MaterialPageRoute(builder: (_) => const CustomerQrScreen()));
+      return;
+    }
+    if (link == 'ai-info') {
+      nav.push(MaterialPageRoute(builder: (_) => const AiInfoScreen()));
+      return;
+    }
+    if (link.startsWith('tab:')) {
+      final idx = int.tryParse(link.substring(4));
+      if (idx != null && widget.onSelectTab != null) widget.onSelectTab!(idx);
+      return;
+    }
+    if (link.startsWith('route:')) {
+      context.push(link.substring(6));
+      return;
+    }
+    // Legacy-Format ohne Schema-Präfix: als GoRouter-Push behandeln.
+    context.push(link);
   }
 
   void _scrollToBottom() {
@@ -324,7 +387,10 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
                   itemCount: _log.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.s3),
-                  itemBuilder: (context, i) => _Bubble(msg: _log[i]),
+                  itemBuilder: (context, i) => _Bubble(
+                    msg: _log[i],
+                    onLink: _handleDeepLink,
+                  ),
                 ),
               ),
 
@@ -433,8 +499,9 @@ class _Header extends StatelessWidget {
 }
 
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.msg});
+  const _Bubble({required this.msg, required this.onLink});
   final _ChatbotMsg msg;
+  final void Function(String link) onLink;
   @override
   Widget build(BuildContext context) {
     final isBot = msg.role == 'bot';
@@ -471,24 +538,22 @@ class _Bubble extends StatelessWidget {
               if (msg.deepLink != null) ...[
                 const SizedBox(height: 6),
                 InkWell(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    context.push(msg.deepLink!);
-                  },
+                  onTap: () => onLink(msg.deepLink!),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.open_in_new,
-                          size: 14, color: AppColors.ink),
+                      const Icon(Icons.touch_app_outlined,
+                          size: 14, color: AppColors.brand),
                       const SizedBox(width: 4),
                       Text(
-                        'Direkt öffnen',
+                        'hier klicken',
                         style: AppTypography.body(
-                          size: 12,
+                          size: 13,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.brand,
                         ).copyWith(
                           decoration: TextDecoration.underline,
+                          decorationColor: AppColors.brand,
                         ),
                       ),
                     ],

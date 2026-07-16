@@ -55,10 +55,14 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
           // frei bleibt. Verwendet einen normalen Materialkreis (kein
           // FloatingActionButton), weil der zentrale QR-FAB bereits im
           // Scaffold liegt.
-          const Positioned(
+          Positioned(
             right: 12,
             bottom: 88,
-            child: ChatbotLauncherFab(),
+            child: ChatbotLauncherFab(
+              onSelectTab: (i) {
+                if (i >= 0 && i < _tabs.length) setState(() => _index = i);
+              },
+            ),
           ),
         ],
       ),
