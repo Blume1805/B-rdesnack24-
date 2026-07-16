@@ -11,6 +11,7 @@ import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
+import 'ai_info_screen.dart';
 import 'donations_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
@@ -50,7 +51,9 @@ class OffersTab extends ConsumerWidget {
 
           // 0.3. ── Feierabend-Deal (fetter Gold-Block) ───────────────
           const _FeierabendDealCard(),
-          const SizedBox(height: AppSpacing.s6),
+          const SizedBox(height: AppSpacing.s3),
+          const _CouponFootnote(),
+          const SizedBox(height: AppSpacing.s5),
 
           // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ─────────
           const _HeroCarousel(),
@@ -85,9 +88,10 @@ class OffersTab extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (specials.isNotEmpty) ...[
-                    const SectionHeader(
+                    SectionHeader(
                       eyebrow: 'Für dich persönlich',
                       title: 'Sonderangebote',
+                      action: _AiSectionBadge(context: context),
                     ),
                     const SizedBox(height: AppSpacing.s4),
                     for (final o in specials)
@@ -98,9 +102,10 @@ class OffersTab extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.s5),
                   ],
                   if (loyalty.isNotEmpty) ...[
-                    const SectionHeader(
+                    SectionHeader(
                       eyebrow: 'Belohnung',
                       title: 'Bonus-Angebote',
+                      action: _AiSectionBadge(context: context),
                     ),
                     const SizedBox(height: AppSpacing.s4),
                     for (final o in loyalty)
@@ -111,9 +116,10 @@ class OffersTab extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.s5),
                   ],
                   if (basis.isNotEmpty) ...[
-                    const SectionHeader(
+                    SectionHeader(
                       eyebrow: 'Nur für dich',
                       title: 'Dein Angebot',
+                      action: _AiSectionBadge(context: context),
                     ),
                     const SizedBox(height: AppSpacing.s4),
                     for (final o in basis)
@@ -129,9 +135,10 @@ class OffersTab extends ConsumerWidget {
           ),
 
           // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
-          const SectionHeader(
+          SectionHeader(
             eyebrow: 'Für alle',
             title: 'Wochen­angebote',
+            action: _AiSectionBadge(context: context),
           ),
           const SizedBox(height: AppSpacing.s4),
           offers.when(
@@ -172,7 +179,8 @@ class OffersTab extends ConsumerWidget {
               );
             },
           ),
-          const SizedBox(height: AppSpacing.s6),
+          const _CouponFootnote(),
+          const SizedBox(height: AppSpacing.s4),
 
           // 4. ── Bewertung der Community (Eure Favoriten) ────────────
           const SectionHeader(
@@ -198,6 +206,54 @@ class _PersonalLoading extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: AppSpacing.s6),
       child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
+    );
+  }
+}
+
+/// KI-Chip für den `action`-Slot eines SectionHeader.
+///
+/// Benötigt den [BuildContext] der ListView, um bei Tap direkt in den
+/// AiInfoScreen zu navigieren, ohne Riverpod-Refs zu binden.
+class _AiSectionBadge extends StatelessWidget {
+  const _AiSectionBadge({required this.context});
+  // Ignore-Reason: der SectionHeader.action nimmt ein Widget entgegen und
+  // hat selbst keinen BuildContext-Zugriff; wir reichen ihn hier durch,
+  // um den bequemen Callback-Navigator zu ermöglichen. Kein Anti-Pattern
+  // im Ergebnis, weil das Widget stateless und nicht in Isolation
+  // wiederverwendet wird.
+  final BuildContext context;
+
+  void _openInfo() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AiInfoScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext _) {
+    return AiBadge(onTap: _openInfo, dense: true);
+  }
+}
+
+/// Fußnote unter Coupon-/Angebots-Sektionen. Bezieht sich auf das „*"
+/// hinter jedem Rabatt und macht die Kombinierbarkeits-Einschränkung
+/// transparent. Wird nach jeder Coupon-Liste gerendert.
+class _CouponFootnote extends StatelessWidget {
+  const _CouponFootnote();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.s2, bottom: AppSpacing.s3),
+      child: Text(
+        '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind mehrere '
+        'Coupons für dasselbe Produkt aktiviert, wird automatisch der '
+        'günstigste Preis für dich angewandt.',
+        style: AppTypography.body(
+          size: 11,
+          weight: FontWeight.w600,
+          color: AppColors.textMuted,
+        ).copyWith(height: 1.35),
+      ),
     );
   }
 }
@@ -313,7 +369,7 @@ class _PersonalOfferCard extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        '-${offer.discountPercent.toStringAsFixed(0)} %',
+                        '-${offer.discountPercent.toStringAsFixed(0)} % *',
                         style: AppTypography.display(
                           size: 40,
                           weight: FontWeight.w800,
@@ -1435,7 +1491,7 @@ class _FeierabendDealCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack für 2,90 €.',
+            'Kaffee + Snack für 2,90 €. *',
             style: AppTypography.display(
               size: 24,
               weight: FontWeight.w800,

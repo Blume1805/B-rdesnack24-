@@ -1,6 +1,7 @@
 /// Sammel-Export der Bördesnack24-Designsystem-Widgets.
 library;
 
+export 'ai_badge.dart';
 export 'app_card.dart';
 export 'brand_marks.dart';
 export 'eyebrow.dart';

@@ -8,6 +8,7 @@ import 'screens/history_tab.dart';
 import 'screens/offers_tab.dart';
 import 'screens/onboarding_stories.dart';
 import 'screens/profile_tab.dart';
+import 'widgets/customer_chatbot.dart';
 
 /// Kategorie 3 — Kundenbereich. Eigene untere Navigation (nur für Kunden
 /// sichtbar) mit schwebendem QR-Kundenkarten-Button in der Mitte.
@@ -46,7 +47,21 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _index, children: _tabs),
+      body: Stack(
+        children: [
+          IndexedStack(index: _index, children: _tabs),
+          // Chatbot-FAB: unten rechts, über allen Kunden-Tabs erreichbar,
+          // ausreichend vom BottomAppBar entfernt damit die Karten-Navigation
+          // frei bleibt. Verwendet einen normalen Materialkreis (kein
+          // FloatingActionButton), weil der zentrale QR-FAB bereits im
+          // Scaffold liegt.
+          const Positioned(
+            right: 12,
+            bottom: 88,
+            child: ChatbotLauncherFab(),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openQr,
         backgroundColor: AppColors.brand,

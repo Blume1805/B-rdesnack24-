@@ -231,7 +231,7 @@ class _DiscountAnchor extends StatelessWidget {
           const BrandIcon(size: 26),
           const SizedBox(height: 2),
           Text(
-            '-${percent.toStringAsFixed(0)} %',
+            '-${percent.toStringAsFixed(0)} % *',
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,

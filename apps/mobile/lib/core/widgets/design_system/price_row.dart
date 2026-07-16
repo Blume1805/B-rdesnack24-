@@ -86,7 +86,7 @@ class DiscountBadge extends StatelessWidget {
         boxShadow: AppShadows.sm,
       ),
       child: Text(
-        '-${percent.toStringAsFixed(0)} %',
+        '-${percent.toStringAsFixed(0)} % *',
         style: AppTypography.body(
           size: dense ? 12 : 14,
           weight: FontWeight.w800,
