@@ -35,7 +35,7 @@ class ChatbotLauncherFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.brand,
+      color: AppColors.ink,
       shape: const CircleBorder(),
       elevation: 4,
       child: InkWell(
@@ -45,7 +45,7 @@ class ChatbotLauncherFab extends StatelessWidget {
           width: 48,
           height: 48,
           child: Icon(Icons.chat_bubble_outline,
-              color: AppColors.ink, size: 24),
+              color: AppColors.brand, size: 24),
         ),
       ),
     );
