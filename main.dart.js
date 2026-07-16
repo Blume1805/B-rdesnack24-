@@ -13911,7 +13911,7 @@ _.ax=p
 _.ay=q
 _.ch=r},
 bpv(a,b,c,d,e,f,g,h,i){var s=a==null?null:a
-return new A.I7(d,s,f,e,h,g,b,i,c==null?B.ar4:c,null)},
+return new A.I7(d,s,f,e,h,g,b,i,c==null?B.ar3:c,null)},
 bpx(a){var s=a.P(t.qH),r=s==null?null:s.gjk(0)
 return r==null?A.P(a).p3:r},
 bpw(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q){return new A.o6(c,f,e,i,j,l,k,g,a,d,n,h,p,q,o,m,b)},
@@ -62377,7 +62377,7 @@ return this.a.H3(0,s.a,s.b)},
 $S:0}
 A.CC.prototype={
 A(a){var s,r,q=null,p=this.c,o=A.t("Rechnung "+p.c,q,q,q,q,q,q,q),n=t.p
-o=A.ec(A.b([A.ei(q,q,B.a95,q,q,new A.aCn(this),q,q,q,"Als PDF drucken/speichern",q)],n),q,q,q,q,q,q,q,q,q,o,q,q)
+o=A.ec(A.b([A.ei(q,q,B.a96,q,q,new A.aCn(this),q,q,q,"Als PDF drucken/speichern",q)],n),q,q,q,q,q,q,q,q,q,o,q,q)
 s=A.b([A.ch(q,new A.agJ(p,q),q,q,B.M,q,3),B.Y],n)
 r=p.Q
 if(r!=null){r=$.eb().aV(r)
@@ -63744,7 +63744,7 @@ $2(a,b){var s=this,r=null,q=s.c,p=s.d,o=s.e,n=t.p,m=A.b([A.h4(r,B.b7,!1,r,!0,B.r
 if(k!=null)B.b.O(m,A.b([B.y,A.t(k,r,r,r,B.awb,r,r,r)],n))
 m.push(B.y)
 k=s.f
-m.push(new A.f4(B.hd,r,r,A.z5(B.a92,B.ayS,new A.aK9(s.b,k,s.r,s.w),r),r))
+m.push(new A.f4(B.hd,r,r,A.z5(B.a93,B.ayS,new A.aK9(s.b,k,s.r,s.w),r),r))
 m=A.fp(A.au(m,B.ak,B.f,B.P),r,B.a9)
 return A.o5(A.b([A.e2(B.di,r,r,new A.aKa(k),r,r),A.eE(B.ay2,new A.aKb(l,p,b,o,q,k),r)],n),m,B.ayE)},
 $S:149}
@@ -63899,7 +63899,7 @@ return A.k(A.lK(B.J,new A.asj(),b,!0,null,t.H),$async$HA)
 case 2:return A.n(null,r)}})
 return A.o($async$HA,r)},
 A(a){var s=null
-return A.dS(!1,B.W,!0,s,A.f8(!1,s,!0,B.ar0,B.fo,!0,s,s,s,s,s,s,s,s,s,s,s,new A.ask(this,a),s,s,s,s,s,s,s),B.u,B.p,4,s,s,B.fo,s,s,B.bD)}}
+return A.dS(!1,B.W,!0,s,A.f8(!1,s,!0,B.ar5,B.fo,!0,s,s,s,s,s,s,s,s,s,s,s,new A.ask(this,a),s,s,s,s,s,s,s),B.u,B.h,4,s,s,B.fo,s,s,B.bD)}}
 A.asj.prototype={
 $1(a){return B.aCD},
 $S:450}
@@ -64429,7 +64429,7 @@ m=$.fP().aV(s.f)
 return A.ch(r,A.aJ(A.b([n,B.aI,p,A.t(m,r,r,r,A.Y(q?B.bI:B.h,15,B.X),r,r,r)],o),B.o,B.f,B.j,0,r,r),r,r,B.eY,r,3)}}
 A.FP.prototype={
 A(a){var s=null
-return A.ch(B.aB,A.aJ(A.b([B.a91,B.aI,A.bb(A.t(this.c,s,s,s,A.Y(B.h,14,B.n),s,s,s),1)],t.p),B.o,B.f,B.j,0,s,s),B.ip,s,B.M,s,3)}}
+return A.ch(B.aB,A.aJ(A.b([B.a92,B.aI,A.bb(A.t(this.c,s,s,s,A.Y(B.h,14,B.n),s,s,s),1)],t.p),B.o,B.f,B.j,0,s,s),B.ip,s,B.M,s,3)}}
 A.xd.prototype={
 a_(){return new A.agb()}}
 A.agb.prototype={
@@ -65121,7 +65121,7 @@ e=n==null?"":" \xb7 angefragt "+$.eb().aV(n)
 e=A.b([a0,B.bi,A.t("Zeitraum: "+a+" \u2013 "+g+e,b,b,b,A.Y(B.z,11,B.n),b,b,b),B.y],f)
 for(a=J.b9(r);a.q();)e.push(new A.aeg(a.gM(a),b))
 if(a2==="pending"&&s==="pending")B.b.O(e,A.b([B.y,A.aJ(A.b([A.bb(A.hZ(B.nf,B.axy,new A.aW4(c,a3,a4),A.eS(B.bI,B.l,b,b,b,b,b)),1),B.bL,A.bb(A.nn(B.x7,B.zm,new A.aW5(c,a3,a4),A.oL(b,b,b,b,b,b,b,b,b,B.aB,b,b,b,b,b,B.Zq,b,b,b,b)),1)],f),B.o,B.f,B.j,0,b,b)],f))
-if(j)B.b.O(e,A.b([B.y,A.aJ(A.b([B.Dn,B.bE,A.bb(A.t("Tippen zum \xd6ffnen des signierten PDFs",b,b,b,A.Y(B.p,11,B.X),b,b,b),1),B.a93],f),B.o,B.f,B.j,0,b,b)],f))
+if(j)B.b.O(e,A.b([B.y,A.aJ(A.b([B.Dn,B.bE,A.bb(A.t("Tippen zum \xd6ffnen des signierten PDFs",b,b,b,A.Y(B.p,11,B.X),b,b,b),1),B.a94],f),B.o,B.f,B.j,0,b,b)],f))
 d=A.ch(b,A.au(e,B.I,B.f,B.j),b,a1,B.ay,l,3)
 return new A.ag(B.hs,m?A.De(d,0.6):d,b)},
 Bg(a,b,c){return this.aDe(a,b,c)},
@@ -65411,7 +65411,7 @@ m=J.a6(m,j)
 m=m==null?k:J.ar(m)
 if(m==null)m=""
 h.push(A.bH(B.Z,A.bkr(m,new A.bbg(),B.lZ,k,k,k),B.u,k,k,new A.bo(B.aK,k,o,n,k,k,B.L),k,80,B.hs,k,k,k,k))}o=l.y||!s?k:l.gaHE()
-h.push(A.hZ(B.a9_,B.axU,o,A.eS(B.p,B.h,k,B.eX,k,k,k)))
+h.push(A.hZ(B.a90,B.axU,o,A.eS(B.p,B.h,k,B.eX,k,k,k)))
 if(!s)h.push(new A.ag(B.w7,A.t("Kein DocuSign-Signatur-Slot hinterlegt.",k,k,k,A.Y(B.z,10,B.n),k,k,k),k))
 h.push(B.ah)
 o=l.y?k:l.gaJi()
@@ -65869,7 +65869,7 @@ if(!$.buD){$.buD=!0
 A.bkg(new A.b0E(this),t.a)}},
 A(a){var s=this,r=null,q=s.gcp(),p=t.Fu,o=q.aI($.HI(),p),n=q.aI($.biN(),p),m=A.bjk(q.aI($.boF(),t.CK),new A.b0x(),new A.b0y(),t.c8,t.y)
 q=s.y
-p=q?B.ar5:B.a94
+p=q?B.ar4:B.a95
 p=A.ec(A.b([A.ei(r,r,p,r,r,q?r:new A.b0z(s,a),r,r,r,"Pr\xfcfer-Export als ZIP",r)],t.p),r,r,r,r,r,r,r,r,r,B.awW,r,r)
 q=m?A.a1d(B.p,B.h,B.a8t,B.Y5,new A.b0A(s,a)):r
 return A.dL(p,r,A.dv(o,new A.b0B(s,n,m,a),new A.b0C(),new A.b0D(),!1,!0,!1,t.D,t.jK),r,q,r)},
@@ -66253,7 +66253,7 @@ p=A.T(g,g.$ti.i("r.E"))}g=A.b([new A.akx(new A.b0m(h),i),B.y,new A.afI(a,h.x,new
 for(o=J.b9(p),n=j.c,m=j.d;o.q();){l=o.gM(o)
 k=e.h(0,J.a6(l,"slug"))
 if(k==null)k=B.cM
-g.push(new A.afJ(l,k,n,new A.b0o(h,m),new A.b0p(h,m),new A.b0q(h,m),new A.b0r(h,m),new A.b0s(h,m),i))}g.push(B.ar3)
+g.push(new A.afJ(l,k,n,new A.b0o(h,m),new A.b0p(h,m),new A.b0q(h,m),new A.b0r(h,m),new A.b0s(h,m),i))}g.push(B.ar2)
 return A.kn(A.eH(g,B.ay,i,!1),B.p,new A.b0t(h))},
 $S:320}
 A.b0j.prototype={
@@ -66499,9 +66499,9 @@ f=A.t("v"+g+" \xb7 "+r+f,c,c,c,A.Y(B.z,11,B.n),c,c,c)
 if(o)g=A.aJ(A.b([B.a8h,B.dh,new A.hC(1,B.cK,A.t(n?"Vorlage herunterladen":"Tippen zum \xd6ffnen",1,B.an,c,B.aue,c,c,c),c)],a0),B.o,B.f,B.P,0,c,c)
 else g=A.t("Noch keine Version hochgeladen",1,B.an,c,A.Y(B.z,11,B.n),c,c,c)
 g=A.b([A.bb(g,1)],a0)
-if(d.f&&!n){e=A.b([A.ei(B.b4,B.lY,B.a8X,c,c,d.x,B.a7,c,c,"G\xfcltigkeit setzen",B.lI),A.ei(B.b4,B.lY,B.a90,c,c,d.w,B.a7,c,c,"Neue Version hochladen",B.lI)],a0)
+if(d.f&&!n){e=A.b([A.ei(B.b4,B.lY,B.a8Y,c,c,d.x,B.a7,c,c,"G\xfcltigkeit setzen",B.lI),A.ei(B.b4,B.lY,B.a91,c,c,d.w,B.a7,c,c,"Neue Version hochladen",B.lI)],a0)
 if(j)e.push(A.ei(B.p,B.lY,B.a8O,c,c,o?d.z:c,B.a7,c,c,"Mitarbeiter zur Signatur einladen",B.lI))
-e.push(A.ei(B.p,B.lY,B.a8Y,c,c,o?d.y:c,B.a7,c,c,"Freigabe (2-of-2 Gesellschafter)",B.lI))
+e.push(A.ei(B.p,B.lY,B.a8Z,c,c,o?d.y:c,B.a7,c,c,"Freigabe (2-of-2 Gesellschafter)",B.lI))
 g.push(A.rm(B.d8,e,B.eJ,0,0))}h=A.b([h,B.dZ,f,B.y,A.aJ(g,B.o,B.f,B.j,0,c,c)],a0)
 if(i!=null)B.b.O(h,A.b([B.y,B.cJ,B.ah,A.dv(i,new A.b_Y(),new A.b_Z(),new A.b0_(),!1,!0,!1,t.D,t.G)],a0))
 return new A.ag(new A.am(b,0,0,12),A.ch(c,A.au(h,B.I,B.f,B.j),c,a,B.ay,l,3),c)}}
@@ -146712,8 +146712,8 @@ B.a5=new A.G(0,0)
 B.a5Y=new A.a19(B.a5,B.a5)
 B.mP=new A.C8(1)
 B.cK=new A.a1c(1,"loose")
-B.ar2=new A.d1(null,38,null,null)
-B.a61=new A.hC(1,B.cK,B.ar2,null)
+B.ar1=new A.d1(null,38,null,null)
+B.a61=new A.hC(1,B.cK,B.ar1,null)
 B.a62=new A.C9(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Cy=new A.Kq(0,"Start")
 B.mQ=new A.Kq(1,"Update")
@@ -147016,19 +147016,19 @@ B.a8T=new A.aY(B.n9,32,B.h,null,null)
 B.a8U=new A.aY(B.CK,null,null,null,null)
 B.a8V=new A.aY(B.kA,18,null,null,null)
 B.a6s=new A.ac(57919,"MaterialIcons",null,!1)
-B.a8X=new A.aY(B.a6s,20,null,null,null)
-B.a8Y=new A.aY(B.iH,20,null,null,null)
+B.a8Y=new A.aY(B.a6s,20,null,null,null)
+B.a8Z=new A.aY(B.iH,20,null,null,null)
 B.a78=new A.ac(61280,"MaterialIcons",null,!1)
-B.a9_=new A.aY(B.a78,null,null,null,null)
-B.a90=new A.aY(B.CV,20,null,null,null)
+B.a90=new A.aY(B.a78,null,null,null,null)
+B.a91=new A.aY(B.CV,20,null,null,null)
 B.a6r=new A.ac(57912,"MaterialIcons",null,!1)
-B.a91=new A.aY(B.a6r,null,B.aB,null,null)
+B.a92=new A.aY(B.a6r,null,B.aB,null,null)
 B.a6w=new A.ac(58123,"MaterialIcons",null,!0)
-B.a92=new A.aY(B.a6w,16,null,null,null)
-B.a93=new A.aY(B.n6,18,B.p,null,null)
+B.a93=new A.aY(B.a6w,16,null,null,null)
+B.a94=new A.aY(B.n6,18,B.p,null,null)
 B.a7O=new A.ac(984578,"MaterialIcons",null,!1)
-B.a94=new A.aY(B.a7O,null,B.p,null,null)
-B.a95=new A.aY(B.Dd,null,null,null,null)
+B.a95=new A.aY(B.a7O,null,B.p,null,null)
+B.a96=new A.aY(B.Dd,null,null,null,null)
 B.a7A=new A.ac(62333,"MaterialIcons",null,!1)
 B.a97=new A.aY(B.a7A,18,B.p,null,null)
 B.a7m=new A.ac(61720,"MaterialIcons",null,!1)
@@ -148173,11 +148173,11 @@ B.qF=s(["\u0b30\u0b2c\u0b3f","\u0b38\u0b4b\u0b2e","\u0b2e\u0b19\u0b4d\u0b17\u0b3
 B.IA=s(["\u099c\u09be\u09a8\u09c1","\u09ab\u09c7\u09ac","\u09ae\u09be\u09b0\u09cd\u099a","\u098f\u09aa\u09cd\u09b0\u09bf\u09b2","\u09ae\u09c7","\u099c\u09c1\u09a8","\u099c\u09c1\u09b2\u09be\u0987","\u0986\u0997\u09b8\u09cd\u099f","\u09b8\u09c7\u09aa\u09cd\u099f\u09c7\u09ae\u09cd\u09ac\u09b0","\u0985\u0995\u09cd\u099f\u09cb\u09ac\u09b0","\u09a8\u09ad\u09c7\u09ae\u09cd\u09ac\u09b0","\u09a1\u09bf\u09b8\u09c7\u09ae\u09cd\u09ac\u09b0"],t.s)
 B.IB=s(["eKr.","jKr."],t.s)
 B.ba=s(["h:mm:ss a zzzz","h:mm:ss a z","h:mm:ss a","h:mm a"],t.s)
-B.ar1=new A.d1(null,120,null,null)
+B.ar0=new A.d1(null,120,null,null)
 B.ayc=new A.at("Aktuell nichts zu unterschreiben.",null,null,null,null,null,null,null,null,null)
 B.amt=new A.ag(B.M,B.ayc,null)
 B.a17=new A.fi(B.Z,null,null,B.amt,null)
-B.agm=s([B.ar1,B.a17],t.p)
+B.agm=s([B.ar0,B.a17],t.p)
 B.ago=s(["click","scroll"],t.s)
 B.agp=s(["KWOTA 1","KWOTA 2","KWOTA 3","KWOTA 4"],t.s)
 B.qG=s(["EEEE\u060c d MMMM y","d MMMM y","dd\u200f/MM\u200f/y","d\u200f/M\u200f/y"],t.s)
@@ -150061,8 +150061,8 @@ B.a4Z=new A.am(0,24,0,24)
 B.amm=new A.ag(B.a4Z,B.c2,null)
 B.a50=new A.am(0,2,6,0)
 B.a6N=new A.ac(58612,"MaterialIcons",null,!1)
-B.a8Z=new A.aY(B.a6N,16,B.p,null,null)
-B.amn=new A.ag(B.a50,B.a8Z,null)
+B.a9_=new A.aY(B.a6N,16,B.p,null,null)
+B.amn=new A.ag(B.a50,B.a9_,null)
 B.a5o=new A.am(48,48,48,48)
 B.amo=new A.ag(B.a5o,B.c2,null)
 B.a4Y=new A.am(0,16,0,16)
@@ -150517,20 +150517,20 @@ B.uh=new A.d1(16,16,B.vs,null)
 B.ar_=new A.d1(20,20,B.vs,null)
 B.ui=new A.d1(14,14,B.vs,null)
 B.z5=new A.d1(20,20,B.AZ,null)
-B.a6l=new A.ac(57685,"MaterialIcons",null,!1)
-B.a96=new A.aY(B.a6l,24,B.h,null,null)
-B.ar0=new A.d1(48,48,B.a96,null)
 B.y=new A.d1(null,12,null,null)
 B.Y=new A.d1(null,16,null,null)
 B.aZ=new A.d1(null,20,null,null)
 B.cD=new A.d1(null,24,null,null)
 B.dB=new A.d1(null,2,null,null)
-B.ar3=new A.d1(null,48,null,null)
+B.ar2=new A.d1(null,48,null,null)
 B.bi=new A.d1(null,4,null,null)
 B.dZ=new A.d1(null,6,null,null)
-B.ar4=new A.d1(null,null,null,null)
+B.ar3=new A.d1(null,null,null,null)
 B.a1h=new A.k0(2,null,null,null,null,B.p,null,null,null,null)
-B.ar5=new A.d1(20,20,B.a1h,null)
+B.ar4=new A.d1(20,20,B.a1h,null)
+B.a6l=new A.ac(57685,"MaterialIcons",null,!1)
+B.a8X=new A.aY(B.a6l,24,B.p,null,null)
+B.ar5=new A.d1(48,48,B.a8X,null)
 B.ar6=new A.OC(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Xx=new A.a8j(0,0,0,0,0,0,!1,!1,null,0)
 B.h5=new A.aRW(0,"firstIsTop")
