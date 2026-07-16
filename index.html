@@ -17,10 +17,8 @@
   <title>Bördesnack24</title>
   <link rel="manifest" href="manifest.json">
 
-  <link rel="preload" as="script" href="flutter.js?v=1784206338">
-  <link rel="preload" as="script" href="main.dart.js?v=1784206338">
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="script" href="flutter.js?v=1784207659">
+  <link rel="preload" as="script" href="main.dart.js?v=1784207659">
 
   <!--
     Passkeys-SDK-Stub MUSS vor jedem Skript existieren, das dart2js-Code
@@ -40,6 +38,48 @@
       };
       window.PasskeyAuthenticator = stub;
       window.corbadoPasskeys = stub;
+    })();
+  </script>
+
+  <!--
+    FIX: Flutter Web (CanvasKit) versucht beim Boot Roboto-Fallback-Fonts
+    von https://fonts.gstatic.com/... zu laden. In iOS-In-App-Browsern
+    (WhatsApp/iMessage/Safari View Controller mit Private-Relay) wird
+    dieser Cross-Origin-Fetch weder erfolgreich noch abgebrochen — er
+    bleibt >30 s hängen und blockiert `runApp()` → Grauer Screen ohne
+    Fehlermeldung. Wir shim'en `fetch`/`XHR` so, dass Anfragen an
+    fonts.gstatic.com / fonts.googleapis.com sofort mit HTTP 504
+    fehlschlagen; die Engine loggt eine Warnung und rendert weiter mit
+    System-Fonts. Verifiziert per Headless-Chromium (iPhone-UA):
+    ohne Shim >25 s hängt, mit Shim <15 s bis flutter-view.
+  -->
+  <script>
+    (function () {
+      var GFONT_HOSTS = /^https?:\/\/fonts\.(?:gstatic|googleapis)\.com\//i;
+      var origFetch = window.fetch && window.fetch.bind(window);
+      if (origFetch) {
+        window.fetch = function (input, init) {
+          var u = typeof input === 'string' ? input :
+                  (input && input.url) ? input.url : '';
+          if (GFONT_HOSTS.test(u)) {
+            return Promise.resolve(new Response(null, {
+              status: 504, statusText: 'BOERDESNACK24_FONT_SHIM'
+            }));
+          }
+          return origFetch(input, init);
+        };
+      }
+      var OrigXHR = window.XMLHttpRequest;
+      if (OrigXHR) {
+        var origOpen = OrigXHR.prototype.open;
+        OrigXHR.prototype.open = function (method, url) {
+          if (typeof url === 'string' && GFONT_HOSTS.test(url)) {
+            this.__b24_blocked = true;
+            arguments[1] = 'data:text/plain,';
+          }
+          return origOpen.apply(this, arguments);
+        };
+      }
     })();
   </script>
 
@@ -151,6 +191,6 @@
     Bootstrap am Ende des Bodies (Flutter-Default) — DOM ist fertig und
     Passkeys-Stub garantiert schon installiert.
   -->
-  <script src="flutter_bootstrap.js?v=1784206338" async></script>
+  <script src="flutter_bootstrap.js?v=1784207659" async></script>
 </body>
 </html>
