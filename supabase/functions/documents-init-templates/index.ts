@@ -26,6 +26,7 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
   const page = pdf.addPage([595, 842]);
 
   // Kopf: Aussteller rechts oben
@@ -40,45 +41,42 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
 
   // Titel + Ordner-Label
   let y = 800 - 70;
-  page.drawText("Bördesnack24 – Blanko-Vorlage", { x: 40, y, size: 15, font: bold, color: GOLD });
+  page.drawText("Bördesnack24 – Vorlage", { x: 40, y, size: 15, font: bold, color: GOLD });
   y -= 20;
   page.drawText(folderLabel, { x: 40, y, size: 12, font: bold, color: INK });
-  y -= 16;
-  page.drawText("Diese Vorlage dient als Grundgerüst. Ausfüllen, unterschreiben,",
-    { x: 40, y, size: 10, font, color: MUTED });
+  y -= 18;
+  page.drawText("Felder in eckigen Klammern ausfüllen, danach unterschreiben und als",
+    { x: 40, y, size: 9, font: italic, color: MUTED });
+  y -= 11;
+  page.drawText("neue Version desselben Dokuments in der App hochladen.",
+    { x: 40, y, size: 9, font: italic, color: MUTED });
   y -= 12;
-  page.drawText("dann als neue Version desselben Dokuments in der App hochladen.",
-    { x: 40, y, size: 10, font, color: MUTED });
-  y -= 14;
   page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 0.8, color: INK });
   y -= 22;
 
-  // Stammdaten-Block: leere Felder
+  // Stammdaten-Block mit Platzhaltern
   page.drawText("Stammdaten", { x: 40, y, size: 12, font: bold, color: INK });
-  y -= 16;
+  y -= 18;
 
   const fields: Array<[string, string]> = [
-    ["Titel des Dokuments",   ""],
-    ["Datum",                 ""],
-    ["Vertragsart / Betreff", ""],
-    ["Beteiligte Partei 1",   ""],
-    ["Anschrift Partei 1",    ""],
-    ["Beteiligte Partei 2",   ""],
-    ["Anschrift Partei 2",    ""],
-    ["Gegenstand / Inhalt",   ""],
-    ["Gültig ab",             ""],
-    ["Gültig bis",            ""],
-    ["Bemerkungen",           ""],
+    ["Titel des Dokuments",   "[Titel]"],
+    ["Datum",                 "[TT.MM.JJJJ]"],
+    ["Vertragsart / Betreff", "[Vertragsart]"],
+    ["Beteiligte Partei 1",   "[Name / Firma]"],
+    ["Anschrift Partei 1",    "[Straße Nr., PLZ Ort]"],
+    ["Beteiligte Partei 2",   "[Name / Firma]"],
+    ["Anschrift Partei 2",    "[Straße Nr., PLZ Ort]"],
+    ["Gegenstand / Inhalt",   "[Kurze Beschreibung]"],
+    ["Gültig ab",             "[TT.MM.JJJJ]"],
+    ["Gültig bis",            "[TT.MM.JJJJ oder \"unbefristet\"]"],
+    ["Bemerkungen",           "[Optionale Notizen]"],
   ];
-  for (const [k, _v] of fields) {
+  for (const [k, placeholder] of fields) {
     page.drawText(k, { x: 40, y, size: 9, font: bold, color: INK });
-    page.drawLine({
-      start: { x: 200, y: y - 2 }, end: { x: 555, y: y - 2 },
-      thickness: 0.4, color: MUTED,
-    });
-    y -= 22;
+    page.drawText(placeholder, { x: 200, y, size: 9, font, color: MUTED });
+    y -= 18;
   }
-  y -= 8;
+  y -= 10;
 
   // Unterschriftsblock
   page.drawText("Unterschriften", { x: 40, y, size: 12, font: bold, color: INK });
@@ -92,20 +90,19 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
       borderColor: MUTED, borderWidth: 0.5,
       color: rgb(0.98, 0.96, 0.92),
     });
-    page.drawLine({
-      start: { x: sx + 10, y: y - 66 },
-      end:   { x: sx + slotW - 10, y: y - 66 },
-      thickness: 0.5, color: INK,
-    });
-    page.drawText(col === 0 ? "Partei 1 – Unterschrift" : "Partei 2 – Unterschrift",
-      { x: sx + 10, y: y - 80, size: 9, font: bold, color: INK });
-    page.drawText("Name in Druckschrift / Datum",
-      { x: sx + 10, y: y - 92 + 4, size: 8, font, color: MUTED });
+    page.drawText(col === 0 ? "Partei 1" : "Partei 2",
+      { x: sx + 10, y: y - 16, size: 9, font: bold, color: INK });
+    page.drawText("[Ort, Datum]",
+      { x: sx + 10, y: y - 34, size: 9, font, color: MUTED });
+    page.drawText("[Unterschrift]",
+      { x: sx + 10, y: y - 52, size: 9, font, color: MUTED });
+    page.drawText("[Name in Druckschrift]",
+      { x: sx + 10, y: y - 70, size: 9, font, color: MUTED });
   }
   y -= 110;
 
-  page.drawText(`Vorlagen-Version 1 · Erstellt am ${new Date().toISOString().substring(0,10)}`,
-    { x: 40, y: 40, size: 8, font, color: MUTED });
+  page.drawText(`Vorlage · Bördesnack24 GbR · Version 1 · Erstellt am ${new Date().toISOString().substring(0,10)}`,
+    { x: 40, y: 40, size: 8, font: italic, color: MUTED });
 
   return await pdf.save();
 }
@@ -132,6 +129,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Nicht autorisiert" }, 403);
   }
 
+  // Optional: ?refresh=1 → PDFs auch für bestehende Vorlagen neu erzeugen
+  // und in-place ersetzen (gleicher Storage-Pfad → Client sieht sofort neu).
+  const url = new URL(req.url);
+  const refresh = url.searchParams.get("refresh") === "1"
+    || (typeof (await req.clone().json().catch(() => ({}))) === "object"
+        && ((await req.clone().json().catch(() => ({} as Record<string, unknown>))) as Record<string, unknown>)["refresh"] === true);
+
   const { data: folders } = await admin.from("document_folders")
     .select("slug, label").order("sort_order");
   const results: Array<Record<string, unknown>> = [];
@@ -140,14 +144,15 @@ Deno.serve(async (req) => {
     const slug = f.slug as string;
     const label = f.label as string;
 
-    // existiert schon eine Blanko-Vorlage in diesem Ordner?
+    // existiert schon eine Vorlage in diesem Ordner?
     const { data: existing } = await admin.from("documents")
       .select("id")
       .eq("is_template", true)
       .eq("category", slug)
       .is("archived_at", null)
       .maybeSingle();
-    if (existing) {
+
+    if (existing && !refresh) {
       results.push({ folder: slug, action: "skip (already exists)" });
       continue;
     }
@@ -155,7 +160,7 @@ Deno.serve(async (req) => {
     // PDF erzeugen und hochladen
     const bytes = await buildBlankPdf(label);
     const now = Date.now();
-    const filePath = `templates/${slug}/${now}_blanko.pdf`;
+    const filePath = `templates/${slug}/${now}_vorlage.pdf`;
     const up = await admin.storage.from("documents").upload(
       filePath, bytes,
       { contentType: "application/pdf", upsert: true },
@@ -165,10 +170,24 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    if (existing && refresh) {
+      // Neuen Datei-Pfad für Version 1 setzen, Titel refresh, keine neue Version.
+      const docId = (existing as { id: string }).id;
+      await admin.from("document_versions")
+        .update({ file_path: filePath, notes: "Vorlage aktualisiert" })
+        .eq("document_id", docId)
+        .eq("version", 1);
+      await admin.from("documents")
+        .update({ title: label, updated_at: new Date().toISOString() })
+        .eq("id", docId);
+      results.push({ folder: slug, action: "refreshed", document_id: docId });
+      continue;
+    }
+
     // documents-Row + version anlegen
     const { data: doc, error: dErr } = await admin.from("documents")
       .insert({
-        title: `Blanko-Vorlage – ${label}`,
+        title: label,
         category: slug,
         status: "active",
         is_template: true,
@@ -183,7 +202,7 @@ Deno.serve(async (req) => {
       document_id: doc.id,
       version: 1,
       file_path: filePath,
-      notes: "Initiale Blanko-Vorlage",
+      notes: "Initiale Vorlage",
     });
 
     results.push({ folder: slug, action: "created", document_id: doc.id });

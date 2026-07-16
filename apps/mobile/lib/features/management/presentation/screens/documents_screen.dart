@@ -763,7 +763,12 @@ class _DocumentCard extends ConsumerWidget {
         : null;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.s3),
+      // Hochgeladene Dokumente (Nicht-Vorlagen) sind leicht rechts
+      // eingerückt, damit sie visuell „unter der Vorlage einliegen".
+      padding: EdgeInsets.only(
+        bottom: AppSpacing.s3,
+        left: isTemplate ? 0 : AppSpacing.s5,
+      ),
       child: AppCard(
         onTap: hasFile ? onOpen : null,
         topStripeColor: stripeColor,

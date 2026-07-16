@@ -99,10 +99,12 @@ export async function buildNdaPdf(ctx: Ctx): Promise<Uint8Array> {
       { type: "p", text: "13.2. Es liegen keine weiteren schriftlichen oder mündlichen Vereinbarungen über den Gegenstand dieser Vereinbarung vor. Änderungen oder Ergänzungen dieser Vereinbarung unterliegen der Schriftform. Auf dieses Schriftformerfordernis kann nur schriftlich durch die Parteien verzichtet werden." },
       { type: "p", text: "13.3. Der Export Vertraulicher Informationen, die im Rahmen dieser Vereinbarung offengelegt werden, könnte gesetzlich verboten sein oder einer staatlichen Genehmigung unterliegen. Jede Partei verpflichtet sich, die jeweils auf die Verwendung und Weitergabe von im Rahmen dieser Vereinbarung ausgetauschten Vertraulichen Informationen anwendbaren nationalen und internationalen Gesetze und sonstigen Rechtsvorschriften zu beachten, insbesondere die geltenden Ausfuhrkontrollbestimmungen und Sanktionsregelungen." },
       { type: "p", text: "13.4. Sollten Bestimmungen dieser Vereinbarung nichtig, ungültig oder aus rechtlichen Gründen nicht bestimmungsgemäß durchsetzbar sein oder werden, wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt. Die Vertragsparteien ersetzen die nichtige, ungültige oder nicht durchsetzbare Bestimmung durch eine rechtsgültige Bestimmung, die dem wirtschaftlichen Zweck der ursprünglichen Bestimmung weitestgehend entspricht." },
-      { type: "signature-line", label: "Ort, Datum" },
-      { type: "signature-line", label: "Unterschrift Partei X" },
-      { type: "signature-line", label: "Unterschrift Partei Y" },
+      { type: "space", height: 12 },
+      { type: "placeholder", label: "Ort, Datum", value: "[Ort, TT.MM.JJJJ]" },
+      { type: "placeholder", label: "Unterschrift Partei X", value: "[Name, Funktion, Unterschrift]" },
+      { type: "placeholder", label: "Unterschrift Partei Y", value: "[Name, Funktion, Unterschrift]" },
     ],
+    { showLegend: true },
   );
   return await ctx.pdf.save();
 }

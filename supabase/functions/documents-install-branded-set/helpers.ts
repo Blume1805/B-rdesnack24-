@@ -58,13 +58,15 @@ export type Block =
   | { type: "space"; height?: number }
   | { type: "line" }
   | { type: "italic-note"; text: string }
-  | { type: "signature-line"; label: string };
+  | { type: "signature-line"; label: string }
+  | { type: "placeholder"; label: string; value: string };
 
 export async function drawFlow(
   ctx: Ctx,
   headerTitle: string,
   contentPage: () => Promise<PDFPage>,
   blocks: Block[],
+  opts?: { showLegend?: boolean },
 ): Promise<void> {
   const marginLeft = 40;
   const marginRight = 40;
@@ -74,6 +76,7 @@ export async function drawFlow(
 
   let page = await contentPage();
   let y = drawStandardHeader(page, ctx, headerTitle);
+  if (opts?.showLegend) y = drawPlaceholderLegend(page, ctx, y);
 
   const newPage = async () => {
     page = await contentPage();
@@ -166,6 +169,30 @@ export async function drawFlow(
         y -= 22;
         break;
       }
+      case "placeholder": {
+        await ensure(28);
+        page.drawText(b.label + ":", { x: marginLeft, y, size: 9, font: ctx.bold, color: INK });
+        page.drawText(b.value, { x: marginLeft + 160, y, size: 10, font: ctx.font, color: MUTED });
+        y -= 22;
+        break;
+      }
     }
   }
+}
+
+// Renders eine kleine gelbe Legende am oberen Rand aller Vorlagen.
+export function drawPlaceholderLegend(
+  page: import("https://esm.sh/pdf-lib@1.17.1").PDFPage,
+  ctx: Ctx,
+  y: number,
+): number {
+  const text = "Felder in eckigen Klammern […] durch die tatsächlichen Werte ersetzen.";
+  page.drawRectangle({
+    x: 40, y: y - 14, width: 515, height: 18,
+    color: rgb(1.0, 0.94, 0.72),
+    borderColor: GOLD,
+    borderWidth: 0.4,
+  });
+  page.drawText(text, { x: 46, y: y - 8, size: 8, font: ctx.italic, color: INK });
+  return y - 22;
 }
