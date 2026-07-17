@@ -456,24 +456,24 @@ class _MiniStat extends StatelessWidget {
   }
 }
 
-/// Logo-Kachel für einen Spendenzweck. Zeigt entweder das hinterlegte
-/// Logo (`cause.logoUrl`) oder einen Platzhalter im Bördesnack24-Style
-/// mit Herz-Icon und der Aufschrift „Logo folgt". Unter dem Logo wird
-/// signalisiert, ob der Kunde bereits für den Zweck gestimmt hat
-/// (kleines Herz-Icon in kritisch/gold).
-class _CauseLogo extends StatelessWidget {
-  const _CauseLogo({required this.cause});
+/// Logo-Header für eine Cause-Card. Das Logo liegt oben über die volle
+/// Kartenbreite und nimmt etwa das obere Drittel ein (AspectRatio 5:2).
+/// Ohne hinterlegtes Logo rendert ein Cream-Platzhalter mit
+/// Herz-Icon und „Logo folgt"-Beschriftung.
+///
+/// Rechts oben liegt der Voting-Status-Chip: gelber Herz-Kreis, wenn
+/// der Kunde für den Zweck gestimmt hat; sonst ein transparenter
+/// Umriss-Kreis mit dem Herz-Umriss.
+class _CauseLogoHeader extends StatelessWidget {
+  const _CauseLogoHeader({required this.cause});
   final DonationCause cause;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          child: SizedBox(
-            width: 64,
-            height: 64,
+    return AspectRatio(
+      aspectRatio: 5 / 2,
+      child: Stack(
+        children: [
+          Positioned.fill(
             child: cause.logoUrl != null && cause.logoUrl!.isNotEmpty
                 ? Image.network(
                     cause.logoUrl!,
@@ -482,16 +482,36 @@ class _CauseLogo extends StatelessWidget {
                   )
                 : const _LogoPlaceholder(),
           ),
-        ),
-        const SizedBox(height: 4),
-        Icon(
-          cause.votedByMe ? Icons.favorite : Icons.favorite_border,
-          color: cause.votedByMe
-              ? AppColors.statusCritical
-              : AppColors.textMuted,
-          size: 18,
-        ),
-      ],
+          Positioned(
+            top: 8,
+            right: 8,
+            child: _VoteStatusChip(voted: cause.votedByMe),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VoteStatusChip extends StatelessWidget {
+  const _VoteStatusChip({required this.voted});
+  final bool voted;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: voted ? AppColors.brand : AppColors.surfaceCard,
+        border: Border.all(color: AppColors.ink, width: 1.2),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        voted ? Icons.favorite : Icons.favorite_border,
+        size: 16,
+        color: voted ? AppColors.statusCritical : AppColors.textMuted,
+      ),
     );
   }
 }
@@ -507,16 +527,15 @@ class _LogoPlaceholder extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.volunteer_activism,
-              color: AppColors.brand, size: 22),
-          const SizedBox(height: 2),
+              color: AppColors.brand, size: 30),
+          const SizedBox(height: 4),
           Text(
-            'Logo\nfolgt',
-            textAlign: TextAlign.center,
+            'Logo folgt',
             style: AppTypography.body(
-              size: 8,
-              weight: FontWeight.w700,
+              size: 11,
+              weight: FontWeight.w800,
               color: AppColors.textMuted,
-            ).copyWith(height: 1.05, letterSpacing: 0.2),
+            ).copyWith(letterSpacing: 0.4),
           ),
         ],
       ),
@@ -567,49 +586,62 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
     return AppCard(
       color: c.votedByMe ? AppColors.brandLight : AppColors.surfaceCard,
       borderColor: c.votedByMe ? AppColors.brand : AppColors.borderSubtle,
-      padding: const EdgeInsets.all(AppSpacing.s4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // Kein Card-Padding — der Header greift bis an die Kartenränder;
+      // das Padding kommt im _CauseCardBody dahinter.
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _CauseLogo(cause: c),
-          const SizedBox(width: AppSpacing.s3),
-          Expanded(
+          // Oberes Drittel: Logo/Bild-Header.
+          _CauseLogoHeader(cause: c),
+          // Unterer Bereich (~2/3): Titel, Beschreibung, Progress und
+          // Voting-Footer, jeweils sauber gepaddet und durchgängig
+          // vertikal ausgerichtet.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.s4,
+              AppSpacing.s4,
+              AppSpacing.s4,
+              AppSpacing.s4,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   c.title,
-                  style: AppTypography.body(
-                    size: 15,
+                  style: AppTypography.display(
+                    size: 18,
                     weight: FontWeight.w800,
                     color: AppColors.ink,
                   ),
                 ),
-                if (c.description != null) ...[
-                  const SizedBox(height: 2),
+                if (c.description != null && c.description!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
                   Text(
                     c.description!,
                     style: AppTypography.body(
-                      size: 12,
+                      size: 13,
+                      weight: FontWeight.w600,
                       color: AppColors.textMuted,
-                    ),
+                    ).copyWith(height: 1.35),
                   ),
                 ],
                 if (widget.showProgress && widget.share != null) ...[
-                  const SizedBox(height: AppSpacing.s3),
+                  const SizedBox(height: AppSpacing.s4),
                   _GoalProgress(collected: widget.share!),
                 ],
-                const SizedBox(height: AppSpacing.s2),
+                const SizedBox(height: AppSpacing.s4),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(Icons.people_outline,
-                        size: 14, color: AppColors.textMuted),
+                        size: 16, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
                       '${c.voteCount} ${c.voteCount == 1 ? 'Stimme' : 'Stimmen'}',
                       style: AppTypography.body(
                         size: 12,
-                        weight: FontWeight.w700,
+                        weight: FontWeight.w800,
                         color: AppColors.textMuted,
                       ),
                     ),
@@ -634,36 +666,36 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                         ),
                       ),
                     ],
+                    const Spacer(),
+                    FilledButton(
+                      onPressed: _busy ? null : _toggle,
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            c.votedByMe ? AppColors.ink : AppColors.brand,
+                        foregroundColor:
+                            c.votedByMe ? AppColors.onDark : AppColors.ink,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s3, vertical: 10),
+                      ),
+                      child: _busy
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: AppColors.onDark),
+                            )
+                          : Text(
+                              c.votedByMe ? 'Stimme entfernen' : 'Abstimmen',
+                              style: AppTypography.body(
+                                size: 12,
+                                weight: FontWeight.w800,
+                              ),
+                            ),
+                    ),
                   ],
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: AppSpacing.s2),
-          FilledButton(
-            onPressed: _busy ? null : _toggle,
-            style: FilledButton.styleFrom(
-              backgroundColor:
-                  c.votedByMe ? AppColors.ink : AppColors.brand,
-              foregroundColor:
-                  c.votedByMe ? AppColors.onDark : AppColors.ink,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s3, vertical: 10),
-            ),
-            child: _busy
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.onDark),
-                  )
-                : Text(
-                    c.votedByMe ? 'Stimme entfernen' : 'Abstimmen',
-                    style: AppTypography.body(
-                      size: 12,
-                      weight: FontWeight.w800,
-                    ),
-                  ),
           ),
         ],
       ),
