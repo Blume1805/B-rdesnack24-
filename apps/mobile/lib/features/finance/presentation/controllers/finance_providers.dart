@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../data/datasources/finance_remote_data_source.dart';
 import '../../data/repositories/finance_repository_impl.dart';
+import '../../domain/entities/finance_kpis.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../../domain/repositories/finance_repository.dart';
@@ -26,6 +27,12 @@ final selectedPeriodProvider = StateProvider<FinancePeriod>(
 final financeSummaryProvider = FutureProvider.autoDispose<FinanceSummary>((ref) {
   final period = ref.watch(selectedPeriodProvider);
   return ref.watch(financeRepositoryProvider).getSummary(period);
+});
+
+/// Volles KPI-Paket (Trend, Vorjahr/Vormonat, Automaten, Produkte).
+final financeKpisProvider = FutureProvider.autoDispose<FinanceKpis>((ref) {
+  final period = ref.watch(selectedPeriodProvider);
+  return ref.watch(financeRepositoryProvider).getKpis(period);
 });
 
 /// Aktionen (Sync/Export) mit Lade-/Fehlerzustand.

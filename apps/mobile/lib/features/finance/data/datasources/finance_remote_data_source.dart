@@ -41,6 +41,44 @@ class FinanceRemoteDataSource {
     };
   }
 
+  Future<Map<String, dynamic>> fetchKpis(FinancePeriod period) async {
+    final result = await _client.rpc(
+      'finance_kpis',
+      params: {'p_from': period.fromIso, 'p_to': period.toIso},
+    );
+    if (result is Map) return Map<String, dynamic>.from(result);
+    // Fallback: leerer KPI-Block, damit die UI nicht crasht.
+    return const {
+      'current': {
+        'revenue_net_7': 0, 'revenue_net_19': 0, 'revenue_net': 0,
+        'expense_net': 0, 'result_net': 0,
+        'vat_collected': 0, 'vat_paid': 0, 'accounts': [],
+      },
+      'prior_year': {
+        'revenue_net_7': 0, 'revenue_net_19': 0, 'revenue_net': 0,
+        'expense_net': 0, 'result_net': 0,
+        'vat_collected': 0, 'vat_paid': 0, 'accounts': [],
+      },
+      'prior_period': {
+        'revenue_net_7': 0, 'revenue_net_19': 0, 'revenue_net': 0,
+        'expense_net': 0, 'result_net': 0,
+        'vat_collected': 0, 'vat_paid': 0, 'accounts': [],
+      },
+      'trend': [],
+      'machines': [],
+      'top_products': [],
+      'customer': {
+        'purchases_count': 0, 'app_gross': 0, 'active_customers': 0, 'avg_basket': 0,
+      },
+      'derived': {
+        'gross_margin_pct': 0, 'net_margin_pct': 0, 'ebitda_margin_pct': 0,
+        'cashflow_operating': 0,
+        'revenue_growth_yoy_pct': null, 'revenue_growth_mom_pct': null,
+        'result_growth_yoy_pct': null, 'result_growth_mom_pct': null,
+      },
+    };
+  }
+
   Future<int> syncSevdesk(FinancePeriod period) async {
     final res = await _client.functions.invoke(
       'sevdesk-sync',

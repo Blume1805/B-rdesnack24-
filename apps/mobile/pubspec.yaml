@@ -41,6 +41,9 @@ dependencies:
   # QR-Code für die Kundenkarte (Automaten-Verifizierung)
   qr_flutter: ^4.1.0
 
+  # Diagramme im Finanzdashboard (KPI-Trend, Cashflow, Vergleich Vorjahr).
+  fl_chart: ^0.68.0
+
   # Push-Benachrichtigungen (FCM) — nur native Builds; für die Web-Demo
   # deaktiviert, weil firebase_messaging_web sich beim Plugin-Register ohne
   # firebase_options.dart synchron initialisiert und crasht.

@@ -13,6 +13,7 @@ import '../../../management/data/approvals_remote_data_source.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
+import '../widgets/kpi_dashboard.dart';
 
 /// Kategorie 1 — Finanzdashboard (nur Gesellschafter/Admin).
 class FinanceScreen extends ConsumerWidget {
@@ -49,6 +50,8 @@ class FinanceScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s5),
           _PeriodSelector(period: period),
+          const SizedBox(height: AppSpacing.s6),
+          const KpiDashboard(),
           const SizedBox(height: AppSpacing.s6),
           summary.when(
             loading: () => const Padding(
