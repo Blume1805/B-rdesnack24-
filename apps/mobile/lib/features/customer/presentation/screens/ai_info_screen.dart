@@ -68,8 +68,11 @@ class AiInfoScreen extends StatelessWidget {
                 'Ein regel-basierter Empfehlungs- und Angebots-Generator, der '
                 'Kaufhistorie, Kategorie-Präferenzen und Loyalty-Punkte '
                 'auswertet, um dir Wochenangebote, Bonus-Angebote und '
-                'personalisierte Coupons vorzuschlagen. '
-                '${_kAppUsesLlm ? 'Zusätzlich läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
+                'personalisierte Coupons vorzuschlagen. Zusätzlich wählt '
+                'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
+                'den Feierabend-Deal je eine Heißgetränk-/Snack-Paarung '
+                'aus dem Produktkatalog aus. '
+                '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           _InfoBlock(
             title: 'Zweck',

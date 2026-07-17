@@ -1600,16 +1600,35 @@ class _TimeDealCard extends ConsumerWidget {
                   color: AppColors.ink,
                 ).copyWith(letterSpacing: 2, height: 1),
               ),
+              const Spacer(),
+              // Kennzeichnung nach Art. 50 EU AI Act: die tägliche
+              // Heißgetränk-/Snack-Kombi wird algorithmisch ausgewählt →
+              // KI-Chip mit Sprung in die AI-Info-Seite.
+              _DealAiBadge(),
             ],
           ),
           const SizedBox(height: AppSpacing.s3),
-          Text(
-            'Heißgetränk + Snack.  *',
-            style: AppTypography.display(
-              size: 22,
-              weight: FontWeight.w800,
-              color: AppColors.ink,
-            ).copyWith(height: 1.1),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Heißgetränk + Snack.',
+                  style: AppTypography.display(
+                    size: 22,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ).copyWith(height: 1.1),
+                ),
+                TextSpan(
+                  text: '  *',
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.s2),
           Text(
@@ -1653,6 +1672,23 @@ class _TimeDealCard extends ConsumerWidget {
             ).copyWith(height: 1.3),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// KI-Chip auf der Deal-Karte. Öffnet die AI-Info-Seite mit Art.-50-
+/// Angaben. Muss ein eigenes Widget sein, weil `_TimeDealCard` als
+/// ConsumerWidget keinen direkten BuildContext-Push macht — wir wollen
+/// den Chip als kleinen Header-Action verbauen.
+class _DealAiBadge extends StatelessWidget {
+  const _DealAiBadge();
+  @override
+  Widget build(BuildContext context) {
+    return AiBadge(
+      dense: true,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AiInfoScreen()),
       ),
     );
   }
