@@ -11,6 +11,7 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
+import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'master_data_screen.dart';
 
@@ -86,13 +87,16 @@ class ProfileTab extends ConsumerWidget {
           eyebrow: 'Zugang & Profil',
           children: [
             _ProfileRow(
+              key: CustomerAnchors.kundennummer,
               icon: Icons.badge_outlined,
               title: 'Stammdaten',
+              subtitle: 'Kundennummer, Name, Anschrift',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const MasterDataScreen()),
               ),
             ),
             _ProfileRow(
+              key: CustomerAnchors.passwordRow,
               icon: Icons.lock_outline,
               title: 'Passwort ändern',
               onTap: () => _changePassword(context, ref, repo),
@@ -109,6 +113,7 @@ class ProfileTab extends ConsumerWidget {
           eyebrow: 'Kontakt',
           children: [
             _ProfileRow(
+              key: CustomerAnchors.contactRow,
               icon: Icons.mail_outline,
               title: 'Kontakt / Feedback',
               onTap: () => _contact(context, repo),
@@ -467,6 +472,7 @@ class _ProfileGroup extends StatelessWidget {
 
 class _ProfileRow extends StatelessWidget {
   const _ProfileRow({
+    super.key,
     required this.icon,
     required this.title,
     this.subtitle,

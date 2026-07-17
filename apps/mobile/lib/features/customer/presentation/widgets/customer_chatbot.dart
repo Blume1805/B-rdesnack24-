@@ -10,6 +10,7 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
 import '../screens/ai_info_screen.dart';
 import '../screens/customer_qr_screen.dart';
+import 'customer_anchors.dart';
 
 /// Callback vom CustomerScreen, mit dem der Chatbot in einen bestimmten
 /// Tab (Angebote, Automaten, Verlauf, Profil) wechseln kann.
@@ -69,11 +70,13 @@ class _FaqEntry {
 
   /// Optionaler Deep-Link, den der „hier klicken"-Button auslöst.
   /// Unterstützte Schemata (String-Prefix):
-  ///   * `route:<path>` — GoRouter-Push (z. B. `route:/legal/privacy`)
-  ///   * `tab:<0..3>`   — CustomerScreen-Tab wechseln
-  ///                        (0=Angebote 1=Automaten 2=Verlauf 3=Profil)
-  ///   * `qr`           — Kundenkarte öffnen (CustomerQrScreen)
-  ///   * `ai-info`      — KI-Info-Seite öffnen
+  ///   * `route:<path>`        — GoRouter-Push (z. B. `route:/legal/privacy`)
+  ///   * `tab:<0..3>`          — CustomerScreen-Tab wechseln
+  ///                              (0=Angebote 1=Automaten 2=Verlauf 3=Profil)
+  ///   * `tab:<0..3>@<anchor>` — Tab wechseln **und** zum Anker scrollen
+  ///                              (z. B. `tab:3@password`).
+  ///   * `qr`                  — Kundenkarte öffnen (CustomerQrScreen)
+  ///   * `ai-info`             — KI-Info-Seite öffnen
   final String? deepLink;
 }
 
@@ -88,22 +91,23 @@ const _kFaq = <_FaqCategory>[
   _FaqCategory('Konto & Profil', Icons.person_outline, [
     _FaqEntry(
       'Wie ändere ich mein Passwort?',
-      'Im Profil-Tab unter „Sicherheit" → „Passwort ändern". '
+      'Im Profil-Tab unter „Zugang & Profil" → „Passwort ändern". '
           'Du bekommst per E-Mail einen Bestätigungs-Link.',
-      deepLink: 'tab:3',
+      deepLink: 'tab:3@password',
     ),
     _FaqEntry(
       'Wo finde ich meine Kundennummer?',
-      'Deine Kundennummer siehst du im Profil-Tab ganz oben unter deinem '
-          'Namen. Sie beginnt mit „B24-".',
-      deepLink: 'tab:3',
+      'Deine Kundennummer findest du im Profil-Tab unter „Stammdaten". '
+          'Sie ist eine fortlaufende, fünfstellige Zahl ab 10001 — '
+          'kein Buchstaben-Präfix davor.',
+      deepLink: 'tab:3@kundennummer',
     ),
     _FaqEntry(
       'Wie deaktiviere ich mein Konto?',
       'Nutze bitte das Kontaktformular im Profil-Tab. Wir bestätigen die '
           'Deaktivierung binnen 24 Stunden und löschen deine Daten nach '
           '30 Tagen, falls du nicht widerrufst.',
-      deepLink: 'tab:3',
+      deepLink: 'tab:3@kontakt',
     ),
   ]),
   _FaqCategory('Coupons & Angebote', Icons.local_offer_outlined, [
@@ -129,8 +133,8 @@ const _kFaq = <_FaqCategory>[
       'Warum sind meine Coupons plötzlich weg?',
       'Coupons haben ein Ablaufdatum, das dir auf jeder Karte angezeigt wird. '
           'Nach Einlösung oder nach Fristablauf verschwinden sie automatisch. '
-          'Aktuelle Angebote und Coupons siehst du im Angebote-Tab.',
-      deepLink: 'tab:0',
+          'Aktuelle Wochenangebote siehst du im Angebote-Tab.',
+      deepLink: 'tab:0@wochenangebote',
     ),
   ]),
   _FaqCategory('Automaten & Standorte', Icons.place_outlined, [
@@ -156,7 +160,7 @@ const _kFaq = <_FaqCategory>[
           'pro Cent Umsatz — 1 € Einkauf = 100 Punkte. Sonderaktionen '
           'können deinen Bonus zusätzlich erhöhen. Deinen aktuellen Punkte-'
           'stand siehst du im Angebote-Tab.',
-      deepLink: 'tab:0',
+      deepLink: 'tab:0@punkte',
     ),
     _FaqEntry(
       'Wann werden meine Punkte zurückgesetzt?',
@@ -165,7 +169,7 @@ const _kFaq = <_FaqCategory>[
           'von vorn. Bereits erreichte Meilenstein-Boni (Coupons) bleiben '
           'aber trotzdem noch 2 Wochen nach Erreichen des Meilensteins '
           'einlösbar.',
-      deepLink: 'tab:0',
+      deepLink: 'tab:0@punkte',
     ),
     _FaqEntry(
       'Welche Meilensteine gibt es?',
@@ -174,7 +178,7 @@ const _kFaq = <_FaqCategory>[
           'erreichst, ist dein Rabatt-Coupon 2 Wochen lang einlösbar — auch '
           'wenn zwischenzeitlich der Monatswechsel deinen Punktestand '
           'zurücksetzt. Deine Meilenstein-Übersicht:',
-      deepLink: 'tab:0',
+      deepLink: 'tab:0@punkte',
     ),
   ]),
   _FaqCategory('Datenschutz & KI', Icons.shield_outlined, [
@@ -277,7 +281,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
 
   /// Führt einen `deepLink`-String aus einer Bot-Antwort aus.
   /// Schließt zuerst das Bottom-Sheet und springt dann ans Ziel.
-  void _handleDeepLink(String link) {
+  Future<void> _handleDeepLink(String link) async {
     // Sheet vor dem Nav-Push schließen — sonst überlagert das Modal
     // den neuen Screen und iOS scrollt in einen leeren Zustand.
     Navigator.of(context).pop();
@@ -291,8 +295,20 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       return;
     }
     if (link.startsWith('tab:')) {
-      final idx = int.tryParse(link.substring(4));
-      if (idx != null && widget.onSelectTab != null) widget.onSelectTab!(idx);
+      // Format: tab:<n>   oder   tab:<n>@<anchor>
+      final rest = link.substring(4);
+      final at = rest.indexOf('@');
+      final tabStr = at < 0 ? rest : rest.substring(0, at);
+      final anchor = at < 0 ? null : rest.substring(at + 1);
+      final idx = int.tryParse(tabStr);
+      if (idx != null && widget.onSelectTab != null) {
+        widget.onSelectTab!(idx);
+      }
+      if (anchor != null && anchor.isNotEmpty) {
+        // Erst das Sheet-Pop und den Tab-Switch verarbeiten lassen,
+        // dann zur Zielposition scrollen.
+        await CustomerAnchors.scrollTo(anchor);
+      }
       return;
     }
     if (link.startsWith('route:')) {
@@ -508,7 +524,7 @@ class _Bubble extends StatelessWidget {
     return Align(
       alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 300),
+        constraints: const BoxConstraints(maxWidth: 340),
         child: Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.s3,
@@ -530,30 +546,31 @@ class _Bubble extends StatelessWidget {
               Text(
                 msg.text,
                 style: AppTypography.body(
-                  size: 13,
+                  size: 15,
                   weight: FontWeight.w600,
                   color: AppColors.ink,
-                ).copyWith(height: 1.4),
+                ).copyWith(height: 1.45),
               ),
               if (msg.deepLink != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 InkWell(
                   onTap: () => onLink(msg.deepLink!),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.touch_app_outlined,
-                          size: 14, color: AppColors.brand),
+                          size: 16, color: AppColors.ink),
                       const SizedBox(width: 4),
                       Text(
                         'hier klicken',
                         style: AppTypography.body(
-                          size: 13,
-                          weight: FontWeight.w800,
-                          color: AppColors.brand,
+                          size: 15,
+                          weight: FontWeight.w900,
+                          color: AppColors.ink,
                         ).copyWith(
                           decoration: TextDecoration.underline,
-                          decorationColor: AppColors.brand,
+                          decorationColor: AppColors.ink,
+                          decorationThickness: 2,
                         ),
                       ),
                     ],

@@ -11,6 +11,7 @@ import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
+import '../widgets/customer_anchors.dart';
 import 'ai_info_screen.dart';
 import 'donations_screen.dart';
 import 'news_screen.dart';
@@ -49,8 +50,20 @@ class OffersTab extends ConsumerWidget {
           const _ProductSearchBar(),
           const SizedBox(height: AppSpacing.s5),
 
-          // 0.3. ── Feierabend-Deal (fetter Gold-Block) ───────────────
-          const _FeierabendDealCard(),
+          // 0.3. ── Frühstücks-Deal + Feierabend-Deal ─────────────────
+          _TimeDealCard(
+            key: CustomerAnchors.fruehstueckDeal,
+            eyebrow: 'FRÜHSTÜCKS-DEAL',
+            timeRange: 'Täglich von 6 bis 8 Uhr — an allen Automaten.',
+            icon: Icons.wb_sunny_outlined,
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          _TimeDealCard(
+            key: CustomerAnchors.feierabendDeal,
+            eyebrow: 'FEIERABEND-DEAL',
+            timeRange: 'Täglich von 16 bis 17 Uhr — an allen Automaten.',
+            icon: Icons.nights_stay_outlined,
+          ),
           const SizedBox(height: AppSpacing.s3),
           const _CouponFootnote(),
           const SizedBox(height: AppSpacing.s5),
@@ -64,12 +77,15 @@ class OffersTab extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s6),
 
           // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
-          loyalty.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (l) => l == null
-                ? const SizedBox.shrink()
-                : _LoyaltyProgressCard(status: l),
+          KeyedSubtree(
+            key: CustomerAnchors.loyaltyCard,
+            child: loyalty.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (l) => l == null
+                  ? const SizedBox.shrink()
+                  : _LoyaltyProgressCard(status: l),
+            ),
           ),
           if (loyalty.valueOrNull != null)
             const SizedBox(height: AppSpacing.s5),
@@ -136,6 +152,7 @@ class OffersTab extends ConsumerWidget {
 
           // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
           SectionHeader(
+            key: CustomerAnchors.weeklyOffers,
             eyebrow: 'Für alle',
             title: 'Wochen­angebote',
             action: _AiSectionBadge(context: context),
@@ -1462,13 +1479,43 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
 }
 
 /// Vollflächige, goldgelbe Deal-Karte im Stil der Design-Mockups. Eyebrow
-/// „FEIERABEND-DEAL" in Versalien mit Buchstabenabstand, darunter der fette
-/// Deal-Titel und Gültigkeit.
-class _FeierabendDealCard extends StatelessWidget {
-  const _FeierabendDealCard();
+/// Zeitgebundener Kombi-Deal mit zwei Slots: **Heißgetränk + Snack**.
+///
+/// Die konkrete Auswahl wird täglich zufällig neu getriggert
+/// (Client-seitiger Date-Seed über die Top-Community-Favoriten). Da wir
+/// aktuell noch keine echten Produktbilder pflegen, bleiben die zwei
+/// Slots als Bild-Platzhalter mit Bördesnack24-Markenkreis stehen —
+/// sobald echte Assets hinterlegt sind, ziehen sie automatisch nach.
+class _TimeDealCard extends ConsumerWidget {
+  const _TimeDealCard({
+    super.key,
+    required this.eyebrow,
+    required this.timeRange,
+    required this.icon,
+  });
+
+  final String eyebrow;
+  final String timeRange;
+  final IconData icon;
+
+  RankedProduct? _pickDaily(List<RankedProduct> list) {
+    if (list.isEmpty) return null;
+    // Deterministischer „Tages-Zufall": alle Kunden sehen am gleichen
+    // Tag die gleiche Kombi, aber sie wechselt zum Datumswechsel.
+    final today = DateTime.now();
+    final seed = today.year * 10000 + today.month * 100 + today.day;
+    return list[seed % list.length];
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final drinks =
+        ref.watch(topProductsProvider('Getränke')).valueOrNull ?? const [];
+    final snacks =
+        ref.watch(topProductsProvider('Snacks')).valueOrNull ?? const [];
+    final drink = _pickDaily(drinks);
+    final snack = _pickDaily(snacks);
+
     return AppCard(
       color: AppColors.brand,
       borderColor: AppColors.brand,
@@ -1481,31 +1528,118 @@ class _FeierabendDealCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'FEIERABEND-DEAL',
-            style: AppTypography.body(
-              size: 12,
-              weight: FontWeight.w800,
-              color: AppColors.ink,
-            ).copyWith(letterSpacing: 2, height: 1),
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.ink),
+              const SizedBox(width: 6),
+              Text(
+                eyebrow,
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ).copyWith(letterSpacing: 2, height: 1),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack für 2,90 €. *',
+            'Heißgetränk + Snack.  *',
             style: AppTypography.display(
-              size: 24,
+              size: 22,
               weight: FontWeight.w800,
               color: AppColors.ink,
             ).copyWith(height: 1.1),
           ),
           const SizedBox(height: AppSpacing.s2),
           Text(
-            'Täglich von 17 bis 20 Uhr — an allen Automaten.',
+            timeRange,
             style: AppTypography.body(
               size: 13,
-              weight: FontWeight.w600,
+              weight: FontWeight.w700,
               color: AppColors.ink,
             ),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          Row(
+            children: [
+              Expanded(
+                child: _DealSlot(
+                  label: 'Heißgetränk',
+                  product: drink,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: _DealSlot(
+                  label: 'Snack',
+                  product: snack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Text(
+            'Kombi wird täglich neu ausgewählt — direkt am Automaten einlösen.',
+            style: AppTypography.body(
+              size: 11,
+              weight: FontWeight.w600,
+              color: AppColors.ink,
+            ).copyWith(height: 1.3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ein Deal-Slot (Bild-Platzhalter + Produktname), wie er in Frühstücks-
+/// und Feierabend-Deal-Karte eingesetzt wird. Falls kein Produkt geladen
+/// werden konnte, bleibt der Slot bei „wird generiert".
+class _DealSlot extends StatelessWidget {
+  const _DealSlot({required this.label, required this.product});
+  final String label;
+  final RankedProduct? product;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s2),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: AppTypography.body(
+              size: 10,
+              weight: FontWeight.w800,
+              color: AppColors.brand,
+            ).copyWith(letterSpacing: 1.2),
+          ),
+          const SizedBox(height: 4),
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadii.sm),
+              child: ProductImage.expand(
+                imageUrl: product?.imageUrl,
+                productName: product?.name ?? label,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            product?.name ?? 'wird täglich generiert',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: AppColors.onDark,
+            ).copyWith(height: 1.2),
           ),
         ],
       ),

@@ -95,8 +95,8 @@ class AiInfoScreen extends StatelessWidget {
                 'Du kannst der personalisierten Angebots-Anzeige jederzeit '
                 'widersprechen — schreib uns über das Kontaktformular in '
                 'der App oder per E-Mail an datenschutz@boerdesnack24.de. Du '
-                'siehst dann nur noch die allgemeinen Wochenangebote und '
-                'den Feierabend-Deal.',
+                'siehst dann nur noch die allgemeinen Wochenangebote, den '
+                'Frühstücks- und den Feierabend-Deal.',
           ),
           _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',
