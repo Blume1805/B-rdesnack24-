@@ -118,6 +118,7 @@ class DonationCause extends Equatable {
     required this.voteCount,
     required this.votedByMe,
     this.description,
+    this.logoUrl,
   });
 
   final String id;
@@ -126,6 +127,11 @@ class DonationCause extends Equatable {
   final String status; // 'active' | 'suggested' | 'archived'
   final int voteCount;
   final bool votedByMe;
+
+  /// Optionales Logo/Bild der gemeinnützigen Einrichtung. Wird oben
+  /// links in der Cause-Card angezeigt; ohne Wert erscheint ein
+  /// Bördesnack24-Platzhalter mit Herz-Icon.
+  final String? logoUrl;
 
   bool get isActive => status == 'active';
   bool get isSuggested => status == 'suggested';
@@ -137,11 +143,12 @@ class DonationCause extends Equatable {
         status: j['status'] as String? ?? 'suggested',
         voteCount: (j['vote_count'] as num?)?.toInt() ?? 0,
         votedByMe: (j['voted_by_me'] as bool?) ?? false,
+        logoUrl: j['logo_url'] as String?,
       );
 
   @override
   List<Object?> get props =>
-      [id, title, description, status, voteCount, votedByMe];
+      [id, title, description, status, voteCount, votedByMe, logoUrl];
 }
 
 /// News-Beitrag.

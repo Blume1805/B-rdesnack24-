@@ -456,6 +456,74 @@ class _MiniStat extends StatelessWidget {
   }
 }
 
+/// Logo-Kachel für einen Spendenzweck. Zeigt entweder das hinterlegte
+/// Logo (`cause.logoUrl`) oder einen Platzhalter im Bördesnack24-Style
+/// mit Herz-Icon und der Aufschrift „Logo folgt". Unter dem Logo wird
+/// signalisiert, ob der Kunde bereits für den Zweck gestimmt hat
+/// (kleines Herz-Icon in kritisch/gold).
+class _CauseLogo extends StatelessWidget {
+  const _CauseLogo({required this.cause});
+  final DonationCause cause;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          child: SizedBox(
+            width: 64,
+            height: 64,
+            child: cause.logoUrl != null && cause.logoUrl!.isNotEmpty
+                ? Image.network(
+                    cause.logoUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const _LogoPlaceholder(),
+                  )
+                : const _LogoPlaceholder(),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Icon(
+          cause.votedByMe ? Icons.favorite : Icons.favorite_border,
+          color: cause.votedByMe
+              ? AppColors.statusCritical
+              : AppColors.textMuted,
+          size: 18,
+        ),
+      ],
+    );
+  }
+}
+
+class _LogoPlaceholder extends StatelessWidget {
+  const _LogoPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.surfaceAlt,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.volunteer_activism,
+              color: AppColors.brand, size: 22),
+          const SizedBox(height: 2),
+          Text(
+            'Logo\nfolgt',
+            textAlign: TextAlign.center,
+            style: AppTypography.body(
+              size: 8,
+              weight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ).copyWith(height: 1.05, letterSpacing: 0.2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CauseCard extends ConsumerStatefulWidget {
   const _CauseCard({
     required this.cause,
@@ -503,11 +571,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            c.votedByMe ? Icons.favorite : Icons.favorite_border,
-            color: c.votedByMe ? AppColors.statusCritical : AppColors.ink,
-            size: 26,
-          ),
+          _CauseLogo(cause: c),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
