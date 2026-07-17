@@ -1504,7 +1504,7 @@ class _DealsCarouselState extends State<_DealsCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 380,
+          height: 440,
           child: PageView.builder(
             controller: _ctrl,
             itemCount: slides.length,
@@ -1621,22 +1621,25 @@ class _TimeDealCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.s4),
-          Row(
-            children: [
-              Expanded(
-                child: _DealSlot(
-                  label: 'Heißgetränk',
-                  product: drink,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _DealSlot(
+                    label: 'Heißgetränk',
+                    product: drink,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s3),
-              Expanded(
-                child: _DealSlot(
-                  label: 'Snack',
-                  product: snack,
+                const SizedBox(width: AppSpacing.s3),
+                Expanded(
+                  child: _DealSlot(
+                    label: 'Snack',
+                    product: snack,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
@@ -1658,6 +1661,12 @@ class _TimeDealCard extends ConsumerWidget {
 /// Ein Deal-Slot (Bild-Platzhalter + Produktname), wie er in Frühstücks-
 /// und Feierabend-Deal-Karte eingesetzt wird. Falls kein Produkt geladen
 /// werden konnte, bleibt der Slot bei „wird generiert".
+///
+/// Der Slot wird über `IntrinsicHeight + CrossAxisAlignment.stretch` in
+/// der Row auf die Höhe des jeweils höheren Nachbarn gezogen. Damit
+/// sowohl die Bild-Kachel gleich groß bleibt (AspectRatio 1:1) als auch
+/// die zwei Slots exakt gleich hoch aussehen, füllt eine `Spacer`-Zeile
+/// den freien Raum zwischen Bild und Produktname aus.
 class _DealSlot extends StatelessWidget {
   const _DealSlot({required this.label, required this.product});
   final String label;
@@ -1671,7 +1680,7 @@ class _DealSlot extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             label.toUpperCase(),
@@ -1681,9 +1690,9 @@ class _DealSlot extends StatelessWidget {
               color: AppColors.brand,
             ).copyWith(letterSpacing: 1.2),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           AspectRatio(
-            aspectRatio: 4 / 3,
+            aspectRatio: 1,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppRadii.sm),
               child: ProductImage.expand(
@@ -1692,16 +1701,21 @@ class _DealSlot extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            product?.name ?? 'wird täglich generiert',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.body(
-              size: 12,
-              weight: FontWeight.w800,
-              color: AppColors.onDark,
-            ).copyWith(height: 1.2),
+          const SizedBox(height: 6),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                product?.name ?? 'wird täglich generiert',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w800,
+                  color: AppColors.onDark,
+                ).copyWith(height: 1.2),
+              ),
+            ),
           ),
         ],
       ),
