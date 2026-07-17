@@ -17,8 +17,8 @@ class FinanceRemoteDataSource {
     // gebucht sind — nicht als Fehler behandeln, sondern als leeres Summary.
     if (result == null) {
       return const {
-        'revenue_net7': 0,
-        'revenue_net19': 0,
+        'revenue_net_7': 0,
+        'revenue_net_19': 0,
         'revenue_net': 0,
         'expense_net': 0,
         'result_net': 0,

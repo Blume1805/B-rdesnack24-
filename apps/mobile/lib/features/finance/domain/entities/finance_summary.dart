@@ -22,9 +22,12 @@ class AccountAmount extends Equatable {
   bool get isExpense => direction == 'expense';
 
   factory AccountAmount.fromJson(Map<String, dynamic> j) => AccountAmount(
-        code: j['code'] as String,
-        name: j['name'] as String? ?? '',
-        direction: j['direction'] as String? ?? 'expense',
+        // Defensiv: die RPC kann in seltenen Fällen null oder unerwartete
+        // Typen liefern. Aussteigen mit „minified:qY" hätte in Release
+        // den ganzen Screen zerlegt, siehe Screenshot #9859.
+        code: (j['code'] ?? '').toString(),
+        name: (j['name'] ?? '').toString(),
+        direction: (j['direction'] ?? 'expense').toString(),
         net: _toDouble(j['net']),
         tax: _toDouble(j['tax']),
         gross: _toDouble(j['gross']),
