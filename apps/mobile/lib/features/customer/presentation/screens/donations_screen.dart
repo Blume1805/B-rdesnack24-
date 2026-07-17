@@ -81,19 +81,55 @@ class DonationsScreen extends ConsumerWidget {
                   const LinearProgressIndicator(color: AppColors.brand),
               error: (e, _) => _errorCard('$e'),
               data: (list) {
-                final active =
-                    list.where((c) => c.isActive).toList();
-                final suggested =
-                    list.where((c) => c.isSuggested).toList();
+                final active = list.where((c) => c.isActive).toList()
+                  ..sort((a, b) => b.voteCount.compareTo(a.voteCount));
+                final suggested = list.where((c) => c.isSuggested).toList();
+                final top3 = active.take(3).toList();
+                final rest = active.length > 3
+                    ? active.sublist(3)
+                    : const <DonationCause>[];
+
+                final totalPool = pool.valueOrNull?.totalPool ?? 0;
+                // Gleichmäßige Verteilung auf drei Empfänger — bei
+                // weniger als drei aktiven Zwecken auf die tatsächlich
+                // aktive Zahl. Zielwert je Projekt: 500 €.
+                final divisor = top3.isEmpty ? 1 : top3.length;
+                final sharePerProject = totalPool / divisor;
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final c in active)
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: AppSpacing.s3),
-                        child: _CauseCard(cause: c),
+                    if (top3.isNotEmpty) ...[
+                      _DistributionExplainerCard(
+                        share: sharePerProject,
+                        totalPool: totalPool,
+                        activeCount: top3.length,
                       ),
+                      const SizedBox(height: AppSpacing.s4),
+                      Eyebrow('Aktuelle Empfänger (Top ${top3.length})'),
+                      const SizedBox(height: AppSpacing.s2),
+                      for (final c in top3)
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: AppSpacing.s3),
+                          child: _CauseCard(
+                            cause: c,
+                            share: sharePerProject,
+                            showProgress: true,
+                          ),
+                        ),
+                    ],
+                    if (rest.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.s4),
+                      const Eyebrow('Weitere Zwecke — jetzt abstimmen'),
+                      const SizedBox(height: AppSpacing.s2),
+                      for (final c in rest)
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: AppSpacing.s3),
+                          child: _CauseCard(cause: c),
+                        ),
+                    ],
                     if (suggested.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.s4),
                       const Eyebrow('Vorschläge von Kund*innen'),
@@ -301,9 +337,137 @@ class _PoolCard extends StatelessWidget {
   }
 }
 
+/// Zielbetrag pro Empfänger-Projekt. Sobald jedes der drei aktuellen
+/// Empfänger 500 € erreicht hat, wird die Spende ausgezahlt — solange
+/// darunter, sammelt sich der Pool weiter an.
+const double _kProjectGoal = 500.0;
+
+/// Kleiner Info-Block über den Empfänger-Karten, der die Verteil-Regel
+/// transparent erklärt (jedes Projekt bekommt 1/3 des Pools; Auszahlung
+/// erst wenn 500 € pro Projekt zusammengekommen sind).
+class _DistributionExplainerCard extends StatelessWidget {
+  const _DistributionExplainerCard({
+    required this.share,
+    required this.totalPool,
+    required this.activeCount,
+  });
+  final double share;
+  final double totalPool;
+  final int activeCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      color: AppColors.brandLight,
+      borderColor: AppColors.brand,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.balance, color: AppColors.ink, size: 20),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'So wird verteilt',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Der Gesamt-Spendenpool wird zu gleichen Teilen auf die aktuell '
+            'gewählten $activeCount Empfänger verteilt. Zielwert je Projekt: '
+            '${Formatters.euro(_kProjectGoal)}. Erst wenn jedes Projekt '
+            '${Formatters.euro(_kProjectGoal)} erreicht hat, wird '
+            'ausgezahlt — bis dahin sammelt sich der Anteil weiter.',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w600,
+              color: AppColors.ink,
+            ).copyWith(height: 1.4),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Row(
+            children: [
+              Expanded(
+                child: _MiniStat(
+                  label: 'Anteil je Projekt',
+                  value: Formatters.euro(share),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s2),
+              Expanded(
+                child: _MiniStat(
+                  label: 'Gesamt-Pool',
+                  value: Formatters.euro(totalPool),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({required this.label, required this.value});
+  final String label;
+  final String value;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCard,
+        border: Border.all(color: AppColors.brand),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: AppTypography.body(
+              size: 10,
+              weight: FontWeight.w800,
+              color: AppColors.textMuted,
+            ).copyWith(letterSpacing: 0.6),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: AppTypography.display(
+              size: 18,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CauseCard extends ConsumerStatefulWidget {
-  const _CauseCard({required this.cause});
+  const _CauseCard({
+    required this.cause,
+    this.share,
+    this.showProgress = false,
+  });
   final DonationCause cause;
+
+  /// Nur gesetzt für die Top-3-Empfänger — bestimmt Fortschritts-Anzeige.
+  final double? share;
+  final bool showProgress;
+
   @override
   ConsumerState<_CauseCard> createState() => _CauseCardState();
 }
@@ -366,6 +530,10 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                       color: AppColors.textMuted,
                     ),
                   ),
+                ],
+                if (widget.showProgress && widget.share != null) ...[
+                  const SizedBox(height: AppSpacing.s3),
+                  _GoalProgress(collected: widget.share!),
                 ],
                 const SizedBox(height: AppSpacing.s2),
                 Row(
@@ -435,6 +603,115 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Fortschrittsanzeige eines Empfänger-Projekts gegen den 500 €-Zielwert.
+///
+/// Zeigt den bereits **absolut** gesammelten Betrag (linke Zahl) und
+/// den **relativen** Fortschritt in Prozent (rechte Zahl). Ist der Anteil
+/// kleiner als das Ziel, bleibt der Balken innerhalb 100 % — überschreitet
+/// er das Ziel, gibt es einen zweiten Balken-Abschnitt in einem
+/// abweichenden Farbton für den „Bonus"-Anteil.
+class _GoalProgress extends StatelessWidget {
+  const _GoalProgress({required this.collected});
+  final double collected;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseFrac = (collected / _kProjectGoal).clamp(0.0, 1.0);
+    final overshootFrac =
+        collected > _kProjectGoal ? (collected / _kProjectGoal) - 1.0 : 0.0;
+    // Der Fortschritts-Anteil wird auf max. 100 % + 100 % (also
+    // 500 → 1000 €) skaliert für die visuelle Anzeige.
+    final overshootShown = overshootFrac.clamp(0.0, 1.0);
+    final pctText = (collected / _kProjectGoal * 100)
+        .toStringAsFixed(0)
+        .replaceAll('-', '');
+    final reached = collected >= _kProjectGoal;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              Formatters.euro(collected),
+              style: AppTypography.display(
+                size: 20,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                '/ ${Formatters.euro(_kProjectGoal)} Ziel',
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+            Text(
+              '$pctText %',
+              style: AppTypography.body(
+                size: 14,
+                weight: FontWeight.w800,
+                color: reached
+                    ? AppColors.statusPositive
+                    : AppColors.ink,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Stack(
+            children: [
+              Container(
+                height: 12,
+                color: AppColors.borderSubtle,
+              ),
+              FractionallySizedBox(
+                widthFactor: baseFrac,
+                child: Container(
+                  height: 12,
+                  color: reached
+                      ? AppColors.statusPositive
+                      : AppColors.brand,
+                ),
+              ),
+              if (overshootShown > 0)
+                FractionallySizedBox(
+                  widthFactor: overshootShown,
+                  child: Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: AppColors.statusPositive.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (reached) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Ziel erreicht — Auszahlung startet, sobald alle drei Projekte '
+            '${Formatters.euro(_kProjectGoal)} zusammenhaben.',
+            style: AppTypography.body(
+              size: 11,
+              weight: FontWeight.w700,
+              color: AppColors.statusPositive,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
