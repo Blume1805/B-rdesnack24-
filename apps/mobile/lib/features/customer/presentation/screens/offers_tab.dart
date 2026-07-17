@@ -50,22 +50,8 @@ class OffersTab extends ConsumerWidget {
           const _ProductSearchBar(),
           const SizedBox(height: AppSpacing.s5),
 
-          // 0.3. ── Frühstücks-Deal + Feierabend-Deal ─────────────────
-          _TimeDealCard(
-            key: CustomerAnchors.fruehstueckDeal,
-            eyebrow: 'FRÜHSTÜCKS-DEAL',
-            timeRange: 'Täglich von 6 bis 8 Uhr — an allen Automaten.',
-            icon: Icons.wb_sunny_outlined,
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          _TimeDealCard(
-            key: CustomerAnchors.feierabendDeal,
-            eyebrow: 'FEIERABEND-DEAL',
-            timeRange: 'Täglich von 16 bis 17 Uhr — an allen Automaten.',
-            icon: Icons.nights_stay_outlined,
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          const _CouponFootnote(),
+          // 0.3. ── Frühstücks-Deal + Feierabend-Deal (horizontales Karussell)
+          const _DealsCarousel(),
           const SizedBox(height: AppSpacing.s5),
 
           // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ─────────
@@ -1479,6 +1465,80 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
 }
 
 /// Vollflächige, goldgelbe Deal-Karte im Stil der Design-Mockups. Eyebrow
+/// Horizontales Karussell mit dem Frühstücks- und dem Feierabend-Deal.
+///
+/// Beide Karten werden mit ihrem Anker-Key gerendert, damit der Chatbot
+/// per `tab:0@fruehstueck` / `tab:0@feierabend` an sie scrollen kann.
+class _DealsCarousel extends StatefulWidget {
+  const _DealsCarousel();
+  @override
+  State<_DealsCarousel> createState() => _DealsCarouselState();
+}
+
+class _DealsCarouselState extends State<_DealsCarousel> {
+  final _ctrl = PageController(viewportFraction: 0.94);
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slides = <Widget>[
+      _TimeDealCard(
+        key: CustomerAnchors.fruehstueckDeal,
+        eyebrow: 'FRÜHSTÜCKS-DEAL',
+        timeRange: 'Täglich von 6 bis 8 Uhr — an allen Automaten.',
+        icon: Icons.wb_sunny_outlined,
+      ),
+      _TimeDealCard(
+        key: CustomerAnchors.feierabendDeal,
+        eyebrow: 'FEIERABEND-DEAL',
+        timeRange: 'Täglich von 16 bis 17 Uhr — an allen Automaten.',
+        icon: Icons.nights_stay_outlined,
+      ),
+    ];
+    return Column(
+      children: [
+        SizedBox(
+          height: 380,
+          child: PageView.builder(
+            controller: _ctrl,
+            itemCount: slides.length,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (_, i) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: slides[i],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < slides.length; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: _page == i ? 22 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _page == i
+                      ? AppColors.brand
+                      : AppColors.borderSubtle,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 /// Zeitgebundener Kombi-Deal mit zwei Slots: **Heißgetränk + Snack**.
 ///
 /// Die konkrete Auswahl wird täglich zufällig neu getriggert
@@ -1578,11 +1638,13 @@ class _TimeDealCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s2),
+          const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kombi wird täglich neu ausgewählt — direkt am Automaten einlösen.',
+            '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind '
+            'mehrere Coupons für dasselbe Produkt aktiviert, wird '
+            'automatisch der günstigste Preis für dich angewandt.',
             style: AppTypography.body(
-              size: 11,
+              size: 9,
               weight: FontWeight.w600,
               color: AppColors.ink,
             ).copyWith(height: 1.3),
