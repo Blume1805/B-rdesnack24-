@@ -130,6 +130,22 @@ class PersonalOffer extends Equatable {
       source == PersonalOfferSource.birthday ||
       source == PersonalOfferSource.anniversary;
 
+  /// Für den Offline-Cache (gleiche Keys wie fromJson).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'regular_price_net': regularPriceNet,
+        'offer_price_net': offerPriceNet,
+        'discount_percent': discountPercent,
+        'redemption_code': redemptionCode,
+        'valid_from': validFrom.toIso8601String(),
+        'valid_to': validTo.toIso8601String(),
+        'redeemed_at': redeemedAt?.toIso8601String(),
+        'activated_at': activatedAt?.toIso8601String(),
+        'image_url': imageUrl,
+        'source': source.name,
+      };
+
   factory PersonalOffer.fromJson(Map<String, dynamic> j) => PersonalOffer(
         id: j['id'] as String,
         title: j['title'] as String? ?? '',

@@ -79,6 +79,30 @@ class OffersTab extends ConsumerWidget {
 
           // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
           if (hasSub) ...[
+            // Offline-Hinweis: Coupons kommen aus dem lokalen Snapshot.
+            if (ref.watch(personalOffersOfflineProvider)) ...[
+              AppCard(
+                color: const Color(0xFFFFF3D6),
+                borderColor: AppColors.statusWarning,
+                padding: const EdgeInsets.all(AppSpacing.s3),
+                child: Row(
+                  children: [
+                    const Icon(Icons.wifi_off_outlined,
+                        size: 20, color: AppColors.statusWarning),
+                    const SizedBox(width: AppSpacing.s2),
+                    Expanded(
+                      child: Text(
+                        'Kein Empfang — deine gespeicherten Coupons und '
+                        'Codes werden offline angezeigt.',
+                        style:
+                            AppTypography.body(size: 12, color: AppColors.ink),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s4),
+            ],
             KeyedSubtree(
               key: CustomerAnchors.loyaltyCard,
               child: loyalty.when(

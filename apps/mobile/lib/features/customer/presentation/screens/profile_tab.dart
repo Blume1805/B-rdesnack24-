@@ -48,7 +48,9 @@ class ProfileTab extends ConsumerWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  (u?.fullName ?? u?.email ?? 'K').substring(0, 1).toUpperCase(),
+                  (u?.fullName ?? u?.email ?? 'K')
+                      .substring(0, 1)
+                      .toUpperCase(),
                   style: AppTypography.display(
                     size: 20,
                     weight: FontWeight.w800,
@@ -231,11 +233,15 @@ class ProfileTab extends ConsumerWidget {
     try {
       await ref.read(supabaseClientProvider).rpc(
         'request_account_deletion',
-        params: {'p_reason': reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim()},
+        params: {
+          'p_reason':
+              reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim()
+        },
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Antrag gestellt. Wir melden uns per E-Mail.')),
+        const SnackBar(
+            content: Text('Antrag gestellt. Wir melden uns per E-Mail.')),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -292,8 +298,7 @@ class ProfileTab extends ConsumerWidget {
                 if (error != null) ...[
                   const SizedBox(height: 12),
                   Text(error!,
-                      style: const TextStyle(
-                          color: Colors.red, fontSize: 12)),
+                      style: const TextStyle(color: Colors.red, fontSize: 12)),
                 ],
                 const SizedBox(height: 12),
                 Align(
@@ -382,8 +387,8 @@ class ProfileTab extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content:
-                  Text('Passwort geändert. Eine Bestätigungs-Mail ist unterwegs.')),
+              content: Text(
+                  'Passwort geändert. Eine Bestätigungs-Mail ist unterwegs.')),
         );
       }
     } catch (e) {
@@ -458,7 +463,8 @@ class ProfileTab extends ConsumerWidget {
     if (url.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bewertungslink noch nicht konfiguriert.')),
+          const SnackBar(
+              content: Text('Bewertungslink noch nicht konfiguriert.')),
         );
       }
       return;
@@ -563,7 +569,8 @@ class _ProfileRow extends StatelessWidget {
 
 class _NotificationSection extends ConsumerStatefulWidget {
   @override
-  ConsumerState<_NotificationSection> createState() => _NotificationSectionState();
+  ConsumerState<_NotificationSection> createState() =>
+      _NotificationSectionState();
 }
 
 class _NotificationSectionState extends ConsumerState<_NotificationSection> {
@@ -602,7 +609,9 @@ class _NotificationSectionState extends ConsumerState<_NotificationSection> {
       _email = email;
       _push = push;
     });
-    await ref.read(customerRepositoryProvider).updateNotifications(email: email, push: push);
+    await ref
+        .read(customerRepositoryProvider)
+        .updateNotifications(email: email, push: push);
     ref.invalidate(myCustomerProvider);
   }
 }
@@ -653,7 +662,8 @@ class _ContactFormState extends State<_ContactForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -662,7 +672,8 @@ class _ContactFormState extends State<_ContactForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Kontakt / Feedback', style: Theme.of(context).textTheme.titleLarge),
+              Text('Kontakt / Feedback',
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _category,
@@ -676,15 +687,17 @@ class _ContactFormState extends State<_ContactForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _subjectCtrl,
-                decoration: const InputDecoration(labelText: 'Betreff (optional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Betreff (optional)'),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _bodyCtrl,
                 decoration: const InputDecoration(labelText: 'Nachricht'),
                 maxLines: 4,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Bitte Nachricht eingeben' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Bitte Nachricht eingeben'
+                    : null,
               ),
               const SizedBox(height: 12),
               const Text(

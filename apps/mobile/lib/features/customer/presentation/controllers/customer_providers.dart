@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../data/customer_remote_data_source.dart';
+import '../../data/personal_offer_cache.dart';
 import '../../data/customer_repository_impl.dart';
 import '../../domain/entities/customer_models.dart';
 import '../../domain/entities/donations_news.dart';
@@ -54,13 +55,33 @@ final myPersonalOfferProvider = FutureProvider.autoDispose<PersonalOffer?>(
   (ref) => ref.watch(customerRepositoryProvider).ensurePersonalOffer(),
 );
 
+/// true, wenn die persönlichen Angebote gerade aus dem Offline-Cache
+/// stammen (Netzwerkfehler beim Laden) — der Offers-Tab zeigt dann einen
+/// Hinweis-Banner mit dem letzten Sync-Zeitpunkt.
+final personalOffersOfflineProvider = StateProvider<bool>((_) => false);
+
 /// Alle aktiven individuellen Angebote (Basis + Loyalty-Bonusse), Loyalty
-/// zuerst — Client kann daraus die Sektionen bauen.
+/// zuerst — Client kann daraus die Sektionen bauen. Erfolgreiche Loads
+/// werden lokal gecacht; bei Netzwerkfehlern (typisch: schlechter Empfang
+/// direkt am Automaten) kommt der letzte Snapshot zurück, damit die
+/// Einlösecodes trotzdem anzeigbar bleiben.
 final myPersonalOffersProvider =
     FutureProvider.autoDispose<List<PersonalOffer>>((ref) async {
-  // Sicherstellen, dass mindestens das Basis-Angebot existiert.
-  await ref.watch(customerRepositoryProvider).ensurePersonalOffer();
-  return ref.watch(customerRepositoryProvider).myPersonalOffers();
+  try {
+    // Sicherstellen, dass mindestens das Basis-Angebot existiert.
+    await ref.watch(customerRepositoryProvider).ensurePersonalOffer();
+    final list = await ref.watch(customerRepositoryProvider).myPersonalOffers();
+    await PersonalOfferCache.save(list);
+    ref.read(personalOffersOfflineProvider.notifier).state = false;
+    return list;
+  } catch (_) {
+    final cached = await PersonalOfferCache.load();
+    if (cached != null) {
+      ref.read(personalOffersOfflineProvider.notifier).state = true;
+      return cached;
+    }
+    rethrow;
+  }
 });
 
 final myLoyaltyStatusProvider = FutureProvider.autoDispose<LoyaltyStatus?>(
