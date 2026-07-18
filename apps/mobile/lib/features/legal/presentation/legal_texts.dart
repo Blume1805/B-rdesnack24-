@@ -22,7 +22,7 @@ Website: https://www.boerdesnack24.de
 
 Umsatzsteuer / Steuernummer
 Steuernummer: 102/178/01635
-(Umsatzsteuer-Identifikationsnummer nach § 27a UStG: sofern zugeteilt hier ergänzen.)
+Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE 458804058
 
 Zuständige Aufsichtsbehörde für Lebensmittelrecht
 Veterinär- und Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis
