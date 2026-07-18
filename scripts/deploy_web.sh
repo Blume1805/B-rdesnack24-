@@ -121,11 +121,17 @@ if [ -z "$SUBPATH" ]; then
   # Feature-Branch trägt `/assets/`, damit Build-Artefakte dort nicht liegen
   # bleiben — ohne -f würden neue Bilder (z. B. brand_hero_wide.png) beim
   # gh-pages-Commit still verschluckt.
+  # Jede Datei einzeln stagen: git add bricht bei EINEM fehlenden Pathspec
+  # komplett ab und fügt dann GAR NICHTS hinzu — das hat schon einmal die
+  # dart2js-part-Dateien still vom Deploy ausgeschlossen. Einzeln + laut.
   ( cd "$ROOT" && \
-    git add -f index.html 404.html manifest.json favicon.png flutter.js \
-      flutter_bootstrap.js flutter_service_worker.js main.dart.js* \
+    for f in index.html 404.html manifest.json favicon.png flutter.js \
+      flutter_bootstrap.js flutter_service_worker.js main.dart.js \
+      main.dart.js_*.part.js \
       version.json version.txt assets canvaskit icons .last_build_id \
-      roboto-regular.ttf 2>/dev/null || true; \
+      roboto-regular.ttf; do
+      [ -e "$f" ] && git add -f -- "$f" || echo "  (skip: $f fehlt)"
+    done; \
     git add -u )
 else
   # Sub-Path-Deploy (Legacy / Preview).  Neben der Root-App liegen lassen.
