@@ -39,6 +39,11 @@ class _KpiBody extends StatelessWidget {
   final FinanceKpis k;
   @override
   Widget build(BuildContext context) {
+    final avgRevenuePerDay =
+        k.periodDays > 0 ? k.current.revenueNet / k.periodDays : 0.0;
+    final avgSalesPerDay =
+        k.periodDays > 0 ? k.customer.purchasesCount / k.periodDays : 0.0;
+    final wareneinsatzquotePct = 100 - k.derived.grossMarginPct;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -62,6 +67,15 @@ class _KpiBody extends StatelessWidget {
                 trend: k.trend.map((t) => t.revenueNet).toList(),
               ),
               _KpiTile(
+                label: 'Ø Umsatz / Tag',
+                value: Formatters.euro(avgRevenuePerDay),
+                sub: 'Zielband: 15 – 50 €/Tag · Automat',
+                trend: k.trend.map((t) => t.revenueNet / 30.0).toList(),
+                targetLower: 15,
+                targetUpper: 50,
+                targetLabel: '15 – 50 €',
+              ),
+              _KpiTile(
                 label: 'Ergebnis (netto)',
                 value: Formatters.euro(k.current.resultNet),
                 deltaYoyPct: k.derived.resultGrowthYoyPct,
@@ -72,27 +86,51 @@ class _KpiBody extends StatelessWidget {
               _KpiTile(
                 label: 'Umsatzrendite',
                 value: '${k.derived.netMarginPct.toStringAsFixed(1)} %',
-                sub: 'Ergebnis / Umsatz',
+                sub: 'Ergebnis / Umsatz · Ziel 25 – 35 %',
                 trend: k.trend
-                    .map((t) => t.revenueNet > 0 ? t.resultNet / t.revenueNet : 0.0)
+                    .map((t) => t.revenueNet > 0
+                        ? (t.resultNet / t.revenueNet) * 100
+                        : 0.0)
                     .toList(),
+                targetLower: 25,
+                targetUpper: 35,
+                targetLabel: '25 – 35 %',
               ),
               _KpiTile(
                 label: 'Rohertragsmarge',
                 value: '${k.derived.grossMarginPct.toStringAsFixed(1)} %',
-                sub: '(Umsatz – Wareneinsatz) / Umsatz',
+                sub: '(Umsatz – Wareneinsatz) / Umsatz · Ziel 50 – 70 %',
                 trend: k.trend
                     .map((t) => t.revenueNet > 0
-                        ? (t.revenueNet - t.expenseNet) / t.revenueNet
+                        ? ((t.revenueNet - t.expenseNet) / t.revenueNet) * 100
                         : 0.0)
                     .toList(),
+                targetLower: 50,
+                targetUpper: 70,
+                targetLabel: '50 – 70 %',
+              ),
+              _KpiTile(
+                label: 'Wareneinsatzquote',
+                value: '${wareneinsatzquotePct.toStringAsFixed(1)} %',
+                sub: 'Wareneinsatz / Umsatz · Ziel 30 – 40 %',
+                trend: k.trend
+                    .map((t) => t.revenueNet > 0
+                        ? (t.expenseNet / t.revenueNet) * 100
+                        : 0.0)
+                    .toList(),
+                targetLower: 30,
+                targetUpper: 40,
+                targetLabel: '30 – 40 %',
+                lowerIsBetter: true,
               ),
               _KpiTile(
                 label: 'EBITDA-Marge',
                 value: '${k.derived.ebitdaMarginPct.toStringAsFixed(1)} %',
                 sub: 'ohne AfA/Zinsen/Steuern *',
                 trend: k.trend
-                    .map((t) => t.revenueNet > 0 ? t.resultNet / t.revenueNet : 0.0)
+                    .map((t) => t.revenueNet > 0
+                        ? (t.resultNet / t.revenueNet) * 100
+                        : 0.0)
                     .toList(),
               ),
               _KpiTile(
@@ -100,6 +138,24 @@ class _KpiBody extends StatelessWidget {
                 value: Formatters.euro(k.derived.cashflowOperating),
                 sub: 'Einzahlungen – Auszahlungen (brutto)',
                 trend: k.trend.map((t) => t.resultNet).toList(),
+              ),
+              _KpiTile(
+                label: 'Ø Warenkorb',
+                value: Formatters.euro(k.customer.avgBasket),
+                sub: 'App-Käufe · Zielband 1 – 3 €',
+                trend: k.trend.map((t) => k.customer.avgBasket).toList(),
+                targetLower: 1,
+                targetUpper: 3,
+                targetLabel: '1 – 3 €',
+              ),
+              _KpiTile(
+                label: 'Ø Verkäufe / Tag',
+                value: avgSalesPerDay.toStringAsFixed(1),
+                sub: 'App-Käufe · Zielband 10 – 50/Tag · Automat',
+                trend: k.trend.map((t) => avgSalesPerDay).toList(),
+                targetLower: 10,
+                targetUpper: 50,
+                targetLabel: '10 – 50',
               ),
             ],
           );
@@ -128,8 +184,7 @@ class _KpiBody extends StatelessWidget {
         _CustomerCard(k: k),
         if (k.topProducts.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.s5),
-          const SectionHeader(
-              eyebrow: 'Top', title: 'Meistverkaufte Produkte'),
+          const SectionHeader(eyebrow: 'Top', title: 'Meistverkaufte Produkte'),
           const SizedBox(height: AppSpacing.s3),
           _TopProducts(k: k),
         ],
@@ -152,8 +207,19 @@ class _FootnoteEbitda extends StatelessWidget {
   }
 }
 
-/// Einzelne KPI-Kachel: großer Wert, Vorjahres-/Vormonatsdelta und
+/// Einzelne KPI-Kachel: großer Wert, Vorjahres-/Vormonatsdelta,
+/// optionales Zielband (gestrichelte rote Linien in der Sparkline) und
 /// eine leichte Sparkline in den unteren 40 % der Kachel.
+///
+/// `targetLower` und `targetUpper` sind in derselben Einheit wie die
+/// Trend-Werte anzugeben (also z. B. Prozent-Zahlen für Margen-KPIs,
+/// EUR für Umsatz-KPIs). Wenn beide Grenzen gesetzt sind, wird ein
+/// Zielband dargestellt; ist nur eine gesetzt, entsteht eine einzelne
+/// rote Zielline.
+///
+/// `lowerIsBetter` schaltet die Farbcodierung des Ist-Werts um, wenn
+/// niedrigere Werte besser sind (z. B. Wareneinsatzquote): Ist-Wert
+/// innerhalb/unter dem Band → grün, darüber → rot.
 class _KpiTile extends StatelessWidget {
   const _KpiTile({
     required this.label,
@@ -163,6 +229,10 @@ class _KpiTile extends StatelessWidget {
     this.deltaMomPct,
     this.trend = const [],
     this.emphasizePositive = false,
+    this.targetLower,
+    this.targetUpper,
+    this.targetLabel,
+    this.lowerIsBetter = false,
   });
   final String label;
   final String value;
@@ -171,6 +241,10 @@ class _KpiTile extends StatelessWidget {
   final double? deltaMomPct;
   final List<double> trend;
   final bool emphasizePositive;
+  final double? targetLower;
+  final double? targetUpper;
+  final String? targetLabel;
+  final bool lowerIsBetter;
 
   @override
   Widget build(BuildContext context) {
@@ -184,13 +258,36 @@ class _KpiTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.body(
-              size: 10,
-              weight: FontWeight.w800,
-              color: AppColors.textMuted,
-            ).copyWith(letterSpacing: 0.6),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: AppTypography.body(
+                    size: 10,
+                    weight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                  ).copyWith(letterSpacing: 0.6),
+                ),
+              ),
+              if (targetLabel != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    border:
+                        Border.all(color: AppColors.statusCritical, width: 0.8),
+                    borderRadius: BorderRadius.circular(AppRadii.sm),
+                  ),
+                  child: Text(
+                    'Ziel ${targetLabel!}',
+                    style: AppTypography.body(
+                        size: 9,
+                        weight: FontWeight.w800,
+                        color: AppColors.statusCritical),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           FittedBox(
@@ -225,7 +322,13 @@ class _KpiTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Expanded(child: _Sparkline(values: trend)),
+          Expanded(
+            child: _Sparkline(
+              values: trend,
+              targetLower: targetLower,
+              targetUpper: targetUpper,
+            ),
+          ),
         ],
       ),
     );
@@ -247,9 +350,7 @@ class _DeltaChip extends StatelessWidget {
         ),
         child: Text('$label —',
             style: AppTypography.body(
-                size: 9,
-                weight: FontWeight.w800,
-                color: AppColors.textMuted)),
+                size: 9, weight: FontWeight.w800, color: AppColors.textMuted)),
       );
     }
     final positive = pct! >= 0;
@@ -278,8 +379,15 @@ class _DeltaChip extends StatelessWidget {
 }
 
 class _Sparkline extends StatelessWidget {
-  const _Sparkline({required this.values});
+  const _Sparkline({
+    required this.values,
+    this.targetLower,
+    this.targetUpper,
+  });
   final List<double> values;
+  final double? targetLower;
+  final double? targetUpper;
+
   @override
   Widget build(BuildContext context) {
     if (values.length < 2) {
@@ -288,9 +396,31 @@ class _Sparkline extends StatelessWidget {
     final spots = <FlSpot>[
       for (int i = 0; i < values.length; i++) FlSpot(i.toDouble(), values[i]),
     ];
-    final minY = values.reduce((a, b) => a < b ? a : b);
-    final maxY = values.reduce((a, b) => a > b ? a : b);
+    var minY = values.reduce((a, b) => a < b ? a : b);
+    var maxY = values.reduce((a, b) => a > b ? a : b);
+    // Zielband ins Y-Fenster einbeziehen, damit die roten Linien nie
+    // aus der Kachel rauslaufen.
+    if (targetLower != null) {
+      if (targetLower! < minY) minY = targetLower!;
+      if (targetLower! > maxY) maxY = targetLower!;
+    }
+    if (targetUpper != null) {
+      if (targetUpper! < minY) minY = targetUpper!;
+      if (targetUpper! > maxY) maxY = targetUpper!;
+    }
     final padded = (maxY - minY).abs() < 0.001;
+    final xMax = (values.length - 1).toDouble();
+
+    LineChartBarData dashedTarget(double y) => LineChartBarData(
+          spots: [FlSpot(0, y), FlSpot(xMax, y)],
+          isCurved: false,
+          color: AppColors.statusCritical,
+          barWidth: 1.4,
+          isStrokeCapRound: false,
+          dashArray: const [4, 3],
+          dotData: const FlDotData(show: false),
+        );
+
     return LineChart(
       LineChartData(
         minY: padded ? minY - 1 : minY,
@@ -312,6 +442,8 @@ class _Sparkline extends StatelessWidget {
               color: AppColors.brand.withValues(alpha: 0.16),
             ),
           ),
+          if (targetLower != null) dashedTarget(targetLower!),
+          if (targetUpper != null) dashedTarget(targetUpper!),
         ],
       ),
       duration: Duration.zero,
@@ -393,7 +525,8 @@ class _CashflowChart extends StatelessWidget {
                       ),
                     );
                   })),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           rightTitles:
               const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
@@ -449,7 +582,8 @@ class _ComparisonBars extends StatelessWidget {
               ])
           ],
           titlesData: FlTitlesData(
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles:
                 const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             topTitles:
@@ -490,8 +624,9 @@ class _MachineList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (k.machines.isEmpty) {
-      return const _EmptyBox(text: 'Im gewählten Zeitraum wurden keine '
-          'Umsätze je Automat erfasst.');
+      return const _EmptyBox(
+          text: 'Im gewählten Zeitraum wurden keine '
+              'Umsätze je Automat erfasst.');
     }
     final maxGross =
         k.machines.map((m) => m.gross).reduce((a, b) => a > b ? a : b);
@@ -524,9 +659,7 @@ class _MachineList extends StatelessWidget {
                 Text(
                   Formatters.euro(m.gross),
                   style: AppTypography.display(
-                      size: 16,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink),
+                      size: 16, weight: FontWeight.w800, color: AppColors.ink),
                 ),
               ],
             ),
@@ -593,7 +726,9 @@ class _Stat extends StatelessWidget {
       children: [
         Text(label.toUpperCase(),
             style: AppTypography.body(
-                    size: 10, weight: FontWeight.w800, color: AppColors.textMuted)
+                    size: 10,
+                    weight: FontWeight.w800,
+                    color: AppColors.textMuted)
                 .copyWith(letterSpacing: 0.6)),
         const SizedBox(height: 2),
         Text(value,
@@ -648,8 +783,7 @@ class _TopProducts extends StatelessWidget {
                     const AlwaysStoppedAnimation<Color>(AppColors.brand),
               ),
             ),
-            if (p != k.topProducts.last)
-              const SizedBox(height: AppSpacing.s2),
+            if (p != k.topProducts.last) const SizedBox(height: AppSpacing.s2),
           ]
         ],
       ),

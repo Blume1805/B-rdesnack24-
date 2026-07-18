@@ -80,7 +80,7 @@ function drawHeader(ctx: Ctx) {
   ctx.page.drawRectangle({
     x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: GOLD,
   });
-  ctx.page.drawText("BOERDESNACK24", {
+  ctx.page.drawText(asciiSafe("BÖRDESNACK24"), {
     x: MARGIN_X, y: PAGE_H - 30, size: 10, font: ctx.bold, color: INK,
   });
   ctx.page.drawText("Finanzauswertung", {
@@ -91,8 +91,8 @@ function drawHeader(ctx: Ctx) {
 
 function drawFooter(ctx: Ctx, i: number, total: number) {
   ctx.page.drawText(
-    asciiSafe("Datenquelle: sevDesk-Buchungen + App-Kaeufe (Bordesnack24). "
-      + "Vor externer/steuerlicher Nutzung gegen sevDesk gegenpruefen."),
+    asciiSafe("Datenquelle: sevDesk-Buchungen + App-Käufe (Bördesnack24). "
+      + "Vor externer/steuerlicher Nutzung gegen sevDesk gegenprüfen."),
     { x: MARGIN_X, y: 30, size: 7, font: ctx.italic, color: MUTED },
   );
   ctx.page.drawText(`Seite ${i} / ${total}`, {
@@ -246,7 +246,7 @@ function barList(ctx: Ctx, rows: Array<{ label: string; value: number; text: str
 /** Trend-Balken: für jede Monatsspalte Umsatz (Gold) + Aufwand (Ink). */
 function trendChart(ctx: Ctx, trend: Array<{ month: string; revenue_net: number; expense_net: number }>) {
   if (trend.length === 0) {
-    p(ctx, "Noch keine Trend-Daten fuer den Zeitraum.", { color: MUTED, size: 10 });
+    p(ctx, "Noch keine Trend-Daten für den Zeitraum.", { color: MUTED, size: 10 });
     return;
   }
   ensureSpace(ctx, 180);
@@ -356,11 +356,11 @@ Deno.serve(async (req) => {
     // ── Deckblatt / Rentabilität ────────────────────────────────────
     h1(ctx, "Finanzauswertung");
     p(ctx, `Zeitraum: ${dateStr(from)} bis ${dateStr(to)}`, { size: 11, bold: true });
-    p(ctx, `Aussteller: Bordesnack24 GbR - Pia & Philipp Blume`, { size: 9, color: MUTED });
+    p(ctx, `Aussteller: Bördesnack24 GbR - Pia & Philipp Blume`, { size: 9, color: MUTED });
     p(ctx, `Erstellt am ${new Date().toISOString().substring(0, 10)}`, { size: 9, color: MUTED });
     ctx.y -= 6;
 
-    h2(ctx, "Rentabilitaet");
+    h2(ctx, "Rentabilität");
     kpiGrid(ctx, [
       { label: "Umsatz netto", value: eur(cur.revenue_net),
         deltaMom: der.revenue_growth_mom_pct, deltaYoy: der.revenue_growth_yoy_pct },
@@ -383,7 +383,7 @@ Deno.serve(async (req) => {
     kv(ctx, "Ergebnis netto - Vorjahr",  eur(py.result_net));
 
     p(ctx, "* EBITDA wird in Etappe 1 als Betriebsergebnis approximiert. "
-      + "Sobald der Bilanz-Sync aktiv ist, kommen Liquiditaet 1/2/3, EK-Quote, "
+      + "Sobald der Bilanz-Sync aktiv ist, kommen Liquidität 1/2/3, EK-Quote, "
       + "ROI und die saubere EBITDA-Berechnung dazu.",
       { size: 8, color: MUTED });
 
@@ -397,7 +397,7 @@ Deno.serve(async (req) => {
     kv(ctx, "Konto / Bezeichnung", "Netto", { bold: true });
     const accounts = (cur.accounts as Array<any>) ?? [];
     if (accounts.length === 0) {
-      p(ctx, "Fuer den Zeitraum sind keine Konten-Zeilen aggregiert.", { color: MUTED });
+      p(ctx, "Für den Zeitraum sind keine Konten-Zeilen aggregiert.", { color: MUTED });
     } else {
       for (const a of accounts) {
         kv(ctx, `${a.code}  ${a.name}`, eur(a.net));
@@ -410,12 +410,12 @@ Deno.serve(async (req) => {
 
     h2(ctx, "Umsatz je Automat");
     if (machines.length === 0) {
-      p(ctx, "Im Zeitraum wurden keine Umsaetze je Automat erfasst.", { color: MUTED });
+      p(ctx, "Im Zeitraum wurden keine Umsätze je Automat erfasst.", { color: MUTED });
     } else {
       barList(ctx, machines.map((m: any) => ({
         label: `${m.label ?? "unbekannt"}${m.code ? ` (${m.code})` : ""}`
-             + ` - ${m.purchases_count ?? 0} Verkaeufe`
-             + `, Oe ${eur(m.avg_basket)}`,
+             + ` - ${m.purchases_count ?? 0} Verkäufe`
+             + `, Ø ${eur(m.avg_basket)}`,
         value: Number(m.gross ?? 0),
         text: eur(m.gross),
       })));
@@ -426,13 +426,13 @@ Deno.serve(async (req) => {
     kv(ctx, "Aktive Kunden",      String(cust.active_customers ?? 0));
     kv(ctx, "Kaufanzahl",         String(cust.purchases_count  ?? 0));
     kv(ctx, "Umsatz (App brutto)", eur(cust.app_gross));
-    kv(ctx, "Oe-Warenkorb",        eur(cust.avg_basket));
+    kv(ctx, "Ø-Warenkorb",         eur(cust.avg_basket));
 
     if (products.length > 0) {
       ctx.y -= 4;
       h2(ctx, "Top-Produkte nach Umsatz");
       barList(ctx, products.map((tp: any) => ({
-        label: `${tp.name ?? "unbekannt"} - ${tp.quantity ?? 0} Stueck`,
+        label: `${tp.name ?? "unbekannt"} - ${tp.quantity ?? 0} Stück`,
         value: Number(tp.gross ?? 0),
         text: eur(tp.gross),
       })));
@@ -444,8 +444,8 @@ Deno.serve(async (req) => {
       const p = pages[i];
       // Manuell Footer zeichnen (drawFooter nutzt ctx.page — hier direkt)
       p.drawText(
-        asciiSafe("Datenquelle: sevDesk-Buchungen + App-Kaeufe (Bordesnack24). "
-          + "Vor externer/steuerlicher Nutzung gegen sevDesk gegenpruefen."),
+        asciiSafe("Datenquelle: sevDesk-Buchungen + App-Käufe (Bördesnack24). "
+          + "Vor externer/steuerlicher Nutzung gegen sevDesk gegenprüfen."),
         { x: MARGIN_X, y: 30, size: 7, font: italic, color: MUTED },
       );
       p.drawText(`Seite ${i + 1} / ${pages.length}`, {

@@ -163,6 +163,7 @@ class FinanceKpis extends Equatable {
     required this.topProducts,
     required this.customer,
     required this.derived,
+    required this.periodDays,
   });
 
   final FinanceSummary current;
@@ -174,32 +175,50 @@ class FinanceKpis extends Equatable {
   final CustomerKpi customer;
   final DerivedKpis derived;
 
-  factory FinanceKpis.fromJson(Map<String, dynamic> j) => FinanceKpis(
-        current: FinanceSummary.fromJson(
-            Map<String, dynamic>.from(j['current'] as Map)),
-        priorYear: FinanceSummary.fromJson(
-            Map<String, dynamic>.from(j['prior_year'] as Map)),
-        priorPeriod: FinanceSummary.fromJson(
-            Map<String, dynamic>.from(j['prior_period'] as Map)),
-        trend: ((j['trend'] as List?) ?? const [])
-            .map((e) => TrendPoint.fromJson(Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        machines: ((j['machines'] as List?) ?? const [])
-            .map((e) => MachineKpi.fromJson(Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        topProducts: ((j['top_products'] as List?) ?? const [])
-            .map((e) =>
-                TopProductKpi.fromJson(Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        customer: CustomerKpi.fromJson(
-            Map<String, dynamic>.from(j['customer'] as Map)),
-        derived: DerivedKpis.fromJson(
-            Map<String, dynamic>.from(j['derived'] as Map)),
-      );
+  /// Anzahl Tage im gewählten Zeitraum — wird für pro-Tag-Benchmarks
+  /// (Umsatz/Tag, Verkäufe/Tag) gebraucht. Fallback 1, damit die
+  /// Division auch bei fehlender period-Node nicht crasht.
+  final int periodDays;
+
+  factory FinanceKpis.fromJson(Map<String, dynamic> j) {
+    final period = (j['period'] as Map?) ?? const {};
+    return FinanceKpis(
+      current: FinanceSummary.fromJson(
+          Map<String, dynamic>.from(j['current'] as Map)),
+      priorYear: FinanceSummary.fromJson(
+          Map<String, dynamic>.from(j['prior_year'] as Map)),
+      priorPeriod: FinanceSummary.fromJson(
+          Map<String, dynamic>.from(j['prior_period'] as Map)),
+      trend: ((j['trend'] as List?) ?? const [])
+          .map((e) => TrendPoint.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      machines: ((j['machines'] as List?) ?? const [])
+          .map((e) => MachineKpi.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      topProducts: ((j['top_products'] as List?) ?? const [])
+          .map((e) =>
+              TopProductKpi.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList(),
+      customer:
+          CustomerKpi.fromJson(Map<String, dynamic>.from(j['customer'] as Map)),
+      derived:
+          DerivedKpis.fromJson(Map<String, dynamic>.from(j['derived'] as Map)),
+      periodDays: (period['days'] as num?)?.toInt() ?? 1,
+    );
+  }
 
   @override
-  List<Object?> get props =>
-      [current, priorYear, priorPeriod, trend, machines, topProducts, customer, derived];
+  List<Object?> get props => [
+        current,
+        priorYear,
+        priorPeriod,
+        trend,
+        machines,
+        topProducts,
+        customer,
+        derived,
+        periodDays,
+      ];
 }
 
 double _toDouble(dynamic v) {
