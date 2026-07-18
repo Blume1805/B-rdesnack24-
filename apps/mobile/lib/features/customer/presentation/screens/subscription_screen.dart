@@ -99,85 +99,124 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   /// Kontrollfrage vor jeder Bestellung: nennt die konkreten Konditionen
   /// und verlangt eine ausdrückliche Bestätigung (Button-Lösung analog
-  /// § 312j BGB). Bei Lifetime zusätzlich der Endgültigkeits-Hinweis.
+  /// § 312j BGB). Bei Lifetime zusätzlich der Endgültigkeits-Hinweis und
+  /// die Pflicht-Checkbox nach § 356 Abs. 5 BGB (Zustimmung zur sofortigen
+  /// Bereitstellung + Kenntnisnahme vom Erlöschen des Widerrufsrechts) —
+  /// ohne Haken bleibt der Bestell-Button deaktiviert; das Flag wird
+  /// serverseitig verlangt und revisionssicher gespeichert.
   Future<bool> _confirmOrder(_Plan plan) async {
     final isSwitch = _currentPlan != null;
     final lifetime = plan.key == 'lifetime';
+    var withdrawalConsent = false;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dctx) => AlertDialog(
-        title: Text(isSwitch
-            ? 'Zum ${plan.title} wechseln?'
-            : '${plan.title} bestellen?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Möchtest du das ${plan.title} zu den folgenden Konditionen '
-              'jetzt verbindlich bestellen?',
-              style: AppTypography.body(size: 14, color: AppColors.textDefault)
-                  .copyWith(height: 1.4),
-            ),
-            const SizedBox(height: AppSpacing.s3),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.s3),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceAlt,
-                border: const Border(
-                  left: BorderSide(color: AppColors.brand, width: 4),
+      builder: (dctx) => StatefulBuilder(
+        builder: (dctx, setDialog) => AlertDialog(
+          title: Text(isSwitch
+              ? 'Zum ${plan.title} wechseln?'
+              : '${plan.title} bestellen?'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Möchtest du das ${plan.title} zu den folgenden Konditionen '
+                  'jetzt verbindlich bestellen?',
+                  style:
+                      AppTypography.body(size: 14, color: AppColors.textDefault)
+                          .copyWith(height: 1.4),
                 ),
-                borderRadius: BorderRadius.circular(AppRadii.sm),
-              ),
-              child: Text(
-                '${plan.title}: ${plan.price} ${plan.cadence}\n'
-                '${lifetime ? 'Einmalzahlung, dauerhafte Nutzung' : 'Verlängert sich automatisch, jederzeit kündbar'}\n'
-                'Preis inkl. gesetzlicher USt.',
-                style: AppTypography.body(
-                  size: 13,
-                  weight: FontWeight.w700,
-                  color: AppColors.ink,
-                ).copyWith(height: 1.5),
-              ),
+                const SizedBox(height: AppSpacing.s3),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.s3),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    border: const Border(
+                      left: BorderSide(color: AppColors.brand, width: 4),
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadii.sm),
+                  ),
+                  child: Text(
+                    '${plan.title}: ${plan.price} ${plan.cadence}\n'
+                    '${lifetime ? 'Einmalzahlung, dauerhafte Nutzung' : 'Verlängert sich automatisch, jederzeit kündbar'}\n'
+                    'Preis inkl. gesetzlicher USt.',
+                    style: AppTypography.body(
+                      size: 13,
+                      weight: FontWeight.w700,
+                      color: AppColors.ink,
+                    ).copyWith(height: 1.5),
+                  ),
+                ),
+                if (lifetime) ...[
+                  const SizedBox(height: AppSpacing.s3),
+                  Text(
+                    'Achtung: Das Lifetime-Abo ist endgültig — ein späterer '
+                    'Wechsel in ein anderes Abo-Modell ist nicht mehr möglich.',
+                    style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w700,
+                        color: AppColors.statusCritical),
+                  ),
+                  const SizedBox(height: AppSpacing.s2),
+                  // § 356 Abs. 5 BGB: ohne diesen Haken bleibt der
+                  // Bestell-Button deaktiviert (zusätzlich Server-Prüfung).
+                  CheckboxListTile(
+                    value: withdrawalConsent,
+                    onChanged: (v) =>
+                        setDialog(() => withdrawalConsent = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    activeColor: AppColors.brand,
+                    checkColor: AppColors.ink,
+                    title: Text(
+                      'Ich stimme ausdrücklich zu, dass die Leistung sofort '
+                      'bereitgestellt wird, und nehme zur Kenntnis, dass mein '
+                      'Widerrufsrecht mit vollständiger Bereitstellung erlischt '
+                      '(§ 356 Abs. 5 BGB).',
+                      style: AppTypography.body(size: 12, color: AppColors.ink)
+                          .copyWith(height: 1.35),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.s3),
+                Text(
+                  'Die Abrechnung erfolgt über den App Store bzw. Google Play, '
+                  'sobald die App dort veröffentlicht ist. Du erhältst eine '
+                  'Bestätigung per E-Mail.',
+                  style:
+                      AppTypography.body(size: 12, color: AppColors.textMuted)
+                          .copyWith(height: 1.4),
+                ),
+              ],
             ),
-            if (lifetime) ...[
-              const SizedBox(height: AppSpacing.s3),
-              Text(
-                'Achtung: Das Lifetime-Abo ist endgültig — ein späterer '
-                'Wechsel in ein anderes Abo-Modell ist nicht mehr möglich.',
-                style: AppTypography.body(
-                    size: 13,
-                    weight: FontWeight.w700,
-                    color: AppColors.statusCritical),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.s3),
-            Text(
-              'Die Abrechnung erfolgt über den App Store bzw. Google Play, '
-              'sobald die App dort veröffentlicht ist. Du erhältst eine '
-              'Bestätigung per E-Mail.',
-              style: AppTypography.body(size: 12, color: AppColors.textMuted)
-                  .copyWith(height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dctx).pop(false),
+              child: const Text('Abbrechen'),
+            ),
+            FilledButton(
+              onPressed: (lifetime && !withdrawalConsent)
+                  ? null
+                  : () => Navigator.of(dctx).pop(true),
+              child: Text(lifetime
+                  ? 'Jetzt endgültig bestellen'
+                  : 'Jetzt verbindlich bestellen'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dctx).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dctx).pop(true),
-            child: Text(lifetime
-                ? 'Jetzt endgültig bestellen'
-                : 'Jetzt verbindlich bestellen'),
-          ),
-        ],
       ),
     );
+    if (ok == true) _pendingWithdrawalConsent = withdrawalConsent;
     return ok == true;
   }
+
+  /// Consent aus dem zuletzt bestätigten Dialog — wird der Edge Function
+  /// mitgegeben und dort serverseitig erneut geprüft.
+  bool _pendingWithdrawalConsent = false;
 
   Future<void> _choose(_Plan plan) async {
     if (_busy) return;
@@ -188,7 +227,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       final res = await ref
           .read(supabaseClientProvider)
           .functions
-          .invoke('subscription-choose', body: {'plan': plan.key});
+          .invoke('subscription-choose', body: {
+        'plan': plan.key,
+        'withdrawal_consent': _pendingWithdrawalConsent,
+      });
       final data = Map<String, dynamic>.from(res.data as Map);
       if (data['ok'] != true) {
         throw Exception(data['error'] ?? 'Unbekannter Fehler');

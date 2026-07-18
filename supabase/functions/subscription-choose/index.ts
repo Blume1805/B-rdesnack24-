@@ -49,7 +49,9 @@ function confirmationHtml(opts: {
       </div>
       ${opts.lifetime
         ? `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
-             Hinweis: Das Lifetime-Abo ist endgültig — ein späterer Wechsel in ein anderes Modell ist nicht mehr möglich.</p>`
+             Hinweis: Das Lifetime-Abo ist endgültig — ein späterer Wechsel in ein anderes Modell ist nicht mehr möglich.
+             Du hast der sofortigen Bereitstellung ausdrücklich zugestimmt und bestätigt, dass dein Widerrufsrecht mit
+             vollständiger Bereitstellung erlischt (§ 356 Abs. 5 BGB).</p>`
         : `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
              Du kannst dein Abo-Modell jederzeit im Kundenbereich unter &bdquo;Mein Abo&ldquo; wechseln.</p>`}
       <p style="font-size:13px;line-height:1.5;margin:0;color:#6F6A5E;">
@@ -84,9 +86,11 @@ Deno.serve(async (req) => {
     if (!email) return jsonResponse({ error: "Konto hat keine E-Mail-Adresse" }, 400);
 
     let plan = "";
+    let withdrawalConsent = false;
     try {
       const body = await req.json();
       plan = String(body.plan);
+      withdrawalConsent = body.withdrawal_consent === true;
       if (!["monthly", "yearly", "lifetime"].includes(plan)) throw new Error("invalid");
     } catch {
       return jsonResponse({ error: "plan (monthly|yearly|lifetime) erforderlich" }, 400);
@@ -95,7 +99,8 @@ Deno.serve(async (req) => {
     // Planwechsel — sämtliche Geschäftsregeln (Lifetime-Sperre, Doppelwahl,
     // Preise) liegen in der RPC; Fehlermeldungen gehen 1:1 an die App.
     const { data: result, error: rpcErr } =
-      await caller.rpc("choose_subscription_plan", { p_plan: plan });
+      await caller.rpc("choose_subscription_plan",
+        { p_plan: plan, p_withdrawal_consent: withdrawalConsent });
     if (rpcErr) {
       return jsonResponse({ error: rpcErr.message }, 400);
     }

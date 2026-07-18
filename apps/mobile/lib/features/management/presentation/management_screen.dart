@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import 'screens/b2b_customers_screen.dart';
+import 'screens/cancellations_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
 import 'screens/disposal_screen.dart';
@@ -145,6 +146,13 @@ class ManagementScreen extends ConsumerWidget {
         visible: p.contains('customers.manage'),
       ),
       _Module(
+        'Kündigungen',
+        'Abo-Kündigungen prüfen',
+        Icons.unsubscribe_outlined,
+        const CancellationsScreen(),
+        visible: p.contains('customers.manage'),
+      ),
+      _Module(
         'Zu signieren',
         'Belehrungen & Nachweise',
         Icons.draw_outlined,
@@ -228,7 +236,8 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.brand),
               ),
-              child: const Icon(Icons.lock_outline, size: 32, color: AppColors.ink),
+              child: const Icon(Icons.lock_outline,
+                  size: 32, color: AppColors.ink),
             ),
             const SizedBox(height: AppSpacing.s4),
             Text(
