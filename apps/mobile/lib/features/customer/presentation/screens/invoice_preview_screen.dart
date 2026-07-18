@@ -5,8 +5,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/invoice.dart';
-import 'invoice_print.dart'
-    if (dart.library.html) 'invoice_print_web.dart';
+import 'invoice_print.dart' if (dart.library.html) 'invoice_print_web.dart';
 
 /// Rechnungsvorschau im Layout einer § 14 UStG-Rechnung. Der Kunde kann
 /// über den Aktionsknopf oben rechts die Rechnung als PDF drucken/speichern
@@ -175,10 +174,8 @@ class _InvoiceBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _kv('Rechnungs-Nr.', invoice.invoiceNumber),
-                _kv('Rechnungsdatum',
-                    Formatters.date(invoice.issuedAt)),
-                _kv('Leistungsdatum',
-                    Formatters.date(invoice.issuedAt)),
+                _kv('Rechnungsdatum', Formatters.date(invoice.issuedAt)),
+                _kv('Leistungsdatum', Formatters.date(invoice.issuedAt)),
                 _kv('Zahlung', _paymentLabel(invoice.paymentMethod)),
               ],
             ),
@@ -256,9 +253,7 @@ class _InvoiceBody extends StatelessWidget {
                     color: AppColors.textMuted)),
             Text(v,
                 style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink)),
+                    size: 12, weight: FontWeight.w800, color: AppColors.ink)),
           ],
         ),
       );
@@ -290,8 +285,7 @@ class _RateTable extends StatelessWidget {
 
     return Table(
       border: TableBorder(
-        horizontalInside:
-            const BorderSide(color: AppColors.borderSubtle),
+        horizontalInside: const BorderSide(color: AppColors.borderSubtle),
         top: const BorderSide(color: AppColors.ink),
         bottom: const BorderSide(color: AppColors.ink),
       ),
@@ -308,8 +302,7 @@ class _RateTable extends StatelessWidget {
           children: [
             for (final h in header)
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 6, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 child: Text(h,
                     style: AppTypography.body(
                         size: 11,
@@ -323,15 +316,13 @@ class _RateTable extends StatelessWidget {
             children: [
               for (int i = 0; i < row.length; i++)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Text(
                     row[i],
                     style: AppTypography.body(
                       size: 12,
-                      weight: i == 0
-                          ? FontWeight.w700
-                          : FontWeight.w800,
+                      weight: i == 0 ? FontWeight.w700 : FontWeight.w800,
                       color: AppColors.ink,
                     ),
                     textAlign: i == 0 ? TextAlign.left : TextAlign.right,

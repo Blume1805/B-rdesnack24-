@@ -55,8 +55,8 @@ class ChatbotLauncherFab extends StatelessWidget {
         child: const SizedBox(
           width: 48,
           height: 48,
-          child: Icon(Icons.chat_bubble_outline,
-              color: AppColors.brand, size: 24),
+          child:
+              Icon(Icons.chat_bubble_outline, color: AppColors.brand, size: 24),
         ),
       ),
     );
@@ -262,8 +262,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
   void _pickQuestion(_FaqEntry e) {
     setState(() {
       _log.add(_ChatbotMsg(role: 'user', text: e.question));
-      _log.add(_ChatbotMsg(
-          role: 'bot', text: e.answer, deepLink: e.deepLink));
+      _log.add(_ChatbotMsg(role: 'bot', text: e.answer, deepLink: e.deepLink));
     });
     _scrollToBottom();
   }
@@ -462,8 +461,8 @@ class _Header extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.pill),
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.support_agent,
-                color: AppColors.ink, size: 22),
+            child:
+                const Icon(Icons.support_agent, color: AppColors.ink, size: 22),
           ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(

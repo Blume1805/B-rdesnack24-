@@ -61,7 +61,6 @@ class AiInfoScreen extends StatelessWidget {
                 .copyWith(height: 1.4),
           ),
           const SizedBox(height: AppSpacing.s5),
-
           _InfoBlock(
             title: 'Was wird eingesetzt?',
             body:
@@ -83,8 +82,7 @@ class AiInfoScreen extends StatelessWidget {
           ),
           _InfoBlock(
             title: 'Welche Daten fließen ein?',
-            body:
-                '• Deine Kaufhistorie an unseren Automaten\n'
+            body: '• Deine Kaufhistorie an unseren Automaten\n'
                 '• Deine Kategorie-Präferenzen (Getränke, Snacks, Eis)\n'
                 '• Loyalty-Punktestand und -Meilensteine\n'
                 '• Aktive Coupons\n\n'
@@ -94,8 +92,7 @@ class AiInfoScreen extends StatelessWidget {
           ),
           _InfoBlock(
             title: 'Widerspruch und Opt-out',
-            body:
-                'Du kannst der personalisierten Angebots-Anzeige jederzeit '
+            body: 'Du kannst der personalisierten Angebots-Anzeige jederzeit '
                 'widersprechen — schreib uns über das Kontaktformular in '
                 'der App oder per E-Mail an datenschutz@boerdesnack24.de. Du '
                 'siehst dann nur noch die allgemeinen Wochenangebote, den '
@@ -103,8 +100,7 @@ class AiInfoScreen extends StatelessWidget {
           ),
           _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',
-            body:
-                'Überall wo KI oder Algorithmen dir Inhalte vorschlagen, '
+            body: 'Überall wo KI oder Algorithmen dir Inhalte vorschlagen, '
                 'siehst du in der oberen rechten Ecke der Section den '
                 'gold-schwarzen „KI"-Chip. Der Chat-Assistent trägt das '
                 'Label „Automatischer Chat-Assistent" damit du weißt, dass '
@@ -112,14 +108,12 @@ class AiInfoScreen extends StatelessWidget {
           ),
           _InfoBlock(
             title: 'Beschwerde',
-            body:
-                'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
+            body: 'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
                 'verletzt, kannst du dich an die zuständige Datenschutz-'
                 'Aufsichtsbehörde wenden: den Bundesbeauftragten für den '
                 'Datenschutz und die Informationsfreiheit (BfDI) oder — für '
                 'Sachsen-Anhalt — die Landesbeauftragte für den Datenschutz.',
           ),
-
           const SizedBox(height: AppSpacing.s5),
           OutlinedButton.icon(
             onPressed: () => launchUrl(

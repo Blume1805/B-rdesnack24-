@@ -33,8 +33,8 @@ class NewsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSpacing.s5),
                 child: Text(
                   'Aktuell keine Beiträge.',
-                  style: AppTypography.body(
-                      size: 14, color: AppColors.textMuted),
+                  style:
+                      AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
               );
             }

@@ -60,8 +60,8 @@ class NotificationsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSpacing.s5),
                 child: Text(
                   'Aktuell keine neuen Nachrichten.',
-                  style: AppTypography.body(
-                      size: 14, color: AppColors.textMuted),
+                  style:
+                      AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
               );
             }
@@ -104,7 +104,10 @@ class _NotificationTile extends StatelessWidget {
       case 'news':
         return (icon: Icons.campaign, color: AppColors.brand);
       case 'coupon':
-        return (icon: Icons.local_activity_outlined, color: AppColors.statusPositive);
+        return (
+          icon: Icons.local_activity_outlined,
+          color: AppColors.statusPositive
+        );
       case 'offer':
         return (icon: Icons.card_giftcard, color: AppColors.brand);
       case 'invoice':
@@ -118,8 +121,7 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final v = _visual();
     return AppCard(
-      color:
-          notification.isRead ? AppColors.surfaceCard : AppColors.brandLight,
+      color: notification.isRead ? AppColors.surfaceCard : AppColors.brandLight,
       borderColor:
           notification.isRead ? AppColors.borderSubtle : AppColors.brand,
       padding: EdgeInsets.zero,

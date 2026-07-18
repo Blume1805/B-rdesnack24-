@@ -21,13 +21,16 @@ class CustomerAnchors {
   CustomerAnchors._();
 
   // ── Angebote-Tab ────────────────────────────────────────────────
-  static final GlobalKey fruehstueckDeal = GlobalKey(debugLabel: 'fruehstueck-deal');
-  static final GlobalKey feierabendDeal = GlobalKey(debugLabel: 'feierabend-deal');
+  static final GlobalKey fruehstueckDeal =
+      GlobalKey(debugLabel: 'fruehstueck-deal');
+  static final GlobalKey feierabendDeal =
+      GlobalKey(debugLabel: 'feierabend-deal');
   static final GlobalKey loyaltyCard = GlobalKey(debugLabel: 'loyalty-card');
   static final GlobalKey weeklyOffers = GlobalKey(debugLabel: 'weekly-offers');
 
   // ── Profil-Tab ──────────────────────────────────────────────────
-  static final GlobalKey profileHeader = GlobalKey(debugLabel: 'profile-header');
+  static final GlobalKey profileHeader =
+      GlobalKey(debugLabel: 'profile-header');
   static final GlobalKey kundennummer = GlobalKey(debugLabel: 'kundennummer');
   static final GlobalKey passwordRow = GlobalKey(debugLabel: 'password-row');
   static final GlobalKey contactRow = GlobalKey(debugLabel: 'contact-row');

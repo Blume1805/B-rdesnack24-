@@ -55,7 +55,6 @@ class DonationsScreen extends ConsumerWidget {
               data: (p) => _PoolCard(pool: p),
             ),
             const SizedBox(height: AppSpacing.s6),
-
             Row(
               children: [
                 const Icon(Icons.how_to_vote_outlined,
@@ -75,7 +74,6 @@ class DonationsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.s3),
-
             causes.when(
               loading: () =>
                   const LinearProgressIndicator(color: AppColors.brand),
@@ -110,8 +108,7 @@ class DonationsScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.s2),
                       for (final c in top3)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.s3),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s3),
                           child: _CauseCard(
                             cause: c,
                             share: sharePerProject,
@@ -125,8 +122,7 @@ class DonationsScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.s2),
                       for (final c in rest)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.s3),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s3),
                           child: _CauseCard(cause: c),
                         ),
                     ],
@@ -136,8 +132,7 @@ class DonationsScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.s2),
                       for (final c in suggested)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.s3),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s3),
                           child: _CauseCard(cause: c),
                         ),
                     ],
@@ -145,7 +140,6 @@ class DonationsScreen extends ConsumerWidget {
                 );
               },
             ),
-
             const SizedBox(height: AppSpacing.s6),
             Row(
               children: [
@@ -286,8 +280,7 @@ class _PoolCard extends StatelessWidget {
             'Enthält Automaten-Umsätze (${Formatters.euro(pool.nonAppGross)} '
             'brutto der letzten 90 Tage) von Kunden ohne App. Datenquelle: '
             'Nayax → Bördesnack24-Backend.',
-            style: AppTypography.body(
-                size: 11, color: AppColors.textMuted),
+            style: AppTypography.body(size: 11, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s4),
           Row(
@@ -327,8 +320,8 @@ class _PoolCard extends StatelessWidget {
               value: share,
               minHeight: 12,
               backgroundColor: AppColors.borderSubtle,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.statusPositive),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.statusPositive),
             ),
           ),
         ],
@@ -653,8 +646,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                         decoration: BoxDecoration(
                           color: AppColors.brandLight,
                           border: Border.all(color: AppColors.brand),
-                          borderRadius:
-                              BorderRadius.circular(AppRadii.pill),
+                          borderRadius: BorderRadius.circular(AppRadii.pill),
                         ),
                         child: Text(
                           'Vorschlag',
@@ -757,9 +749,7 @@ class _GoalProgress extends StatelessWidget {
               style: AppTypography.body(
                 size: 14,
                 weight: FontWeight.w800,
-                color: reached
-                    ? AppColors.statusPositive
-                    : AppColors.ink,
+                color: reached ? AppColors.statusPositive : AppColors.ink,
               ),
             ),
           ],
@@ -777,9 +767,7 @@ class _GoalProgress extends StatelessWidget {
                 widthFactor: baseFrac,
                 child: Container(
                   height: 12,
-                  color: reached
-                      ? AppColors.statusPositive
-                      : AppColors.brand,
+                  color: reached ? AppColors.statusPositive : AppColors.brand,
                 ),
               ),
               if (overshootShown > 0)
@@ -834,15 +822,15 @@ class _SuggestFormState extends ConsumerState<_SuggestForm> {
     final title = _title.text.trim();
     if (title.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte einen aussagekräftigen Titel angeben.')),
+        const SnackBar(
+            content: Text('Bitte einen aussagekräftigen Titel angeben.')),
       );
       return;
     }
     setState(() => _busy = true);
     try {
-      await ref
-          .read(customerRepositoryProvider)
-          .suggestDonationCause(title, _desc.text.trim().isEmpty ? null : _desc.text.trim());
+      await ref.read(customerRepositoryProvider).suggestDonationCause(
+          title, _desc.text.trim().isEmpty ? null : _desc.text.trim());
       _title.clear();
       _desc.clear();
       ref.invalidate(donationCausesProvider);

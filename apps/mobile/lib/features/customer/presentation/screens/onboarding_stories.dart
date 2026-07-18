@@ -36,8 +36,7 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       icon: Icons.qr_code_2,
       eyebrow: 'Kundenkarte',
       title: 'Am Automaten scannen',
-      body:
-          'Öffne die App und zeige deinen QR-Code am Automaten — Rabatte, '
+      body: 'Öffne die App und zeige deinen QR-Code am Automaten — Rabatte, '
           'Punkte und (bei Unternehmern) die Rechnung werden automatisch '
           'verknüpft.',
     ),
@@ -45,16 +44,14 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       icon: Icons.stars_rounded,
       eyebrow: 'Punktesystem',
       title: 'Sammeln und sparen',
-      body:
-          'Jeder Cent Umsatz = 1 Punkt. Bei 500 · 1200 · 2000 · 3000 '
+      body: 'Jeder Cent Umsatz = 1 Punkt. Bei 500 · 1200 · 2000 · 3000 '
           'Punkten schaltest du 5 · 10 · 15 · 25 % Rabatt frei.',
     ),
     _StoryPage(
       icon: Icons.volunteer_activism,
       eyebrow: '5 % für den guten Zweck',
       title: 'Deine Spende zählt',
-      body:
-          '5 % jedes Netto-Umsatzes wandern in einen Spendentopf. Du '
+      body: '5 % jedes Netto-Umsatzes wandern in einen Spendentopf. Du '
           'entscheidest über die Empfänger — Vorschlagen, Abstimmen, '
           'nachlesen wohin es geht.',
     ),
@@ -112,9 +109,8 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
                     width: _page == i ? 20 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: _page == i
-                          ? AppColors.brand
-                          : AppColors.borderSubtle,
+                      color:
+                          _page == i ? AppColors.brand : AppColors.borderSubtle,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

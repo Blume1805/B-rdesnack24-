@@ -21,9 +21,7 @@ class CustomerRemoteDataSource {
   }
 
   Future<Map<String, dynamic>?> myActivePersonalOffer() async {
-    final row = await _client
-        .rpc('my_active_personal_offer')
-        .maybeSingle();
+    final row = await _client.rpc('my_active_personal_offer').maybeSingle();
     return row as Map<String, dynamic>?;
   }
 
@@ -46,9 +44,8 @@ class CustomerRemoteDataSource {
     if (_uid == null) return null;
     final existing = await myActivePersonalOffer();
     if (existing != null) return existing;
-    final row = await _client
-        .rpc('generate_personal_offer', params: {'p_customer_id': _uid})
-        .maybeSingle();
+    final row = await _client.rpc('generate_personal_offer',
+        params: {'p_customer_id': _uid}).maybeSingle();
     return row as Map<String, dynamic>?;
   }
 
@@ -147,8 +144,8 @@ class CustomerRemoteDataSource {
   }
 
   Future<bool> voteDonationCause(String causeId) async {
-    final res =
-        await _client.rpc('vote_donation_cause', params: {'p_cause_id': causeId});
+    final res = await _client
+        .rpc('vote_donation_cause', params: {'p_cause_id': causeId});
     return (res as bool?) ?? false;
   }
 
@@ -215,7 +212,8 @@ class CustomerRemoteDataSource {
     return (rows as List).cast<Map<String, dynamic>>();
   }
 
-  Future<void> submitContact(String category, String? subject, String body) async {
+  Future<void> submitContact(
+      String category, String? subject, String body) async {
     await _client.from('contact_messages').insert({
       'customer_id': _uid,
       'category': category,
@@ -232,11 +230,11 @@ class CustomerRemoteDataSource {
     });
   }
 
-  Future<void> updateNotifications({required bool email, required bool push}) async {
+  Future<void> updateNotifications(
+      {required bool email, required bool push}) async {
     await _client
         .from('customers')
-        .update({'notify_email': email, 'notify_push': push})
-        .eq('id', _uid!);
+        .update({'notify_email': email, 'notify_push': push}).eq('id', _uid!);
   }
 
   Future<Map<String, dynamic>?> myCustomer() async {
@@ -318,17 +316,13 @@ class CustomerRemoteDataSource {
 
   Future<void> updateGender(String? gender) async {
     if (_uid == null) return;
-    await _client
-        .from('profiles')
-        .update({'gender': gender})
-        .eq('id', _uid!);
+    await _client.from('profiles').update({'gender': gender}).eq('id', _uid!);
   }
 
   Future<void> updateProfileName(String fullName, String? phone) async {
     await _client
         .from('profiles')
-        .update({'full_name': fullName, 'phone': phone})
-        .eq('id', _uid!);
+        .update({'full_name': fullName, 'phone': phone}).eq('id', _uid!);
   }
 
   Future<void> changePassword(String newPassword) async {

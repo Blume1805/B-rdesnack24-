@@ -77,7 +77,8 @@ class PurchaseDonation extends Equatable {
   final double totalNet;
   final double donation;
   final double sharePct;
-  final String paymentMethod; // 'cash' | 'card_ec' | 'card_credit' | 'card_contactless' | 'other'
+  final String
+      paymentMethod; // 'cash' | 'card_ec' | 'card_credit' | 'card_contactless' | 'other'
   final String? invoiceId;
   final String? invoiceNumber;
 

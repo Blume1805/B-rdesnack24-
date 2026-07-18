@@ -44,8 +44,8 @@ class Invoice extends Equatable {
         totalVat19: (j['total_vat_19'] as num?)?.toDouble() ?? 0,
         totalGross: (j['total_gross'] as num?)?.toDouble() ?? 0,
         paymentMethod: j['payment_method'] as String? ?? 'cash',
-        billingSnapshot:
-            Map<String, dynamic>.from(j['billing_snapshot'] as Map? ?? const {}),
+        billingSnapshot: Map<String, dynamic>.from(
+            j['billing_snapshot'] as Map? ?? const {}),
         emailSentAt: j['email_sent_at'] == null
             ? null
             : DateTime.tryParse(j['email_sent_at'].toString()),

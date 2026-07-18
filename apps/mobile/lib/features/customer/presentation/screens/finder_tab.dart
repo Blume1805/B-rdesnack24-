@@ -26,7 +26,8 @@ class _FinderTabState extends ConsumerState<FinderTab> {
   Widget build(BuildContext context) {
     final machines = ref.watch(machinesProvider);
     return machines.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brand)),
+      loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.brand)),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.s5),
@@ -53,9 +54,7 @@ class _FinderTabState extends ConsumerState<FinderTab> {
             SegmentedButton<bool>(
               segments: const [
                 ButtonSegment(
-                    value: false,
-                    icon: Icon(Icons.list),
-                    label: Text('Liste')),
+                    value: false, icon: Icon(Icons.list), label: Text('Liste')),
                 ButtonSegment(
                     value: true,
                     icon: Icon(Icons.map_outlined),
@@ -72,7 +71,8 @@ class _FinderTabState extends ConsumerState<FinderTab> {
                 color: AppColors.surfaceAlt,
                 child: Text(
                   'Aktuell sind keine Automaten hinterlegt.',
-                  style: AppTypography.body(size: 14, color: AppColors.textMuted),
+                  style:
+                      AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
               )
             else
@@ -113,10 +113,10 @@ class _MapPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future<void> openAll() async {
-      final query = Uri.encodeComponent(
-          'Bördesnack24 Automat Sülzetal Osterweddingen');
-      final uri = Uri.parse(
-          'https://www.google.com/maps/search/?api=1&query=$query');
+      final query =
+          Uri.encodeComponent('Bördesnack24 Automat Sülzetal Osterweddingen');
+      final uri =
+          Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
 
@@ -168,8 +168,8 @@ class _MapPreview extends StatelessWidget {
                   right: 8,
                   bottom: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.ink,
                       borderRadius: BorderRadius.circular(4),

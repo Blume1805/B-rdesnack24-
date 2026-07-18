@@ -60,8 +60,7 @@ class HistoryTab extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(AppRadii.lg),
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const DonationsScreen()),
+                    MaterialPageRoute(builder: (_) => const DonationsScreen()),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.s4),
@@ -72,8 +71,7 @@ class HistoryTab extends ConsumerWidget {
                           height: 44,
                           decoration: BoxDecoration(
                             color: AppColors.brand,
-                            borderRadius:
-                                BorderRadius.circular(AppRadii.md),
+                            borderRadius: BorderRadius.circular(AppRadii.md),
                           ),
                           alignment: Alignment.center,
                           child: const Icon(Icons.volunteer_activism,
@@ -103,8 +101,7 @@ class HistoryTab extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_forward,
-                            color: AppColors.brand),
+                        const Icon(Icons.arrow_forward, color: AppColors.brand),
                       ],
                     ),
                   ),
@@ -149,8 +146,7 @@ class HistoryTab extends ConsumerWidget {
             'automatisch. Bei Unternehmer-Kunden wird zusätzlich die '
             'Rechnung erzeugt (mit sevDesk versendet, im Verlauf als '
             'PDF verfügbar).',
-            style: AppTypography.body(
-                size: 12, color: AppColors.textMuted),
+            style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s3),
           const _DemoPurchaseButtons(),
@@ -319,8 +315,8 @@ class _PurchaseDonationRow extends ConsumerWidget {
               value: (purchase.sharePct / 100).clamp(0.0, 1.0),
               minHeight: 6,
               backgroundColor: AppColors.borderSubtle,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.statusPositive),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.statusPositive),
             ),
           ),
           if (purchase.hasInvoice) ...[
@@ -331,16 +327,12 @@ class _PurchaseDonationRow extends ConsumerWidget {
                 'Rechnung ${purchase.invoiceNumber ?? ''} — PDF öffnen',
               ),
               onPressed: () async {
-                final invoice = ref
-                    .read(myInvoicesProvider)
-                    .valueOrNull
-                    ?.firstWhere(
-                      (i) => i.id == purchase.invoiceId,
-                      orElse: () => ref
-                          .read(myInvoicesProvider)
-                          .valueOrNull!
-                          .first,
-                    );
+                final invoice =
+                    ref.read(myInvoicesProvider).valueOrNull?.firstWhere(
+                          (i) => i.id == purchase.invoiceId,
+                          orElse: () =>
+                              ref.read(myInvoicesProvider).valueOrNull!.first,
+                        );
                 if (invoice == null) return;
                 if (!context.mounted) return;
                 await Navigator.of(context).push(

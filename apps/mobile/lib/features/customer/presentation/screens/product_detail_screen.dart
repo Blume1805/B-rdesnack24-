@@ -152,9 +152,7 @@ class _NutritionGrid extends StatelessWidget {
       _NutritionItem(
         icon: Icons.opacity_outlined,
         label: 'davon gesättigt',
-        value: detail.saturatedFatG == null
-            ? '—'
-            : _g(detail.saturatedFatG!),
+        value: detail.saturatedFatG == null ? '—' : _g(detail.saturatedFatG!),
       ),
       _NutritionItem(
         icon: Icons.grain_outlined,

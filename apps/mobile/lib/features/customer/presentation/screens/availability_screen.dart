@@ -14,7 +14,8 @@ import '../../../management/presentation/controllers/management_providers.dart';
 /// Status-Badge — die Zahl wird durch die Nayax-Sales-Webhooks laufend
 /// aktualisiert (siehe supabase/functions/nayax-webhook).
 class AvailabilityScreen extends ConsumerStatefulWidget {
-  const AvailabilityScreen({required this.machineId, required this.title, super.key});
+  const AvailabilityScreen(
+      {required this.machineId, required this.title, super.key});
 
   final String machineId;
   final String title;
@@ -61,8 +62,8 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: stock.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: AppColors.brand)),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.brand)),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s5),
@@ -70,7 +71,8 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
           ),
         ),
         data: (items) => RefreshIndicator(
-          onRefresh: () async => ref.invalidate(machineStockProvider(widget.machineId)),
+          onRefresh: () async =>
+              ref.invalidate(machineStockProvider(widget.machineId)),
           color: AppColors.brand,
           child: items.isEmpty
               ? ListView(

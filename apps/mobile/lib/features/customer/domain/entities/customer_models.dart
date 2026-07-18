@@ -68,8 +68,8 @@ class Purchase extends Equatable {
   factory Purchase.fromJson(Map<String, dynamic> j) => Purchase(
         id: j['id'] as String,
         totalGross: (j['total_gross'] as num?)?.toDouble() ?? 0,
-        purchasedAt:
-            DateTime.tryParse(j['purchased_at']?.toString() ?? '') ?? DateTime.now(),
+        purchasedAt: DateTime.tryParse(j['purchased_at']?.toString() ?? '') ??
+            DateTime.now(),
       );
 
   @override

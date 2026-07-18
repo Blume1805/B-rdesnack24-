@@ -33,8 +33,8 @@ class MasterDataScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Stammdaten')),
       body: data.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: AppColors.brand)),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.brand)),
         error: (e, _) => Padding(
           padding: const EdgeInsets.all(AppSpacing.s5),
           child: Text('$e', style: AppTypography.body(size: 14)),
@@ -56,15 +56,13 @@ class MasterDataScreen extends ConsumerWidget {
           final birthDateStr = row['birth_date'] as String?;
           final registeredStr = row['registered_at'] as String?;
           final gender = row['gender'] as String?;
-          final customerType =
-              (row['customer_type'] as String?) ?? 'private';
+          final customerType = (row['customer_type'] as String?) ?? 'private';
           final isBusiness = customerType == 'business';
           final companyName = row['company_name'] as String?;
           final billingStreet = row['billing_street'] as String?;
           final billingZip = row['billing_zip'] as String?;
           final billingCity = row['billing_city'] as String?;
-          final billingCountry =
-              (row['billing_country'] as String?) ?? 'DE';
+          final billingCountry = (row['billing_country'] as String?) ?? 'DE';
           final taxNumber = row['tax_number'] as String?;
           final vatId = row['vat_id'] as String?;
           final businessComplete = isBusiness &&
@@ -73,12 +71,10 @@ class MasterDataScreen extends ConsumerWidget {
               (billingCity?.isNotEmpty ?? false) &&
               (taxNumber?.isNotEmpty ?? false);
 
-          final birthDate = birthDateStr == null
-              ? null
-              : DateTime.tryParse(birthDateStr);
-          final registered = registeredStr == null
-              ? null
-              : DateTime.tryParse(registeredStr);
+          final birthDate =
+              birthDateStr == null ? null : DateTime.tryParse(birthDateStr);
+          final registered =
+              registeredStr == null ? null : DateTime.tryParse(registeredStr);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -92,8 +88,7 @@ class MasterDataScreen extends ConsumerWidget {
                 'Diese Angaben stammen aus deiner Registrierung und sind '
                 'nicht veränderbar. Nur dein Geschlecht kannst du hier '
                 'ergänzen.',
-                style: AppTypography.body(
-                    size: 13, color: AppColors.textMuted),
+                style: AppTypography.body(size: 13, color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.s5),
               AppCard(
@@ -116,7 +111,8 @@ class MasterDataScreen extends ConsumerWidget {
                       icon: Icons.cake_outlined,
                       label: 'Geburtsdatum',
                       value: birthDate != null ? _formatDate(birthDate) : '—',
-                      hint: 'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl.',
+                      hint:
+                          'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl.',
                     ),
                     const Divider(height: 1, color: AppColors.borderSubtle),
                     _DataRow(
@@ -128,10 +124,9 @@ class MasterDataScreen extends ConsumerWidget {
                     _DataRow(
                       icon: Icons.event_available_outlined,
                       label: 'Kunde seit',
-                      value: registered != null
-                          ? _formatDate(registered)
-                          : '—',
-                      hint: 'Am Jahrestag deiner Anmeldung gibt es ein individuelles Angebot.',
+                      value: registered != null ? _formatDate(registered) : '—',
+                      hint:
+                          'Am Jahrestag deiner Anmeldung gibt es ein individuelles Angebot.',
                     ),
                   ],
                 ),
@@ -197,8 +192,7 @@ class MasterDataScreen extends ConsumerWidget {
                         value: (billingZip ?? '').isEmpty &&
                                 (billingCity ?? '').isEmpty
                             ? '—'
-                            : '${billingZip ?? ''} ${billingCity ?? ''}'
-                                .trim(),
+                            : '${billingZip ?? ''} ${billingCity ?? ''}'.trim(),
                       ),
                       const Divider(height: 1, color: AppColors.borderSubtle),
                       _DataRow(
@@ -210,9 +204,8 @@ class MasterDataScreen extends ConsumerWidget {
                       _DataRow(
                         icon: Icons.receipt_long_outlined,
                         label: 'Steuernummer',
-                        value: (taxNumber?.isNotEmpty ?? false)
-                            ? taxNumber!
-                            : '—',
+                        value:
+                            (taxNumber?.isNotEmpty ?? false) ? taxNumber! : '—',
                       ),
                       const Divider(height: 1, color: AppColors.borderSubtle),
                       _DataRow(
@@ -256,9 +249,7 @@ class MasterDataScreen extends ConsumerWidget {
               _GenderPicker(
                 selected: gender,
                 onSelected: (g) async {
-                  await ref
-                      .read(customerRepositoryProvider)
-                      .updateGender(g);
+                  await ref.read(customerRepositoryProvider).updateGender(g);
                   ref.invalidate(myCustomerProvider);
                 },
                 labels: _genderLabels,
@@ -431,16 +422,16 @@ class _EditBusinessDataScreenState
       text: (widget.row['company_name'] as String?) ?? '');
   late final _street = TextEditingController(
       text: (widget.row['billing_street'] as String?) ?? '');
-  late final _zip = TextEditingController(
-      text: (widget.row['billing_zip'] as String?) ?? '');
+  late final _zip =
+      TextEditingController(text: (widget.row['billing_zip'] as String?) ?? '');
   late final _city = TextEditingController(
       text: (widget.row['billing_city'] as String?) ?? '');
   late final _country = TextEditingController(
       text: (widget.row['billing_country'] as String?) ?? 'DE');
-  late final _tax = TextEditingController(
-      text: (widget.row['tax_number'] as String?) ?? '');
-  late final _vat = TextEditingController(
-      text: (widget.row['vat_id'] as String?) ?? '');
+  late final _tax =
+      TextEditingController(text: (widget.row['tax_number'] as String?) ?? '');
+  late final _vat =
+      TextEditingController(text: (widget.row['vat_id'] as String?) ?? '');
   bool _saving = false;
 
   @override
@@ -492,8 +483,8 @@ class _EditBusinessDataScreenState
             children: const [
               TextSpan(
                 text: ' *',
-                style: TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.w800),
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.w800),
               ),
             ],
           ),
@@ -512,33 +503,29 @@ class _EditBusinessDataScreenState
           const SizedBox(height: AppSpacing.s4),
           TextField(
               controller: _company,
-              decoration:
-                  InputDecoration(label: requiredLabel('Firmenname'))),
+              decoration: InputDecoration(label: requiredLabel('Firmenname'))),
           const SizedBox(height: 12),
           TextField(
               controller: _street,
-              decoration: InputDecoration(
-                  label: requiredLabel('Straße + Hausnr.'))),
+              decoration:
+                  InputDecoration(label: requiredLabel('Straße + Hausnr.'))),
           const SizedBox(height: 12),
           Row(children: [
             SizedBox(
                 width: 100,
                 child: TextField(
                     controller: _zip,
-                    decoration:
-                        InputDecoration(label: requiredLabel('PLZ')))),
+                    decoration: InputDecoration(label: requiredLabel('PLZ')))),
             const SizedBox(width: 12),
             Expanded(
                 child: TextField(
                     controller: _city,
-                    decoration:
-                        InputDecoration(label: requiredLabel('Ort')))),
+                    decoration: InputDecoration(label: requiredLabel('Ort')))),
           ]),
           const SizedBox(height: 12),
           TextField(
               controller: _country,
-              decoration:
-                  InputDecoration(label: requiredLabel('Land'))),
+              decoration: InputDecoration(label: requiredLabel('Land'))),
           const SizedBox(height: 12),
           TextField(
               controller: _tax,
@@ -549,8 +536,8 @@ class _EditBusinessDataScreenState
           const SizedBox(height: 12),
           TextField(
               controller: _vat,
-              decoration: const InputDecoration(
-                  labelText: 'USt-IdNr. (optional)')),
+              decoration:
+                  const InputDecoration(labelText: 'USt-IdNr. (optional)')),
           const SizedBox(height: AppSpacing.s4),
           FilledButton.icon(
             onPressed: _saving ? null : _save,
@@ -558,7 +545,8 @@ class _EditBusinessDataScreenState
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink))
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.ink))
                 : const Icon(Icons.save_outlined),
             label: const Text('Speichern'),
             style: FilledButton.styleFrom(

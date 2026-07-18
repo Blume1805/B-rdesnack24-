@@ -75,8 +75,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
         tooltip: 'Kundenkarte',
         child: const Icon(Icons.qr_code_2, size: 30),
       ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: AppColors.surfaceCard,
         elevation: 8,

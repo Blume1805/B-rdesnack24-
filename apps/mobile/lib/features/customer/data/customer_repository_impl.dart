@@ -21,16 +21,18 @@ class CustomerRepositoryImpl implements CustomerRepository {
       () async => (await _remote.activeOffers()).map(Offer.fromJson).toList());
 
   @override
-  Future<List<CustomerPrice>> myPrices() => _guard(
-      () async => (await _remote.myPrices()).map(CustomerPrice.fromJson).toList());
+  Future<List<CustomerPrice>> myPrices() => _guard(() async =>
+      (await _remote.myPrices()).map(CustomerPrice.fromJson).toList());
 
   @override
-  Future<List<Purchase>> myPurchases() => _guard(
-      () async => (await _remote.myPurchases()).map(Purchase.fromJson).toList());
+  Future<List<Purchase>> myPurchases() => _guard(() async =>
+      (await _remote.myPurchases()).map(Purchase.fromJson).toList());
 
   @override
-  Future<List<Recommendation>> myRecommendations() => _guard(() async =>
-      (await _remote.myRecommendations()).map(Recommendation.fromJson).toList());
+  Future<List<Recommendation>> myRecommendations() =>
+      _guard(() async => (await _remote.myRecommendations())
+          .map(Recommendation.fromJson)
+          .toList());
 
   @override
   Future<Map<String, dynamic>?> myCustomer() => _guard(_remote.myCustomer);
@@ -211,8 +213,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
           ));
 
   @override
-  Future<String> businessCustomersCsv() =>
-      _guard(_remote.businessCustomersCsv);
+  Future<String> businessCustomersCsv() => _guard(_remote.businessCustomersCsv);
 
   @override
   Future<void> addDemoPurchase({

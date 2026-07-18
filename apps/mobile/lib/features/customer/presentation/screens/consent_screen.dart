@@ -55,15 +55,12 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
   Future<void> _set(String key, bool granted) async {
     setState(() => _state[key] = granted);
-    await ref
-        .read(customerRepositoryProvider)
-        .recordConsent(key, granted);
+    await ref.read(customerRepositoryProvider).recordConsent(key, granted);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(granted
-              ? 'Einwilligung erteilt.'
-              : 'Einwilligung widerrufen.'),
+          content: Text(
+              granted ? 'Einwilligung erteilt.' : 'Einwilligung widerrufen.'),
         ),
       );
     }
@@ -85,8 +82,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             'Deine Einwilligungen sind jederzeit widerrufbar. Der Widerruf '
             'wirkt in die Zukunft und lässt bereits erfolgte Verarbeitungen '
             'unberührt.',
-            style:
-                AppTypography.body(size: 14, color: AppColors.textDefault),
+            style: AppTypography.body(size: 14, color: AppColors.textDefault),
           ),
           const SizedBox(height: AppSpacing.s5),
           for (final item in _items) ...[
