@@ -6,6 +6,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../legal/presentation/cancellation_screen.dart';
+import '../controllers/customer_providers.dart';
 
 /// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
 ///
@@ -198,6 +199,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         _currentPlan = plan.key;
         _locked = plan.key == 'lifetime';
       });
+      // Gating im Kundenbereich sofort entsperren.
+      ref.invalidate(hasSubscriptionProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

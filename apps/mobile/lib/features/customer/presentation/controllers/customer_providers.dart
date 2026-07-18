@@ -22,6 +22,15 @@ final offersProvider = FutureProvider.autoDispose<List<Offer>>(
   (ref) => ref.watch(customerRepositoryProvider).offers(),
 );
 
+/// Abo-Status des Kunden (Gating: Basis frei, Vorteile im Abo).
+/// true, sobald ein Abo-Modell gewählt wurde — die eigentliche
+/// Durchsetzung passiert zusätzlich serverseitig in den RPCs.
+final hasSubscriptionProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final res = await ref.watch(supabaseClientProvider).rpc('my_subscription');
+  final map = Map<String, dynamic>.from(res as Map);
+  return map['plan'] != null;
+});
+
 final myPricesProvider = FutureProvider.autoDispose<List<CustomerPrice>>(
   (ref) => ref.watch(customerRepositoryProvider).myPrices(),
 );
@@ -35,8 +44,7 @@ final myRecommendationsProvider =
   (ref) => ref.watch(customerRepositoryProvider).myRecommendations(),
 );
 
-final myCustomerProvider =
-    FutureProvider.autoDispose<Map<String, dynamic>?>(
+final myCustomerProvider = FutureProvider.autoDispose<Map<String, dynamic>?>(
   (ref) => ref.watch(customerRepositoryProvider).myCustomer(),
 );
 
@@ -105,8 +113,7 @@ final personalOfferActionsProvider =
 
 // ── Spenden + News ───────────────────────────────────────────────────
 
-final myDonationSummaryProvider =
-    FutureProvider.autoDispose<DonationSummary>(
+final myDonationSummaryProvider = FutureProvider.autoDispose<DonationSummary>(
   (ref) => ref.watch(customerRepositoryProvider).myDonationSummary(),
 );
 
@@ -120,8 +127,7 @@ final donationPoolSummaryProvider =
   (ref) => ref.watch(customerRepositoryProvider).donationPoolSummary(),
 );
 
-final donationCausesProvider =
-    FutureProvider.autoDispose<List<DonationCause>>(
+final donationCausesProvider = FutureProvider.autoDispose<List<DonationCause>>(
   (ref) => ref.watch(customerRepositoryProvider).donationCauses(),
 );
 

@@ -14,6 +14,7 @@ import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'ai_info_screen.dart';
 import 'donations_screen.dart';
+import 'subscription_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
 
@@ -25,6 +26,10 @@ class OffersTab extends ConsumerWidget {
     final offers = ref.watch(offersProvider);
     final personals = ref.watch(myPersonalOffersProvider);
     final loyalty = ref.watch(myLoyaltyStatusProvider);
+    // Abo-Gating: Basis frei, Vorteile im Abo. Während des Ladens wird
+    // nicht gesperrt (kein Lock-Flackern); die Durchsetzung liegt
+    // ohnehin zusätzlich serverseitig in den Aktivierungs-RPCs.
+    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? true;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -33,6 +38,7 @@ class OffersTab extends ConsumerWidget {
           ..invalidate(myPersonalOffersProvider)
           ..invalidate(myLoyaltyStatusProvider)
           ..invalidate(activatedOfferIdsProvider)
+          ..invalidate(hasSubscriptionProvider)
           ..invalidate(topProductsProvider('Getränke'))
           ..invalidate(topProductsProvider('Snacks'))
           ..invalidate(topProductsProvider('Eis'));
@@ -50,140 +56,152 @@ class OffersTab extends ConsumerWidget {
           const _ProductSearchBar(),
           const SizedBox(height: AppSpacing.s5),
 
-          // 0.3. ── Frühstücks-Deal + Feierabend-Deal (horizontales Karussell)
-          const _DealsCarousel(),
-          const SizedBox(height: AppSpacing.s5),
+          // Ohne Abo: ein Freischalt-Hinweis ersetzt die Abo-Vorteile
+          // (Deals, Aktionen, Loyalty, persönliche + Wochenangebote).
+          if (!hasSub) ...[
+            const _SubscriptionLockCard(),
+            const SizedBox(height: AppSpacing.s6),
+          ],
 
-          // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ─────────
-          const _HeroCarousel(),
-          const SizedBox(height: AppSpacing.s6),
+          if (hasSub) ...[
+            // 0.3. ── Frühstücks-Deal + Feierabend-Deal (Karussell) ───
+            const _DealsCarousel(),
+            const SizedBox(height: AppSpacing.s5),
+
+            // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ───────
+            const _HeroCarousel(),
+            const SizedBox(height: AppSpacing.s6),
+          ],
 
           // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
           const _NewsTeaser(),
           const SizedBox(height: AppSpacing.s6),
 
           // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
-          KeyedSubtree(
-            key: CustomerAnchors.loyaltyCard,
-            child: loyalty.when(
-              loading: () => const SizedBox.shrink(),
+          if (hasSub) ...[
+            KeyedSubtree(
+              key: CustomerAnchors.loyaltyCard,
+              child: loyalty.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (l) => l == null
+                    ? const SizedBox.shrink()
+                    : _LoyaltyProgressCard(status: l),
+              ),
+            ),
+            if (loyalty.valueOrNull != null)
+              const SizedBox(height: AppSpacing.s5),
+            personals.when(
+              loading: () => const _PersonalLoading(),
               error: (_, __) => const SizedBox.shrink(),
-              data: (l) => l == null
-                  ? const SizedBox.shrink()
-                  : _LoyaltyProgressCard(status: l),
+              data: (list) {
+                final specials = list.where((o) => o.isSpecial).toList();
+                final loyalty = list
+                    .where((o) => o.source == PersonalOfferSource.loyalty)
+                    .toList();
+                final basis = list
+                    .where((o) => o.source == PersonalOfferSource.auto)
+                    .toList();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (specials.isNotEmpty) ...[
+                      SectionHeader(
+                        eyebrow: 'Für dich persönlich',
+                        title: 'Sonderangebote',
+                        action: _AiSectionBadge(context: context),
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      for (final o in specials)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                          child: _PersonalOfferCard(offer: o),
+                        ),
+                      const SizedBox(height: AppSpacing.s5),
+                    ],
+                    if (loyalty.isNotEmpty) ...[
+                      SectionHeader(
+                        eyebrow: 'Belohnung',
+                        title: 'Bonus-Angebote',
+                        action: _AiSectionBadge(context: context),
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      for (final o in loyalty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                          child: _PersonalOfferCard(offer: o),
+                        ),
+                      const SizedBox(height: AppSpacing.s5),
+                    ],
+                    if (basis.isNotEmpty) ...[
+                      SectionHeader(
+                        eyebrow: 'Nur für dich',
+                        title: 'Dein Angebot',
+                        action: _AiSectionBadge(context: context),
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      for (final o in basis)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                          child: _PersonalOfferCard(offer: o),
+                        ),
+                      const SizedBox(height: AppSpacing.s5),
+                    ],
+                  ],
+                );
+              },
             ),
-          ),
-          if (loyalty.valueOrNull != null)
-            const SizedBox(height: AppSpacing.s5),
-          personals.when(
-            loading: () => const _PersonalLoading(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (list) {
-              final specials = list.where((o) => o.isSpecial).toList();
-              final loyalty = list
-                  .where((o) => o.source == PersonalOfferSource.loyalty)
-                  .toList();
-              final basis = list
-                  .where((o) => o.source == PersonalOfferSource.auto)
-                  .toList();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (specials.isNotEmpty) ...[
-                    SectionHeader(
-                      eyebrow: 'Für dich persönlich',
-                      title: 'Sonderangebote',
-                      action: _AiSectionBadge(context: context),
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-                    for (final o in specials)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                        child: _PersonalOfferCard(offer: o),
-                      ),
-                    const SizedBox(height: AppSpacing.s5),
-                  ],
-                  if (loyalty.isNotEmpty) ...[
-                    SectionHeader(
-                      eyebrow: 'Belohnung',
-                      title: 'Bonus-Angebote',
-                      action: _AiSectionBadge(context: context),
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-                    for (final o in loyalty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                        child: _PersonalOfferCard(offer: o),
-                      ),
-                    const SizedBox(height: AppSpacing.s5),
-                  ],
-                  if (basis.isNotEmpty) ...[
-                    SectionHeader(
-                      eyebrow: 'Nur für dich',
-                      title: 'Dein Angebot',
-                      action: _AiSectionBadge(context: context),
-                    ),
-                    const SizedBox(height: AppSpacing.s4),
-                    for (final o in basis)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                        child: _PersonalOfferCard(offer: o),
-                      ),
-                    const SizedBox(height: AppSpacing.s5),
-                  ],
-                ],
-              );
-            },
-          ),
 
-          // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
-          SectionHeader(
-            key: CustomerAnchors.weeklyOffers,
-            eyebrow: 'Für alle',
-            title: 'Wochen­angebote',
-            action: _AiSectionBadge(context: context),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          offers.when(
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(AppSpacing.s6),
-                child: CircularProgressIndicator(color: AppColors.brand),
-              ),
+            // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
+            SectionHeader(
+              key: CustomerAnchors.weeklyOffers,
+              eyebrow: 'Für alle',
+              title: 'Wochen­angebote',
+              action: _AiSectionBadge(context: context),
             ),
-            error: (e, _) => AppCard(
-              color: const Color(0xFFF7DBDB),
-              borderColor: AppColors.statusCritical,
-              child: Text(
-                '$e',
-                style: AppTypography.body(size: 13, color: AppColors.ink),
+            const SizedBox(height: AppSpacing.s4),
+            offers.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.s6),
+                  child: CircularProgressIndicator(color: AppColors.brand),
+                ),
               ),
-            ),
-            data: (list) {
-              if (list.isEmpty) {
-                return AppCard(
-                  color: AppColors.surfaceAlt,
-                  child: Text(
-                    'Aktuell sind keine Wochen­angebote verfügbar. Schau bald wieder vorbei.',
-                    style: AppTypography.body(
-                        size: 14, color: AppColors.textMuted),
+              error: (e, _) => AppCard(
+                color: const Color(0xFFF7DBDB),
+                borderColor: AppColors.statusCritical,
+                child: Text(
+                  '$e',
+                  style: AppTypography.body(size: 13, color: AppColors.ink),
+                ),
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return AppCard(
+                    color: AppColors.surfaceAlt,
+                    child: Text(
+                      'Aktuell sind keine Wochen­angebote verfügbar. Schau bald wieder vorbei.',
+                      style: AppTypography.body(
+                          size: 14, color: AppColors.textMuted),
+                    ),
+                  );
+                }
+                return SizedBox(
+                  height: 440,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: list.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: AppSpacing.s3),
+                    itemBuilder: (context, i) =>
+                        _WeeklyOfferSlot(offer: list[i]),
                   ),
                 );
-              }
-              return SizedBox(
-                height: 440,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: list.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: AppSpacing.s3),
-                  itemBuilder: (context, i) => _WeeklyOfferSlot(offer: list[i]),
-                ),
-              );
-            },
-          ),
-          const _CouponFootnote(),
-          const SizedBox(height: AppSpacing.s4),
+              },
+            ),
+            const _CouponFootnote(),
+            const SizedBox(height: AppSpacing.s4),
+          ],
 
           // 4. ── Bewertung der Community (Eure Favoriten) ────────────
           const SectionHeader(
@@ -614,8 +632,8 @@ class _RedeemButton extends ConsumerWidget {
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.brand,
         foregroundColor: AppColors.ink,
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s4, vertical: 10),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.s4, vertical: 10),
         textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
       ),
       icon: busy
@@ -697,8 +715,7 @@ class _LoyaltyProgressCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.stars_rounded,
-                  color: AppColors.brand, size: 22),
+              const Icon(Icons.stars_rounded, color: AppColors.brand, size: 22),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -865,9 +882,7 @@ class _MilestoneChip extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Icon(
-                  reached
-                      ? Icons.card_giftcard_rounded
-                      : Icons.lock_outline,
+                  reached ? Icons.card_giftcard_rounded : Icons.lock_outline,
                   size: 24,
                   color: reached ? ink : AppColors.textMuted,
                 ),
@@ -928,11 +943,13 @@ class _WeeklyOfferSlot extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activatedIds = ref.watch(activatedOfferIdsProvider).valueOrNull ?? const <String>{};
+    final activatedIds =
+        ref.watch(activatedOfferIdsProvider).valueOrNull ?? const <String>{};
     final activated = activatedIds.contains(offer.id);
     final busy = ref.watch(offerActivationActionsProvider).isLoading;
-    final ratingSummary =
-        offer.productId == null ? null : ref.watch(productDetailProvider(offer.productId!)).valueOrNull;
+    final ratingSummary = offer.productId == null
+        ? null
+        : ref.watch(productDetailProvider(offer.productId!)).valueOrNull;
 
     Future<void> openDetail() async {
       if (offer.productId == null) return;
@@ -1084,8 +1101,8 @@ class _FavoritesSection extends ConsumerWidget {
         top.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
-            child:
-                Center(child: CircularProgressIndicator(color: AppColors.brand)),
+            child: Center(
+                child: CircularProgressIndicator(color: AppColors.brand)),
           ),
           error: (_, __) => const SizedBox.shrink(),
           data: (list) => list.isEmpty
@@ -1253,8 +1270,8 @@ class OfferActivationActions extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final offerActivationActionsProvider = StateNotifierProvider.autoDispose<
-    OfferActivationActions, AsyncValue<void>>(
+final offerActivationActionsProvider =
+    StateNotifierProvider.autoDispose<OfferActivationActions, AsyncValue<void>>(
   (ref) => OfferActivationActions(ref),
 );
 
@@ -1297,8 +1314,7 @@ class _NewsTeaser extends ConsumerWidget {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: AppColors.brand,
-                            borderRadius:
-                                BorderRadius.circular(AppRadii.sm),
+                            borderRadius: BorderRadius.circular(AppRadii.sm),
                           ),
                           child: const Icon(Icons.campaign,
                               color: AppColors.ink, size: 18),
@@ -1314,8 +1330,7 @@ class _NewsTeaser extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const Icon(Icons.arrow_forward,
-                            color: AppColors.brand),
+                        const Icon(Icons.arrow_forward, color: AppColors.brand),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.s3),
@@ -1323,8 +1338,7 @@ class _NewsTeaser extends ConsumerWidget {
                       _NewsPreviewRow(article: n),
                       if (n != preview.last) ...[
                         const SizedBox(height: 8),
-                        const Divider(
-                            height: 1, color: AppColors.borderSubtle),
+                        const Divider(height: 1, color: AppColors.borderSubtle),
                         const SizedBox(height: 8),
                       ],
                     ],
@@ -1403,8 +1417,7 @@ class _NewsPreviewRow extends StatelessWidget {
 class _ProductSearchBar extends ConsumerStatefulWidget {
   const _ProductSearchBar();
   @override
-  ConsumerState<_ProductSearchBar> createState() =>
-      _ProductSearchBarState();
+  ConsumerState<_ProductSearchBar> createState() => _ProductSearchBarState();
 }
 
 class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
@@ -1526,9 +1539,7 @@ class _DealsCarouselState extends State<_DealsCarousel> {
                 width: _page == i ? 22 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _page == i
-                      ? AppColors.brand
-                      : AppColors.borderSubtle,
+                  color: _page == i ? AppColors.brand : AppColors.borderSubtle,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -1786,8 +1797,7 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
 
     final slides = <Widget>[
       _HeroLoyaltyCard(status: loyalty),
-      if (news != null && news.isNotEmpty)
-        _HeroNewsCard(article: news.first),
+      if (news != null && news.isNotEmpty) _HeroNewsCard(article: news.first),
       _HeroDonationCard(totalDonated: donation?.totalDonated ?? 0),
     ];
     return Column(
@@ -1815,9 +1825,7 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
                 width: _page == i ? 22 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: _page == i
-                      ? AppColors.brand
-                      : AppColors.borderSubtle,
+                  color: _page == i ? AppColors.brand : AppColors.borderSubtle,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -1921,8 +1929,8 @@ class _HeroNewsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.campaign,
-                    color: AppColors.ink, size: 30),
+                child:
+                    const Icon(Icons.campaign, color: AppColors.ink, size: 30),
               ),
               const SizedBox(width: AppSpacing.s3),
               Expanded(
@@ -1980,8 +1988,7 @@ class _HeroDonationCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.lg),
         onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (_) => const DonationsScreen()),
+          MaterialPageRoute(builder: (_) => const DonationsScreen()),
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.s4),
@@ -2033,6 +2040,76 @@ class _HeroDonationCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Freischalt-Hinweis für Nicht-Abonnenten: ersetzt die Abo-Vorteile
+/// (Deals, Aktionen, Loyalty, persönliche + Wochenangebote) durch eine
+/// prominente Karte mit CTA zum Abo-Screen.
+class _SubscriptionLockCard extends ConsumerWidget {
+  const _SubscriptionLockCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AppCard(
+      color: AppColors.ink,
+      borderColor: AppColors.brand,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.workspace_premium_outlined,
+                  color: AppColors.brand, size: 26),
+              const SizedBox(width: AppSpacing.s2),
+              Expanded(
+                child: Text(
+                  'Deine Vorteile warten',
+                  style: AppTypography.display(
+                    size: 18,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Text(
+            'Mit dem Bördesnack24-Abo schaltest du frei:\n'
+            '•  Frühstücks- & Feierabend-Deals\n'
+            '•  Wochen- und Aktionsangebote mit Coupons\n'
+            '•  Loyalty-Punkte mit Meilenstein-Boni\n'
+            '•  Persönliche Angebote nur für dich',
+            style: AppTypography.body(size: 14, color: AppColors.brandLight)
+                .copyWith(height: 1.6),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.brand,
+                foregroundColor: AppColors.ink,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                ),
+              ),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+                );
+                // Nach Rückkehr neu prüfen — bei Abo-Wahl entsperrt der
+                // Tab sofort.
+                ref.invalidate(hasSubscriptionProvider);
+              },
+              child: const Text('Abo wählen — ab 1 € im Monat'),
+            ),
+          ),
+        ],
       ),
     );
   }
