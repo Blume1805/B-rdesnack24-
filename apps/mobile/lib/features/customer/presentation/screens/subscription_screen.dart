@@ -96,33 +96,91 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     }
   }
 
-  Future<void> _choose(_Plan plan) async {
-    if (_busy) return;
-    // Lifetime ist endgültig — vorher unmissverständlich bestätigen lassen.
-    if (plan.key == 'lifetime') {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (dctx) => AlertDialog(
-          title: const Text('Lifetime-Abo wählen?'),
-          content: const Text(
-            'Das Lifetime-Abo kostet einmalig 60 € und gilt dauerhaft. '
-            'Ein späterer Wechsel in ein anderes Abo-Modell ist danach '
-            'nicht mehr möglich.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dctx).pop(false),
-              child: const Text('Abbrechen'),
+  /// Kontrollfrage vor jeder Bestellung: nennt die konkreten Konditionen
+  /// und verlangt eine ausdrückliche Bestätigung (Button-Lösung analog
+  /// § 312j BGB). Bei Lifetime zusätzlich der Endgültigkeits-Hinweis.
+  Future<bool> _confirmOrder(_Plan plan) async {
+    final isSwitch = _currentPlan != null;
+    final lifetime = plan.key == 'lifetime';
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(isSwitch
+            ? 'Zum ${plan.title} wechseln?'
+            : '${plan.title} bestellen?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Möchtest du das ${plan.title} zu den folgenden Konditionen '
+              'jetzt verbindlich bestellen?',
+              style: AppTypography.body(size: 14, color: AppColors.textDefault)
+                  .copyWith(height: 1.4),
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(dctx).pop(true),
-              child: const Text('Endgültig wählen'),
+            const SizedBox(height: AppSpacing.s3),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.s3),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                border: const Border(
+                  left: BorderSide(color: AppColors.brand, width: 4),
+                ),
+                borderRadius: BorderRadius.circular(AppRadii.sm),
+              ),
+              child: Text(
+                '${plan.title}: ${plan.price} ${plan.cadence}\n'
+                '${lifetime ? 'Einmalzahlung, dauerhafte Nutzung' : 'Verlängert sich automatisch, jederzeit kündbar'}\n'
+                'Preis inkl. gesetzlicher USt.',
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w700,
+                  color: AppColors.ink,
+                ).copyWith(height: 1.5),
+              ),
+            ),
+            if (lifetime) ...[
+              const SizedBox(height: AppSpacing.s3),
+              Text(
+                'Achtung: Das Lifetime-Abo ist endgültig — ein späterer '
+                'Wechsel in ein anderes Abo-Modell ist nicht mehr möglich.',
+                style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w700,
+                    color: AppColors.statusCritical),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.s3),
+            Text(
+              'Die Abrechnung erfolgt über den App Store bzw. Google Play, '
+              'sobald die App dort veröffentlicht ist. Du erhältst eine '
+              'Bestätigung per E-Mail.',
+              style: AppTypography.body(size: 12, color: AppColors.textMuted)
+                  .copyWith(height: 1.4),
             ),
           ],
         ),
-      );
-      if (ok != true) return;
-    }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dctx).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dctx).pop(true),
+            child: Text(lifetime
+                ? 'Jetzt endgültig bestellen'
+                : 'Jetzt verbindlich bestellen'),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
+  Future<void> _choose(_Plan plan) async {
+    if (_busy) return;
+    if (!await _confirmOrder(plan)) return;
 
     setState(() => _busy = true);
     try {
