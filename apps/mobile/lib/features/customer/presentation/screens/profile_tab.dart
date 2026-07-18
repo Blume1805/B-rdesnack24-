@@ -14,6 +14,7 @@ import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'master_data_screen.dart';
+import 'subscription_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -100,6 +101,15 @@ class ProfileTab extends ConsumerWidget {
               icon: Icons.lock_outline,
               title: 'Passwort ändern',
               onTap: () => _changePassword(context, ref, repo),
+            ),
+            _ProfileRow(
+              icon: Icons.workspace_premium_outlined,
+              title: 'Mein Abo',
+              subtitle: 'Monats-, Jahres- oder Lifetime-Abo wählen',
+              iconColor: AppColors.brand,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+              ),
             ),
           ],
         ),
