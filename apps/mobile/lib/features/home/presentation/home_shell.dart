@@ -10,8 +10,14 @@ import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
 import '../../customer/presentation/screens/notifications_screen.dart';
-import '../../finance/presentation/screens/finance_screen.dart';
-import '../../management/presentation/management_screen.dart';
+// Deferred: Finanz- und Verwaltungsbereich werden erst geladen, wenn ein
+// interner Nutzer sie öffnet. dart2js legt sie dadurch in separate
+// .part.js-Dateien — Kunden (die große Mehrheit) laden nur den
+// Kunden-Code und starten entsprechend schneller.
+import '../../finance/presentation/screens/finance_screen.dart'
+    deferred as finance;
+import '../../management/presentation/management_screen.dart'
+    deferred as management;
 
 /// Rollenabhängige Hauptnavigation. Sichtbarkeit der Bereiche richtet sich
 /// nach der Rolle; die eigentliche Autorisierung erfolgt serverseitig (RLS).
@@ -72,18 +78,78 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       case UserRole.systemAdmin:
       case UserRole.shareholder:
         return [
-          _Tab(l10n.navFinance, Icons.trending_up_outlined, const FinanceScreen()),
-          _Tab(l10n.navManagement, Icons.inventory_2_outlined, const ManagementScreen()),
+          _Tab(
+            l10n.navFinance,
+            Icons.trending_up_outlined,
+            _DeferredScreen(
+              load: finance.loadLibrary,
+              build: () => finance.FinanceScreen(),
+            ),
+          ),
+          _Tab(
+            l10n.navManagement,
+            Icons.inventory_2_outlined,
+            _DeferredScreen(
+              load: management.loadLibrary,
+              build: () => management.ManagementScreen(),
+            ),
+          ),
         ];
       case UserRole.employee:
         return [
-          _Tab(l10n.navManagement, Icons.inventory_2_outlined, const ManagementScreen()),
+          _Tab(
+            l10n.navManagement,
+            Icons.inventory_2_outlined,
+            _DeferredScreen(
+              load: management.loadLibrary,
+              build: () => management.ManagementScreen(),
+            ),
+          ),
         ];
       case UserRole.customer:
         return [
           _Tab(l10n.navCustomer, Icons.storefront_outlined, const CustomerScreen()),
         ];
     }
+  }
+}
+
+/// Lädt eine deferred Library nach und zeigt bis dahin einen Marken-Spinner.
+/// `loadLibrary()` ist idempotent — nach dem ersten Laden löst das Future
+/// sofort auf, spätere Tab-Wechsel rendern ohne Verzögerung.
+class _DeferredScreen extends StatefulWidget {
+  const _DeferredScreen({required this.load, required this.build});
+  final Future<void> Function() load;
+  final Widget Function() build;
+
+  @override
+  State<_DeferredScreen> createState() => _DeferredScreenState();
+}
+
+class _DeferredScreenState extends State<_DeferredScreen> {
+  late final Future<void> _future = widget.load();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _future,
+      builder: (context, snap) {
+        if (snap.hasError) {
+          return Center(
+            child: Text(
+              'Bereich konnte nicht geladen werden. Bitte neu laden.',
+              style: AppTypography.body(size: 13, color: AppColors.textMuted),
+            ),
+          );
+        }
+        if (snap.connectionState != ConnectionState.done) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.brand),
+          );
+        }
+        return widget.build();
+      },
+    );
   }
 }
 
