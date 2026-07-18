@@ -133,31 +133,73 @@ Nutzerinnen und Nutzer.
 3) Leistungsumfang
 Die App zeigt Angebote, Standorte, Produktverfügbarkeiten und individuelle Preise an.
 Kauf und Warenausgabe erfolgen am jeweiligen Automaten und unterliegen der Verfügbarkeit.
-Rechtsgeschäfte kommen am Automaten zustande.
+Rechtsgeschäfte über Waren kommen am Automaten zustande.
 
-4) Widerrufsrecht
-Waren, die am Automaten unmittelbar entnommen werden, sind vom Widerrufsrecht ausgenommen
-(unmittelbare Übergabe der Ware, § 355 ff. BGB findet insoweit keine Anwendung).
+4) Abo-Modelle
+  a) Für erweiterte App-Funktionen bieten wir drei Abo-Modelle an
+     (alle Preise inklusive gesetzlicher Umsatzsteuer):
+       * Monats-Abo:  1 € pro Monat
+       * Jahres-Abo:  10 € pro Jahr
+       * Lifetime-Abo: 60 € einmalig, dauerhafte Nutzung
+  b) Laufzeit und Verlängerung: Das Monats-Abo verlängert sich jeweils um einen
+     Monat, das Jahres-Abo jeweils um ein Jahr, sofern nicht zum Ende des laufenden
+     Abrechnungszeitraums gekündigt wird. Das Lifetime-Abo ist eine Einmalzahlung
+     ohne Verlängerung.
+  c) Wechsel: Ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit möglich und
+     wird zum nächsten Abrechnungszeitraum wirksam. Nach Abschluss des Lifetime-Abos
+     ist ein Wechsel ausgeschlossen; hierauf wird vor Abschluss gesondert hingewiesen.
+  d) Jede Auswahl und jeder Wechsel wird per E-Mail an die hinterlegte Adresse
+     bestätigt.
+  e) Zahlungsabwicklung: Nach Veröffentlichung der App in den Stores erfolgt die
+     Abrechnung über den Apple App Store bzw. Google Play; ergänzend gelten deren
+     Bedingungen. Bis dahin ist die Auswahl eine unverbindliche Vormerkung, es
+     erfolgt keine Abbuchung.
 
-5) Preise
+5) Kündigung der Abos
+  a) Monats- und Jahres-Abo können jederzeit zum Ende des laufenden
+     Abrechnungszeitraums gekündigt werden; das Recht zur außerordentlichen
+     Kündigung aus wichtigem Grund bleibt unberührt.
+  b) Die Kündigung ist möglich über die Schaltfläche „Verträge hier kündigen"
+     in der App (auch ohne Anmeldung erreichbar, § 312k BGB), im Kundenbereich
+     unter „Mein Abo" sowie — nach Store-Veröffentlichung — über die
+     Abo-Verwaltung des jeweiligen Stores.
+  c) Den Zugang einer über die App erklärten Kündigung bestätigen wir sofort
+     elektronisch in Textform (E-Mail) unter Angabe von Datum und Uhrzeit.
+
+6) Widerrufsrecht
+  a) Waren, die am Automaten unmittelbar entnommen werden, sind vom Widerrufsrecht
+     ausgenommen (unmittelbare Übergabe der Ware, §§ 355 ff. BGB finden insoweit
+     keine Anwendung).
+  b) Für Abos (digitale Dienstleistung) gilt: Verbraucher haben das Recht, binnen
+     14 Tagen ohne Angabe von Gründen den Vertrag zu widerrufen. Die Frist beginnt
+     mit Vertragsschluss. Zur Ausübung genügt eine eindeutige Erklärung (z. B.
+     E-Mail an kontakt@boerdesnack24.de). Im Fall des Widerrufs erstatten wir
+     bereits geleistete Zahlungen unverzüglich, spätestens binnen 14 Tagen.
+  c) Verlangt die Kundin/der Kunde ausdrücklich, dass die Leistung vor Ablauf der
+     Widerrufsfrist beginnt, ist bei Widerruf ein anteiliger Betrag für die bereits
+     erbrachte Leistung zu zahlen. Beim Lifetime-Abo erlischt das Widerrufsrecht
+     mit vollständiger Bereitstellung, wenn zuvor ausdrücklich zugestimmt und die
+     Kenntnis vom Erlöschen bestätigt wurde (§ 356 Abs. 5 BGB).
+
+7) Preise
 Preise gelten wie am Automaten und in der App angezeigt. Für Bestandskundinnen können
 individuelle Preise hinterlegt sein; diese sind in der App einsehbar.
 
-6) Haftung
+8) Haftung
 Wir haften nach den gesetzlichen Vorschriften für Vorsatz und grobe Fahrlässigkeit sowie
 bei Verletzung wesentlicher Vertragspflichten (Kardinalpflichten). Im Übrigen ist die
 Haftung – soweit gesetzlich zulässig – ausgeschlossen.
 
-7) Verfügbarkeit
+9) Verfügbarkeit
 Wir bemühen uns um eine hohe Verfügbarkeit, garantieren jedoch keine ununterbrochene
 Erreichbarkeit.
 
-8) Änderungen dieser Bedingungen
+10) Änderungen dieser Bedingungen
 Änderungen werden rechtzeitig angekündigt. Widerspricht die/der Nutzer:in nicht innerhalb
 der gesetzten Frist, gelten die Änderungen als genehmigt.
 
-9) Anwendbares Recht / Gerichtsstand
-Es gilt deutsches Recht. Verbraucherinnen und Verbraucher stehen zwingend geltende
+11) Anwendbares Recht / Gerichtsstand
+Es gilt deutsches Recht. Verbraucherinnen und Verbrauchern stehen zwingend geltende
 Schutzvorschriften ihres Aufenthaltsstaates zu.
 
 Diese Bedingungen sind eine technische Vorlage und werden vor Live-Betrieb anwaltlich

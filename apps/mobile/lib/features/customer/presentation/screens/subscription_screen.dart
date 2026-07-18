@@ -5,6 +5,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../legal/presentation/cancellation_screen.dart';
 
 /// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
 ///
@@ -210,6 +211,25 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   'inkl. USt.',
                   style:
                       AppTypography.body(size: 11, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                // § 312k BGB: Kündigungsmöglichkeit auch im Kundenbereich —
+                // öffnet dasselbe Formular mit vorbefüllter Konto-Adresse.
+                OutlinedButton.icon(
+                  onPressed: () {
+                    final email = ref
+                        .read(supabaseClientProvider)
+                        .auth
+                        .currentUser
+                        ?.email;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CancellationScreen(prefillEmail: email),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.cancel_outlined, size: 18),
+                  label: const Text('Verträge hier kündigen'),
                 ),
               ],
             ),

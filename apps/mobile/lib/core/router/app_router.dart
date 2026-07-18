@@ -9,6 +9,7 @@ import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
+import '../../features/legal/presentation/cancellation_screen.dart';
 import '../../features/legal/presentation/legal_screens.dart';
 import '../di/providers.dart';
 
@@ -24,16 +25,25 @@ abstract final class AppRoutes {
   static const imprint = '/legal/imprint';
   static const privacy = '/legal/privacy';
   static const terms = '/legal/terms';
+  static const cancellation = '/legal/kuendigung';
 }
 
-/// Öffentlich erreichbare Routen (ohne Anmeldung).
-const _publicRoutes = {
+/// Auth-Flow-Routen: ohne Login erreichbar, für Angemeldete sinnlos
+/// (werden auf die Startseite umgeleitet).
+const _authRoutes = {
   AppRoutes.signIn,
   AppRoutes.register,
   AppRoutes.forgotPassword,
+};
+
+/// Rechtsseiten: in BEIDEN Zuständen erreichbar. Impressum/Datenschutz/AGB
+/// sind Pflichtangaben, die Kündigungsseite muss nach § 312k BGB sogar
+/// ausdrücklich ohne Anmeldung nutzbar sein.
+const _openRoutes = {
   AppRoutes.imprint,
   AppRoutes.privacy,
   AppRoutes.terms,
+  AppRoutes.cancellation,
 };
 
 /// go_router mit Auth-Guard: nicht angemeldete Nutzer landen auf /signin.
@@ -44,10 +54,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = ref.read(currentSessionProvider);
       final loggedIn = session != null;
-      final onPublicRoute = _publicRoutes.contains(state.matchedLocation);
+      final loc = state.matchedLocation;
 
-      if (!loggedIn) return onPublicRoute ? null : AppRoutes.signIn;
-      if (onPublicRoute) return AppRoutes.home;
+      if (_openRoutes.contains(loc)) return null;
+      if (!loggedIn) {
+        return _authRoutes.contains(loc) ? null : AppRoutes.signIn;
+      }
+      if (_authRoutes.contains(loc)) return AppRoutes.home;
       return null;
     },
     routes: [
@@ -90,6 +103,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.terms,
         builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cancellation,
+        builder: (context, state) => const CancellationScreen(),
       ),
     ],
   );

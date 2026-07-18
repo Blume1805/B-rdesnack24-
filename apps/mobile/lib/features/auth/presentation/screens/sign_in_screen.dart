@@ -75,7 +75,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       emailCtrl: _emailCtrl,
                       passwordCtrl: _passwordCtrl,
                       obscure: _obscure,
-                      onToggleObscure: () => setState(() => _obscure = !_obscure),
+                      onToggleObscure: () =>
+                          setState(() => _obscure = !_obscure),
                       isLoading: isLoading,
                       onSubmit: _submit,
                       onFillDemo: _fillDemo,
@@ -143,12 +144,14 @@ class _FormPanel extends StatelessWidget {
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   l10n.signInTitle,
-                  style: AppTypography.display(size: 28, weight: FontWeight.w800),
+                  style:
+                      AppTypography.display(size: 28, weight: FontWeight.w800),
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   'Melde dich mit deinem Konto an oder wähle einen Demo-Zugang.',
-                  style: AppTypography.body(size: 14, color: AppColors.textMuted),
+                  style:
+                      AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.s6),
                 TextFormField(
@@ -176,7 +179,9 @@ class _FormPanel extends StatelessWidget {
                     suffixIcon: IconButton(
                       onPressed: onToggleObscure,
                       icon: Icon(
-                        obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        obscure
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         size: 20,
                       ),
                     ),
@@ -223,9 +228,11 @@ class _FormPanel extends StatelessWidget {
                 const SizedBox(height: AppSpacing.s5),
                 Row(
                   children: [
-                    const Expanded(child: Divider(color: AppColors.borderSubtle)),
+                    const Expanded(
+                        child: Divider(color: AppColors.borderSubtle)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
                       child: Text(
                         'Demo-Zugänge',
                         style: AppTypography.body(
@@ -235,7 +242,8 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Expanded(child: Divider(color: AppColors.borderSubtle)),
+                    const Expanded(
+                        child: Divider(color: AppColors.borderSubtle)),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.s3),
@@ -298,7 +306,9 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text('·', style: AppTypography.body(size: 12, color: AppColors.textMuted)),
+                    Text('·',
+                        style: AppTypography.body(
+                            size: 12, color: AppColors.textMuted)),
                     TextButton(
                       onPressed: () => context.push(AppRoutes.privacy),
                       child: Text(
@@ -310,7 +320,25 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text('·', style: AppTypography.body(size: 12, color: AppColors.textMuted)),
+                    Text('·',
+                        style: AppTypography.body(
+                            size: 12, color: AppColors.textMuted)),
+                    // § 312k BGB: Kündigungsschaltfläche muss ständig
+                    // verfügbar, gut lesbar und eindeutig beschriftet sein.
+                    TextButton(
+                      onPressed: () => context.push(AppRoutes.cancellation),
+                      child: Text(
+                        'Verträge hier kündigen',
+                        style: AppTypography.body(
+                          size: 12,
+                          weight: FontWeight.w600,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                    Text('·',
+                        style: AppTypography.body(
+                            size: 12, color: AppColors.textMuted)),
                     TextButton(
                       onPressed: () => context.push(AppRoutes.terms),
                       child: Text(
