@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/security/pwned_password_checker.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
@@ -358,7 +359,24 @@ class ProfileTab extends ConsumerWidget {
       return;
     }
 
-    // 2) Neues Passwort setzen.
+    // 2) Leak-Check gegen HaveIBeenPwned (k-Anonymity, fail-open).
+    final breaches = await PwnedPasswordChecker().breachCount(newCtrl.text);
+    if ((breaches ?? 0) > 0) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Dieses Passwort ist aus Datenlecks bekannt '
+              '($breaches Fundstellen) und kann nicht verwendet werden. '
+              'Bitte wähle ein anderes.',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 3) Neues Passwort setzen.
     try {
       await repo.changePassword(newCtrl.text);
       if (context.mounted) {

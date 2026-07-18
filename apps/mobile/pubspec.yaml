@@ -22,6 +22,11 @@ dependencies:
   # Backend
   supabase_flutter: ^2.8.0
 
+  # Passwort-Leak-Prüfung (HaveIBeenPwned, k-Anonymity) — clientseitig,
+  # weil die Supabase-Variante Pro-Plan-Feature ist.
+  crypto: ^3.0.3
+  http: ^1.2.0
+
   # Observability (consent-gated initialisiert; nur nativ).
   # Hinweis: PostHog/Sentry werden in der Web-Demo nicht eingebunden, da deren
   # Web-Plugins sich beim Import selbst initialisieren und im Demo-Build sonst

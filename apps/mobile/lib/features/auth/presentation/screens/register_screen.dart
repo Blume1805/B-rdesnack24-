@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/security/pwned_password_checker.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../controllers/auth_providers.dart';
@@ -131,6 +132,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
         return;
       }
+    }
+
+    // Leak-Check gegen HaveIBeenPwned (k-Anonymity, fail-open bei
+    // Netzwerkfehlern) — Ersatz für die Pro-Plan-Prüfung von Supabase.
+    final breaches =
+        await PwnedPasswordChecker().breachCount(_passwordCtrl.text);
+    if (!mounted) return;
+    if ((breaches ?? 0) > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Dieses Passwort ist aus Datenlecks bekannt '
+            '($breaches Fundstellen) und kann nicht verwendet werden. '
+            'Bitte wähle ein anderes.',
+          ),
+        ),
+      );
+      return;
     }
 
     final ok = await ref.read(authControllerProvider.notifier).registerCustomer(
