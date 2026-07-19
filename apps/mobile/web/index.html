@@ -155,25 +155,50 @@
         log('rej', (e.reason && (e.reason.message || e.reason.toString())) || 'unknown');
       });
 
-      // Service Worker: versionierter Offline-Cache (PWA). Fremde/alte
-      // Registrierungen werden abgemeldet; die eigene wird mit der neuen
-      // Build-Version aktualisiert. Der SW selbst räumt Alt-Caches beim
-      // Aktivieren weg — HTML läuft Network-First, Ghost-Content wie beim
-      // frühen Zombie-SW ist damit ausgeschlossen.
-      (async function () {
+      // Service Worker: versionierter Offline-Cache (PWA).
+      //
+      // WICHTIG (Lehre aus dem iOS-Boot-Hänger): Die Registrierung passiert
+      // erst, wenn Flutter fertig gebootet hat (flutter-view im DOM) — nie
+      // während des Boots, damit ein frisch installierter Worker niemals
+      // die laufenden Engine-Downloads (main.dart.js, canvaskit.wasm)
+      // übernehmen kann.
+      //
+      // Selbstheilung: Hängt der Boot nach 12 s UND kontrolliert ein alter
+      // Service Worker die Seite, wird er samt Caches entfernt und die
+      // Seite einmalig neu geladen (sessionStorage-Guard gegen Schleifen).
+      var swNuke = async function () {
         try {
           if (!('serviceWorker' in navigator)) return;
-          var swUrl = 'flutter_service_worker.js?v=__BUILD_V__';
           var regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(function (r) {
-            var s = (r.active || r.installing || r.waiting);
-            var u = (s && s.scriptURL) || '';
-            return u.indexOf('flutter_service_worker.js') === -1
-                ? r.unregister() : Promise.resolve();
-          }));
-          await navigator.serviceWorker.register(swUrl);
+          await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          if ('caches' in window) {
+            var names = await caches.keys();
+            await Promise.all(names.map(function (n) { return caches.delete(n); }));
+          }
         } catch (_) {}
-      })();
+      };
+      setTimeout(function () {
+        if (document.querySelector('flutter-view')) return;
+        if (!('serviceWorker' in navigator)) return;
+        if (!navigator.serviceWorker.controller) return;
+        if (sessionStorage.getItem('bs24-sw-heal')) return;
+        sessionStorage.setItem('bs24-sw-heal', '1');
+        swNuke().then(function () { location.reload(); });
+      }, 12000);
+      var swRegister = function () {
+        try {
+          if (!('serviceWorker' in navigator)) return;
+          navigator.serviceWorker
+            .register('flutter_service_worker.js?v=__BUILD_V__')
+            .catch(function () {});
+        } catch (_) {}
+      };
+      var swPoll = setInterval(function () {
+        if (!document.querySelector('flutter-view')) return;
+        clearInterval(swPoll);
+        swRegister();
+      }, 2000);
+      setTimeout(function () { clearInterval(swPoll); }, 120000);
 
       // Simulierter Progress — springt auf 100 %, sobald Flutter rendert.
       var done = false;

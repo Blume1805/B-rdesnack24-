@@ -75,44 +75,60 @@ echo "▶︎ flutter_service_worker.js: versionierter Offline-Cache (PWA)"
 # Assets Cache-First innerhalb eines pro-Deploy versionierten Caches. Beim
 # Aktivieren einer neuen Version werden alle Alt-Caches gelöscht — das
 # Ghost-Content-Problem des früheren Flutter-SW kann so nicht auftreten.
+# SICHERHEITSREGELN dieses Workers (Lehre aus dem iOS-Boot-Hänger):
+#  * KEIN clients.claim() — der Worker übernimmt eine bereits ladende Seite
+#    nie mitten im Boot; er kontrolliert erst die nächste Navigation.
+#  * Cache-API-Fehler dürfen NIE eine Response verhindern: jeder Pfad endet
+#    notfalls in einem nativen fetch(req); cache.put läuft fire-and-forget.
+#    (iOS Safari wirft bei Quota/Private-Mode/In-App-Kontext — der alte
+#    Worker awaited put() und brach damit den main.dart.js-Download ab.)
 cat > "$BUILD_DIR/flutter_service_worker.js" <<JS
 // Bördesnack24 Web — Offline-Cache v${TS} (generiert von deploy_web.sh).
 const CACHE = 'bs24-${TS}';
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
-    await self.clients.claim();
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    } catch (_) {}
   })());
 });
+function stash(req, res) {
+  try {
+    const copy = res.clone();
+    caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+  } catch (_) {}
+}
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
+  let sameOrigin = false;
+  try { sameOrigin = new URL(req.url).origin === location.origin; } catch (_) {}
+  if (!sameOrigin) return;
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(req);
-        const c = await caches.open(CACHE);
-        c.put(req, fresh.clone());
+        stash(req, fresh);
         return fresh;
       } catch (_) {
-        const hit = await caches.match(req);
-        return hit || Response.error();
+        try {
+          const hit = await caches.match(req);
+          if (hit) return hit;
+        } catch (_) {}
+        return fetch(req);
       }
     })());
     return;
   }
   event.respondWith((async () => {
-    const hit = await caches.match(req);
-    if (hit) return hit;
+    try {
+      const hit = await caches.match(req);
+      if (hit) return hit;
+    } catch (_) {}
     const res = await fetch(req);
-    if (res.ok) {
-      const c = await caches.open(CACHE);
-      c.put(req, res.clone());
-    }
+    if (res && res.ok) stash(req, res);
     return res;
   })());
 });
