@@ -60,7 +60,7 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: AppBar(title: const Text('Kündigungen')),
+      appBar: const HeroAppBar(title: Text('Kündigungen')),
       body: RefreshIndicator(
         color: AppColors.brand,
         onRefresh: () async => setState(() => _future = _load()),

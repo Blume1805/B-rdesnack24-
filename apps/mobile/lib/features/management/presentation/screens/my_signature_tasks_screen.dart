@@ -29,7 +29,7 @@ class MySignatureTasksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(_mySignatureTasksProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Zu signieren')),
+      appBar: const HeroAppBar(title: Text('Zu signieren')),
       body: tasks.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.brand),

@@ -187,7 +187,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize =>
-      Size.fromHeight(user.role == UserRole.customer ? 220 : 108);
+      Size.fromHeight(user.role == UserRole.customer ? 220 : 180);
 
   // Rollen-Labels für die UI: intern bleiben shareholder und employee als
   // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
@@ -219,75 +219,168 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
     if (isCustomer) {
       return _customerHeader(context, customerNumber);
     }
-    return AppBar(
-      toolbarHeight: 88,
-      backgroundColor: AppColors.ink,
-      elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      iconTheme: const IconThemeData(color: AppColors.onDark),
-      titleSpacing: AppSpacing.s5,
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.brand,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-            ),
-            child: const BrandIcon(size: 40, color: AppColors.ink),
+    // Interne Nutzer: gleiche Hero-Komposition wie im Kunden-Header
+    // (Markenbild rechts, Verschmelzungs-Gradient, Konto-Zeile unten links).
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(180),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF0C0A07),
+          gradient: RadialGradient(
+            center: Alignment(-0.4, 1.6),
+            radius: 1.4,
+            colors: [
+              Color(0xFF3A2C10),
+              Color(0xFF1A1409),
+              Color(0xFF0C0A07),
+            ],
+            stops: [0.0, 0.35, 0.85],
           ),
-          const SizedBox(width: AppSpacing.s3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 180,
+            child: Stack(
               children: [
-                Text(
-                  _roleLabel(user.role),
-                  style: AppTypography.body(
-                    size: 13,
-                    weight: FontWeight.w800,
-                    color: AppColors.brand,
-                  ).copyWith(letterSpacing: 0.3),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  user.fullName ?? user.email,
-                  style: AppTypography.display(
-                    size: 20,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
+                // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
+                Positioned(
+                  right: -12,
+                  top: 0,
+                  bottom: 0,
+                  width: MediaQuery.of(context).size.width * 0.60,
+                  child: Image.asset(
+                    'assets/images/brand_hero_wide.png',
+                    fit: BoxFit.contain,
+                    alignment: Alignment.centerRight,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  user.email,
-                  style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w600,
-                    color: AppColors.brandLight,
+                // Weicher Übergang von der Grundfläche in das Bild.
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  right: MediaQuery.of(context).size.width * 0.22,
+                  child: const IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xFF0C0A07),
+                            Color(0xFF0C0A07),
+                            Color(0x000C0A07),
+                          ],
+                          stops: [0.0, 0.55, 1.0],
+                        ),
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                ),
+                // Bodennebel für die Lesbarkeit der Konto-Zeile.
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 84,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [Color(0xE60C0A07), Color(0x000C0A07)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  children: [
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.s5,
+                        0,
+                        AppSpacing.s2,
+                        AppSpacing.s3,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.brand,
+                              borderRadius: BorderRadius.circular(AppRadii.md),
+                            ),
+                            child: const BrandIcon(
+                              size: 40,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s3),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _roleLabel(user.role),
+                                  style: AppTypography.body(
+                                    size: 13,
+                                    weight: FontWeight.w800,
+                                    color: AppColors.brand,
+                                  ).copyWith(letterSpacing: 0.3),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  user.fullName ?? user.email,
+                                  style: AppTypography.display(
+                                    size: 20,
+                                    weight: FontWeight.w800,
+                                    color: AppColors.onDark,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  user.email,
+                                  style: AppTypography.body(
+                                    size: 12,
+                                    weight: FontWeight.w600,
+                                    color: AppColors.brandLight,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: AppLocalizations.of(context).signOut,
+                            icon: const Icon(
+                              Icons.logout,
+                              size: 22,
+                              color: AppColors.onDark,
+                            ),
+                            onPressed: onSignOut,
+                          ),
+                          const SizedBox(width: AppSpacing.s2),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          tooltip: AppLocalizations.of(context).signOut,
-          icon: const Icon(Icons.logout, size: 22, color: AppColors.onDark),
-          onPressed: onSignOut,
         ),
-        const SizedBox(width: AppSpacing.s2),
-      ],
+      ),
     );
   }
 

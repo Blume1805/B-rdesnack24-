@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/formatters.dart';
 import '../controllers/approvals_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Gesellschafter-Freigaben (Dual-Control). Ein aktiver Gesellschafter gibt
 /// neue Gesellschafter frei oder lehnt sie ab. Selbstfreigabe ist serverseitig
@@ -16,7 +17,7 @@ class ApprovalsScreen extends ConsumerWidget {
     final busy = ref.watch(approvalsActionProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gesellschafter-Freigaben')),
+      appBar: const HeroAppBar(title: Text('Gesellschafter-Freigaben')),
       body: approvals.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

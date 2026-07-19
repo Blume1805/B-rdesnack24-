@@ -47,7 +47,7 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('B2B-Kunden — sevDesk-Export')),
+      appBar: const HeroAppBar(title: Text('B2B-Kunden — sevDesk-Export')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s5),
         children: [

@@ -22,11 +22,7 @@ class AiInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: AppBar(
-        title: const Text('KI-Transparenz'),
-        backgroundColor: AppColors.surfaceCard,
-        foregroundColor: AppColors.ink,
-      ),
+      appBar: const HeroAppBar(title: Text('KI-Transparenz')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s5,

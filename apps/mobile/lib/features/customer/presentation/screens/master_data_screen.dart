@@ -31,7 +31,7 @@ class MasterDataScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(myCustomerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Stammdaten')),
+      appBar: const HeroAppBar(title: Text('Stammdaten')),
       body: data.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.brand),
@@ -501,7 +501,7 @@ class _EditBusinessDataScreenState
           ),
         );
     return Scaffold(
-      appBar: AppBar(title: const Text('Unternehmensangaben')),
+      appBar: const HeroAppBar(title: Text('Unternehmensangaben')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s5),
         children: [

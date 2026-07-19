@@ -46,7 +46,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
     final beLifetimeNorm = 60 / normal;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Wann rechnet sich das Abo?')),
+      appBar: const HeroAppBar(title: Text('Wann rechnet sich das Abo?')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s5,

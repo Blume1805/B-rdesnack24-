@@ -67,7 +67,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     final stock = ref.watch(machineStockProvider(widget.machineId));
     final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.brand),

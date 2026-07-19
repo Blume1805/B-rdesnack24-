@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Verfügbare Einzelberechtigungen (ABAC) für Mitarbeiter.
 const _assignablePermissions = <String, String>{
@@ -37,7 +38,7 @@ class EmployeesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profiles = ref.watch(_profilesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mitarbeiter')),
+      appBar: const HeroAppBar(title: Text('Mitarbeiter')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _invite(context, ref),
         icon: const Icon(Icons.person_add),

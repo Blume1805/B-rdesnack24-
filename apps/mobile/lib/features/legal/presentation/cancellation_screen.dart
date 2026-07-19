@@ -89,7 +89,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: AppBar(title: const Text('Verträge hier kündigen')),
+      appBar: const HeroAppBar(title: Text('Verträge hier kündigen')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s4),
         children: [

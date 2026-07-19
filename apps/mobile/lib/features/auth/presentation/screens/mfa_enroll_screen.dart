@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/mfa_enrollment.dart';
 import '../controllers/auth_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Startet eine TOTP-Einrichtung beim Öffnen des Screens.
 final _enrollmentProvider = FutureProvider.autoDispose<MfaEnrollment>((ref) {
@@ -60,7 +61,7 @@ class _MfaEnrollScreenState extends ConsumerState<MfaEnrollScreen> {
     final enrollment = ref.watch(_enrollmentProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.mfaTitle)),
+      appBar: HeroAppBar(title: Text(l10n.mfaTitle)),
       body: enrollment.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(l10n.errorGeneric)),

@@ -5,6 +5,7 @@ import 'dart:ui_web' as ui_web;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
+import '../../../../core/widgets/design_system/design_system.dart';
 
 int _seq = 0;
 
@@ -30,7 +31,7 @@ Future<void> showInlinePdf(
       fullscreenDialog: true,
       builder: (ctx) => Scaffold(
         backgroundColor: const Color(0xFFF8F5EF),
-        appBar: AppBar(
+        appBar: HeroAppBar(
           title: Text(
             title,
             maxLines: 1,

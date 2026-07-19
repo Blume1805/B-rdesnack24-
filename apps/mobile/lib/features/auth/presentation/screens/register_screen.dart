@@ -11,6 +11,7 @@ import '../../../../core/security/pwned_password_checker.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../controllers/auth_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Self-Signup ausschließlich für Kunden. Interne Nutzer werden eingeladen.
 /// Registrierung verlangt eine ausdrückliche Zustimmung zu Datenschutz- und
@@ -210,7 +211,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final isLoading = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.registerTitle)),
+      appBar: HeroAppBar(title: Text(l10n.registerTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),

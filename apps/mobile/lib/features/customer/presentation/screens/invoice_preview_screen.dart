@@ -20,7 +20,7 @@ class InvoicePreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: HeroAppBar(
         title: Text('Rechnung ${invoice.invoiceNumber}'),
         actions: [
           IconButton(

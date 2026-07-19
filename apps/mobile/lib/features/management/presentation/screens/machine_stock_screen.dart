@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/di/providers.dart';
 import '../../domain/entities/stock_item.dart';
 import '../controllers/management_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Echtzeit-Bestand eines Automaten. Abonniert Änderungen der Tabelle
 /// `inventory` (Realtime) und aktualisiert die Liste automatisch.
@@ -73,7 +74,7 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
   Widget build(BuildContext context) {
     final stock = ref.watch(machineStockProvider(widget.machineId));
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

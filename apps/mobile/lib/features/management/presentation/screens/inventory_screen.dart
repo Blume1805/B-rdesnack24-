@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/management_providers.dart';
 import 'machine_stock_screen.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Inventur — Übersicht der Automaten; Auswahl führt zum Echtzeit-Bestand.
 class InventoryScreen extends ConsumerWidget {
@@ -12,7 +13,7 @@ class InventoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final machines = ref.watch(machinesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventur')),
+      appBar: const HeroAppBar(title: Text('Inventur')),
       body: machines.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

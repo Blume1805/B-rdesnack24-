@@ -125,7 +125,7 @@ class _SignatureManagementScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Signaturen')),
+      appBar: const HeroAppBar(title: Text('Signaturen')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetch(),
         builder: (context, snap) {

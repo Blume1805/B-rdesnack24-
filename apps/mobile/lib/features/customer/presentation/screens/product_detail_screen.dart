@@ -19,7 +19,7 @@ class ProductDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(productDetailProvider(productId));
     return Scaffold(
-      appBar: AppBar(
+      appBar: HeroAppBar(
         title: Text(
           detail.valueOrNull?.name ?? 'Produkt',
           maxLines: 1,

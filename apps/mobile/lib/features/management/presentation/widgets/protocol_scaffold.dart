@@ -8,6 +8,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../finance/domain/entities/finance_period.dart';
 import '../../data/approvals_remote_data_source.dart';
 import '../controllers/management_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Generisches Gerüst für ein revisionssicheres Protokoll:
 /// Zeitraum-Filter, Liste, optionaler PDF-Export und Anlegen-FAB.
@@ -172,7 +173,7 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
   Widget build(BuildContext context) {
     final list = ref.watch(protocolListProvider(_query));
     return Scaffold(
-      appBar: AppBar(
+      appBar: HeroAppBar(
         title: Text(widget.title),
         actions: [
           if (widget.exportKind != null) ...[

@@ -34,7 +34,7 @@ class DocumentApprovalsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final approvals = ref.watch(_approvalsListProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Freigaben')),
+      appBar: const HeroAppBar(title: Text('Freigaben')),
       body: approvals.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.brand),

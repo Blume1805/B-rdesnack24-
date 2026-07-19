@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../controllers/auth_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -49,7 +50,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.resetTitle)),
+      appBar: HeroAppBar(title: Text(l10n.resetTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),

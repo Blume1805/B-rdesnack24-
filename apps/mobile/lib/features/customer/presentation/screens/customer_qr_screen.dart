@@ -6,6 +6,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../controllers/customer_providers.dart';
+import '../../../../core/widgets/design_system/design_system.dart';
 
 /// Kundenkarte mit QR-Code (Kd.-Nr. + Name). Wird am Automaten gescannt zur
 /// Verifizierung des Kunden (zukünftige Nayax-Integration).
@@ -22,12 +23,7 @@ class CustomerQrScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.ink,
-      appBar: AppBar(
-        backgroundColor: AppColors.ink,
-        foregroundColor: AppColors.onDark,
-        elevation: 0,
-        title: const Text('Meine Kundenkarte'),
-      ),
+      appBar: const HeroAppBar(title: Text('Meine Kundenkarte')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.s6),

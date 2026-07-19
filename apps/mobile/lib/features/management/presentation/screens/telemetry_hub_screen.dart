@@ -23,8 +23,8 @@ class _TelemetryHubScreenState extends ConsumerState<TelemetryHubScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Telemetrie / IoT'),
+      appBar: const HeroAppBar(
+        title: Text('Telemetrie / IoT'),
       ),
       body: Column(
         children: [

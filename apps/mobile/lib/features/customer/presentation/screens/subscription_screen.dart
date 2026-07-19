@@ -275,7 +275,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: AppBar(title: const Text('Mein Abo')),
+      appBar: const HeroAppBar(title: Text('Mein Abo')),
       body: _loading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.brand),

@@ -127,7 +127,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           orElse: () => false,
         );
     return Scaffold(
-      appBar: AppBar(
+      appBar: HeroAppBar(
         title: const Text('Dokumente'),
         actions: [
           IconButton(

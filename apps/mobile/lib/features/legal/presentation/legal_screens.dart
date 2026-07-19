@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'legal_texts.dart';
+import '../../../core/widgets/design_system/design_system.dart';
 
 /// Wiederverwendbarer Text-Screen für Impressum/Datenschutz/AGB. Bewusst
 /// einfach und barrierefrei (Textgröße respektiert System-Einstellung).
@@ -13,7 +14,7 @@ class _LegalTextScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: HeroAppBar(title: Text(title)),
       body: SafeArea(
         child: Semantics(
           label: title,
