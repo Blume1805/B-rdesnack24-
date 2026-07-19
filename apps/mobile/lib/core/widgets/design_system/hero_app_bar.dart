@@ -21,7 +21,7 @@ class HeroAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// damit das Markenbild wie auf der Kunden-Startseite wirkt.
   static const double heroHeight = 200;
 
-  // Farbwelt des brand_hero_wide.png-Hintergrunds (vgl. Kunden-Header).
+  // Farbwelt des brand_hero_wide.webp-Hintergrunds (vgl. Kunden-Header).
   static const Color _bg = Color(0xFF0C0A07);
 
   @override
@@ -42,7 +42,8 @@ class HeroAppBar extends StatelessWidget implements PreferredSizeWidget {
             bottom: 0,
             width: width * 0.62,
             child: Image.asset(
-              'assets/images/brand_hero_wide.png',
+              'assets/images/brand_hero_wide.webp',
+              excludeFromSemantics: true,
               fit: BoxFit.contain,
               alignment: Alignment.centerRight,
               errorBuilder: (_, __, ___) => const SizedBox.shrink(),

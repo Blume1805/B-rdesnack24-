@@ -98,6 +98,12 @@ class AuthRemoteDataSource {
     return _auth.mfa.enroll(factorType: FactorType.totp);
   }
 
+  /// True, wenn der Nutzer mindestens einen bestätigten TOTP-Faktor hat.
+  Future<bool> hasVerifiedTotp() async {
+    final res = await _auth.mfa.listFactors();
+    return res.totp.any((f) => f.status == FactorStatus.verified);
+  }
+
   Future<void> verifyTotp(String factorId, String code) async {
     final challenge = await _auth.mfa.challenge(factorId: factorId);
     await _auth.mfa.verify(

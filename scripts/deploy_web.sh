@@ -67,27 +67,58 @@ else:
     print("  ✓ canvasKitBaseUrl gesetzt, serviceWorkerSettings entfernt")
 PY
 
-echo "▶︎ flutter_service_worker.js entschärfen (harte Auto-Deregistrierung)"
-cat > "$BUILD_DIR/flutter_service_worker.js" <<'JS'
-// Kein aktives Service-Worker-Caching in der Web-Demo. Wenn Safari diese
-// Datei aus altem Cache lädt, meldet sie den Worker sofort ab und leert
-// den Cache — die nächste Navigation kommt garantiert vom Server.
-self.addEventListener('install', (event) => { self.skipWaiting(); });
+TS=$(date +%s)
+
+echo "▶︎ flutter_service_worker.js: versionierter Offline-Cache (PWA)"
+# Ersetzt den Flutter-Standard-SW durch einen kleinen, deterministischen
+# Worker: HTML läuft IMMER Network-First (offline: Cache-Fallback), statische
+# Assets Cache-First innerhalb eines pro-Deploy versionierten Caches. Beim
+# Aktivieren einer neuen Version werden alle Alt-Caches gelöscht — das
+# Ghost-Content-Problem des früheren Flutter-SW kann so nicht auftreten.
+cat > "$BUILD_DIR/flutter_service_worker.js" <<JS
+// Bördesnack24 Web — Offline-Cache v${TS} (generiert von deploy_web.sh).
+const CACHE = 'bs24-${TS}';
+self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    try {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-      await self.registration.unregister();
-      const clients = await self.clients.matchAll();
-      for (const c of clients) c.navigate(c.url);
-    } catch (_) {}
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req);
+        const c = await caches.open(CACHE);
+        c.put(req, fresh.clone());
+        return fresh;
+      } catch (_) {
+        const hit = await caches.match(req);
+        return hit || Response.error();
+      }
+    })());
+    return;
+  }
+  event.respondWith((async () => {
+    const hit = await caches.match(req);
+    if (hit) return hit;
+    const res = await fetch(req);
+    if (res.ok) {
+      const c = await caches.open(CACHE);
+      c.put(req, res.clone());
+    }
+    return res;
   })());
 });
 JS
-echo "  ✓ neutralisiert"
+echo "  ✓ generiert (Cache bs24-${TS})"
 
-TS=$(date +%s)
 echo "▶︎ Cache-Buster: $TS"
 sed -i "s/__BUILD_V__/$TS/g" "$BUILD_DIR/index.html"
 # main.dart.js im Bootstrap versionieren, damit Safari/Chrome die neue

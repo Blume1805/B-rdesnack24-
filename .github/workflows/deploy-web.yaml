@@ -1,0 +1,43 @@
+name: Deploy Web-Demo
+
+# Baut das Flutter-Web-Bundle und deployt es nach gh-pages — identisch zum
+# lokalen `scripts/deploy_web.sh` (lokales CanvasKit, versionierter Service
+# Worker, Cache-Buster). Läuft bei jedem Push auf main sowie manuell über
+# workflow_dispatch, damit die Live-Demo automatisch auf Branch-Stand bleibt.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Build + gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Voller Verlauf: das Deploy-Skript wechselt lokal auf gh-pages.
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: gh-pages-Branch lokal verfügbar machen
+        run: git fetch origin gh-pages && git branch -f gh-pages origin/gh-pages
+      - name: Git-Identität
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Dependencies
+        run: flutter pub get
+        working-directory: apps/mobile
+      - name: Build + Deploy
+        run: bash scripts/deploy_web.sh

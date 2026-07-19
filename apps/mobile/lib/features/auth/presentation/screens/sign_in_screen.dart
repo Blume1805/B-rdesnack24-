@@ -177,6 +177,8 @@ class _FormPanel extends StatelessWidget {
                     labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outline, size: 20),
                     suffixIcon: IconButton(
+                      tooltip:
+                          obscure ? 'Passwort anzeigen' : 'Passwort verbergen',
                       onPressed: onToggleObscure,
                       icon: Icon(
                         obscure

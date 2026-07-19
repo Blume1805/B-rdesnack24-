@@ -28,6 +28,17 @@ final currentPermissionsProvider = FutureProvider<Set<String>>((ref) async {
   return ref.watch(authRepositoryProvider).myPermissions();
 });
 
+/// Hat der aktuelle Nutzer einen bestätigten TOTP-Faktor (MFA)?
+/// Für die Sicherheits-Erinnerung interner Rollen im Home-Shell.
+final mfaEnrolledProvider = FutureProvider<bool>((ref) async {
+  final user = await ref.watch(currentUserProvider.future);
+  if (user == null) return true;
+  return ref.watch(authRepositoryProvider).hasMfaEnrolled();
+});
+
+/// Session-weites „Später"-Dismiss der MFA-Erinnerung.
+final mfaReminderDismissedProvider = StateProvider<bool>((ref) => false);
+
 /// Controller für Anmelde-/Registrierungsaktionen.
 class AuthController extends StateNotifier<AsyncValue<void>> {
   AuthController(this._ref) : super(const AsyncData(null));

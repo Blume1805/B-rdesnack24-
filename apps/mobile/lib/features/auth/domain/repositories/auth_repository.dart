@@ -49,4 +49,7 @@ abstract interface class AuthRepository {
     required String factorId,
     required String code,
   });
+
+  /// MFA: hat der aktuelle Nutzer einen bestätigten TOTP-Faktor?
+  Future<bool> hasMfaEnrolled();
 }

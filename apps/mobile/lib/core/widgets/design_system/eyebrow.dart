@@ -10,9 +10,9 @@ class Eyebrow extends StatelessWidget {
 
   final String text;
 
-  /// Für Kontraste auf dunklen Flächen: rein zur Farbwahl (leichtes Gold).
-  /// Weil die Marken-Gold-Farbe auf hellen wie dunklen Flächen gut liest,
-  /// bleibt sie in beiden Fällen dieselbe.
+  /// Farbwahl nach Untergrund: auf dunklen Flächen das volle Marken-Gold,
+  /// auf hellen Flächen der WCAG-konforme Text-Goldton [AppColors.brandText]
+  /// (BFSG: mindestens 4,5:1 Kontrast für Text dieser Größe).
   final bool onDark;
 
   @override
@@ -22,7 +22,7 @@ class Eyebrow extends StatelessWidget {
       style: AppTypography.body(
         size: 16,
         weight: FontWeight.w800,
-        color: AppColors.brand,
+        color: onDark ? AppColors.brand : AppColors.brandText,
       ).copyWith(letterSpacing: 0.1, height: 1.2),
     );
   }

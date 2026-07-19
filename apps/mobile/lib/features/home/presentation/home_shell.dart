@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/brand_marks.dart';
@@ -37,6 +39,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final userAsync = ref.watch(currentUserProvider);
 
     return userAsync.when(
+      // Der Provider baut sich bei JEDEM Auth-Event neu auf (auch beim
+      // stündlichen Token-Refresh). Ohne diese Flags würde die komplette
+      // Oberfläche dann kurz auf den Lade-Spinner zurückfallen — die
+      // bisherigen Daten bleiben stattdessen sichtbar, bis der neue
+      // Stand da ist.
+      skipLoadingOnReload: true,
+      skipLoadingOnRefresh: true,
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
@@ -58,7 +67,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             onSignOut: () =>
                 ref.read(authControllerProvider.notifier).signOut(),
           ),
-          body: tabs[safeIndex].screen,
+          body: user.role == UserRole.customer
+              ? tabs[safeIndex].screen
+              : Column(
+                  children: [
+                    const _MfaReminderBanner(),
+                    Expanded(child: tabs[safeIndex].screen),
+                  ],
+                ),
           bottomNavigationBar: tabs.length > 1
               ? NavigationBar(
                   selectedIndex: safeIndex,
@@ -179,6 +195,63 @@ class _Tab {
   final Widget screen;
 }
 
+/// Sicherheits-Erinnerung für interne Rollen (Admin/Gesellschafter/
+/// Mitarbeiter): solange kein bestätigter TOTP-Faktor existiert, erscheint
+/// oberhalb des Inhalts eine Banner-Zeile mit Direkteinstieg in die
+/// MFA-Einrichtung. „Später" blendet sie für die laufende Sitzung aus —
+/// bewusst keine harte Pflicht, damit Demo-Zugänge nutzbar bleiben.
+class _MfaReminderBanner extends ConsumerWidget {
+  const _MfaReminderBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dismissed = ref.watch(mfaReminderDismissedProvider);
+    final enrolled = ref.watch(mfaEnrolledProvider).valueOrNull;
+    if (dismissed || enrolled != false) return const SizedBox.shrink();
+    return Material(
+      color: const Color(0xFFFFF3D6),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s4,
+          AppSpacing.s2,
+          AppSpacing.s2,
+          AppSpacing.s2,
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.shield_outlined,
+              size: 18,
+              color: AppColors.brandText,
+            ),
+            const SizedBox(width: AppSpacing.s2),
+            Expanded(
+              child: Text(
+                'Konto absichern: Zwei-Faktor-Authentifizierung einrichten.',
+                style: AppTypography.body(
+                  size: 12.5,
+                  weight: FontWeight.w600,
+                  color: AppColors.ink,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => GoRouter.of(context).push(AppRoutes.mfaEnroll),
+              child: const Text('Einrichten'),
+            ),
+            IconButton(
+              tooltip: 'Später',
+              icon: const Icon(Icons.close, size: 18),
+              onPressed: () =>
+                  ref.read(mfaReminderDismissedProvider.notifier).state = true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _BrandAppBar({required this.user, required this.onSignOut});
 
@@ -250,7 +323,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   bottom: 0,
                   width: MediaQuery.of(context).size.width * 0.60,
                   child: Image.asset(
-                    'assets/images/brand_hero_wide.png',
+                    'assets/images/brand_hero_wide.webp',
+                    excludeFromSemantics: true,
                     fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
@@ -389,7 +463,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
   Widget _customerHeader(BuildContext context, String? customerNumber) {
     final firstName = _firstName(user.fullName) ?? 'Kunde';
-    // Farbtöne aus dem brand_hero_wide.png-Hintergrund:
+    // Farbtöne aus dem brand_hero_wide.webp-Hintergrund:
     // - warm-schwarz als Grundfläche
     // - subtiler goldener Bodennebel am unteren Rand (radial)
     // Damit wirkt der linke Header wie eine Fortsetzung der Bild-
@@ -423,7 +497,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   bottom: 0,
                   width: MediaQuery.of(context).size.width * 0.60,
                   child: Image.asset(
-                    'assets/images/brand_hero_wide.png',
+                    'assets/images/brand_hero_wide.webp',
+                    excludeFromSemantics: true,
                     fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
                   ),

@@ -81,6 +81,7 @@ class RatingInput extends StatelessWidget {
       children: [
         for (int i = 1; i <= 5; i++)
           IconButton(
+            tooltip: '$i von 5 Sternen',
             padding: EdgeInsets.zero,
             constraints:
                 BoxConstraints.tightFor(width: size + 8, height: size + 8),

@@ -5,7 +5,7 @@ import '../../theme/app_typography.dart';
 
 /// Ink-farbener „Hero"-Bereich mit Marken-Foto (Automat + leuchtender
 /// Bördekreis-Umriss + Wortmarke + Slogan). Das Foto liegt als Asset unter
-/// `assets/images/brand_hero_wide.png`. Der Container wächst mit der
+/// `assets/images/brand_hero_wide.webp`. Der Container wächst mit der
 /// Bildschirmbreite und rendert das Motiv immer vollständig (BoxFit.contain).
 ///
 /// [showTaglineOverlay] blendet den Slogan noch einmal als eigene Text-Zeile
@@ -44,7 +44,9 @@ class HeroBackdrop extends StatelessWidget {
                 width: width,
                 height: target,
                 child: Image.asset(
-                  'assets/images/brand_hero_wide.png',
+                  'assets/images/brand_hero_wide.webp',
+                  semanticLabel:
+                      'Bördesnack24 — Snackautomat mit Umrisskarte des Bördekreises',
                   fit: BoxFit.contain,
                   alignment: Alignment.center,
                 ),

@@ -66,6 +66,9 @@ class ProductImage extends StatelessWidget {
             child: (url != null && url.isNotEmpty)
                 ? Image.network(
                     url,
+                    semanticLabel: productName == null
+                        ? null
+                        : 'Produktfoto: $productName',
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,

@@ -80,6 +80,7 @@ class _MfaEnrollScreenState extends ConsumerState<MfaEnrollScreen> {
                       title: Text(l10n.secretManual),
                       subtitle: SelectableText(data.secret),
                       trailing: IconButton(
+                        tooltip: 'Schlüssel kopieren',
                         icon: const Icon(Icons.copy),
                         onPressed: () => Clipboard.setData(
                           ClipboardData(text: data.secret),

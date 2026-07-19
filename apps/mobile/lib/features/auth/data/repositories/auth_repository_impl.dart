@@ -147,6 +147,16 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<bool> hasMfaEnrolled() async {
+    try {
+      return await _remote.hasVerifiedTotp();
+    } catch (_) {
+      // Konservativ: bei Fehlern keine Dauer-Erinnerung erzwingen.
+      return true;
+    }
+  }
+
   Failure _map(Object e) {
     if (e is Failure) return e;
     if (e is AuthException) {

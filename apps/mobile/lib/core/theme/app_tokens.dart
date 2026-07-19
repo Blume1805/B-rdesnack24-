@@ -11,9 +11,17 @@ abstract final class AppColors {
   static const Color brandLight = Color(0xFFFEE7A0);
   static const Color brandDark = Color(0xFFB89A00);
 
+  /// Gold als *Textfarbe* auf hellen Flächen. Das Marken-Gold (#FDC102)
+  /// erreicht auf Weiß nur ~1,6:1 Kontrast — für Fließ-/Labeltext ist nach
+  /// WCAG 1.4.3 (BFSG) mindestens 4,5:1 nötig. Dieser abgedunkelte Goldton
+  /// liegt bei ~4,9:1 und bleibt in der Markenwelt. Auf dunklen Flächen
+  /// weiterhin [brand] verwenden.
+  static const Color brandText = Color(0xFF8A6E00);
+
   static const Color ink = Color(0xFF202321); // Ink — Headlines/Dark
   static const Color textDefault = Color(0xFF4A4844);
-  static const Color textMuted = Color(0xFF7D7975);
+  // 4,6:1 auf Weiß (WCAG 1.4.3); vorher #7D7975 mit nur 4,1:1.
+  static const Color textMuted = Color(0xFF6E6A66);
 
   static const Color surfaceCard = Color(0xFFFFFFFF); // Weiß
   static const Color surfaceAlt =

@@ -194,15 +194,19 @@ class _KpiBody extends StatelessWidget {
           title: 'Cashflow-Entwicklung',
         ),
         const SizedBox(height: AppSpacing.s3),
-        GestureDetector(
-          onTap: () => _showZoomedChart(
-            context,
-            title: 'Cashflow-Entwicklung',
-            subtitle: 'Umsatz (gold) und Aufwand (schwarz) je Monat',
-            aspectRatio: 1.45,
-            chart: _CashflowChart(k: k, height: double.infinity),
+        Semantics(
+          button: true,
+          label: 'Cashflow-Entwicklung — Diagramm vergrößern',
+          child: GestureDetector(
+            onTap: () => _showZoomedChart(
+              context,
+              title: 'Cashflow-Entwicklung',
+              subtitle: 'Umsatz (gold) und Aufwand (schwarz) je Monat',
+              aspectRatio: 1.45,
+              chart: _CashflowChart(k: k, height: double.infinity),
+            ),
+            child: AppCard(child: _CashflowChart(k: k)),
           ),
-          child: AppCard(child: _CashflowChart(k: k)),
         ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
@@ -210,15 +214,19 @@ class _KpiBody extends StatelessWidget {
           title: 'Aktueller vs. Vergleichszeitraum',
         ),
         const SizedBox(height: AppSpacing.s3),
-        GestureDetector(
-          onTap: () => _showZoomedChart(
-            context,
-            title: 'Aktueller vs. Vergleichszeitraum',
-            subtitle: 'Umsatz (gold) und Ergebnis (grün)',
-            aspectRatio: 1.6,
-            chart: _ComparisonBars(k: k, height: double.infinity, bare: true),
+        Semantics(
+          button: true,
+          label: 'Aktueller vs. Vergleichszeitraum — Diagramm vergrößern',
+          child: GestureDetector(
+            onTap: () => _showZoomedChart(
+              context,
+              title: 'Aktueller vs. Vergleichszeitraum',
+              subtitle: 'Umsatz (gold) und Ergebnis (grün)',
+              aspectRatio: 1.6,
+              chart: _ComparisonBars(k: k, height: double.infinity, bare: true),
+            ),
+            child: _ComparisonBars(k: k),
           ),
-          child: _ComparisonBars(k: k),
         ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
@@ -395,88 +403,96 @@ class _KpiTile extends StatelessWidget {
             ? AppColors.statusCritical
             : AppColors.statusPositive)
         : AppColors.ink;
-    return GestureDetector(
-      onTap: trend.length >= 2 ? () => _zoom(context) : null,
-      child: AppCard(
-        padding: const EdgeInsets.all(AppSpacing.s3),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label.toUpperCase(),
-                    style: AppTypography.body(
-                      size: 10,
-                      weight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                    ).copyWith(letterSpacing: 0.6),
-                  ),
-                ),
-                if (targetLabel != null)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColors.statusCritical,
-                        width: 0.8,
-                      ),
-                      borderRadius: BorderRadius.circular(AppRadii.sm),
-                    ),
+    // Screenreader: Kachel als Button ("Diagramm vergrößern") ansagen,
+    // Inhalt (Label + Wert) bleibt als Kind-Semantik erhalten.
+    return Semantics(
+      button: trend.length >= 2,
+      hint: trend.length >= 2 ? 'Diagramm vergrößern' : null,
+      child: GestureDetector(
+        onTap: trend.length >= 2 ? () => _zoom(context) : null,
+        child: AppCard(
+          padding: const EdgeInsets.all(AppSpacing.s3),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
                     child: Text(
-                      'Ziel ${targetLabel!}',
+                      label.toUpperCase(),
                       style: AppTypography.body(
-                        size: 9,
+                        size: 10,
                         weight: FontWeight.w800,
-                        color: AppColors.statusCritical,
-                      ),
+                        color: AppColors.textMuted,
+                      ).copyWith(letterSpacing: 0.6),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            FittedBox(
-              alignment: Alignment.centerLeft,
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: AppTypography.display(
-                  size: 22,
-                  weight: FontWeight.w800,
-                  color: valueColor,
+                  if (targetLabel != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.statusCritical,
+                          width: 0.8,
+                        ),
+                        borderRadius: BorderRadius.circular(AppRadii.sm),
+                      ),
+                      child: Text(
+                        'Ziel ${targetLabel!}',
+                        style: AppTypography.body(
+                          size: 9,
+                          weight: FontWeight.w800,
+                          color: AppColors.statusCritical,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                alignment: Alignment.centerLeft,
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  style: AppTypography.display(
+                    size: 22,
+                    weight: FontWeight.w800,
+                    color: valueColor,
+                  ),
                 ),
               ),
-            ),
-            if (sub != null)
-              Text(
-                sub!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.body(
-                  size: 10,
-                  weight: FontWeight.w600,
-                  color: AppColors.textMuted,
+              if (sub != null)
+                Text(
+                  sub!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.body(
+                    size: 10,
+                    weight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  _DeltaChip(label: 'Vormonat', pct: deltaMomPct),
+                  const SizedBox(width: 4),
+                  _DeltaChip(label: 'Vorjahr', pct: deltaYoyPct),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Expanded(
+                child: _Sparkline(
+                  values: trend,
+                  targetLower: targetLower,
+                  targetUpper: targetUpper,
                 ),
               ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                _DeltaChip(label: 'Vormonat', pct: deltaMomPct),
-                const SizedBox(width: 4),
-                _DeltaChip(label: 'Vorjahr', pct: deltaYoyPct),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Expanded(
-              child: _Sparkline(
-                values: trend,
-                targetLower: targetLower,
-                targetUpper: targetUpper,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

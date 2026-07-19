@@ -155,17 +155,23 @@
         log('rej', (e.reason && (e.reason.message || e.reason.toString())) || 'unknown');
       });
 
-      // Alte Service-Worker + Caches einmalig entfernen.
+      // Service Worker: versionierter Offline-Cache (PWA). Fremde/alte
+      // Registrierungen werden abgemeldet; die eigene wird mit der neuen
+      // Build-Version aktualisiert. Der SW selbst räumt Alt-Caches beim
+      // Aktivieren weg — HTML läuft Network-First, Ghost-Content wie beim
+      // frühen Zombie-SW ist damit ausgeschlossen.
       (async function () {
         try {
-          if ('serviceWorker' in navigator) {
-            var regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(function (r) { return r.unregister(); }));
-          }
-          if ('caches' in window) {
-            var names = await caches.keys();
-            await Promise.all(names.map(function (n) { return caches.delete(n); }));
-          }
+          if (!('serviceWorker' in navigator)) return;
+          var swUrl = 'flutter_service_worker.js?v=__BUILD_V__';
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function (r) {
+            var s = (r.active || r.installing || r.waiting);
+            var u = (s && s.scriptURL) || '';
+            return u.indexOf('flutter_service_worker.js') === -1
+                ? r.unregister() : Promise.resolve();
+          }));
+          await navigator.serviceWorker.register(swUrl);
         } catch (_) {}
       })();
 
