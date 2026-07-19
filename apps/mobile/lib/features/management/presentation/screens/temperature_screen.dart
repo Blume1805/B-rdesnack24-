@@ -87,8 +87,8 @@ class _TemperatureFormState extends ConsumerState<_TemperatureForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _tempCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true, signed: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true, signed: true),
                 decoration: const InputDecoration(
                   labelText: 'Ist-Temperatur (°C)',
                   suffixText: '°C',

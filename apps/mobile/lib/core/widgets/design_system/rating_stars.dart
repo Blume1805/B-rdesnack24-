@@ -82,7 +82,8 @@ class RatingInput extends StatelessWidget {
         for (int i = 1; i <= 5; i++)
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: BoxConstraints.tightFor(width: size + 8, height: size + 8),
+            constraints:
+                BoxConstraints.tightFor(width: size + 8, height: size + 8),
             splashRadius: size,
             icon: Icon(
               (value ?? 0) >= i

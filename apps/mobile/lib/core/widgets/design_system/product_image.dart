@@ -69,8 +69,9 @@ class ProductImage extends StatelessWidget {
                   width: double.infinity,
                   height: double.infinity,
                   errorBuilder: (_, __, ___) => _placeholder(effective, letter),
-                  loadingBuilder: (_, child, progress) =>
-                      progress == null ? child : _placeholder(effective, letter),
+                  loadingBuilder: (_, child, progress) => progress == null
+                      ? child
+                      : _placeholder(effective, letter),
                 )
               : _placeholder(effective, letter),
         ),

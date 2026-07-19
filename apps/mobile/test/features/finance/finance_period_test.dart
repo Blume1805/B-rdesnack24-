@@ -16,7 +16,8 @@ void main() {
     });
 
     test('ISO-Formatierung füllt führende Nullen', () {
-      final p = FinancePeriod(from: DateTime(2026, 1, 3), to: DateTime(2026, 1, 9));
+      final p =
+          FinancePeriod(from: DateTime(2026, 1, 3), to: DateTime(2026, 1, 9));
       expect(p.fromIso, '2026-01-03');
       expect(p.toIso, '2026-01-09');
     });

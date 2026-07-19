@@ -61,7 +61,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
       return ServerFailure(e.message, cause: e);
     }
     if (e is FunctionException) {
-      return ServerFailure('Edge Function fehlgeschlagen (${e.status})', cause: e);
+      return ServerFailure('Edge Function fehlgeschlagen (${e.status})',
+          cause: e);
     }
     return UnknownFailure('Unerwarteter Fehler: $e', cause: e);
   }

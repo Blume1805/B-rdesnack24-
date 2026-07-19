@@ -17,7 +17,8 @@ import 'package:http/http.dart' as http;
 /// (Offline, Firmen-Proxy, CORS-Sonderfall), blockieren wir die
 /// Registrierung nicht — der Check ist Zusatzschutz, kein Gatekeeper.
 class PwnedPasswordChecker {
-  PwnedPasswordChecker({http.Client? client, this.timeout = const Duration(seconds: 4)})
+  PwnedPasswordChecker(
+      {http.Client? client, this.timeout = const Duration(seconds: 4)})
       : _client = client ?? http.Client();
 
   final http.Client _client;
@@ -32,9 +33,8 @@ class PwnedPasswordChecker {
     final prefix = digest.substring(0, 5);
     final suffix = digest.substring(5);
     try {
-      final res = await _client
-          .get(_base.resolve(prefix), headers: {'Add-Padding': 'true'})
-          .timeout(timeout);
+      final res = await _client.get(_base.resolve(prefix),
+          headers: {'Add-Padding': 'true'}).timeout(timeout);
       if (res.statusCode != 200) return null;
       for (final line in const LineSplitter().convert(res.body)) {
         final sep = line.indexOf(':');

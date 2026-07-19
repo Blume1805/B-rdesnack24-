@@ -16,7 +16,8 @@ const _assignablePermissions = <String, String>{
   'documents.view': 'Dokumente ansehen',
 };
 
-final _profilesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
+final _profilesProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   (ref) async {
     final rows = await ref
         .read(supabaseClientProvider)
@@ -131,7 +132,8 @@ class _InviteFormState extends State<_InviteForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(

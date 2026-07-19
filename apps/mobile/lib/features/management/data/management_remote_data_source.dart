@@ -107,7 +107,8 @@ class ManagementRemoteDataSource {
       },
     );
     final data = res.data;
-    if (data is Map && data['base64'] is String) return data['base64'] as String;
+    if (data is Map && data['base64'] is String)
+      return data['base64'] as String;
     throw Exception('PDF-Export fehlgeschlagen');
   }
 }

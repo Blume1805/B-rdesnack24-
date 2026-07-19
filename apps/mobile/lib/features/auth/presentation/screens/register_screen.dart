@@ -127,8 +127,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (_taxNumberCtrl.text.trim().isEmpty) missing.add('Steuernummer');
       if (missing.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Bitte ausfüllen: ${missing.join(', ')}')),
+          SnackBar(content: Text('Bitte ausfüllen: ${missing.join(', ')}')),
         );
         return;
       }
@@ -155,15 +154,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final ok = await ref.read(authControllerProvider.notifier).registerCustomer(
           _emailCtrl.text,
           _passwordCtrl.text,
-          fullName: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+          fullName:
+              _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
           birthDate: _birthDate,
           customerType: _customerType,
           companyName: _companyCtrl.text.trim().isEmpty
               ? null
               : _companyCtrl.text.trim(),
-          billingStreet: _streetCtrl.text.trim().isEmpty
-              ? null
-              : _streetCtrl.text.trim(),
+          billingStreet:
+              _streetCtrl.text.trim().isEmpty ? null : _streetCtrl.text.trim(),
           billingZip:
               _zipCtrl.text.trim().isEmpty ? null : _zipCtrl.text.trim(),
           billingCity:
@@ -174,9 +173,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           taxNumber: _taxNumberCtrl.text.trim().isEmpty
               ? null
               : _taxNumberCtrl.text.trim(),
-          vatId: _vatIdCtrl.text.trim().isEmpty
-              ? null
-              : _vatIdCtrl.text.trim(),
+          vatId: _vatIdCtrl.text.trim().isEmpty ? null : _vatIdCtrl.text.trim(),
         );
     if (!mounted) return;
     if (ok) {
@@ -389,7 +386,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: 16),
                   _ConsentTile(
                     checked: _acceptPrivacy,
-                    onChanged: (v) => setState(() => _acceptPrivacy = v ?? false),
+                    onChanged: (v) =>
+                        setState(() => _acceptPrivacy = v ?? false),
                     error: _triedSubmit && !_acceptPrivacy,
                     label: l10n.consentPrivacyLabel,
                     linkLabel: l10n.consentPrivacyLink,
@@ -465,7 +463,9 @@ class _ConsentTile extends StatelessWidget {
             Checkbox(
               value: checked,
               onChanged: onChanged,
-              side: error ? BorderSide(color: theme.colorScheme.error, width: 2) : null,
+              side: error
+                  ? BorderSide(color: theme.colorScheme.error, width: 2)
+                  : null,
             ),
             Expanded(
               child: Padding(
@@ -493,4 +493,3 @@ class _ConsentTile extends StatelessWidget {
     );
   }
 }
-

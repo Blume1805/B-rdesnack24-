@@ -7,35 +7,37 @@ import 'package:flutter/material.dart';
 /// ausschließlich diese Konstanten (keine Hex-Werte hart im Code).
 abstract final class AppColors {
   // Basis-Palette
-  static const Color brand       = Color(0xFFFDC102); // Gold
-  static const Color brandLight  = Color(0xFFFEE7A0);
-  static const Color brandDark   = Color(0xFFB89A00);
+  static const Color brand = Color(0xFFFDC102); // Gold
+  static const Color brandLight = Color(0xFFFEE7A0);
+  static const Color brandDark = Color(0xFFB89A00);
 
-  static const Color ink         = Color(0xFF202321); // Ink — Headlines/Dark
+  static const Color ink = Color(0xFF202321); // Ink — Headlines/Dark
   static const Color textDefault = Color(0xFF4A4844);
-  static const Color textMuted   = Color(0xFF7D7975);
+  static const Color textMuted = Color(0xFF7D7975);
 
   static const Color surfaceCard = Color(0xFFFFFFFF); // Weiß
-  static const Color surfaceAlt  = Color(0xFFF7F5F1); // sehr leichte Creme für Layering
-  static const Color borderSubtle= Color(0xFFE3DFDA); // Börde-Grau (etwas heller wegen Weiß-BG)
+  static const Color surfaceAlt =
+      Color(0xFFF7F5F1); // sehr leichte Creme für Layering
+  static const Color borderSubtle =
+      Color(0xFFE3DFDA); // Börde-Grau (etwas heller wegen Weiß-BG)
 
   static const Color statusPositive = Color(0xFF5C9A3F);
-  static const Color statusWarning  = Color(0xFFE8A206);
+  static const Color statusWarning = Color(0xFFE8A206);
   static const Color statusCritical = Color(0xFFB31C1C);
-  static const Color statusInfo     = Color(0xFF0066CC);
+  static const Color statusInfo = Color(0xFF0066CC);
 
   static const Color onDark = Colors.white;
 }
 
 /// Spacing-Tokens auf 8-px-Grid.
 abstract final class AppSpacing {
-  static const double s1  = 4;
-  static const double s2  = 8;
-  static const double s3  = 12;
-  static const double s4  = 16;
-  static const double s5  = 20;
-  static const double s6  = 24;
-  static const double s8  = 32;
+  static const double s1 = 4;
+  static const double s2 = 8;
+  static const double s3 = 12;
+  static const double s4 = 16;
+  static const double s5 = 20;
+  static const double s6 = 24;
+  static const double s8 = 32;
   static const double s10 = 40;
   static const double s12 = 48;
   static const double s16 = 64;
@@ -44,12 +46,12 @@ abstract final class AppSpacing {
 
 /// Radien.
 abstract final class AppRadii {
-  static const double sm  = 4;
-  static const double base= 8;
-  static const double md  = 12;
-  static const double lg  = 16;
-  static const double xl  = 24;
-  static const double pill= 9999;
+  static const double sm = 4;
+  static const double base = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+  static const double pill = 9999;
 }
 
 /// Schatten.
@@ -70,9 +72,9 @@ abstract final class AppShadows {
 
 /// Motion.
 abstract final class AppMotion {
-  static const Duration fast   = Duration(milliseconds: 150);
-  static const Duration base   = Duration(milliseconds: 250);
-  static const Duration slow   = Duration(milliseconds: 350);
-  static const Curve easeOut   = Curves.easeOutCubic;
+  static const Duration fast = Duration(milliseconds: 150);
+  static const Duration base = Duration(milliseconds: 250);
+  static const Duration slow = Duration(milliseconds: 350);
+  static const Curve easeOut = Curves.easeOutCubic;
   static const Curve easeInOut = Curves.easeInOutCubic;
 }

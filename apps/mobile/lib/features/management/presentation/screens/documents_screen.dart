@@ -21,8 +21,7 @@ import '../widgets/pdf_inline_stub.dart'
 /// Dokumente sortiert nach updated_at desc.
 final _documentsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final rows =
-      await ref.read(supabaseClientProvider).rpc('list_documents');
+  final rows = await ref.read(supabaseClientProvider).rpc('list_documents');
   final docs = (rows as List).cast<Map<String, dynamic>>();
   // Signed URLs vorziehen, damit _open() das Fenster synchron im
   // Tap-Handler öffnen kann (sonst blockiert iOS Safari den Popup).
@@ -32,7 +31,7 @@ final _documentsProvider =
     if (path == null || path.isEmpty) return;
     try {
       d['signed_url'] = await storage.createSignedUrl(path, 3600 * 24);
-    } catch (_) { /* leerer Slot — Fehler beim Öffnen kommunizieren */ }
+    } catch (_) {/* leerer Slot — Fehler beim Öffnen kommunizieren */}
   }));
   return docs;
 });
@@ -55,18 +54,30 @@ final _signatureTasksProvider = FutureProvider.autoDispose
 /// Material-Icon-Auswahl anhand des Icon-Slugs aus document_folders.icon
 IconData _iconFor(String? slug) {
   switch (slug) {
-    case 'description':          return Icons.description_outlined;
-    case 'health_and_safety':    return Icons.health_and_safety_outlined;
-    case 'medical_information':  return Icons.medical_information_outlined;
-    case 'cleaning_services':    return Icons.cleaning_services_outlined;
-    case 'store':                return Icons.store_outlined;
-    case 'work':                 return Icons.work_outline;
-    case 'local_shipping':       return Icons.local_shipping_outlined;
-    case 'build':                return Icons.build_outlined;
-    case 'shield':               return Icons.shield_outlined;
-    case 'gavel':                return Icons.gavel_outlined;
-    case 'folder_open':          return Icons.folder_open_outlined;
-    default:                     return Icons.folder_outlined;
+    case 'description':
+      return Icons.description_outlined;
+    case 'health_and_safety':
+      return Icons.health_and_safety_outlined;
+    case 'medical_information':
+      return Icons.medical_information_outlined;
+    case 'cleaning_services':
+      return Icons.cleaning_services_outlined;
+    case 'store':
+      return Icons.store_outlined;
+    case 'work':
+      return Icons.work_outline;
+    case 'local_shipping':
+      return Icons.local_shipping_outlined;
+    case 'build':
+      return Icons.build_outlined;
+    case 'shield':
+      return Icons.shield_outlined;
+    case 'gavel':
+      return Icons.gavel_outlined;
+    case 'folder_open':
+      return Icons.folder_open_outlined;
+    default:
+      return Icons.folder_outlined;
   }
 }
 
@@ -91,12 +102,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       _initTriggered = true;
       Future.microtask(() async {
         try {
+          await ref
+              .read(supabaseClientProvider)
+              .functions
+              .invoke('documents-init-templates', body: <String, dynamic>{});
           await ref.read(supabaseClientProvider).functions.invoke(
-              'documents-init-templates', body: <String, dynamic>{});
-          await ref.read(supabaseClientProvider).functions.invoke(
-              'documents-install-branded-set', body: <String, dynamic>{});
+              'documents-install-branded-set',
+              body: <String, dynamic>{});
           if (mounted) ref.invalidate(_documentsProvider);
-        } catch (_) { /* ignore — Rolle ohne Adminrechte */ }
+        } catch (_) {/* ignore — Rolle ohne Adminrechte */}
       });
     }
   }
@@ -121,8 +135,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: AppColors.brand))
-                : const Icon(Icons.folder_zip_outlined,
-                    color: AppColors.brand),
+                : const Icon(Icons.folder_zip_outlined, color: AppColors.brand),
             onPressed: _exporting ? null : () => _exportZip(context, ref),
           ),
         ],
@@ -140,8 +153,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.brand)),
         error: (e, _) => Padding(
-            padding: const EdgeInsets.all(AppSpacing.s5),
-            child: Text('$e')),
+            padding: const EdgeInsets.all(AppSpacing.s5), child: Text('$e')),
         data: (list) => folders.when(
           loading: () => const SizedBox.shrink(),
           error: (e, _) => Text('$e'),
@@ -170,14 +182,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.s4),
                 children: [
-                  _SearchBar(
-                      onChanged: (v) => setState(() => _search = v)),
+                  _SearchBar(onChanged: (v) => setState(() => _search = v)),
                   const SizedBox(height: AppSpacing.s3),
                   _FolderChips(
                     folders: folderList,
                     selected: _folderFilter,
-                    onSelected: (slug) =>
-                        setState(() => _folderFilter = slug),
+                    onSelected: (slug) => setState(() => _folderFilter = slug),
                   ),
                   const SizedBox(height: AppSpacing.s4),
                   for (final f in visibleFolders)
@@ -205,20 +215,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // ─── Aktionen ────────────────────────────────────────────────────
 
-  Future<void> _open(BuildContext context, WidgetRef ref,
-      Map<String, dynamic> doc) async {
+  Future<void> _open(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
     final path = doc['latest_file_path']?.toString();
     if (path == null || path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
+        content:
+            Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
       ));
       return;
     }
     final title = doc['title']?.toString() ?? 'Dokument';
     final lower = path.toLowerCase();
     final isPdf = lower.endsWith('.pdf');
-    final isImage = lower.endsWith('.png') || lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') || lower.endsWith('.gif') ||
+    final isImage = lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.gif') ||
         lower.endsWith('.webp');
     // signed_url wird im _documentsProvider vorgeladen; nur der Fallback
     // signiert nach.
@@ -287,13 +300,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       ));
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload fehlgeschlagen: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Upload fehlgeschlagen: $e')));
     }
   }
 
-  Future<void> _setValidUntil(BuildContext context, WidgetRef ref,
-      Map<String, dynamic> doc) async {
+  Future<void> _setValidUntil(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
     final currentRaw = doc['valid_until']?.toString();
     DateTime? initial;
     if (currentRaw != null && currentRaw.isNotEmpty) {
@@ -326,8 +339,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  Future<void> _requestReview(BuildContext context, WidgetRef ref,
-      Map<String, dynamic> doc) async {
+  Future<void> _requestReview(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -367,8 +380,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  Future<void> _inviteEmployees(BuildContext context, WidgetRef ref,
-      Map<String, dynamic> doc) async {
+  Future<void> _inviteEmployees(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
     final client = ref.read(supabaseClientProvider);
     List<Map<String, dynamic>> employees;
     try {
@@ -446,8 +459,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       if (!context.mounted) return;
       ref.invalidate(_signatureTasksProvider(doc['id'] as String));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('${selected.length} Mitarbeiter eingeladen.')),
+        SnackBar(content: Text('${selected.length} Mitarbeiter eingeladen.')),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -491,9 +503,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   Future<void> _create(BuildContext context, WidgetRef ref) async {
     final folders = ref.read(_foldersProvider).valueOrNull ?? const [];
     final titleCtrl = TextEditingController();
-    String? selectedFolder = folders.isNotEmpty
-        ? folders.first['slug'] as String
-        : 'sonstiges';
+    String? selectedFolder =
+        folders.isNotEmpty ? folders.first['slug'] as String : 'sonstiges';
     final ok = await showDialog<bool>(
       context: context,
       builder: (dCtx) => StatefulBuilder(
@@ -597,8 +608,8 @@ class _FolderChips extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _chip(context, 'Alle Ordner', selected == null,
-              () => onSelected(null)),
+          _chip(
+              context, 'Alle Ordner', selected == null, () => onSelected(null)),
           const SizedBox(width: 6),
           for (final f in folders) ...[
             _chip(
@@ -614,8 +625,8 @@ class _FolderChips extends StatelessWidget {
     );
   }
 
-  Widget _chip(BuildContext context, String label, bool active,
-      VoidCallback onTap) {
+  Widget _chip(
+      BuildContext context, String label, bool active, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
@@ -689,14 +700,12 @@ class _FolderSection extends StatelessWidget {
                 child: Text(
                   folder['label']?.toString() ?? '',
                   style: AppTypography.display(
-                      size: 15,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink),
+                      size: 15, weight: FontWeight.w800, color: AppColors.ink),
                 ),
               ),
               Text('${documents.length}',
-                  style: AppTypography.body(
-                      size: 11, color: AppColors.textMuted)),
+                  style:
+                      AppTypography.body(size: 11, color: AppColors.textMuted)),
             ],
           ),
           const SizedBox(height: AppSpacing.s2),
@@ -783,8 +792,8 @@ class _DocumentCard extends ConsumerWidget {
                 if (isTemplate) ...[
                   const Padding(
                     padding: EdgeInsets.only(top: 2, right: 6),
-                    child: Icon(Icons.push_pin,
-                        size: 16, color: AppColors.brand),
+                    child:
+                        Icon(Icons.push_pin, size: 16, color: AppColors.brand),
                   ),
                 ],
                 Expanded(
@@ -800,8 +809,7 @@ class _DocumentCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 if (isTemplate)
-                  const StatusBadge(
-                      label: 'Vorlage', tone: StatusTone.warning)
+                  const StatusBadge(label: 'Vorlage', tone: StatusTone.warning)
                 else
                   _ExpiryBadge(expiry: expiry, validUntil: validUntil),
               ],
@@ -851,47 +859,47 @@ class _DocumentCard extends ConsumerWidget {
                   Wrap(
                     spacing: 0,
                     children: [
-                  IconButton(
-                    tooltip: 'Gültigkeit setzen',
-                    icon: const Icon(Icons.event_available, size: 20),
-                    color: AppColors.textDefault,
-                    onPressed: onSetValidUntil,
-                    visualDensity: VisualDensity.compact,
-                    constraints:
-                        const BoxConstraints(minWidth: 34, minHeight: 34),
-                    padding: EdgeInsets.zero,
-                  ),
-                  IconButton(
-                    tooltip: 'Neue Version hochladen',
-                    icon: const Icon(Icons.upload_file, size: 20),
-                    color: AppColors.textDefault,
-                    onPressed: onNewVersion,
-                    visualDensity: VisualDensity.compact,
-                    constraints:
-                        const BoxConstraints(minWidth: 34, minHeight: 34),
-                    padding: EdgeInsets.zero,
-                  ),
-                  if (isIfsg)
-                    IconButton(
-                      tooltip: 'Mitarbeiter zur Signatur einladen',
-                      icon: const Icon(Icons.person_add_alt_1, size: 20),
-                      color: AppColors.brand,
-                      onPressed: hasFile ? onInviteEmployees : null,
-                      visualDensity: VisualDensity.compact,
-                      constraints:
-                          const BoxConstraints(minWidth: 34, minHeight: 34),
-                      padding: EdgeInsets.zero,
-                    ),
-                  IconButton(
-                    tooltip: 'Freigabe (2-of-2 Gesellschafter)',
-                    icon: const Icon(Icons.rule_folder_outlined, size: 20),
-                    color: AppColors.brand,
-                    onPressed: hasFile ? onRequestApproval : null,
-                    visualDensity: VisualDensity.compact,
-                    constraints:
-                        const BoxConstraints(minWidth: 34, minHeight: 34),
-                    padding: EdgeInsets.zero,
-                  ),
+                      IconButton(
+                        tooltip: 'Gültigkeit setzen',
+                        icon: const Icon(Icons.event_available, size: 20),
+                        color: AppColors.textDefault,
+                        onPressed: onSetValidUntil,
+                        visualDensity: VisualDensity.compact,
+                        constraints:
+                            const BoxConstraints(minWidth: 34, minHeight: 34),
+                        padding: EdgeInsets.zero,
+                      ),
+                      IconButton(
+                        tooltip: 'Neue Version hochladen',
+                        icon: const Icon(Icons.upload_file, size: 20),
+                        color: AppColors.textDefault,
+                        onPressed: onNewVersion,
+                        visualDensity: VisualDensity.compact,
+                        constraints:
+                            const BoxConstraints(minWidth: 34, minHeight: 34),
+                        padding: EdgeInsets.zero,
+                      ),
+                      if (isIfsg)
+                        IconButton(
+                          tooltip: 'Mitarbeiter zur Signatur einladen',
+                          icon: const Icon(Icons.person_add_alt_1, size: 20),
+                          color: AppColors.brand,
+                          onPressed: hasFile ? onInviteEmployees : null,
+                          visualDensity: VisualDensity.compact,
+                          constraints:
+                              const BoxConstraints(minWidth: 34, minHeight: 34),
+                          padding: EdgeInsets.zero,
+                        ),
+                      IconButton(
+                        tooltip: 'Freigabe (2-of-2 Gesellschafter)',
+                        icon: const Icon(Icons.rule_folder_outlined, size: 20),
+                        color: AppColors.brand,
+                        onPressed: hasFile ? onRequestApproval : null,
+                        visualDensity: VisualDensity.compact,
+                        constraints:
+                            const BoxConstraints(minWidth: 34, minHeight: 34),
+                        padding: EdgeInsets.zero,
+                      ),
                     ],
                   ),
               ],
@@ -958,12 +966,12 @@ class _SigTaskRow extends ConsumerWidget {
             child: Text(
               signed
                   ? '$name — signiert' +
-                      (signedAt == null ? '' : ' · ${signedAt.substring(0, 10)}')
+                      (signedAt == null
+                          ? ''
+                          : ' · ${signedAt.substring(0, 10)}')
                   : '$name — ausstehend',
               style: AppTypography.body(
-                  size: 12,
-                  weight: FontWeight.w700,
-                  color: AppColors.ink),
+                  size: 12, weight: FontWeight.w700, color: AppColors.ink),
             ),
           ),
           if (signed && path != null && path.isNotEmpty)
@@ -988,8 +996,7 @@ class _SigTaskRow extends ConsumerWidget {
           .from('signed-documents')
           .createSignedUrl(path, 3600 * 24);
       await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-          webOnlyWindowName: '_blank');
+          mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -1010,8 +1017,7 @@ class _ExpiryBadge extends StatelessWidget {
         return const StatusBadge(
             label: 'abgelaufen', tone: StatusTone.critical);
       case 'expiring':
-        return const StatusBadge(
-            label: 'läuft bald', tone: StatusTone.warning);
+        return const StatusBadge(label: 'läuft bald', tone: StatusTone.warning);
       case 'ok':
         return const StatusBadge(label: 'gültig', tone: StatusTone.positive);
       default:

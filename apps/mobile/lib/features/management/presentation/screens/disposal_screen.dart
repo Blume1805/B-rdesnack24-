@@ -25,7 +25,8 @@ class DisposalScreen extends StatelessWidget {
       table: 'disposal_logs',
       dateCol: 'disposed_at',
       exportKind: 'disposal',
-      itemTitle: (r) => '${r['product_label'] ?? 'Ware'} · ${r['quantity']} Stk.',
+      itemTitle: (r) =>
+          '${r['product_label'] ?? 'Ware'} · ${r['quantity']} Stk.',
       itemSubtitle: (r) =>
           '${_short(r['disposed_at'])} · ${_reasonLabels[r['reason']] ?? r['reason']}'
           '${r['mhd_date'] != null ? ' · MHD ${r['mhd_date']}' : ''}',
@@ -84,7 +85,8 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
   Widget build(BuildContext context) {
     final products = ref.watch(productsProvider);
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -109,7 +111,8 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
                     labelText: 'Produkt (optional, koppelt Inventur)',
                   ),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('— freie Eingabe —')),
+                    const DropdownMenuItem(
+                        value: null, child: Text('— freie Eingabe —')),
                     for (final p in list)
                       DropdownMenuItem(
                         value: p['id'] as String,
@@ -129,7 +132,8 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _labelCtrl,
-                decoration: const InputDecoration(labelText: 'Produktbezeichnung'),
+                decoration:
+                    const InputDecoration(labelText: 'Produktbezeichnung'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Pflichtfeld' : null,
               ),
@@ -148,9 +152,12 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
                 initialValue: _reason,
                 decoration: const InputDecoration(labelText: 'Grund'),
                 items: const [
-                  DropdownMenuItem(value: 'mhd', child: Text('MHD überschritten')),
-                  DropdownMenuItem(value: 'damage', child: Text('Beschädigung')),
-                  DropdownMenuItem(value: 'hygiene', child: Text('Hygienemangel')),
+                  DropdownMenuItem(
+                      value: 'mhd', child: Text('MHD überschritten')),
+                  DropdownMenuItem(
+                      value: 'damage', child: Text('Beschädigung')),
+                  DropdownMenuItem(
+                      value: 'hygiene', child: Text('Hygienemangel')),
                   DropdownMenuItem(value: 'other', child: Text('Sonstiges')),
                 ],
                 onChanged: (v) => setState(() => _reason = v ?? 'mhd'),

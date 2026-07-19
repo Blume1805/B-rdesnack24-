@@ -61,7 +61,8 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
     Navigator.of(context).pop({
       'machine_id': _machineId,
       'issue': _issueCtrl.text.trim(),
-      'action': _actionCtrl.text.trim().isEmpty ? null : _actionCtrl.text.trim(),
+      'action':
+          _actionCtrl.text.trim().isEmpty ? null : _actionCtrl.text.trim(),
       'performed_by': _byCtrl.text.trim().isEmpty ? null : _byCtrl.text.trim(),
       'cost_amount': _costCtrl.text.trim().isEmpty
           ? null
@@ -74,7 +75,8 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -93,7 +95,8 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _issueCtrl,
-                decoration: const InputDecoration(labelText: 'Fehlerbeschreibung'),
+                decoration:
+                    const InputDecoration(labelText: 'Fehlerbeschreibung'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Pflichtfeld' : null,
                 maxLines: 2,
@@ -107,12 +110,14 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _byCtrl,
-                decoration: const InputDecoration(labelText: 'Erledigt durch (Name/Firma)'),
+                decoration: const InputDecoration(
+                    labelText: 'Erledigt durch (Name/Firma)'),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _costCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(labelText: 'Kosten (€)'),
               ),
               SwitchListTile(

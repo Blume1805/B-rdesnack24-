@@ -21,17 +21,41 @@ class StatusBadge extends StatelessWidget {
   ({Color bg, Color fg, Color border}) _colors() {
     switch (tone) {
       case StatusTone.positive:
-        return (bg: const Color(0xFFE7F1E0), fg: AppColors.statusPositive, border: AppColors.statusPositive);
+        return (
+          bg: const Color(0xFFE7F1E0),
+          fg: AppColors.statusPositive,
+          border: AppColors.statusPositive
+        );
       case StatusTone.warning:
-        return (bg: const Color(0xFFFCEECB), fg: AppColors.statusWarning, border: AppColors.statusWarning);
+        return (
+          bg: const Color(0xFFFCEECB),
+          fg: AppColors.statusWarning,
+          border: AppColors.statusWarning
+        );
       case StatusTone.critical:
-        return (bg: const Color(0xFFF7DBDB), fg: AppColors.statusCritical, border: AppColors.statusCritical);
+        return (
+          bg: const Color(0xFFF7DBDB),
+          fg: AppColors.statusCritical,
+          border: AppColors.statusCritical
+        );
       case StatusTone.info:
-        return (bg: const Color(0xFFDBE8F5), fg: AppColors.statusInfo, border: AppColors.statusInfo);
+        return (
+          bg: const Color(0xFFDBE8F5),
+          fg: AppColors.statusInfo,
+          border: AppColors.statusInfo
+        );
       case StatusTone.brand:
-        return (bg: AppColors.brandLight, fg: AppColors.ink, border: AppColors.brand);
+        return (
+          bg: AppColors.brandLight,
+          fg: AppColors.ink,
+          border: AppColors.brand
+        );
       case StatusTone.neutral:
-        return (bg: AppColors.surfaceAlt, fg: AppColors.textMuted, border: AppColors.borderSubtle);
+        return (
+          bg: AppColors.surfaceAlt,
+          fg: AppColors.textMuted,
+          border: AppColors.borderSubtle
+        );
     }
   }
 
@@ -39,7 +63,8 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = _colors();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.s3, vertical: 4),
       decoration: BoxDecoration(
         color: c.bg,
         borderRadius: BorderRadius.circular(AppRadii.pill),

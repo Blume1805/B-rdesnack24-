@@ -56,7 +56,8 @@ class FinanceScreen extends ConsumerWidget {
           summary.when(
             loading: () => const Padding(
               padding: EdgeInsets.all(48),
-              child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
+              child: Center(
+                  child: CircularProgressIndicator(color: AppColors.brand)),
             ),
             error: (e, _) => _ErrorCard(message: '$e'),
             data: (s) => _SummaryContent(summary: s),
@@ -97,11 +98,11 @@ class FinanceScreen extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Freigabe anfordern'),
-        content: Text(
-            'Die Finanzauswertung für ${Formatters.date(period.from)} – '
-            '${Formatters.date(period.to)} wird beiden Gesellschaftern zur '
-            'Prüfung vorgelegt. Nach 2-of-2-Freigabe wird die signierte '
-            'PDF-Fassung automatisch abgelegt.'),
+        content:
+            Text('Die Finanzauswertung für ${Formatters.date(period.from)} – '
+                '${Formatters.date(period.to)} wird beiden Gesellschaftern zur '
+                'Prüfung vorgelegt. Nach 2-of-2-Freigabe wird die signierte '
+                'PDF-Fassung automatisch abgelegt.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -253,7 +254,8 @@ class _PeriodSelector extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s2),
           Row(
             children: [
-              const Icon(Icons.date_range_outlined, size: 20, color: AppColors.ink),
+              const Icon(Icons.date_range_outlined,
+                  size: 20, color: AppColors.ink),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -417,7 +419,8 @@ class _SummaryContent extends StatelessWidget {
                 ),
                 KpiCard(
                   label: 'USt-Saldo',
-                  value: Formatters.euro(summary.vatCollected - summary.vatPaid),
+                  value:
+                      Formatters.euro(summary.vatCollected - summary.vatPaid),
                   icon: Icons.receipt_long_outlined,
                 ),
               ],
@@ -437,7 +440,8 @@ class _SummaryContent extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Keine Buchungen im gewählten Zeitraum.',
-                    style: AppTypography.body(size: 14, color: AppColors.textMuted),
+                    style: AppTypography.body(
+                        size: 14, color: AppColors.textMuted),
                   ),
                 ),
               ],
@@ -521,7 +525,8 @@ class _AccountRow extends StatelessWidget {
                 ),
                 Text(
                   isRevenue ? 'Erlös' : 'Aufwand',
-                  style: AppTypography.body(size: 12, color: AppColors.textMuted),
+                  style:
+                      AppTypography.body(size: 12, color: AppColors.textMuted),
                 ),
               ],
             ),

@@ -123,7 +123,8 @@ abstract final class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.md),
-          borderSide: const BorderSide(color: AppColors.statusCritical, width: 2),
+          borderSide:
+              const BorderSide(color: AppColors.statusCritical, width: 2),
         ),
       ),
 

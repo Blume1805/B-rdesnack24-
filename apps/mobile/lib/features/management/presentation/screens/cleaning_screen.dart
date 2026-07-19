@@ -22,7 +22,8 @@ class CleaningScreen extends StatelessWidget {
       table: 'cleaning_logs',
       dateCol: 'cleaned_at',
       exportKind: 'cleaning',
-      itemTitle: (r) => _typeLabels[r['cleaning_type']] ?? '${r['cleaning_type']}',
+      itemTitle: (r) =>
+          _typeLabels[r['cleaning_type']] ?? '${r['cleaning_type']}',
       itemSubtitle: (r) =>
           '${_short(r['cleaned_at'])}${r['agent'] != null ? ' · ${r['agent']}' : ''}'
           '${r['notes'] != null ? '\n${r['notes']}' : ''}',
@@ -75,7 +76,8 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -96,16 +98,21 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
                 initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Art'),
                 items: const [
-                  DropdownMenuItem(value: 'exterior', child: Text('Außenreinigung')),
-                  DropdownMenuItem(value: 'interior', child: Text('Innenreinigung')),
-                  DropdownMenuItem(value: 'full', child: Text('Vollreinigung + Desinfektion')),
+                  DropdownMenuItem(
+                      value: 'exterior', child: Text('Außenreinigung')),
+                  DropdownMenuItem(
+                      value: 'interior', child: Text('Innenreinigung')),
+                  DropdownMenuItem(
+                      value: 'full',
+                      child: Text('Vollreinigung + Desinfektion')),
                 ],
                 onChanged: (v) => setState(() => _type = v ?? 'exterior'),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _agentCtrl,
-                decoration: const InputDecoration(labelText: 'Reinigungsmittel'),
+                decoration:
+                    const InputDecoration(labelText: 'Reinigungsmittel'),
               ),
               const SizedBox(height: 12),
               TextFormField(

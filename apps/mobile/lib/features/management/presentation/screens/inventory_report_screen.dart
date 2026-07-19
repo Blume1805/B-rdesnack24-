@@ -25,8 +25,7 @@ class InventoryReportScreen extends ConsumerStatefulWidget {
       _InventoryReportScreenState();
 }
 
-class _InventoryReportScreenState
-    extends ConsumerState<InventoryReportScreen> {
+class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
   DateTime _from = DateTime.now().subtract(const Duration(days: 90));
   DateTime _to = DateTime.now();
   List<Map<String, dynamic>>? _movements;
@@ -104,7 +103,8 @@ class _InventoryReportScreenState
             'Freigabe wird der Report mit den DocuSign-Signaturen finalisiert. '
             'Fortfahren?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('Abbrechen')),
           FilledButton(
               style: FilledButton.styleFrom(
@@ -257,8 +257,7 @@ class _InventoryReportScreenState
               color: AppColors.surfaceAlt,
               child: Text(
                 'Keine Bewegungen im gewählten Zeitraum.',
-                style: AppTypography.body(
-                    size: 13, color: AppColors.textMuted),
+                style: AppTypography.body(size: 13, color: AppColors.textMuted),
               ),
             )
           else ...[
@@ -364,8 +363,7 @@ class _ProductSection extends StatelessWidget {
                 headingRowHeight: 32,
                 dataRowMinHeight: 30,
                 dataRowMaxHeight: 40,
-                headingRowColor:
-                    WidgetStateProperty.all(AppColors.surfaceAlt),
+                headingRowColor: WidgetStateProperty.all(AppColors.surfaceAlt),
                 columns: const [
                   DataColumn(label: Text('Datum')),
                   DataColumn(label: Text('Vorgang')),
@@ -393,8 +391,7 @@ class _ProductSection extends StatelessWidget {
                 headingRowHeight: 32,
                 dataRowMinHeight: 30,
                 dataRowMaxHeight: 40,
-                headingRowColor:
-                    WidgetStateProperty.all(AppColors.surfaceAlt),
+                headingRowColor: WidgetStateProperty.all(AppColors.surfaceAlt),
                 columns: const [
                   DataColumn(label: Text('Rechnung')),
                   DataColumn(label: Text('Rg-Datum')),
@@ -441,18 +438,15 @@ class _ProductSection extends StatelessWidget {
             ? const Color(0xFFFAE9E4)
             : null;
     return DataRow(
-      color: rowColor == null
-          ? null
-          : WidgetStateProperty.all(rowColor),
+      color: rowColor == null ? null : WidgetStateProperty.all(rowColor),
       cells: [
         DataCell(Text(_fmtDate(occurred))),
         DataCell(Text(label,
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: type == 'disposal'
-                  ? AppColors.statusCritical
-                  : AppColors.ink,
+              color:
+                  type == 'disposal' ? AppColors.statusCritical : AppColors.ink,
             ))),
         DataCell(Text(
           qty > 0 ? '+$qty' : '$qty',
@@ -589,8 +583,7 @@ class _GrandTotal extends StatelessWidget {
         children: [
           Row(
             children: const [
-              Icon(Icons.stacked_line_chart,
-                  color: AppColors.ink, size: 18),
+              Icon(Icons.stacked_line_chart, color: AppColors.ink, size: 18),
               SizedBox(width: 6),
               Eyebrow('Bilanzwert der Vorräte'),
             ],
@@ -676,16 +669,31 @@ class _MhdWritedownMatrix extends StatelessWidget {
   const _MhdWritedownMatrix();
 
   static const rows = <_MhdRow>[
-    _MhdRow(range: '> 4 Wochen', typical: '0 %',
-        applied: '0 %', reason: 'normale Verwertbarkeit'),
-    _MhdRow(range: '2–4 Wochen', typical: '10–30 %',
-        applied: '20 %', reason: 'eingeschränkte Verkaufszeit'),
-    _MhdRow(range: '1–2 Wochen', typical: '30–50 %',
-        applied: '40 %', reason: 'erheblicher Verkaufsdruck'),
-    _MhdRow(range: '< 1 Woche', typical: '50–80 %',
-        applied: '65 %', reason: 'Risiko Nichtverkauf deutlich erhöht'),
-    _MhdRow(range: 'MHD überschritten', typical: '100 %',
-        applied: '100 %', reason: 'keine wirtschaftl. Verwertbarkeit'),
+    _MhdRow(
+        range: '> 4 Wochen',
+        typical: '0 %',
+        applied: '0 %',
+        reason: 'normale Verwertbarkeit'),
+    _MhdRow(
+        range: '2–4 Wochen',
+        typical: '10–30 %',
+        applied: '20 %',
+        reason: 'eingeschränkte Verkaufszeit'),
+    _MhdRow(
+        range: '1–2 Wochen',
+        typical: '30–50 %',
+        applied: '40 %',
+        reason: 'erheblicher Verkaufsdruck'),
+    _MhdRow(
+        range: '< 1 Woche',
+        typical: '50–80 %',
+        applied: '65 %',
+        reason: 'Risiko Nichtverkauf deutlich erhöht'),
+    _MhdRow(
+        range: 'MHD überschritten',
+        typical: '100 %',
+        applied: '100 %',
+        reason: 'keine wirtschaftl. Verwertbarkeit'),
   ];
 
   @override
@@ -717,12 +725,12 @@ class _MhdWritedownMatrix extends StatelessWidget {
               headingRowHeight: 34,
               dataRowMinHeight: 32,
               dataRowMaxHeight: 44,
-              headingRowColor:
-                  WidgetStateProperty.all(AppColors.surfaceAlt),
+              headingRowColor: WidgetStateProperty.all(AppColors.surfaceAlt),
               columns: const [
                 DataColumn(label: Text('Rest-MHD am Stichtag')),
                 DataColumn(label: Text('Typischer Ansatz')),
-                DataColumn(label: Text('Bördesnack24 wendet an'), numeric: true),
+                DataColumn(
+                    label: Text('Bördesnack24 wendet an'), numeric: true),
                 DataColumn(label: Text('Begründung')),
               ],
               rows: [
@@ -826,7 +834,8 @@ class _SignatureSlot extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.s2),
             alignment: Alignment.bottomLeft,
             child: image != null && image.isNotEmpty
-                ? Image.network(image, fit: BoxFit.contain,
+                ? Image.network(image,
+                    fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const _Line())
                 : const _Line(),
           ),
@@ -834,14 +843,11 @@ class _SignatureSlot extends StatelessWidget {
           Text(
             name,
             style: AppTypography.body(
-                size: 13,
-                weight: FontWeight.w800,
-                color: AppColors.ink),
+                size: 13, weight: FontWeight.w800, color: AppColors.ink),
           ),
           Text(
             '$role · Datum: ${Formatters.date(DateTime.now())}',
-            style: AppTypography.body(
-                size: 11, color: AppColors.textMuted),
+            style: AppTypography.body(size: 11, color: AppColors.textMuted),
           ),
         ],
       ),

@@ -56,7 +56,8 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
     super.dispose();
   }
 
-  Color _color(BuildContext context, String availability) => switch (availability) {
+  Color _color(BuildContext context, String availability) =>
+      switch (availability) {
         'out' => Theme.of(context).colorScheme.error,
         'low' => Colors.orange,
         _ => Colors.green,
@@ -88,12 +89,14 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
                     final s = items[i];
                     return ListTile(
                       title: Text(s.productName),
-                      subtitle: Text('Bestand: ${s.quantity} (Schwelle ${s.parLevel})'),
+                      subtitle: Text(
+                          'Bestand: ${s.quantity} (Schwelle ${s.parLevel})'),
                       trailing: Chip(
                         label: Text(_label(s.availability)),
                         backgroundColor:
                             _color(context, s.availability).withOpacity(0.15),
-                        side: BorderSide(color: _color(context, s.availability)),
+                        side:
+                            BorderSide(color: _color(context, s.availability)),
                       ),
                       onTap: () => _correct(context, s),
                     );
@@ -130,14 +133,17 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
       ),
     );
     if (delta == null || delta == 0) return;
-    final ok = await ref.read(managementActionsProvider.notifier).correctInventory(
-          machineId: s.machineId,
-          productId: s.productId,
-          deltaQty: delta,
-        );
+    final ok =
+        await ref.read(managementActionsProvider.notifier).correctInventory(
+              machineId: s.machineId,
+              productId: s.productId,
+              deltaQty: delta,
+            );
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Korrektur gebucht.' : 'Fehlgeschlagen (Berechtigung?).')),
+      SnackBar(
+          content: Text(
+              ok ? 'Korrektur gebucht.' : 'Fehlgeschlagen (Berechtigung?).')),
     );
   }
 }

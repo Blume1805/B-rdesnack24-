@@ -22,8 +22,7 @@ class FinancePeriod extends Equatable {
     return FinancePeriod(from: DateTime(n.year, 1, 1), to: n);
   }
 
-  static String _iso(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
+  static String _iso(DateTime d) => '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 

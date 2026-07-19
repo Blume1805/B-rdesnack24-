@@ -14,8 +14,7 @@ class B2bCustomersScreen extends ConsumerStatefulWidget {
   const B2bCustomersScreen({super.key});
 
   @override
-  ConsumerState<B2bCustomersScreen> createState() =>
-      _B2bCustomersScreenState();
+  ConsumerState<B2bCustomersScreen> createState() => _B2bCustomersScreenState();
 }
 
 class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
@@ -25,9 +24,8 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
   Future<void> _load() async {
     setState(() => _busy = true);
     try {
-      final csv = await ref
-          .read(customerRepositoryProvider)
-          .businessCustomersCsv();
+      final csv =
+          await ref.read(customerRepositoryProvider).businessCustomersCsv();
       setState(() => _preview = csv);
     } catch (e) {
       if (mounted) {
@@ -83,8 +81,7 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
             OutlinedButton.icon(
               onPressed: _download,
               icon: const Icon(Icons.download_outlined),
-              label:
-                  const Text('CSV herunterladen (b2b_customers.csv)'),
+              label: const Text('CSV herunterladen (b2b_customers.csv)'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.ink,
                 side: const BorderSide(color: AppColors.brand),

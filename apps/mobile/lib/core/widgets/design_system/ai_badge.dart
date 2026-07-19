@@ -38,8 +38,7 @@ class AiBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.auto_awesome,
-              size: dense ? 12 : 14, color: AppColors.ink),
+          Icon(Icons.auto_awesome, size: dense ? 12 : 14, color: AppColors.ink),
           const SizedBox(width: 4),
           Text(
             label,

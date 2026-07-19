@@ -62,21 +62,24 @@ abstract final class AppTypography {
   /// Text-Theme für Material 3.
   static TextTheme textTheme() {
     return TextTheme(
-      displayLarge:  display(size: 56, weight: FontWeight.w800),
+      displayLarge: display(size: 56, weight: FontWeight.w800),
       displayMedium: display(size: 44, weight: FontWeight.w800),
-      displaySmall:  display(size: 36, weight: FontWeight.w800),
+      displaySmall: display(size: 36, weight: FontWeight.w800),
       headlineLarge: display(size: 32, weight: FontWeight.w700),
-      headlineMedium:display(size: 24, weight: FontWeight.w700),
+      headlineMedium: display(size: 24, weight: FontWeight.w700),
       headlineSmall: display(size: 20, weight: FontWeight.w700),
-      titleLarge:    display(size: 20, weight: FontWeight.w700),
-      titleMedium:   body(size: 16, weight: FontWeight.w600, color: AppColors.ink),
-      titleSmall:    body(size: 14, weight: FontWeight.w600, color: AppColors.ink),
-      bodyLarge:     body(size: 16),
-      bodyMedium:    body(size: 14),
-      bodySmall:     body(size: 12, color: AppColors.textMuted),
-      labelLarge:    body(size: 14, weight: FontWeight.w700, color: AppColors.ink),
-      labelMedium:   body(size: 12, weight: FontWeight.w600, color: AppColors.textMuted),
-      labelSmall:    body(size: 11, weight: FontWeight.w600, color: AppColors.textMuted),
+      titleLarge: display(size: 20, weight: FontWeight.w700),
+      titleMedium:
+          body(size: 16, weight: FontWeight.w600, color: AppColors.ink),
+      titleSmall: body(size: 14, weight: FontWeight.w600, color: AppColors.ink),
+      bodyLarge: body(size: 16),
+      bodyMedium: body(size: 14),
+      bodySmall: body(size: 12, color: AppColors.textMuted),
+      labelLarge: body(size: 14, weight: FontWeight.w700, color: AppColors.ink),
+      labelMedium:
+          body(size: 12, weight: FontWeight.w600, color: AppColors.textMuted),
+      labelSmall:
+          body(size: 11, weight: FontWeight.w600, color: AppColors.textMuted),
     );
   }
 }

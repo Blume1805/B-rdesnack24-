@@ -18,9 +18,8 @@ import '../../data/approvals_remote_data_source.dart';
 import 'inventory_report_print.dart'
     if (dart.library.html) 'inventory_report_print_web.dart';
 
-final _approvalsRemoteProvider =
-    Provider<ApprovalsRemoteDataSource>((ref) =>
-        ApprovalsRemoteDataSource(ref.watch(supabaseClientProvider)));
+final _approvalsRemoteProvider = Provider<ApprovalsRemoteDataSource>(
+    (ref) => ApprovalsRemoteDataSource(ref.watch(supabaseClientProvider)));
 
 final _approvalsListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>(
@@ -40,7 +39,8 @@ class DocumentApprovalsScreen extends ConsumerWidget {
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.brand)),
         error: (e, _) => Center(
-            child: Padding(padding: const EdgeInsets.all(AppSpacing.s6),
+            child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.s6),
                 child: Text('$e'))),
         data: (rows) => rows.isEmpty
             ? const _EmptyHint()
@@ -83,10 +83,14 @@ class _ApprovalCard extends ConsumerWidget {
 
   Color _statusColor(String status) {
     switch (status) {
-      case 'approved': return AppColors.statusPositive;
-      case 'rejected': return AppColors.statusCritical;
-      case 'cancelled': return AppColors.textMuted;
-      default: return AppColors.brand;
+      case 'approved':
+        return AppColors.statusPositive;
+      case 'rejected':
+        return AppColors.statusCritical;
+      case 'cancelled':
+        return AppColors.textMuted;
+      default:
+        return AppColors.brand;
     }
   }
 
@@ -109,8 +113,8 @@ class _ApprovalCard extends ConsumerWidget {
     final isDone =
         status == 'approved' || status == 'rejected' || status == 'cancelled';
     final finalPath = row['final_pdf_path']?.toString();
-    final hasFinal = status == 'approved' &&
-        finalPath != null && finalPath.isNotEmpty;
+    final hasFinal =
+        status == 'approved' && finalPath != null && finalPath.isNotEmpty;
 
     // Signed-URL wurde bereits im List-Load geholt und ist in row
     // hinterlegt. Damit ist der Tap-Handler synchron und iOS Safari
@@ -147,15 +151,19 @@ class _ApprovalCard extends ConsumerWidget {
               .cast<Map<String, dynamic>>();
           final decisions = ((row['decisions'] as List?) ?? const [])
               .cast<Map<String, dynamic>>();
-          final from = DateTime.tryParse(row['period_from']?.toString() ?? '')
-              ?? DateTime.now();
-          final to = DateTime.tryParse(row['period_to']?.toString() ?? '')
-              ?? DateTime.now();
+          final from =
+              DateTime.tryParse(row['period_from']?.toString() ?? '') ??
+                  DateTime.now();
+          final to = DateTime.tryParse(row['period_to']?.toString() ?? '') ??
+              DateTime.now();
           // Alles ist vorgeladen → Aufruf ist synchron in der User-Gesture,
           // window.open wird nicht vom Popup-Blocker geblockt.
           printInventoryReport(
-            movements: movements, lots: lots, signatures: signatures,
-            from: from, to: to,
+            movements: movements,
+            lots: lots,
+            signatures: signatures,
+            from: from,
+            to: to,
             approvalDecisions: decisions,
           );
           return;
@@ -282,7 +290,8 @@ class _ApprovalCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _openFinal(BuildContext context, WidgetRef ref, String path) async {
+  Future<void> _openFinal(
+      BuildContext context, WidgetRef ref, String path) async {
     if (path.isEmpty) return;
     final messenger = ScaffoldMessenger.of(context);
     // Feedback anzeigen, während der Signed-URL geholt wird — sonst
@@ -320,7 +329,8 @@ class _ApprovalCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _decide(BuildContext context, WidgetRef ref, String decision) async {
+  Future<void> _decide(
+      BuildContext context, WidgetRef ref, String decision) async {
     String? comment;
     if (decision == 'rejected') {
       final ctrl = TextEditingController();
@@ -334,7 +344,8 @@ class _ApprovalCard extends ConsumerWidget {
             decoration: const InputDecoration(hintText: 'Kommentar (Pflicht)'),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, null),
+            TextButton(
+                onPressed: () => Navigator.pop(context, null),
                 child: const Text('Abbrechen')),
             FilledButton(
               onPressed: () {
@@ -359,10 +370,10 @@ class _ApprovalCard extends ConsumerWidget {
     }
     try {
       await ref.read(_approvalsRemoteProvider).decide(
-        approvalId: row['id']?.toString() ?? '',
-        decision: decision,
-        comment: comment,
-      );
+            approvalId: row['id']?.toString() ?? '',
+            decision: decision,
+            comment: comment,
+          );
       if (context.mounted) {
         ref.invalidate(_approvalsListProvider);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -372,8 +383,8 @@ class _ApprovalCard extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Fehler: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fehler: $e')));
       }
     }
   }
@@ -412,7 +423,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       if (uid == null) return;
       final rows = await client
           .from('partner_signatures')
-          .select('id, full_name, docusign_signature_uri, image_url, captured_via')
+          .select(
+              'id, full_name, docusign_signature_uri, image_url, captured_via')
           .eq('profile_id', uid);
       final list = (rows as List).cast<Map<String, dynamic>>();
       setState(() {
@@ -440,7 +452,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       if (data is Map && data['ok'] == true) {
         if (mounted) Navigator.pop(context, true);
       } else {
-        final msg = data is Map ? (data['error']?.toString() ?? '$data') : '$data';
+        final msg =
+            data is Map ? (data['error']?.toString() ?? '$data') : '$data';
         final hint = data is Map ? data['hint']?.toString() : null;
         setState(() => _error = hint == null ? msg : '$msg\n$hint');
       }
@@ -455,8 +468,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     if (_slot == null) return;
     setState(() => _busy = true);
     try {
-      final picked = await FilePicker.platform.pickFiles(
-        type: FileType.image, withData: true);
+      final picked = await FilePicker.platform
+          .pickFiles(type: FileType.image, withData: true);
       if (picked == null || picked.files.isEmpty) {
         setState(() => _busy = false);
         return;
@@ -471,10 +484,11 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       final ext = file.extension?.toLowerCase() ?? 'png';
       final path = '${_slot!['id']}.$ext';
       await client.storage.from('partner-signatures').uploadBinary(
-            path, bytes,
+            path,
+            bytes,
             fileOptions: FileOptions(
-              contentType: (ext == 'jpg' || ext == 'jpeg')
-                  ? 'image/jpeg' : 'image/png',
+              contentType:
+                  (ext == 'jpg' || ext == 'jpeg') ? 'image/jpeg' : 'image/png',
               upsert: true,
             ),
           );
@@ -499,11 +513,12 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     final hasSlot = _slot != null;
     final hasDs = hasSlot &&
         (_slot!['docusign_signature_uri']?.toString().isNotEmpty ?? false);
-    final hasImage = hasSlot &&
-        (_slot!['image_url']?.toString().isNotEmpty ?? false);
+    final hasImage =
+        hasSlot && (_slot!['image_url']?.toString().isNotEmpty ?? false);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s5),
         child: Column(
@@ -512,19 +527,17 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
           children: [
             Text('Signatur für Freigabe wählen',
                 style: AppTypography.display(
-                    size: 20,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink)),
+                    size: 20, weight: FontWeight.w800, color: AppColors.ink)),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Deine Unterschrift wird im signierten PDF als Freigabe-Stempel '
               'eingebettet.',
-              style: AppTypography.body(
-                  size: 13, color: AppColors.textMuted),
+              style: AppTypography.body(size: 13, color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.s4),
             if (_loading)
-              const Center(child: CircularProgressIndicator(color: AppColors.brand))
+              const Center(
+                  child: CircularProgressIndicator(color: AppColors.brand))
             else if (!hasSlot)
               AppCard(
                 color: const Color(0xFFFAE9E4),
@@ -596,8 +609,9 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
             ],
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.s3),
-              Text(_error!, style: AppTypography.body(
-                  size: 12, color: AppColors.statusCritical)),
+              Text(_error!,
+                  style: AppTypography.body(
+                      size: 12, color: AppColors.statusCritical)),
             ],
             const SizedBox(height: AppSpacing.s2),
             TextButton(
@@ -649,9 +663,7 @@ class _DecisionRow extends StatelessWidget {
                     _ => 'ausstehend',
                   }}${at == null ? '' : ' · $at'}',
                   style: AppTypography.body(
-                      size: 12,
-                      weight: FontWeight.w700,
-                      color: AppColors.ink),
+                      size: 12, weight: FontWeight.w700, color: AppColors.ink),
                 ),
                 if (comment?.isNotEmpty == true)
                   Text('„$comment"',

@@ -105,7 +105,8 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
   Widget build(BuildContext context) {
     final products = ref.watch(productsProvider);
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -143,7 +144,8 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
               TextFormField(
                 controller: _qtyCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Eingelegte Menge'),
+                decoration:
+                    const InputDecoration(labelText: 'Eingelegte Menge'),
                 validator: (v) {
                   final n = int.tryParse(v ?? '');
                   return (n == null || n <= 0) ? 'Menge > 0' : null;
@@ -153,13 +155,15 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
               TextFormField(
                 controller: _spoiledCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Entnommener Verderb'),
+                decoration:
+                    const InputDecoration(labelText: 'Entnommener Verderb'),
               ),
               const SizedBox(height: 12),
               // ── FIFO-Lot-Metadaten (Rechnung + EK-Preis + MHD) ─────
               TextFormField(
                 controller: _unitCostCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   labelText: 'EK-Preis netto €/Stück',
                   helperText: 'Aus Lieferantenrechnung',

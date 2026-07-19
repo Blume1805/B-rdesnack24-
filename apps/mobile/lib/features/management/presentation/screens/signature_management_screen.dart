@@ -31,8 +31,8 @@ class _SignatureManagementScreenState
     final rows = await client
         .from('partner_signatures')
         .select('id, full_name, role_label, image_url, docusign_signature_uri, '
-                'captured_via, captured_at, profile_id, '
-                'profile:profiles(full_name)')
+            'captured_via, captured_at, profile_id, '
+            'profile:profiles(full_name)')
         .order('sort_order');
     return (rows as List).cast<Map<String, dynamic>>();
   }
@@ -47,11 +47,12 @@ class _SignatureManagementScreenState
       if (!mounted) return;
       final data = res.data;
       if (data is Map && data['ok'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Signatur aus DocuSign übernommen.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Signatur aus DocuSign übernommen.')));
         setState(() {});
       } else {
-        final msg = data is Map ? (data['error']?.toString() ?? '$data') : '$data';
+        final msg =
+            data is Map ? (data['error']?.toString() ?? '$data') : '$data';
         final hint = data is Map ? data['hint']?.toString() : null;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(hint == null ? msg : '$msg\n\n$hint'),
@@ -82,10 +83,11 @@ class _SignatureManagementScreenState
       final ext = file.extension?.toLowerCase() ?? 'png';
       final path = '$signatureId.$ext';
       await client.storage.from('partner-signatures').uploadBinary(
-            path, bytes,
+            path,
+            bytes,
             fileOptions: FileOptions(
-              contentType: ext == 'jpg' || ext == 'jpeg'
-                  ? 'image/jpeg' : 'image/png',
+              contentType:
+                  ext == 'jpg' || ext == 'jpeg' ? 'image/jpeg' : 'image/png',
               upsert: true,
             ),
           );
@@ -124,9 +126,10 @@ class _SignatureManagementScreenState
                 child: CircularProgressIndicator(color: AppColors.brand));
           }
           if (snap.hasError) {
-            return Center(child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.s6),
-                child: Text('${snap.error}')));
+            return Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.s6),
+                    child: Text('${snap.error}')));
           }
           final rows = snap.data ?? [];
           if (rows.isEmpty) {
@@ -150,12 +153,13 @@ class _SignatureManagementScreenState
                         size: 12, color: AppColors.textMuted),
                   ),
                 ),
-                for (final r in rows) _SignatureCard(
-                  row: r,
-                  busy: _busy[r['id']?.toString()] ?? false,
-                  onSync: () => _syncDocuSign(r['id']?.toString() ?? ''),
-                  onUpload: () => _uploadImage(r['id']?.toString() ?? ''),
-                ),
+                for (final r in rows)
+                  _SignatureCard(
+                    row: r,
+                    busy: _busy[r['id']?.toString()] ?? false,
+                    onSync: () => _syncDocuSign(r['id']?.toString() ?? ''),
+                    onUpload: () => _uploadImage(r['id']?.toString() ?? ''),
+                  ),
               ],
             ),
           );
@@ -216,8 +220,11 @@ class _SignatureCard extends StatelessWidget {
                 ),
                 if (hasImage)
                   StatusBadge(
-                    label: capturedVia == 'docusign' ? 'DocuSign' :
-                           capturedVia == 'manual'   ? 'manuell'  : 'gesetzt',
+                    label: capturedVia == 'docusign'
+                        ? 'DocuSign'
+                        : capturedVia == 'manual'
+                            ? 'manuell'
+                            : 'gesetzt',
                     tone: StatusTone.positive,
                     icon: Icons.check_circle_outline,
                   )
@@ -277,10 +284,11 @@ class _SignatureCard extends StatelessWidget {
             ),
             if (!hasDs) ...[
               const SizedBox(height: 6),
-              Text('Kein docusign_signature_uri hinterlegt — nur '
-                   'manueller Upload verfügbar.',
-                  style: AppTypography.body(
-                      size: 10, color: AppColors.textMuted)),
+              Text(
+                  'Kein docusign_signature_uri hinterlegt — nur '
+                  'manueller Upload verfügbar.',
+                  style:
+                      AppTypography.body(size: 10, color: AppColors.textMuted)),
             ],
           ],
         ),

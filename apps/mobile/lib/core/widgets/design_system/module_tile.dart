@@ -39,7 +39,8 @@ class ModuleTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.brandLight,
                   borderRadius: BorderRadius.circular(AppRadii.md),
-                  border: Border.all(color: AppColors.brand.withValues(alpha: 0.4)),
+                  border:
+                      Border.all(color: AppColors.brand.withValues(alpha: 0.4)),
                 ),
                 alignment: Alignment.center,
                 child: Icon(icon, size: 22, color: AppColors.ink),

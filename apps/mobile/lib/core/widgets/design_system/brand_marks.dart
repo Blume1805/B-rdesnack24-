@@ -310,13 +310,15 @@ class WordmarkLarge extends StatelessWidget {
       children: [
         Text(
           'BÖRDESNACK',
-          style: AppTypography.display(size: size, weight: FontWeight.w800, color: color)
+          style: AppTypography.display(
+                  size: size, weight: FontWeight.w800, color: color)
               .copyWith(height: 1.0, letterSpacing: -0.5),
         ),
         SizedBox(width: size * 0.18),
         Text(
           '24',
-          style: AppTypography.display(size: size, weight: FontWeight.w800, color: accent)
+          style: AppTypography.display(
+                  size: size, weight: FontWeight.w800, color: accent)
               .copyWith(height: 1.0, letterSpacing: -0.5),
         ),
       ],

@@ -78,7 +78,7 @@ class ApprovalsRemoteDataSource {
     try {
       final sigs = await _client.rpc('list_partner_signatures');
       partnerSignatures = (sigs as List).cast<Map<String, dynamic>>();
-    } catch (_) { /* Fallback: leer */ }
+    } catch (_) {/* Fallback: leer */}
 
     // Signed-URLs für freigegebene Dokumente parallel vorab holen und
     // in die Row unter 'signed_url' schreiben. Grund: iOS Safari blockt
@@ -111,10 +111,13 @@ class ApprovalsRemoteDataSource {
       // Für inventory_fifo-Approvals das Snapshot mitladen (movements
       // + lots), damit der Tap-Handler synchron den HTML-Report bauen
       // kann — Popup-Blocker-sicher.
-      if (status == 'approved' && kind == 'inventory_fifo' &&
-          id != null && id.isNotEmpty) {
+      if (status == 'approved' &&
+          kind == 'inventory_fifo' &&
+          id != null &&
+          id.isNotEmpty) {
         futures.add(
-          _client.from('document_approvals')
+          _client
+              .from('document_approvals')
               .select('snapshot')
               .eq('id', id)
               .maybeSingle()

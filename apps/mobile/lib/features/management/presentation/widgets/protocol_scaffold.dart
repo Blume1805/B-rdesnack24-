@@ -32,8 +32,8 @@ class ProtocolScaffold extends ConsumerStatefulWidget {
   final String? exportKind;
   final String Function(Map<String, dynamic> row) itemTitle;
   final String Function(Map<String, dynamic> row) itemSubtitle;
-  final Future<Map<String, dynamic>?> Function(BuildContext context, WidgetRef ref)
-      onCreate;
+  final Future<Map<String, dynamic>?> Function(
+      BuildContext context, WidgetRef ref) onCreate;
 
   @override
   ConsumerState<ProtocolScaffold> createState() => _ProtocolScaffoldState();
@@ -46,7 +46,8 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
         table: widget.table,
         dateCol: widget.dateCol,
         from: _period.from,
-        to: DateTime(_period.to.year, _period.to.month, _period.to.day, 23, 59, 59),
+        to: DateTime(
+            _period.to.year, _period.to.month, _period.to.day, 23, 59, 59),
       );
 
   Future<void> _create() async {
@@ -63,7 +64,8 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Speichern fehlgeschlagen (Berechtigung?).')),
+        const SnackBar(
+            content: Text('Speichern fehlgeschlagen (Berechtigung?).')),
       );
     }
   }
@@ -145,12 +147,12 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
   /// auf das document_kind-Enum in Supabase.
   static const Map<String, String> _kindMap = {
     'temperature': 'haccp_temperature',
-    'cleaning':    'haccp_cleaning',
-    'disposal':    'haccp_disposal',
-    'filling':     'haccp_filling',
+    'cleaning': 'haccp_cleaning',
+    'disposal': 'haccp_disposal',
+    'filling': 'haccp_filling',
     'maintenance': 'haccp_maintenance',
-    'cash':        'haccp_cash',
-    'training':    'haccp_training',
+    'cash': 'haccp_cash',
+    'training': 'haccp_training',
   };
 
   @override
@@ -169,7 +171,8 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
             ),
             IconButton(
               tooltip: 'PDF-Nachweis',
-              icon: const Icon(Icons.picture_as_pdf, color: AppColors.statusCritical),
+              icon: const Icon(Icons.picture_as_pdf,
+                  color: AppColors.statusCritical),
               onPressed: _export,
             ),
           ],

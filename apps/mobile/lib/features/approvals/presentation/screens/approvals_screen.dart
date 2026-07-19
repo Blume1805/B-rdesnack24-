@@ -72,9 +72,8 @@ class ApprovalsScreen extends ConsumerWidget {
     String id,
     bool approve,
   ) async {
-    final ok = await ref
-        .read(approvalsActionProvider.notifier)
-        .decide(id, approve);
+    final ok =
+        await ref.read(approvalsActionProvider.notifier).decide(id, approve);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

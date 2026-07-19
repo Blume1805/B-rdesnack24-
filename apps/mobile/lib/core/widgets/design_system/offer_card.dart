@@ -78,8 +78,8 @@ class OfferCard extends StatelessWidget {
                 top: AppSpacing.s2,
                 left: AppSpacing.s2,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.ink,
                     borderRadius: BorderRadius.circular(AppRadii.sm),

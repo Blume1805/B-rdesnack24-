@@ -17,9 +17,8 @@ import '../../../../core/widgets/design_system/design_system.dart';
 /// Dokumente, für die sie eine Unterschrift leisten müssen.
 final _mySignatureTasksProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final rows = await ref
-      .read(supabaseClientProvider)
-      .rpc('list_my_signature_tasks');
+  final rows =
+      await ref.read(supabaseClientProvider).rpc('list_my_signature_tasks');
   return (rows as List).cast<Map<String, dynamic>>();
 });
 
@@ -35,12 +34,10 @@ class MySignatureTasksScreen extends ConsumerWidget {
         loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.brand)),
         error: (e, _) => Padding(
-            padding: const EdgeInsets.all(AppSpacing.s5),
-            child: Text('$e')),
+            padding: const EdgeInsets.all(AppSpacing.s5), child: Text('$e')),
         data: (list) => RefreshIndicator(
           color: AppColors.brand,
-          onRefresh: () async =>
-              ref.invalidate(_mySignatureTasksProvider),
+          onRefresh: () async => ref.invalidate(_mySignatureTasksProvider),
           child: list.isEmpty
               ? ListView(children: const [
                   SizedBox(height: 120),
@@ -155,8 +152,9 @@ class _TaskCard extends ConsumerWidget {
       BuildContext context, WidgetRef ref, String filePath) async {
     final client = ref.read(supabaseClientProvider);
     try {
-      final url =
-          await client.storage.from('documents').createSignedUrl(filePath, 3600 * 24);
+      final url = await client.storage
+          .from('documents')
+          .createSignedUrl(filePath, 3600 * 24);
       await launchUrl(Uri.parse(url),
           mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
     } catch (e) {
@@ -233,7 +231,10 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       setState(() => _error = 'Bitte zuerst unterschreiben.');
       return;
     }
-    setState(() { _busy = true; _error = null; });
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
     try {
       final png = await _controller.toPngBytes();
       if (png == null) throw Exception('Signatur-Rendering fehlgeschlagen');
@@ -241,9 +242,11 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       final uid = client.auth.currentUser!.id;
       final path = '$uid/${widget.taskId}.png';
       await client.storage.from('employee-signatures').uploadBinary(
-            path, Uint8List.fromList(png),
+            path,
+            Uint8List.fromList(png),
             fileOptions: FileOptions(
-              contentType: 'image/png', upsert: true,
+              contentType: 'image/png',
+              upsert: true,
             ),
           );
       // Auth-Kontext-Hash (User-Agent + Zeit) — statt echter IP
@@ -262,15 +265,18 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       });
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      setState(() { _error = '$e'; _busy = false; });
+      setState(() {
+        _error = '$e';
+        _busy = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s5),
         child: Column(
@@ -279,9 +285,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
           children: [
             Text('Unterschrift zeichnen',
                 style: AppTypography.display(
-                    size: 20,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink)),
+                    size: 20, weight: FontWeight.w800, color: AppColors.ink)),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Zeichne deine Unterschrift mit dem Finger. Die Signatur '
@@ -332,7 +336,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: _busy ? null : () => Navigator.pop(context, false),
+                    onPressed:
+                        _busy ? null : () => Navigator.pop(context, false),
                     child: const Text('Abbrechen'),
                   ),
                 ),
@@ -342,7 +347,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                     onPressed: _busy ? null : _submit,
                     icon: _busy
                         ? const SizedBox(
-                            width: 16, height: 16,
+                            width: 16,
+                            height: 16,
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: AppColors.ink))
                         : const Icon(Icons.check),

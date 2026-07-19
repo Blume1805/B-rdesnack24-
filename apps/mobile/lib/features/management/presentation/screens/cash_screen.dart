@@ -65,7 +65,8 @@ class _CashFormState extends ConsumerState<_CashForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -84,8 +85,10 @@ class _CashFormState extends ConsumerState<_CashForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _grossCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Entnommener Betrag brutto (€)'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                    labelText: 'Entnommener Betrag brutto (€)'),
                 validator: (v) {
                   final n = double.tryParse((v ?? '').replaceAll(',', '.'));
                   return n == null ? 'Betrag eingeben' : null;
@@ -94,7 +97,8 @@ class _CashFormState extends ConsumerState<_CashForm> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _changeCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(labelText: 'Wechselgeld (€)'),
               ),
               const SizedBox(height: 16),

@@ -35,7 +35,8 @@ class AppCard extends StatelessWidget {
     final decoration = BoxDecoration(
       color: color ?? AppColors.surfaceCard,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: borderColor ?? AppColors.borderSubtle, width: 1),
+      border:
+          Border.all(color: borderColor ?? AppColors.borderSubtle, width: 1),
     );
 
     Widget stripedContent = content;

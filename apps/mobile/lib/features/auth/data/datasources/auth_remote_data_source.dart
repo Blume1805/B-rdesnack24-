@@ -52,8 +52,7 @@ class AuthRemoteDataSource {
           'billing_city': billingCity,
         if (billingCountry != null && billingCountry.isNotEmpty)
           'billing_country': billingCountry,
-        if (taxNumber != null && taxNumber.isNotEmpty)
-          'tax_number': taxNumber,
+        if (taxNumber != null && taxNumber.isNotEmpty) 'tax_number': taxNumber,
         if (vatId != null && vatId.isNotEmpty) 'vat_id': vatId,
       },
     );
