@@ -15,11 +15,14 @@ void main() {
   });
 
   group('Validators.password', () {
-    test('akzeptiert ausreichend langes Passwort', () {
-      expect(Validators.password('sehrsicher1'), isNull);
+    test('akzeptiert langes Passwort mit Groß-/Kleinbuchstaben und Ziffer', () {
+      expect(Validators.password('SehrSicher1'), isNull);
     });
     test('lehnt zu kurzes Passwort ab', () {
       expect(Validators.password('kurz'), 'tooShort');
+    });
+    test('lehnt Passwort ohne Komplexität ab', () {
+      expect(Validators.password('sehrsicher1'), 'complexity');
     });
     test('lehnt leeres Passwort ab', () {
       expect(Validators.password(''), 'required');

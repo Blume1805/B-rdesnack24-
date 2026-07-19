@@ -24,6 +24,11 @@ void main() {
   });
 
   testWidgets('Validierung verhindert leere Anmeldung', (tester) async {
+    // Formular ist höher als der 600-px-Standardviewport — sonst liegt
+    // der Anmelden-Button außerhalb und der Tap läuft ins Leere.
+    tester.view.physicalSize = const Size(1024, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(

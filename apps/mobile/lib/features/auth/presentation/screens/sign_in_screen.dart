@@ -208,8 +208,11 @@ class _FormPanel extends StatelessWidget {
                       : Text(l10n.signIn),
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Wrap statt Row: bei schmalen Panels brechen die beiden
+                // Links untereinander um, statt rechts zu überlaufen.
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     TextButton(
                       onPressed: isLoading
