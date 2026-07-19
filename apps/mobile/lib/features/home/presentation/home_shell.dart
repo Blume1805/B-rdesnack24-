@@ -55,7 +55,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         return Scaffold(
           appBar: _BrandAppBar(
             user: user,
-            onSignOut: () => ref.read(authControllerProvider.notifier).signOut(),
+            onSignOut: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
           ),
           body: tabs[safeIndex].screen,
           bottomNavigationBar: tabs.length > 1
@@ -82,6 +83,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             l10n.navFinance,
             Icons.trending_up_outlined,
             _DeferredScreen(
+              key: const ValueKey('deferred-finance'),
               load: finance.loadLibrary,
               build: () => finance.FinanceScreen(),
             ),
@@ -90,6 +92,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             l10n.navManagement,
             Icons.inventory_2_outlined,
             _DeferredScreen(
+              key: const ValueKey('deferred-management'),
               load: management.loadLibrary,
               build: () => management.ManagementScreen(),
             ),
@@ -101,6 +104,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             l10n.navManagement,
             Icons.inventory_2_outlined,
             _DeferredScreen(
+              key: const ValueKey('deferred-management'),
               load: management.loadLibrary,
               build: () => management.ManagementScreen(),
             ),
@@ -108,7 +112,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         ];
       case UserRole.customer:
         return [
-          _Tab(l10n.navCustomer, Icons.storefront_outlined, const CustomerScreen()),
+          _Tab(l10n.navCustomer, Icons.storefront_outlined,
+              const CustomerScreen()),
         ];
     }
   }
@@ -117,8 +122,19 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 /// Lädt eine deferred Library nach und zeigt bis dahin einen Marken-Spinner.
 /// `loadLibrary()` ist idempotent — nach dem ersten Laden löst das Future
 /// sofort auf, spätere Tab-Wechsel rendern ohne Verzögerung.
+///
+/// WICHTIG: Jede Instanz braucht einen eindeutigen [key]. Ohne Key recycelt
+/// Flutter beim Tab-Wechsel das Element samt State — inklusive des
+/// memoisierten loadLibrary-Futures des ANDEREN Tabs. Der FutureBuilder
+/// meldet dann „fertig", obwohl die neue Library nie geladen wurde, und
+/// build() wirft „Deferred library … was not loaded" (im Release: graue
+/// Fläche statt Verwaltung/Finanzen).
 class _DeferredScreen extends StatefulWidget {
-  const _DeferredScreen({required this.load, required this.build});
+  const _DeferredScreen({
+    required super.key,
+    required this.load,
+    required this.build,
+  });
   final Future<void> Function() load;
   final Widget Function() build;
 
@@ -435,47 +451,43 @@ class _NotificationBell extends ConsumerWidget {
   const _NotificationBell();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread =
-        ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
+    final unread = ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
     return Stack(
       clipBehavior: Clip.none,
       children: [
-          IconButton(
-            tooltip: 'Benachrichtigungen',
-            icon: const Icon(Icons.notifications_none,
-                color: AppColors.onDark, size: 24),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const NotificationsScreen()),
-              );
-            },
-          ),
-          if (unread > 0)
-            Positioned(
-              top: 6,
-              right: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 5, vertical: 2),
-                constraints:
-                    const BoxConstraints(minWidth: 18, minHeight: 18),
-                decoration: BoxDecoration(
-                  color: AppColors.statusCritical,
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  unread > 99 ? '99+' : '$unread',
-                  style: AppTypography.body(
-                    size: 10,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
-                  ),
+        IconButton(
+          tooltip: 'Benachrichtigungen',
+          icon: const Icon(Icons.notifications_none,
+              color: AppColors.onDark, size: 24),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+            );
+          },
+        ),
+        if (unread > 0)
+          Positioned(
+            top: 6,
+            right: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              decoration: BoxDecoration(
+                color: AppColors.statusCritical,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                unread > 99 ? '99+' : '$unread',
+                style: AppTypography.body(
+                  size: 10,
+                  weight: FontWeight.w800,
+                  color: AppColors.onDark,
                 ),
               ),
             ),
-        ],
+          ),
+      ],
     );
   }
 }
