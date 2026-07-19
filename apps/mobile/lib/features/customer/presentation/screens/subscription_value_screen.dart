@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -19,6 +20,13 @@ import 'subscription_screen.dart';
 /// Rechnung ebenfalls öffnen.
 class SubscriptionValueScreen extends ConsumerWidget {
   const SubscriptionValueScreen({super.key});
+
+  /// Der One-Pager als PDF — wird mit dem Web-Build ausgeliefert
+  /// (apps/mobile/web/marketing/) und liegt damit auf GitHub Pages;
+  /// die absolute URL funktioniert auch aus den nativen Apps.
+  static final Uri onePagerPdf = Uri.parse(
+    'https://blume1805.github.io/B-rdesnack24-/marketing/abo-rechnet-sich.pdf',
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,10 +71,48 @@ class SubscriptionValueScreen extends ConsumerWidget {
             style: AppTypography.body(size: 13.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),
-          const SizedBox(height: AppSpacing.s5),
+          const SizedBox(height: AppSpacing.s3),
+
+          // One-Pager-PDF zum Ansehen/Teilen — schwarz und fett als Link.
+          InkWell(
+            onTap: () => launchUrl(
+              onePagerPdf,
+              mode: LaunchMode.externalApplication,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.s1),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Beispielrechnung hier klicken',
+                      style: AppTypography.body(
+                        size: 14.5,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ).copyWith(
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.ink,
+                        decorationThickness: 2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s1),
+                  const Icon(Icons.picture_as_pdf_outlined,
+                      size: 18, color: AppColors.ink),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s4),
 
           // ── Die zwei Szenarien ────────────────────────────────────────
-          Row(
+          // IntrinsicHeight: gleiche Kartenhöhe trotz stretch — ohne sie
+          // fordert die Row in der ListView unendliche Höhe an und die
+          // Seite bricht nach dem Intro ab.
+          IntrinsicHeight(
+              child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
@@ -89,7 +135,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
+          )),
           const SizedBox(height: AppSpacing.s5),
 
           // ── Break-even-Tabelle ────────────────────────────────────────

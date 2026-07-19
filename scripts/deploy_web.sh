@@ -109,7 +109,7 @@ if [ -z "$SUBPATH" ]; then
   # zu älteren Versionen weiter funktionieren.
   # Alte Kern-Dateien am Root wegräumen, damit unser Build sie ersetzt:
   find "$ROOT" -maxdepth 1 -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.png' -o -name '*.ico' -o -name '*.txt' -o -name '.last_build_id' \) -delete
-  rm -rf "$ROOT/assets" "$ROOT/canvaskit" "$ROOT/icons"
+  rm -rf "$ROOT/assets" "$ROOT/canvaskit" "$ROOT/icons" "$ROOT/marketing"
   # Neuen Build am Root ablegen.
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
@@ -128,7 +128,7 @@ if [ -z "$SUBPATH" ]; then
     for f in index.html 404.html manifest.json favicon.png flutter.js \
       flutter_bootstrap.js flutter_service_worker.js main.dart.js \
       main.dart.js_*.part.js \
-      version.json version.txt assets canvaskit icons .last_build_id \
+      version.json version.txt assets canvaskit icons marketing .last_build_id \
       roboto-regular.ttf; do
       [ -e "$f" ] && git add -f -- "$f" || echo "  (skip: $f fehlt)"
     done; \
@@ -170,7 +170,7 @@ rm -rf "$STAGE"
 # Feature-Branch nicht tracked.
 if [ -z "$SUBPATH" ]; then
   ( cd "$ROOT" && \
-    rm -rf assets canvaskit icons && \
+    rm -rf assets canvaskit icons marketing && \
     rm -f  index.html 404.html main.dart.js main.dart.js_*.part.js \
            flutter.js flutter_bootstrap.js \
            flutter_service_worker.js manifest.json favicon.png version.json \
