@@ -15,6 +15,7 @@ import '../widgets/customer_anchors.dart';
 import 'ai_info_screen.dart';
 import 'donations_screen.dart';
 import 'subscription_screen.dart';
+import 'subscription_value_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
 
@@ -2131,6 +2132,23 @@ class _SubscriptionLockCard extends ConsumerWidget {
                 ref.invalidate(hasSubscriptionProvider);
               },
               child: const Text('Abo wählen — ab 1 € im Monat'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          // Marketing-Rechnung: ab welchem Einkaufswert sich das Abo lohnt.
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.brandLight,
+              ),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SubscriptionValueScreen(),
+                ),
+              ),
+              icon: const Icon(Icons.calculate_outlined, size: 18),
+              label: const Text('Ab wann rechnet sich das? Zur Rechnung'),
             ),
           ),
         ],

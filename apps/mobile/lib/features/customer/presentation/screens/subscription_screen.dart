@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../legal/presentation/cancellation_screen.dart';
 import '../controllers/customer_providers.dart';
+import 'subscription_value_screen.dart';
 
 /// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
 ///
@@ -297,7 +298,25 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   style:
                       AppTypography.body(size: 13, color: AppColors.textMuted),
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.s3),
+                // Marketing-Rechnung: Break-even konservativ vs. normal.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.brandDark,
+                      padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SubscriptionValueScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.calculate_outlined, size: 18),
+                    label: const Text('Ab wann rechnet sich das Abo?'),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s3),
                 for (final plan in _plans) ...[
                   _PlanCard(
                     plan: plan,

@@ -14,6 +14,32 @@ abstract final class Pricing {
   /// App-Vorteil: Abonnenten sparen gegenüber dem Automatenpreis immer 5 %.
   static const appDiscountRate = 0.05;
 
+  /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben
+  /// zusätzlich 10 % Rabatt — multiplikativ auf den App-Preis.
+  static const dealExtraDiscountRate = 0.10;
+
+  /// Ersparnis eines Deal-Kaufs gegenüber dem Automatenpreis:
+  /// 1 − 0,95 × 0,90 = 14,5 %.
+  static double get dealSavingsRate =>
+      1 - (1 - appDiscountRate) * (1 - dealExtraDiscountRate);
+
+  /// Annahme „normales" Nutzungsszenario: Anteil des Einkaufswerts, der
+  /// über Deals/Angebote läuft (Frühstück, Feierabend, Tages-/Wochenaktion).
+  static const normalDealShare = 0.30;
+
+  /// Annahme „normales" Szenario: Zusatzeffekt der Treue-Meilensteine
+  /// (persönliche Coupons 5–25 % auf einzelne Produkte, Geburtstags-
+  /// angebot) — konservativ 1,5 Prozentpunkte vom Einkaufswert.
+  static const normalLoyaltyEffect = 0.015;
+
+  /// Effektive Ersparnisquote im „normalen" Szenario (≈ 9,4 %):
+  /// 30 % der Käufe als Deal (14,5 %), Rest zum App-Preis (5 %),
+  /// plus Treue-Effekt.
+  static double get normalSavingsRate =>
+      normalDealShare * dealSavingsRate +
+      (1 - normalDealShare) * appDiscountRate +
+      normalLoyaltyEffect;
+
   /// Ziel-Wareneinsatzquote (EK netto / VK netto) für die Kalkulation.
   static const targetWareneinsatz = 0.35;
 

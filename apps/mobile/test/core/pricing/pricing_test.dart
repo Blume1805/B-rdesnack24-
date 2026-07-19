@@ -79,6 +79,33 @@ void main() {
     });
   });
 
+  group('Pricing „normales" Szenario (Deals + Coupons + Meilensteine)', () {
+    test('Deal-Kauf spart 14,5 % (5 % App-Preis + 10 % Deal, multiplikativ)',
+        () {
+      expect(Pricing.dealSavingsRate, closeTo(0.145, 0.0001));
+    });
+
+    test('effektive Ersparnisquote liegt bei ≈ 9,35 %', () {
+      // 30 % Deal-Anteil × 14,5 % + 70 % × 5 % + 1,5 pp Treue-Effekt.
+      expect(Pricing.normalSavingsRate, closeTo(0.0935, 0.0001));
+    });
+
+    test('Break-even sinkt im normalen Szenario deutlich', () {
+      expect(
+        Pricing.breakEvenMonthlySpend(1.00,
+            savingsRate: Pricing.normalSavingsRate),
+        closeTo(10.70, 0.01),
+      );
+      expect(
+        Pricing.breakEvenMonthlySpend(10 / 12,
+            savingsRate: Pricing.normalSavingsRate),
+        closeTo(8.91, 0.01),
+      );
+      // Lifetime: 60 € / 9,35 % ≈ 642 € kumulierter Einkauf.
+      expect(60 / Pricing.normalSavingsRate, closeTo(641.71, 0.5));
+    });
+  });
+
   group('Abo-Preismodell (Konsistenz zur Server-RPC)', () {
     // Preise müssen mit choose_subscription_plan (Migration 0049) und dem
     // SubscriptionScreen übereinstimmen.
