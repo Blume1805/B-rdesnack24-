@@ -95,8 +95,10 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Vernichtung erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Vernichtung erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,
@@ -112,7 +114,9 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
                   ),
                   items: [
                     const DropdownMenuItem(
-                        value: null, child: Text('— freie Eingabe —')),
+                      value: null,
+                      child: Text('— freie Eingabe —'),
+                    ),
                     for (final p in list)
                       DropdownMenuItem(
                         value: p['id'] as String,
@@ -153,11 +157,17 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
                 decoration: const InputDecoration(labelText: 'Grund'),
                 items: const [
                   DropdownMenuItem(
-                      value: 'mhd', child: Text('MHD überschritten')),
+                    value: 'mhd',
+                    child: Text('MHD überschritten'),
+                  ),
                   DropdownMenuItem(
-                      value: 'damage', child: Text('Beschädigung')),
+                    value: 'damage',
+                    child: Text('Beschädigung'),
+                  ),
                   DropdownMenuItem(
-                      value: 'hygiene', child: Text('Hygienemangel')),
+                    value: 'hygiene',
+                    child: Text('Hygienemangel'),
+                  ),
                   DropdownMenuItem(value: 'other', child: Text('Sonstiges')),
                 ],
                 onChanged: (v) => setState(() => _reason = v ?? 'mhd'),
@@ -165,9 +175,11 @@ class _DisposalFormState extends ConsumerState<_DisposalForm> {
               const SizedBox(height: 8),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(_mhdDate == null
-                    ? 'MHD-Datum (optional)'
-                    : 'MHD: ${_mhdDate!.toIso8601String().substring(0, 10)}'),
+                title: Text(
+                  _mhdDate == null
+                      ? 'MHD-Datum (optional)'
+                      : 'MHD: ${_mhdDate!.toIso8601String().substring(0, 10)}',
+                ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final now = DateTime.now();

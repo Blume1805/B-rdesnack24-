@@ -50,8 +50,11 @@ class AiBadge extends StatelessWidget {
           ),
           if (onTap != null) ...[
             const SizedBox(width: 4),
-            Icon(Icons.info_outline,
-                size: dense ? 12 : 13, color: AppColors.ink),
+            Icon(
+              Icons.info_outline,
+              size: dense ? 12 : 13,
+              color: AppColors.ink,
+            ),
           ],
         ],
       ),

@@ -27,8 +27,10 @@ class KpiDashboard extends ConsumerWidget {
       error: (e, _) => AppCard(
         color: const Color(0xFFF7DBDB),
         borderColor: AppColors.statusCritical,
-        child: Text('KPIs konnten nicht geladen werden: $e',
-            style: AppTypography.body(size: 13, color: AppColors.ink)),
+        child: Text(
+          'KPIs konnten nicht geladen werden: $e',
+          style: AppTypography.body(size: 13, color: AppColors.ink),
+        ),
       ),
       data: (k) => _KpiBody(k: k),
     );
@@ -50,132 +52,147 @@ class _KpiBody extends StatelessWidget {
       children: [
         const SectionHeader(eyebrow: 'Kennzahlen', title: 'Rentabilität'),
         const SizedBox(height: AppSpacing.s3),
-        LayoutBuilder(builder: (context, c) {
-          final compact = c.maxWidth < 480;
-          return GridView.count(
-            crossAxisCount: compact ? 2 : 3,
-            crossAxisSpacing: AppSpacing.s3,
-            mainAxisSpacing: AppSpacing.s3,
-            childAspectRatio: compact ? 1.05 : 1.1,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _KpiTile(
-                label: 'Umsatz (netto)',
-                value: Formatters.euro(k.current.revenueNet),
-                deltaYoyPct: k.derived.revenueGrowthYoyPct,
-                deltaMomPct: k.derived.revenueGrowthMomPct,
-                trend: k.trend.map((t) => t.revenueNet).toList(),
-              ),
-              _KpiTile(
-                label: 'Ø Umsatz / Tag',
-                value: Formatters.euro(avgRevenuePerDay),
-                sub: 'Zielband: 15 – 50 €/Tag · Automat',
-                trend: k.trend.map((t) => t.revenueNet / 30.0).toList(),
-                targetLower: 15,
-                targetUpper: 50,
-                targetLabel: '15 – 50 €',
-              ),
-              _KpiTile(
-                label: 'Ergebnis (netto)',
-                value: Formatters.euro(k.current.resultNet),
-                deltaYoyPct: k.derived.resultGrowthYoyPct,
-                deltaMomPct: k.derived.resultGrowthMomPct,
-                trend: k.trend.map((t) => t.resultNet).toList(),
-                emphasizePositive: true,
-              ),
-              _KpiTile(
-                // \u00AD = weiches Trennzeichen: bricht lange Titel an der
-                // Silbengrenze MIT Trennstrich um (statt mitten im Wort).
-                label: 'Umsatz\u00ADrendite',
-                value: '${k.derived.netMarginPct.toStringAsFixed(1)} %',
-                sub: 'Ergebnis / Umsatz · Ziel 25 – 35 %',
-                trend: k.trend
-                    .map((t) => t.revenueNet > 0
-                        ? (t.resultNet / t.revenueNet) * 100
-                        : 0.0)
-                    .toList(),
-                targetLower: 25,
-                targetUpper: 35,
-                targetLabel: '25 – 35 %',
-              ),
-              _KpiTile(
-                label: 'Rohertrags\u00ADmarge',
-                value: '${k.derived.grossMarginPct.toStringAsFixed(1)} %',
-                sub: '(Umsatz – Wareneinsatz) / Umsatz · Ziel 50 – 70 %',
-                trend: k.trend
-                    .map((t) => t.revenueNet > 0
-                        ? ((t.revenueNet - t.expenseNet) / t.revenueNet) * 100
-                        : 0.0)
-                    .toList(),
-                targetLower: 50,
-                targetUpper: 70,
-                targetLabel: '50 – 70 %',
-              ),
-              _KpiTile(
-                label: 'Waren\u00ADeinsatz\u00ADquote',
-                value: '${wareneinsatzquotePct.toStringAsFixed(1)} %',
-                sub: 'Wareneinsatz / Umsatz · Ziel 30 – 40 %',
-                trend: k.trend
-                    .map((t) => t.revenueNet > 0
-                        ? (t.expenseNet / t.revenueNet) * 100
-                        : 0.0)
-                    .toList(),
-                targetLower: 30,
-                targetUpper: 40,
-                targetLabel: '30 – 40 %',
-                lowerIsBetter: true,
-              ),
-              _KpiTile(
-                label: 'EBITDA-Marge',
-                value: '${k.derived.ebitdaMarginPct.toStringAsFixed(1)} %',
-                sub: 'ohne AfA/Zinsen/Steuern *',
-                trend: k.trend
-                    .map((t) => t.revenueNet > 0
-                        ? (t.resultNet / t.revenueNet) * 100
-                        : 0.0)
-                    .toList(),
-              ),
-              _KpiTile(
-                label: 'Operativer Cashflow',
-                value: Formatters.euro(k.derived.cashflowOperating),
-                sub: 'Einzahlungen – Auszahlungen (brutto)',
-                trend: k.trend.map((t) => t.resultNet).toList(),
-              ),
-              _KpiTile(
-                label: 'Ø Warenkorb',
-                value: Formatters.euro(k.customer.avgBasket),
-                sub: 'App-Käufe · Zielband 1 – 3 €',
-                trend: k.trend.map((t) => k.customer.avgBasket).toList(),
-                targetLower: 1,
-                targetUpper: 3,
-                targetLabel: '1 – 3 €',
-              ),
-              _KpiTile(
-                label: 'Ø Verkäufe / Tag',
-                value: avgSalesPerDay.toStringAsFixed(1),
-                sub: 'App-Käufe · Zielband 10 – 50/Tag · Automat',
-                trend: k.trend.map((t) => avgSalesPerDay).toList(),
-                targetLower: 10,
-                targetUpper: 50,
-                targetLabel: '10 – 50',
-              ),
-            ],
-          );
-        }),
+        LayoutBuilder(
+          builder: (context, c) {
+            final compact = c.maxWidth < 480;
+            return GridView.count(
+              crossAxisCount: compact ? 2 : 3,
+              crossAxisSpacing: AppSpacing.s3,
+              mainAxisSpacing: AppSpacing.s3,
+              childAspectRatio: compact ? 1.05 : 1.1,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _KpiTile(
+                  label: 'Umsatz (netto)',
+                  value: Formatters.euro(k.current.revenueNet),
+                  deltaYoyPct: k.derived.revenueGrowthYoyPct,
+                  deltaMomPct: k.derived.revenueGrowthMomPct,
+                  trend: k.trend.map((t) => t.revenueNet).toList(),
+                ),
+                _KpiTile(
+                  label: 'Ø Umsatz / Tag',
+                  value: Formatters.euro(avgRevenuePerDay),
+                  sub: 'Zielband: 15 – 50 €/Tag · Automat',
+                  trend: k.trend.map((t) => t.revenueNet / 30.0).toList(),
+                  targetLower: 15,
+                  targetUpper: 50,
+                  targetLabel: '15 – 50 €',
+                ),
+                _KpiTile(
+                  label: 'Ergebnis (netto)',
+                  value: Formatters.euro(k.current.resultNet),
+                  deltaYoyPct: k.derived.resultGrowthYoyPct,
+                  deltaMomPct: k.derived.resultGrowthMomPct,
+                  trend: k.trend.map((t) => t.resultNet).toList(),
+                  emphasizePositive: true,
+                ),
+                _KpiTile(
+                  // \u00AD = weiches Trennzeichen: bricht lange Titel an der
+                  // Silbengrenze MIT Trennstrich um (statt mitten im Wort).
+                  label: 'Umsatz\u00ADrendite',
+                  value: '${k.derived.netMarginPct.toStringAsFixed(1)} %',
+                  sub: 'Ergebnis / Umsatz · Ziel 25 – 35 %',
+                  trend: k.trend
+                      .map(
+                        (t) => t.revenueNet > 0
+                            ? (t.resultNet / t.revenueNet) * 100
+                            : 0.0,
+                      )
+                      .toList(),
+                  targetLower: 25,
+                  targetUpper: 35,
+                  targetLabel: '25 – 35 %',
+                ),
+                _KpiTile(
+                  label: 'Rohertrags\u00ADmarge',
+                  value: '${k.derived.grossMarginPct.toStringAsFixed(1)} %',
+                  sub: '(Umsatz – Wareneinsatz) / Umsatz · Ziel 50 – 70 %',
+                  trend: k.trend
+                      .map(
+                        (t) => t.revenueNet > 0
+                            ? ((t.revenueNet - t.expenseNet) / t.revenueNet) *
+                                100
+                            : 0.0,
+                      )
+                      .toList(),
+                  targetLower: 50,
+                  targetUpper: 70,
+                  targetLabel: '50 – 70 %',
+                ),
+                _KpiTile(
+                  label: 'Waren\u00ADeinsatz\u00ADquote',
+                  value: '${wareneinsatzquotePct.toStringAsFixed(1)} %',
+                  sub: 'Wareneinsatz / Umsatz · Ziel 30 – 40 %',
+                  trend: k.trend
+                      .map(
+                        (t) => t.revenueNet > 0
+                            ? (t.expenseNet / t.revenueNet) * 100
+                            : 0.0,
+                      )
+                      .toList(),
+                  targetLower: 30,
+                  targetUpper: 40,
+                  targetLabel: '30 – 40 %',
+                  lowerIsBetter: true,
+                ),
+                _KpiTile(
+                  label: 'EBITDA-Marge',
+                  value: '${k.derived.ebitdaMarginPct.toStringAsFixed(1)} %',
+                  sub: 'ohne AfA/Zinsen/Steuern *',
+                  trend: k.trend
+                      .map(
+                        (t) => t.revenueNet > 0
+                            ? (t.resultNet / t.revenueNet) * 100
+                            : 0.0,
+                      )
+                      .toList(),
+                ),
+                _KpiTile(
+                  label: 'Operativer Cashflow',
+                  value: Formatters.euro(k.derived.cashflowOperating),
+                  sub: 'Einzahlungen – Auszahlungen (brutto)',
+                  trend: k.trend.map((t) => t.resultNet).toList(),
+                ),
+                _KpiTile(
+                  label: 'Ø Warenkorb',
+                  value: Formatters.euro(k.customer.avgBasket),
+                  sub: 'App-Käufe · Zielband 1 – 3 €',
+                  trend: k.trend.map((t) => k.customer.avgBasket).toList(),
+                  targetLower: 1,
+                  targetUpper: 3,
+                  targetLabel: '1 – 3 €',
+                ),
+                _KpiTile(
+                  label: 'Ø Verkäufe / Tag',
+                  value: avgSalesPerDay.toStringAsFixed(1),
+                  sub: 'App-Käufe · Zielband 10 – 50/Tag · Automat',
+                  trend: k.trend.map((t) => avgSalesPerDay).toList(),
+                  targetLower: 10,
+                  targetUpper: 50,
+                  targetLabel: '10 – 50',
+                ),
+              ],
+            );
+          },
+        ),
         const SizedBox(height: AppSpacing.s3),
         _FootnoteEbitda(),
         const SizedBox(height: AppSpacing.s5),
 
         // ── Etappe 2: Bilanz, Liquidität, EK-Quote, ROI ────────────────
         const SectionHeader(
-            eyebrow: 'Bilanz', title: 'Liquidität & Eigenkapital'),
+          eyebrow: 'Bilanz',
+          title: 'Liquidität & Eigenkapital',
+        ),
         const SizedBox(height: AppSpacing.s3),
         _BalanceSection(k: k),
         const SizedBox(height: AppSpacing.s5),
 
         const SectionHeader(
-            eyebrow: 'Trend & Vergleich', title: 'Cashflow-Entwicklung'),
+          eyebrow: 'Trend & Vergleich',
+          title: 'Cashflow-Entwicklung',
+        ),
         const SizedBox(height: AppSpacing.s3),
         GestureDetector(
           onTap: () => _showZoomedChart(
@@ -189,7 +206,9 @@ class _KpiBody extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
-            eyebrow: 'Vergleich', title: 'Aktueller vs. Vergleichszeitraum'),
+          eyebrow: 'Vergleich',
+          title: 'Aktueller vs. Vergleichszeitraum',
+        ),
         const SizedBox(height: AppSpacing.s3),
         GestureDetector(
           onTap: () => _showZoomedChart(
@@ -203,12 +222,16 @@ class _KpiBody extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
-            eyebrow: 'Automaten-Business', title: 'Umsatz je Automat'),
+          eyebrow: 'Automaten-Business',
+          title: 'Umsatz je Automat',
+        ),
         const SizedBox(height: AppSpacing.s3),
         _MachineList(k: k),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
-            eyebrow: 'Automaten-Business', title: 'App-Käufe im Zeitraum'),
+          eyebrow: 'Automaten-Business',
+          title: 'App-Käufe im Zeitraum',
+        ),
         const SizedBox(height: AppSpacing.s3),
         _CustomerCard(k: k),
         if (k.topProducts.isNotEmpty) ...[
@@ -397,15 +420,18 @@ class _KpiTile extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
                       border: Border.all(
-                          color: AppColors.statusCritical, width: 0.8),
+                        color: AppColors.statusCritical,
+                        width: 0.8,
+                      ),
                       borderRadius: BorderRadius.circular(AppRadii.sm),
                     ),
                     child: Text(
                       'Ziel ${targetLabel!}',
                       style: AppTypography.body(
-                          size: 9,
-                          weight: FontWeight.w800,
-                          color: AppColors.statusCritical),
+                        size: 9,
+                        weight: FontWeight.w800,
+                        color: AppColors.statusCritical,
+                      ),
                     ),
                   ),
               ],
@@ -470,9 +496,14 @@ class _DeltaChip extends StatelessWidget {
           color: AppColors.borderSubtle,
           borderRadius: BorderRadius.circular(AppRadii.sm),
         ),
-        child: Text('$label —',
-            style: AppTypography.body(
-                size: 9, weight: FontWeight.w800, color: AppColors.textMuted)),
+        child: Text(
+          '$label —',
+          style: AppTypography.body(
+            size: 9,
+            weight: FontWeight.w800,
+            color: AppColors.textMuted,
+          ),
+        ),
       );
     }
     final positive = pct! >= 0;
@@ -488,12 +519,20 @@ class _DeltaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(positive ? Icons.arrow_upward : Icons.arrow_downward,
-              size: 10, color: color),
+          Icon(
+            positive ? Icons.arrow_upward : Icons.arrow_downward,
+            size: 10,
+            color: color,
+          ),
           const SizedBox(width: 2),
-          Text('$label ${pct!.toStringAsFixed(1)} %',
-              style: AppTypography.body(
-                  size: 9, weight: FontWeight.w800, color: color)),
+          Text(
+            '$label ${pct!.toStringAsFixed(1)} %',
+            style: AppTypography.body(
+              size: 9,
+              weight: FontWeight.w800,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -584,7 +623,7 @@ class _CashflowChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final points = k.trend;
     if (points.isEmpty) {
-      return _EmptyBox(text: 'Noch keine Trend-Daten für den Zeitraum.');
+      return const _EmptyBox(text: 'Noch keine Trend-Daten für den Zeitraum.');
     }
     final maxAbs = points.fold<double>(0, (acc, p) {
       final revenue = p.revenueNet;
@@ -594,74 +633,86 @@ class _CashflowChart extends StatelessWidget {
     });
     return SizedBox(
       height: height,
-      child: BarChart(BarChartData(
-        maxY: maxAbs > 0 ? maxAbs * 1.15 : 10,
-        barGroups: [
-          for (int i = 0; i < points.length; i++)
-            BarChartGroupData(x: i, barsSpace: 2, barRods: [
-              BarChartRodData(
-                toY: points[i].revenueNet,
-                color: AppColors.brand,
-                width: 6,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(3),
-                  topRight: Radius.circular(3),
+      child: BarChart(
+        BarChartData(
+          maxY: maxAbs > 0 ? maxAbs * 1.15 : 10,
+          barGroups: [
+            for (int i = 0; i < points.length; i++)
+              BarChartGroupData(
+                x: i,
+                barsSpace: 2,
+                barRods: [
+                  BarChartRodData(
+                    toY: points[i].revenueNet,
+                    color: AppColors.brand,
+                    width: 6,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(3),
+                      topRight: Radius.circular(3),
+                    ),
+                  ),
+                  BarChartRodData(
+                    toY: points[i].expenseNet,
+                    color: AppColors.ink,
+                    width: 6,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(3),
+                      topRight: Radius.circular(3),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 46,
+                getTitlesWidget: (v, _) => Text(
+                  _shortEuro(v),
+                  style: AppTypography.body(
+                    size: 10,
+                    weight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
-              BarChartRodData(
-                toY: points[i].expenseNet,
-                color: AppColors.ink,
-                width: 6,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(3),
-                  topRight: Radius.circular(3),
-                ),
-              ),
-            ]),
-        ],
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
+            ),
+            bottomTitles: AxisTitles(
               sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 46,
-                  getTitlesWidget: (v, _) => Text(
-                        _shortEuro(v),
-                        style: AppTypography.body(
-                            size: 10,
-                            weight: FontWeight.w700,
-                            color: AppColors.textMuted),
-                      ))),
-          bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 26,
-                  getTitlesWidget: (v, _) {
-                    final i = v.toInt();
-                    if (i < 0 || i >= points.length) return const SizedBox();
-                    final month = points[i].month;
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        month.substring(5),
-                        style: AppTypography.body(
-                            size: 9,
-                            weight: FontWeight.w700,
-                            color: AppColors.textMuted),
+                showTitles: true,
+                reservedSize: 26,
+                getTitlesWidget: (v, _) {
+                  final i = v.toInt();
+                  if (i < 0 || i >= points.length) return const SizedBox();
+                  final month = points[i].month;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      month.substring(5),
+                      style: AppTypography.body(
+                        size: 9,
+                        weight: FontWeight.w700,
+                        color: AppColors.textMuted,
                       ),
-                    );
-                  })),
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                  );
+                },
+              ),
+            ),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: FlGridData(
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (_) =>
+                const FlLine(color: AppColors.borderSubtle, strokeWidth: 0.5),
+          ),
+          borderData: FlBorderData(show: false),
         ),
-        gridData: FlGridData(
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (_) =>
-              const FlLine(color: AppColors.borderSubtle, strokeWidth: 0.5),
-        ),
-        borderData: FlBorderData(show: false),
-      )),
+      ),
     );
   }
 
@@ -673,8 +724,11 @@ class _CashflowChart extends StatelessWidget {
 
 /// Nebeneinander: aktueller Zeitraum · Vormonat · Vorjahr — je Balken.
 class _ComparisonBars extends StatelessWidget {
-  const _ComparisonBars(
-      {required this.k, this.height = 200, this.bare = false});
+  const _ComparisonBars({
+    required this.k,
+    this.height = 200,
+    this.bare = false,
+  });
   final FinanceKpis k;
 
   /// Chart-Höhe; `double.infinity` füllt den Zoom-Dialog.
@@ -700,17 +754,28 @@ class _ComparisonBars extends StatelessWidget {
       ...result.map((e) => e.abs()),
     ].fold<double>(0, (a, b) => a > b ? a : b);
     final chart = SizedBox(
-        height: height,
-        child: BarChart(BarChartData(
+      height: height,
+      child: BarChart(
+        BarChartData(
           maxY: maxV > 0 ? maxV * 1.2 : 10,
           barGroups: [
             for (int i = 0; i < labels.length; i++)
-              BarChartGroupData(x: i, barsSpace: 4, barRods: [
-                BarChartRodData(
-                    toY: revenue[i], color: AppColors.brand, width: 14),
-                BarChartRodData(
-                    toY: result[i], color: AppColors.statusPositive, width: 14),
-              ])
+              BarChartGroupData(
+                x: i,
+                barsSpace: 4,
+                barRods: [
+                  BarChartRodData(
+                    toY: revenue[i],
+                    color: AppColors.brand,
+                    width: 14,
+                  ),
+                  BarChartRodData(
+                    toY: result[i],
+                    color: AppColors.statusPositive,
+                    width: 14,
+                  ),
+                ],
+              ),
           ],
           titlesData: FlTitlesData(
             leftTitles:
@@ -731,9 +796,10 @@ class _ComparisonBars extends StatelessWidget {
                     child: Text(
                       labels[i],
                       style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink),
+                        size: 12,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
                     ),
                   );
                 },
@@ -742,7 +808,9 @@ class _ComparisonBars extends StatelessWidget {
           ),
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
-        )));
+        ),
+      ),
+    );
     return bare ? chart : AppCard(child: chart);
   }
 }
@@ -755,8 +823,9 @@ class _MachineList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (k.machines.isEmpty) {
       return const _EmptyBox(
-          text: 'Im gewählten Zeitraum wurden keine '
-              'Umsätze je Automat erfasst.');
+        text: 'Im gewählten Zeitraum wurden keine '
+            'Umsätze je Automat erfasst.',
+      );
     }
     final maxGross =
         k.machines.map((m) => m.gross).reduce((a, b) => a > b ? a : b);
@@ -770,17 +839,21 @@ class _MachineList extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(m.label,
-                          style: AppTypography.body(
-                              size: 14,
-                              weight: FontWeight.w800,
-                              color: AppColors.ink)),
+                      Text(
+                        m.label,
+                        style: AppTypography.body(
+                          size: 14,
+                          weight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
                       Text(
                         '${m.purchasesCount} Verkäufe · Ø ${Formatters.euro(m.avgBasket)}',
                         style: AppTypography.body(
-                            size: 12,
-                            weight: FontWeight.w600,
-                            color: AppColors.textMuted),
+                          size: 12,
+                          weight: FontWeight.w600,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -789,7 +862,10 @@ class _MachineList extends StatelessWidget {
                 Text(
                   Formatters.euro(m.gross),
                   style: AppTypography.display(
-                      size: 16, weight: FontWeight.w800, color: AppColors.ink),
+                    size: 16,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
                 ),
               ],
             ),
@@ -854,16 +930,23 @@ class _Stat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label.toUpperCase(),
-            style: AppTypography.body(
-                    size: 10,
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted)
-                .copyWith(letterSpacing: 0.6)),
+        Text(
+          label.toUpperCase(),
+          style: AppTypography.body(
+            size: 10,
+            weight: FontWeight.w800,
+            color: AppColors.textMuted,
+          ).copyWith(letterSpacing: 0.6),
+        ),
         const SizedBox(height: 2),
-        Text(value,
-            style: AppTypography.display(
-                size: 20, weight: FontWeight.w800, color: AppColors.ink)),
+        Text(
+          value,
+          style: AppTypography.display(
+            size: 20,
+            weight: FontWeight.w800,
+            color: AppColors.ink,
+          ),
+        ),
       ],
     );
   }
@@ -883,23 +966,33 @@ class _TopProducts extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                    child: Text(p.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w800,
-                            color: AppColors.ink))),
-                Text('${p.quantity}× ',
+                  child: Text(
+                    p.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.body(
-                        size: 12,
-                        weight: FontWeight.w700,
-                        color: AppColors.textMuted)),
-                Text(Formatters.euro(p.gross),
-                    style: AppTypography.body(
-                        size: 13,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink)),
+                      size: 13,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${p.quantity}× ',
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                Text(
+                  Formatters.euro(p.gross),
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 4),
@@ -914,7 +1007,7 @@ class _TopProducts extends StatelessWidget {
               ),
             ),
             if (p != k.topProducts.last) const SizedBox(height: AppSpacing.s2),
-          ]
+          ],
         ],
       ),
     );
@@ -928,8 +1021,10 @@ class _EmptyBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       color: AppColors.surfaceAlt,
-      child: Text(text,
-          style: AppTypography.body(size: 13, color: AppColors.textMuted)),
+      child: Text(
+        text,
+        style: AppTypography.body(size: 13, color: AppColors.textMuted),
+      ),
     );
   }
 }
@@ -972,7 +1067,9 @@ class _BalanceSection extends ConsumerWidget {
                   'ein Bilanz-Stichtag erfasst ist. Später übernimmt der '
                   'sevDesk-Sync die Werte automatisch.',
                   style: AppTypography.body(
-                      size: 12.5, color: AppColors.textMuted),
+                    size: 12.5,
+                    color: AppColors.textMuted,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 OutlinedButton.icon(
@@ -1001,55 +1098,57 @@ class _BalanceSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            LayoutBuilder(builder: (context, c) {
-              final compact = c.maxWidth < 480;
-              return GridView.count(
-                crossAxisCount: compact ? 2 : 3,
-                crossAxisSpacing: AppSpacing.s3,
-                mainAxisSpacing: AppSpacing.s3,
-                childAspectRatio: compact ? 1.35 : 1.4,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _KpiTile(
-                    label: 'Liquidität 1. Grades',
-                    value: pct('liquidity1_pct'),
-                    sub: 'Flüssige Mittel / kurzfr. Verb. · Ziel >= 20 %',
-                    targetLabel: '>= 20 %',
-                  ),
-                  _KpiTile(
-                    label: 'Liquidität 2. Grades',
-                    value: pct('liquidity2_pct'),
-                    sub: '+ Forderungen · Ziel >= 100 %',
-                    targetLabel: '>= 100 %',
-                  ),
-                  _KpiTile(
-                    label: 'Liquidität 3. Grades',
-                    value: pct('liquidity3_pct'),
-                    sub: 'Umlaufvermögen / kurzfr. Verb. · Ziel >= 120 %',
-                    targetLabel: '>= 120 %',
-                  ),
-                  _KpiTile(
-                    label: 'EK-Quote',
-                    value: pct('equity_ratio_pct'),
-                    sub: 'Eigenkapital / Bilanzsumme · Ziel >= 30 %',
-                    targetLabel: '>= 30 %',
-                  ),
-                  _KpiTile(
-                    label: 'ROI (12 Monate)',
-                    value: roi == null
-                        ? '—'
-                        : '${roi.toStringAsFixed(1).replaceAll('.', ',')} %',
-                    sub: 'Ergebnis 12 M / Eigenkapital',
-                  ),
-                  _KpiTile(
-                    label: 'Bilanzsumme',
-                    value: Formatters.euro(num_('total_assets') ?? 0),
-                    sub: 'EK ${Formatters.euro(equity)}',
-                  ),
-                ],
-              );
-            }),
+            LayoutBuilder(
+              builder: (context, c) {
+                final compact = c.maxWidth < 480;
+                return GridView.count(
+                  crossAxisCount: compact ? 2 : 3,
+                  crossAxisSpacing: AppSpacing.s3,
+                  mainAxisSpacing: AppSpacing.s3,
+                  childAspectRatio: compact ? 1.35 : 1.4,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _KpiTile(
+                      label: 'Liquidität 1. Grades',
+                      value: pct('liquidity1_pct'),
+                      sub: 'Flüssige Mittel / kurzfr. Verb. · Ziel >= 20 %',
+                      targetLabel: '>= 20 %',
+                    ),
+                    _KpiTile(
+                      label: 'Liquidität 2. Grades',
+                      value: pct('liquidity2_pct'),
+                      sub: '+ Forderungen · Ziel >= 100 %',
+                      targetLabel: '>= 100 %',
+                    ),
+                    _KpiTile(
+                      label: 'Liquidität 3. Grades',
+                      value: pct('liquidity3_pct'),
+                      sub: 'Umlaufvermögen / kurzfr. Verb. · Ziel >= 120 %',
+                      targetLabel: '>= 120 %',
+                    ),
+                    _KpiTile(
+                      label: 'EK-Quote',
+                      value: pct('equity_ratio_pct'),
+                      sub: 'Eigenkapital / Bilanzsumme · Ziel >= 30 %',
+                      targetLabel: '>= 30 %',
+                    ),
+                    _KpiTile(
+                      label: 'ROI (12 Monate)',
+                      value: roi == null
+                          ? '—'
+                          : '${roi.toStringAsFixed(1).replaceAll('.', ',')} %',
+                      sub: 'Ergebnis 12 M / Eigenkapital',
+                    ),
+                    _KpiTile(
+                      label: 'Bilanzsumme',
+                      value: Formatters.euro(num_('total_assets') ?? 0),
+                      sub: 'EK ${Formatters.euro(equity)}',
+                    ),
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: AppSpacing.s2),
             Row(
               children: [
@@ -1058,7 +1157,9 @@ class _BalanceSection extends ConsumerWidget {
                     'Stand: ${b['as_of']} · Quelle: '
                     '${b['source'] == 'sevdesk' ? 'sevDesk-Sync' : 'manuell erfasst'}',
                     style: AppTypography.body(
-                        size: 11, color: AppColors.textMuted),
+                      size: 11,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
                 TextButton.icon(
@@ -1085,11 +1186,12 @@ Future<void> _showBalanceDialog(
   await showDialog<void>(
     context: context,
     builder: (_) => _BalanceDialog(
-        existing: existing,
-        onSaved: () {
-          ref.invalidate(financeBalanceProvider);
-        },
-        client: client),
+      existing: existing,
+      onSaved: () {
+        ref.invalidate(financeBalanceProvider);
+      },
+      client: client,
+    ),
   );
 }
 
@@ -1163,17 +1265,20 @@ class _BalanceDialogState extends State<_BalanceDialog> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
-      await widget.client.rpc('upsert_finance_balance', params: {
-        'p_as_of': _asOf.toIso8601String().substring(0, 10),
-        'p_cash_and_bank': _parse('cash_and_bank'),
-        'p_receivables': _parse('receivables'),
-        'p_inventory_value': _parse('inventory_value'),
-        'p_other_current_assets': _parse('other_current_assets'),
-        'p_fixed_assets': _parse('fixed_assets'),
-        'p_current_liabilities': _parse('current_liabilities'),
-        'p_long_term_liabilities': _parse('long_term_liabilities'),
-        'p_equity': _parse('equity'),
-      });
+      await widget.client.rpc(
+        'upsert_finance_balance',
+        params: {
+          'p_as_of': _asOf.toIso8601String().substring(0, 10),
+          'p_cash_and_bank': _parse('cash_and_bank'),
+          'p_receivables': _parse('receivables'),
+          'p_inventory_value': _parse('inventory_value'),
+          'p_other_current_assets': _parse('other_current_assets'),
+          'p_fixed_assets': _parse('fixed_assets'),
+          'p_current_liabilities': _parse('current_liabilities'),
+          'p_long_term_liabilities': _parse('long_term_liabilities'),
+          'p_equity': _parse('equity'),
+        },
+      );
       if (!mounted) return;
       widget.onSaved();
       Navigator.of(context).pop();
@@ -1197,7 +1302,10 @@ class _BalanceDialogState extends State<_BalanceDialog> {
       title: Text(
         'Bilanzwerte erfassen',
         style: AppTypography.display(
-            size: 18, weight: FontWeight.w800, color: AppColors.ink),
+          size: 18,
+          weight: FontWeight.w800,
+          color: AppColors.ink,
+        ),
       ),
       content: SizedBox(
         width: 380,
@@ -1220,7 +1328,8 @@ class _BalanceDialogState extends State<_BalanceDialog> {
                       },
                 icon: const Icon(Icons.event_outlined, size: 18),
                 label: Text(
-                    'Stichtag: ${_asOf.toIso8601String().substring(0, 10)}'),
+                  'Stichtag: ${_asOf.toIso8601String().substring(0, 10)}',
+                ),
               ),
               const SizedBox(height: AppSpacing.s3),
               for (final (key, label) in _fields) ...[
@@ -1260,7 +1369,9 @@ class _BalanceDialogState extends State<_BalanceDialog> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.ink),
+                    strokeWidth: 2,
+                    color: AppColors.ink,
+                  ),
                 )
               : const Text('Speichern'),
         ),

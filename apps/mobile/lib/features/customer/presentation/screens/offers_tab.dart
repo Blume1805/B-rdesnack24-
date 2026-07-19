@@ -88,8 +88,11 @@ class OffersTab extends ConsumerWidget {
                 padding: const EdgeInsets.all(AppSpacing.s3),
                 child: Row(
                   children: [
-                    const Icon(Icons.wifi_off_outlined,
-                        size: 20, color: AppColors.statusWarning),
+                    const Icon(
+                      Icons.wifi_off_outlined,
+                      size: 20,
+                      color: AppColors.statusWarning,
+                    ),
                     const SizedBox(width: AppSpacing.s2),
                     Expanded(
                       child: Text(
@@ -207,7 +210,9 @@ class OffersTab extends ConsumerWidget {
                     child: Text(
                       'Aktuell sind keine Wochen­angebote verfügbar. Schau bald wieder vorbei.',
                       style: AppTypography.body(
-                          size: 14, color: AppColors.textMuted),
+                        size: 14,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   );
                 }
@@ -505,8 +510,11 @@ class _PersonalActivationFooter extends ConsumerWidget {
                         color: AppColors.ink,
                       ),
                     )
-                  : const Icon(Icons.add_circle_outline,
-                      size: 18, color: AppColors.ink),
+                  : const Icon(
+                      Icons.add_circle_outline,
+                      size: 18,
+                      color: AppColors.ink,
+                    ),
               label: const Text('Aktivieren'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brand,
@@ -565,7 +573,8 @@ class _PersonalActivationFooter extends ConsumerWidget {
                 icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
                 onPressed: () async {
                   await Clipboard.setData(
-                      ClipboardData(text: offer.redemptionCode));
+                    ClipboardData(text: offer.redemptionCode),
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Code kopiert.')),
@@ -592,10 +601,15 @@ class _PersonalActivationFooter extends ConsumerWidget {
                     width: 14,
                     height: 14,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.onDark),
+                      strokeWidth: 2,
+                      color: AppColors.onDark,
+                    ),
                   )
-                : const Icon(Icons.check_circle,
-                    size: 18, color: AppColors.onDark),
+                : const Icon(
+                    Icons.check_circle,
+                    size: 18,
+                    color: AppColors.onDark,
+                  ),
             label: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -646,13 +660,15 @@ class _RedeemButton extends ConsumerWidget {
               if (!ctx.mounted) return;
               final err = ref.read(personalOfferActionsProvider).error;
               ref.invalidate(myPersonalOffersProvider);
-              ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                content: Text(
-                  offer != null
-                      ? 'Angebot eingelöst — viel Spaß!'
-                      : 'Einlösen fehlgeschlagen: ${err ?? 'unbekannt'}',
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    offer != null
+                        ? 'Angebot eingelöst — viel Spaß!'
+                        : 'Einlösen fehlgeschlagen: ${err ?? 'unbekannt'}',
+                  ),
                 ),
-              ));
+              );
             },
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.brand,
@@ -730,7 +746,7 @@ class _LoyaltyProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiers = const [500, 1200, 2000, 3000];
+    const tiers = [500, 1200, 2000, 3000];
     final resetDay = status.nextReset.day.toString().padLeft(2, '0');
     final resetMonth = status.nextReset.month.toString().padLeft(2, '0');
     return AppCard(
@@ -886,7 +902,7 @@ class _MilestoneChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = AppColors.ink;
+    const ink = AppColors.ink;
     return SizedBox(
       width: width,
       child: Column(
@@ -1042,7 +1058,9 @@ class _ActivationButton extends StatelessWidget {
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.onDark),
+                    strokeWidth: 2,
+                    color: AppColors.onDark,
+                  ),
                 )
               : const Icon(Icons.check_circle, size: 18),
           label: Column(
@@ -1083,7 +1101,9 @@ class _ActivationButton extends StatelessWidget {
                 width: 14,
                 height: 14,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppColors.ink),
+                  strokeWidth: 2,
+                  color: AppColors.ink,
+                ),
               )
             : const Icon(Icons.add_circle_outline, size: 18),
         label: const Text('Aktivieren'),
@@ -1127,18 +1147,23 @@ class _FavoritesSection extends ConsumerWidget {
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
             child: Center(
-                child: CircularProgressIndicator(color: AppColors.brand)),
+              child: CircularProgressIndicator(color: AppColors.brand),
+            ),
           ),
           error: (_, __) => const SizedBox.shrink(),
           data: (list) => list.isEmpty
               ? AppCard(
                   color: AppColors.surfaceAlt,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s4, vertical: AppSpacing.s3),
+                    horizontal: AppSpacing.s4,
+                    vertical: AppSpacing.s3,
+                  ),
                   child: Text(
                     'Noch keine Bewertungen in dieser Kategorie.',
                     style: AppTypography.body(
-                        size: 13, color: AppColors.textMuted),
+                      size: 13,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 )
               : SizedBox(
@@ -1341,8 +1366,11 @@ class _NewsTeaser extends ConsumerWidget {
                             color: AppColors.brand,
                             borderRadius: BorderRadius.circular(AppRadii.sm),
                           ),
-                          child: const Icon(Icons.campaign,
-                              color: AppColors.ink, size: 18),
+                          child: const Icon(
+                            Icons.campaign,
+                            color: AppColors.ink,
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.s2),
                         Expanded(
@@ -1640,7 +1668,7 @@ class _TimeDealCard extends ConsumerWidget {
               // Kennzeichnung nach Art. 50 EU AI Act: die tägliche
               // Heißgetränk-/Snack-Kombi wird algorithmisch ausgewählt →
               // KI-Chip mit Sprung in die AI-Info-Seite.
-              _DealAiBadge(),
+              const _DealAiBadge(),
             ],
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -1887,8 +1915,11 @@ class _HeroLoyaltyCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.stars_rounded,
-                color: AppColors.brand, size: 32),
+            child: const Icon(
+              Icons.stars_rounded,
+              color: AppColors.brand,
+              size: 32,
+            ),
           ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
@@ -2027,8 +2058,11 @@ class _HeroDonationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.volunteer_activism,
-                    color: AppColors.statusPositive, size: 30),
+                child: const Icon(
+                  Icons.volunteer_activism,
+                  color: AppColors.statusPositive,
+                  size: 30,
+                ),
               ),
               const SizedBox(width: AppSpacing.s3),
               Expanded(
@@ -2086,8 +2120,11 @@ class _SubscriptionLockCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.workspace_premium_outlined,
-                  color: AppColors.brand, size: 26),
+              const Icon(
+                Icons.workspace_premium_outlined,
+                color: AppColors.brand,
+                size: 26,
+              ),
               const SizedBox(width: AppSpacing.s2),
               Expanded(
                 child: Text(

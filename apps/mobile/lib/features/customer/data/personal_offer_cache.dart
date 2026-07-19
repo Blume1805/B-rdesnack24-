@@ -19,7 +19,9 @@ class PersonalOfferCache {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          _key, jsonEncode([for (final o in offers) o.toJson()]));
+        _key,
+        jsonEncode([for (final o in offers) o.toJson()]),
+      );
       await prefs.setString(_tsKey, DateTime.now().toIso8601String());
     } catch (_) {
       // Cache ist best-effort — Fehler hier dürfen den Online-Pfad nie stören.

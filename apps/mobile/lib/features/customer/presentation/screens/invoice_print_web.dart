@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
+// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 
 import '../../../../core/utils/formatters.dart';
@@ -10,7 +10,8 @@ import '../../domain/entities/invoice.dart';
 Future<void> printInvoice(Invoice invoice) async {
   final snap = invoice.billingSnapshot;
   final issuer = Map<String, dynamic>.from(
-      snap['issuer'] as Map? ?? const <String, dynamic>{});
+    snap['issuer'] as Map? ?? const <String, dynamic>{},
+  );
 
   String s(String key) => (snap[key] as String?)?.trim() ?? '';
   String iss(String key) => (issuer[key] as String?)?.trim() ?? '';

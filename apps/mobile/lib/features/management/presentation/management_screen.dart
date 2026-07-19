@@ -152,11 +152,11 @@ class ManagementScreen extends ConsumerWidget {
         const CancellationsScreen(),
         visible: p.contains('customers.manage'),
       ),
-      _Module(
+      const _Module(
         'Zu signieren',
         'Belehrungen & Nachweise',
         Icons.draw_outlined,
-        const MySignatureTasksScreen(),
+        MySignatureTasksScreen(),
         // Für alle authentifizierten Rollen sichtbar — die RPC filtert
         // ohnehin nur die dem User zugewiesenen Aufgaben. Nützlich vor
         // allem für Rolle 'employee'.
@@ -236,8 +236,11 @@ class _EmptyState extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.brand),
               ),
-              child: const Icon(Icons.lock_outline,
-                  size: 32, color: AppColors.ink),
+              child: const Icon(
+                Icons.lock_outline,
+                size: 32,
+                color: AppColors.ink,
+              ),
             ),
             const SizedBox(height: AppSpacing.s4),
             Text(

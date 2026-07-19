@@ -28,7 +28,8 @@ class RankedProduct extends Equatable {
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
-          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2),
+        );
 
   factory RankedProduct.fromJson(Map<String, dynamic> j) => RankedProduct(
         id: j['id'] as String,
@@ -80,7 +81,8 @@ class ProductDetail extends Equatable {
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
-          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2),
+        );
   final double? energyKcal;
   final double? fatG;
   final double? saturatedFatG;

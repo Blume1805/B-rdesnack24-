@@ -27,7 +27,8 @@ class _FinderTabState extends ConsumerState<FinderTab> {
     final machines = ref.watch(machinesProvider);
     return machines.when(
       loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brand)),
+        child: CircularProgressIndicator(color: AppColors.brand),
+      ),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.s5),
@@ -54,11 +55,15 @@ class _FinderTabState extends ConsumerState<FinderTab> {
             SegmentedButton<bool>(
               segments: const [
                 ButtonSegment(
-                    value: false, icon: Icon(Icons.list), label: Text('Liste')),
+                  value: false,
+                  icon: Icon(Icons.list),
+                  label: Text('Liste'),
+                ),
                 ButtonSegment(
-                    value: true,
-                    icon: Icon(Icons.map_outlined),
-                    label: Text('Karte')),
+                  value: true,
+                  icon: Icon(Icons.map_outlined),
+                  label: Text('Karte'),
+                ),
               ],
               selected: {_mapMode},
               onSelectionChanged: (s) => setState(() => _mapMode = s.first),
@@ -143,11 +148,16 @@ class _MapPreview extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.place,
-                            size: 34, color: AppColors.brand),
+                        const Icon(
+                          Icons.place,
+                          size: 34,
+                          color: AppColors.brand,
+                        ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.ink,
                             borderRadius: BorderRadius.circular(4),

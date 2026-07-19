@@ -45,7 +45,7 @@ class CustomerAnchors {
 
     final key = _keys[name];
     final ctx = key?.currentContext;
-    if (ctx == null) return;
+    if (ctx == null || !ctx.mounted) return;
     await Scrollable.ensureVisible(
       ctx,
       duration: const Duration(milliseconds: 400),

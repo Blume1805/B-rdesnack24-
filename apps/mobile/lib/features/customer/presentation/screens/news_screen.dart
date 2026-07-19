@@ -22,7 +22,8 @@ class NewsScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(newsProvider),
         child: news.when(
           loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.brand)),
+            child: CircularProgressIndicator(color: AppColors.brand),
+          ),
           error: (e, _) => Padding(
             padding: const EdgeInsets.all(AppSpacing.s5),
             child: Text('$e', style: AppTypography.body(size: 14)),
@@ -85,8 +86,11 @@ class _NewsCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.article_outlined,
-                        size: 16, color: AppColors.brand),
+                    const Icon(
+                      Icons.article_outlined,
+                      size: 16,
+                      color: AppColors.brand,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       Formatters.date(article.publishedAt),

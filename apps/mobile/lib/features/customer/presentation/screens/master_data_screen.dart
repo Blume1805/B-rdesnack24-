@@ -34,7 +34,8 @@ class MasterDataScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Stammdaten')),
       body: data.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Padding(
           padding: const EdgeInsets.all(AppSpacing.s5),
           child: Text('$e', style: AppTypography.body(size: 14)),
@@ -133,11 +134,14 @@ class MasterDataScreen extends ConsumerWidget {
               ),
               if (isBusiness) ...[
                 const SizedBox(height: AppSpacing.s5),
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.business_center_outlined,
-                        size: 16, color: AppColors.ink),
-                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.business_center_outlined,
+                      size: 16,
+                      color: AppColors.ink,
+                    ),
+                    SizedBox(width: 6),
                     Eyebrow('Unternehmensangaben'),
                   ],
                 ),
@@ -148,8 +152,10 @@ class MasterDataScreen extends ConsumerWidget {
                     borderColor: AppColors.statusWarning,
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_outlined,
-                            color: AppColors.statusWarning),
+                        const Icon(
+                          Icons.warning_amber_outlined,
+                          color: AppColors.statusWarning,
+                        ),
                         const SizedBox(width: AppSpacing.s2),
                         Expanded(
                           child: Text(
@@ -157,9 +163,10 @@ class MasterDataScreen extends ConsumerWidget {
                             'damit wir dir eine ordnungsgemäße Rechnung '
                             'nach § 14 UStG ausstellen können.',
                             style: AppTypography.body(
-                                size: 12,
-                                weight: FontWeight.w700,
-                                color: AppColors.ink),
+                              size: 12,
+                              weight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
                           ),
                         ),
                       ],
@@ -419,15 +426,19 @@ class _EditBusinessDataScreen extends ConsumerStatefulWidget {
 class _EditBusinessDataScreenState
     extends ConsumerState<_EditBusinessDataScreen> {
   late final _company = TextEditingController(
-      text: (widget.row['company_name'] as String?) ?? '');
+    text: (widget.row['company_name'] as String?) ?? '',
+  );
   late final _street = TextEditingController(
-      text: (widget.row['billing_street'] as String?) ?? '');
+    text: (widget.row['billing_street'] as String?) ?? '',
+  );
   late final _zip =
       TextEditingController(text: (widget.row['billing_zip'] as String?) ?? '');
   late final _city = TextEditingController(
-      text: (widget.row['billing_city'] as String?) ?? '');
+    text: (widget.row['billing_city'] as String?) ?? '',
+  );
   late final _country = TextEditingController(
-      text: (widget.row['billing_country'] as String?) ?? 'DE');
+    text: (widget.row['billing_country'] as String?) ?? 'DE',
+  );
   late final _tax =
       TextEditingController(text: (widget.row['tax_number'] as String?) ?? '');
   late final _vat =
@@ -502,42 +513,53 @@ class _EditBusinessDataScreenState
           ),
           const SizedBox(height: AppSpacing.s4),
           TextField(
-              controller: _company,
-              decoration: InputDecoration(label: requiredLabel('Firmenname'))),
+            controller: _company,
+            decoration: InputDecoration(label: requiredLabel('Firmenname')),
+          ),
           const SizedBox(height: 12),
           TextField(
-              controller: _street,
-              decoration:
-                  InputDecoration(label: requiredLabel('Straße + Hausnr.'))),
+            controller: _street,
+            decoration:
+                InputDecoration(label: requiredLabel('Straße + Hausnr.')),
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            SizedBox(
+          Row(
+            children: [
+              SizedBox(
                 width: 100,
                 child: TextField(
-                    controller: _zip,
-                    decoration: InputDecoration(label: requiredLabel('PLZ')))),
-            const SizedBox(width: 12),
-            Expanded(
+                  controller: _zip,
+                  decoration: InputDecoration(label: requiredLabel('PLZ')),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
                 child: TextField(
-                    controller: _city,
-                    decoration: InputDecoration(label: requiredLabel('Ort')))),
-          ]),
+                  controller: _city,
+                  decoration: InputDecoration(label: requiredLabel('Ort')),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           TextField(
-              controller: _country,
-              decoration: InputDecoration(label: requiredLabel('Land'))),
+            controller: _country,
+            decoration: InputDecoration(label: requiredLabel('Land')),
+          ),
           const SizedBox(height: 12),
           TextField(
-              controller: _tax,
-              decoration: InputDecoration(
-                label: requiredLabel('Steuernummer'),
-                helperText: 'Pflichtangabe für §§ 14, 15 UStG',
-              )),
+            controller: _tax,
+            decoration: InputDecoration(
+              label: requiredLabel('Steuernummer'),
+              helperText: 'Pflichtangabe für §§ 14, 15 UStG',
+            ),
+          ),
           const SizedBox(height: 12),
           TextField(
-              controller: _vat,
-              decoration:
-                  const InputDecoration(labelText: 'USt-IdNr. (optional)')),
+            controller: _vat,
+            decoration:
+                const InputDecoration(labelText: 'USt-IdNr. (optional)'),
+          ),
           const SizedBox(height: AppSpacing.s4),
           FilledButton.icon(
             onPressed: _saving ? null : _save,
@@ -546,7 +568,10 @@ class _EditBusinessDataScreenState
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.ink))
+                      strokeWidth: 2,
+                      color: AppColors.ink,
+                    ),
+                  )
                 : const Icon(Icons.save_outlined),
             label: const Text('Speichern'),
             style: FilledButton.styleFrom(

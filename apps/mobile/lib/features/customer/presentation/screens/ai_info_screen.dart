@@ -61,7 +61,7 @@ class AiInfoScreen extends StatelessWidget {
                 .copyWith(height: 1.4),
           ),
           const SizedBox(height: AppSpacing.s5),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Was wird eingesetzt?',
             body:
                 'Ein regel-basierter Empfehlungs- und Angebots-Generator, der '
@@ -73,14 +73,14 @@ class AiInfoScreen extends StatelessWidget {
                 'aus dem Produktkatalog aus. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Zweck',
             body:
                 'Bessere Sichtbarkeit von Angeboten, die zu deinem bisherigen '
                 'Einkaufsverhalten passen. Die Vorschläge sind Empfehlungen — '
                 'du bist nie verpflichtet, ein Angebot anzunehmen.',
           ),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Welche Daten fließen ein?',
             body: '• Deine Kaufhistorie an unseren Automaten\n'
                 '• Deine Kategorie-Präferenzen (Getränke, Snacks, Eis)\n'
@@ -90,7 +90,7 @@ class AiInfoScreen extends StatelessWidget {
                 'Einzelentscheidungen mit rechtlicher Wirkung im Sinne von '
                 'Art. 22 DSGVO.',
           ),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Widerspruch und Opt-out',
             body: 'Du kannst der personalisierten Angebots-Anzeige jederzeit '
                 'widersprechen — schreib uns über das Kontaktformular in '
@@ -98,7 +98,7 @@ class AiInfoScreen extends StatelessWidget {
                 'siehst dann nur noch die allgemeinen Wochenangebote, den '
                 'Frühstücks- und den Feierabend-Deal.',
           ),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',
             body: 'Überall wo KI oder Algorithmen dir Inhalte vorschlagen, '
                 'siehst du in der oberen rechten Ecke der Section den '
@@ -106,7 +106,7 @@ class AiInfoScreen extends StatelessWidget {
                 'Label „Automatischer Chat-Assistent" damit du weißt, dass '
                 'du nicht mit einem Menschen sprichst.',
           ),
-          _InfoBlock(
+          const _InfoBlock(
             title: 'Beschwerde',
             body: 'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
                 'verletzt, kannst du dich an die zuständige Datenschutz-'

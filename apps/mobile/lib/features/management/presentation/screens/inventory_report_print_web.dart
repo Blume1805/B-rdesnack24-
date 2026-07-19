@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
+// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 
 import '../../../../core/utils/formatters.dart';
@@ -194,20 +194,20 @@ Future<void> printInventoryReport({
       '2–4 Wochen',
       '10–30 %',
       '20 %',
-      'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen'
+      'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen',
     ],
     ['1–2 Wochen', '30–50 %', '40 %', 'erheblicher Verkaufsdruck'],
     [
       '< 1 Woche',
       '50–80 %',
       '65 %',
-      'Risiko des Nichtverkaufs deutlich erhöht'
+      'Risiko des Nichtverkaufs deutlich erhöht',
     ],
     [
       'MHD überschritten',
       '100 % Abschreibung',
       '100 %',
-      'keine wirtschaftliche Verwertbarkeit'
+      'keine wirtschaftliche Verwertbarkeit',
     ],
   ];
   for (final r in matrix) {
@@ -240,7 +240,7 @@ Future<void> printInventoryReport({
       final decision =
           d['decision']?.toString() == 'approved' ? 'freigegeben' : 'abgelehnt';
       final at = d['decided_at']?.toString();
-      final atFmt = at == null ? '' : ' · ' + fmtDate(at);
+      final atFmt = at == null ? '' : ' · ${fmtDate(at)}';
       signaturesHtml.write('<li><b>$name</b> — $decision$atFmt</li>');
     }
     signaturesHtml.write('</ul></section>');

@@ -32,7 +32,8 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
         .read(supabaseClientProvider)
         .from('cancellation_requests')
         .select(
-            'id, email, customer_number, kind, reason, cancel_at, requested_at, processed_at')
+          'id, email, customer_number, kind, reason, cancel_at, requested_at, processed_at',
+        )
         .order('requested_at', ascending: false);
     return List<Map<String, dynamic>>.from(rows as List);
   }
@@ -81,7 +82,8 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
             }
             if (!snap.hasData) {
               return const Center(
-                  child: CircularProgressIndicator(color: AppColors.brand));
+                child: CircularProgressIndicator(color: AppColors.brand),
+              );
             }
             final rows = snap.data!;
             final open = rows.where((r) => r['processed_at'] == null).length;
@@ -90,11 +92,14 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
               children: [
                 const Eyebrow('Abo-Verwaltung'),
                 const SizedBox(height: 2),
-                Text('Eingegangene Kündigungen',
-                    style: AppTypography.display(
-                        size: 22,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink)),
+                Text(
+                  'Eingegangene Kündigungen',
+                  style: AppTypography.display(
+                    size: 22,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   rows.isEmpty
@@ -148,7 +153,10 @@ class _CancellationCard extends StatelessWidget {
                 child: Text(
                   (row['email'] ?? '').toString(),
                   style: AppTypography.body(
-                      size: 14, weight: FontWeight.w800, color: AppColors.ink),
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -159,10 +167,11 @@ class _CancellationCard extends StatelessWidget {
                       ? AppColors.statusPositive.withValues(alpha: 0.12)
                       : AppColors.statusWarning.withValues(alpha: 0.14),
                   border: Border.all(
-                      color: processed
-                          ? AppColors.statusPositive
-                          : AppColors.statusWarning,
-                      width: 0.8),
+                    color: processed
+                        ? AppColors.statusPositive
+                        : AppColors.statusWarning,
+                    width: 0.8,
+                  ),
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
                 child: Text(
@@ -183,7 +192,10 @@ class _CancellationCard extends StatelessWidget {
             '${extraordinary ? 'Außerordentliche' : 'Ordentliche'} Kündigung · '
             '${(row['cancel_at'] ?? '').toString()}',
             style: AppTypography.body(
-                size: 12, weight: FontWeight.w700, color: AppColors.ink),
+              size: 12,
+              weight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
           ),
           Text(
             'Eingegangen: ${fmtTs(row['requested_at'] as String?)}'
@@ -192,14 +204,19 @@ class _CancellationCard extends StatelessWidget {
           ),
           if ((row['reason'] ?? '').toString().isNotEmpty) ...[
             const SizedBox(height: AppSpacing.s2),
-            Text('Grund: ${row['reason']}',
-                style:
-                    AppTypography.body(size: 12, color: AppColors.textDefault)),
+            Text(
+              'Grund: ${row['reason']}',
+              style: AppTypography.body(size: 12, color: AppColors.textDefault),
+            ),
           ],
           if (processed)
-            Text('Bearbeitet: ${fmtTs(row['processed_at'] as String?)}',
-                style: AppTypography.body(
-                    size: 12, color: AppColors.statusPositive)),
+            Text(
+              'Bearbeitet: ${fmtTs(row['processed_at'] as String?)}',
+              style: AppTypography.body(
+                size: 12,
+                color: AppColors.statusPositive,
+              ),
+            ),
           if (!processed) ...[
             const SizedBox(height: AppSpacing.s3),
             OutlinedButton.icon(

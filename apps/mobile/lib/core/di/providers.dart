@@ -7,7 +7,8 @@ import '../services/push_service.dart';
 /// Globale Konfiguration. Wird in main() via overrideWithValue gesetzt.
 final appConfigProvider = Provider<AppConfig>(
   (ref) => throw UnimplementedError(
-      'appConfigProvider muss in main() überschrieben werden'),
+    'appConfigProvider muss in main() überschrieben werden',
+  ),
 );
 
 /// Supabase-Client (nach Supabase.initialize in bootstrap verfügbar).

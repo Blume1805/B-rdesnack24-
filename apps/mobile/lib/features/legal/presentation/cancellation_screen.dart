@@ -53,15 +53,15 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
     try {
-      final res = await ref
-          .read(supabaseClientProvider)
-          .functions
-          .invoke('subscription-cancel', body: {
-        'email': _emailCtrl.text.trim(),
-        'customer_number': _customerNumberCtrl.text.trim(),
-        'kind': _kind,
-        'reason': _reasonCtrl.text.trim(),
-      });
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
+        'subscription-cancel',
+        body: {
+          'email': _emailCtrl.text.trim(),
+          'customer_number': _customerNumberCtrl.text.trim(),
+          'kind': _kind,
+          'reason': _reasonCtrl.text.trim(),
+        },
+      );
       final data = Map<String, dynamic>.from(res.data as Map);
       if (data['ok'] != true) {
         throw Exception(data['error'] ?? 'Unbekannter Fehler');
@@ -158,30 +158,52 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
                     ),
                     RadioListTile<String>(
                       value: 'ordentlich',
+                      // RadioGroup-Migration folgt mit dem nächsten
+                      // Flutter-Upgrade.
+                      // ignore: deprecated_member_use
                       groupValue: _kind,
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       activeColor: AppColors.brand,
-                      title: Text('Ordentliche Kündigung',
-                          style: AppTypography.body(
-                              size: 14, weight: FontWeight.w700)),
-                      subtitle: Text('zum nächstmöglichen Zeitpunkt',
-                          style: AppTypography.body(
-                              size: 12, color: AppColors.textMuted)),
+                      title: Text(
+                        'Ordentliche Kündigung',
+                        style: AppTypography.body(
+                          size: 14,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'zum nächstmöglichen Zeitpunkt',
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      // ignore: deprecated_member_use
                       onChanged: (v) => setState(() => _kind = v!),
                     ),
                     RadioListTile<String>(
                       value: 'ausserordentlich',
+                      // ignore: deprecated_member_use
                       groupValue: _kind,
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       activeColor: AppColors.brand,
-                      title: Text('Außerordentliche Kündigung',
-                          style: AppTypography.body(
-                              size: 14, weight: FontWeight.w700)),
-                      subtitle: Text('aus wichtigem Grund',
-                          style: AppTypography.body(
-                              size: 12, color: AppColors.textMuted)),
+                      title: Text(
+                        'Außerordentliche Kündigung',
+                        style: AppTypography.body(
+                          size: 14,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'aus wichtigem Grund',
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      // ignore: deprecated_member_use
                       onChanged: (v) => setState(() => _kind = v!),
                     ),
                     if (_kind == 'ausserordentlich') ...[
@@ -217,7 +239,9 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
                               height: 18,
                               width: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppColors.brand),
+                                strokeWidth: 2,
+                                color: AppColors.brand,
+                              ),
                             )
                           : const Text('Jetzt kündigen'),
                     ),
@@ -254,8 +278,11 @@ class _ConfirmationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.check_circle_outline,
-                  color: AppColors.statusPositive, size: 28),
+              const Icon(
+                Icons.check_circle_outline,
+                color: AppColors.statusPositive,
+                size: 28,
+              ),
               const SizedBox(width: AppSpacing.s2),
               Expanded(
                 child: Text(

@@ -50,5 +50,7 @@ class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
   @override
   Widget build(BuildContext context) => const _LegalTextScreen(
-      title: 'Nutzungsbedingungen', body: LegalTexts.terms);
+        title: 'Nutzungsbedingungen',
+        body: LegalTexts.terms,
+      );
 }

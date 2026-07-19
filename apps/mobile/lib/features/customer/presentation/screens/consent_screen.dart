@@ -60,7 +60,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              granted ? 'Einwilligung erteilt.' : 'Einwilligung widerrufen.'),
+            granted ? 'Einwilligung erteilt.' : 'Einwilligung widerrufen.',
+          ),
         ),
       );
     }

@@ -37,8 +37,10 @@ void main() {
 
     test('meldet 0 für unbekanntes Passwort', () async {
       final checker = PwnedPasswordChecker(
-        client: MockClient((_) async =>
-            http.Response('0018A45C4D1DEF81644B54AB7F969B88D65:3', 200)),
+        client: MockClient(
+          (_) async =>
+              http.Response('0018A45C4D1DEF81644B54AB7F969B88D65:3', 200),
+        ),
       );
       expect(await checker.breachCount('vermutlich-einzigartig-9!x'), 0);
       expect(await checker.isBreached('vermutlich-einzigartig-9!x'), isFalse);
@@ -47,7 +49,8 @@ void main() {
     test('Padding-Zeilen mit Count 0 zählen nicht als Treffer', () async {
       final checker = PwnedPasswordChecker(
         client: MockClient(
-            (_) async => http.Response(_rangeBodyFor('abc-xyz', 0), 200)),
+          (_) async => http.Response(_rangeBodyFor('abc-xyz', 0), 200),
+        ),
       );
       expect(await checker.isBreached('abc-xyz'), isFalse);
     });

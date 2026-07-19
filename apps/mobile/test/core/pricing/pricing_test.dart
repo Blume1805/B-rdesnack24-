@@ -74,8 +74,10 @@ void main() {
 
     test('mit Coupon-Ersparnis obendrauf sinkt der Break-even', () {
       // 5 % Basis + konservativ 3 % Ø-Coupon-Effekt = 8 %.
-      expect(Pricing.breakEvenMonthlySpend(1.00, savingsRate: 0.08),
-          closeTo(12.50, 0.01));
+      expect(
+        Pricing.breakEvenMonthlySpend(1.00, savingsRate: 0.08),
+        closeTo(12.50, 0.01),
+      );
     });
   });
 
@@ -92,13 +94,17 @@ void main() {
 
     test('Break-even sinkt im normalen Szenario deutlich', () {
       expect(
-        Pricing.breakEvenMonthlySpend(1.00,
-            savingsRate: Pricing.normalSavingsRate),
+        Pricing.breakEvenMonthlySpend(
+          1.00,
+          savingsRate: Pricing.normalSavingsRate,
+        ),
         closeTo(10.70, 0.01),
       );
       expect(
-        Pricing.breakEvenMonthlySpend(10 / 12,
-            savingsRate: Pricing.normalSavingsRate),
+        Pricing.breakEvenMonthlySpend(
+          10 / 12,
+          savingsRate: Pricing.normalSavingsRate,
+        ),
         closeTo(8.91, 0.01),
       );
       // Lifetime: 60 € / 9,35 % ≈ 642 € kumulierter Einkauf.

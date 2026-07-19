@@ -77,7 +77,9 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
   void _next() {
     if (_page < _pages.length - 1) {
       _pageCtrl.nextPage(
-          duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
     } else {
       Navigator.of(context).pop();
     }
@@ -157,7 +159,9 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
                     backgroundColor: AppColors.brand,
                     foregroundColor: AppColors.ink,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s5, vertical: 12),
+                      horizontal: AppSpacing.s5,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ],

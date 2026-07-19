@@ -184,11 +184,14 @@ class FinanceKpis extends Equatable {
     final period = (j['period'] as Map?) ?? const {};
     return FinanceKpis(
       current: FinanceSummary.fromJson(
-          Map<String, dynamic>.from(j['current'] as Map)),
+        Map<String, dynamic>.from(j['current'] as Map),
+      ),
       priorYear: FinanceSummary.fromJson(
-          Map<String, dynamic>.from(j['prior_year'] as Map)),
+        Map<String, dynamic>.from(j['prior_year'] as Map),
+      ),
       priorPeriod: FinanceSummary.fromJson(
-          Map<String, dynamic>.from(j['prior_period'] as Map)),
+        Map<String, dynamic>.from(j['prior_period'] as Map),
+      ),
       trend: ((j['trend'] as List?) ?? const [])
           .map((e) => TrendPoint.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
@@ -196,8 +199,9 @@ class FinanceKpis extends Equatable {
           .map((e) => MachineKpi.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
       topProducts: ((j['top_products'] as List?) ?? const [])
-          .map((e) =>
-              TopProductKpi.fromJson(Map<String, dynamic>.from(e as Map)))
+          .map(
+            (e) => TopProductKpi.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList(),
       customer:
           CustomerKpi.fromJson(Map<String, dynamic>.from(j['customer'] as Map)),

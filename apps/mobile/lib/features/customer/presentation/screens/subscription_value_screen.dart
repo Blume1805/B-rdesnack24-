@@ -42,7 +42,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
     final beYearlyCons = Pricing.breakEvenMonthlySpend(10 / 12);
     final beYearlyNorm =
         Pricing.breakEvenMonthlySpend(10 / 12, savingsRate: normal);
-    final beLifetimeCons = 60 / conservative;
+    const beLifetimeCons = 60 / conservative;
     final beLifetimeNorm = 60 / normal;
 
     return Scaffold(
@@ -99,8 +99,11 @@ class SubscriptionValueScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.s1),
-                  const Icon(Icons.picture_as_pdf_outlined,
-                      size: 18, color: AppColors.ink),
+                  const Icon(
+                    Icons.picture_as_pdf_outlined,
+                    size: 18,
+                    color: AppColors.ink,
+                  ),
                 ],
               ),
             ),
@@ -112,30 +115,31 @@ class SubscriptionValueScreen extends ConsumerWidget {
           // fordert die Row in der ListView unendliche Höhe an und die
           // Seite bricht nach dem Intro ab.
           IntrinsicHeight(
-              child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _ScenarioCard(
-                  title: 'Konservativ',
-                  rate: conservative,
-                  subtitle: 'Nur der garantierte 5-%-App-Preis — '
-                      'ohne einen einzigen Coupon.',
-                  highlighted: false,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Expanded(
+                  child: _ScenarioCard(
+                    title: 'Konservativ',
+                    rate: conservative,
+                    subtitle: 'Nur der garantierte 5-%-App-Preis — '
+                        'ohne einen einzigen Coupon.',
+                    highlighted: false,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s3),
-              Expanded(
-                child: _ScenarioCard(
-                  title: 'Normal',
-                  rate: normal,
-                  subtitle: 'Mit Deals (−10 % extra), Wochen-/Tagesangeboten '
-                      'und Treue-Boni.',
-                  highlighted: true,
+                const SizedBox(width: AppSpacing.s3),
+                Expanded(
+                  child: _ScenarioCard(
+                    title: 'Normal',
+                    rate: normal,
+                    subtitle: 'Mit Deals (−10 % extra), Wochen-/Tagesangeboten '
+                        'und Treue-Boni.',
+                    highlighted: true,
+                  ),
                 ),
-              ),
-            ],
-          )),
+              ],
+            ),
+          ),
           const SizedBox(height: AppSpacing.s5),
 
           // ── Break-even-Tabelle ────────────────────────────────────────
@@ -184,11 +188,11 @@ class SubscriptionValueScreen extends ConsumerWidget {
           // ── Was steckt im normalen Szenario? ──────────────────────────
           const Eyebrow('So kommt die normale Ersparnis zustande'),
           const SizedBox(height: AppSpacing.s3),
-          AppCard(
+          const AppCard(
             color: AppColors.surfaceAlt,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 _AssumptionRow(
                   icon: Icons.percent,
                   text: '5 % App-Preis auf jeden Kauf — garantiert.',
@@ -238,8 +242,11 @@ class SubscriptionValueScreen extends ConsumerWidget {
               color: AppColors.surfaceAlt,
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_outline,
-                      color: AppColors.statusPositive, size: 20),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    color: AppColors.statusPositive,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.s2),
                   Expanded(
                     child: Text(

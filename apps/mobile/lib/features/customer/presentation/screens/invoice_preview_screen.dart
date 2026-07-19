@@ -44,8 +44,11 @@ class InvoicePreviewScreen extends StatelessWidget {
               borderColor: AppColors.brand,
               child: Row(
                 children: [
-                  const Icon(Icons.mark_email_read_outlined,
-                      color: AppColors.ink, size: 20),
+                  const Icon(
+                    Icons.mark_email_read_outlined,
+                    color: AppColors.ink,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.s2),
                   Expanded(
                     child: Text(
@@ -78,7 +81,8 @@ class _InvoiceBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final snap = invoice.billingSnapshot;
     final issuer = Map<String, dynamic>.from(
-        snap['issuer'] as Map? ?? const <String, dynamic>{});
+      snap['issuer'] as Map? ?? const <String, dynamic>{},
+    );
     final recipientLines = <String>[
       if ((snap['company_name'] as String?)?.isNotEmpty ?? false)
         snap['company_name'] as String,
@@ -114,13 +118,17 @@ class _InvoiceBody extends StatelessWidget {
                   Text(
                     '${issuer['street'] ?? ''}\n${issuer['zip'] ?? ''} ${issuer['city'] ?? ''}',
                     style: AppTypography.body(
-                        size: 12, color: AppColors.textDefault),
+                      size: 12,
+                      color: AppColors.textDefault,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Steuernummer: ${issuer['tax_number'] ?? ''}',
                     style: AppTypography.body(
-                        size: 12, color: AppColors.textDefault),
+                      size: 12,
+                      color: AppColors.textDefault,
+                    ),
                   ),
                 ],
               ),
@@ -146,27 +154,41 @@ class _InvoiceBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Rechnungsempfänger:',
-                      style: AppTypography.body(
-                          size: 11,
-                          weight: FontWeight.w800,
-                          color: AppColors.textMuted)),
+                  Text(
+                    'Rechnungsempfänger:',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w800,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   for (final line in recipientLines)
-                    Text(line,
-                        style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w700,
-                            color: AppColors.ink)),
+                    Text(
+                      line,
+                      style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
                   const SizedBox(height: 6),
                   if ((snap['tax_number'] as String?)?.isNotEmpty ?? false)
-                    Text('Steuernummer: ${snap['tax_number']}',
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textDefault)),
+                    Text(
+                      'Steuernummer: ${snap['tax_number']}',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textDefault,
+                      ),
+                    ),
                   if ((snap['vat_id'] as String?)?.isNotEmpty ?? false)
-                    Text('USt-IdNr.: ${snap['vat_id']}',
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textDefault)),
+                    Text(
+                      'USt-IdNr.: ${snap['vat_id']}',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textDefault,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -191,7 +213,9 @@ class _InvoiceBody extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s4, vertical: AppSpacing.s3),
+                horizontal: AppSpacing.s4,
+                vertical: AppSpacing.s3,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.brand,
                 borderRadius: BorderRadius.circular(AppRadii.md),
@@ -199,11 +223,14 @@ class _InvoiceBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Bruttobetrag',
-                      style: AppTypography.body(
-                          size: 11,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  Text(
+                    'Bruttobetrag',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
                   Text(
                     Formatters.euro(invoice.totalGross),
                     style: AppTypography.display(
@@ -246,14 +273,22 @@ class _InvoiceBody extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('$k: ',
-                style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w700,
-                    color: AppColors.textMuted)),
-            Text(v,
-                style: AppTypography.body(
-                    size: 12, weight: FontWeight.w800, color: AppColors.ink)),
+            Text(
+              '$k: ',
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w700,
+                color: AppColors.textMuted,
+              ),
+            ),
+            Text(
+              v,
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
           ],
         ),
       );
@@ -284,10 +319,10 @@ class _RateTable extends StatelessWidget {
     final header = ['Position', 'Satz', 'Netto', 'USt', 'Brutto'];
 
     return Table(
-      border: TableBorder(
-        horizontalInside: const BorderSide(color: AppColors.borderSubtle),
-        top: const BorderSide(color: AppColors.ink),
-        bottom: const BorderSide(color: AppColors.ink),
+      border: const TableBorder(
+        horizontalInside: BorderSide(color: AppColors.borderSubtle),
+        top: BorderSide(color: AppColors.ink),
+        bottom: BorderSide(color: AppColors.ink),
       ),
       columnWidths: const {
         0: FlexColumnWidth(3),
@@ -303,11 +338,14 @@ class _RateTable extends StatelessWidget {
             for (final h in header)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                child: Text(h,
-                    style: AppTypography.body(
-                        size: 11,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink)),
+                child: Text(
+                  h,
+                  style: AppTypography.body(
+                    size: 11,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
               ),
           ],
         ),

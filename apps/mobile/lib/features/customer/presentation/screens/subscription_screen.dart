@@ -113,9 +113,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       context: context,
       builder: (dctx) => StatefulBuilder(
         builder: (dctx, setDialog) => AlertDialog(
-          title: Text(isSwitch
-              ? 'Zum ${plan.title} wechseln?'
-              : '${plan.title} bestellen?'),
+          title: Text(
+            isSwitch
+                ? 'Zum ${plan.title} wechseln?'
+                : '${plan.title} bestellen?',
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -156,9 +158,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     'Achtung: Das Lifetime-Abo ist endgültig — ein späterer '
                     'Wechsel in ein anderes Abo-Modell ist nicht mehr möglich.',
                     style: AppTypography.body(
-                        size: 13,
-                        weight: FontWeight.w700,
-                        color: AppColors.statusCritical),
+                      size: 13,
+                      weight: FontWeight.w700,
+                      color: AppColors.statusCritical,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.s2),
                   // § 356 Abs. 5 BGB: ohne diesen Haken bleibt der
@@ -203,9 +206,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               onPressed: (lifetime && !withdrawalConsent)
                   ? null
                   : () => Navigator.of(dctx).pop(true),
-              child: Text(lifetime
-                  ? 'Jetzt endgültig bestellen'
-                  : 'Jetzt verbindlich bestellen'),
+              child: Text(
+                lifetime
+                    ? 'Jetzt endgültig bestellen'
+                    : 'Jetzt verbindlich bestellen',
+              ),
             ),
           ],
         ),
@@ -225,13 +230,13 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
     setState(() => _busy = true);
     try {
-      final res = await ref
-          .read(supabaseClientProvider)
-          .functions
-          .invoke('subscription-choose', body: {
-        'plan': plan.key,
-        'withdrawal_consent': _pendingWithdrawalConsent,
-      });
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
+        'subscription-choose',
+        body: {
+          'plan': plan.key,
+          'withdrawal_consent': _pendingWithdrawalConsent,
+        },
+      );
       final data = Map<String, dynamic>.from(res.data as Map);
       if (data['ok'] != true) {
         throw Exception(data['error'] ?? 'Unbekannter Fehler');
@@ -273,7 +278,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       appBar: AppBar(title: const Text('Mein Abo')),
       body: _loading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.brand))
+              child: CircularProgressIndicator(color: AppColors.brand),
+            )
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.s4),
               children: [

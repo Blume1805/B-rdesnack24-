@@ -32,22 +32,27 @@ class MySignatureTasksScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Zu signieren')),
       body: tasks.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Padding(
-            padding: const EdgeInsets.all(AppSpacing.s5), child: Text('$e')),
+          padding: const EdgeInsets.all(AppSpacing.s5),
+          child: Text('$e'),
+        ),
         data: (list) => RefreshIndicator(
           color: AppColors.brand,
           onRefresh: () async => ref.invalidate(_mySignatureTasksProvider),
           child: list.isEmpty
-              ? ListView(children: const [
-                  SizedBox(height: 120),
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.s5),
-                      child: Text('Aktuell nichts zu unterschreiben.'),
+              ? ListView(
+                  children: const [
+                    SizedBox(height: 120),
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.s5),
+                        child: Text('Aktuell nichts zu unterschreiben.'),
+                      ),
                     ),
-                  ),
-                ])
+                  ],
+                )
               : ListView(
                   padding: const EdgeInsets.all(AppSpacing.s4),
                   children: [
@@ -87,11 +92,14 @@ class _TaskCard extends ConsumerWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(title,
-                      style: AppTypography.body(
-                          size: 15,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  child: Text(
+                    title,
+                    style: AppTypography.body(
+                      size: 15,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
                 ),
                 StatusBadge(
                   label: done ? 'signiert' : 'offen',
@@ -149,14 +157,20 @@ class _TaskCard extends ConsumerWidget {
   }
 
   Future<void> _openDoc(
-      BuildContext context, WidgetRef ref, String filePath) async {
+    BuildContext context,
+    WidgetRef ref,
+    String filePath,
+  ) async {
     final client = ref.read(supabaseClientProvider);
     try {
       final url = await client.storage
           .from('documents')
           .createSignedUrl(filePath, 3600 * 24);
-      await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -172,8 +186,11 @@ class _TaskCard extends ConsumerWidget {
       final url = await client.storage
           .from('signed-documents')
           .createSignedUrl('employee/${row['id']}.pdf', 3600 * 24);
-      await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -244,7 +261,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       await client.storage.from('employee-signatures').uploadBinary(
             path,
             Uint8List.fromList(png),
-            fileOptions: FileOptions(
+            fileOptions: const FileOptions(
               contentType: 'image/png',
               upsert: true,
             ),
@@ -253,16 +270,22 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       final ctx = '${DateTime.now().millisecondsSinceEpoch}|'
           '${Uri.base.host}|${client.auth.currentUser?.id}';
       final ipHash = base64Encode(utf8.encode(ctx)).substring(0, 32);
-      await client.rpc('submit_employee_signature', params: {
-        'p_task': widget.taskId,
-        'p_png_path': path,
-        'p_ip_hash': ipHash,
-      });
+      await client.rpc(
+        'submit_employee_signature',
+        params: {
+          'p_task': widget.taskId,
+          'p_png_path': path,
+          'p_ip_hash': ipHash,
+        },
+      );
       // Merge-Edge-Function anstoßen (fire-and-forget nicht sinnvoll:
       // Rückmeldung soll den Nachweis-Button freischalten)
-      await client.functions.invoke('merge-employee-signature', body: {
-        'task_id': widget.taskId,
-      });
+      await client.functions.invoke(
+        'merge-employee-signature',
+        body: {
+          'task_id': widget.taskId,
+        },
+      );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() {
@@ -283,9 +306,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Unterschrift zeichnen',
-                style: AppTypography.display(
-                    size: 20, weight: FontWeight.w800, color: AppColors.ink)),
+            Text(
+              'Unterschrift zeichnen',
+              style: AppTypography.display(
+                size: 20,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Zeichne deine Unterschrift mit dem Finger. Die Signatur '
@@ -327,9 +355,13 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text(_error!,
-                    style: AppTypography.body(
-                        size: 12, color: AppColors.statusCritical)),
+                child: Text(
+                  _error!,
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.statusCritical,
+                  ),
+                ),
               ),
             const SizedBox(height: AppSpacing.s3),
             Row(
@@ -350,7 +382,10 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppColors.ink))
+                              strokeWidth: 2,
+                              color: AppColors.ink,
+                            ),
+                          )
                         : const Icon(Icons.check),
                     label: const Text('Speichern'),
                     style: FilledButton.styleFrom(

@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../di/providers.dart';
 
 /// Sichere Uploads in private Storage-Buckets (haccp/documents).
-/// Pfadkonvention: <uid>/<timestamp>_<name>.
+/// Pfadkonvention: `<uid>/<timestamp>_<name>`.
 class StorageService {
   StorageService(this._client);
   final SupabaseClient _client;

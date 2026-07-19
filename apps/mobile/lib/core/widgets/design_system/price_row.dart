@@ -23,8 +23,9 @@ class PriceRow extends StatelessWidget {
   final bool showBadge;
 
   double get _percent {
-    if (discountPercent != null && discountPercent! > 0)
+    if (discountPercent != null && discountPercent! > 0) {
       return discountPercent!;
+    }
     if (regular <= 0) return 0;
     return ((regular - discounted) / regular) * 100;
   }

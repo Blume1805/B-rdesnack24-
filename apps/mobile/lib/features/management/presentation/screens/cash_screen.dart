@@ -75,8 +75,10 @@ class _CashFormState extends ConsumerState<_CashForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Geldentnahme erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Geldentnahme erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,
@@ -88,7 +90,8 @@ class _CashFormState extends ConsumerState<_CashForm> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
-                    labelText: 'Entnommener Betrag brutto (€)'),
+                  labelText: 'Entnommener Betrag brutto (€)',
+                ),
                 validator: (v) {
                   final n = double.tryParse((v ?? '').replaceAll(',', '.'));
                   return n == null ? 'Betrag eingeben' : null;

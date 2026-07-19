@@ -104,11 +104,17 @@ class _VendingMachinePainter extends CustomPainter {
     // Gehäuse
     const r = 12.0;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, w, h), Radius.circular(r)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, w, h),
+        const Radius.circular(r),
+      ),
       body,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, w, h), Radius.circular(r)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, w, h),
+        const Radius.circular(r),
+      ),
       line,
     );
 
@@ -311,15 +317,19 @@ class WordmarkLarge extends StatelessWidget {
         Text(
           'BÖRDESNACK',
           style: AppTypography.display(
-                  size: size, weight: FontWeight.w800, color: color)
-              .copyWith(height: 1.0, letterSpacing: -0.5),
+            size: size,
+            weight: FontWeight.w800,
+            color: color,
+          ).copyWith(height: 1.0, letterSpacing: -0.5),
         ),
         SizedBox(width: size * 0.18),
         Text(
           '24',
           style: AppTypography.display(
-                  size: size, weight: FontWeight.w800, color: accent)
-              .copyWith(height: 1.0, letterSpacing: -0.5),
+            size: size,
+            weight: FontWeight.w800,
+            color: accent,
+          ).copyWith(height: 1.0, letterSpacing: -0.5),
         ),
       ],
     );

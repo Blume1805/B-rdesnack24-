@@ -42,13 +42,19 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
     try {
       final client = ref.read(supabaseClientProvider);
       final results = await Future.wait([
-        client.rpc('inventory_fifo_movements', params: {
-          'p_from': _from.toUtc().toIso8601String(),
-          'p_to': _to.toUtc().toIso8601String(),
-        }),
-        client.rpc('inventory_fifo_lots', params: {
-          'p_to': _to.toUtc().toIso8601String(),
-        }),
+        client.rpc(
+          'inventory_fifo_movements',
+          params: {
+            'p_from': _from.toUtc().toIso8601String(),
+            'p_to': _to.toUtc().toIso8601String(),
+          },
+        ),
+        client.rpc(
+          'inventory_fifo_lots',
+          params: {
+            'p_to': _to.toUtc().toIso8601String(),
+          },
+        ),
         client.rpc('list_partner_signatures'),
       ]);
       _movements = (results[0] as List).cast<Map<String, dynamic>>();
@@ -104,14 +110,17 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
             'Fortfahren?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
           FilledButton(
-              style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Anfordern')),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brand,
+              foregroundColor: AppColors.ink,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Anfordern'),
+          ),
         ],
       ),
     );
@@ -146,7 +155,8 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
   /// Gruppiert Bewegungen nach Produkt in Original-Reihenfolge (Server
   /// liefert bereits nach product_name, sku, occurred_at sortiert).
   Map<String, List<Map<String, dynamic>>> _byProduct(
-      List<Map<String, dynamic>> rows) {
+    List<Map<String, dynamic>> rows,
+  ) {
     final m = <String, List<Map<String, dynamic>>>{};
     for (final r in rows) {
       final key = r['product_id']?.toString() ?? '';
@@ -164,14 +174,18 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
           if (_movements != null && _movements!.isNotEmpty) ...[
             IconButton(
               tooltip: 'Freigabe anfordern',
-              icon: const Icon(Icons.rule_folder_outlined,
-                  color: AppColors.brand),
+              icon: const Icon(
+                Icons.rule_folder_outlined,
+                color: AppColors.brand,
+              ),
               onPressed: _requestApproval,
             ),
             IconButton(
               tooltip: 'Als PDF drucken',
-              icon: const Icon(Icons.picture_as_pdf,
-                  color: AppColors.statusCritical),
+              icon: const Icon(
+                Icons.picture_as_pdf,
+                color: AppColors.statusCritical,
+              ),
               onPressed: () => printInventoryReport(
                 movements: _movements!,
                 lots: _lots ?? const [],
@@ -232,7 +246,9 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.ink),
+                      strokeWidth: 2,
+                      color: AppColors.ink,
+                    ),
                   )
                 : const Icon(Icons.refresh),
             label: const Text('Inventur berechnen'),
@@ -247,8 +263,10 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
             AppCard(
               color: const Color(0xFFF7DBDB),
               borderColor: AppColors.statusCritical,
-              child: Text(_error!,
-                  style: AppTypography.body(size: 13, color: AppColors.ink)),
+              child: Text(
+                _error!,
+                style: AppTypography.body(size: 13, color: AppColors.ink),
+              ),
             )
           else if (_movements == null)
             const SizedBox.shrink()
@@ -300,13 +318,21 @@ class _ProductSection extends StatelessWidget {
     final name = movements.first['product_name']?.toString() ?? '';
     final sku = movements.first['sku']?.toString() ?? '';
     final endQty = lots.fold<int>(
-        0, (s, l) => s + ((l['remaining_qty'] as num?)?.toInt() ?? 0));
+      0,
+      (s, l) => s + ((l['remaining_qty'] as num?)?.toInt() ?? 0),
+    );
     final grossSum = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_gross'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_gross'] as num?)?.toDouble() ?? 0),
+    );
     final discSum = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_discount'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_discount'] as num?)?.toDouble() ?? 0),
+    );
     final netSum = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_net'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_net'] as num?)?.toDouble() ?? 0),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.s5),
@@ -351,11 +377,14 @@ class _ProductSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.s3),
-            Text('Bewegungen im Zeitraum',
-                style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted)),
+            Text(
+              'Bewegungen im Zeitraum',
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w800,
+                color: AppColors.textMuted,
+              ),
+            ),
             const SizedBox(height: 4),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -379,11 +408,14 @@ class _ProductSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.s3),
-            Text('FIFO-Restlots am Stichtag',
-                style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted)),
+            Text(
+              'FIFO-Restlots am Stichtag',
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w800,
+                color: AppColors.textMuted,
+              ),
+            ),
             const SizedBox(height: 4),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -441,38 +473,48 @@ class _ProductSection extends StatelessWidget {
       color: rowColor == null ? null : WidgetStateProperty.all(rowColor),
       cells: [
         DataCell(Text(_fmtDate(occurred))),
-        DataCell(Text(label,
+        DataCell(
+          Text(
+            label,
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
               color:
                   type == 'disposal' ? AppColors.statusCritical : AppColors.ink,
-            ))),
-        DataCell(Text(
-          qty > 0 ? '+$qty' : '$qty',
-          style: AppTypography.body(
-            size: 12,
-            weight: FontWeight.w800,
-            color: qty > 0 ? AppColors.statusPositive : AppColors.ink,
+            ),
           ),
-        )),
+        ),
+        DataCell(
+          Text(
+            qty > 0 ? '+$qty' : '$qty',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: qty > 0 ? AppColors.statusPositive : AppColors.ink,
+            ),
+          ),
+        ),
         DataCell(Text(cost == null ? '—' : Formatters.euro(cost))),
-        DataCell(Text(
-          invNo.isEmpty
-              ? '—'
-              : '$invNo${invDate == null ? '' : '  · ${_fmtDate(invDate)}'}',
-          style: AppTypography.body(size: 11),
-        )),
-        DataCell(Text(_fmtDate(lotMhd))),
-        DataCell(SizedBox(
-          width: 200,
-          child: Text(
-            reason,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.body(size: 11, color: AppColors.textMuted),
+        DataCell(
+          Text(
+            invNo.isEmpty
+                ? '—'
+                : '$invNo${invDate == null ? '' : '  · ${_fmtDate(invDate)}'}',
+            style: AppTypography.body(size: 11),
           ),
-        )),
+        ),
+        DataCell(Text(_fmtDate(lotMhd))),
+        DataCell(
+          SizedBox(
+            width: 200,
+            child: Text(
+              reason,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.body(size: 11, color: AppColors.textMuted),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -489,44 +531,69 @@ class _ProductSection extends StatelessWidget {
     final disc = (l['lot_discount'] as num?)?.toDouble() ?? 0;
     final net = (l['lot_net'] as num?)?.toDouble() ?? 0;
     final warn = pct >= 20;
-    return DataRow(cells: [
-      DataCell(Text(invNo,
-          style: AppTypography.body(size: 11, color: AppColors.ink))),
-      DataCell(Text(_fmtDate(invDate))),
-      DataCell(Text('$rest',
-          style: AppTypography.body(
-              size: 12, weight: FontWeight.w800, color: AppColors.ink))),
-      DataCell(Text(Formatters.euro(cost))),
-      DataCell(Text(_fmtDate(mhd))),
-      DataCell(Text(days == null ? '—' : '${days}d')),
-      DataCell(Text(
-        '$pct %',
-        style: AppTypography.body(
-          size: 12,
-          weight: FontWeight.w800,
-          color: warn ? AppColors.statusCritical : AppColors.ink,
+    return DataRow(
+      cells: [
+        DataCell(
+          Text(
+            invNo,
+            style: AppTypography.body(size: 11, color: AppColors.ink),
+          ),
         ),
-      )),
-      DataCell(Text(Formatters.euro(gross))),
-      DataCell(Text(
-        disc == 0 ? '—' : '− ${Formatters.euro(disc)}',
-        style: AppTypography.body(
-          size: 12,
-          weight: FontWeight.w800,
-          color: warn ? AppColors.statusCritical : AppColors.ink,
+        DataCell(Text(_fmtDate(invDate))),
+        DataCell(
+          Text(
+            '$rest',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
+          ),
         ),
-      )),
-      DataCell(Text(
-        Formatters.euro(net),
-        style: AppTypography.body(
-            size: 13, weight: FontWeight.w800, color: AppColors.ink),
-      )),
-    ]);
+        DataCell(Text(Formatters.euro(cost))),
+        DataCell(Text(_fmtDate(mhd))),
+        DataCell(Text(days == null ? '—' : '${days}d')),
+        DataCell(
+          Text(
+            '$pct %',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: warn ? AppColors.statusCritical : AppColors.ink,
+            ),
+          ),
+        ),
+        DataCell(Text(Formatters.euro(gross))),
+        DataCell(
+          Text(
+            disc == 0 ? '—' : '− ${Formatters.euro(disc)}',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w800,
+              color: warn ? AppColors.statusCritical : AppColors.ink,
+            ),
+          ),
+        ),
+        DataCell(
+          Text(
+            Formatters.euro(net),
+            style: AppTypography.body(
+              size: 13,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   DataRow _lotSumRow(int qty, double gross, double disc, double net) {
     final bold = AppTypography.body(
-        size: 13, weight: FontWeight.w800, color: AppColors.ink);
+      size: 13,
+      weight: FontWeight.w800,
+      color: AppColors.ink,
+    );
     return DataRow(
       color: WidgetStateProperty.all(AppColors.brandLight),
       cells: [
@@ -538,8 +605,12 @@ class _ProductSection extends StatelessWidget {
         const DataCell(Text('')),
         const DataCell(Text('')),
         DataCell(Text(Formatters.euro(gross), style: bold)),
-        DataCell(Text(disc == 0 ? '—' : '− ${Formatters.euro(disc)}',
-            style: bold.copyWith(color: AppColors.statusCritical))),
+        DataCell(
+          Text(
+            disc == 0 ? '—' : '− ${Formatters.euro(disc)}',
+            style: bold.copyWith(color: AppColors.statusCritical),
+          ),
+        ),
         DataCell(Text(Formatters.euro(net), style: bold)),
       ],
     );
@@ -564,13 +635,21 @@ class _GrandTotal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalItems = lots.fold<int>(
-        0, (s, l) => s + ((l['remaining_qty'] as num?)?.toInt() ?? 0));
+      0,
+      (s, l) => s + ((l['remaining_qty'] as num?)?.toInt() ?? 0),
+    );
     final totalGross = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_gross'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_gross'] as num?)?.toDouble() ?? 0),
+    );
     final totalDisc = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_discount'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_discount'] as num?)?.toDouble() ?? 0),
+    );
     final totalNet = lots.fold<double>(
-        0, (s, l) => s + ((l['lot_net'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, l) => s + ((l['lot_net'] as num?)?.toDouble() ?? 0),
+    );
     final products =
         lots.map((l) => l['product_id']?.toString()).toSet().length;
 
@@ -581,8 +660,8 @@ class _GrandTotal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.stacked_line_chart, color: AppColors.ink, size: 18),
               SizedBox(width: 6),
               Eyebrow('Bilanzwert der Vorräte'),
@@ -596,18 +675,21 @@ class _GrandTotal extends StatelessWidget {
               _KpiTile(label: 'Produkte im Bestand', value: '$products'),
               _KpiTile(label: 'Einheiten gesamt', value: '$totalItems'),
               _KpiTile(
-                  label: 'Anschaffungskosten netto',
-                  value: Formatters.euro(totalGross)),
+                label: 'Anschaffungskosten netto',
+                value: Formatters.euro(totalGross),
+              ),
               _KpiTile(
-                  label: 'MHD-Abschlag',
-                  value: totalDisc == 0
-                      ? '— 0,00 €'
-                      : '− ${Formatters.euro(totalDisc)}',
-                  emphasize: true),
+                label: 'MHD-Abschlag',
+                value: totalDisc == 0
+                    ? '— 0,00 €'
+                    : '− ${Formatters.euro(totalDisc)}',
+                emphasize: true,
+              ),
               _KpiTile(
-                  label: 'Bilanzwert netto',
-                  value: Formatters.euro(totalNet),
-                  bold: true),
+                label: 'Bilanzwert netto',
+                value: Formatters.euro(totalNet),
+                bold: true,
+              ),
             ],
           ),
         ],
@@ -631,7 +713,9 @@ class _KpiTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s3, vertical: AppSpacing.s2),
+        horizontal: AppSpacing.s3,
+        vertical: AppSpacing.s2,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(AppRadii.md),
@@ -670,30 +754,35 @@ class _MhdWritedownMatrix extends StatelessWidget {
 
   static const rows = <_MhdRow>[
     _MhdRow(
-        range: '> 4 Wochen',
-        typical: '0 %',
-        applied: '0 %',
-        reason: 'normale Verwertbarkeit'),
+      range: '> 4 Wochen',
+      typical: '0 %',
+      applied: '0 %',
+      reason: 'normale Verwertbarkeit',
+    ),
     _MhdRow(
-        range: '2–4 Wochen',
-        typical: '10–30 %',
-        applied: '20 %',
-        reason: 'eingeschränkte Verkaufszeit'),
+      range: '2–4 Wochen',
+      typical: '10–30 %',
+      applied: '20 %',
+      reason: 'eingeschränkte Verkaufszeit',
+    ),
     _MhdRow(
-        range: '1–2 Wochen',
-        typical: '30–50 %',
-        applied: '40 %',
-        reason: 'erheblicher Verkaufsdruck'),
+      range: '1–2 Wochen',
+      typical: '30–50 %',
+      applied: '40 %',
+      reason: 'erheblicher Verkaufsdruck',
+    ),
     _MhdRow(
-        range: '< 1 Woche',
-        typical: '50–80 %',
-        applied: '65 %',
-        reason: 'Risiko Nichtverkauf deutlich erhöht'),
+      range: '< 1 Woche',
+      typical: '50–80 %',
+      applied: '65 %',
+      reason: 'Risiko Nichtverkauf deutlich erhöht',
+    ),
     _MhdRow(
-        range: 'MHD überschritten',
-        typical: '100 %',
-        applied: '100 %',
-        reason: 'keine wirtschaftl. Verwertbarkeit'),
+      range: 'MHD überschritten',
+      typical: '100 %',
+      applied: '100 %',
+      reason: 'keine wirtschaftl. Verwertbarkeit',
+    ),
   ];
 
   @override
@@ -703,8 +792,8 @@ class _MhdWritedownMatrix extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.rule_folder_outlined, color: AppColors.ink, size: 18),
               SizedBox(width: 6),
               Eyebrow('Bewertungsansatz MHD-Abschlag'),
@@ -730,32 +819,49 @@ class _MhdWritedownMatrix extends StatelessWidget {
                 DataColumn(label: Text('Rest-MHD am Stichtag')),
                 DataColumn(label: Text('Typischer Ansatz')),
                 DataColumn(
-                    label: Text('Bördesnack24 wendet an'), numeric: true),
+                  label: Text('Bördesnack24 wendet an'),
+                  numeric: true,
+                ),
                 DataColumn(label: Text('Begründung')),
               ],
               rows: [
                 for (final r in rows)
-                  DataRow(cells: [
-                    DataCell(Text(r.range,
-                        style: AppTypography.body(
+                  DataRow(
+                    cells: [
+                      DataCell(
+                        Text(
+                          r.range,
+                          style: AppTypography.body(
                             size: 13,
                             weight: FontWeight.w800,
-                            color: AppColors.ink))),
-                    DataCell(Text(r.typical)),
-                    DataCell(Text(
-                      r.applied,
-                      style: AppTypography.body(
-                        size: 13,
-                        weight: FontWeight.w800,
-                        color: r.applied == '0 %'
-                            ? AppColors.ink
-                            : AppColors.statusCritical,
+                            color: AppColors.ink,
+                          ),
+                        ),
                       ),
-                    )),
-                    DataCell(Text(r.reason,
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textDefault))),
-                  ]),
+                      DataCell(Text(r.typical)),
+                      DataCell(
+                        Text(
+                          r.applied,
+                          style: AppTypography.body(
+                            size: 13,
+                            weight: FontWeight.w800,
+                            color: r.applied == '0 %'
+                                ? AppColors.ink
+                                : AppColors.statusCritical,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          r.reason,
+                          style: AppTypography.body(
+                            size: 12,
+                            color: AppColors.textDefault,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -790,8 +896,8 @@ class _SignatureBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.draw_outlined, color: AppColors.ink, size: 18),
               SizedBox(width: 6),
               Eyebrow('Freigabe / Unterschriften'),
@@ -834,16 +940,21 @@ class _SignatureSlot extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.s2),
             alignment: Alignment.bottomLeft,
             child: image != null && image.isNotEmpty
-                ? Image.network(image,
+                ? Image.network(
+                    image,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const _Line())
+                    errorBuilder: (_, __, ___) => const _Line(),
+                  )
                 : const _Line(),
           ),
           const SizedBox(height: 6),
           Text(
             name,
             style: AppTypography.body(
-                size: 13, weight: FontWeight.w800, color: AppColors.ink),
+              size: 13,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
           ),
           Text(
             '$role · Datum: ${Formatters.date(DateTime.now())}',

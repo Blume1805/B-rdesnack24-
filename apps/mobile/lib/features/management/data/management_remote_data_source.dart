@@ -41,19 +41,25 @@ class ManagementRemoteDataSource {
     DateTime from,
     DateTime to,
   ) async {
-    final rows = await _client.rpc('inventory_fifo_movements', params: {
-      'p_from': from.toUtc().toIso8601String(),
-      'p_to': to.toUtc().toIso8601String(),
-    });
+    final rows = await _client.rpc(
+      'inventory_fifo_movements',
+      params: {
+        'p_from': from.toUtc().toIso8601String(),
+        'p_to': to.toUtc().toIso8601String(),
+      },
+    );
     return (rows as List).cast<Map<String, dynamic>>();
   }
 
   /// Am Stichtag noch verbliebene FIFO-Lots je Produkt mit Restmenge,
   /// EK-Preis, MHD-Abschlag und Bilanzwert.
   Future<List<Map<String, dynamic>>> inventoryFifoLots(DateTime to) async {
-    final rows = await _client.rpc('inventory_fifo_lots', params: {
-      'p_to': to.toUtc().toIso8601String(),
-    });
+    final rows = await _client.rpc(
+      'inventory_fifo_lots',
+      params: {
+        'p_to': to.toUtc().toIso8601String(),
+      },
+    );
     return (rows as List).cast<Map<String, dynamic>>();
   }
 
@@ -107,8 +113,9 @@ class ManagementRemoteDataSource {
       },
     );
     final data = res.data;
-    if (data is Map && data['base64'] is String)
+    if (data is Map && data['base64'] is String) {
       return data['base64'] as String;
+    }
     throw Exception('PDF-Export fehlgeschlagen');
   }
 }

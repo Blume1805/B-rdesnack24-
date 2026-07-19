@@ -48,15 +48,19 @@ class _SignatureManagementScreenState
       final data = res.data;
       if (data is Map && data['ok'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Signatur aus DocuSign übernommen.')));
+          const SnackBar(content: Text('Signatur aus DocuSign übernommen.')),
+        );
         setState(() {});
       } else {
         final msg =
             data is Map ? (data['error']?.toString() ?? '$data') : '$data';
         final hint = data is Map ? data['hint']?.toString() : null;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text(hint == null ? msg : '$msg\n\n$hint'),
-            duration: const Duration(seconds: 6)));
+            duration: const Duration(seconds: 6),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -94,14 +98,18 @@ class _SignatureManagementScreenState
       final signed = await client.storage
           .from('partner-signatures')
           .createSignedUrl(path, 60 * 60 * 24 * 365);
-      await client.rpc('set_partner_signature_image', params: {
-        'p_signature_id': signatureId,
-        'p_image_url': signed,
-        'p_captured_via': 'manual',
-      });
+      await client.rpc(
+        'set_partner_signature_image',
+        params: {
+          'p_signature_id': signatureId,
+          'p_image_url': signed,
+          'p_captured_via': 'manual',
+        },
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Signatur hochgeladen.')));
+          const SnackBar(content: Text('Signatur hochgeladen.')),
+        );
         setState(() {});
       }
     } catch (e) {
@@ -123,13 +131,16 @@ class _SignatureManagementScreenState
         builder: (context, snap) {
           if (snap.connectionState != ConnectionState.done) {
             return const Center(
-                child: CircularProgressIndicator(color: AppColors.brand));
+              child: CircularProgressIndicator(color: AppColors.brand),
+            );
           }
           if (snap.hasError) {
             return Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.s6),
-                    child: Text('${snap.error}')));
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.s6),
+                child: Text('${snap.error}'),
+              ),
+            );
           }
           final rows = snap.data ?? [];
           if (rows.isEmpty) {
@@ -150,7 +161,9 @@ class _SignatureManagementScreenState
                     'hochgeladen werden. PNG mit transparentem Hintergrund '
                     'sieht am besten aus.',
                     style: AppTypography.body(
-                        size: 12, color: AppColors.textMuted),
+                      size: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
                 for (final r in rows)
@@ -204,16 +217,21 @@ class _SignatureCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(row['full_name']?.toString() ?? '',
-                          style: AppTypography.body(
-                              size: 15,
-                              weight: FontWeight.w800,
-                              color: AppColors.ink)),
+                      Text(
+                        row['full_name']?.toString() ?? '',
+                        style: AppTypography.body(
+                          size: 15,
+                          weight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
                       Text(
                         '${row['role_label'] ?? ''}'
                         '${profileName == null ? '' : ' · verknüpft mit „$profileName"'}',
                         style: AppTypography.body(
-                            size: 11, color: AppColors.textMuted),
+                          size: 11,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -246,13 +264,19 @@ class _SignatureCard extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: hasImage
-                  ? Image.network(imageUrl,
+                  ? Image.network(
+                      imageUrl,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) =>
-                          const Text('Bild konnte nicht geladen werden'))
-                  : Text('— noch keine Signatur —',
+                          const Text('Bild konnte nicht geladen werden'),
+                    )
+                  : Text(
+                      '— noch keine Signatur —',
                       style: AppTypography.body(
-                          size: 12, color: AppColors.textMuted)),
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
             ),
             const SizedBox(height: AppSpacing.s3),
             Row(
@@ -285,10 +309,10 @@ class _SignatureCard extends StatelessWidget {
             if (!hasDs) ...[
               const SizedBox(height: 6),
               Text(
-                  'Kein docusign_signature_uri hinterlegt — nur '
-                  'manueller Upload verfügbar.',
-                  style:
-                      AppTypography.body(size: 10, color: AppColors.textMuted)),
+                'Kein docusign_signature_uri hinterlegt — nur '
+                'manueller Upload verfügbar.',
+                style: AppTypography.body(size: 10, color: AppColors.textMuted),
+              ),
             ],
           ],
         ),

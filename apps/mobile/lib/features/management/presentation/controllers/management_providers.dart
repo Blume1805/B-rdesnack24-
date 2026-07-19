@@ -93,12 +93,14 @@ class ManagementActionsController extends StateNotifier<AsyncValue<void>> {
     String? reason,
   }) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _repo.correctInventory(
-          machineId: machineId,
-          productId: productId,
-          deltaQty: deltaQty,
-          reason: reason,
-        ));
+    state = await AsyncValue.guard(
+      () => _repo.correctInventory(
+        machineId: machineId,
+        productId: productId,
+        deltaQty: deltaQty,
+        reason: reason,
+      ),
+    );
     return !state.hasError;
   }
 

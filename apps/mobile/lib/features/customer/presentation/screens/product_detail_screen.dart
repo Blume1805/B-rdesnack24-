@@ -28,7 +28,8 @@ class ProductDetailScreen extends ConsumerWidget {
       ),
       body: detail.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Padding(
           padding: const EdgeInsets.all(AppSpacing.s5),
           child: Text('$e', style: AppTypography.body(size: 14)),
@@ -104,8 +105,11 @@ class ProductDetailScreen extends ConsumerWidget {
                   color: AppColors.surfaceAlt,
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle_outline,
-                          color: AppColors.statusPositive, size: 20),
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: AppColors.statusPositive,
+                        size: 20,
+                      ),
                       const SizedBox(width: AppSpacing.s2),
                       Expanded(
                         child: Text(

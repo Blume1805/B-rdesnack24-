@@ -85,8 +85,10 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Wartung erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Wartung erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,
@@ -111,7 +113,8 @@ class _MaintenanceFormState extends ConsumerState<_MaintenanceForm> {
               TextFormField(
                 controller: _byCtrl,
                 decoration: const InputDecoration(
-                    labelText: 'Erledigt durch (Name/Firma)'),
+                  labelText: 'Erledigt durch (Name/Firma)',
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(

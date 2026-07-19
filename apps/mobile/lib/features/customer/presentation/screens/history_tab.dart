@@ -46,8 +46,10 @@ class HistoryTab extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s5),
 
           // Spenden-Übersicht mit Klick auf Detail-Screen
-          _SectionEyebrow(
-              eyebrow: 'Deine Spende', icon: Icons.volunteer_activism),
+          const _SectionEyebrow(
+            eyebrow: 'Deine Spende',
+            icon: Icons.volunteer_activism,
+          ),
           const SizedBox(height: AppSpacing.s3),
           donationSummary.when(
             loading: () =>
@@ -74,8 +76,11 @@ class HistoryTab extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(AppRadii.md),
                           ),
                           alignment: Alignment.center,
-                          child: const Icon(Icons.volunteer_activism,
-                              color: AppColors.ink, size: 26),
+                          child: const Icon(
+                            Icons.volunteer_activism,
+                            color: AppColors.ink,
+                            size: 26,
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.s3),
                         Expanded(
@@ -111,8 +116,10 @@ class HistoryTab extends ConsumerWidget {
           ),
 
           const SizedBox(height: AppSpacing.s5),
-          _SectionEyebrow(
-              eyebrow: 'Kaufhistorie', icon: Icons.receipt_long_outlined),
+          const _SectionEyebrow(
+            eyebrow: 'Kaufhistorie',
+            icon: Icons.receipt_long_outlined,
+          ),
           const SizedBox(height: AppSpacing.s3),
           donations.when(
             loading: () =>
@@ -136,8 +143,10 @@ class HistoryTab extends ConsumerWidget {
           // Datum, Produkt, Menge, Bezahlweise. Bei Unternehmern zusätzlich
           // sevDesk-Rechnung + E-Mail. Diese Buttons hier sind reines
           // Demo-Werkzeug für die manuelle Simulation.
-          _SectionEyebrow(
-              eyebrow: 'Demo-Testkauf', icon: Icons.science_outlined),
+          const _SectionEyebrow(
+            eyebrow: 'Demo-Testkauf',
+            icon: Icons.science_outlined,
+          ),
           const SizedBox(height: AppSpacing.s2),
           Text(
             'Simuliert einen Kauf am Automaten mit der gewählten Zahlungs-'
@@ -282,8 +291,11 @@ class _PurchaseDonationRow extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.volunteer_activism,
-                          size: 14, color: AppColors.statusPositive),
+                      const Icon(
+                        Icons.volunteer_activism,
+                        size: 14,
+                        color: AppColors.statusPositive,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         Formatters.euro(purchase.donation),
@@ -414,7 +426,9 @@ class _DemoPurchaseButtonsState extends ConsumerState<_DemoPurchaseButtons> {
               foregroundColor: AppColors.ink,
               side: const BorderSide(color: AppColors.brand),
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s3, vertical: 10),
+                horizontal: AppSpacing.s3,
+                vertical: 10,
+              ),
             ),
           ),
       ],

@@ -49,34 +49,37 @@ class ProductImage extends StatelessWidget {
         ? productName!.trim().substring(0, 1).toUpperCase()
         : null;
 
-    final content = LayoutBuilder(builder: (context, c) {
-      final effective = _expand
-          ? (c.maxWidth.isFinite && c.maxHeight.isFinite
-              ? (c.maxWidth < c.maxHeight ? c.maxWidth : c.maxHeight)
-              : 64.0)
-          : size;
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceAlt,
-          border: Border.all(color: AppColors.borderSubtle),
-          borderRadius: BorderRadius.circular(radius),
-        ),
-        child: Center(
-          child: (url != null && url.isNotEmpty)
-              ? Image.network(
-                  url,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorBuilder: (_, __, ___) => _placeholder(effective, letter),
-                  loadingBuilder: (_, child, progress) => progress == null
-                      ? child
-                      : _placeholder(effective, letter),
-                )
-              : _placeholder(effective, letter),
-        ),
-      );
-    });
+    final content = LayoutBuilder(
+      builder: (context, c) {
+        final effective = _expand
+            ? (c.maxWidth.isFinite && c.maxHeight.isFinite
+                ? (c.maxWidth < c.maxHeight ? c.maxWidth : c.maxHeight)
+                : 64.0)
+            : size;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceAlt,
+            border: Border.all(color: AppColors.borderSubtle),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          child: Center(
+            child: (url != null && url.isNotEmpty)
+                ? Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (_, __, ___) =>
+                        _placeholder(effective, letter),
+                    loadingBuilder: (_, child, progress) => progress == null
+                        ? child
+                        : _placeholder(effective, letter),
+                  )
+                : _placeholder(effective, letter),
+          ),
+        );
+      },
+    );
 
     final clipped = ClipRRect(
       borderRadius: BorderRadius.circular(radius),

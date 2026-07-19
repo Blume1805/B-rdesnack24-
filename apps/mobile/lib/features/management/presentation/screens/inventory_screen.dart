@@ -29,7 +29,9 @@ class InventoryScreen extends ConsumerWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => MachineStockScreen(
-                      machineId: m.id, title: '${m.code} · ${m.name}'),
+                    machineId: m.id,
+                    title: '${m.code} · ${m.name}',
+                  ),
                 ),
               ),
             );

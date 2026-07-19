@@ -55,11 +55,14 @@ class DonationsScreen extends ConsumerWidget {
               data: (p) => _PoolCard(pool: p),
             ),
             const SizedBox(height: AppSpacing.s6),
-            Row(
+            const Row(
               children: [
-                const Icon(Icons.how_to_vote_outlined,
-                    color: AppColors.ink, size: 20),
-                const SizedBox(width: 6),
+                Icon(
+                  Icons.how_to_vote_outlined,
+                  color: AppColors.ink,
+                  size: 20,
+                ),
+                SizedBox(width: 6),
                 Eyebrow('Wofür soll gespendet werden?'),
               ],
             ),
@@ -141,11 +144,14 @@ class DonationsScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: AppSpacing.s6),
-            Row(
+            const Row(
               children: [
-                const Icon(Icons.lightbulb_outline,
-                    color: AppColors.ink, size: 20),
-                const SizedBox(width: 6),
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: AppColors.ink,
+                  size: 20,
+                ),
+                SizedBox(width: 6),
                 Eyebrow('Eigenen Vorschlag einreichen'),
               ],
             ),
@@ -185,8 +191,11 @@ class _SummaryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.volunteer_activism,
-                color: AppColors.ink, size: 32),
+            child: const Icon(
+              Icons.volunteer_activism,
+              color: AppColors.ink,
+              size: 32,
+            ),
           ),
           const SizedBox(width: AppSpacing.s4),
           Expanded(
@@ -246,8 +255,11 @@ class _PoolCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.groups_outlined,
-                    color: AppColors.ink, size: 22),
+                child: const Icon(
+                  Icons.groups_outlined,
+                  color: AppColors.ink,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: AppSpacing.s3),
               Expanded(
@@ -287,12 +299,14 @@ class _PoolCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Dein Anteil: ',
-                  style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w700,
-                    color: AppColors.textMuted,
-                  )),
+              Text(
+                'Dein Anteil: ',
+                style: AppTypography.body(
+                  size: 12,
+                  weight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                ),
+              ),
               Text(
                 '${pool.mySharePct.toStringAsFixed(2).replaceAll('.', ',')} %',
                 style: AppTypography.body(
@@ -519,8 +533,11 @@ class _LogoPlaceholder extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.volunteer_activism,
-              color: AppColors.brand, size: 30),
+          const Icon(
+            Icons.volunteer_activism,
+            color: AppColors.brand,
+            size: 30,
+          ),
           const SizedBox(height: 4),
           Text(
             'Logo folgt',
@@ -627,8 +644,11 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.people_outline,
-                        size: 16, color: AppColors.textMuted),
+                    const Icon(
+                      Icons.people_outline,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${c.voteCount} ${c.voteCount == 1 ? 'Stimme' : 'Stimmen'}',
@@ -642,7 +662,9 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                       const SizedBox(width: AppSpacing.s2),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.brandLight,
                           border: Border.all(color: AppColors.brand),
@@ -667,14 +689,18 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                         foregroundColor:
                             c.votedByMe ? AppColors.onDark : AppColors.ink,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s3, vertical: 10),
+                          horizontal: AppSpacing.s3,
+                          vertical: 10,
+                        ),
                       ),
                       child: _busy
                           ? const SizedBox(
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppColors.onDark),
+                                strokeWidth: 2,
+                                color: AppColors.onDark,
+                              ),
                             )
                           : Text(
                               c.votedByMe ? 'Stimme entfernen' : 'Abstimmen',
@@ -823,22 +849,27 @@ class _SuggestFormState extends ConsumerState<_SuggestForm> {
     if (title.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Bitte einen aussagekräftigen Titel angeben.')),
+          content: Text('Bitte einen aussagekräftigen Titel angeben.'),
+        ),
       );
       return;
     }
     setState(() => _busy = true);
     try {
       await ref.read(customerRepositoryProvider).suggestDonationCause(
-          title, _desc.text.trim().isEmpty ? null : _desc.text.trim());
+            title,
+            _desc.text.trim().isEmpty ? null : _desc.text.trim(),
+          );
       _title.clear();
       _desc.clear();
       ref.invalidate(donationCausesProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Vorschlag eingereicht — er erscheint jetzt unter „Vorschläge".')),
+            content: Text(
+              'Vorschlag eingereicht — er erscheint jetzt unter „Vorschläge".',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -885,7 +916,9 @@ class _SuggestFormState extends ConsumerState<_SuggestForm> {
                     width: 14,
                     height: 14,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.ink),
+                      strokeWidth: 2,
+                      color: AppColors.ink,
+                    ),
                   )
                 : const Icon(Icons.send_outlined, size: 18),
             label: const Text('Vorschlag einreichen'),

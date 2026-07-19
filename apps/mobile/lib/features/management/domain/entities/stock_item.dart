@@ -31,7 +31,8 @@ class StockItem extends Equatable {
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
-          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2),
+        );
 
   factory StockItem.fromJson(Map<String, dynamic> j) => StockItem(
         machineId: j['machine_id'] as String,

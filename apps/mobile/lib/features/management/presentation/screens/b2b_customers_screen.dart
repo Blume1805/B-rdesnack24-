@@ -66,7 +66,9 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.ink),
+                      strokeWidth: 2,
+                      color: AppColors.ink,
+                    ),
                   )
                 : const Icon(Icons.refresh),
             label: const Text('Datensätze laden'),

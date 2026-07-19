@@ -115,8 +115,10 @@ class _FillingFormState extends ConsumerState<_FillingForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Befüllung erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Befüllung erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,

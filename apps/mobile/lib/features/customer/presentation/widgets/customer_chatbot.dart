@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -335,10 +337,13 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
     setState(() {
       _openCategory = c;
       _log.add(_ChatbotMsg(role: 'user', text: c.title));
-      _log.add(_ChatbotMsg(
+      _log.add(
+        _ChatbotMsg(
           role: 'bot',
           text: 'Welche Frage zu „${c.title}" hast du? Tippe auf eine der '
-              'folgenden Fragen.'));
+              'folgenden Fragen.',
+        ),
+      );
     });
     _scrollToBottom();
   }
@@ -354,10 +359,12 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
   void _backToCategories() {
     setState(() {
       _openCategory = null;
-      _log.add(const _ChatbotMsg(
-        role: 'bot',
-        text: 'Alles klar. Womit kann ich dir sonst helfen?',
-      ));
+      _log.add(
+        const _ChatbotMsg(
+          role: 'bot',
+          text: 'Alles klar. Womit kann ich dir sonst helfen?',
+        ),
+      );
     });
     _scrollToBottom();
   }
@@ -370,20 +377,28 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
     Navigator.of(context).pop();
     final nav = Navigator.of(context, rootNavigator: true);
     if (link == 'qr') {
-      nav.push(MaterialPageRoute(builder: (_) => const CustomerQrScreen()));
+      unawaited(
+        nav.push(MaterialPageRoute(builder: (_) => const CustomerQrScreen())),
+      );
       return;
     }
     if (link == 'ai-info') {
-      nav.push(MaterialPageRoute(builder: (_) => const AiInfoScreen()));
+      unawaited(
+        nav.push(MaterialPageRoute(builder: (_) => const AiInfoScreen())),
+      );
       return;
     }
     if (link == 'abo') {
-      nav.push(MaterialPageRoute(builder: (_) => const SubscriptionScreen()));
+      unawaited(
+        nav.push(MaterialPageRoute(builder: (_) => const SubscriptionScreen())),
+      );
       return;
     }
     if (link == 'abo-rechnung') {
-      nav.push(
-        MaterialPageRoute(builder: (_) => const SubscriptionValueScreen()),
+      unawaited(
+        nav.push(
+          MaterialPageRoute(builder: (_) => const SubscriptionValueScreen()),
+        ),
       );
       return;
     }
@@ -405,11 +420,11 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       return;
     }
     if (link.startsWith('route:')) {
-      context.push(link.substring(6));
+      unawaited(context.push(link.substring(6)));
       return;
     }
     // Legacy-Format ohne Schema-Präfix: als GoRouter-Push behandeln.
-    context.push(link);
+    unawaited(context.push(link));
   }
 
   void _scrollToBottom() {
@@ -659,8 +674,11 @@ class _Bubble extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.touch_app_outlined,
-                          size: 16, color: AppColors.ink),
+                      const Icon(
+                        Icons.touch_app_outlined,
+                        size: 16,
+                        color: AppColors.ink,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'hier klicken',

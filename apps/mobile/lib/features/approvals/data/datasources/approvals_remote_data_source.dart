@@ -19,10 +19,13 @@ class ApprovalsRemoteDataSource {
   }
 
   Future<void> decide(String approvalId, bool approve, String? note) async {
-    await _client.rpc('approve_shareholder', params: {
-      'approval_id': approvalId,
-      'decision': approve ? 'approved' : 'rejected',
-      'note': note,
-    });
+    await _client.rpc(
+      'approve_shareholder',
+      params: {
+        'approval_id': approvalId,
+        'decision': approve ? 'approved' : 'rejected',
+        'note': note,
+      },
+    );
   }
 }

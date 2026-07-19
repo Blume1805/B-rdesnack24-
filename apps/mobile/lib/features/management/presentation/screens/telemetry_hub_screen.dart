@@ -30,7 +30,11 @@ class _TelemetryHubScreenState extends ConsumerState<TelemetryHubScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.s5, AppSpacing.s3, AppSpacing.s5, 0),
+              AppSpacing.s5,
+              AppSpacing.s3,
+              AppSpacing.s5,
+              0,
+            ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SegmentedButton<int>(
@@ -88,16 +92,21 @@ class _LiveTab extends ConsumerWidget {
     final health = ref.watch(_healthProvider);
     return health.when(
       loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brand)),
+        child: CircularProgressIndicator(color: AppColors.brand),
+      ),
       error: (e, _) => Center(
-          child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.s6), child: Text('$e'))),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s6),
+          child: Text('$e'),
+        ),
+      ),
       data: (rows) => rows.isEmpty
           ? const _EmptyHint(
               icon: Icons.sensors_off,
               text: 'Noch keine Telemetrie-Daten empfangen. Automat mit '
                   'IoT-Modul verknüpfen und Webhook des Anbieters auf '
-                  '/iot-webhook zeigen lassen.')
+                  '/iot-webhook zeigen lassen.',
+            )
           : RefreshIndicator(
               onRefresh: () async => ref.invalidate(_healthProvider),
               color: AppColors.brand,
@@ -140,11 +149,14 @@ class _HealthCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('$code · $name',
-                      style: AppTypography.body(
-                          size: 16,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  child: Text(
+                    '$code · $name',
+                    style: AppTypography.body(
+                      size: 16,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
                 ),
                 StatusBadge(
                   label: stale
@@ -167,26 +179,31 @@ class _HealthCard extends StatelessWidget {
               children: [
                 if (row['temperature_c'] != null)
                   _Kv(
-                      icon: Icons.thermostat,
-                      label: 'Temperatur',
-                      value: '${row['temperature_c']} °C'),
+                    icon: Icons.thermostat,
+                    label: 'Temperatur',
+                    value: '${row['temperature_c']} °C',
+                  ),
                 if (row['door_state'] != null)
                   _Kv(
-                      icon: Icons.sensor_door_outlined,
-                      label: 'Tür',
-                      value: row['door_state']?.toString() ?? '?'),
+                    icon: Icons.sensor_door_outlined,
+                    label: 'Tür',
+                    value: row['door_state']?.toString() ?? '?',
+                  ),
                 if (row['cash_balance_net'] != null)
                   _Kv(
-                      icon: Icons.euro_symbol,
-                      label: 'Kasse',
-                      value: Formatters.euro(
-                          (row['cash_balance_net'] as num).toDouble())),
+                    icon: Icons.euro_symbol,
+                    label: 'Kasse',
+                    value: Formatters.euro(
+                      (row['cash_balance_net'] as num).toDouble(),
+                    ),
+                  ),
                 if (alarms > 0)
                   _Kv(
-                      icon: Icons.notification_important_outlined,
-                      label: 'Alarme',
-                      value: '$alarms',
-                      warn: true),
+                    icon: Icons.notification_important_outlined,
+                    label: 'Alarme',
+                    value: '$alarms',
+                    warn: true,
+                  ),
               ],
             ),
           ],
@@ -197,11 +214,12 @@ class _HealthCard extends StatelessWidget {
 }
 
 class _Kv extends StatelessWidget {
-  const _Kv(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      this.warn = false});
+  const _Kv({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.warn = false,
+  });
   final IconData icon;
   final String label;
   final String value;
@@ -211,7 +229,9 @@ class _Kv extends StatelessWidget {
     final c = warn ? AppColors.statusCritical : AppColors.ink;
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s3, vertical: AppSpacing.s2),
+        horizontal: AppSpacing.s3,
+        vertical: AppSpacing.s2,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(AppRadii.md),
@@ -222,11 +242,18 @@ class _Kv extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: c),
           const SizedBox(width: 6),
-          Text('$label: ',
-              style: AppTypography.body(size: 11, color: AppColors.textMuted)),
-          Text(value,
-              style: AppTypography.body(
-                  size: 13, weight: FontWeight.w800, color: c)),
+          Text(
+            '$label: ',
+            style: AppTypography.body(size: 11, color: AppColors.textMuted),
+          ),
+          Text(
+            value,
+            style: AppTypography.body(
+              size: 13,
+              weight: FontWeight.w800,
+              color: c,
+            ),
+          ),
         ],
       ),
     );
@@ -260,7 +287,8 @@ class _ProvidersTab extends ConsumerWidget {
       ),
       body: providers.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) => rows.isEmpty
             ? const _EmptyHint(
@@ -268,7 +296,8 @@ class _ProvidersTab extends ConsumerWidget {
                 text: 'Noch kein Telemetrie-Provider registriert. Lege '
                     'einen an (z. B. „CleverMetrics-Prod") und trage '
                     'seinen Webhook-Endpoint bei uns hinterlegten '
-                    'HMAC-Secret ein.')
+                    'HMAC-Secret ein.',
+              )
             : ListView(
                 padding: const EdgeInsets.all(AppSpacing.s5),
                 children: [for (final r in rows) _ProviderCard(row: r)],
@@ -302,11 +331,14 @@ class _ProviderCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(row['name']?.toString() ?? '',
-                      style: AppTypography.body(
-                          size: 15,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                  child: Text(
+                    row['name']?.toString() ?? '',
+                    style: AppTypography.body(
+                      size: 15,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
                 ),
                 StatusBadge(
                   label: (row['is_active'] as bool? ?? true)
@@ -320,15 +352,19 @@ class _ProviderCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-                'Adapter: ${row['adapter']} · '
-                'Uhr-Toleranz: ${row['time_skew_max_s']} s',
-                style:
-                    AppTypography.body(size: 11, color: AppColors.textMuted)),
+              'Adapter: ${row['adapter']} · '
+              'Uhr-Toleranz: ${row['time_skew_max_s']} s',
+              style: AppTypography.body(size: 11, color: AppColors.textMuted),
+            ),
             if ((row['notes'] as String?)?.isNotEmpty == true) ...[
               const SizedBox(height: 4),
-              Text(row['notes']?.toString() ?? '',
-                  style: AppTypography.body(
-                      size: 11, color: AppColors.textDefault)),
+              Text(
+                row['notes']?.toString() ?? '',
+                style: AppTypography.body(
+                  size: 11,
+                  color: AppColors.textDefault,
+                ),
+              ),
             ],
           ],
         ),
@@ -362,13 +398,16 @@ class _ProviderFormState extends ConsumerState<_ProviderForm> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final client = ref.read(supabaseClientProvider);
     try {
-      await client.rpc('register_telemetry_provider', params: {
-        'p_name': _nameCtrl.text.trim(),
-        'p_adapter': _adapter,
-        'p_hmac_secret': _secretCtrl.text.trim(),
-        'p_notes':
-            _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-      });
+      await client.rpc(
+        'register_telemetry_provider',
+        params: {
+          'p_name': _nameCtrl.text.trim(),
+          'p_adapter': _adapter,
+          'p_hmac_secret': _secretCtrl.text.trim(),
+          'p_notes':
+              _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+        },
+      );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
@@ -392,14 +431,17 @@ class _ProviderFormState extends ConsumerState<_ProviderForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Telemetrie-Provider anlegen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Telemetrie-Provider anlegen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nameCtrl,
                 decoration: const InputDecoration(
-                    labelText: 'Anzeigename',
-                    helperText: 'z. B. „CleverMetrics-Prod"'),
+                  labelText: 'Anzeigename',
+                  helperText: 'z. B. „CleverMetrics-Prod"',
+                ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Pflicht' : null,
               ),
@@ -409,9 +451,13 @@ class _ProviderFormState extends ConsumerState<_ProviderForm> {
                 decoration: const InputDecoration(labelText: 'Adapter'),
                 items: const [
                   DropdownMenuItem(
-                      value: 'generic', child: Text('Generic (kanonisch)')),
+                    value: 'generic',
+                    child: Text('Generic (kanonisch)'),
+                  ),
                   DropdownMenuItem(
-                      value: 'clevermetrics', child: Text('CleverMetrics')),
+                    value: 'clevermetrics',
+                    child: Text('CleverMetrics'),
+                  ),
                   DropdownMenuItem(value: 'nayax', child: Text('Nayax')),
                   DropdownMenuItem(value: 'custom', child: Text('Custom')),
                 ],
@@ -422,8 +468,9 @@ class _ProviderFormState extends ConsumerState<_ProviderForm> {
                 controller: _secretCtrl,
                 obscureText: true,
                 decoration: const InputDecoration(
-                    labelText: 'HMAC-Secret',
-                    helperText: 'Wird zur Signaturprüfung genutzt.'),
+                  labelText: 'HMAC-Secret',
+                  helperText: 'Wird zur Signaturprüfung genutzt.',
+                ),
                 validator: (v) => (v == null || v.trim().length < 16)
                     ? 'Min. 16 Zeichen'
                     : null,
@@ -477,14 +524,16 @@ class _DevicesTab extends ConsumerWidget {
       ),
       body: devices.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) => rows.isEmpty
             ? const _EmptyHint(
                 icon: Icons.developer_board_off_outlined,
                 text: 'Noch kein IoT-Gerät verknüpft. Registriere das '
                     'Gateway eines Automaten mit seiner externen '
-                    'Serien-Nummer beim jeweiligen Provider.')
+                    'Serien-Nummer beim jeweiligen Provider.',
+              )
             : ListView(
                 padding: const EdgeInsets.all(AppSpacing.s5),
                 children: [for (final r in rows) _DeviceCard(row: r)],
@@ -517,20 +566,28 @@ class _DeviceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${m?['code'] ?? '?'} · ${m?['name'] ?? ''}',
-                style: AppTypography.body(
-                    size: 14, weight: FontWeight.w800, color: AppColors.ink)),
+            Text(
+              '${m?['code'] ?? '?'} · ${m?['name'] ?? ''}',
+              style: AppTypography.body(
+                size: 14,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text('Provider: ${p?['name']} (${p?['adapter']})',
-                style:
-                    AppTypography.body(size: 11, color: AppColors.textMuted)),
-            Text('Gerät: ${row['external_device_id']}',
-                style:
-                    AppTypography.body(size: 11, color: AppColors.textMuted)),
+            Text(
+              'Provider: ${p?['name']} (${p?['adapter']})',
+              style: AppTypography.body(size: 11, color: AppColors.textMuted),
+            ),
+            Text(
+              'Gerät: ${row['external_device_id']}',
+              style: AppTypography.body(size: 11, color: AppColors.textMuted),
+            ),
             if (row['firmware_version'] != null)
-              Text('Firmware: ${row['firmware_version']}',
-                  style:
-                      AppTypography.body(size: 11, color: AppColors.textMuted)),
+              Text(
+                'Firmware: ${row['firmware_version']}',
+                style: AppTypography.body(size: 11, color: AppColors.textMuted),
+              ),
           ],
         ),
       ),
@@ -595,8 +652,10 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('IoT-Gerät registrieren',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'IoT-Gerät registrieren',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               FutureBuilder<List<Map<String, dynamic>>>(
                 future: client
@@ -612,8 +671,9 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
                     items: [
                       for (final m in list)
                         DropdownMenuItem(
-                            value: m['id'] as String,
-                            child: Text('${m['code']} · ${m['name']}'))
+                          value: m['id'] as String,
+                          child: Text('${m['code']} · ${m['name']}'),
+                        ),
                     ],
                     onChanged: (v) => setState(() => _machineId = v),
                     validator: (v) => v == null ? 'Pflicht' : null,
@@ -630,8 +690,9 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
                   items: [
                     for (final p in list)
                       DropdownMenuItem(
-                          value: p['id'] as String,
-                          child: Text('${p['name']} (${p['adapter']})'))
+                        value: p['id'] as String,
+                        child: Text('${p['name']} (${p['adapter']})'),
+                      ),
                   ],
                   onChanged: (v) => setState(() => _providerId = v),
                   validator: (v) => v == null ? 'Pflicht' : null,
@@ -641,8 +702,9 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
               TextFormField(
                 controller: _deviceIdCtrl,
                 decoration: const InputDecoration(
-                    labelText: 'Externe Gerät-ID / Serien-Nummer',
-                    helperText: 'Wie beim Provider hinterlegt'),
+                  labelText: 'Externe Gerät-ID / Serien-Nummer',
+                  helperText: 'Wie beim Provider hinterlegt',
+                ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Pflicht' : null,
               ),
@@ -654,7 +716,9 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
               ),
               const SizedBox(height: 16),
               FilledButton(
-                  onPressed: _submit, child: const Text('Registrieren')),
+                onPressed: _submit,
+                child: const Text('Registrieren'),
+              ),
             ],
           ),
         ),
@@ -694,8 +758,9 @@ class _SlotsTabState extends ConsumerState<_SlotsTab> {
                 items: [
                   for (final m in list)
                     DropdownMenuItem(
-                        value: m['id'] as String,
-                        child: Text('${m['code']} · ${m['name']}'))
+                      value: m['id'] as String,
+                      child: Text('${m['code']} · ${m['name']}'),
+                    ),
                 ],
                 onChanged: (v) => setState(() => _machineId = v),
               );
@@ -706,7 +771,8 @@ class _SlotsTabState extends ConsumerState<_SlotsTab> {
           child: _machineId == null
               ? const _EmptyHint(
                   icon: Icons.grid_view,
-                  text: 'Automat wählen, um die Slot-Belegung zu bearbeiten.')
+                  text: 'Automat wählen, um die Slot-Belegung zu bearbeiten.',
+                )
               : _SlotList(machineId: _machineId!),
         ),
       ],
@@ -749,14 +815,16 @@ class _SlotList extends ConsumerWidget {
                   ? const _EmptyHint(
                       icon: Icons.grid_off_outlined,
                       text: 'Für diesen Automaten sind noch keine Slots '
-                          'konfiguriert.')
+                          'konfiguriert.',
+                    )
                   : ListView(
                       padding: const EdgeInsets.all(AppSpacing.s5),
                       children: [
                         for (final s in list)
                           _SlotCard(
-                              row: s,
-                              onTap: () => _openSlotForm(context, ref, s)),
+                            row: s,
+                            onTap: () => _openSlotForm(context, ref, s),
+                          ),
                       ],
                     ),
             ),
@@ -766,8 +834,11 @@ class _SlotList extends ConsumerWidget {
     );
   }
 
-  Future<void> _openSlotForm(BuildContext context, WidgetRef ref,
-      Map<String, dynamic>? existing) async {
+  Future<void> _openSlotForm(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic>? existing,
+  ) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -800,26 +871,37 @@ class _SlotCard extends StatelessWidget {
                 color: AppColors.brand,
                 borderRadius: BorderRadius.circular(AppRadii.md),
               ),
-              child: Text(row['slot_code']?.toString() ?? '',
-                  style: AppTypography.body(
-                      size: 14, weight: FontWeight.w800, color: AppColors.ink)),
+              child: Text(
+                row['slot_code']?.toString() ?? '',
+                style: AppTypography.body(
+                  size: 14,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
+              ),
             ),
             const SizedBox(width: AppSpacing.s3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(p?['name']?.toString() ?? '— kein Produkt zugeordnet —',
-                      style: AppTypography.body(
-                          size: 14,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
                   Text(
-                      'SKU: ${p?['sku'] ?? '—'} · '
-                      'Kapazität: ${row['capacity']} · '
-                      'Preis: ${row['unit_price_net'] == null ? '—' : Formatters.euro((row['unit_price_net'] as num).toDouble())}',
-                      style: AppTypography.body(
-                          size: 11, color: AppColors.textMuted)),
+                    p?['name']?.toString() ?? '— kein Produkt zugeordnet —',
+                    style: AppTypography.body(
+                      size: 14,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  Text(
+                    'SKU: ${p?['sku'] ?? '—'} · '
+                    'Kapazität: ${row['capacity']} · '
+                    'Preis: ${row['unit_price_net'] == null ? '—' : Formatters.euro((row['unit_price_net'] as num).toDouble())}',
+                    style: AppTypography.body(
+                      size: 11,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -870,14 +952,17 @@ class _SlotFormState extends ConsumerState<_SlotForm> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final client = ref.read(supabaseClientProvider);
     try {
-      await client.rpc('set_machine_slot', params: {
-        'p_machine_id': widget.machineId,
-        'p_slot_code': _slotCtrl.text.trim(),
-        'p_product_id': _productId,
-        'p_unit_price_net':
-            double.tryParse(_priceCtrl.text.replaceAll(',', '.')),
-        'p_capacity': int.tryParse(_capCtrl.text) ?? 12,
-      });
+      await client.rpc(
+        'set_machine_slot',
+        params: {
+          'p_machine_id': widget.machineId,
+          'p_slot_code': _slotCtrl.text.trim(),
+          'p_product_id': _productId,
+          'p_unit_price_net':
+              double.tryParse(_priceCtrl.text.replaceAll(',', '.')),
+          'p_capacity': int.tryParse(_capCtrl.text) ?? 12,
+        },
+      );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
@@ -901,8 +986,10 @@ class _SlotFormState extends ConsumerState<_SlotForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(widget.existing == null ? 'Slot anlegen' : 'Slot bearbeiten',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                widget.existing == null ? 'Slot anlegen' : 'Slot bearbeiten',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _slotCtrl,
@@ -926,11 +1013,14 @@ class _SlotFormState extends ConsumerState<_SlotForm> {
                     decoration: const InputDecoration(labelText: 'Produkt'),
                     items: [
                       const DropdownMenuItem(
-                          value: null, child: Text('— kein Produkt —')),
+                        value: null,
+                        child: Text('— kein Produkt —'),
+                      ),
                       for (final p in list)
                         DropdownMenuItem(
-                            value: p['id'] as String,
-                            child: Text('${p['name']} (${p['sku']})')),
+                          value: p['id'] as String,
+                          child: Text('${p['name']} (${p['sku']})'),
+                        ),
                     ],
                     onChanged: (v) => setState(() => _productId = v),
                   );
@@ -983,12 +1073,14 @@ class _EventsTab extends ConsumerWidget {
     final events = ref.watch(_eventsProvider);
     return events.when(
       loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brand)),
+        child: CircularProgressIndicator(color: AppColors.brand),
+      ),
       error: (e, _) => Center(child: Text('$e')),
       data: (rows) => rows.isEmpty
           ? const _EmptyHint(
               icon: Icons.history_toggle_off,
-              text: 'Noch keine Telemetrie-Events empfangen.')
+              text: 'Noch keine Telemetrie-Events empfangen.',
+            )
           : RefreshIndicator(
               onRefresh: () async => ref.invalidate(_eventsProvider),
               color: AppColors.brand,
@@ -1027,34 +1119,42 @@ class _EventCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                      '$type · ${m?['code'] ?? '?'}${row['slot_code'] != null ? ' · Slot ${row['slot_code']}' : ''}',
-                      style: AppTypography.body(
-                          size: 13,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink)),
+                    '$type · ${m?['code'] ?? '?'}${row['slot_code'] != null ? ' · Slot ${row['slot_code']}' : ''}',
+                    style: AppTypography.body(
+                      size: 13,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
                 ),
                 StatusBadge(label: status, tone: tone),
               ],
             ),
             const SizedBox(height: 2),
             Text(
-                'Occurred: ${_short(row['occurred_at'])} · '
-                'Received: ${_short(row['received_at'])}',
-                style:
-                    AppTypography.body(size: 11, color: AppColors.textMuted)),
+              'Occurred: ${_short(row['occurred_at'])} · '
+              'Received: ${_short(row['received_at'])}',
+              style: AppTypography.body(size: 11, color: AppColors.textMuted),
+            ),
             if (row['quantity'] != null || row['unit_price_net'] != null)
               Text(
-                  'Menge: ${row['quantity'] ?? '—'}'
-                  '${row['unit_price_net'] != null ? ' · Preis: ${Formatters.euro((row['unit_price_net'] as num).toDouble())}' : ''}'
-                  '${row['dispense_confirmed'] == false ? ' · Auswurf NICHT bestätigt' : ''}',
-                  style: AppTypography.body(
-                      size: 11, color: AppColors.textDefault)),
+                'Menge: ${row['quantity'] ?? '—'}'
+                '${row['unit_price_net'] != null ? ' · Preis: ${Formatters.euro((row['unit_price_net'] as num).toDouble())}' : ''}'
+                '${row['dispense_confirmed'] == false ? ' · Auswurf NICHT bestätigt' : ''}',
+                style: AppTypography.body(
+                  size: 11,
+                  color: AppColors.textDefault,
+                ),
+              ),
             if ((row['error_reason'] as String?)?.isNotEmpty == true)
-              Text('Fehler: ${row['error_reason']}',
-                  style: AppTypography.body(
-                      size: 11,
-                      weight: FontWeight.w700,
-                      color: AppColors.statusCritical)),
+              Text(
+                'Fehler: ${row['error_reason']}',
+                style: AppTypography.body(
+                  size: 11,
+                  weight: FontWeight.w700,
+                  color: AppColors.statusCritical,
+                ),
+              ),
           ],
         ),
       ),
@@ -1091,10 +1191,11 @@ class _EmptyHint extends StatelessWidget {
           children: [
             Icon(icon, size: 40, color: AppColors.textMuted),
             const SizedBox(height: AppSpacing.s2),
-            Text(text,
-                textAlign: TextAlign.center,
-                style:
-                    AppTypography.body(size: 13, color: AppColors.textMuted)),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: AppTypography.body(size: 13, color: AppColors.textMuted),
+            ),
           ],
         ),
       ),

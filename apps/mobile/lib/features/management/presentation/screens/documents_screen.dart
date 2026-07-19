@@ -26,13 +26,15 @@ final _documentsProvider =
   // Signed URLs vorziehen, damit _open() das Fenster synchron im
   // Tap-Handler öffnen kann (sonst blockiert iOS Safari den Popup).
   final storage = ref.read(supabaseClientProvider).storage.from('documents');
-  await Future.wait(docs.map((d) async {
-    final path = d['latest_file_path']?.toString();
-    if (path == null || path.isEmpty) return;
-    try {
-      d['signed_url'] = await storage.createSignedUrl(path, 3600 * 24);
-    } catch (_) {/* leerer Slot — Fehler beim Öffnen kommunizieren */}
-  }));
+  await Future.wait(
+    docs.map((d) async {
+      final path = d['latest_file_path']?.toString();
+      if (path == null || path.isEmpty) return;
+      try {
+        d['signed_url'] = await storage.createSignedUrl(path, 3600 * 24);
+      } catch (_) {/* leerer Slot — Fehler beim Öffnen kommunizieren */}
+    }),
+  );
   return docs;
 });
 
@@ -107,8 +109,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               .functions
               .invoke('documents-init-templates', body: <String, dynamic>{});
           await ref.read(supabaseClientProvider).functions.invoke(
-              'documents-install-branded-set',
-              body: <String, dynamic>{});
+            'documents-install-branded-set',
+            body: <String, dynamic>{},
+          );
           if (mounted) ref.invalidate(_documentsProvider);
         } catch (_) {/* ignore — Rolle ohne Adminrechte */}
       });
@@ -134,7 +137,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.brand))
+                      strokeWidth: 2,
+                      color: AppColors.brand,
+                    ),
+                  )
                 : const Icon(Icons.folder_zip_outlined, color: AppColors.brand),
             onPressed: _exporting ? null : () => _exportZip(context, ref),
           ),
@@ -151,9 +157,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           : null,
       body: docs.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Padding(
-            padding: const EdgeInsets.all(AppSpacing.s5), child: Text('$e')),
+          padding: const EdgeInsets.all(AppSpacing.s5),
+          child: Text('$e'),
+        ),
         data: (list) => folders.when(
           loading: () => const SizedBox.shrink(),
           error: (e, _) => Text('$e'),
@@ -216,13 +225,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   // ─── Aktionen ────────────────────────────────────────────────────
 
   Future<void> _open(
-      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> doc,
+  ) async {
     final path = doc['latest_file_path']?.toString();
     if (path == null || path.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-            Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Für dieses Dokument ist noch keine Version hochgeladen.'),
+        ),
+      );
       return;
     }
     final title = doc['title']?.toString() ?? 'Dokument';
@@ -242,6 +256,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           .storage
           .from('documents')
           .createSignedUrl(path, 3600 * 24);
+      if (!context.mounted) return;
       if (isPdf || isImage) {
         // Inline-Viewer (auf Web: iframe im Fullscreen-Dialog; auf mobile:
         // url_launcher). Umgeht Popup-Blocker und behält den App-State.
@@ -250,12 +265,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // DOCX u. ä. → Systembrowser
         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            duration: const Duration(seconds: 5),
-            content: Text(
-                'Format nicht direkt anzeigbar — Datei wurde heruntergeladen. '
-                'Tipp: künftige Versionen als PDF hochladen für Inline-Vorschau.'),
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              duration: Duration(seconds: 5),
+              content: Text(
+                  'Format nicht direkt anzeigbar — Datei wurde heruntergeladen. '
+                  'Tipp: künftige Versionen als PDF hochladen für Inline-Vorschau.'),
+            ),
+          );
         }
       }
     } catch (e) {
@@ -267,7 +284,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Future<void> _addVersion(
-      BuildContext context, WidgetRef ref, String docId) async {
+    BuildContext context,
+    WidgetRef ref,
+    String docId,
+  ) async {
     final picked = await FilePicker.platform.pickFiles(
       withData: true,
       type: FileType.custom,
@@ -282,22 +302,27 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             filename: file.name,
             bytes: file.bytes!,
           );
-      await ref
-          .read(supabaseClientProvider)
-          .rpc('add_document_version', params: {
-        'p_document': docId,
-        'p_file_path': path,
-        'p_notes': file.name,
-      });
+      await ref.read(supabaseClientProvider).rpc(
+        'add_document_version',
+        params: {
+          'p_document': docId,
+          'p_file_path': path,
+          'p_notes': file.name,
+        },
+      );
       if (!context.mounted) return;
       ref.invalidate(_documentsProvider);
       final isPdf = file.name.toLowerCase().endsWith('.pdf');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(isPdf
-            ? 'Neue Version gespeichert.'
-            : 'Version gespeichert. Hinweis: Nicht-PDFs werden beim Öffnen '
-                'heruntergeladen — PDF ist ideal für Inline-Vorschau.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isPdf
+                ? 'Neue Version gespeichert.'
+                : 'Version gespeichert. Hinweis: Nicht-PDFs werden beim Öffnen '
+                    'heruntergeladen — PDF ist ideal für Inline-Vorschau.',
+          ),
+        ),
+      );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context)
@@ -306,7 +331,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Future<void> _setValidUntil(
-      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> doc,
+  ) async {
     final currentRaw = doc['valid_until']?.toString();
     DateTime? initial;
     if (currentRaw != null && currentRaw.isNotEmpty) {
@@ -321,12 +349,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
     if (picked == null) return;
     try {
-      await ref
-          .read(supabaseClientProvider)
-          .rpc('set_document_valid_until', params: {
-        'p_document': doc['id'],
-        'p_valid_until': picked.toIso8601String().substring(0, 10),
-      });
+      await ref.read(supabaseClientProvider).rpc(
+        'set_document_valid_until',
+        params: {
+          'p_document': doc['id'],
+          'p_valid_until': picked.toIso8601String().substring(0, 10),
+        },
+      );
       if (!context.mounted) return;
       ref.invalidate(_documentsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -340,7 +369,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Future<void> _requestReview(
-      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> doc,
+  ) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -351,8 +383,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
@@ -381,7 +414,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Future<void> _inviteEmployees(
-      BuildContext context, WidgetRef ref, Map<String, dynamic> doc) async {
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> doc,
+  ) async {
     final client = ref.read(supabaseClientProvider);
     List<Map<String, dynamic>> employees;
     try {
@@ -396,10 +432,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
     if (employees.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Keine Mitarbeiter angelegt — zuerst über „Mitarbeiter" einladen.'),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Keine Mitarbeiter angelegt — zuerst über „Mitarbeiter" einladen.',
+            ),
+          ),
+        );
       }
       return;
     }
@@ -434,8 +473,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(dCtx, false),
-                child: const Text('Abbrechen')),
+              onPressed: () => Navigator.pop(dCtx, false),
+              child: const Text('Abbrechen'),
+            ),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brand,
@@ -451,10 +491,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     if (ok != true || selected.isEmpty) return;
     try {
       for (final empId in selected) {
-        await client.rpc('invite_employee_signature', params: {
-          'p_document': doc['id'],
-          'p_employee': empId,
-        });
+        await client.rpc(
+          'invite_employee_signature',
+          params: {
+            'p_document': doc['id'],
+            'p_employee': empId,
+          },
+        );
       }
       if (!context.mounted) return;
       ref.invalidate(_signatureTasksProvider(doc['id'] as String));
@@ -483,9 +526,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         await Clipboard.setData(ClipboardData(text: url));
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
               content:
-                  Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.')));
+                  Text('$name (${bytes.length ~/ 1024} KB) heruntergeladen.'),
+            ),
+          );
         }
       } else {
         throw Exception('Ungültige Antwort: $data');
@@ -521,7 +567,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 DropdownButtonFormField<String>(
-                  value: selectedFolder,
+                  initialValue: selectedFolder,
                   decoration: const InputDecoration(labelText: 'Ordner'),
                   items: [
                     for (final f in folders)
@@ -537,11 +583,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(dCtx, false),
-                child: const Text('Abbrechen')),
+              onPressed: () => Navigator.pop(dCtx, false),
+              child: const Text('Abbrechen'),
+            ),
             FilledButton(
-                onPressed: () => Navigator.pop(dCtx, true),
-                child: const Text('Anlegen')),
+              onPressed: () => Navigator.pop(dCtx, true),
+              child: const Text('Anlegen'),
+            ),
           ],
         ),
       ),
@@ -609,7 +657,11 @@ class _FolderChips extends StatelessWidget {
       child: Row(
         children: [
           _chip(
-              context, 'Alle Ordner', selected == null, () => onSelected(null)),
+            context,
+            'Alle Ordner',
+            selected == null,
+            () => onSelected(null),
+          ),
           const SizedBox(width: 6),
           for (final f in folders) ...[
             _chip(
@@ -626,7 +678,11 @@ class _FolderChips extends StatelessWidget {
   }
 
   Widget _chip(
-      BuildContext context, String label, bool active, VoidCallback onTap) {
+    BuildContext context,
+    String label,
+    bool active,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
@@ -693,19 +749,26 @@ class _FolderSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(_iconFor(folder['icon']?.toString()),
-                  size: 18, color: AppColors.ink),
+              Icon(
+                _iconFor(folder['icon']?.toString()),
+                size: 18,
+                color: AppColors.ink,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   folder['label']?.toString() ?? '',
                   style: AppTypography.display(
-                      size: 15, weight: FontWeight.w800, color: AppColors.ink),
+                    size: 15,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
                 ),
               ),
-              Text('${documents.length}',
-                  style:
-                      AppTypography.body(size: 11, color: AppColors.textMuted)),
+              Text(
+                '${documents.length}',
+                style: AppTypography.body(size: 11, color: AppColors.textMuted),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.s2),
@@ -802,9 +865,10 @@ class _DocumentCard extends ConsumerWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.body(
-                        size: 15,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink),
+                      size: 15,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -831,8 +895,11 @@ class _DocumentCard extends ConsumerWidget {
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.picture_as_pdf,
-                                size: 14, color: AppColors.brand),
+                            const Icon(
+                              Icons.picture_as_pdf,
+                              size: 14,
+                              color: AppColors.brand,
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
@@ -842,18 +909,23 @@ class _DocumentCard extends ConsumerWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.brand),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.brand,
+                                ),
                               ),
                             ),
                           ],
                         )
-                      : Text('Noch keine Version hochgeladen',
+                      : Text(
+                          'Noch keine Version hochgeladen',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.body(
-                              size: 11, color: AppColors.textMuted)),
+                            size: 11,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                 ),
                 if (canEdit && !isTemplate)
                   Wrap(
@@ -913,23 +985,34 @@ class _DocumentCard extends ConsumerWidget {
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: LinearProgressIndicator(color: AppColors.brand),
                 ),
-                error: (e, _) => Text('$e',
-                    style: AppTypography.body(
-                        size: 11, color: AppColors.statusCritical)),
+                error: (e, _) => Text(
+                  '$e',
+                  style: AppTypography.body(
+                    size: 11,
+                    color: AppColors.statusCritical,
+                  ),
+                ),
                 data: (tasks) {
                   if (tasks.isEmpty) {
-                    return Text('Noch keine Mitarbeiter eingeladen.',
-                        style: AppTypography.body(
-                            size: 11, color: AppColors.textMuted));
+                    return Text(
+                      'Noch keine Mitarbeiter eingeladen.',
+                      style: AppTypography.body(
+                        size: 11,
+                        color: AppColors.textMuted,
+                      ),
+                    );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Mitarbeiter-Signaturen',
-                          style: AppTypography.body(
-                              size: 11,
-                              weight: FontWeight.w800,
-                              color: AppColors.textMuted)),
+                      Text(
+                        'Mitarbeiter-Signaturen',
+                        style: AppTypography.body(
+                          size: 11,
+                          weight: FontWeight.w800,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       for (final t in tasks) _SigTaskRow(row: t),
                     ],
@@ -958,29 +1041,36 @@ class _SigTaskRow extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Icon(signed ? Icons.check_circle : Icons.hourglass_bottom,
-              size: 16,
-              color: signed ? AppColors.statusPositive : AppColors.brand),
+          Icon(
+            signed ? Icons.check_circle : Icons.hourglass_bottom,
+            size: 16,
+            color: signed ? AppColors.statusPositive : AppColors.brand,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               signed
-                  ? '$name — signiert' +
-                      (signedAt == null
-                          ? ''
-                          : ' · ${signedAt.substring(0, 10)}')
+                  ? '$name — signiert${signedAt == null ? '' : ' · ${signedAt.substring(0, 10)}'}'
                   : '$name — ausstehend',
               style: AppTypography.body(
-                  size: 12, weight: FontWeight.w700, color: AppColors.ink),
+                size: 12,
+                weight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
           ),
           if (signed && path != null && path.isNotEmpty)
             TextButton.icon(
               onPressed: () => _openSigned(context, ref, path),
-              icon: const Icon(Icons.picture_as_pdf,
-                  size: 16, color: AppColors.brand),
-              label: const Text('Nachweis',
-                  style: TextStyle(color: AppColors.brand)),
+              icon: const Icon(
+                Icons.picture_as_pdf,
+                size: 16,
+                color: AppColors.brand,
+              ),
+              label: const Text(
+                'Nachweis',
+                style: TextStyle(color: AppColors.brand),
+              ),
             ),
         ],
       ),
@@ -988,15 +1078,21 @@ class _SigTaskRow extends ConsumerWidget {
   }
 
   Future<void> _openSigned(
-      BuildContext context, WidgetRef ref, String path) async {
+    BuildContext context,
+    WidgetRef ref,
+    String path,
+  ) async {
     try {
       final url = await ref
           .read(supabaseClientProvider)
           .storage
           .from('signed-documents')
           .createSignedUrl(path, 3600 * 24);
-      await launchUrl(Uri.parse(url),
-          mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank',
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -1015,7 +1111,9 @@ class _ExpiryBadge extends StatelessWidget {
     switch (expiry) {
       case 'expired':
         return const StatusBadge(
-            label: 'abgelaufen', tone: StatusTone.critical);
+          label: 'abgelaufen',
+          tone: StatusTone.critical,
+        );
       case 'expiring':
         return const StatusBadge(label: 'läuft bald', tone: StatusTone.warning);
       case 'ok':

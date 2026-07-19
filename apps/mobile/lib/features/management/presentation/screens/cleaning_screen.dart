@@ -86,8 +86,10 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Reinigung erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Reinigung erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,
@@ -99,12 +101,17 @@ class _CleaningFormState extends ConsumerState<_CleaningForm> {
                 decoration: const InputDecoration(labelText: 'Art'),
                 items: const [
                   DropdownMenuItem(
-                      value: 'exterior', child: Text('Außenreinigung')),
+                    value: 'exterior',
+                    child: Text('Außenreinigung'),
+                  ),
                   DropdownMenuItem(
-                      value: 'interior', child: Text('Innenreinigung')),
+                    value: 'interior',
+                    child: Text('Innenreinigung'),
+                  ),
                   DropdownMenuItem(
-                      value: 'full',
-                      child: Text('Vollreinigung + Desinfektion')),
+                    value: 'full',
+                    child: Text('Vollreinigung + Desinfektion'),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _type = v ?? 'exterior'),
               ),

@@ -33,7 +33,9 @@ class ProtocolScaffold extends ConsumerStatefulWidget {
   final String Function(Map<String, dynamic> row) itemTitle;
   final String Function(Map<String, dynamic> row) itemSubtitle;
   final Future<Map<String, dynamic>?> Function(
-      BuildContext context, WidgetRef ref) onCreate;
+    BuildContext context,
+    WidgetRef ref,
+  ) onCreate;
 
   @override
   ConsumerState<ProtocolScaffold> createState() => _ProtocolScaffoldState();
@@ -47,7 +49,13 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
         dateCol: widget.dateCol,
         from: _period.from,
         to: DateTime(
-            _period.to.year, _period.to.month, _period.to.day, 23, 59, 59),
+          _period.to.year,
+          _period.to.month,
+          _period.to.day,
+          23,
+          59,
+          59,
+        ),
       );
 
   Future<void> _create() async {
@@ -65,7 +73,8 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Speichern fehlgeschlagen (Berechtigung?).')),
+          content: Text('Speichern fehlgeschlagen (Berechtigung?).'),
+        ),
       );
     }
   }
@@ -101,14 +110,17 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
           FilledButton(
-              style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Anfordern')),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brand,
+              foregroundColor: AppColors.ink,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Anfordern'),
+          ),
         ],
       ),
     );
@@ -133,7 +145,8 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Freigabe angefordert.')));
+          const SnackBar(content: Text('Freigabe angefordert.')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -165,14 +178,18 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
           if (widget.exportKind != null) ...[
             IconButton(
               tooltip: 'Freigabe anfordern',
-              icon: const Icon(Icons.rule_folder_outlined,
-                  color: AppColors.brand),
+              icon: const Icon(
+                Icons.rule_folder_outlined,
+                color: AppColors.brand,
+              ),
               onPressed: _requestApproval,
             ),
             IconButton(
               tooltip: 'PDF-Nachweis',
-              icon: const Icon(Icons.picture_as_pdf,
-                  color: AppColors.statusCritical),
+              icon: const Icon(
+                Icons.picture_as_pdf,
+                color: AppColors.statusCritical,
+              ),
               onPressed: _export,
             ),
           ],
@@ -208,8 +225,10 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
                       locale: const Locale('de'),
                     );
                     if (picked != null) {
-                      setState(() => _period =
-                          FinancePeriod(from: picked.start, to: picked.end));
+                      setState(
+                        () => _period =
+                            FinancePeriod(from: picked.start, to: picked.end),
+                      );
                     }
                   },
                 ),

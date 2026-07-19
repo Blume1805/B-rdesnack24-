@@ -22,7 +22,7 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myActivePersonalOffer() async {
     final row = await _client.rpc('my_active_personal_offer').maybeSingle();
-    return row as Map<String, dynamic>?;
+    return row;
   }
 
   Future<List<Map<String, dynamic>>> myActivePersonalOffers() async {
@@ -37,16 +37,18 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myLoyaltyStatus() async {
     final row = await _client.rpc('my_loyalty_status').maybeSingle();
-    return row as Map<String, dynamic>?;
+    return row;
   }
 
   Future<Map<String, dynamic>?> ensurePersonalOffer() async {
     if (_uid == null) return null;
     final existing = await myActivePersonalOffer();
     if (existing != null) return existing;
-    final row = await _client.rpc('generate_personal_offer',
-        params: {'p_customer_id': _uid}).maybeSingle();
-    return row as Map<String, dynamic>?;
+    final row = await _client.rpc(
+      'generate_personal_offer',
+      params: {'p_customer_id': _uid},
+    ).maybeSingle();
+    return row;
   }
 
   Future<Map<String, dynamic>> redeemPersonalOffer(String code) async {
@@ -54,7 +56,7 @@ class CustomerRemoteDataSource {
       'redeem_personal_offer',
       params: {'p_code': code.trim()},
     ).single();
-    return row as Map<String, dynamic>;
+    return row;
   }
 
   // Coupon-Aktivierung ------------------------------------------------------
@@ -68,13 +70,17 @@ class CustomerRemoteDataSource {
   }
 
   Future<void> activatePersonalOffer(String personalOfferId) async {
-    await _client.rpc('activate_personal_offer',
-        params: {'p_offer_id': personalOfferId});
+    await _client.rpc(
+      'activate_personal_offer',
+      params: {'p_offer_id': personalOfferId},
+    );
   }
 
   Future<void> deactivatePersonalOffer(String personalOfferId) async {
-    await _client.rpc('deactivate_personal_offer',
-        params: {'p_offer_id': personalOfferId});
+    await _client.rpc(
+      'deactivate_personal_offer',
+      params: {'p_offer_id': personalOfferId},
+    );
   }
 
   Future<List<String>> myActivatedOfferIds() async {
@@ -92,10 +98,13 @@ class CustomerRemoteDataSource {
   // Ratings + Top-Produkte + Detail -------------------------------------
 
   Future<void> rateProduct(String productId, int rating) async {
-    await _client.rpc('rate_product', params: {
-      'p_product_id': productId,
-      'p_rating': rating,
-    });
+    await _client.rpc(
+      'rate_product',
+      params: {
+        'p_product_id': productId,
+        'p_rating': rating,
+      },
+    );
   }
 
   Future<List<Map<String, dynamic>>> topProductsByCategory(
@@ -114,12 +123,12 @@ class CustomerRemoteDataSource {
 
   Future<Map<String, dynamic>?> myDonationSummary() async {
     final row = await _client.rpc('my_donation_summary').maybeSingle();
-    return row as Map<String, dynamic>?;
+    return row;
   }
 
   Future<Map<String, dynamic>?> donationPoolSummary() async {
     final row = await _client.rpc('donation_pool_summary').maybeSingle();
-    return row as Map<String, dynamic>?;
+    return row;
   }
 
   Future<List<Map<String, dynamic>>> myDonationsByPurchase() async {
@@ -135,12 +144,14 @@ class CustomerRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> suggestDonationCause(
-      String title, String? description) async {
+    String title,
+    String? description,
+  ) async {
     final row = await _client.rpc(
       'suggest_donation_cause',
       params: {'p_title': title, 'p_description': description},
     ).single();
-    return row as Map<String, dynamic>;
+    return row;
   }
 
   Future<bool> voteDonationCause(String causeId) async {
@@ -213,7 +224,10 @@ class CustomerRemoteDataSource {
   }
 
   Future<void> submitContact(
-      String category, String? subject, String body) async {
+    String category,
+    String? subject,
+    String body,
+  ) async {
     await _client.from('contact_messages').insert({
       'customer_id': _uid,
       'category': category,
@@ -230,8 +244,10 @@ class CustomerRemoteDataSource {
     });
   }
 
-  Future<void> updateNotifications(
-      {required bool email, required bool push}) async {
+  Future<void> updateNotifications({
+    required bool email,
+    required bool push,
+  }) async {
     await _client
         .from('customers')
         .update({'notify_email': email, 'notify_push': push}).eq('id', _uid!);
@@ -308,10 +324,13 @@ class CustomerRemoteDataSource {
     required String paymentMethod,
     double totalGross = 4.99,
   }) async {
-    await _client.rpc('dev_add_demo_purchase', params: {
-      'p_payment_method': paymentMethod,
-      'p_total_gross': totalGross,
-    });
+    await _client.rpc(
+      'dev_add_demo_purchase',
+      params: {
+        'p_payment_method': paymentMethod,
+        'p_total_gross': totalGross,
+      },
+    );
   }
 
   Future<void> updateGender(String? gender) async {

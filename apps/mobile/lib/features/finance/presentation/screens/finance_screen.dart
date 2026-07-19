@@ -57,7 +57,8 @@ class FinanceScreen extends ConsumerWidget {
             loading: () => const Padding(
               padding: EdgeInsets.all(48),
               child: Center(
-                  child: CircularProgressIndicator(color: AppColors.brand)),
+                child: CircularProgressIndicator(color: AppColors.brand),
+              ),
             ),
             error: (e, _) => _ErrorCard(message: '$e'),
             data: (s) => _SummaryContent(summary: s),
@@ -73,9 +74,11 @@ class FinanceScreen extends ConsumerWidget {
     final ok = !ref.read(financeActionsProvider).hasError;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ok
-            ? 'sevDesk synchronisiert: $count Buchungen.'
-            : 'Synchronisierung fehlgeschlagen.'),
+        content: Text(
+          ok
+              ? 'sevDesk synchronisiert: $count Buchungen.'
+              : 'Synchronisierung fehlgeschlagen.',
+        ),
       ),
     );
   }
@@ -93,7 +96,10 @@ class FinanceScreen extends ConsumerWidget {
   }
 
   Future<void> _requestApproval(
-      BuildContext context, WidgetRef ref, FinancePeriod period) async {
+    BuildContext context,
+    WidgetRef ref,
+    FinancePeriod period,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -105,14 +111,17 @@ class FinanceScreen extends ConsumerWidget {
                 'PDF-Fassung automatisch abgelegt.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
           FilledButton(
-              style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Anfordern')),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brand,
+              foregroundColor: AppColors.ink,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Anfordern'),
+          ),
         ],
       ),
     );
@@ -130,7 +139,8 @@ class FinanceScreen extends ConsumerWidget {
       );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Freigabe angefordert.')));
+          const SnackBar(content: Text('Freigabe angefordert.')),
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -198,10 +208,9 @@ class _IconAction extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     this.onTap,
-    this.emphasize = false,
     this.iconColor,
     this.borderColor,
-  });
+  }) : emphasize = false;
 
   final IconData icon;
   final String tooltip;
@@ -254,8 +263,11 @@ class _PeriodSelector extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s2),
           Row(
             children: [
-              const Icon(Icons.date_range_outlined,
-                  size: 20, color: AppColors.ink),
+              const Icon(
+                Icons.date_range_outlined,
+                size: 20,
+                color: AppColors.ink,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -441,7 +453,9 @@ class _SummaryContent extends StatelessWidget {
                   child: Text(
                     'Keine Buchungen im gewählten Zeitraum.',
                     style: AppTypography.body(
-                        size: 14, color: AppColors.textMuted),
+                      size: 14,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ],

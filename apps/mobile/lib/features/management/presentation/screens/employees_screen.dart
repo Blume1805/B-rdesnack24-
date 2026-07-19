@@ -122,11 +122,13 @@ class _InviteFormState extends State<_InviteForm> {
 
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.of(context).pop(_InviteResult(
-      _emailCtrl.text.trim(),
-      _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
-      _selected.toList(),
-    ));
+    Navigator.of(context).pop(
+      _InviteResult(
+        _emailCtrl.text.trim(),
+        _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+        _selected.toList(),
+      ),
+    );
   }
 
   @override
@@ -142,8 +144,10 @@ class _InviteFormState extends State<_InviteForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Mitarbeiter einladen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Mitarbeiter einladen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailCtrl,
@@ -158,8 +162,10 @@ class _InviteFormState extends State<_InviteForm> {
                 decoration: const InputDecoration(labelText: 'Name (optional)'),
               ),
               const SizedBox(height: 12),
-              Text('Berechtigungen',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Berechtigungen',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               for (final entry in _assignablePermissions.entries)
                 CheckboxListTile(
                   dense: true,

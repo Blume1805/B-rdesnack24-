@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,11 +17,13 @@ import 'inventory_report_print.dart'
     if (dart.library.html) 'inventory_report_print_web.dart';
 
 final _approvalsRemoteProvider = Provider<ApprovalsRemoteDataSource>(
-    (ref) => ApprovalsRemoteDataSource(ref.watch(supabaseClientProvider)));
+  (ref) => ApprovalsRemoteDataSource(ref.watch(supabaseClientProvider)),
+);
 
 final _approvalsListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>(
-        (ref) => ref.watch(_approvalsRemoteProvider).list());
+  (ref) => ref.watch(_approvalsRemoteProvider).list(),
+);
 
 /// Freigaben-Übersicht: alle offenen und erledigten Anfragen. Gesellschafter
 /// sehen ihre eigenen offenen Entscheidungen ganz oben.
@@ -37,11 +37,14 @@ class DocumentApprovalsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Freigaben')),
       body: approvals.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Center(
-            child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.s6),
-                child: Text('$e'))),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.s6),
+            child: Text('$e'),
+          ),
+        ),
         data: (rows) => rows.isEmpty
             ? const _EmptyHint()
             : RefreshIndicator(
@@ -66,12 +69,18 @@ class _EmptyHint extends StatelessWidget {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.s6),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.rule_folder_outlined,
-              size: 40, color: AppColors.textMuted),
-          SizedBox(height: 8),
-          Text('Keine Freigabe-Anfragen offen.'),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.rule_folder_outlined,
+              size: 40,
+              color: AppColors.textMuted,
+            ),
+            SizedBox(height: 8),
+            Text('Keine Freigabe-Anfragen offen.'),
+          ],
+        ),
       ),
     );
   }
@@ -130,12 +139,17 @@ class _ApprovalCard extends ConsumerWidget {
     // Direktansicht 100 % identisch (mit zusätzlichem FREIGEGEBEN-Stempel).
     void handleTap() {
       if (!hasFinal) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(status == 'rejected'
-                ? 'Diese Freigabe wurde abgelehnt.'
-                : status == 'cancelled'
-                    ? 'Diese Freigabe wurde abgebrochen.'
-                    : 'Signiertes PDF wird noch erzeugt …')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              status == 'rejected'
+                  ? 'Diese Freigabe wurde abgelehnt.'
+                  : status == 'cancelled'
+                      ? 'Diese Freigabe wurde abgebrochen.'
+                      : 'Signiertes PDF wird noch erzeugt …',
+            ),
+          ),
+        );
         return;
       }
 
@@ -196,11 +210,14 @@ class _ApprovalCard extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text(row['title']?.toString() ?? '',
-                    style: AppTypography.body(
-                        size: 15,
-                        weight: FontWeight.w800,
-                        color: AppColors.ink)),
+                child: Text(
+                  row['title']?.toString() ?? '',
+                  style: AppTypography.body(
+                    size: 15,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
               ),
               StatusBadge(
                 label: switch (status) {
@@ -261,20 +278,27 @@ class _ApprovalCard extends ConsumerWidget {
             const SizedBox(height: AppSpacing.s3),
             Row(
               children: [
-                const Icon(Icons.picture_as_pdf,
-                    size: 16, color: AppColors.brand),
+                const Icon(
+                  Icons.picture_as_pdf,
+                  size: 16,
+                  color: AppColors.brand,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'Tippen zum Öffnen des signierten PDFs',
                     style: AppTypography.body(
-                        size: 11,
-                        weight: FontWeight.w700,
-                        color: AppColors.brand),
+                      size: 11,
+                      weight: FontWeight.w700,
+                      color: AppColors.brand,
+                    ),
                   ),
                 ),
-                const Icon(Icons.chevron_right,
-                    size: 18, color: AppColors.brand),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: AppColors.brand,
+                ),
               ],
             ),
           ],
@@ -291,15 +315,20 @@ class _ApprovalCard extends ConsumerWidget {
   }
 
   Future<void> _openFinal(
-      BuildContext context, WidgetRef ref, String path) async {
+    BuildContext context,
+    WidgetRef ref,
+    String path,
+  ) async {
     if (path.isEmpty) return;
     final messenger = ScaffoldMessenger.of(context);
     // Feedback anzeigen, während der Signed-URL geholt wird — sonst
     // wirkt der Tap ins Leere, bis der Browser das neue Fenster öffnet.
-    messenger.showSnackBar(const SnackBar(
-      duration: Duration(seconds: 2),
-      content: Text('Signiertes PDF wird geöffnet …'),
-    ));
+    messenger.showSnackBar(
+      const SnackBar(
+        duration: Duration(seconds: 2),
+        content: Text('Signiertes PDF wird geöffnet …'),
+      ),
+    );
     final remote = ref.read(_approvalsRemoteProvider);
     try {
       final url = await remote.signedUrl(path);
@@ -314,13 +343,15 @@ class _ApprovalCard extends ConsumerWidget {
         webOnlyWindowName: '_blank',
       );
       if (!ok && context.mounted) {
-        messenger.showSnackBar(SnackBar(
-          content: const Text('PDF konnte nicht geöffnet werden.'),
-          action: SnackBarAction(
-            label: 'Link kopieren',
-            onPressed: () => Clipboard.setData(ClipboardData(text: url)),
+        messenger.showSnackBar(
+          SnackBar(
+            content: const Text('PDF konnte nicht geöffnet werden.'),
+            action: SnackBarAction(
+              label: 'Link kopieren',
+              onPressed: () => Clipboard.setData(ClipboardData(text: url)),
+            ),
           ),
-        ));
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -330,7 +361,10 @@ class _ApprovalCard extends ConsumerWidget {
   }
 
   Future<void> _decide(
-      BuildContext context, WidgetRef ref, String decision) async {
+    BuildContext context,
+    WidgetRef ref,
+    String decision,
+  ) async {
     String? comment;
     if (decision == 'rejected') {
       final ctrl = TextEditingController();
@@ -345,8 +379,9 @@ class _ApprovalCard extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context, null),
-                child: const Text('Abbrechen')),
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text('Abbrechen'),
+            ),
             FilledButton(
               onPressed: () {
                 if (ctrl.text.trim().length < 3) return;
@@ -376,10 +411,15 @@ class _ApprovalCard extends ConsumerWidget {
           );
       if (context.mounted) {
         ref.invalidate(_approvalsListProvider);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(decision == 'approved'
-                ? 'Freigegeben — signiertes PDF wird erzeugt.'
-                : 'Abgelehnt.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              decision == 'approved'
+                  ? 'Freigegeben — signiertes PDF wird erzeugt.'
+                  : 'Abgelehnt.',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -424,7 +464,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       final rows = await client
           .from('partner_signatures')
           .select(
-              'id, full_name, docusign_signature_uri, image_url, captured_via')
+            'id, full_name, docusign_signature_uri, image_url, captured_via',
+          )
           .eq('profile_id', uid);
       final list = (rows as List).cast<Map<String, dynamic>>();
       setState(() {
@@ -495,11 +536,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       final signed = await client.storage
           .from('partner-signatures')
           .createSignedUrl(path, 60 * 60 * 24 * 365);
-      await client.rpc('set_partner_signature_image', params: {
-        'p_signature_id': _slot!['id'],
-        'p_image_url': signed,
-        'p_captured_via': 'manual',
-      });
+      await client.rpc(
+        'set_partner_signature_image',
+        params: {
+          'p_signature_id': _slot!['id'],
+          'p_image_url': signed,
+          'p_captured_via': 'manual',
+        },
+      );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() => _error = '$e');
@@ -525,9 +569,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Signatur für Freigabe wählen',
-                style: AppTypography.display(
-                    size: 20, weight: FontWeight.w800, color: AppColors.ink)),
+            Text(
+              'Signatur für Freigabe wählen',
+              style: AppTypography.display(
+                size: 20,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Deine Unterschrift wird im signierten PDF als Freigabe-Stempel '
@@ -537,7 +586,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
             const SizedBox(height: AppSpacing.s4),
             if (_loading)
               const Center(
-                  child: CircularProgressIndicator(color: AppColors.brand))
+                child: CircularProgressIndicator(color: AppColors.brand),
+              )
             else if (!hasSlot)
               AppCard(
                 color: const Color(0xFFFAE9E4),
@@ -583,7 +633,9 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                   child: Text(
                     'Kein DocuSign-Signatur-Slot hinterlegt.',
                     style: AppTypography.body(
-                        size: 10, color: AppColors.textMuted),
+                      size: 10,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               const SizedBox(height: AppSpacing.s2),
@@ -609,9 +661,13 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
             ],
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.s3),
-              Text(_error!,
-                  style: AppTypography.body(
-                      size: 12, color: AppColors.statusCritical)),
+              Text(
+                _error!,
+                style: AppTypography.body(
+                  size: 12,
+                  color: AppColors.statusCritical,
+                ),
+              ),
             ],
             const SizedBox(height: AppSpacing.s2),
             TextButton(
@@ -663,12 +719,19 @@ class _DecisionRow extends StatelessWidget {
                     _ => 'ausstehend',
                   }}${at == null ? '' : ' · $at'}',
                   style: AppTypography.body(
-                      size: 12, weight: FontWeight.w700, color: AppColors.ink),
+                    size: 12,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
                 ),
                 if (comment?.isNotEmpty == true)
-                  Text('„$comment"',
-                      style: AppTypography.body(
-                          size: 11, color: AppColors.textMuted)),
+                  Text(
+                    '„$comment"',
+                    style: AppTypography.body(
+                      size: 11,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
               ],
             ),
           ),

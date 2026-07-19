@@ -29,8 +29,11 @@ Future<void> bootstrap() async {
     GoogleFonts.config.allowRuntimeFetching = false;
   }
 
-  await _safe(() => initializeDateFormatting('de_DE'),
-      label: 'initializeDateFormatting', timeoutSeconds: 3);
+  await _safe(
+    () => initializeDateFormatting('de_DE'),
+    label: 'initializeDateFormatting',
+    timeoutSeconds: 3,
+  );
 
   final config = AppConfig.fromEnvironment();
   if (!config.isValid) {
@@ -39,6 +42,9 @@ Future<void> bootstrap() async {
     await _safe(
       () => Supabase.initialize(
         url: config.supabaseUrl,
+        // Umstieg auf publishableKey folgt mit der Key-Rotation im
+        // Supabase-Dashboard.
+        // ignore: deprecated_member_use
         anonKey: config.supabaseAnonKey,
       ),
       label: 'Supabase.initialize',

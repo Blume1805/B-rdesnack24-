@@ -4,7 +4,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
 import '../controllers/customer_providers.dart';
 

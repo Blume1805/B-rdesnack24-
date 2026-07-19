@@ -18,21 +18,27 @@ class CustomerRepositoryImpl implements CustomerRepository {
 
   @override
   Future<List<Offer>> offers() => _guard(
-      () async => (await _remote.activeOffers()).map(Offer.fromJson).toList());
+        () async => (await _remote.activeOffers()).map(Offer.fromJson).toList(),
+      );
 
   @override
-  Future<List<CustomerPrice>> myPrices() => _guard(() async =>
-      (await _remote.myPrices()).map(CustomerPrice.fromJson).toList());
+  Future<List<CustomerPrice>> myPrices() => _guard(
+        () async =>
+            (await _remote.myPrices()).map(CustomerPrice.fromJson).toList(),
+      );
 
   @override
-  Future<List<Purchase>> myPurchases() => _guard(() async =>
-      (await _remote.myPurchases()).map(Purchase.fromJson).toList());
+  Future<List<Purchase>> myPurchases() => _guard(
+        () async =>
+            (await _remote.myPurchases()).map(Purchase.fromJson).toList(),
+      );
 
   @override
-  Future<List<Recommendation>> myRecommendations() =>
-      _guard(() async => (await _remote.myRecommendations())
-          .map(Recommendation.fromJson)
-          .toList());
+  Future<List<Recommendation>> myRecommendations() => _guard(
+        () async => (await _remote.myRecommendations())
+            .map(Recommendation.fromJson)
+            .toList(),
+      );
 
   @override
   Future<Map<String, dynamic>?> myCustomer() => _guard(_remote.myCustomer);
@@ -130,7 +136,11 @@ class CustomerRepositoryImpl implements CustomerRepository {
         final row = await _remote.donationPoolSummary();
         return row == null
             ? const DonationPoolSummary(
-                myDonated: 0, totalPool: 0, mySharePct: 0, nonAppGross: 0)
+                myDonated: 0,
+                totalPool: 0,
+                mySharePct: 0,
+                nonAppGross: 0,
+              )
             : DonationPoolSummary.fromJson(row);
       });
 
@@ -142,7 +152,9 @@ class CustomerRepositoryImpl implements CustomerRepository {
 
   @override
   Future<DonationCause> suggestDonationCause(
-          String title, String? description) =>
+    String title,
+    String? description,
+  ) =>
       _guard(() async {
         final row = await _remote.suggestDonationCause(title, description);
         // Backend liefert die frisch angelegte Zeile ohne Vote-Count zurück
@@ -202,15 +214,17 @@ class CustomerRepositoryImpl implements CustomerRepository {
     String? taxNumber,
     String? vatId,
   }) =>
-      _guard(() => _remote.updateBusinessData(
-            companyName: companyName,
-            billingStreet: billingStreet,
-            billingZip: billingZip,
-            billingCity: billingCity,
-            billingCountry: billingCountry,
-            taxNumber: taxNumber,
-            vatId: vatId,
-          ));
+      _guard(
+        () => _remote.updateBusinessData(
+          companyName: companyName,
+          billingStreet: billingStreet,
+          billingZip: billingZip,
+          billingCity: billingCity,
+          billingCountry: billingCountry,
+          taxNumber: taxNumber,
+          vatId: vatId,
+        ),
+      );
 
   @override
   Future<String> businessCustomersCsv() => _guard(_remote.businessCustomersCsv);
@@ -220,10 +234,12 @@ class CustomerRepositoryImpl implements CustomerRepository {
     required String paymentMethod,
     double totalGross = 4.99,
   }) =>
-      _guard(() => _remote.addDemoPurchase(
-            paymentMethod: paymentMethod,
-            totalGross: totalGross,
-          ));
+      _guard(
+        () => _remote.addDemoPurchase(
+          paymentMethod: paymentMethod,
+          totalGross: totalGross,
+        ),
+      );
 
   @override
   Future<void> submitContact({
@@ -253,7 +269,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
     try {
       return await run();
     } catch (e) {
-      if (e is Failure) throw e;
+      if (e is Failure) rethrow;
       if (e is PostgrestException) {
         if (e.code == '42501') throw PermissionFailure(e.message, cause: e);
         throw ServerFailure(e.message, cause: e);

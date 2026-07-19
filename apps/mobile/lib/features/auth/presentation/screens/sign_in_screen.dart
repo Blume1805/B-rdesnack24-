@@ -232,7 +232,8 @@ class _FormPanel extends StatelessWidget {
                 Row(
                   children: [
                     const Expanded(
-                        child: Divider(color: AppColors.borderSubtle)),
+                      child: Divider(color: AppColors.borderSubtle),
+                    ),
                     Padding(
                       padding:
                           const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
@@ -246,7 +247,8 @@ class _FormPanel extends StatelessWidget {
                       ),
                     ),
                     const Expanded(
-                        child: Divider(color: AppColors.borderSubtle)),
+                      child: Divider(color: AppColors.borderSubtle),
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.s3),
@@ -309,9 +311,13 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text('·',
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textMuted)),
+                    Text(
+                      '·',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => context.push(AppRoutes.privacy),
                       child: Text(
@@ -323,9 +329,13 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text('·',
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textMuted)),
+                    Text(
+                      '·',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                     // § 312k BGB: Kündigungsschaltfläche muss ständig
                     // verfügbar, gut lesbar und eindeutig beschriftet sein.
                     TextButton(
@@ -339,9 +349,13 @@ class _FormPanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text('·',
-                        style: AppTypography.body(
-                            size: 12, color: AppColors.textMuted)),
+                    Text(
+                      '·',
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => context.push(AppRoutes.terms),
                       child: Text(

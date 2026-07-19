@@ -57,7 +57,8 @@ class _PhotoPickerButtonState extends ConsumerState<PhotoPickerButton> {
           ? const SizedBox(
               height: 16,
               width: 16,
-              child: CircularProgressIndicator(strokeWidth: 2))
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
           : Icon(_path == null ? Icons.photo_camera : Icons.check),
       label: Text(_path == null ? 'Foto aufnehmen' : 'Foto angehängt'),
     );

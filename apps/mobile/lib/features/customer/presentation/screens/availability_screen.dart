@@ -17,8 +17,11 @@ import '../controllers/customer_providers.dart';
 /// Status-Badge — die Zahl wird durch die Nayax-Sales-Webhooks laufend
 /// aktualisiert (siehe supabase/functions/nayax-webhook).
 class AvailabilityScreen extends ConsumerStatefulWidget {
-  const AvailabilityScreen(
-      {required this.machineId, required this.title, super.key});
+  const AvailabilityScreen({
+    required this.machineId,
+    required this.title,
+    super.key,
+  });
 
   final String machineId;
   final String title;
@@ -67,7 +70,8 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
       appBar: AppBar(title: Text(widget.title)),
       body: stock.when(
         loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.brand)),
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s5),
@@ -88,7 +92,9 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                         child: Text(
                           'Für diesen Automaten liegen aktuell keine Produktdaten vor.',
                           style: AppTypography.body(
-                              size: 14, color: AppColors.textMuted),
+                            size: 14,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ),
                     ),
@@ -110,7 +116,9 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                     Text(
                       'Bestand wird laufend über die Verkaufsdaten der Automaten aktualisiert.',
                       style: AppTypography.body(
-                          size: 13, color: AppColors.textMuted),
+                        size: 13,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.s5),
                     for (final s in items) ...[

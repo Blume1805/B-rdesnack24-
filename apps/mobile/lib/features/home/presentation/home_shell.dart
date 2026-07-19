@@ -112,8 +112,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         ];
       case UserRole.customer:
         return [
-          _Tab(l10n.navCustomer, Icons.storefront_outlined,
-              const CustomerScreen()),
+          _Tab(
+            l10n.navCustomer,
+            Icons.storefront_outlined,
+            const CustomerScreen(),
+          ),
         ];
     }
   }
@@ -342,9 +345,9 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   top: 0,
                   bottom: 0,
                   right: MediaQuery.of(context).size.width * 0.22,
-                  child: IgnorePointer(
+                  child: const IgnorePointer(
                     child: DecoratedBox(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -457,8 +460,11 @@ class _NotificationBell extends ConsumerWidget {
       children: [
         IconButton(
           tooltip: 'Benachrichtigungen',
-          icon: const Icon(Icons.notifications_none,
-              color: AppColors.onDark, size: 24),
+          icon: const Icon(
+            Icons.notifications_none,
+            color: AppColors.onDark,
+            size: 24,
+          ),
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const NotificationsScreen()),

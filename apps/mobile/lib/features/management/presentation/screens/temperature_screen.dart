@@ -77,8 +77,10 @@ class _TemperatureFormState extends ConsumerState<_TemperatureForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Temperatur erfassen',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Temperatur erfassen',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               MachineDropdown(
                 value: _machineId,
@@ -88,7 +90,9 @@ class _TemperatureFormState extends ConsumerState<_TemperatureForm> {
               TextFormField(
                 controller: _tempCtrl,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true, signed: true),
+                  decimal: true,
+                  signed: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: 'Ist-Temperatur (°C)',
                   suffixText: '°C',

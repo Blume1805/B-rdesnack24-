@@ -90,11 +90,12 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
                     return ListTile(
                       title: Text(s.productName),
                       subtitle: Text(
-                          'Bestand: ${s.quantity} (Schwelle ${s.parLevel})'),
+                        'Bestand: ${s.quantity} (Schwelle ${s.parLevel})',
+                      ),
                       trailing: Chip(
                         label: Text(_label(s.availability)),
-                        backgroundColor:
-                            _color(context, s.availability).withOpacity(0.15),
+                        backgroundColor: _color(context, s.availability)
+                            .withValues(alpha: 0.15),
                         side:
                             BorderSide(color: _color(context, s.availability)),
                       ),
@@ -142,8 +143,10 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(
-              ok ? 'Korrektur gebucht.' : 'Fehlgeschlagen (Berechtigung?).')),
+        content: Text(
+          ok ? 'Korrektur gebucht.' : 'Fehlgeschlagen (Berechtigung?).',
+        ),
+      ),
     );
   }
 }

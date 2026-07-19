@@ -235,13 +235,14 @@ class ProfileTab extends ConsumerWidget {
         'request_account_deletion',
         params: {
           'p_reason':
-              reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim()
+              reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim(),
         },
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Antrag gestellt. Wir melden uns per E-Mail.')),
+          content: Text('Antrag gestellt. Wir melden uns per E-Mail.'),
+        ),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -252,7 +253,10 @@ class ProfileTab extends ConsumerWidget {
   }
 
   Future<void> _changePassword(
-      BuildContext context, WidgetRef ref, CustomerRepository repo) async {
+    BuildContext context,
+    WidgetRef ref,
+    CustomerRepository repo,
+  ) async {
     final currentCtrl = TextEditingController();
     final newCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
@@ -297,8 +301,10 @@ class ProfileTab extends ConsumerWidget {
                 ),
                 if (error != null) ...[
                   const SizedBox(height: 12),
-                  Text(error!,
-                      style: const TextStyle(color: Colors.red, fontSize: 12)),
+                  Text(
+                    error!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  ),
                 ],
                 const SizedBox(height: 12),
                 Align(
@@ -317,8 +323,9 @@ class ProfileTab extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, false),
-                child: const Text('Abbrechen')),
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Abbrechen'),
+            ),
             FilledButton(
               onPressed: () async {
                 if (newCtrl.text.length < 10) {
@@ -387,8 +394,10 @@ class ProfileTab extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Passwort geändert. Eine Bestätigungs-Mail ist unterwegs.')),
+            content: Text(
+              'Passwort geändert. Eine Bestätigungs-Mail ist unterwegs.',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -414,11 +423,13 @@ class ProfileTab extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen')),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Mail senden')),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Mail senden'),
+          ),
         ],
       ),
     );
@@ -464,7 +475,8 @@ class ProfileTab extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Bewertungslink noch nicht konfiguriert.')),
+            content: Text('Bewertungslink noch nicht konfiguriert.'),
+          ),
         );
       }
       return;
@@ -652,11 +664,13 @@ class _ContactFormState extends State<_ContactForm> {
 
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.of(context).pop(_ContactResult(
-      _category,
-      _subjectCtrl.text.trim().isEmpty ? null : _subjectCtrl.text.trim(),
-      _bodyCtrl.text.trim(),
-    ));
+    Navigator.of(context).pop(
+      _ContactResult(
+        _category,
+        _subjectCtrl.text.trim().isEmpty ? null : _subjectCtrl.text.trim(),
+        _bodyCtrl.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -672,8 +686,10 @@ class _ContactFormState extends State<_ContactForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Kontakt / Feedback',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Kontakt / Feedback',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _category,

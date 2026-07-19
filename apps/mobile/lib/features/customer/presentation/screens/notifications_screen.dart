@@ -49,7 +49,8 @@ class NotificationsScreen extends ConsumerWidget {
         },
         child: notifications.when(
           loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.brand)),
+            child: CircularProgressIndicator(color: AppColors.brand),
+          ),
           error: (e, _) => Padding(
             padding: const EdgeInsets.all(AppSpacing.s5),
             child: Text('$e', style: AppTypography.body(size: 14)),

@@ -77,9 +77,11 @@ class ApprovalsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ok
-            ? (approve ? 'Gesellschafter freigegeben.' : 'Antrag abgelehnt.')
-            : 'Aktion fehlgeschlagen (ggf. keine Berechtigung).'),
+        content: Text(
+          ok
+              ? (approve ? 'Gesellschafter freigegeben.' : 'Antrag abgelehnt.')
+              : 'Aktion fehlgeschlagen (ggf. keine Berechtigung).',
+        ),
       ),
     );
   }
