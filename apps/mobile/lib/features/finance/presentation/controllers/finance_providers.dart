@@ -24,7 +24,8 @@ final selectedPeriodProvider = StateProvider<FinancePeriod>(
 );
 
 /// Kennzahlen für den gewählten Zeitraum.
-final financeSummaryProvider = FutureProvider.autoDispose<FinanceSummary>((ref) {
+final financeSummaryProvider =
+    FutureProvider.autoDispose<FinanceSummary>((ref) {
   final period = ref.watch(selectedPeriodProvider);
   return ref.watch(financeRepositoryProvider).getSummary(period);
 });
@@ -33,6 +34,17 @@ final financeSummaryProvider = FutureProvider.autoDispose<FinanceSummary>((ref) 
 final financeKpisProvider = FutureProvider.autoDispose<FinanceKpis>((ref) {
   final period = ref.watch(selectedPeriodProvider);
   return ref.watch(financeRepositoryProvider).getKpis(period);
+});
+
+/// Bilanz-Kennzahlen (Etappe 2): jüngster Snapshot mit Liquidität 1/2/3
+/// und EK-Quote. `null` = noch keine Bilanzdaten erfasst.
+final financeBalanceProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>?>((ref) async {
+  final res =
+      await ref.watch(supabaseClientProvider).rpc('finance_balance_kpis');
+  final map = Map<String, dynamic>.from(res as Map);
+  if (map['has_data'] != true) return null;
+  return map;
 });
 
 /// Aktionen (Sync/Export) mit Lade-/Fehlerzustand.

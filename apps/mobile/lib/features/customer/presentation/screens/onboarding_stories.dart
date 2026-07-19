@@ -5,7 +5,9 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/brand_marks.dart';
 
-const _prefsKey = 'bs24_onboarding_shown_v1';
+// v2: Abo-Vorteile-Karte ergänzt — bestehende Nutzer sehen die
+// aktualisierten Stories dadurch genau einmal erneut.
+const _prefsKey = 'bs24_onboarding_shown_v2';
 
 /// Zeigt beim ersten Öffnen der Kunden-App drei Story-Cards und speichert
 /// die Sichtung in SharedPreferences. Bei jedem weiteren Start kein-op.
@@ -39,6 +41,15 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       body: 'Öffne die App und zeige deinen QR-Code am Automaten — Rabatte, '
           'Punkte und (bei Unternehmern) die Rechnung werden automatisch '
           'verknüpft.',
+    ),
+    _StoryPage(
+      icon: Icons.workspace_premium_outlined,
+      eyebrow: 'Abo-Vorteile',
+      title: 'Immer 5 % günstiger',
+      body: 'Mit Abo (ab 1 € im Monat) zahlst du an jedem Automaten immer '
+          '5 % weniger — Frühstücks- und Feierabend-Deals sparen weitere '
+          '10 %. Ob sich das lohnt, zeigt dir die Beispielrechnung im '
+          'Angebote-Tab.',
     ),
     _StoryPage(
       icon: Icons.stars_rounded,

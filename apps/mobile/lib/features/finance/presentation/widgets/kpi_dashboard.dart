@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -165,6 +166,14 @@ class _KpiBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.s3),
         _FootnoteEbitda(),
         const SizedBox(height: AppSpacing.s5),
+
+        // ── Etappe 2: Bilanz, Liquidität, EK-Quote, ROI ────────────────
+        const SectionHeader(
+            eyebrow: 'Bilanz', title: 'Liquidität & Eigenkapital'),
+        const SizedBox(height: AppSpacing.s3),
+        _BalanceSection(k: k),
+        const SizedBox(height: AppSpacing.s5),
+
         const SectionHeader(
             eyebrow: 'Trend & Vergleich', title: 'Cashflow-Entwicklung'),
         const SizedBox(height: AppSpacing.s3),
@@ -921,6 +930,341 @@ class _EmptyBox extends StatelessWidget {
       color: AppColors.surfaceAlt,
       child: Text(text,
           style: AppTypography.body(size: 13, color: AppColors.textMuted)),
+    );
+  }
+}
+
+/// Etappe 2 — Bilanz-Kennzahlen: Liquidität 1/2/3, EK-Quote und ROI aus
+/// dem jüngsten Bilanz-Snapshot. Ohne Snapshot wirbt eine Karte für die
+/// manuelle Erfassung; sobald der sevDesk-Bilanz-Sync aktiv ist,
+/// überschreibt er dieselben Werte (source = 'sevdesk').
+class _BalanceSection extends ConsumerWidget {
+  const _BalanceSection({required this.k});
+  final FinanceKpis k;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final balance = ref.watch(financeBalanceProvider);
+    return balance.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
+      ),
+      error: (e, _) => _EmptyBox(text: 'Bilanzdaten nicht verfügbar: $e'),
+      data: (b) {
+        if (b == null) {
+          return AppCard(
+            color: AppColors.surfaceAlt,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Noch keine Bilanzdaten erfasst.',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                Text(
+                  'Liquidität 1–3, EK-Quote und ROI erscheinen hier, sobald '
+                  'ein Bilanz-Stichtag erfasst ist. Später übernimmt der '
+                  'sevDesk-Sync die Werte automatisch.',
+                  style: AppTypography.body(
+                      size: 12.5, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                OutlinedButton.icon(
+                  onPressed: () => _showBalanceDialog(context, ref, null),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Bilanzwerte erfassen'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        double? num_(String key) => (b[key] as num?)?.toDouble();
+        String pct(String key) {
+          final v = num_(key);
+          return v == null
+              ? '—'
+              : '${v.toStringAsFixed(1).replaceAll('.', ',')} %';
+        }
+
+        // ROI: Ergebnis der letzten 12 Trend-Monate / Eigenkapital.
+        final result12m = k.trend.fold<double>(0, (s, t) => s + t.resultNet);
+        final equity = num_('equity') ?? 0;
+        final roi = equity > 0 ? result12m / equity * 100 : null;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            LayoutBuilder(builder: (context, c) {
+              final compact = c.maxWidth < 480;
+              return GridView.count(
+                crossAxisCount: compact ? 2 : 3,
+                crossAxisSpacing: AppSpacing.s3,
+                mainAxisSpacing: AppSpacing.s3,
+                childAspectRatio: compact ? 1.35 : 1.4,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _KpiTile(
+                    label: 'Liquidität 1. Grades',
+                    value: pct('liquidity1_pct'),
+                    sub: 'Flüssige Mittel / kurzfr. Verb. · Ziel >= 20 %',
+                    targetLabel: '>= 20 %',
+                  ),
+                  _KpiTile(
+                    label: 'Liquidität 2. Grades',
+                    value: pct('liquidity2_pct'),
+                    sub: '+ Forderungen · Ziel >= 100 %',
+                    targetLabel: '>= 100 %',
+                  ),
+                  _KpiTile(
+                    label: 'Liquidität 3. Grades',
+                    value: pct('liquidity3_pct'),
+                    sub: 'Umlaufvermögen / kurzfr. Verb. · Ziel >= 120 %',
+                    targetLabel: '>= 120 %',
+                  ),
+                  _KpiTile(
+                    label: 'EK-Quote',
+                    value: pct('equity_ratio_pct'),
+                    sub: 'Eigenkapital / Bilanzsumme · Ziel >= 30 %',
+                    targetLabel: '>= 30 %',
+                  ),
+                  _KpiTile(
+                    label: 'ROI (12 Monate)',
+                    value: roi == null
+                        ? '—'
+                        : '${roi.toStringAsFixed(1).replaceAll('.', ',')} %',
+                    sub: 'Ergebnis 12 M / Eigenkapital',
+                  ),
+                  _KpiTile(
+                    label: 'Bilanzsumme',
+                    value: Formatters.euro(num_('total_assets') ?? 0),
+                    sub: 'EK ${Formatters.euro(equity)}',
+                  ),
+                ],
+              );
+            }),
+            const SizedBox(height: AppSpacing.s2),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Stand: ${b['as_of']} · Quelle: '
+                    '${b['source'] == 'sevdesk' ? 'sevDesk-Sync' : 'manuell erfasst'}',
+                    style: AppTypography.body(
+                        size: 11, color: AppColors.textMuted),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _showBalanceDialog(context, ref, b),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('Aktualisieren'),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Formular für die manuelle Bilanz-Erfassung (Upsert je Stichtag).
+Future<void> _showBalanceDialog(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic>? existing,
+) async {
+  final client = ref.read(supabaseClientProvider);
+  await showDialog<void>(
+    context: context,
+    builder: (_) => _BalanceDialog(
+        existing: existing,
+        onSaved: () {
+          ref.invalidate(financeBalanceProvider);
+        },
+        client: client),
+  );
+}
+
+class _BalanceDialog extends StatefulWidget {
+  const _BalanceDialog({
+    required this.existing,
+    required this.onSaved,
+    required this.client,
+  });
+  final Map<String, dynamic>? existing;
+  final VoidCallback onSaved;
+
+  /// SupabaseClient — direkt durchgereicht, damit der Dialog auch ohne
+  /// Riverpod-Scope (showDialog-Kontext) funktioniert.
+  final dynamic client;
+
+  @override
+  State<_BalanceDialog> createState() => _BalanceDialogState();
+}
+
+class _BalanceDialogState extends State<_BalanceDialog> {
+  late DateTime _asOf;
+  late final Map<String, TextEditingController> _ctrl;
+  bool _saving = false;
+
+  static const _fields = <(String, String)>[
+    ('cash_and_bank', 'Flüssige Mittel (Kasse/Bank)'),
+    ('receivables', 'Forderungen (kurzfristig)'),
+    ('inventory_value', 'Vorräte (Warenbestand)'),
+    ('other_current_assets', 'Sonstiges Umlaufvermögen'),
+    ('fixed_assets', 'Anlagevermögen'),
+    ('current_liabilities', 'Kurzfristige Verbindlichkeiten'),
+    ('long_term_liabilities', 'Langfristige Verbindlichkeiten'),
+    ('equity', 'Eigenkapital'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _asOf = DateTime.now();
+    final e = widget.existing;
+    if (e?['as_of'] != null) {
+      _asOf = DateTime.tryParse(e!['as_of'].toString()) ?? _asOf;
+    }
+    _ctrl = {
+      for (final (key, _) in _fields)
+        key: TextEditingController(
+          text: e == null
+              ? ''
+              : ((e[key] as num?)?.toDouble() ?? 0)
+                  .toStringAsFixed(2)
+                  .replaceAll('.', ','),
+        ),
+    };
+  }
+
+  @override
+  void dispose() {
+    for (final c in _ctrl.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  double _parse(String key) {
+    final raw =
+        _ctrl[key]!.text.trim().replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(raw) ?? 0;
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await widget.client.rpc('upsert_finance_balance', params: {
+        'p_as_of': _asOf.toIso8601String().substring(0, 10),
+        'p_cash_and_bank': _parse('cash_and_bank'),
+        'p_receivables': _parse('receivables'),
+        'p_inventory_value': _parse('inventory_value'),
+        'p_other_current_assets': _parse('other_current_assets'),
+        'p_fixed_assets': _parse('fixed_assets'),
+        'p_current_liabilities': _parse('current_liabilities'),
+        'p_long_term_liabilities': _parse('long_term_liabilities'),
+        'p_equity': _parse('equity'),
+      });
+      if (!mounted) return;
+      widget.onSaved();
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bilanzwerte gespeichert.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Speichern fehlgeschlagen: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surfaceCard,
+      title: Text(
+        'Bilanzwerte erfassen',
+        style: AppTypography.display(
+            size: 18, weight: FontWeight.w800, color: AppColors.ink),
+      ),
+      content: SizedBox(
+        width: 380,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _saving
+                    ? null
+                    : () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _asOf,
+                          firstDate: DateTime(2024),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) setState(() => _asOf = picked);
+                      },
+                icon: const Icon(Icons.event_outlined, size: 18),
+                label: Text(
+                    'Stichtag: ${_asOf.toIso8601String().substring(0, 10)}'),
+              ),
+              const SizedBox(height: AppSpacing.s3),
+              for (final (key, label) in _fields) ...[
+                TextField(
+                  controller: _ctrl[key],
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: '$label (EUR)',
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+              ],
+              Text(
+                'Werte lt. sevDesk-Bilanz bzw. Kontoauszug. Der spätere '
+                'sevDesk-Sync überschreibt den Stichtag automatisch.',
+                style: AppTypography.body(size: 11, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        FilledButton(
+          onPressed: _saving ? null : _save,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brand,
+            foregroundColor: AppColors.ink,
+          ),
+          child: _saving
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.ink),
+                )
+              : const Text('Speichern'),
+        ),
+      ],
     );
   }
 }
