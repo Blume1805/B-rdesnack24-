@@ -99,9 +99,21 @@ class AuthRemoteDataSource {
   }
 
   /// True, wenn der Nutzer mindestens einen bestätigten TOTP-Faktor hat.
+  ///
+  /// WICHTIG: bewusst NICHT `_auth.mfa.listFactors()` — das ruft intern
+  /// `refreshSession()` auf und erzwingt einen Token-Refresh. Da diese
+  /// Prüfung aus einem Provider läuft, der bei jedem Auth-Event neu baut,
+  /// entstand daraus eine Endlosschleife aus Token-Refreshes (tokenRefreshed
+  /// → Provider-Rebuild → listFactors → refreshSession → tokenRefreshed …),
+  /// die den internen Bereich beim Login komplett blockiert hat
+  /// (gemessen: >470 Auth-Requests in 20 s). Die Faktorenliste liegt
+  /// bereits lokal am User — kein Netzwerkaufruf nötig.
   Future<bool> hasVerifiedTotp() async {
-    final res = await _auth.mfa.listFactors();
-    return res.totp.any((f) => f.status == FactorStatus.verified);
+    final factors = _auth.currentUser?.factors ?? const [];
+    return factors.any(
+      (f) =>
+          f.factorType == FactorType.totp && f.status == FactorStatus.verified,
+    );
   }
 
   Future<void> verifyTotp(String factorId, String code) async {
