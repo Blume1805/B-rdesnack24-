@@ -173,6 +173,7 @@ class _KpiBody extends StatelessWidget {
             context,
             title: 'Cashflow-Entwicklung',
             subtitle: 'Umsatz (gold) und Aufwand (schwarz) je Monat',
+            aspectRatio: 1.45,
             chart: _CashflowChart(k: k, height: double.infinity),
           ),
           child: AppCard(child: _CashflowChart(k: k)),
@@ -186,6 +187,7 @@ class _KpiBody extends StatelessWidget {
             context,
             title: 'Aktueller vs. Vergleichszeitraum',
             subtitle: 'Umsatz (gold) und Ergebnis (grün)',
+            aspectRatio: 1.6,
             chart: _ComparisonBars(k: k, height: double.infinity, bare: true),
           ),
           child: _ComparisonBars(k: k),
@@ -213,19 +215,23 @@ class _KpiBody extends StatelessWidget {
 
 /// Zoom-Ansicht für Dashboard-Grafiken: öffnet die Grafik groß in einem
 /// Dialog (Tap auf Kachel oder Chart). Schließen per X oder Tap daneben.
+///
+/// [aspectRatio] = Breite/Höhe der Grafik in der normalen Ansicht — die
+/// Zoom-Darstellung behält damit exakt das gewohnte Format und wird nur
+/// auf die maximale Dialog-Breite skaliert (kein Verzerren in die Höhe).
 Future<void> _showZoomedChart(
   BuildContext context, {
   required String title,
   String? subtitle,
   required Widget chart,
+  required double aspectRatio,
 }) {
   return showDialog<void>(
     context: context,
     builder: (context) {
-      final size = MediaQuery.of(context).size;
       return Dialog(
         backgroundColor: AppColors.surfaceCard,
-        insetPadding: const EdgeInsets.all(AppSpacing.s3),
+        insetPadding: const EdgeInsets.all(AppSpacing.s2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.lg),
         ),
@@ -268,8 +274,10 @@ Future<void> _showZoomedChart(
               const SizedBox(height: AppSpacing.s3),
               SizedBox(
                 width: double.maxFinite,
-                height: (size.height * 0.55).clamp(260.0, 520.0),
-                child: chart,
+                child: AspectRatio(
+                  aspectRatio: aspectRatio,
+                  child: chart,
+                ),
               ),
             ],
           ),
@@ -332,12 +340,14 @@ class _KpiTile extends StatelessWidget {
   final String? targetLabel;
   final bool lowerIsBetter;
 
-  /// Tap auf die Kachel öffnet die Sparkline groß im Dialog.
+  /// Tap auf die Kachel öffnet die Sparkline groß im Dialog — im selben
+  /// breiten, flachen Format wie in der Kachel, nur skaliert.
   void _zoom(BuildContext context) {
     _showZoomedChart(
       context,
       title: label.replaceAll('\u00AD', ''),
       subtitle: [value, if (sub != null) sub!].join(' · '),
+      aspectRatio: 2.4,
       chart: _Sparkline(
         values: trend,
         targetLower: targetLower,
