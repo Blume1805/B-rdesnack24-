@@ -1,40 +1,49 @@
-// Bördesnack24 Web — Offline-Cache v1784485440 (generiert von deploy_web.sh).
-const CACHE = 'bs24-1784485440';
+// Bördesnack24 Web — Offline-Cache v1784486268 (generiert von deploy_web.sh).
+const CACHE = 'bs24-1784486268';
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
-    await self.clients.claim();
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    } catch (_) {}
   })());
 });
+function stash(req, res) {
+  try {
+    const copy = res.clone();
+    caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+  } catch (_) {}
+}
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
+  let sameOrigin = false;
+  try { sameOrigin = new URL(req.url).origin === location.origin; } catch (_) {}
+  if (!sameOrigin) return;
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(req);
-        const c = await caches.open(CACHE);
-        c.put(req, fresh.clone());
+        stash(req, fresh);
         return fresh;
       } catch (_) {
-        const hit = await caches.match(req);
-        return hit || Response.error();
+        try {
+          const hit = await caches.match(req);
+          if (hit) return hit;
+        } catch (_) {}
+        return fetch(req);
       }
     })());
     return;
   }
   event.respondWith((async () => {
-    const hit = await caches.match(req);
-    if (hit) return hit;
+    try {
+      const hit = await caches.match(req);
+      if (hit) return hit;
+    } catch (_) {}
     const res = await fetch(req);
-    if (res.ok) {
-      const c = await caches.open(CACHE);
-      c.put(req, res.clone());
-    }
+    if (res && res.ok) stash(req, res);
     return res;
   })());
 });
