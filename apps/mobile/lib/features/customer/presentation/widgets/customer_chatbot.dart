@@ -505,25 +505,33 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
 
               const Divider(height: 1, color: AppColors.borderSubtle),
 
-              // Optionen unten: Kategorien / Fragen / Handoff
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.s4,
-                  AppSpacing.s3,
-                  AppSpacing.s4,
-                  AppSpacing.s3,
+              // Optionen unten: Kategorien / Fragen / Handoff.
+              // Höhe gedeckelt + eigenes Scrolling — sonst drückt eine
+              // lange Fragenliste den Chat-Verlauf (die Antworten!) auf
+              // wenige Pixel zusammen.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.30,
                 ),
-                child: _openCategory == null
-                    ? _CategoryChips(
-                        onPick: _pickCategory,
-                        onHandoff: _handoff,
-                      )
-                    : _QuestionChips(
-                        category: _openCategory!,
-                        onPick: _pickQuestion,
-                        onBack: _backToCategories,
-                        onHandoff: _handoff,
-                      ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.s4,
+                    AppSpacing.s3,
+                    AppSpacing.s4,
+                    AppSpacing.s3,
+                  ),
+                  child: _openCategory == null
+                      ? _CategoryChips(
+                          onPick: _pickCategory,
+                          onHandoff: _handoff,
+                        )
+                      : _QuestionChips(
+                          category: _openCategory!,
+                          onPick: _pickQuestion,
+                          onBack: _backToCategories,
+                          onHandoff: _handoff,
+                        ),
+                ),
               ),
             ],
           ),

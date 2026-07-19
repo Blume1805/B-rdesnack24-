@@ -84,7 +84,9 @@ class _KpiBody extends StatelessWidget {
                 emphasizePositive: true,
               ),
               _KpiTile(
-                label: 'Umsatzrendite',
+                // \u00AD = weiches Trennzeichen: bricht lange Titel an der
+                // Silbengrenze MIT Trennstrich um (statt mitten im Wort).
+                label: 'Umsatz\u00ADrendite',
                 value: '${k.derived.netMarginPct.toStringAsFixed(1)} %',
                 sub: 'Ergebnis / Umsatz · Ziel 25 – 35 %',
                 trend: k.trend
@@ -97,7 +99,7 @@ class _KpiBody extends StatelessWidget {
                 targetLabel: '25 – 35 %',
               ),
               _KpiTile(
-                label: 'Rohertragsmarge',
+                label: 'Rohertrags\u00ADmarge',
                 value: '${k.derived.grossMarginPct.toStringAsFixed(1)} %',
                 sub: '(Umsatz – Wareneinsatz) / Umsatz · Ziel 50 – 70 %',
                 trend: k.trend
@@ -110,7 +112,7 @@ class _KpiBody extends StatelessWidget {
                 targetLabel: '50 – 70 %',
               ),
               _KpiTile(
-                label: 'Wareneinsatzquote',
+                label: 'Waren\u00ADeinsatz\u00ADquote',
                 value: '${wareneinsatzquotePct.toStringAsFixed(1)} %',
                 sub: 'Wareneinsatz / Umsatz · Ziel 30 – 40 %',
                 trend: k.trend
@@ -166,12 +168,28 @@ class _KpiBody extends StatelessWidget {
         const SectionHeader(
             eyebrow: 'Trend & Vergleich', title: 'Cashflow-Entwicklung'),
         const SizedBox(height: AppSpacing.s3),
-        AppCard(child: _CashflowChart(k: k)),
+        GestureDetector(
+          onTap: () => _showZoomedChart(
+            context,
+            title: 'Cashflow-Entwicklung',
+            subtitle: 'Umsatz (gold) und Aufwand (schwarz) je Monat',
+            chart: _CashflowChart(k: k, height: double.infinity),
+          ),
+          child: AppCard(child: _CashflowChart(k: k)),
+        ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
             eyebrow: 'Vergleich', title: 'Aktueller vs. Vergleichszeitraum'),
         const SizedBox(height: AppSpacing.s3),
-        _ComparisonBars(k: k),
+        GestureDetector(
+          onTap: () => _showZoomedChart(
+            context,
+            title: 'Aktueller vs. Vergleichszeitraum',
+            subtitle: 'Umsatz (gold) und Ergebnis (grün)',
+            chart: _ComparisonBars(k: k, height: double.infinity, bare: true),
+          ),
+          child: _ComparisonBars(k: k),
+        ),
         const SizedBox(height: AppSpacing.s5),
         const SectionHeader(
             eyebrow: 'Automaten-Business', title: 'Umsatz je Automat'),
@@ -191,6 +209,74 @@ class _KpiBody extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Zoom-Ansicht für Dashboard-Grafiken: öffnet die Grafik groß in einem
+/// Dialog (Tap auf Kachel oder Chart). Schließen per X oder Tap daneben.
+Future<void> _showZoomedChart(
+  BuildContext context, {
+  required String title,
+  String? subtitle,
+  required Widget chart,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (context) {
+      final size = MediaQuery.of(context).size;
+      return Dialog(
+        backgroundColor: AppColors.surfaceCard,
+        insetPadding: const EdgeInsets.all(AppSpacing.s3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTypography.display(
+                        size: 18,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Schließen',
+                    icon: const Icon(Icons.close, color: AppColors.ink),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              if (subtitle != null) ...[
+                Text(
+                  subtitle,
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+              ],
+              const SizedBox(height: AppSpacing.s3),
+              SizedBox(
+                width: double.maxFinite,
+                height: (size.height * 0.55).clamp(260.0, 520.0),
+                child: chart,
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _FootnoteEbitda extends StatelessWidget {
@@ -246,6 +332,20 @@ class _KpiTile extends StatelessWidget {
   final String? targetLabel;
   final bool lowerIsBetter;
 
+  /// Tap auf die Kachel öffnet die Sparkline groß im Dialog.
+  void _zoom(BuildContext context) {
+    _showZoomedChart(
+      context,
+      title: label.replaceAll('\u00AD', ''),
+      subtitle: [value, if (sub != null) sub!].join(' · '),
+      chart: _Sparkline(
+        values: trend,
+        targetLower: targetLower,
+        targetUpper: targetUpper,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final valueColor = emphasizePositive
@@ -253,83 +353,86 @@ class _KpiTile extends StatelessWidget {
             ? AppColors.statusCritical
             : AppColors.statusPositive)
         : AppColors.ink;
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.s3),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label.toUpperCase(),
-                  style: AppTypography.body(
-                    size: 10,
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted,
-                  ).copyWith(letterSpacing: 0.6),
-                ),
-              ),
-              if (targetLabel != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  decoration: BoxDecoration(
-                    border:
-                        Border.all(color: AppColors.statusCritical, width: 0.8),
-                    borderRadius: BorderRadius.circular(AppRadii.sm),
-                  ),
+    return GestureDetector(
+      onTap: trend.length >= 2 ? () => _zoom(context) : null,
+      child: AppCard(
+        padding: const EdgeInsets.all(AppSpacing.s3),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
                   child: Text(
-                    'Ziel ${targetLabel!}',
+                    label.toUpperCase(),
                     style: AppTypography.body(
-                        size: 9,
-                        weight: FontWeight.w800,
-                        color: AppColors.statusCritical),
+                      size: 10,
+                      weight: FontWeight.w800,
+                      color: AppColors.textMuted,
+                    ).copyWith(letterSpacing: 0.6),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          FittedBox(
-            alignment: Alignment.centerLeft,
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: AppTypography.display(
-                size: 22,
-                weight: FontWeight.w800,
-                color: valueColor,
+                if (targetLabel != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppColors.statusCritical, width: 0.8),
+                      borderRadius: BorderRadius.circular(AppRadii.sm),
+                    ),
+                    child: Text(
+                      'Ziel ${targetLabel!}',
+                      style: AppTypography.body(
+                          size: 9,
+                          weight: FontWeight.w800,
+                          color: AppColors.statusCritical),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: AppTypography.display(
+                  size: 22,
+                  weight: FontWeight.w800,
+                  color: valueColor,
+                ),
               ),
             ),
-          ),
-          if (sub != null)
-            Text(
-              sub!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.body(
-                size: 10,
-                weight: FontWeight.w600,
-                color: AppColors.textMuted,
+            if (sub != null)
+              Text(
+                sub!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.body(
+                  size: 10,
+                  weight: FontWeight.w600,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                _DeltaChip(label: 'Vormonat', pct: deltaMomPct),
+                const SizedBox(width: 4),
+                _DeltaChip(label: 'Vorjahr', pct: deltaYoyPct),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Expanded(
+              child: _Sparkline(
+                values: trend,
+                targetLower: targetLower,
+                targetUpper: targetUpper,
               ),
             ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              _DeltaChip(label: 'Vormonat', pct: deltaMomPct),
-              const SizedBox(width: 4),
-              _DeltaChip(label: 'Vorjahr', pct: deltaYoyPct),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Expanded(
-            child: _Sparkline(
-              values: trend,
-              targetLower: targetLower,
-              targetUpper: targetUpper,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -453,8 +556,11 @@ class _Sparkline extends StatelessWidget {
 
 /// Balken-Chart mit revenue/expense je Monat (letzte 12 Monate).
 class _CashflowChart extends StatelessWidget {
-  const _CashflowChart({required this.k});
+  const _CashflowChart({required this.k, this.height = 220});
   final FinanceKpis k;
+
+  /// Chart-Höhe; `double.infinity` füllt den Zoom-Dialog.
+  final double height;
   @override
   Widget build(BuildContext context) {
     final points = k.trend;
@@ -468,7 +574,7 @@ class _CashflowChart extends StatelessWidget {
       return v > acc ? v : acc;
     });
     return SizedBox(
-      height: 220,
+      height: height,
       child: BarChart(BarChartData(
         maxY: maxAbs > 0 ? maxAbs * 1.15 : 10,
         barGroups: [
@@ -548,8 +654,15 @@ class _CashflowChart extends StatelessWidget {
 
 /// Nebeneinander: aktueller Zeitraum · Vormonat · Vorjahr — je Balken.
 class _ComparisonBars extends StatelessWidget {
-  const _ComparisonBars({required this.k});
+  const _ComparisonBars(
+      {required this.k, this.height = 200, this.bare = false});
   final FinanceKpis k;
+
+  /// Chart-Höhe; `double.infinity` füllt den Zoom-Dialog.
+  final double height;
+
+  /// true = ohne AppCard-Rahmen rendern (für den Zoom-Dialog).
+  final bool bare;
   @override
   Widget build(BuildContext context) {
     final labels = ['Aktuell', 'Vormonat', 'Vorjahr'];
@@ -567,9 +680,8 @@ class _ComparisonBars extends StatelessWidget {
       ...revenue.map((e) => e.abs()),
       ...result.map((e) => e.abs()),
     ].fold<double>(0, (a, b) => a > b ? a : b);
-    return AppCard(
-      child: SizedBox(
-        height: 200,
+    final chart = SizedBox(
+        height: height,
         child: BarChart(BarChartData(
           maxY: maxV > 0 ? maxV * 1.2 : 10,
           barGroups: [
@@ -611,9 +723,8 @@ class _ComparisonBars extends StatelessWidget {
           ),
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
-        )),
-      ),
-    );
+        )));
+    return bare ? chart : AppCard(child: chart);
   }
 }
 
