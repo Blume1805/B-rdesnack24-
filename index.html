@@ -18,8 +18,8 @@
   <title>Bördesnack24</title>
   <link rel="manifest" href="manifest.json">
 
-  <link rel="preload" as="script" href="flutter.js?v=1784464558">
-  <link rel="preload" as="script" href="main.dart.js?v=1784464558">
+  <link rel="preload" as="script" href="flutter.js?v=1784481546">
+  <link rel="preload" as="script" href="main.dart.js?v=1784481546">
 
   <!--
     Passkeys-SDK-Stub MUSS vor jedem Skript existieren, das dart2js-Code
@@ -125,7 +125,7 @@
 </head>
 <body>
   <div id="loader">
-    <div class="logo"><img src="icons/Icon-192.png?v=1784464558" alt=""
+    <div class="logo"><img src="icons/Icon-192.png?v=1784481546" alt=""
          onerror="this.style.display='none'"></div>
     <div class="title">BÖRDESNACK24</div>
     <div class="slogan">immer da, wenn der Hunger kommt</div>
@@ -155,17 +155,23 @@
         log('rej', (e.reason && (e.reason.message || e.reason.toString())) || 'unknown');
       });
 
-      // Alte Service-Worker + Caches einmalig entfernen.
+      // Service Worker: versionierter Offline-Cache (PWA). Fremde/alte
+      // Registrierungen werden abgemeldet; die eigene wird mit der neuen
+      // Build-Version aktualisiert. Der SW selbst räumt Alt-Caches beim
+      // Aktivieren weg — HTML läuft Network-First, Ghost-Content wie beim
+      // frühen Zombie-SW ist damit ausgeschlossen.
       (async function () {
         try {
-          if ('serviceWorker' in navigator) {
-            var regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(function (r) { return r.unregister(); }));
-          }
-          if ('caches' in window) {
-            var names = await caches.keys();
-            await Promise.all(names.map(function (n) { return caches.delete(n); }));
-          }
+          if (!('serviceWorker' in navigator)) return;
+          var swUrl = 'flutter_service_worker.js?v=1784481546';
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function (r) {
+            var s = (r.active || r.installing || r.waiting);
+            var u = (s && s.scriptURL) || '';
+            return u.indexOf('flutter_service_worker.js') === -1
+                ? r.unregister() : Promise.resolve();
+          }));
+          await navigator.serviceWorker.register(swUrl);
         } catch (_) {}
       })();
 
@@ -214,6 +220,6 @@
     Bootstrap am Ende des Bodies (Flutter-Default) — DOM ist fertig und
     Passkeys-Stub garantiert schon installiert.
   -->
-  <script src="flutter_bootstrap.js?v=1784464558" async></script>
+  <script src="flutter_bootstrap.js?v=1784481546" async></script>
 </body>
 </html>
