@@ -10,6 +10,8 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
 import '../screens/ai_info_screen.dart';
 import '../screens/customer_qr_screen.dart';
+import '../screens/subscription_screen.dart';
+import '../screens/subscription_value_screen.dart';
 import 'customer_anchors.dart';
 
 /// Callback vom CustomerScreen, mit dem der Chatbot in einen bestimmten
@@ -77,6 +79,9 @@ class _FaqEntry {
   ///                              (z. B. `tab:3@password`).
   ///   * `qr`                  — Kundenkarte öffnen (CustomerQrScreen)
   ///   * `ai-info`             — KI-Info-Seite öffnen
+  ///   * `abo`                 — Abo-Auswahl öffnen (SubscriptionScreen)
+  ///   * `abo-rechnung`        — Beispielrechnung „Wann rechnet sich das
+  ///                              Abo?" öffnen (SubscriptionValueScreen)
   final String? deepLink;
 }
 
@@ -110,6 +115,55 @@ const _kFaq = <_FaqCategory>[
       deepLink: 'tab:3@kontakt',
     ),
   ]),
+  _FaqCategory('Abo & Preise', Icons.workspace_premium_outlined, [
+    _FaqEntry(
+      'Welche Abo-Modelle gibt es?',
+      'Drei Modelle: 1 € pro Monat, 10 € pro Jahr (2 Monate geschenkt) oder '
+          '60 € einmalig (Lifetime). Nach jeder Wahl oder jedem Wechsel '
+          'bekommst du eine Bestätigung an deine hinterlegte E-Mail-Adresse.',
+      deepLink: 'abo',
+    ),
+    _FaqEntry(
+      'Kann ich mein Abo-Modell wechseln?',
+      'Ja, ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit '
+          'möglich. Nur das Lifetime-Abo ist endgültig — deshalb bestätigst '
+          'du beim Lifetime-Kauf ausdrücklich, dass dein Widerrufsrecht mit '
+          'der Bereitstellung erlischt.',
+      deepLink: 'abo',
+    ),
+    _FaqEntry(
+      'Was spare ich mit dem Abo?',
+      'Mit Abo zahlst du an jedem Automaten immer 5 % weniger — den '
+          'App-Preis siehst du direkt an jedem Produkt. Obendrauf: '
+          'Frühstücks- & Feierabend-Deals sowie Tages- und Wochenangebote '
+          'mit weiteren 10 % Rabatt auf den App-Preis und Treue-Coupons '
+          'von 5 bis 25 %.',
+      deepLink: 'abo-rechnung',
+    ),
+    _FaqEntry(
+      'Ab wann rechnet sich das Abo?',
+      'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,67 € '
+          'Einkauf im Monat. Bei normaler Nutzung von Deals und Coupons '
+          '(zusammen ≈ 9,4 % Ersparnis) schon ab rund 9 € im Monat. Die '
+          'komplette Beispielrechnung mit allen Annahmen:',
+      deepLink: 'abo-rechnung',
+    ),
+    _FaqEntry(
+      'Was kann ich ohne Abo nutzen?',
+      'Kostenlos bleiben: Automatenfinder, Bestände in Echtzeit, Produkt-'
+          'infos mit Nährwerten, Kaufhistorie, News und Favoriten. Die '
+          'Rabatt-Vorteile (App-Preis −5 %, Deals, Coupons, Treuepunkte) '
+          'gibt es mit Abo ab 1 € im Monat.',
+      deepLink: 'abo',
+    ),
+    _FaqEntry(
+      'Wie kündige ich mein Abo?',
+      'Über den Kündigungsbutton „Verträge hier kündigen" — ohne Hürden, '
+          'auch ohne Login erreichbar. Du bekommst sofort eine Bestätigung '
+          'mit Datum und Uhrzeit deiner Kündigungserklärung (§ 312k BGB).',
+      deepLink: 'route:${AppRoutes.cancellation}',
+    ),
+  ]),
   _FaqCategory('Coupons & Angebote', Icons.local_offer_outlined, [
     _FaqEntry(
       'Kann ich mehrere Coupons kombinieren?',
@@ -136,6 +190,21 @@ const _kFaq = <_FaqCategory>[
           'Aktuelle Wochenangebote siehst du im Angebote-Tab.',
       deepLink: 'tab:0@wochenangebote',
     ),
+    _FaqEntry(
+      'Was sind Frühstücks- und Feierabend-Deals?',
+      'Wechselnde Aktionen für morgens und für den Feierabend: zusätzlich '
+          '10 % Rabatt auf deinen App-Preis — zusammen also 14,5 % unter dem '
+          'Automatenpreis. Du findest sie ganz oben im Angebote-Tab.',
+      deepLink: 'tab:0',
+    ),
+    _FaqEntry(
+      'Funktionieren Coupons auch ohne Internet?',
+      'Ja. Deine aktivierten Coupons und Einlöse-Codes werden auf dem Gerät '
+          'gespeichert. Hast du am Automaten keinen Empfang, zeigt die App '
+          'den zuletzt gespeicherten Stand mit einem Offline-Hinweis an — '
+          'einlösen funktioniert trotzdem.',
+      deepLink: 'qr',
+    ),
   ]),
   _FaqCategory('Automaten & Standorte', Icons.place_outlined, [
     _FaqEntry(
@@ -150,6 +219,21 @@ const _kFaq = <_FaqCategory>[
           'täglich. Ist ein Produkt „ausverkauft" markiert, wird beim nächsten '
           'Auffüllen (i. d. R. binnen 48 h) wieder befüllt. Aktuelle Bestände '
           'pro Automat siehst du im Automaten-Tab.',
+      deepLink: 'tab:1',
+    ),
+    _FaqEntry(
+      'Wo sehe ich die Preise der Produkte?',
+      'Im Automaten-Tab bei jedem Produkt: der Automatenpreis und — mit '
+          'Abo — dein App-Preis (−5 %). Auf der Produktdetailseite stehen '
+          'zusätzlich Nährwerte und Allergene.',
+      deepLink: 'tab:1',
+    ),
+    _FaqEntry(
+      'Gibt es auch Kaffee und Heißgetränke?',
+      'Ja, am Heißgetränkeautomaten: Espresso (doppelt), Cappuccino, '
+          'Latte Macchiato, Café Crema, Tee und heiße Schokolade. Auch hier '
+          'gilt dein App-Preis mit 5 % Rabatt — und Deals sparen weitere '
+          '10 %.',
       deepLink: 'tab:1',
     ),
   ]),
@@ -291,6 +375,16 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
     }
     if (link == 'ai-info') {
       nav.push(MaterialPageRoute(builder: (_) => const AiInfoScreen()));
+      return;
+    }
+    if (link == 'abo') {
+      nav.push(MaterialPageRoute(builder: (_) => const SubscriptionScreen()));
+      return;
+    }
+    if (link == 'abo-rechnung') {
+      nav.push(
+        MaterialPageRoute(builder: (_) => const SubscriptionValueScreen()),
+      );
       return;
     }
     if (link.startsWith('tab:')) {
