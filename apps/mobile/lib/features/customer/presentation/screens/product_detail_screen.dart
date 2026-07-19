@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
@@ -80,6 +82,14 @@ class ProductDetailScreen extends ConsumerWidget {
               RatingStars(rating: p.avgRating, count: p.reviewCount, size: 18),
               const SizedBox(height: AppSpacing.s5),
 
+              // Preisblock (Automatenpreis vs. App-Preis −5 %)
+              if (p.grossPrice != null) ...[
+                const Eyebrow('Preis'),
+                const SizedBox(height: AppSpacing.s3),
+                _PriceCard(gross: p.grossPrice!),
+                const SizedBox(height: AppSpacing.s5),
+              ],
+
               // Nährwertblock
               const Eyebrow('Nährwerte je 100 g / 100 ml'),
               const SizedBox(height: AppSpacing.s3),
@@ -124,6 +134,78 @@ class ProductDetailScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Preisblock: Abonnenten sehen den App-Preis (−5 %) prominent mit
+/// durchgestrichenem Automatenpreis; ohne Abo steht der Automatenpreis
+/// vorn und der App-Preis wirbt als Abo-Vorteil.
+class _PriceCard extends ConsumerWidget {
+  const _PriceCard({required this.gross});
+  final double gross;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+    final appPrice = Pricing.appPriceGross(gross);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasSub) ...[
+            PriceRow(
+              regular: gross,
+              discounted: appPrice,
+              discountPercent: Pricing.appDiscountRate * 100,
+              showBadge: false,
+            ),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Dein App-Preis mit Abo — immer 5 % unter dem Automatenpreis.',
+              style: AppTypography.body(
+                size: 13,
+                weight: FontWeight.w600,
+                color: AppColors.brandDark,
+              ),
+            ),
+          ] else ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  Formatters.euro(gross),
+                  style: AppTypography.display(
+                    size: 26,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s2),
+                Text(
+                  'am Automaten',
+                  style: AppTypography.body(
+                    size: 13,
+                    weight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Mit Bördesnack24-Abo nur ${Formatters.euro(appPrice)} — '
+              'App-Nutzer sparen immer 5 %.',
+              style: AppTypography.body(
+                size: 13,
+                weight: FontWeight.w600,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../management/domain/entities/stock_item.dart';
 import '../../../management/presentation/controllers/management_providers.dart';
+import '../controllers/customer_providers.dart';
 
 /// Echtzeit-Produktverfügbarkeit für Kunden (read-only). Abonniert die
 /// Inventur-Tabelle und zeigt jeden Artikel mit konkreter Stückzahl und
@@ -59,6 +62,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
   @override
   Widget build(BuildContext context) {
     final stock = ref.watch(machineStockProvider(widget.machineId));
+    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: stock.when(
@@ -110,7 +114,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s5),
                     for (final s in items) ...[
-                      _StockRow(item: s),
+                      _StockRow(item: s, hasSubscription: hasSub),
                       const SizedBox(height: AppSpacing.s2),
                     ],
                   ],
@@ -122,8 +126,9 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
 }
 
 class _StockRow extends StatelessWidget {
-  const _StockRow({required this.item});
+  const _StockRow({required this.item, required this.hasSubscription});
   final StockItem item;
+  final bool hasSubscription;
 
   ({String label, StatusTone tone, IconData icon}) _status() {
     switch (item.availability) {
@@ -192,6 +197,13 @@ class _StockRow extends StatelessWidget {
               ),
             ],
           ),
+          if (item.grossPrice != null) ...[
+            const SizedBox(height: AppSpacing.s3),
+            _PriceLine(
+              gross: item.grossPrice!,
+              hasSubscription: hasSubscription,
+            ),
+          ],
           const SizedBox(height: AppSpacing.s3),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -246,6 +258,71 @@ class _StockRow extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Preiszeile im Katalog: Abonnenten sehen den App-Preis (−5 %) mit
+/// durchgestrichenem Automatenpreis, alle anderen den Automatenpreis
+/// plus Hinweis auf den Abo-Vorteil.
+class _PriceLine extends StatelessWidget {
+  const _PriceLine({required this.gross, required this.hasSubscription});
+  final double gross;
+  final bool hasSubscription;
+
+  @override
+  Widget build(BuildContext context) {
+    final appPrice = Pricing.appPriceGross(gross);
+    if (hasSubscription) {
+      return Row(
+        children: [
+          Expanded(
+            child: PriceRow(
+              regular: gross,
+              discounted: appPrice,
+              discountPercent: Pricing.appDiscountRate * 100,
+              size: 20,
+              showBadge: false,
+            ),
+          ),
+          Text(
+            'Dein App-Preis · −5 %',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w700,
+              color: AppColors.brandDark,
+            ),
+          ),
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text(
+          Formatters.euro(gross),
+          style: AppTypography.display(
+            size: 20,
+            weight: FontWeight.w800,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.s3),
+        Expanded(
+          child: Text(
+            'Mit Abo ${Formatters.euro(appPrice)} (−5 %)',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+            textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

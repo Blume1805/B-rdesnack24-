@@ -10,6 +10,7 @@ class RankedProduct extends Equatable {
     required this.reviewCount,
     this.imageUrl,
     this.listPriceNet,
+    this.taxRate,
   });
 
   final String id;
@@ -20,12 +21,22 @@ class RankedProduct extends Equatable {
   final String? imageUrl;
   final double? listPriceNet;
 
+  /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
+  final double? taxRate;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt).
+  double? get grossPrice => listPriceNet == null
+      ? null
+      : double.parse(
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
+
   factory RankedProduct.fromJson(Map<String, dynamic> j) => RankedProduct(
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         category: j['category'] as String? ?? '',
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
+        taxRate: (j['tax_rate'] as num?)?.toDouble(),
         avgRating: (j['avg_rating'] as num?)?.toDouble() ?? 0,
         reviewCount: (j['review_count'] as num?)?.toInt() ?? 0,
       );
@@ -44,6 +55,7 @@ class ProductDetail extends Equatable {
     required this.reviewCount,
     this.imageUrl,
     this.listPriceNet,
+    this.taxRate,
     this.energyKcal,
     this.fatG,
     this.saturatedFatG,
@@ -60,6 +72,15 @@ class ProductDetail extends Equatable {
   final String category;
   final String? imageUrl;
   final double? listPriceNet;
+
+  /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
+  final double? taxRate;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt).
+  double? get grossPrice => listPriceNet == null
+      ? null
+      : double.parse(
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
   final double? energyKcal;
   final double? fatG;
   final double? saturatedFatG;
@@ -78,6 +99,7 @@ class ProductDetail extends Equatable {
         category: j['category'] as String? ?? '',
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
+        taxRate: (j['tax_rate'] as num?)?.toDouble(),
         energyKcal: (j['energy_kcal'] as num?)?.toDouble(),
         fatG: (j['fat_g'] as num?)?.toDouble(),
         saturatedFatG: (j['saturated_fat_g'] as num?)?.toDouble(),

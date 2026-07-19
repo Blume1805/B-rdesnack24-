@@ -10,6 +10,8 @@ class StockItem extends Equatable {
     required this.capacity,
     required this.availability,
     this.imageUrl,
+    this.listPriceNet,
+    this.taxRate,
   });
 
   final String machineId;
@@ -20,6 +22,16 @@ class StockItem extends Equatable {
   final int capacity; // Fach-Kapazität = 100 %
   final String availability; // available | low | out
   final String? imageUrl;
+  final double? listPriceNet;
+
+  /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
+  final double? taxRate;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt).
+  double? get grossPrice => listPriceNet == null
+      ? null
+      : double.parse(
+          (listPriceNet! * (1 + (taxRate ?? 19) / 100)).toStringAsFixed(2));
 
   factory StockItem.fromJson(Map<String, dynamic> j) => StockItem(
         machineId: j['machine_id'] as String,
@@ -30,9 +42,19 @@ class StockItem extends Equatable {
         capacity: (j['capacity'] as num?)?.toInt() ?? 0,
         availability: j['availability'] as String? ?? 'available',
         imageUrl: j['image_url'] as String?,
+        listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
+        taxRate: (j['tax_rate'] as num?)?.toDouble(),
       );
 
   @override
-  List<Object?> get props =>
-      [machineId, productId, quantity, capacity, availability, imageUrl];
+  List<Object?> get props => [
+        machineId,
+        productId,
+        quantity,
+        capacity,
+        availability,
+        imageUrl,
+        listPriceNet,
+        taxRate,
+      ];
 }
