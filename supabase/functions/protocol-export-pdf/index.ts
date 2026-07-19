@@ -71,9 +71,11 @@ Deno.serve(async (req) => {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  // Design-System-Palette — identisch zu finance-export-pdf / One-Pager.
   const ink = rgb(0.08, 0.07, 0.05);
   const gold = rgb(0.99, 0.76, 0.01);
   const muted = rgb(0.44, 0.42, 0.35);
+  const cream = rgb(0.98, 0.96, 0.92);
   const colX = [40, 160, 250, 340, 470];
   // Räume auf jeder Seite: Header (Aussteller + Titel + Zeitraum +
   // Spaltenköpfe) 800 -> ~720; Fußraum für "Eintraege" + Signatur-Block:
@@ -86,35 +88,46 @@ Deno.serve(async (req) => {
   // dann eine horizontale Trennlinie und die Spaltenköpfe.
   // Rückgabe: aktuelles y unter dem Header (ready für Datenzeilen).
   const drawHeader = (p: ReturnType<typeof pdf.addPage>): number => {
-    // Aussteller-Block rechts (5 Zeilen, y=800..755)
-    let hy = 800;
-    p.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: bold, color: ink });
-    p.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font, color: muted });
-    p.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font, color: muted });
-    p.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: muted });
-    p.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font, color: muted });
+    // Gold-Topbar + Wortmarke (One-Pager-Look).
+    p.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: gold });
+    p.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: bold, color: ink });
+    p.drawText("Protokoll-Nachweis", { x: 40, y: 842 - 43, size: 8, font, color: muted });
 
-    // Titel links, unterhalb des Aussteller-Blocks, damit nichts überlappt
-    let ty = hy - 70;
-    p.drawText("Bördesnack24 – " + def.title, { x: 40, y: ty, size: 15, font: bold, color: gold });
-    ty -= 20;
+    // Aussteller-Block rechts (Stammdaten, 5 Zeilen).
+    let hy = 842 - 22;
+    p.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: bold, color: ink });
+    p.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font, color: muted });
+    p.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font, color: muted });
+    p.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font, color: muted });
+    p.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font, color: muted });
+    p.drawLine({
+      start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 },
+      thickness: 0.7, color: ink,
+    });
+
+    // Titel + Zeitraum, dann gold unterstrichene Sektionslinie.
+    let ty = 842 - 104;
+    p.drawText(def.title, { x: 40, y: ty, size: 15, font: bold, color: gold });
+    ty -= 18;
     p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: ty, size: 10, font, color: ink });
-    ty -= 14;
-
-    // Horizontale Trennlinie zwischen Header und Tabellen-Kopf
+    ty -= 10;
     p.drawLine({
       start: { x: 40, y: ty }, end: { x: 555, y: ty },
-      thickness: 0.8, color: ink,
+      thickness: 1.4, color: gold,
     });
-    ty -= 16;
+    ty -= 18;
 
-    // Spaltenköpfe
+    // Tabellenkopf als Ink-Band mit Cream-Text (wie im One-Pager).
+    p.drawRectangle({ x: 40, y: ty - 4, width: 515, height: 16, color: ink });
     def.columns.forEach((c, i) => {
-      p.drawText(c.label, { x: colX[i] ?? 40, y: ty, size: 9, font: bold, color: ink });
+      p.drawText(c.label, { x: (colX[i] ?? 40) + 4, y: ty, size: 8.5, font: bold, color: cream });
     });
-    ty -= 14;
+    ty -= 20;
     return ty;
   };
+
+  // Zebra-Zeilen wie im One-Pager: jede zweite Zeile cream hinterlegen.
+  let zebra = false;
 
   let page = pdf.addPage([595, 842]);
   let y = drawHeader(page);
@@ -127,12 +140,17 @@ Deno.serve(async (req) => {
     if (y < FOOT_Y_LIMIT) {
       page = pdf.addPage([595, 842]);
       y = drawHeader(page);
+      zebra = false;
     }
+    if (zebra) {
+      page.drawRectangle({ x: 40, y: y - 3.5, width: 515, height: 13, color: cream });
+    }
+    zebra = !zebra;
     def.columns.forEach((c, i) => {
       const text = fmt((row as Record<string, unknown>)[c.key]).substring(0, 22);
-      page.drawText(text, { x: colX[i] ?? 40, y, size: 8, font, color: ink });
+      page.drawText(text, { x: (colX[i] ?? 40) + 4, y, size: 8, font, color: ink });
     });
-    y -= 12;
+    y -= 13;
   }
 
   // Signatur-Block: braucht ca. 100 pt Höhe (Überschrift + Linie + Name +
@@ -157,7 +175,14 @@ Deno.serve(async (req) => {
     page.drawText(`${rl} - Datum: ${today}`, { x: sx, y: sigY - 4, size: 7, font, color: ink });
     sx += slotW;
   }
-  page.drawText(`Einträge: ${(rows ?? []).length}`, { x: 40, y: 40, size: 8, font, color: ink });
+  // Footer wie im One-Pager: Trennlinie + Stammdaten-Zeile.
+  page.drawLine({ start: { x: 40, y: 52 }, end: { x: 555, y: 52 }, thickness: 0.5, color: muted });
+  page.drawText(
+    `${ISSUER.name} · ${ISSUER.street}, ${ISSUER.cityLine} · St-Nr. ${ISSUER.taxNumber} · USt-IdNr. ${ISSUER.vatId}`,
+    { x: 40, y: 42, size: 7, font, color: muted },
+  );
+  page.drawText(`Einträge: ${(rows ?? []).length} · Erstellt am ${new Date().toISOString().substring(0, 10)}`,
+    { x: 40, y: 32, size: 7, font, color: muted });
   const bytes = await pdf.save();
   return jsonResponse({ filename: `${kind}_${from}_${to}.pdf`, mime: "application/pdf", base64: encodeBase64(bytes) });
 });

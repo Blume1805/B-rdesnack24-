@@ -40,12 +40,15 @@ Future<void> printInvoice(Invoice invoice) async {
 <meta charset="utf-8">
 <title>Rechnung ${invoice.invoiceNumber}</title>
 <style>
-  @page { size: A4; margin: 22mm 16mm 22mm 16mm; }
+  @page { size: A4; margin: 0 16mm 22mm 16mm; }
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
          color: #14110E; margin: 0; padding: 0; font-size: 12pt; }
+  /* One-Pager-Look: Gold-Topbar + Wortmarke */
+  .topbar { height: 6mm; background: #FDC102; margin: 0 -16mm 8mm; }
+  .brand { font-weight: 900; letter-spacing: 2px; font-size: 12pt; margin-bottom: 10pt; }
   .wrap { max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 24pt; margin: 0; letter-spacing: 1px; }
+  h1 { font-size: 24pt; margin: 0; letter-spacing: 1px; color: #B8860B; }
   .row { display: flex; gap: 24px; }
   .row > .col { flex: 1; }
   .right { text-align: right; }
@@ -53,9 +56,10 @@ Future<void> printInvoice(Invoice invoice) async {
   .divider { border: 0; border-top: 1px solid #14110E; margin: 16pt 0; }
   table.pos { width: 100%; border-collapse: collapse; margin-top: 8pt; }
   table.pos th, table.pos td { padding: 6pt 8pt; text-align: right; }
-  table.pos th { background: #FAF6ED; text-align: left; border-top: 1pt solid #14110E; border-bottom: 1pt solid #14110E; }
+  table.pos th { background: #14110E; color: #F9F5EC; text-align: left; }
   table.pos th:first-child, table.pos td:first-child { text-align: left; }
-  table.pos td { border-bottom: 1pt solid #e6e0cc; }
+  table.pos td { border-bottom: 1pt solid #E8E2D6; }
+  table.pos tbody tr:nth-child(even) td { background: #F9F5EC; }
   .sum { display: inline-block; background: #FDC102; padding: 8pt 14pt; border-radius: 8pt; margin-top: 12pt; }
   .sum .lbl { font-size: 9pt; font-weight: 700; }
   .sum .val { font-size: 20pt; font-weight: 800; }
@@ -66,7 +70,8 @@ Future<void> printInvoice(Invoice invoice) async {
   h2 { font-size: 12pt; margin: 12pt 0 4pt 0; }
   .r-lines { line-height: 1.35; }
 </style>
-</head><body onload="window.print()"><div class="wrap">
+</head><body onload="window.print()"><div class="topbar"></div><div class="wrap">
+  <div class="brand">BÖRDESNACK24</div>
   <div class="row">
     <div class="col">
       <div><strong>${iss('name')}</strong></div>

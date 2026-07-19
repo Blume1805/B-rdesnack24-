@@ -17,18 +17,25 @@ export const CREAM = rgb(0.98, 0.96, 0.92);
 
 export type Ctx = { pdf: PDFDocument; font: PDFFont; bold: PDFFont; italic: PDFFont };
 
+// Kopf im One-Pager-Look: Gold-Topbar, Wortmarke links, Stammdaten rechts,
+// Titel gold, darunter goldene Sektionslinie — identisch zu
+// finance-export-pdf / protocol-export-pdf.
 export function drawStandardHeader(page: PDFPage, ctx: Ctx, title: string): number {
-  const hy = 800;
-  page.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: ctx.bold, color: INK });
-  page.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font: ctx.font, color: MUTED });
-  let y = hy - 70;
+  page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
+  page.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: ctx.bold, color: INK });
+  page.drawText("Dokument", { x: 40, y: 842 - 43, size: 8, font: ctx.font, color: MUTED });
+  const hy = 842 - 22;
+  page.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: ctx.bold, color: INK });
+  page.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
+  let y = 842 - 104;
   page.drawText(title, { x: 40, y, size: 15, font: ctx.bold, color: GOLD });
-  y -= 20;
-  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 0.8, color: INK });
-  y -= 16;
+  y -= 10;
+  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 1.4, color: GOLD });
+  y -= 18;
   return y;
 }
 

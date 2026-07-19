@@ -65,27 +65,31 @@ interface Ctx {
   caller: SupabaseClient;
 }
 
-// ── Header rendern (Aussteller + Titel + Trennlinie) ────────────────
+// ── Header im One-Pager-Look: Gold-Topbar, Wortmarke, Stammdaten ────
 function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: string): number {
-  const hy = 800;
-  page.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: ctx.bold, color: INK });
-  page.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font: ctx.font, color: MUTED });
-  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font: ctx.font, color: MUTED });
+  page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
+  page.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: ctx.bold, color: INK });
+  page.drawText("Freigabe-Dokument", { x: 40, y: 842 - 43, size: 8, font: ctx.font, color: MUTED });
+  const hy = 842 - 22;
+  page.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: ctx.bold, color: INK });
+  page.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
+  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
 
-  let ty = hy - 70;
+  let ty = 842 - 104;
   page.drawText(title, { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
-  ty -= 20;
+  ty -= 18;
   if (subtitle) {
     page.drawText(subtitle, { x: 40, y: ty, size: 10, font: ctx.font, color: INK });
-    ty -= 14;
+    ty -= 12;
   }
   page.drawLine({
     start: { x: 40, y: ty }, end: { x: 555, y: ty },
-    thickness: 0.8, color: INK,
+    thickness: 1.4, color: GOLD,
   });
-  ty -= 16;
+  ty -= 18;
   return ty;
 }
 
@@ -102,28 +106,37 @@ function drawTable(
   let page = ctx.pdf.addPage([595, 842]);
   let y = drawPageHeader(page, ctx, title, subtitle);
 
+  // Tabellenkopf als Ink-Band mit Cream-Text + Zebra-Zeilen (One-Pager).
+  const CREAM = rgb(0.98, 0.96, 0.92);
   const drawColumnHeaders = (p: PDFPage, yPos: number) => {
+    p.drawRectangle({ x: 40, y: yPos - 4, width: 515, height: 16, color: INK });
     for (const c of columns) {
-      p.drawText(c.label, { x: c.x, y: yPos, size: 9, font: ctx.bold, color: INK });
+      p.drawText(c.label, { x: c.x + 4, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
     }
   };
 
   drawColumnHeaders(page, y);
-  y -= 14;
+  y -= 18;
+  let zebra = false;
 
   for (const row of rows) {
     if (y < FOOT_Y_LIMIT) {
       page = ctx.pdf.addPage([595, 842]);
       y = drawPageHeader(page, ctx, title, subtitle);
       drawColumnHeaders(page, y);
-      y -= 14;
+      y -= 18;
+      zebra = false;
     }
+    if (zebra) {
+      page.drawRectangle({ x: 40, y: y - 3.5, width: 515, height: 13, color: CREAM });
+    }
+    zebra = !zebra;
     for (let i = 0; i < columns.length; i++) {
       const c = columns[i];
       const text = fmt(row[i]).substring(0, c.maxChars);
-      page.drawText(text, { x: c.x, y, size: 8, font: ctx.font, color: INK });
+      page.drawText(text, { x: c.x + 4, y, size: 8, font: ctx.font, color: INK });
     }
-    y -= 12;
+    y -= 13;
   }
 
   if (rows.length === 0) {

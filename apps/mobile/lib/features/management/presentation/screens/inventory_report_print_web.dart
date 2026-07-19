@@ -81,8 +81,7 @@ Future<void> printInventoryReport({
 
     // Bewegungen
     blocks.write('<h3>Bewegungen im Zeitraum</h3>');
-    blocks.write(
-        '<table class="pos"><thead><tr>'
+    blocks.write('<table class="pos"><thead><tr>'
         '<th>Datum</th><th>Vorgang</th>'
         '<th class="num">Menge</th><th class="num">EK/Stk.</th>'
         '<th>Rechnung</th><th>Rg-Datum</th><th>MHD</th><th>Bemerkung</th>'
@@ -100,7 +99,7 @@ Future<void> printInventoryReport({
           '<td class="strong">${_esc(label(t))}</td>'
           '<td class="num strong">${qty > 0 ? '+$qty' : qty}</td>'
           '<td class="num">'
-              '${m['unit_cost'] == null ? '—' : Formatters.euro((m['unit_cost'] as num).toDouble())}'
+          '${m['unit_cost'] == null ? '—' : Formatters.euro((m['unit_cost'] as num).toDouble())}'
           '</td>'
           '<td>${_esc((m['invoice_number']?.toString()) ?? '—')}</td>'
           '<td>${fmtDate(m['invoice_date'])}</td>'
@@ -112,8 +111,7 @@ Future<void> printInventoryReport({
 
     // FIFO-Lots
     blocks.write('<h3>FIFO-Restlots am Stichtag</h3>');
-    blocks.write(
-        '<table class="pos"><thead><tr>'
+    blocks.write('<table class="pos"><thead><tr>'
         '<th>Rechnung</th><th>Rg-Datum</th>'
         '<th class="num">Rest</th><th class="num">EK/Stk.</th>'
         '<th>MHD</th><th class="num">Restlaufzeit</th>'
@@ -139,7 +137,7 @@ Future<void> printInventoryReport({
             '<td class="num ${warn ? 'warn' : 'strong'}">$pct %</td>'
             '<td class="num">${Formatters.euro(((l['lot_gross'] as num?)?.toDouble()) ?? 0)}</td>'
             '<td class="num ${warn ? 'warn' : ''}">'
-                '${disc == 0 ? '—' : '− ${Formatters.euro(disc)}'}</td>'
+            '${disc == 0 ? '—' : '− ${Formatters.euro(disc)}'}</td>'
             '<td class="num strong">${Formatters.euro(((l['lot_net'] as num?)?.toDouble()) ?? 0)}</td>'
             '</tr>');
       }
@@ -150,7 +148,7 @@ Future<void> printInventoryReport({
           '<td class="num" colspan="4"></td>'
           '<td class="num strong">${Formatters.euro(grossSum)}</td>'
           '<td class="num warn strong">'
-              '${discSum == 0 ? '—' : '− ${Formatters.euro(discSum)}'}</td>'
+          '${discSum == 0 ? '—' : '− ${Formatters.euro(discSum)}'}</td>'
           '<td class="num strong">${Formatters.euro(netSum)}</td>'
           '</tr>');
     }
@@ -178,7 +176,8 @@ Future<void> printInventoryReport({
   // MHD-Bewertungsmatrix
   final matrixHtml = StringBuffer();
   matrixHtml.write('<section class="matrix-block">');
-  matrixHtml.write('<h2 style="margin-top:14pt">Bewertungsansatz MHD-Abschlag</h2>');
+  matrixHtml
+      .write('<h2 style="margin-top:14pt">Bewertungsansatz MHD-Abschlag</h2>');
   matrixHtml.write('<p class="matrix-intro">Je Rest-Laufzeit am '
       'Bilanzstichtag wird folgender Abschlag auf den Anschaffungskosten-'
       'wert eines FIFO-Restlots angesetzt. Die Bandbreite orientiert sich '
@@ -191,13 +190,25 @@ Future<void> printInventoryReport({
       '<th>Begründung</th></tr></thead><tbody>');
   const matrix = [
     ['> 4 Wochen', '0 % Abschlag', '0 %', 'normale Verwertbarkeit'],
-    ['2–4 Wochen', '10–30 %', '20 %',
-      'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen'],
+    [
+      '2–4 Wochen',
+      '10–30 %',
+      '20 %',
+      'eingeschränkte Verkaufszeit, ggf. erhöhte Preisaktionen'
+    ],
     ['1–2 Wochen', '30–50 %', '40 %', 'erheblicher Verkaufsdruck'],
-    ['< 1 Woche', '50–80 %', '65 %',
-      'Risiko des Nichtverkaufs deutlich erhöht'],
-    ['MHD überschritten', '100 % Abschreibung', '100 %',
-      'keine wirtschaftliche Verwertbarkeit'],
+    [
+      '< 1 Woche',
+      '50–80 %',
+      '65 %',
+      'Risiko des Nichtverkaufs deutlich erhöht'
+    ],
+    [
+      'MHD überschritten',
+      '100 % Abschreibung',
+      '100 %',
+      'keine wirtschaftliche Verwertbarkeit'
+    ],
   ];
   for (final r in matrix) {
     final applied = r[2];
@@ -226,11 +237,10 @@ Future<void> printInventoryReport({
     signaturesHtml.write('<ul class="stamp-list">');
     for (final d in approvalDecisions) {
       final name = _esc((d['approver_name']?.toString()) ?? '?');
-      final decision = d['decision']?.toString() == 'approved'
-          ? 'freigegeben' : 'abgelehnt';
+      final decision =
+          d['decision']?.toString() == 'approved' ? 'freigegeben' : 'abgelehnt';
       final at = d['decided_at']?.toString();
-      final atFmt = at == null ? '' :
-          ' · ' + fmtDate(at);
+      final atFmt = at == null ? '' : ' · ' + fmtDate(at);
       signaturesHtml.write('<li><b>$name</b> — $decision$atFmt</li>');
     }
     signaturesHtml.write('</ul></section>');
@@ -262,22 +272,26 @@ Future<void> printInventoryReport({
 <meta charset="utf-8">
 <title>FIFO-Inventur ${Formatters.date(from)} – ${Formatters.date(to)}</title>
 <style>
-  @page { size: A4 landscape; margin: 12mm 10mm; }
+  @page { size: A4 landscape; margin: 0 10mm 12mm 10mm; }
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
          color: #14110E; margin: 0; padding: 0; font-size: 9pt; }
+  /* One-Pager-Look: Gold-Topbar + Wortmarke */
+  .topbar { height: 5mm; background: #FDC102; margin: 0 -10mm 6mm; }
+  .brand { font-weight: 900; letter-spacing: 2px; font-size: 11pt;
+           margin-bottom: 6pt; }
   .wrap { max-width: 100%; margin: 0 auto; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; }
-  .head h1 { margin: 0; font-size: 17pt; letter-spacing: 0.5px; }
+  .head h1 { margin: 0; font-size: 17pt; letter-spacing: 0.5px; color: #B8860B; }
   .meta { color: #6f6a5b; font-size: 9pt; }
-  h2 { font-size: 11pt; margin: 12pt 0 4pt 0; color: #14110E; }
+  h2 { font-size: 11pt; margin: 12pt 0 4pt 0; color: #14110E;
+       border-bottom: 1.5pt solid #FDC102; padding-bottom: 2pt; }
   h3 { font-size: 10pt; margin: 8pt 0 2pt 0; color: #6f6a5b;
        font-weight: 700; letter-spacing: 0.2px; }
   table.pos { width: 100%; border-collapse: collapse; margin-top: 3pt; }
   table.pos th, table.pos td { padding: 3pt 5pt; text-align: left;
-                                border-bottom: 1pt solid #e6e0cc; }
-  table.pos th { background: #FAF6ED; border-top: 1pt solid #14110E;
-                  border-bottom: 1pt solid #14110E; }
+                                border-bottom: 1pt solid #E8E2D6; }
+  table.pos th { background: #14110E; color: #F9F5EC; }
   .num { text-align: right; white-space: nowrap; }
   .muted { color: #6f6a5b; }
   .strong { font-weight: 800; }
@@ -355,7 +369,8 @@ Future<void> printInventoryReport({
     page-break-inside: avoid; break-inside: avoid;
   }
 </style>
-</head><body onload="window.print()"><div class="wrap">
+</head><body onload="window.print()"><div class="topbar"></div><div class="wrap">
+  <div class="brand">BÖRDESNACK24</div>
   <div class="head">
     <div>
       <h1>INVENTUR — FIFO-Bewegungsreport</h1>

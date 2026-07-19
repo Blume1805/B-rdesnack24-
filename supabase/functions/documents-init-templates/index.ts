@@ -29,29 +29,31 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
   const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
   const page = pdf.addPage([595, 842]);
 
-  // Kopf: Aussteller rechts oben
+  // Kopf im One-Pager-Look: Gold-Topbar, Wortmarke links, Stammdaten rechts.
   {
-    const hy = 800;
-    page.drawText(ISSUER.name, { x: 320, y: hy, size: 9, font: bold, color: INK });
-    page.drawText(ISSUER.street, { x: 320, y: hy - 11, size: 8, font, color: MUTED });
-    page.drawText(ISSUER.cityLine, { x: 320, y: hy - 22, size: 8, font, color: MUTED });
-    page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: MUTED });
-    page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 45, size: 8, font, color: MUTED });
+    page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
+    page.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: bold, color: INK });
+    page.drawText("Vorlage", { x: 40, y: 842 - 43, size: 8, font, color: MUTED });
+    const hy = 842 - 22;
+    page.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: bold, color: INK });
+    page.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font, color: MUTED });
+    page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font, color: MUTED });
+    page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font, color: MUTED });
+    page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font, color: MUTED });
+    page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
   }
 
-  // Titel + Ordner-Label
-  let y = 800 - 70;
-  page.drawText("Bördesnack24 – Vorlage", { x: 40, y, size: 15, font: bold, color: GOLD });
-  y -= 20;
-  page.drawText(folderLabel, { x: 40, y, size: 12, font: bold, color: INK });
+  // Titel + Ordner-Label, goldene Sektionslinie darunter.
+  let y = 842 - 104;
+  page.drawText(folderLabel, { x: 40, y, size: 15, font: bold, color: GOLD });
   y -= 18;
   page.drawText("Felder in eckigen Klammern ausfüllen, danach unterschreiben und als",
     { x: 40, y, size: 9, font: italic, color: MUTED });
   y -= 11;
   page.drawText("neue Version desselben Dokuments in der App hochladen.",
     { x: 40, y, size: 9, font: italic, color: MUTED });
-  y -= 12;
-  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 0.8, color: INK });
+  y -= 10;
+  page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 1.4, color: GOLD });
   y -= 22;
 
   // Stammdaten-Block mit Platzhaltern
@@ -101,8 +103,13 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
   }
   y -= 110;
 
-  page.drawText(`Vorlage · Bördesnack24 GbR · Version 1 · Erstellt am ${new Date().toISOString().substring(0,10)}`,
-    { x: 40, y: 40, size: 8, font: italic, color: MUTED });
+  // Footer wie im One-Pager: Trennlinie + Stammdaten-Zeile.
+  page.drawLine({ start: { x: 40, y: 52 }, end: { x: 555, y: 52 }, thickness: 0.5, color: MUTED });
+  page.drawText(
+    `${ISSUER.name} · ${ISSUER.street}, ${ISSUER.cityLine} · St-Nr. ${ISSUER.taxNumber} · USt-IdNr. ${ISSUER.vatId}`,
+    { x: 40, y: 42, size: 7, font, color: MUTED });
+  page.drawText(`Vorlage · Version 1 · Erstellt am ${new Date().toISOString().substring(0,10)}`,
+    { x: 40, y: 32, size: 7, font: italic, color: MUTED });
 
   return await pdf.save();
 }
