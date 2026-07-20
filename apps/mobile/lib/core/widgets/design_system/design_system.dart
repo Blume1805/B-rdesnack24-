@@ -6,6 +6,7 @@ export 'app_card.dart';
 export 'brand_marks.dart';
 export 'eyebrow.dart';
 export 'hero_app_bar.dart';
+export 'hero_action_bar.dart';
 export 'hero_backdrop.dart';
 export 'kpi_card.dart';
 export 'loyalty_meter.dart';

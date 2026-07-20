@@ -168,38 +168,37 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HeroAppBar(
-        title: const Text('Inventur — FIFO-Bewegungsreport'),
-        actions: [
-          if (_movements != null && _movements!.isNotEmpty) ...[
-            IconButton(
-              tooltip: 'Freigabe anfordern',
-              icon: const Icon(
-                Icons.rule_folder_outlined,
-                color: AppColors.brand,
-              ),
-              onPressed: _requestApproval,
-            ),
-            IconButton(
-              tooltip: 'Als PDF drucken',
-              icon: const Icon(
-                Icons.picture_as_pdf,
-                color: AppColors.statusCritical,
-              ),
-              onPressed: () => printInventoryReport(
-                movements: _movements!,
-                lots: _lots ?? const [],
-                signatures: _signatures ?? const [],
-                from: _from,
-                to: _to,
-              ),
-            ),
-          ],
-        ],
+      appBar: const HeroAppBar(
+        title: Text('Inventur — FIFO-Bewegungsreport'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s5),
         children: [
+          if (_movements != null && _movements!.isNotEmpty)
+            HeroActionBar(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s3),
+              actions: [
+                HeroAction(
+                  icon: Icons.rule_folder_outlined,
+                  tooltip: 'Freigabe anfordern',
+                  iconColor: AppColors.brand,
+                  onTap: _requestApproval,
+                ),
+                HeroAction(
+                  icon: Icons.picture_as_pdf,
+                  tooltip: 'Als PDF drucken',
+                  iconColor: AppColors.statusCritical,
+                  borderColor: AppColors.statusCritical,
+                  onTap: () => printInventoryReport(
+                    movements: _movements!,
+                    lots: _lots ?? const [],
+                    signatures: _signatures ?? const [],
+                    from: _from,
+                    to: _to,
+                  ),
+                ),
+              ],
+            ),
           Text(
             'FIFO-Inventur — je Produkt alle Bewegungen chronologisch, '
             'Bewertung nach dem Verbrauchsfolgeverfahren (§256 HGB): die '

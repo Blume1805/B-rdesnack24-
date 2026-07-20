@@ -127,25 +127,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           orElse: () => false,
         );
     return Scaffold(
-      appBar: HeroAppBar(
-        title: const Text('Dokumente'),
-        actions: [
-          IconButton(
-            tooltip: 'Prüfer-Export als ZIP',
-            icon: _exporting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.brand,
-                    ),
-                  )
-                : const Icon(Icons.folder_zip_outlined, color: AppColors.brand),
-            onPressed: _exporting ? null : () => _exportZip(context, ref),
-          ),
-        ],
-      ),
+      appBar: const HeroAppBar(title: Text('Dokumente')),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(
               onPressed: () => _create(context, ref),
@@ -155,69 +137,96 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               foregroundColor: AppColors.ink,
             )
           : null,
-      body: docs.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brand),
-        ),
-        error: (e, _) => Padding(
-          padding: const EdgeInsets.all(AppSpacing.s5),
-          child: Text('$e'),
-        ),
-        data: (list) => folders.when(
-          loading: () => const SizedBox.shrink(),
-          error: (e, _) => Text('$e'),
-          data: (folderList) {
-            final filteredDocs = list.where((d) {
-              final t = (d['title'] as String? ?? '').toLowerCase();
-              final c = (d['category'] as String? ?? '').toLowerCase();
-              final q = _search.toLowerCase();
-              return q.isEmpty || t.contains(q) || c.contains(q);
-            }).toList();
-            final byFolder = <String, List<Map<String, dynamic>>>{};
-            for (final d in filteredDocs) {
-              final slug = (d['category'] as String?) ?? 'sonstiges';
-              byFolder.putIfAbsent(slug, () => []).add(d);
-            }
-            final visibleFolders = _folderFilter == null
-                ? folderList
-                : folderList.where((f) => f['slug'] == _folderFilter).toList();
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(_documentsProvider);
-                ref.invalidate(_foldersProvider);
-              },
-              color: AppColors.brand,
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.s4),
-                children: [
-                  _SearchBar(onChanged: (v) => setState(() => _search = v)),
-                  const SizedBox(height: AppSpacing.s3),
-                  _FolderChips(
-                    folders: folderList,
-                    selected: _folderFilter,
-                    onSelected: (slug) => setState(() => _folderFilter = slug),
-                  ),
-                  const SizedBox(height: AppSpacing.s4),
-                  for (final f in visibleFolders)
-                    _FolderSection(
-                      folder: f,
-                      documents: byFolder[f['slug']] ?? const [],
-                      canEdit: canEdit,
-                      onOpen: (d) => _open(context, ref, d),
-                      onNewVersion: (d) =>
-                          _addVersion(context, ref, d['id'] as String),
-                      onSetValidUntil: (d) => _setValidUntil(context, ref, d),
-                      onRequestApproval: (d) => _requestReview(context, ref, d),
-                      onInviteEmployees: (d) =>
-                          _inviteEmployees(context, ref, d),
-                    ),
-                  const SizedBox(height: AppSpacing.s12),
-                ],
+      body: Column(
+        children: [
+          HeroActionBar(
+            actions: [
+              HeroAction(
+                icon: Icons.folder_zip_outlined,
+                tooltip: 'Prüfer-Export als ZIP',
+                iconColor: AppColors.brand,
+                busy: _exporting,
+                onTap: () => _exportZip(context, ref),
               ),
-            );
-          },
-        ),
+            ],
+          ),
+          Expanded(child: _body(context, ref, docs, folders)),
+        ],
+      ),
+    );
+  }
+
+  Widget _body(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<Map<String, dynamic>>> docs,
+    AsyncValue<List<Map<String, dynamic>>> folders,
+  ) {
+    final canEdit = ref.watch(currentPermissionsProvider).maybeWhen(
+          data: (p) => p.contains('documents.edit'),
+          orElse: () => false,
+        );
+    return docs.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(color: AppColors.brand),
+      ),
+      error: (e, _) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.s5),
+        child: Text('$e'),
+      ),
+      data: (list) => folders.when(
+        loading: () => const SizedBox.shrink(),
+        error: (e, _) => Text('$e'),
+        data: (folderList) {
+          final filteredDocs = list.where((d) {
+            final t = (d['title'] as String? ?? '').toLowerCase();
+            final c = (d['category'] as String? ?? '').toLowerCase();
+            final q = _search.toLowerCase();
+            return q.isEmpty || t.contains(q) || c.contains(q);
+          }).toList();
+          final byFolder = <String, List<Map<String, dynamic>>>{};
+          for (final d in filteredDocs) {
+            final slug = (d['category'] as String?) ?? 'sonstiges';
+            byFolder.putIfAbsent(slug, () => []).add(d);
+          }
+          final visibleFolders = _folderFilter == null
+              ? folderList
+              : folderList.where((f) => f['slug'] == _folderFilter).toList();
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(_documentsProvider);
+              ref.invalidate(_foldersProvider);
+            },
+            color: AppColors.brand,
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.s4),
+              children: [
+                _SearchBar(onChanged: (v) => setState(() => _search = v)),
+                const SizedBox(height: AppSpacing.s3),
+                _FolderChips(
+                  folders: folderList,
+                  selected: _folderFilter,
+                  onSelected: (slug) => setState(() => _folderFilter = slug),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                for (final f in visibleFolders)
+                  _FolderSection(
+                    folder: f,
+                    documents: byFolder[f['slug']] ?? const [],
+                    canEdit: canEdit,
+                    onOpen: (d) => _open(context, ref, d),
+                    onNewVersion: (d) =>
+                        _addVersion(context, ref, d['id'] as String),
+                    onSetValidUntil: (d) => _setValidUntil(context, ref, d),
+                    onRequestApproval: (d) => _requestReview(context, ref, d),
+                    onInviteEmployees: (d) => _inviteEmployees(context, ref, d),
+                  ),
+                const SizedBox(height: AppSpacing.s12),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
