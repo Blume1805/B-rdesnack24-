@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:printing/printing.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -9,6 +8,10 @@ import '../../../finance/domain/entities/finance_period.dart';
 import '../../data/approvals_remote_data_source.dart';
 import '../controllers/management_providers.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+// Web-sichere PDF-Ausgabe: auf iOS-Web/In-App-Browser öffnet der native
+// Viewer in neuem Tab; auf Mobile/Desktop das System-Teilen-Sheet.
+import 'pdf_inline_stub.dart'
+    if (dart.library.js_interop) 'pdf_inline_web.dart';
 
 /// Generisches Gerüst für ein revisionssicheres Protokoll:
 /// Zeitraum-Filter, Liste, optionaler PDF-Export und Anlegen-FAB.
@@ -93,7 +96,7 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
       );
       return;
     }
-    await Printing.sharePdf(bytes: bytes, filename: '${kind}_nachweis.pdf');
+    await sharePdfBytes(bytes, '${kind}_nachweis.pdf');
   }
 
   Future<void> _requestApproval() async {
