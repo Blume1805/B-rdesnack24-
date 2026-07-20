@@ -27,7 +27,7 @@ const ISSUER = {
 };
 
 const PROTOCOLS: Record<string, ProtocolDef> = {
-  temperature: { table: "temperature_logs", dateCol: "measured_at", title: "Temperaturkontrolle (CCP 2: ≤ 7 °C)",
+  temperature: { table: "temperature_logs", dateCol: "measured_at", title: "Temperaturkontrolle (CCP 2: <= 7 °C)",
     columns: [{ key: "measured_at", label: "Zeitpunkt" },{ key: "temperature_c", label: "Ist °C" },{ key: "within_limit", label: "i.O." },{ key: "corrective_action", label: "Korrektur" }] },
   cleaning: { table: "cleaning_logs", dateCol: "cleaned_at", title: "Reinigungsprotokoll",
     columns: [{ key: "cleaned_at", label: "Zeitpunkt" },{ key: "cleaning_type", label: "Art" },{ key: "agent", label: "Mittel" },{ key: "notes", label: "Bemerkung" }] },
@@ -43,11 +43,36 @@ const PROTOCOLS: Record<string, ProtocolDef> = {
     columns: [{ key: "collected_at", label: "Zeitpunkt" },{ key: "machine_id", label: "Automat" },{ key: "amount_gross", label: "Brutto EUR" },{ key: "change_amount", label: "Wechselgeld" },{ key: "net_amount", label: "Netto EUR" }] },
 };
 
+// Helvetica (StandardFonts) kann nur WinAnsi kodieren. Zeichen außerhalb
+// (z. B. -> ≤ ≥ ≈ • aus freien Textfeldern) lassen pdf-lib beim drawText
+// werfen -> 500. Deshalb JEDEN gezeichneten String zuerst WinAnsi-sicher
+// machen: bekannte Sonderzeichen ersetzen, alles andere > 0xFF, das nicht
+// im WinAnsi-Hochbereich liegt, auf '?' abbilden.
+const WINANSI_MAP: Record<string, string> = {
+  "→": "->", "←": "<-", "↔": "<->", "⇒": "=>", "≤": "<=", "≥": ">=",
+  "≠": "!=", "≈": "~", "×": "x", "÷": "/", "∅": "-", "™": "(TM)", "℃": "°C",
+};
+// Zeichen aus U+2000..U+20FF, die WinAnsi direkt abbildet, bleiben erhalten.
+const WINANSI_SAFE_HIGH = new Set([
+  "–", "—", "‘", "’", "‚", "“", "”", "„", "•", "…", "†", "‡", "‰",
+  "‹", "›", "€", "ƒ", "ˆ", "˜", "Š", "š", "Ž", "ž", "Œ", "œ", "Ÿ",
+]);
+const winAnsiSafe = (s: string): string => {
+  let out = "";
+  for (const ch of s) {
+    if (WINANSI_MAP[ch] !== undefined) { out += WINANSI_MAP[ch]; continue; }
+    const cp = ch.codePointAt(0)!;
+    if (cp <= 0xff || WINANSI_SAFE_HIGH.has(ch)) out += ch;
+    else out += "?";
+  }
+  return out;
+};
+
 const fmt = (v: unknown): string => {
   if (v === null || v === undefined) return "";
   if (typeof v === "boolean") return v ? "Ja" : "Nein";
-  if (typeof v === "string" && v.length > 19 && v.includes("T")) return v.replace("T", " ").substring(0, 16);
-  return String(v);
+  if (typeof v === "string" && v.length > 19 && v.includes("T")) return winAnsiSafe(v.replace("T", " ").substring(0, 16));
+  return winAnsiSafe(String(v));
 };
 
 Deno.serve(async (req) => {
@@ -107,7 +132,7 @@ Deno.serve(async (req) => {
 
     // Titel + Zeitraum, dann gold unterstrichene Sektionslinie.
     let ty = 842 - 104;
-    p.drawText(def.title, { x: 40, y: ty, size: 15, font: bold, color: gold });
+    p.drawText(winAnsiSafe(def.title), { x: 40, y: ty, size: 15, font: bold, color: gold });
     ty -= 18;
     p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: ty, size: 10, font, color: ink });
     ty -= 10;
@@ -169,8 +194,8 @@ Deno.serve(async (req) => {
   const today = new Date().toISOString().substring(0, 10);
   for (const s of (sigs ?? [])) {
     page.drawLine({ start: { x: sx, y: sigY + 22 }, end: { x: sx + slotW - 30, y: sigY + 22 }, thickness: 0.5, color: ink });
-    const nm = String((s as { full_name?: unknown }).full_name ?? "");
-    const rl = String((s as { role_label?: unknown }).role_label ?? "");
+    const nm = winAnsiSafe(String((s as { full_name?: unknown }).full_name ?? ""));
+    const rl = winAnsiSafe(String((s as { role_label?: unknown }).role_label ?? ""));
     page.drawText(nm, { x: sx, y: sigY + 8, size: 9, font: bold, color: ink });
     page.drawText(`${rl} - Datum: ${today}`, { x: sx, y: sigY - 4, size: 7, font, color: ink });
     sx += slotW;
