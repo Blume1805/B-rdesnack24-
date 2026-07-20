@@ -112,6 +112,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             'documents-install-branded-set',
             body: <String, dynamic>{},
           );
+          // HACCP-Eigenkontrollkonzept, Verfahrensdokumentation und die
+          // sechs Betriebsprotokoll-Vorlagen (idempotent).
+          await ref.read(supabaseClientProvider).functions.invoke(
+            'documents-install-haccp-set',
+            body: <String, dynamic>{},
+          );
           if (mounted) ref.invalidate(_documentsProvider);
         } catch (_) {/* ignore — Rolle ohne Adminrechte */}
       });
