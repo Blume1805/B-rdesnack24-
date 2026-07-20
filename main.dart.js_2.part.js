@@ -68,10 +68,10 @@ _.r=d
 _.w=e
 _.x=f
 _.cQ$=g
-_.hV$=h
+_.hW$=h
 _.oL$=i
 _.fh$=j
-_.hW$=k
+_.hX$=k
 _.c=_.a=null},
 b5d:function b5d(d){this.a=d},
 b5c:function b5c(d){this.a=d},
@@ -306,7 +306,7 @@ case 3:q=j
 t=t.as
 t===$&&A.a()
 r=J.oK(q)
-t.i0("approval-notify",A.a5(["approval_id",r.j(q),"phase","requested"],s,s))
+t.hJ("approval-notify",A.a5(["approval_id",r.j(q),"phase","requested"],s,s))
 v=r.j(q)
 x=1
 break
@@ -322,8 +322,8 @@ x=2
 return A.k(u.eB("decide_document_approval",A.a5(["p_approval_id",d,"p_decision",f,"p_comment",e],t,s),s),$async$KK)
 case 2:u=u.as
 u===$&&A.a()
-u.i0("approval-notify",A.a5(["approval_id",d,"phase",f==="approved"?"approved":"rejected"],t,t))
-u.i0("document-finalize",A.a5(["approval_id",d],t,t))
+u.hJ("approval-notify",A.a5(["approval_id",d,"phase",f==="approved"?"approved":"rejected"],t,t))
+u.hJ("document-finalize",A.a5(["approval_id",d],t,t))
 return A.p(null,w)}})
 return A.q($async$KK,w)},
 Ge(d){return this.aks(d)},
@@ -387,7 +387,7 @@ g=l.c
 g===$&&A.a()
 f=A.NE(null,null,d,d)
 f.M(0,l.b)
-p.push(new A.abQ(l.a,f,"signed-documents",l.d,g).nH(k,86400).ck(new B.auC(n),a2).hQ(new B.auD()))}if(m&&h==="inventory_fifo"&&i!=null&&i.length!==0)p.push(e.dF("document_approvals").ib(0,"snapshot").kC("id",i).tf().ck(new B.auE(n),o).hQ(new B.auF()))}x=p.length!==0?9:10
+p.push(new A.abQ(l.a,f,"signed-documents",l.d,g).nH(k,86400).ck(new B.auC(n),a2).hR(new B.auD()))}if(m&&h==="inventory_fifo"&&i!=null&&i.length!==0)p.push(e.dF("document_approvals").ib(0,"snapshot").kC("id",i).tf().ck(new B.auE(n),o).hR(new B.auF()))}x=p.length!==0?9:10
 break
 case 9:x=11
 return A.k(A.kE(p,a2),$async$yF)
@@ -429,7 +429,7 @@ x.ap8()},
 Rs(){var x,w=this,v=w.gl3(),u=v.y,t=u==null
 if((t?A.j(v).i("bg.T").a(u):u)!==C.dq)v=(t?A.j(v).i("bg.T").a(u):u)===C.ev
 else v=!0
-if(v)if(!w.x.ga_().hN()){w.L(new B.b5d(w))
+if(v)if(!w.x.ga_().hO()){w.L(new B.b5d(w))
 return}if(w.ga54()){v=w.grp()
 u=v.y
 v=u==null?A.j(v).i("bg.T").a(u):u
@@ -1060,7 +1060,7 @@ t.e=x
 w=t.x
 w===$&&A.a()
 t.a9r(w,x,!1)}},
-hN(){var x,w,v,u=this,t={},s=u.aac(u.f)
+hO(){var x,w,v,u=this,t={},s=u.aac(u.f)
 t.a=s
 x=u.aac(u.r)
 if(s==null&&x==null){w=u.f
@@ -1099,10 +1099,10 @@ a9r(d,e,f){var x=d.a.ac4(e)
 d.mq(0,f?x.lj(A.dm(C.z,0,e.length,!1)):x)},
 aBs(d){var x=this
 x.L(new B.baX(x,d))
-if(x.a.CW)x.hN()},
+if(x.a.CW)x.hO()},
 ayT(d){var x=this
 x.L(new B.baW(x,d))
-if(x.a.CW)x.hN()},
+if(x.a.CW)x.hO()},
 u(d){var x,w,v,u,t,s,r,q=this,p=null
 A.T(d)
 x=A.cu(d,C.ax,y.y)
@@ -1135,12 +1135,12 @@ w=t.gmh()
 v=t.c
 v.toString
 v=A.pK(v)
-t.hW$=v
+t.hX$=v
 u=t.op(v,w)
 if(w){t.iW(x,t.fh$)
 t.fh$=!1}if(u)if(x!=null)x.l()},
 l(){var x,w=this
-w.hV$.aq(0,new B.bm7())
+w.hW$.aq(0,new B.bm7())
 x=w.cQ$
 if(x!=null)x.l()
 w.cQ$=null
@@ -1379,4 +1379,4 @@ D.aHU=new B.Hy(0,"none")
 D.ZH=new B.Hy(1,"highlightLeading")
 D.Ah=new B.Hy(2,"highlightTrailing")
 D.ZI=new B.Hy(3,"highlightAll")})()};
-(a=>{a["tkAKuBYkBA/2wKVgOmcfVwYvg7U="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["FgCNFF5mJkgm1inyTwF6Dt56MYA="]=a.current})($__dart_deferred_initializers__);
