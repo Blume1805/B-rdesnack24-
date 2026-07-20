@@ -5,6 +5,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../finance/presentation/screens/datev_export_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
 import 'screens/cash_screen.dart';
@@ -122,6 +123,15 @@ class ManagementScreen extends ConsumerWidget {
         const B2bCustomersScreen(),
         // Sichtbar für alle Gesellschafter/Admins mit customers.manage.
         visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'DATEV-Export',
+        'Buchungsstapel (CSV)',
+        Icons.account_balance_outlined,
+        const DatevExportScreen(),
+        // Finanz-sensibel: Kachel nur für Gesellschafter/Admins; die RPC
+        // erzwingt die Rolle zusätzlich serverseitig.
+        visible: p.contains('finance.export'),
       ),
       _Module(
         'Inventur',

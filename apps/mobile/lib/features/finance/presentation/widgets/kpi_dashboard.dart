@@ -46,6 +46,12 @@ class _KpiBody extends StatelessWidget {
         k.periodDays > 0 ? k.current.revenueNet / k.periodDays : 0.0;
     final avgSalesPerDay =
         k.periodDays > 0 ? k.customer.purchasesCount / k.periodDays : 0.0;
+    // Umsatz je Kunde: App-Umsatz (brutto) geteilt durch die Kunden, die im
+    // Zeitraum tatsächlich gekauft haben. Anonyme Automaten-Verkäufe lassen
+    // sich keinem Kunden zuordnen und bleiben bewusst außen vor.
+    final revenuePerCustomer = k.customer.activeCustomers > 0
+        ? k.customer.appGross / k.customer.activeCustomers
+        : 0.0;
     final wareneinsatzquotePct = 100 - k.derived.grossMarginPct;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,6 +168,12 @@ class _KpiBody extends StatelessWidget {
                   targetLower: 1,
                   targetUpper: 3,
                   targetLabel: '1 – 3 €',
+                ),
+                _KpiTile(
+                  label: 'Umsatz je Kunde',
+                  value: Formatters.euro(revenuePerCustomer),
+                  sub: 'App-Umsatz / aktive Kunden im Zeitraum',
+                  trend: k.trend.map((t) => revenuePerCustomer).toList(),
                 ),
                 _KpiTile(
                   label: 'Ø Verkäufe / Tag',
@@ -909,6 +921,9 @@ class _CustomerCard extends StatelessWidget {
   final FinanceKpis k;
   @override
   Widget build(BuildContext context) {
+    final perCustomer = k.customer.activeCustomers > 0
+        ? k.customer.appGross / k.customer.activeCustomers
+        : 0.0;
     return AppCard(
       child: Row(
         children: [
@@ -928,6 +943,12 @@ class _CustomerCard extends StatelessWidget {
             child: _Stat(
               label: 'Ø-Warenkorb',
               value: Formatters.euro(k.customer.avgBasket),
+            ),
+          ),
+          Expanded(
+            child: _Stat(
+              label: 'Umsatz/Kunde',
+              value: Formatters.euro(perCustomer),
             ),
           ),
         ],

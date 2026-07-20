@@ -14,6 +14,7 @@ import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
 import '../widgets/kpi_dashboard.dart';
+import 'datev_export_screen.dart';
 
 /// Kategorie 1 — Finanzdashboard (nur Gesellschafter/Admin).
 class FinanceScreen extends ConsumerWidget {
@@ -44,6 +45,9 @@ class FinanceScreen extends ConsumerWidget {
               busy: busy,
               onSync: () => _sync(context, ref),
               onExport: () => _export(context, ref),
+              onDatev: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DatevExportScreen()),
+              ),
               onApprovals: () => context.push(AppRoutes.approvals),
               onRequestApproval: () => _requestApproval(context, ref, period),
             ),
@@ -156,6 +160,7 @@ class _ActionCluster extends StatelessWidget {
     required this.busy,
     required this.onSync,
     required this.onExport,
+    required this.onDatev,
     required this.onApprovals,
     required this.onRequestApproval,
   });
@@ -163,6 +168,7 @@ class _ActionCluster extends StatelessWidget {
   final bool busy;
   final VoidCallback onSync;
   final VoidCallback onExport;
+  final VoidCallback onDatev;
   final VoidCallback onApprovals;
   final VoidCallback onRequestApproval;
 
@@ -197,6 +203,12 @@ class _ActionCluster extends StatelessWidget {
           onTap: busy ? null : onExport,
           iconColor: AppColors.statusCritical,
           borderColor: AppColors.statusCritical,
+        ),
+        const SizedBox(width: 6),
+        _IconAction(
+          icon: Icons.account_balance_outlined,
+          tooltip: 'DATEV-Export (Buchungsstapel)',
+          onTap: busy ? null : onDatev,
         ),
       ],
     );
