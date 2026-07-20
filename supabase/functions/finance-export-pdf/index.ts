@@ -48,6 +48,15 @@ const pct = (n: unknown, digits = 1) =>
         minimumFractionDigits: digits, maximumFractionDigits: digits,
       })} %`;
 
+// Kompakte EUR-Beschriftung für Achsen-Ticks (begrenzter Platz):
+// ab 1.000 EUR als "x,xk EUR", darunter ganzzahlig.
+const shortEur = (n: number) =>
+  Math.abs(n) >= 1000
+    ? `${(n / 1000).toLocaleString("de-DE", {
+        minimumFractionDigits: 1, maximumFractionDigits: 1,
+      })}k EUR`
+    : `${Math.round(n).toLocaleString("de-DE")} EUR`;
+
 const dateStr = (v: unknown) => (v ?? "").toString();
 
 const PAGE_W = 595;
@@ -347,6 +356,10 @@ function barList(ctx: Ctx, rows: Array<{ label: string; value: number; text: str
 }
 
 // ── 12-Monats-Trendchart (Umsatz Gold, Aufwand Ink) ─────────────────────
+// Y-Achse: 4 Hilfslinien (0/25/50/75/100 % von max) mit EUR-Beschriftung,
+// damit die Balkenhöhen ablesbar sind statt nur relativ zueinander zu
+// wirken (Root Cause des gemeldeten Bugs: die Achse hatte nur Linien,
+// aber nie Werte).
 function trendChart(ctx: Ctx, trend: Array<{ month: string; revenue_net: number; expense_net: number }>) {
   if (trend.length === 0) {
     p(ctx, "Noch keine Trend-Daten für den Zeitraum.", { color: MUTED, size: 10 });
@@ -354,21 +367,43 @@ function trendChart(ctx: Ctx, trend: Array<{ month: string; revenue_net: number;
   }
   ensureSpace(ctx, 185);
   const chartH = 125;
-  const yBase = ctx.y - chartH;
+  const yTop = ctx.y;
+  const yBase = yTop - chartH;
   const max = trend.reduce((a, t) => Math.max(a, t.revenue_net, t.expense_net), 0);
-  const cellW = CONTENT_W / trend.length;
+
+  const TICKS = 4;
+  const labelSize = 6.5;
+  const tickLabels = Array.from({ length: TICKS + 1 }, (_, i) =>
+    safe(shortEur((max * i) / TICKS)));
+  const axisLabelW = Math.max(
+    ...tickLabels.map((t) => ctx.font.widthOfTextAtSize(t, labelSize)),
+  ) + 6;
+
+  const chartX = MARGIN_X + axisLabelW;
+  const chartW = CONTENT_W - axisLabelW;
+  const cellW = chartW / trend.length;
   const barW = Math.max(6, cellW * 0.35);
+
+  for (let i = 0; i <= TICKS; i++) {
+    const ty = yBase + (i / TICKS) * chartH;
+    ctx.page.drawLine({
+      start: { x: chartX, y: ty }, end: { x: chartX + chartW, y: ty },
+      thickness: i === 0 ? 0.6 : 0.35, color: i === 0 ? MUTED : TRACK,
+    });
+    const label = tickLabels[i];
+    const lw = ctx.font.widthOfTextAtSize(label, labelSize);
+    ctx.page.drawText(label, {
+      x: chartX - lw - 4, y: ty - labelSize / 2 + 1, size: labelSize, font: ctx.font, color: MUTED,
+    });
+  }
   ctx.page.drawLine({
-    start: { x: MARGIN_X, y: ctx.y }, end: { x: MARGIN_X, y: yBase },
+    start: { x: chartX, y: yTop }, end: { x: chartX, y: yBase },
     thickness: 0.5, color: MUTED,
   });
-  ctx.page.drawLine({
-    start: { x: MARGIN_X, y: yBase }, end: { x: MARGIN_X + CONTENT_W, y: yBase },
-    thickness: 0.5, color: MUTED,
-  });
+
   for (let i = 0; i < trend.length; i++) {
     const t = trend[i];
-    const cx = MARGIN_X + i * cellW + cellW * 0.15;
+    const cx = chartX + i * cellW + cellW * 0.15;
     const hRev = max > 0 ? (t.revenue_net / max) * chartH : 0;
     const hExp = max > 0 ? (t.expense_net / max) * chartH : 0;
     ctx.page.drawRectangle({ x: cx, y: yBase, width: barW, height: hRev, color: GOLD });

@@ -14,6 +14,9 @@ class ModuleTile extends StatelessWidget {
     this.description,
     this.onTap,
     this.badge,
+    this.iconColor,
+    this.iconBackgroundColor,
+    this.iconBorderColor,
   });
 
   final IconData icon;
@@ -21,6 +24,12 @@ class ModuleTile extends StatelessWidget {
   final String? description;
   final VoidCallback? onTap;
   final Widget? badge;
+
+  /// Optionale Farbüberschreibung des Icon-Badges — z. B. Grün für den
+  /// DATEV-Export. Standard bleibt Gold (Marken-Look aller Kacheln).
+  final Color? iconColor;
+  final Color? iconBackgroundColor;
+  final Color? iconBorderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +46,15 @@ class ModuleTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.brandLight,
+                  color: iconBackgroundColor ?? AppColors.brandLight,
                   borderRadius: BorderRadius.circular(AppRadii.md),
-                  border:
-                      Border.all(color: AppColors.brand.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: iconBorderColor ??
+                        AppColors.brand.withValues(alpha: 0.4),
+                  ),
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon, size: 22, color: AppColors.ink),
+                child: Icon(icon, size: 22, color: iconColor ?? AppColors.ink),
               ),
               const Spacer(),
               if (badge != null)

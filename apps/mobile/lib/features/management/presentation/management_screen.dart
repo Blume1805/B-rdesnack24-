@@ -127,11 +127,15 @@ class ManagementScreen extends ConsumerWidget {
       _Module(
         'DATEV-Export',
         'Buchungsstapel (CSV)',
-        Icons.account_balance_outlined,
+        Icons.receipt_long_outlined,
         const DatevExportScreen(),
         // Finanz-sensibel: Kachel nur für Gesellschafter/Admins; die RPC
         // erzwingt die Rolle zusätzlich serverseitig.
         visible: p.contains('finance.export'),
+        iconColor: AppColors.statusPositive,
+        iconBackgroundColor: AppColors.statusPositive.withValues(alpha: 0.12),
+        iconBorderColor: AppColors.statusPositive.withValues(alpha: 0.4),
+        badge: const _DatevBadge(),
       ),
       _Module(
         'Inventur',
@@ -216,6 +220,10 @@ class _ModuleGrid extends StatelessWidget {
                     icon: m.icon,
                     label: m.label,
                     description: m.description,
+                    iconColor: m.iconColor,
+                    iconBackgroundColor: m.iconBackgroundColor,
+                    iconBorderColor: m.iconBorderColor,
+                    badge: m.badge,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => m.screen),
                     ),
@@ -278,10 +286,49 @@ class _Module {
     this.icon,
     this.screen, {
     required this.visible,
+    this.iconColor,
+    this.iconBackgroundColor,
+    this.iconBorderColor,
+    this.badge,
   });
   final String label;
   final String description;
   final IconData icon;
   final Widget screen;
   final bool visible;
+
+  /// Optionale Farbüberschreibung — z. B. Grün + Badge für DATEV.
+  final Color? iconColor;
+  final Color? iconBackgroundColor;
+  final Color? iconBorderColor;
+  final Widget? badge;
+}
+
+/// Kleines grünes "DATEV"-Label auf der Export-Kachel — kennzeichnet das
+/// Zielformat (EXTF-Buchungsstapel) rein textlich, ohne das geschützte
+/// DATEV-Markenlogo zu reproduzieren.
+class _DatevBadge extends StatelessWidget {
+  const _DatevBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.statusPositive.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+        border: Border.all(
+          color: AppColors.statusPositive.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Text(
+        'DATEV',
+        style: AppTypography.body(
+          size: 9,
+          weight: FontWeight.w800,
+          color: AppColors.statusPositive,
+        ).copyWith(letterSpacing: 0.4),
+      ),
+    );
+  }
 }

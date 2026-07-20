@@ -1,12 +1,13 @@
-/// DATEV-Export (EXTF-Buchungsstapel) für die Steuerkanzlei.
+/// DATEV-Export (EXTF-Buchungsstapel) für die eigene Buchhaltung.
 ///
-/// Erzeugt aus den aggregierten Tageslosungen (RPC `datev_export_rows`)
-/// eine CSV-Datei im DATEV-Format 700 („EXTF"-Buchungsstapel), die die
-/// Kanzlei direkt in DATEV Rechnungswesen importieren kann. Je Tag und
-/// Steuersatz entsteht eine Buchungszeile: Kasse (SKR 03 Konto 1000) an
-/// Erlöse 7 % (8300) bzw. 19 % (8400) — Automatikkonten, daher ohne
-/// BU-Schlüssel. Beträge brutto mit Dezimal-KOMMA (DATEV-Konvention),
-/// Belegdatum im Format TTMM.
+/// Buchhaltung und Steuererklärungen erstellt Gesellschafter Philipp Blume
+/// selbst (keine externe Steuerkanzlei). Erzeugt aus den aggregierten
+/// Tageslosungen (RPC `datev_export_rows`) eine CSV-Datei im DATEV-Format
+/// 700 („EXTF"-Buchungsstapel), die sich direkt in eine DATEV-fähige
+/// Buchhaltungssoftware importieren lässt. Je Tag und Steuersatz entsteht
+/// eine Buchungszeile: Kasse (SKR 03 Konto 1000) an Erlöse 7 % (8300) bzw.
+/// 19 % (8400) — Automatikkonten, daher ohne BU-Schlüssel. Beträge brutto
+/// mit Dezimal-KOMMA (DATEV-Konvention), Belegdatum im Format TTMM.
 library;
 
 /// Eine aggregierte Tageslosung aus der RPC.

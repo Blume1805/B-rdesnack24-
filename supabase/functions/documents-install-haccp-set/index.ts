@@ -417,7 +417,7 @@ export async function buildHaccpPdf(ctx: Ctx): Promise<Uint8Array> {
         ["Tätigkeit", "Betrieb von Snack- und Getränkeautomaten (vorverpackte Lebensmittel, Getränke, Genussmittel)"],
         ["Anzahl Automaten", "3 Stück (siehe Standortliste, Anlage C der Verfahrensdokumentation)"],
         ["Zuständige Behörde", "Veterinär- und Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis"],
-        ["Steuerliche Beratung", "Steuerkanzlei Uwe Most, Schönebeck (Elbe)"],
+        ["Buchhaltung / Steuererklärung", "Philipp Blume (Gesellschafter)"],
       ],
     },
 
@@ -516,7 +516,7 @@ export async function buildHaccpPdf(ctx: Ctx): Promise<Uint8Array> {
 // die verbindliche Prozessbeschreibung inkl. SKR-03-Kontierung.
 export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
   const blocks: Block[] = [
-    { type: "italic-note", text: "Betrieb von Snack- und Getränkeautomaten · Version 1.0 · Stand: Juni 2026 · Nächste Prüfung: März 2027 · Erstellt unter Mitwirkung der Steuerkanzlei Uwe Most, Schönebeck (Elbe)" },
+    { type: "italic-note", text: "Betrieb von Snack- und Getränkeautomaten · Version 1.0 · Stand: Juni 2026 · Nächste Prüfung: März 2027" },
     {
       type: "table",
       columns: ["Merkmal", "Inhalt"],
@@ -548,7 +548,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       rows: [
         ["Pflege und Aktualisierung", "Gesellschafter Bördesnack24 GbR"],
         ["Freigabe neuer Versionen", "Gesellschafter Bördesnack24 GbR (2-of-2)"],
-        ["Steuerliche Beratung", "Steuerkanzlei Uwe Most, Schönebeck (Elbe)"],
+        ["Buchhaltung / Steuererklärung", "Philipp Blume (Gesellschafter)"],
         ["Archivierung (digital)", "sevDesk"],
       ],
     },
@@ -574,7 +574,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
         ["Nichtlebensmittel (Hygieneartikel etc.)", "19 %", "3400", "§ 12 Abs. 1 UStG"],
       ],
     },
-    { type: "italic-note", text: "Abgrenzungsfragen bei Mischsortimenten sind mit dem steuerlichen Berater abzustimmen (§ 12 Abs. 2 Nr. 1 UStG i. V. m. Anlage 2 UStG)." },
+    { type: "italic-note", text: "Abgrenzungsfragen bei Mischsortimenten klärt Philipp Blume im Rahmen der laufenden Buchhaltung (§ 12 Abs. 2 Nr. 1 UStG i. V. m. Anlage 2 UStG)." },
 
     { type: "h2", text: "3. Prozess: Auffüllen der Automaten" },
     { type: "p", text: "Ablauf: Tourplanung -> Warenentnahme Lager -> Fahrt zum Standort -> Befüllung -> Bestandsdokumentation." },
@@ -715,7 +715,6 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
     { type: "p", text: "Erstellt durch Philipp Blume; geprüft und freigegeben durch die Gesellschafter (2-of-2). Version 1.0, Stand Juni 2026, nächste planmäßige Überprüfung März 2027." },
     { type: "signature-line", label: "Pia Blume (Gesellschafterin) · Sülzetal, den" },
     { type: "signature-line", label: "Philipp Blume (Gesellschafter) · Sülzetal, den" },
-    { type: "italic-note", text: "Diese Verfahrensdokumentation ist integraler Bestandteil der ordnungsgemäßen Buchführung gemäß § 238 HGB, § 145 AO und den GoBD. Änderungen sind versioniert zu dokumentieren und dem steuerlichen Berater mitzuteilen." },
   ];
 
   await drawFlow(

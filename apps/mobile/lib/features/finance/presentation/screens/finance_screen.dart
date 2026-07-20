@@ -206,9 +206,11 @@ class _ActionCluster extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         _IconAction(
-          icon: Icons.account_balance_outlined,
+          icon: Icons.receipt_long_outlined,
           tooltip: 'DATEV-Export (Buchungsstapel)',
           onTap: busy ? null : onDatev,
+          iconColor: AppColors.statusPositive,
+          borderColor: AppColors.statusPositive,
         ),
       ],
     );
