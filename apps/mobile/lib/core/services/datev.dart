@@ -60,12 +60,28 @@ String buildDatevBuchungsstapel({
   // Von-Jahres, Sachkontenlänge 4 (SKR 03), Festschreibung 0 = die
   // Kanzlei schreibt beim Import fest.
   final header = [
-    '"EXTF"', '700', '21', '"Buchungsstapel"', '13',
-    created, '', '"BS"', '"Boerdesnack24 App"', '',
+    '"EXTF"',
+    '700',
+    '21',
+    '"Buchungsstapel"',
+    '13',
+    created,
+    '',
+    '"BS"',
+    '"Boerdesnack24 App"',
+    '',
     consultantId.isEmpty ? '0' : consultantId,
     clientId.isEmpty ? '0' : clientId,
-    '${from.year}0101', '4', d8(from), d8(to),
-    '"Automatenumsaetze App"', '', '1', '0', '0', '"EUR"',
+    '${from.year}0101',
+    '4',
+    d8(from),
+    d8(to),
+    '"Automatenumsaetze App"',
+    '',
+    '1',
+    '0',
+    '0',
+    '"EUR"',
   ].join(
     ';',
   );
@@ -87,9 +103,20 @@ String buildDatevBuchungsstapel({
         '${_two(r.bookingDate.day)}.${_two(r.bookingDate.month)}.${r.bookingDate.year}';
     lines.add(
       [
-        datevAmount(r.gross), '"S"', '"EUR"', '', '', '',
-        kDatevKontoKasse, gegenkonto, '', belegdatum,
-        '"$beleg1"', '', '', '"$text"',
+        datevAmount(r.gross),
+        '"S"',
+        '"EUR"',
+        '',
+        '',
+        '',
+        kDatevKontoKasse,
+        gegenkonto,
+        '',
+        belegdatum,
+        '"$beleg1"',
+        '',
+        '',
+        '"$text"',
       ].join(';'),
     );
   }
