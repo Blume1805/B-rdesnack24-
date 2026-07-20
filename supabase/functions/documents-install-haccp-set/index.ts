@@ -121,65 +121,118 @@ export async function drawFlow(
     if (y - h < footerY) await newPage();
   };
 
-  for (const b of blocks) {
+  // Einheitliche Typo-Metrik: EINE Zeilenhöhe (LEADING) für ALLE Fließtext-,
+  // Listen- und Hinweiszeilen -> überall identischer Zeilenabstand. Graue
+  // Zusatzhinweise (italic-note) sind bewusst kleiner als der Fließtext
+  // (NOTE_SIZE < BODY_SIZE), behalten aber denselben Zeilenabstand.
+  const BODY_SIZE = 10;
+  const NOTE_SIZE = 8.5;
+  const LEADING = 13;
+
+  // Grobschätzung der Höhe der ERSTEN maxLines-Zeilen eines Blocks — für die
+  // „Überschrift nie allein am Seitenende"-Regel (keep-with-next).
+  const firstLinesHeight = (blk: Block, maxLines: number): number => {
+    switch (blk.type) {
+      case "p":
+        return Math.min(wrapLines(blk.text, ctx.font, BODY_SIZE, contentWidth).length, maxLines) * LEADING;
+      case "italic-note":
+        return Math.min(wrapLines(blk.text, ctx.italic, NOTE_SIZE, contentWidth).length, maxLines) * LEADING;
+      case "li": {
+        const ind = (blk.indent ?? 0) * 12 + 14;
+        return Math.min(wrapLines(blk.text, ctx.font, BODY_SIZE, contentWidth - ind).length, maxLines) * LEADING;
+      }
+      case "sub-li":
+        return Math.min(wrapLines(blk.text, ctx.font, BODY_SIZE, contentWidth - 28).length, maxLines) * LEADING;
+      case "table":
+        return 40; // Kopfband + erste Zeile
+      case "placeholder":
+        return 22;
+      case "signature-line":
+        return 42;
+      case "line":
+        return 12;
+      default:
+        return 0;
+    }
+  };
+
+  // Wie viel Folgeinhalt (in pt) MUSS mit einer Überschrift zusammen auf der
+  // Seite bleiben: mind. ~3 Zeilen echter Inhalt, aufsummiert über die auf
+  // die Überschrift folgenden Blöcke bis zur nächsten Überschrift.
+  const keepWithNext = (startIdx: number): number => {
+    const target = 3 * LEADING;
+    let acc = 0;
+    for (let j = startIdx; j < blocks.length && acc < target; j++) {
+      const nb = blocks[j];
+      if (nb.type === "space") continue;
+      if (nb.type === "h2" || nb.type === "h3") break;
+      acc += firstLinesHeight(nb, Math.max(1, Math.ceil((target - acc) / LEADING)));
+    }
+    return Math.min(acc, target);
+  };
+
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
     switch (b.type) {
       case "h2": {
-        await ensure(22);
+        // Überschrift + Folgeinhalt zusammenhalten: passt beides nicht mehr,
+        // beginnt die Überschrift auf der neuen Seite.
+        if (y - (6 + 16 + keepWithNext(i + 1)) < footerY) await newPage();
         y -= 6;
         page.drawText(b.text, { x: marginLeft, y, size: 12, font: ctx.bold, color: INK });
         y -= 16;
         break;
       }
       case "h3": {
-        await ensure(18);
+        if (y - (4 + LEADING + keepWithNext(i + 1)) < footerY) await newPage();
         y -= 4;
-        page.drawText(b.text, { x: marginLeft, y, size: 10, font: ctx.bold, color: INK });
-        y -= 13;
+        page.drawText(b.text, { x: marginLeft, y, size: BODY_SIZE, font: ctx.bold, color: INK });
+        y -= LEADING;
         break;
       }
       case "p": {
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth);
+        const lines = wrapLines(b.text, ctx.font, BODY_SIZE, contentWidth);
         for (const line of lines) {
-          await ensure(14);
-          page.drawText(line, { x: marginLeft, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          await ensure(LEADING + 1);
+          page.drawText(line, { x: marginLeft, y, size: BODY_SIZE, font: ctx.font, color: INK });
+          y -= LEADING;
         }
         y -= 4;
         break;
       }
       case "italic-note": {
-        const lines = wrapLines(b.text, ctx.italic, 9, contentWidth);
+        const lines = wrapLines(b.text, ctx.italic, NOTE_SIZE, contentWidth);
         for (const line of lines) {
-          await ensure(13);
-          page.drawText(line, { x: marginLeft, y, size: 9, font: ctx.italic, color: MUTED });
-          y -= 12;
+          await ensure(LEADING + 1);
+          page.drawText(line, { x: marginLeft, y, size: NOTE_SIZE, font: ctx.italic, color: MUTED });
+          y -= LEADING;
         }
         y -= 4;
         break;
       }
       case "li": {
         const indent = (b.indent ?? 0) * 12 + 14;
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth - indent);
-        for (let i = 0; i < lines.length; i++) {
-          await ensure(14);
-          if (i === 0) {
-            page.drawText("•", { x: marginLeft + indent - 12, y, size: 10, font: ctx.bold, color: INK });
+        const lines = wrapLines(b.text, ctx.font, BODY_SIZE, contentWidth - indent);
+        for (let k = 0; k < lines.length; k++) {
+          await ensure(LEADING + 1);
+          if (k === 0) {
+            page.drawText("•", { x: marginLeft + indent - 12, y, size: BODY_SIZE, font: ctx.bold, color: INK });
           }
-          page.drawText(lines[i], { x: marginLeft + indent, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          page.drawText(lines[k], { x: marginLeft + indent, y, size: BODY_SIZE, font: ctx.font, color: INK });
+          y -= LEADING;
         }
         break;
       }
       case "sub-li": {
         const indent = 28;
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth - indent);
-        for (let i = 0; i < lines.length; i++) {
-          await ensure(14);
-          if (i === 0) {
+        const lines = wrapLines(b.text, ctx.font, BODY_SIZE, contentWidth - indent);
+        for (let k = 0; k < lines.length; k++) {
+          await ensure(LEADING + 1);
+          if (k === 0) {
             page.drawText("·", { x: marginLeft + indent - 12, y, size: 12, font: ctx.bold, color: MUTED });
           }
-          page.drawText(lines[i], { x: marginLeft + indent, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          page.drawText(lines[k], { x: marginLeft + indent, y, size: BODY_SIZE, font: ctx.font, color: INK });
+          y -= LEADING;
         }
         break;
       }
