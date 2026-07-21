@@ -441,11 +441,24 @@ function comparisonChart(
     const gx = MARGIN_X + i * cellW + cellW / 2;
     const hRev = max > 0 ? (Math.max(g.revenue, 0) / max) * chartH : 0;
     const hRes = max > 0 ? (Math.max(g.result, 0) / max) * chartH : 0;
-    ctx.page.drawRectangle({ x: gx - barW - 3, y: yBase, width: barW, height: hRev, color: GOLD });
-    ctx.page.drawRectangle({ x: gx + 3, y: yBase, width: barW, height: hRes, color: OK });
-    ctx.page.drawText(safe(eur(g.revenue)), {
-      x: gx - barW - 3, y: yBase + hRev + 4, size: 7, font: ctx.bold, color: INK,
+    const revX = gx - barW - 3;
+    const resX = gx + 3;
+    ctx.page.drawRectangle({ x: revX, y: yBase, width: barW, height: hRev, color: GOLD });
+    ctx.page.drawRectangle({ x: resX, y: yBase, width: barW, height: hRes, color: OK });
+
+    // Beide Balken bekommen ihren Wert über der Säule — vorher fehlte die
+    // Beschriftung des Ergebnis-Balkens (grün) komplett.
+    const revLabel = safe(eur(g.revenue));
+    const revLw = ctx.bold.widthOfTextAtSize(revLabel, 7);
+    ctx.page.drawText(revLabel, {
+      x: revX + barW / 2 - revLw / 2, y: yBase + hRev + 4, size: 7, font: ctx.bold, color: INK,
     });
+    const resLabel = safe(eur(g.result));
+    const resLw = ctx.bold.widthOfTextAtSize(resLabel, 7);
+    ctx.page.drawText(resLabel, {
+      x: resX + barW / 2 - resLw / 2, y: yBase + hRes + 4, size: 7, font: ctx.bold, color: OK,
+    });
+
     const lw = ctx.bold.widthOfTextAtSize(safe(g.label), 9);
     ctx.page.drawText(safe(g.label), {
       x: gx - lw / 2, y: yBase - 14, size: 9, font: ctx.bold, color: INK,
