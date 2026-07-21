@@ -5,13 +5,18 @@
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #14110E; }
-  .page { width: 210mm; height: 296mm; padding: 11mm 14mm 6mm; position: relative; overflow: hidden; }
+  /* Kein fester height + overflow:hidden mehr: bei Bedarf fließt der Inhalt
+     sauber auf eine 2. Seite (@page regelt die echte Paginierung), statt
+     Pflichtangaben im Footer unsichtbar abzuschneiden. */
+  .page { width: 210mm; min-height: 296mm; padding: 9mm 14mm 8mm; position: relative; }
+  .kpi-row, table, .barchart, .savings-line, .warn, .callout, .foot, .cmp-table
+    { page-break-inside: avoid; }
   .topbar { position: absolute; top:0; left:0; right:0; height: 6mm; background:#FDC102; }
   .brand { font-weight: 900; letter-spacing: 2px; font-size: 14px; margin-top: 5mm; }
-  h1 { font-size: 21px; font-weight: 900; color:#B8860B; margin: 3mm 0 1.6mm; line-height:1.12; }
+  h1 { font-size: 20px; font-weight: 900; color:#B8860B; margin: 2mm 0 1.2mm; line-height:1.1; }
   h1 .big { color:#14110E; }
-  .sub { color:#6F6A5E; font-size: 10.5px; margin-bottom: 2.2mm; line-height:1.35; }
-  h2 { font-size: 12.5px; font-weight: 800; margin: 2.6mm 0 1.6mm; border-bottom: 2px solid #FDC102; padding-bottom: 1mm;}
+  .sub { color:#6F6A5E; font-size: 10.5px; margin-bottom: 1.6mm; line-height:1.3; }
+  h2 { font-size: 12.5px; font-weight: 800; margin: 2mm 0 1.2mm; border-bottom: 2px solid #FDC102; padding-bottom: 0.8mm;}
   table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
   th { background:#14110E; color:#F9F5EC; text-align:left; padding: 1.4mm 2.5mm; font-size: 9.5px; letter-spacing:.4px;}
   th.r, td.r { text-align: right; }
@@ -20,22 +25,22 @@
   .gold { color:#B8860B; font-weight: 800; }
   .green { color:#3F7A2E; font-weight: 800; }
   .red { color:#A33B2E; font-weight: 800; }
-  .kpi-row { display:flex; gap:4mm; margin: 2mm 0 0.8mm; }
+  .kpi-row { display:flex; gap:4mm; margin: 1.4mm 0 0.6mm; }
   .kpi { flex:1; background:#F9F5EC; border-left: 4px solid #FDC102; padding: 1.8mm 3mm; }
   .kpi .v { font-size: 15px; font-weight: 900; }
   .kpi .l { font-size: 9px; color:#6F6A5E; font-weight:700; letter-spacing:.5px; text-transform: uppercase; margin-bottom:0.6mm;}
   .kpi .n { font-size: 9px; color:#6F6A5E; margin-top: 0.6mm; line-height:1.3;}
-  .callout { background:#14110E; color:#F9F5EC; border-radius: 2.5mm; padding: 2.4mm 4mm; margin-top: 2mm; }
+  .callout { background:#14110E; color:#F9F5EC; border-radius: 2.5mm; padding: 2mm 4mm; margin-top: 1.4mm; }
   .callout .h { color:#FDC102; font-weight: 900; font-size: 11.5px; margin-bottom: 1mm;}
   .callout p { font-size: 9.5px; line-height: 1.35; }
-  .warn { background:#F9F5EC; border-left: 4px solid #E8A206; border-radius: 1mm; padding: 2mm 3.5mm; margin-top: 2mm; }
+  .warn { background:#F9F5EC; border-left: 4px solid #E8A206; border-radius: 1mm; padding: 1.8mm 3.5mm; margin-top: 1.4mm; }
   .warn .h { color:#B8860B; font-weight: 900; font-size: 10.5px; margin-bottom: 0.8mm; }
   .warn p { font-size: 8.8px; line-height: 1.3; color:#3A3730; }
   .warn p + p { margin-top: 1mm; }
-  .foot { margin-top: 1.8mm; font-size: 7px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1.2mm; line-height:1.3;}
+  .foot { margin-top: 1.2mm; font-size: 7px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1mm; line-height:1.25;}
   .note { font-size: 8.5px; color:#6F6A5E; margin-top: 1.2mm; line-height:1.35;}
   .barchart { margin: 1.6mm 0 0.8mm; }
-  .bar-row { display:flex; align-items:center; gap:3mm; margin-bottom: 1.3mm; }
+  .bar-row { display:flex; align-items:center; gap:3mm; margin-bottom: 1mm; }
   .bar-label { width: 38mm; font-size: 9px; font-weight: 800; line-height:1.2; flex-shrink:0; }
   .bar-label .s { display:block; font-weight:500; color:#6F6A5E; font-size: 8px; }
   .bar-track { flex:1; background:#EFEAE0; border-radius: 1mm; height: 5.6mm; position:relative; }
@@ -45,10 +50,14 @@
   .bar-fill .bv { font-size: 10px; font-weight: 900; }
   .bar-fill.gold .bv { color:#14110E; }
   .bar-fill.dark .bv { color:#FDC102; }
-  .savings-line { display:flex; gap:3mm; align-items:center; background:#F9F5EC; border-left: 4px solid #14110E; border-radius: 1mm; padding: 1.8mm 3.5mm; margin-top: 1.5mm; }
+  .savings-line { display:flex; gap:3mm; align-items:center; background:#F9F5EC; border-left: 4px solid #14110E; border-radius: 1mm; padding: 1.4mm 3.5mm; margin-top: 1.1mm; }
   .savings-line .big { color:#B8860B; font-size: 15px; font-weight: 900; white-space:nowrap; }
   .savings-line .txt { font-size: 8.8px; line-height: 1.3; color:#3A3730; }
-  .assume { font-size: 7.3px; color:#8B8578; line-height:1.3; margin-top: 1mm; }
+  .assume { font-size: 7.3px; color:#8B8578; line-height:1.25; margin-top: 0.7mm; }
+  .cmp-table { margin: 1.1mm 0; }
+  .cmp-table td:first-child { color:#3A3730; }
+  .cmp-table td.total { font-weight:900; border-top: 1.5px solid #14110E; border-bottom:none; }
+  .cmp-table tr:nth-child(even) td { background:none; }
 </style></head><body>
 <div class="page">
   <div class="topbar"></div>
@@ -97,42 +106,60 @@
   <div class="barchart">
     <div class="bar-row">
       <div class="bar-label">Sachbezug<span class="s">Kosten für 50 € netto</span></div>
-      <div class="bar-track"><div class="bar-fill gold" style="width:37.8%"><span class="bv">50,00 €</span></div></div>
+      <div class="bar-track"><div class="bar-fill gold" style="width:30.4%"><span class="bv">50,00 €</span></div></div>
     </div>
     <div class="bar-row">
       <div class="bar-label">Gehaltserhöhung<span class="s">für denselben Netto-Vorteil</span></div>
-      <div class="bar-track"><div class="bar-fill dark" style="width:100%"><span class="bv">132,30 €</span></div></div>
+      <div class="bar-track"><div class="bar-fill dark" style="width:100%"><span class="bv">164,69 €</span></div></div>
     </div>
   </div>
   <div class="savings-line">
-    <div class="big">−82,30 €/Mon.</div>
-    <div class="txt">Kostenersparnis je Beschäftigtem (≈ 62 % günstiger, ≈ 988 €/Jahr) — bei 5 Beschäftigten
-    ≈ 4.938 €/Jahr, bei 10 ≈ 9.875 €/Jahr, bei 20 ≈ 19.751 €/Jahr.</div>
+    <div class="big">−114,69 €/Mon.</div>
+    <div class="txt">Kostenersparnis je Beschäftigtem (≈ 70 % günstiger, ≈ 1.376 €/Jahr) — bei 5 Beschäftigten
+    ≈ 6.882 €/Jahr, bei 10 ≈ 13.763 €/Jahr, bei 20 ≈ 27.527 €/Jahr.</div>
   </div>
   <div class="assume">Musterannahmen: Steuerklasse I, Beispiel mit Kind, Bruttogehalt ca. 3.500 €/Monat,
-  Grenzsteuersatz Lohnsteuer inkl. Soli ≈ 33 % (ohne Kirchensteuer). SV Stand 2026: RV 18,6 % (je 9,30 %),
-  ALV 2,6 % (je 1,30 %), KV 14,6 %+Ø-Zusatzbeitrag 2,9 %=17,5 % (je 8,75 %), PV 3,6 % (AG-Anteil fix 1,70 %).
-  Individuelle Werte weichen ab — bitte mit Lohnbuchhaltung/Steuerberater exakt durchrechnen lassen.</div>
+  Grenzsteuersatz Lohnsteuer ≈ 42 % (ohne Kirchensteuer). SV Stand 2026: RV 18,6 % (je 9,30 %), ALV 2,6 %
+  (je 1,30 %), KV 14,6 %+Ø-Zusatzbeitrag 2,9 %=17,5 % (je 8,75 %), PV 3,6 % (AG-Anteil fix 1,70 %). Individuelle
+  Werte weichen ab — bitte mit Lohnbuchhaltung/Steuerberater exakt durchrechnen lassen.</div>
+
+  <h2>4 · Liquiditätsvergleich für den Arbeitgeber (nach Steuer)</h2>
+  <div class="sub" style="margin-bottom:1mm;">
+    Als GbR mindern beide Positionen — Sachbezug wie Gehaltserhöhung — den steuerpflichtigen
+    Gewinn der Gesellschafter als Betriebsausgabe. Vereinfachend mit demselben Grenzsteuersatz von
+    42 % gerechnet, ergibt sich diese tatsächliche Liquiditätswirkung pro Jahr und Beschäftigtem:
+  </div>
+  <table class="cmp-table">
+    <tr><th>Position</th><th class="r">Sachbezug</th><th class="r">Gehaltserhöhung (+50 € netto)</th></tr>
+    <tr><td>Bruttokosten Arbeitgeber/Jahr</td><td class="r">600,00 €</td><td class="r">1.976,33 €</td></tr>
+    <tr><td>./. Steuerersparnis (Betriebsausgabe, 42 %)</td><td class="r">−252,00 €</td><td class="r">−830,06 €</td></tr>
+    <tr><td class="total">Netto-Liquiditätsabfluss/Jahr</td><td class="r total">348,00 €</td><td class="r total">1.146,27 €</td></tr>
+  </table>
+  <div class="savings-line">
+    <div class="big">+798,27 €/Jahr</div>
+    <div class="txt">mehr Liquidität am Jahresende pro Beschäftigtem, wenn der Arbeitgeber den Sachbezug statt
+    der Gehaltserhöhung wählt — bei 5 Beschäftigten ≈ 3.991 €, bei 10 ≈ 7.983 €, bei 20 ≈ 15.965 €.</div>
+  </div>
+  <div class="assume">Vereinfachung: Für Beschäftigte (Lohnsteuer) und Gesellschafter (Einkommensteuer aus dem
+  GbR-Gewinnanteil) wird derselbe Grenzsteuersatz von 42 % angesetzt — in der Praxis können beide Sätze
+  voneinander abweichen. Ohne Gewerbesteuer-Effekte gerechnet. Bitte mit Steuerberater/Lohnbuchhaltung anhand
+  der tatsächlichen Grenzsteuersätze exakt durchrechnen lassen.</div>
 
   <div class="warn">
     <div class="h">Wichtige Abgrenzung: Das ist kein Verpflegungszuschuss</div>
-    <p>Ein Verpflegungszuschuss bzw. die Bezuschussung von Mahlzeiten (z. B. per Essensmarken) folgt einer anderen
-    steuerlichen Regel: Bewertung nach den amtlichen Sachbezugswerten (Sozialversicherungsentgeltverordnung) und
-    ggf. Pauschalversteuerung durch den Arbeitgeber nach § 40 Abs. 2 EStG. Voraussetzung dafür ist aber eine
-    „Mahlzeit" im steuerlichen Sinne (R 8.1 Lohnsteuer-Richtlinien) — z. B. ein belegtes Brötchen. Ein reiner
-    Snack oder ein Getränk allein zählt nicht als Mahlzeit.</p>
-    <p>Unsere Automaten bieten aktuell keine vollwertigen Mahlzeiten an. Für Käufe bei uns gilt deshalb
-    ausschließlich die 50-€-Sachbezugsfreigrenze — nicht die Verpflegungszuschuss-Regel. Bieten wir künftig z. B.
-    belegte Brötchen an, könnte zusätzlich die Mahlzeiten-Regelung greifen und weitere steuerlich begünstigte
-    Beteiligungsmöglichkeiten eröffnen.</p>
+    <p>Ein Verpflegungszuschuss (z. B. Essensmarken) folgt einer anderen Regel: Bewertung nach amtlichen
+    Sachbezugswerten, ggf. Pauschalversteuerung nach § 40 Abs. 2 EStG — Voraussetzung ist aber eine „Mahlzeit"
+    im steuerlichen Sinne (R 8.1 LStR, z. B. ein belegtes Brötchen). Ein reiner Snack/Getränk zählt nicht als
+    Mahlzeit. Unsere Automaten bieten aktuell keine vollwertigen Mahlzeiten an — es gilt deshalb ausschließlich
+    die 50-€-Sachbezugsfreigrenze. Bieten wir künftig z. B. belegte Brötchen an, könnte zusätzlich die
+    Mahlzeiten-Regelung greifen und weitere steuerlich begünstigte Beteiligungsmöglichkeiten eröffnen.</p>
   </div>
 
   <div class="callout">
     <div class="h">Die Botschaft für die Personalabteilung:</div>
-    <p>„Ihr Unternehmen kann Beschäftigten bis zu 50 € im Monat <b>steuer- und sozialversicherungsfrei</b>
-    zukommen lassen — einsetzbar an den Bördesnack24-Automaten vor Ort. Zusätzlich zum Gehalt gewährt (§ 8 Abs. 4
-    EStG), spart es Lohnnebenkosten und kommt netto bei den Beschäftigten an. Ein einfacher Baustein für die
-    nächste Gehaltsrunde."</p>
+    <p>„Bis zu 50 € im Monat <b>steuer- und sozialversicherungsfrei</b>, einsetzbar an den Bördesnack24-Automaten
+    vor Ort, zusätzlich zum Gehalt (§ 8 Abs. 4 EStG) — spart Lohnnebenkosten und kommt netto bei den Beschäftigten
+    an. Ein einfacher, günstiger Baustein für die nächste Gehaltsrunde."</p>
   </div>
 
   <div class="foot">
