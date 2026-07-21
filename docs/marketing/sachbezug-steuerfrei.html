@@ -5,35 +5,50 @@
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #14110E; }
-  .page { width: 210mm; height: 296mm; padding: 13mm 14mm 8mm; position: relative; overflow: hidden; }
-  .topbar { position: absolute; top:0; left:0; right:0; height: 7mm; background:#FDC102; }
-  .brand { font-weight: 900; letter-spacing: 2px; font-size: 15px; margin-top: 6mm; }
-  h1 { font-size: 23px; font-weight: 900; color:#B8860B; margin: 4mm 0 2mm; line-height:1.12; }
+  .page { width: 210mm; height: 296mm; padding: 11mm 14mm 6mm; position: relative; overflow: hidden; }
+  .topbar { position: absolute; top:0; left:0; right:0; height: 6mm; background:#FDC102; }
+  .brand { font-weight: 900; letter-spacing: 2px; font-size: 14px; margin-top: 5mm; }
+  h1 { font-size: 21px; font-weight: 900; color:#B8860B; margin: 3mm 0 1.6mm; line-height:1.12; }
   h1 .big { color:#14110E; }
-  .sub { color:#6F6A5E; font-size: 11px; margin-bottom: 3mm; line-height:1.4; }
-  h2 { font-size: 13px; font-weight: 800; margin: 3.5mm 0 2mm; border-bottom: 2px solid #FDC102; padding-bottom: 1.2mm;}
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th { background:#14110E; color:#F9F5EC; text-align:left; padding: 1.7mm 2.5mm; font-size: 10px; letter-spacing:.4px;}
+  .sub { color:#6F6A5E; font-size: 10.5px; margin-bottom: 2.2mm; line-height:1.35; }
+  h2 { font-size: 12.5px; font-weight: 800; margin: 2.6mm 0 1.6mm; border-bottom: 2px solid #FDC102; padding-bottom: 1mm;}
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  th { background:#14110E; color:#F9F5EC; text-align:left; padding: 1.4mm 2.5mm; font-size: 9.5px; letter-spacing:.4px;}
   th.r, td.r { text-align: right; }
-  td { padding: 1.5mm 2.5mm; border-bottom: 1px solid #E8E2D6; }
+  td { padding: 1.2mm 2.5mm; border-bottom: 1px solid #E8E2D6; }
   tr:nth-child(even) td { background: #F9F5EC; }
   .gold { color:#B8860B; font-weight: 800; }
   .green { color:#3F7A2E; font-weight: 800; }
   .red { color:#A33B2E; font-weight: 800; }
-  .kpi-row { display:flex; gap:4mm; margin: 2.5mm 0 1mm; }
-  .kpi { flex:1; background:#F9F5EC; border-left: 4px solid #FDC102; padding: 2.2mm 3.2mm; }
-  .kpi .v { font-size: 16px; font-weight: 900; }
-  .kpi .l { font-size: 9.5px; color:#6F6A5E; font-weight:700; letter-spacing:.5px; text-transform: uppercase; margin-bottom:0.8mm;}
-  .kpi .n { font-size: 9.5px; color:#6F6A5E; margin-top: 0.8mm; line-height:1.35;}
-  .callout { background:#14110E; color:#F9F5EC; border-radius: 3mm; padding: 3.2mm 4.5mm; margin-top: 3mm; }
-  .callout .h { color:#FDC102; font-weight: 900; font-size: 12.5px; margin-bottom: 1.2mm;}
-  .callout p { font-size: 10.5px; line-height: 1.45; }
-  .warn { background:#F9F5EC; border-left: 4px solid #E8A206; border-radius: 1mm; padding: 3mm 4mm; margin-top: 3mm; }
-  .warn .h { color:#B8860B; font-weight: 900; font-size: 12px; margin-bottom: 1.2mm; }
-  .warn p { font-size: 10px; line-height: 1.45; color:#3A3730; }
-  .warn p + p { margin-top: 1.5mm; }
-  .foot { margin-top: 3mm; font-size: 8px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1.8mm; line-height:1.4;}
-  .note { font-size: 9px; color:#6F6A5E; margin-top: 1.5mm; line-height:1.4;}
+  .kpi-row { display:flex; gap:4mm; margin: 2mm 0 0.8mm; }
+  .kpi { flex:1; background:#F9F5EC; border-left: 4px solid #FDC102; padding: 1.8mm 3mm; }
+  .kpi .v { font-size: 15px; font-weight: 900; }
+  .kpi .l { font-size: 9px; color:#6F6A5E; font-weight:700; letter-spacing:.5px; text-transform: uppercase; margin-bottom:0.6mm;}
+  .kpi .n { font-size: 9px; color:#6F6A5E; margin-top: 0.6mm; line-height:1.3;}
+  .callout { background:#14110E; color:#F9F5EC; border-radius: 2.5mm; padding: 2.4mm 4mm; margin-top: 2mm; }
+  .callout .h { color:#FDC102; font-weight: 900; font-size: 11.5px; margin-bottom: 1mm;}
+  .callout p { font-size: 9.5px; line-height: 1.35; }
+  .warn { background:#F9F5EC; border-left: 4px solid #E8A206; border-radius: 1mm; padding: 2mm 3.5mm; margin-top: 2mm; }
+  .warn .h { color:#B8860B; font-weight: 900; font-size: 10.5px; margin-bottom: 0.8mm; }
+  .warn p { font-size: 8.8px; line-height: 1.3; color:#3A3730; }
+  .warn p + p { margin-top: 1mm; }
+  .foot { margin-top: 1.8mm; font-size: 7px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1.2mm; line-height:1.3;}
+  .note { font-size: 8.5px; color:#6F6A5E; margin-top: 1.2mm; line-height:1.35;}
+  .barchart { margin: 1.6mm 0 0.8mm; }
+  .bar-row { display:flex; align-items:center; gap:3mm; margin-bottom: 1.3mm; }
+  .bar-label { width: 38mm; font-size: 9px; font-weight: 800; line-height:1.2; flex-shrink:0; }
+  .bar-label .s { display:block; font-weight:500; color:#6F6A5E; font-size: 8px; }
+  .bar-track { flex:1; background:#EFEAE0; border-radius: 1mm; height: 5.6mm; position:relative; }
+  .bar-fill { height:100%; border-radius: 1mm; display:flex; align-items:center; justify-content:flex-end; padding-right: 2mm; }
+  .bar-fill.gold { background:#FDC102; }
+  .bar-fill.dark { background:#14110E; }
+  .bar-fill .bv { font-size: 10px; font-weight: 900; }
+  .bar-fill.gold .bv { color:#14110E; }
+  .bar-fill.dark .bv { color:#FDC102; }
+  .savings-line { display:flex; gap:3mm; align-items:center; background:#F9F5EC; border-left: 4px solid #14110E; border-radius: 1mm; padding: 1.8mm 3.5mm; margin-top: 1.5mm; }
+  .savings-line .big { color:#B8860B; font-size: 15px; font-weight: 900; white-space:nowrap; }
+  .savings-line .txt { font-size: 8.8px; line-height: 1.3; color:#3A3730; }
+  .assume { font-size: 7.3px; color:#8B8578; line-height:1.3; margin-top: 1mm; }
 </style></head><body>
 <div class="page">
   <div class="topbar"></div>
@@ -72,6 +87,32 @@
     <tr><td class="green">Beteiligung an Verpflegungskosten, spart Lohnnebenkosten (keine SV-Beiträge auf diesen Teil)</td><td class="green">Bis zu 50 € mehr netto im Monat, ganz ohne Abzüge</td></tr>
     <tr><td class="green">Kein zusätzlicher Verwaltungsaufwand — direkt am Arbeitsplatz-Automaten nutzbar</td><td class="green">Sofort einsetzbar für Snacks, Getränke, Eis — auch fürs Bördesnack24-Abo</td></tr>
   </table>
+
+  <h2>3 · Steuerlicher Vorteil im Vergleich: Sachbezug vs. Gehaltserhöhung</h2>
+  <div class="sub" style="margin-bottom:1mm;">
+    Beispielrechnung: Um 50 € netto mehr im Monat zu erhalten, kostet eine Gehaltserhöhung den
+    Arbeitgeber deutlich mehr als derselbe Betrag als Sachbezug — die Erhöhung muss erst durch
+    Lohnsteuer und Sozialversicherung, inklusive Arbeitgeberanteil.
+  </div>
+  <div class="barchart">
+    <div class="bar-row">
+      <div class="bar-label">Sachbezug<span class="s">Kosten für 50 € netto</span></div>
+      <div class="bar-track"><div class="bar-fill gold" style="width:37.8%"><span class="bv">50,00 €</span></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Gehaltserhöhung<span class="s">für denselben Netto-Vorteil</span></div>
+      <div class="bar-track"><div class="bar-fill dark" style="width:100%"><span class="bv">132,30 €</span></div></div>
+    </div>
+  </div>
+  <div class="savings-line">
+    <div class="big">−82,30 €/Mon.</div>
+    <div class="txt">Kostenersparnis je Beschäftigtem (≈ 62 % günstiger, ≈ 988 €/Jahr) — bei 5 Beschäftigten
+    ≈ 4.938 €/Jahr, bei 10 ≈ 9.875 €/Jahr, bei 20 ≈ 19.751 €/Jahr.</div>
+  </div>
+  <div class="assume">Musterannahmen: Steuerklasse I, Beispiel mit Kind, Bruttogehalt ca. 3.500 €/Monat,
+  Grenzsteuersatz Lohnsteuer inkl. Soli ≈ 33 % (ohne Kirchensteuer). SV Stand 2026: RV 18,6 % (je 9,30 %),
+  ALV 2,6 % (je 1,30 %), KV 14,6 %+Ø-Zusatzbeitrag 2,9 %=17,5 % (je 8,75 %), PV 3,6 % (AG-Anteil fix 1,70 %).
+  Individuelle Werte weichen ab — bitte mit Lohnbuchhaltung/Steuerberater exakt durchrechnen lassen.</div>
 
   <div class="warn">
     <div class="h">Wichtige Abgrenzung: Das ist kein Verpflegungszuschuss</div>
