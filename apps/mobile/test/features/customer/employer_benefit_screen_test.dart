@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-      'EmployerBenefitScreen rendert Kernzahl, Abgrenzung und PDF-Link',
+  testWidgets('EmployerBenefitScreen rendert Kernzahl, Abgrenzung und PDF-Link',
       (tester) async {
     tester.view.physicalSize = const Size(1024, 2600);
     tester.view.devicePixelRatio = 1.0;

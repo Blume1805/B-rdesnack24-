@@ -97,8 +97,7 @@ class EmployerBenefitScreen extends StatelessWidget {
 
           const _InfoBlock(
             title: 'Die Rechtsgrundlage',
-            body:
-                'Nach § 8 Abs. 2 Satz 11 EStG bleiben Sachbezüge bis zu 50 € '
+            body: 'Nach § 8 Abs. 2 Satz 11 EStG bleiben Sachbezüge bis zu 50 € '
                 'im Kalendermonat steuerfrei — seit 1.1.2022 angehoben von '
                 'zuvor 44 €. Wichtig: Es handelt sich um eine Freigrenze, '
                 'keinen Freibetrag. Wird der Betrag in einem Monat auch nur '
@@ -109,8 +108,7 @@ class EmployerBenefitScreen extends StatelessWidget {
           ),
           const _InfoBlock(
             title: 'Muss ein „Sachbezug" sein — kein Bargeld',
-            body:
-                'Steuerfrei ist nur eine Sach- oder Dienstleistung, keine '
+            body: 'Steuerfrei ist nur eine Sach- oder Dienstleistung, keine '
                 'Geldzahlung. In der Praxis bedeutet das: eine Guthaben- '
                 'oder Gutscheinkarte, die nur bei einem begrenzten Kreis '
                 'von Akzeptanzstellen bzw. für ein begrenztes Waren- oder '
@@ -120,8 +118,7 @@ class EmployerBenefitScreen extends StatelessWidget {
           ),
           const _InfoBlock(
             title: 'Zusätzlich zum Gehalt, nicht statt Gehalt',
-            body:
-                'Der Sachbezug muss zusätzlich zum ohnehin geschuldeten '
+            body: 'Der Sachbezug muss zusätzlich zum ohnehin geschuldeten '
                 'Arbeitslohn gewährt werden (Zusätzlichkeitserfordernis, '
                 '§ 8 Abs. 4 EStG). Eine Umwandlung von bestehendem Gehalt in '
                 'den Sachbezug erfüllt die Voraussetzungen nicht. Der '
@@ -198,8 +195,7 @@ class EmployerBenefitScreen extends StatelessWidget {
 
           const _InfoBlock(
             title: 'Vorteile auf einen Blick',
-            body:
-                '• Arbeitgeber: beteiligt sich an den Verpflegungskosten, '
+            body: '• Arbeitgeber: beteiligt sich an den Verpflegungskosten, '
                 'spart Lohnnebenkosten, kein zusätzlicher Verwaltungsaufwand '
                 '— nutzbar direkt am Arbeitsplatz-Automaten.\n'
                 '• Beschäftigte: bis zu 50 € mehr netto im Monat, ohne '
