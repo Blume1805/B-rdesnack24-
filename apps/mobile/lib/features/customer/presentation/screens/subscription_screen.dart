@@ -7,6 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../legal/presentation/cancellation_screen.dart';
 import '../controllers/customer_providers.dart';
+import 'employer_benefit_screen.dart';
 import 'subscription_value_screen.dart';
 
 /// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
@@ -323,6 +324,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
+                // Marketing-Hinweis: Sachbezugsfreigrenze — Arbeitgeber
+                // können Abo + Automaten-Käufe im Rahmen von § 8 Abs. 2
+                // Satz 11 EStG steuerfrei mitfinanzieren.
+                _EmployerBenefitTeaser(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const EmployerBenefitScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s3),
                 for (final plan in _plans) ...[
                   _PlanCard(
                     plan: plan,
@@ -361,6 +373,68 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// Teaser-Karte: verweist auf die 50-€-Sachbezugsfreigrenze, mit der
+/// Arbeitgeber Abo und Automaten-Käufe steuerfrei mitfinanzieren können.
+class _EmployerBenefitTeaser extends StatelessWidget {
+  const _EmployerBenefitTeaser({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      topStripeColor: AppColors.brand,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.brandLight,
+              borderRadius: BorderRadius.circular(AppRadii.sm),
+            ),
+            child: const Icon(
+              Icons.savings_outlined,
+              color: AppColors.brandDark,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dein Arbeitgeber kann mitzahlen',
+                  style: AppTypography.body(
+                    size: 13.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Bis zu 50 € im Monat steuerfrei — auch fürs Abo nutzbar.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ).copyWith(height: 1.35),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.textMuted,
+            size: 20,
+          ),
+        ],
+      ),
     );
   }
 }
