@@ -8,7 +8,7 @@
 // signed_pdf_path auf der Task-Row.
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 
 const ISSUER = {
@@ -22,6 +22,25 @@ const ISSUER = {
 const INK = rgb(0.08, 0.07, 0.05);
 const GOLD = rgb(0.99, 0.76, 0.01);
 const MUTED = rgb(0.44, 0.42, 0.35);
+
+// Zeilenumbruch für lange Werte (z. B. E-Mail-Adressen/Namen), damit in der
+// Key/Value-Liste nichts an der Seitenkante abgeschnitten wird.
+function wrapText(font: PDFFont, text: string, maxWidth: number, size: number): string[] {
+  const words = String(text).split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const test = current ? `${current} ${word}` : word;
+    if (current && font.widthOfTextAtSize(test, size) > maxWidth) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  }
+  if (current || lines.length === 0) lines.push(current);
+  return lines;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -83,6 +102,7 @@ Deno.serve(async (req) => {
   const outPdf = await PDFDocument.create();
   const font = await outPdf.embedFont(StandardFonts.Helvetica);
   const bold = await outPdf.embedFont(StandardFonts.HelveticaBold);
+  const italic = await outPdf.embedFont(StandardFonts.HelveticaOblique);
 
   // Original einbetten (nur PDF)
   if (originalPdfBytes) {
@@ -97,7 +117,7 @@ Deno.serve(async (req) => {
 
   // Signatur-Nachweis-Seite anhängen
   const page = outPdf.addPage([595, 842]);
-  // Aussteller oben rechts
+  // Aussteller oben rechts (Stammdaten-Header)
   {
     const hy = 800;
     page.drawText(ISSUER.name,      { x: 320, y: hy,      size: 9,  font: bold, color: INK });
@@ -105,11 +125,18 @@ Deno.serve(async (req) => {
     page.drawText(ISSUER.cityLine,  { x: 320, y: hy - 22, size: 8,  font, color: MUTED });
     page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 34, size: 8, font, color: MUTED });
     page.drawText(`USt-IdNr.: ${ISSUER.vatId}`,        { x: 320, y: hy - 45, size: 8, font, color: MUTED });
+    // Goldene Trennlinie unter dem Stammdaten-Header (analog document-finalize/finance-export-pdf)
+    page.drawLine({ start: { x: 40, y: hy - 55 }, end: { x: 555, y: hy - 55 },
+      thickness: 0.7, color: GOLD });
   }
   let y = 800 - 70;
   page.drawText("Bördesnack24 – Signatur-Nachweis (IfSG/Belehrung)",
     { x: 40, y, size: 15, font: bold, color: GOLD });
-  y -= 20;
+  y -= 8;
+  // Goldene Unterstreichung unter der Überschrift
+  page.drawLine({ start: { x: 40, y }, end: { x: 555, y },
+    thickness: 1.4, color: GOLD });
+  y -= 14;
   page.drawText(`Dokument: ${doc?.title ?? "?"}` +
     `${doc?.category ? " · Kategorie: " + doc.category : ""}` +
     ` · Version ${task.document_version}`,
@@ -136,12 +163,20 @@ Deno.serve(async (req) => {
     ["Task-ID",         task.id],
     ["Auth-Kontext",    task.ip_hash ? `IP-Hash ${task.ip_hash.substring(0, 16)}…` : "-"],
   ];
+  // Platzprüfung + Zeilenumbruch: lange Werte (E-Mail/Namen) sollen umbrechen
+  // statt an der Seitenkante abgeschnitten zu werden.
+  const VALUE_X = 200;
+  const VALUE_MAX_W = 555 - VALUE_X;
   for (const [k, v] of rows) {
-    page.drawText(k, { x: 40,  y, size: 10, font: bold, color: INK });
-    page.drawText(v, { x: 200, y, size: 10, font, color: INK });
-    y -= 16;
+    const lines = wrapText(font, v, VALUE_MAX_W, 10);
+    page.drawText(k, { x: 40, y, size: 10, font: bold, color: INK });
+    lines.forEach((line, li) => {
+      page.drawText(line, { x: VALUE_X, y: y - li * 12, size: 10, font, color: INK });
+    });
+    y -= 16 + Math.max(0, lines.length - 1) * 12;
   }
-  y -= 8;
+  // Bewusste Leerzeile vor der Signaturbox (statt der bisherigen ~8pt)
+  y -= 22;
 
   // Signatur-Bild einbetten
   try {
@@ -158,7 +193,10 @@ Deno.serve(async (req) => {
       color: rgb(0.98, 0.96, 0.92),
     });
     page.drawImage(img, { x: 50, y: y - h - 4, width: w, height: h });
-    page.drawText(empName, { x: 40, y: y - h - 30, size: 11, font: bold, color: INK });
+    // Name in die Box einpassen (bis 280pt Innenbreite) statt abzuschneiden.
+    let nameSize = 11;
+    while (nameSize > 7 && bold.widthOfTextAtSize(empName, nameSize) > 280) nameSize -= 0.5;
+    page.drawText(empName, { x: 40, y: y - h - 30, size: nameSize, font: bold, color: INK });
     page.drawText(`Datum: ${signedAt}`, { x: 40, y: y - h - 44, size: 9, font, color: MUTED });
   } catch (_) {
     page.drawText("Signatur konnte nicht eingebettet werden.",
@@ -169,10 +207,10 @@ Deno.serve(async (req) => {
   if (!originalPdfBytes) {
     page.drawText(
       "Hinweis: Das Original-Dokument liegt als Nicht-PDF vor und ist separat abgelegt.",
-      { x: 40, y: 60, size: 9, font, color: MUTED });
+      { x: 40, y: 60, size: 9, font: italic, color: MUTED });
   }
   page.drawText(`Erstellt am ${new Date().toISOString().substring(0,10)}`,
-    { x: 40, y: 40, size: 8, font, color: MUTED });
+    { x: 40, y: 40, size: 8, font: italic, color: MUTED });
 
   const outBytes = await outPdf.save();
 

@@ -60,23 +60,31 @@ interface Ctx {
   pdf: PDFDocument;
   font: PDFFont;
   bold: PDFFont;
+  italic: PDFFont;
   approval: Approval;
   decisions: Decision[];
   caller: SupabaseClient;
+  headerDrawn?: boolean; // Stammdaten-Adressblock nur auf der ersten Seite des Dokuments
 }
 
 // ── Header im One-Pager-Look: Gold-Topbar, Wortmarke, Stammdaten ────
+// Der volle Stammdaten-/Adressblock (Ausstelleradresse) erscheint nur auf
+// der allerersten Seite des Dokuments; Folgeseiten tragen weiterhin die
+// schlanke Topbar zur Wiedererkennung, ohne die Adresse zu wiederholen.
 function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: string): number {
   page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
   page.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: ctx.bold, color: INK });
   page.drawText("Freigabe-Dokument", { x: 40, y: 842 - 43, size: 8, font: ctx.font, color: MUTED });
-  const hy = 842 - 22;
-  page.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: ctx.bold, color: INK });
-  page.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
+  if (!ctx.headerDrawn) {
+    const hy = 842 - 22;
+    page.drawText(ISSUER.name, { x: 320, y: hy, size: 8, font: ctx.bold, color: INK });
+    page.drawText(ISSUER.street, { x: 320, y: hy - 10, size: 7.5, font: ctx.font, color: MUTED });
+    page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
+    page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
+    page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
+    ctx.headerDrawn = true;
+  }
+  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
 
   let ty = 842 - 104;
   page.drawText(title, { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
@@ -90,11 +98,13 @@ function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: strin
     thickness: 1.4, color: GOLD,
   });
   ty -= 18;
+  // Bewusste Leerzeile vor dem eigentlichen Inhalt (Tabellenkopf o. ä.)
+  ty -= 10;
   return ty;
 }
 
 // ── Generisch: Tabelle mit Header-Wiederholung über mehrere Seiten ──
-interface TableColumn { label: string; x: number; maxChars: number }
+interface TableColumn { label: string; x: number; maxChars: number; align?: "right" }
 function drawTable(
   ctx: Ctx,
   title: string,
@@ -110,8 +120,15 @@ function drawTable(
   const CREAM = rgb(0.98, 0.96, 0.92);
   const drawColumnHeaders = (p: PDFPage, yPos: number) => {
     p.drawRectangle({ x: 40, y: yPos - 4, width: 515, height: 16, color: INK });
-    for (const c of columns) {
-      p.drawText(c.label, { x: c.x + 4, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
+    for (let i = 0; i < columns.length; i++) {
+      const c = columns[i];
+      if (c.align === "right") {
+        const nextX = columns[i + 1]?.x ?? 555;
+        const w = ctx.bold.widthOfTextAtSize(c.label, 8.5);
+        p.drawText(c.label, { x: nextX - 8 - w, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
+      } else {
+        p.drawText(c.label, { x: c.x + 4, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
+      }
     }
   };
 
@@ -134,14 +151,20 @@ function drawTable(
     for (let i = 0; i < columns.length; i++) {
       const c = columns[i];
       const text = fmt(row[i]).substring(0, c.maxChars);
-      page.drawText(text, { x: c.x + 4, y, size: 8, font: ctx.font, color: INK });
+      if (c.align === "right") {
+        const nextX = columns[i + 1]?.x ?? 555;
+        const w = ctx.font.widthOfTextAtSize(text, 8);
+        page.drawText(text, { x: nextX - 8 - w, y, size: 8, font: ctx.font, color: INK });
+      } else {
+        page.drawText(text, { x: c.x + 4, y, size: 8, font: ctx.font, color: INK });
+      }
     }
     y -= 13;
   }
 
   if (rows.length === 0) {
     page.drawText("Keine Datensätze im Zeitraum.",
-      { x: 40, y: y - 4, size: 9, font: ctx.font, color: MUTED });
+      { x: 40, y: y - 4, size: 9, font: ctx.italic, color: MUTED });
   }
 }
 
@@ -159,11 +182,11 @@ function renderInventoryFifo(ctx: Ctx): void {
   const lotCols: TableColumn[] = [
     { label: "Produkt",   x: 40,  maxChars: 22 },
     { label: "Rechnung",  x: 190, maxChars: 14 },
-    { label: "EK-Preis",  x: 275, maxChars: 8 },
+    { label: "EK-Preis",  x: 275, maxChars: 8,  align: "right" },
     { label: "MHD",       x: 335, maxChars: 10 },
-    { label: "Menge",     x: 395, maxChars: 6 },
-    { label: "MHD-%",     x: 435, maxChars: 4 },
-    { label: "Netto EUR", x: 480, maxChars: 10 },
+    { label: "Menge",     x: 395, maxChars: 6,  align: "right" },
+    { label: "MHD-%",     x: 435, maxChars: 4,  align: "right" },
+    { label: "Netto EUR", x: 480, maxChars: 10, align: "right" },
   ];
   const lotRows = lots.map((l) => [
     (l.product_name as string) ?? "",
@@ -188,8 +211,8 @@ function renderInventoryFifo(ctx: Ctx): void {
       { label: "Produkt",     x: 140, maxChars: 20 },
       { label: "Automat",     x: 265, maxChars: 10 },
       { label: "Typ",         x: 335, maxChars: 8 },
-      { label: "Menge",       x: 385, maxChars: 6 },
-      { label: "EK",          x: 425, maxChars: 8 },
+      { label: "Menge",       x: 385, maxChars: 6, align: "right" },
+      { label: "EK",          x: 425, maxChars: 8, align: "right" },
       { label: "Rechnung",    x: 480, maxChars: 12 },
     ];
     const moveRows = movements.map((m) => [
@@ -219,16 +242,21 @@ function renderInventoryFifo(ctx: Ctx): void {
 
   // Bilanz-Zusammenfassung als eigene Seite (wenn Zahlen vorliegen)
   if (lots.length > 0) {
-    const page = ctx.pdf.addPage([595, 842]);
-    let y = drawPageHeader(page, ctx,
-      "Bördesnack24 – Bilanz-Zusammenfassung", subtitle);
+    const bilanzTitle = "Bördesnack24 – Bilanz-Zusammenfassung";
+    let page = ctx.pdf.addPage([595, 842]);
+    let y = drawPageHeader(page, ctx, bilanzTitle, subtitle);
     const rows: Array<[string, string]> = [
       ["Anschaffungskosten (Brutto)", fmtEur(totalGross) + " EUR"],
       ["MHD-Abschlag",                fmtEur(totalDiscount) + " EUR"],
       ["Bilanz-Netto (§253 HGB)",     fmtEur(totalNet) + " EUR"],
       ["Anzahl Lots",                 String(lots.length)],
     ];
+    const FOOT_Y_LIMIT = 100;
     for (const [k, v] of rows) {
+      if (y < FOOT_Y_LIMIT) {
+        page = ctx.pdf.addPage([595, 842]);
+        y = drawPageHeader(page, ctx, bilanzTitle, subtitle);
+      }
       page.drawText(k, { x: 40, y, size: 11, font: ctx.bold, color: INK });
       page.drawText(v, { x: 400, y, size: 11, font: ctx.font, color: INK });
       y -= 20;
@@ -241,7 +269,7 @@ interface ProtocolDef {
   table: string;
   dateCol: string;
   title: string;
-  columns: { key: string; label: string; x: number; maxChars: number }[];
+  columns: { key: string; label: string; x: number; maxChars: number; align?: "right" }[];
 }
 const HACCP_PROTOCOLS: Record<string, ProtocolDef> = {
   haccp_temperature: {
@@ -249,7 +277,7 @@ const HACCP_PROTOCOLS: Record<string, ProtocolDef> = {
     title: "Temperaturkontrolle (CCP 2: ≤ 7 °C)",
     columns: [
       { key: "measured_at",       label: "Zeitpunkt",  x: 40,  maxChars: 16 },
-      { key: "temperature_c",     label: "Ist °C",     x: 160, maxChars: 8 },
+      { key: "temperature_c",     label: "Ist °C",     x: 160, maxChars: 8, align: "right" },
       { key: "within_limit",      label: "i.O.",       x: 250, maxChars: 6 },
       { key: "corrective_action", label: "Korrektur",  x: 340, maxChars: 30 },
     ],
@@ -270,7 +298,7 @@ const HACCP_PROTOCOLS: Record<string, ProtocolDef> = {
     columns: [
       { key: "disposed_at",   label: "Zeitpunkt",  x: 40,  maxChars: 16 },
       { key: "product_label", label: "Produkt",    x: 160, maxChars: 18 },
-      { key: "quantity",      label: "Menge",      x: 285, maxChars: 6 },
+      { key: "quantity",      label: "Menge",      x: 285, maxChars: 6, align: "right" },
       { key: "reason",        label: "Grund",      x: 335, maxChars: 20 },
       { key: "mhd_date",      label: "MHD",        x: 470, maxChars: 12 },
     ],
@@ -290,7 +318,7 @@ const HACCP_PROTOCOLS: Record<string, ProtocolDef> = {
       { key: "filled_at",       label: "Zeitpunkt", x: 40,  maxChars: 16 },
       { key: "machine_id",      label: "Automat",   x: 160, maxChars: 12 },
       { key: "product_id",      label: "Produkt",   x: 250, maxChars: 14 },
-      { key: "quantity",        label: "Menge",     x: 340, maxChars: 6 },
+      { key: "quantity",        label: "Menge",     x: 340, maxChars: 6, align: "right" },
       { key: "removed_spoiled", label: "Verderb",   x: 400, maxChars: 8 },
     ],
   },
@@ -311,9 +339,9 @@ const HACCP_PROTOCOLS: Record<string, ProtocolDef> = {
     columns: [
       { key: "collected_at",  label: "Zeitpunkt",    x: 40,  maxChars: 16 },
       { key: "machine_id",    label: "Automat",      x: 160, maxChars: 12 },
-      { key: "amount_gross",  label: "Brutto EUR",   x: 250, maxChars: 10 },
-      { key: "change_amount", label: "Wechselgeld",  x: 335, maxChars: 10 },
-      { key: "net_amount",    label: "Netto EUR",    x: 420, maxChars: 10 },
+      { key: "amount_gross",  label: "Brutto EUR",   x: 250, maxChars: 10, align: "right" },
+      { key: "change_amount", label: "Wechselgeld",  x: 335, maxChars: 10, align: "right" },
+      { key: "net_amount",    label: "Netto EUR",    x: 420, maxChars: 10, align: "right" },
     ],
   },
 };
@@ -332,7 +360,7 @@ async function renderHaccp(ctx: Ctx): Promise<void> {
 
   const subtitle = `Zeitraum: ${from} bis ${to} · ${(rows ?? []).length} Einträge`;
   const cols: TableColumn[] = def.columns.map((c) =>
-    ({ label: c.label, x: c.x, maxChars: c.maxChars }));
+    ({ label: c.label, x: c.x, maxChars: c.maxChars, align: c.align }));
   const tableRows = (rows ?? []).map((r: Record<string, unknown>) =>
     def.columns.map((c) => r[c.key] as string | number | null | undefined));
   drawTable(ctx, `Bördesnack24 – ${def.title}`, subtitle, cols, tableRows);
@@ -351,13 +379,13 @@ async function renderFinance(ctx: Ctx): Promise<void> {
     summary = Array.isArray(data) ? data[0] : data;
   } catch (_) { /* RPC nicht vorhanden — Placeholder */ }
 
-  const page = ctx.pdf.addPage([595, 842]);
-  let y = drawPageHeader(page, ctx,
-    "Bördesnack24 – Finanzauswertung", subtitle);
+  const financeTitle = "Bördesnack24 – Finanzauswertung";
+  let page = ctx.pdf.addPage([595, 842]);
+  let y = drawPageHeader(page, ctx, financeTitle, subtitle);
   if (!summary) {
     page.drawText(
       "Keine Kennzahlen im Snapshot — Auswertung im Live-Dashboard einsehbar.",
-      { x: 40, y, size: 10, font: ctx.font, color: MUTED });
+      { x: 40, y, size: 10, font: ctx.italic, color: MUTED });
     return;
   }
   const rows: Array<[string, string]> = [
@@ -369,19 +397,24 @@ async function renderFinance(ctx: Ctx): Promise<void> {
     ["Sonstige Kosten",          fmtEur(summary.other_costs as number) + " EUR"],
     ["Ergebnis",                 fmtEur(summary.result as number) + " EUR"],
   ];
+  const FOOT_Y_LIMIT = 100;
   for (const [k, v] of rows) {
+    if (y < FOOT_Y_LIMIT) {
+      page = ctx.pdf.addPage([595, 842]);
+      y = drawPageHeader(page, ctx, financeTitle, subtitle);
+    }
     page.drawText(k, { x: 40, y, size: 11, font: ctx.bold, color: INK });
     page.drawText(v, { x: 400, y, size: 11, font: ctx.font, color: INK });
     y -= 20;
   }
 }
 
-// ── Freigabe-Stempel + Signaturen (immer als letzte Seite) ──────────
+// ── Freigabe-Stempel + Signaturen (immer als letzte Seite(n)) ────────
 async function renderApprovalStamp(ctx: Ctx): Promise<void> {
-  const page = ctx.pdf.addPage([595, 842]);
-  let y = drawPageHeader(page, ctx,
-    "Bördesnack24 – Freigabe & digitale Signaturen",
-    `Approval-ID: ${ctx.approval.id}`);
+  const stampTitle = "Bördesnack24 – Freigabe & digitale Signaturen";
+  const stampSubtitle = `Approval-ID: ${ctx.approval.id}`;
+  let page = ctx.pdf.addPage([595, 842]);
+  let y = drawPageHeader(page, ctx, stampTitle, stampSubtitle);
 
   // FREIGEGEBEN-Stempel-Kasten
   page.drawRectangle({
@@ -406,9 +439,19 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
   }
   y -= 110;
 
-  // Signatur-Karten
+  // Signatur-Karten — Platzprüfung VOR jeder Karte: reicht der Platz auf
+  // der aktuellen Seite nicht, wird eine neue Seite begonnen, statt die
+  // Karte (und damit eine rechtsgültige Unterschrift) wegzulassen.
   let sy = y;
+  const CARD_H = 130;
+  const CARD_GAP = 145;
+  const CARD_FOOT_Y_LIMIT = 60;
   for (const d of ctx.decisions) {
+    if (sy - CARD_H < CARD_FOOT_Y_LIMIT) {
+      page = ctx.pdf.addPage([595, 842]);
+      sy = drawPageHeader(page, ctx, stampTitle, `${stampSubtitle} (Fortsetzung)`);
+    }
+
     const name = d.approver?.full_name ?? "?";
     const decidedAt = d.decided_at
       ? String(d.decided_at).substring(0, 10) : approvedAt;
@@ -458,12 +501,31 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
     page.drawText(`Gesellschafter – freigegeben am ${decidedAt}`,
       { x: 60, y: sy - 114, size: 8, font: ctx.font, color: MUTED });
 
-    sy -= 145;
-    if (sy < 60) break;
+    sy -= CARD_GAP;
   }
+}
 
-  page.drawText(`Erstellt am ${new Date().toISOString().substring(0, 10)}`,
-    { x: 40, y: 40, size: 8, font: ctx.font, color: MUTED });
+// ── Footer auf jeder Seite (Stammdaten + Seitenzahl) ─────────────────
+// Analog zu finance-export-pdf/protocol-export-pdf/documents-*: jede Seite
+// bleibt für sich identifizierbar, auch wenn Seiten getrennt werden.
+function drawFooterOnAllPages(ctx: Ctx): void {
+  const pages = ctx.pdf.getPages();
+  const createdAt = new Date().toISOString().substring(0, 10);
+  for (let i = 0; i < pages.length; i++) {
+    const pg = pages[i];
+    pg.drawLine({
+      start: { x: 40, y: 46 }, end: { x: 555, y: 46 },
+      thickness: 0.4, color: MUTED,
+    });
+    pg.drawText(
+      `${ISSUER.name} · ${ISSUER.street}, ${ISSUER.cityLine} · St-Nr. ${ISSUER.taxNumber} · USt-IdNr. ${ISSUER.vatId}`,
+      { x: 40, y: 34, size: 6.5, font: ctx.font, color: MUTED },
+    );
+    pg.drawText(`Erstellt am ${createdAt}`,
+      { x: 40, y: 24, size: 7, font: ctx.italic, color: MUTED });
+    pg.drawText(`Seite ${i + 1} von ${pages.length}`,
+      { x: 555 - 90, y: 34, size: 8, font: ctx.font, color: MUTED });
+  }
 }
 
 // ── Router ─────────────────────────────────────────────────────────
@@ -505,11 +567,13 @@ Deno.serve(async (req) => {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique);
   const ctx: Ctx = {
-    pdf, font, bold,
+    pdf, font, bold, italic,
     approval: approval as Approval,
     decisions: (decisions ?? []) as Decision[],
     caller,
+    headerDrawn: false,
   };
 
   // 1) Inhaltsseiten je nach Dokument-Typ
@@ -530,8 +594,11 @@ Deno.serve(async (req) => {
       { x: 40, y, size: 10, font, color: INK });
   }
 
-  // 2) Freigabe-Stempel + Signaturen (immer als letzte Seite)
+  // 2) Freigabe-Stempel + Signaturen (immer als letzte Seite(n))
   await renderApprovalStamp(ctx);
+
+  // 3) Footer (mit Seitenzahl) auf jeder Seite des fertigen PDFs
+  drawFooterOnAllPages(ctx);
 
   const pdfBytes = await pdf.save();
   const path = `${ctx.approval.id}.pdf`;
