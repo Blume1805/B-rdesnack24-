@@ -20,7 +20,19 @@ export type Ctx = { pdf: PDFDocument; font: PDFFont; bold: PDFFont; italic: PDFF
 // Kopf im One-Pager-Look: Gold-Topbar, Wortmarke links, Stammdaten rechts,
 // Titel gold, darunter goldene Sektionslinie — identisch zu
 // finance-export-pdf / protocol-export-pdf.
-export function drawStandardHeader(page: PDFPage, ctx: Ctx, title: string): number {
+// Der volle Stammdaten-Block erscheint NUR auf Seite 1 (isFirstPage=true).
+// Auf Folgeseiten wird nur die goldene Topbar-Leiste gezeichnet, damit nicht
+// bei jedem Seitenumbruch Wortmarke/Anschrift/Titel erneut aufgebaut werden.
+export function drawStandardHeader(
+  page: PDFPage,
+  ctx: Ctx,
+  title: string,
+  isFirstPage = true,
+): number {
+  if (!isFirstPage) {
+    page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
+    return 842 - 40;
+  }
   page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
   page.drawText("BÖRDESNACK24", { x: 40, y: 842 - 30, size: 11, font: ctx.bold, color: INK });
   page.drawText("Dokument", { x: 40, y: 842 - 43, size: 8, font: ctx.font, color: MUTED });
@@ -30,7 +42,7 @@ export function drawStandardHeader(page: PDFPage, ctx: Ctx, title: string): numb
   page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
   page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
   page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
+  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
   let y = 842 - 104;
   page.drawText(title, { x: 40, y, size: 15, font: ctx.bold, color: GOLD });
   y -= 10;
@@ -87,7 +99,7 @@ export async function drawFlow(
 
   const newPage = async () => {
     page = await contentPage();
-    y = drawStandardHeader(page, ctx, headerTitle);
+    y = drawStandardHeader(page, ctx, headerTitle, false);
   };
   const ensure = async (h: number) => {
     if (y - h < footerY) await newPage();
@@ -96,17 +108,22 @@ export async function drawFlow(
   for (const b of blocks) {
     switch (b.type) {
       case "h2": {
-        await ensure(22);
-        y -= 6;
+        await ensure(36);
+        y -= 20;
         page.drawText(b.text, { x: marginLeft, y, size: 12, font: ctx.bold, color: INK });
-        y -= 16;
+        y -= 6;
+        page.drawLine({ start: { x: marginLeft, y }, end: { x: 555, y }, thickness: 0.7, color: GOLD });
+        y -= 10;
         break;
       }
       case "h3": {
-        await ensure(18);
-        y -= 4;
+        await ensure(28);
+        y -= 15;
         page.drawText(b.text, { x: marginLeft, y, size: 10, font: ctx.bold, color: INK });
-        y -= 13;
+        y -= 5;
+        const h3Width = ctx.bold.widthOfTextAtSize(b.text, 10);
+        page.drawLine({ start: { x: marginLeft, y }, end: { x: marginLeft + h3Width, y }, thickness: 0.6, color: GOLD });
+        y -= 8;
         break;
       }
       case "p": {
@@ -184,6 +201,25 @@ export async function drawFlow(
         break;
       }
     }
+  }
+
+  // Footer auf jeder Seite — Trennlinie + Aussteller-Adresse + Steuernummer/
+  // USt-IdNr. + "Seite X von Y", analog zu finance-export-pdf. Belehrung und
+  // NDA können mehrseitig sein, daher auf allen erzeugten Seiten anwenden.
+  const allPages = ctx.pdf.getPages();
+  for (let i = 0; i < allPages.length; i++) {
+    const pg = allPages[i];
+    pg.drawLine({
+      start: { x: marginLeft, y: 46 }, end: { x: pageWidth - marginRight, y: 46 },
+      thickness: 0.4, color: MUTED,
+    });
+    pg.drawText(
+      `${ISSUER.name} · ${ISSUER.street}, ${ISSUER.cityLine} · St-Nr. ${ISSUER.taxNumber} · USt-IdNr. ${ISSUER.vatId}`,
+      { x: marginLeft, y: 34, size: 6.5, font: ctx.font, color: MUTED },
+    );
+    pg.drawText(`Seite ${i + 1} / ${allPages.length}`, {
+      x: pageWidth - marginRight - 45, y: 34, size: 8, font: ctx.font, color: MUTED,
+    });
   }
 }
 

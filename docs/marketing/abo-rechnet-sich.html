@@ -5,22 +5,26 @@
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #14110E; }
-  .page { width: 210mm; height: 296mm; padding: 13mm 14mm 8mm; position: relative; overflow: hidden; }
+  /* Kein fester height + overflow:hidden: bei Bedarf fließt der Inhalt sauber
+     auf eine 2. Seite, statt den Pflichtangaben-Footer unsichtbar
+     abzuschneiden (@page regelt die echte Paginierung). */
+  .page { width: 210mm; min-height: 296mm; padding: 11mm 14mm 8mm; position: relative; }
+  .kpi-row, table, .scenarios, .callout, .foot { page-break-inside: avoid; }
   .topbar { position: absolute; top:0; left:0; right:0; height: 7mm; background:#FDC102; }
   .brand { font-weight: 900; letter-spacing: 2px; font-size: 15px; margin-top: 6mm; }
-  h1 { font-size: 23px; font-weight: 900; color:#B8860B; margin: 4mm 0 2mm; line-height:1.12; }
+  h1 { font-size: 22px; font-weight: 900; color:#B8860B; margin: 3mm 0 1.6mm; line-height:1.12; }
   h1 .big { color:#14110E; }
-  .sub { color:#6F6A5E; font-size: 11px; margin-bottom: 3mm; line-height:1.4; }
-  h2 { font-size: 13px; font-weight: 800; margin: 3.5mm 0 2mm; border-bottom: 2px solid #FDC102; padding-bottom: 1.2mm;}
+  .sub { color:#6F6A5E; font-size: 11px; margin-bottom: 2.2mm; line-height:1.38; }
+  h2 { font-size: 13px; font-weight: 800; margin: 2.8mm 0 1.6mm; border-bottom: 2px solid #FDC102; padding-bottom: 1mm;}
   table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th { background:#14110E; color:#F9F5EC; text-align:left; padding: 1.7mm 2.5mm; font-size: 10px; letter-spacing:.4px;}
+  th { background:#14110E; color:#F9F5EC; text-align:left; padding: 1.4mm 2.5mm; font-size: 10px; letter-spacing:.4px;}
   th.r, td.r { text-align: right; }
-  td { padding: 1.5mm 2.5mm; border-bottom: 1px solid #E8E2D6; }
+  td { padding: 1.3mm 2.5mm; border-bottom: 1px solid #E8E2D6; }
   tr:nth-child(even) td { background: #F9F5EC; }
   .gold { color:#B8860B; font-weight: 800; }
   .green { color:#3F7A2E; font-weight: 800; }
   .red { color:#A33B2E; }
-  .scenarios { display:flex; gap:4mm; margin: 2.5mm 0 2mm; }
+  .scenarios { display:flex; gap:4mm; margin: 2mm 0 1.6mm; }
   .scen { flex:1; padding: 2.8mm 3.5mm; border-radius: 2mm; }
   .scen .t { font-size: 9.5px; font-weight: 800; letter-spacing:.8px; text-transform: uppercase; margin-bottom: 1mm;}
   .scen .v { font-size: 19px; font-weight: 900; }
@@ -29,16 +33,16 @@
   .scen.cons .t { color:#6F6A5E; } .scen.cons .d { color:#6F6A5E; }
   .scen.norm { background:#14110E; color:#F9F5EC; border-left: 4px solid #FDC102; }
   .scen.norm .t, .scen.norm .v { color:#FDC102; }
-  .kpi-row { display:flex; gap:4mm; margin: 2.5mm 0 1mm; }
+  .kpi-row { display:flex; gap:4mm; margin: 2mm 0 0.8mm; }
   .kpi { flex:1; background:#F9F5EC; border-left: 4px solid #FDC102; padding: 2.2mm 3.2mm; }
   .kpi .v { font-size: 16px; font-weight: 900; }
   .kpi .l { font-size: 9.5px; color:#6F6A5E; font-weight:700; letter-spacing:.5px; text-transform: uppercase; margin-bottom:0.8mm;}
   .kpi .n { font-size: 9.5px; color:#6F6A5E; margin-top: 0.8mm; line-height:1.35;}
-  .callout { background:#14110E; color:#F9F5EC; border-radius: 3mm; padding: 3.2mm 4.5mm; margin-top: 3mm; }
+  .callout { background:#14110E; color:#F9F5EC; border-radius: 3mm; padding: 2.6mm 4.5mm; margin-top: 2mm; }
   .callout .h { color:#FDC102; font-weight: 900; font-size: 12.5px; margin-bottom: 1.2mm;}
   .callout p { font-size: 10.5px; line-height: 1.45; }
-  .foot { margin-top: 3mm; font-size: 8px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1.8mm; line-height:1.4;}
-  .note { font-size: 9px; color:#6F6A5E; margin-top: 1.5mm; line-height:1.4;}
+  .foot { margin-top: 1.6mm; font-size: 7.5px; color:#9B958A; border-top:1px solid #E8E2D6; padding-top: 1.2mm; line-height:1.3;}
+  .note { font-size: 9px; color:#6F6A5E; margin-top: 1.2mm; line-height:1.35;}
 </style></head><body>
 <div class="page">
   <div class="topbar"></div>

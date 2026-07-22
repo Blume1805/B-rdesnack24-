@@ -6,8 +6,8 @@ import JSZip from "https://esm.sh/jszip@3.10.1";
 // pdf-lib-basierte Farben werden hier nicht benötigt; DOCX nimmt Hex-Werte.
 const INK_HEX = "14110E";
 const GOLD_HEX = "FDC102";
-const MUTED_HEX = "706A5A";
-const CREAM_HEX = "FBF6EB";
+const MUTED_HEX = "6F6A5E";
+const CREAM_HEX = "FAF5EB";
 
 function xmlEsc(s: string): string {
   return s
@@ -234,7 +234,7 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <w:docDefaults>
     <w:rPrDefault>
       <w:rPr>
-        <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+        <w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>
         <w:sz w:val="22"/>
       </w:rPr>
     </w:rPrDefault>

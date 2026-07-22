@@ -30,7 +30,9 @@ export type Ctx = { pdf: PDFDocument; font: PDFFont; bold: PDFFont; italic: PDFF
 
 // Kopf im One-Pager-Look: Gold-Topbar, Wortmarke links, Stammdaten rechts,
 // Titel gold, darunter goldene Sektionslinie — identisch zu
-// finance-export-pdf / protocol-export-pdf.
+// finance-export-pdf / protocol-export-pdf. Nur auf der ERSTEN Seite eines
+// Dokuments verwendet (voller Stammdaten-Block); siehe drawContinuationHeader
+// für alle weiteren Seiten desselben Dokuments.
 export function drawStandardHeader(
   page: PDFPage,
   ctx: Ctx,
@@ -46,13 +48,22 @@ export function drawStandardHeader(
   page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font: ctx.font, color: MUTED });
   page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font: ctx.font, color: MUTED });
   page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font: ctx.font, color: MUTED });
-  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
+  page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
   let y = 842 - 104;
   page.drawText(title, { x: 40, y, size: 15, font: ctx.bold, color: GOLD });
   y -= 10;
   page.drawLine({ start: { x: 40, y }, end: { x: 555, y }, thickness: 1.4, color: GOLD });
   y -= 18;
   return y;
+}
+
+// Kopf für Folgeseiten INNERHALB desselben Dokuments: nur die goldene
+// Topbar-Leiste, ohne den Stammdaten-Text-Block (Name/Anschrift/
+// Steuernummer/USt-IdNr.) und ohne erneuten Dokumenttitel — der volle
+// Stammdaten-Block erscheint bewusst nur auf Seite 1 jedes Dokuments.
+export function drawContinuationHeader(page: PDFPage): number {
+  page.drawRectangle({ x: 0, y: 842 - 6, width: 595, height: 6, color: GOLD });
+  return 842 - 30;
 }
 
 export function wrapLines(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
@@ -93,6 +104,10 @@ export type Block =
       rows?: string[][];
       widths?: number[];
       emptyRows?: number;
+      // Spalten-Indizes (0-basiert), deren Zellinhalte rechtsbündig an der
+      // rechten Spaltengrenze ausgerichtet werden (Zahlen-/Betragsspalten),
+      // analog zum alignRightCols-Pattern in finance-export-pdf/index.ts.
+      alignRightCols?: number[];
     };
 
 export async function drawFlow(
@@ -113,9 +128,11 @@ export async function drawFlow(
   let y = drawStandardHeader(page, ctx, headerTitle, subtitle);
   if (opts?.showLegend) y = drawPlaceholderLegend(page, ctx, y);
 
+  // Folgeseiten INNERHALB desselben Dokuments: nur die goldene Topbar,
+  // kein erneuter Stammdaten-Block (siehe drawContinuationHeader).
   const newPage = async () => {
     page = await contentPage();
-    y = drawStandardHeader(page, ctx, headerTitle, subtitle);
+    y = drawContinuationHeader(page);
   };
   const ensure = async (h: number) => {
     if (y - h < footerY) await newPage();
@@ -128,6 +145,13 @@ export async function drawFlow(
   const BODY_SIZE = 10;
   const NOTE_SIZE = 8.5;
   const LEADING = 13;
+
+  // Überschriften-Abstände: bewusst mehr Luft VOR als NACH der Überschrift
+  // (optische Zuordnung zum folgenden Abschnitt statt zum vorherigen).
+  const H2_BEFORE = 18;
+  const H2_AFTER = 14;
+  const H3_BEFORE = 14;
+  const H3_AFTER = 11;
 
   // Grobschätzung der Höhe der ERSTEN maxLines-Zeilen eines Blocks — für die
   // „Überschrift nie allein am Seitenende"-Regel (keep-with-next).
@@ -177,17 +201,27 @@ export async function drawFlow(
       case "h2": {
         // Überschrift + Folgeinhalt zusammenhalten: passt beides nicht mehr,
         // beginnt die Überschrift auf der neuen Seite.
-        if (y - (6 + 16 + keepWithNext(i + 1)) < footerY) await newPage();
-        y -= 6;
+        if (y - (H2_BEFORE + H2_AFTER + keepWithNext(i + 1)) < footerY) await newPage();
+        y -= H2_BEFORE;
         page.drawText(b.text, { x: marginLeft, y, size: 12, font: ctx.bold, color: INK });
-        y -= 16;
+        const h2Width = ctx.bold.widthOfTextAtSize(b.text, 12);
+        page.drawLine({
+          start: { x: marginLeft, y: y - 3 }, end: { x: marginLeft + h2Width, y: y - 3 },
+          thickness: 1.2, color: GOLD,
+        });
+        y -= H2_AFTER;
         break;
       }
       case "h3": {
-        if (y - (4 + LEADING + keepWithNext(i + 1)) < footerY) await newPage();
-        y -= 4;
+        if (y - (H3_BEFORE + H3_AFTER + keepWithNext(i + 1)) < footerY) await newPage();
+        y -= H3_BEFORE;
         page.drawText(b.text, { x: marginLeft, y, size: BODY_SIZE, font: ctx.bold, color: INK });
-        y -= LEADING;
+        const h3Width = ctx.bold.widthOfTextAtSize(b.text, BODY_SIZE);
+        page.drawLine({
+          start: { x: marginLeft, y: y - 2.5 }, end: { x: marginLeft + h3Width, y: y - 2.5 },
+          thickness: 0.8, color: GOLD,
+        });
+        y -= H3_AFTER;
         break;
       }
       case "p": {
@@ -277,9 +311,10 @@ export async function drawFlow(
           let acc = marginLeft;
           for (const w of colW) { colX.push(acc); acc += w; }
         }
-        const pad = 4;
-        const cellSize = 8.5;
-        const lineH = 11;
+        const pad = 3.5;
+        const cellSize = 8;
+        const lineH = 10.5;
+        const alignRight = b.alignRightCols ?? [];
 
         const wrapCells = (cells: string[], font: PDFFont) =>
           cells.map((c, i) =>
@@ -298,9 +333,13 @@ export async function drawFlow(
           });
           for (let i = 0; i < n; i++) {
             let ty = y - lineH + 1.5;
+            const rightAlign = alignRight.includes(i);
             for (const line of hLines[i]) {
+              const tx = rightAlign
+                ? colX[i] + colW[i] - pad - ctx.bold.widthOfTextAtSize(line, cellSize)
+                : colX[i] + pad;
               page.drawText(line, {
-                x: colX[i] + pad, y: ty, size: cellSize, font: ctx.bold, color: CREAM,
+                x: tx, y: ty, size: cellSize, font: ctx.bold, color: CREAM,
               });
               ty -= lineH;
             }
@@ -318,9 +357,13 @@ export async function drawFlow(
           }
           for (let i = 0; i < n; i++) {
             let ty = y - lineH + 1;
+            const rightAlign = alignRight.includes(i);
             for (const line of (cLines[i].length ? cLines[i] : [""])) {
+              const tx = rightAlign
+                ? colX[i] + colW[i] - pad - ctx.font.widthOfTextAtSize(line, cellSize)
+                : colX[i] + pad;
               page.drawText(line, {
-                x: colX[i] + pad, y: ty, size: cellSize, font: ctx.font, color: INK,
+                x: tx, y: ty, size: cellSize, font: ctx.font, color: INK,
               });
               ty -= lineH;
             }
@@ -333,7 +376,7 @@ export async function drawFlow(
           y -= h;
         };
 
-        y -= 2;
+        y -= 8;
         await ensure(40);
         drawHead();
         const dataRows = b.rows ?? [];
@@ -567,6 +610,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Warengruppe", "USt-Satz", "SKR 03", "Rechtsgrundlage"],
       widths: [4, 1.6, 1.6, 2.8],
+      alignRightCols: [1, 2],
       rows: [
         ["Lebensmittel (Riegel, Chips, Nüsse)", "7 %", "3300", "§ 12 Abs. 2 Nr. 1 UStG"],
         ["Säfte, Milch, Trinkwasser", "7 %", "3300", "Anlage 2 UStG"],
@@ -606,6 +650,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Erlösart", "USt-Satz", "SKR 03"],
       widths: [6, 2, 2],
+      alignRightCols: [1, 2],
       rows: [
         ["Verkäufe ermäßigt besteuerter Waren", "7 %", "8300"],
         ["Verkäufe regelbesteuerter Waren", "19 %", "8400"],
@@ -626,6 +671,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Kostenart", "SKR 03", "Bemerkung"],
       widths: [4, 2, 4],
+      alignRightCols: [1],
       rows: [
         ["Reparaturkosten (Fachbetrieb)", "4805", "Reparatur und Instandhaltung BGA"],
         ["Ersatzteile / Kleinmaterial", "4980", "Sonstige betriebliche Aufwendungen"],
@@ -677,6 +723,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Konto", "Bezeichnung", "Verwendung Bördesnack24"],
       widths: [1.6, 4, 4.4],
+      alignRightCols: [0],
       rows: [
         ["1000", "Kasse", "Bargeldbestand"],
         ["1200", "Bank", "GbR-Geschäftskonto"],
@@ -763,6 +810,7 @@ export async function buildBefuellungProtokoll(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Datum", "Uhrzeit", "Artikel", "Menge eingelegt", "MHD geprüft", "Verderb entnommen", "Kürzel"],
       widths: [1.6, 1.3, 2.6, 1.7, 1.4, 1.9, 1.1],
+      alignRightCols: [3],
       emptyRows: EMPTY_ROWS,
     },
     ...signatureBlocks("HACCP + GoBD, 10 Jahre (§ 147 Abs. 3 AO)"),
@@ -780,6 +828,7 @@ export async function buildTemperaturProtokoll(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Datum", "Uhrzeit", "Ist-Temperatur °C", "Korrekturmaßnahme (bei > 7 °C)", "Kürzel"],
       widths: [1.6, 1.4, 2, 4, 1],
+      alignRightCols: [2],
       emptyRows: EMPTY_ROWS,
     },
     ...signatureBlocks("HACCP + GoBD, 10 Jahre"),
@@ -814,6 +863,7 @@ export async function buildVernichtungProtokoll(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Datum", "Standort / Lager", "Artikel", "Menge", "MHD", "Vernichtungsgrund", "Kürzel"],
       widths: [1.5, 1.8, 2.2, 1, 1.4, 2.1, 1],
+      alignRightCols: [3],
       emptyRows: EMPTY_ROWS,
     },
     ...signatureBlocks("GoBD, 10 Jahre"),
@@ -831,6 +881,7 @@ export async function buildWartungProtokoll(ctx: Ctx): Promise<Uint8Array> {
       type: "table",
       columns: ["Datum", "Automat / Standort", "Fehlerbeschreibung", "Maßnahme", "Erledigt durch", "Kosten €", "Kürzel"],
       widths: [1.5, 1.8, 2.2, 2, 1.6, 1.2, 0.9],
+      alignRightCols: [5],
       emptyRows: EMPTY_ROWS,
     },
     ...signatureBlocks("GoBD, 10 Jahre; Rechnungen zusätzlich in sevDesk erfassen"),
@@ -848,6 +899,7 @@ export async function buildGeldentnahmeProtokoll(ctx: Ctx): Promise<Uint8Array> 
       type: "table",
       columns: ["Datum", "Uhrzeit", "Entnommener Betrag €", "Wechselgeld €", "Nettobetrag €", "Unterzeichner"],
       widths: [1.6, 1.3, 2.2, 1.8, 1.8, 1.8],
+      alignRightCols: [2, 3, 4],
       emptyRows: EMPTY_ROWS,
     },
     ...signatureBlocks("GoBD, 10 Jahre; Buchung in sevDesk"),

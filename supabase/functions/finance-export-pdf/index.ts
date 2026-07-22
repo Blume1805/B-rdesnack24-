@@ -88,10 +88,21 @@ type Ctx = {
 };
 
 // ── Header: Gold-Linie, Wortmarke, Stammdaten-Block rechts ──────────────
+// Der volle Stammdaten-Block (Name/Anschrift/Steuernummer/USt-IdNr.) gehört
+// nur auf die allererste Seite. Auf Folgeseiten (spätere newPage()-Aufrufe)
+// wird nur noch die goldene Topbar-Leiste gezeichnet, der Text-Block wird
+// nicht wiederholt.
 function drawHeader(ctx: Ctx) {
   ctx.page.drawRectangle({
     x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: GOLD,
   });
+
+  const isFirstPage = ctx.pdf.getPageCount() === 1;
+  if (!isFirstPage) {
+    ctx.y = PAGE_H - 40;
+    return;
+  }
+
   ctx.page.drawText(safe("BÖRDESNACK24"), {
     x: MARGIN_X, y: PAGE_H - 30, size: 11, font: ctx.bold, color: INK,
   });
@@ -112,7 +123,7 @@ function drawHeader(ctx: Ctx) {
   ctx.page.drawText(safe(`USt-IdNr.: ${ISSUER.vatId}`), { x: hx, y: hy, size: 7.5, font: ctx.font, color: MUTED });
   ctx.page.drawLine({
     start: { x: MARGIN_X, y: PAGE_H - 82 }, end: { x: PAGE_W - MARGIN_X, y: PAGE_H - 82 },
-    thickness: 0.7, color: INK,
+    thickness: 0.7, color: GOLD,
   });
   ctx.y = PAGE_H - 100;
 }
@@ -131,7 +142,12 @@ function h1(ctx: Ctx, text: string) {
   ctx.page.drawText(safe(text), {
     x: MARGIN_X, y: ctx.y, size: 19, font: ctx.bold, color: GOLD,
   });
-  ctx.y -= 26;
+  ctx.y -= 8;
+  ctx.page.drawLine({
+    start: { x: MARGIN_X, y: ctx.y }, end: { x: MARGIN_X + CONTENT_W, y: ctx.y },
+    thickness: 0.7, color: GOLD,
+  });
+  ctx.y -= 18;
 }
 
 function h2(ctx: Ctx, text: string) {
@@ -147,12 +163,12 @@ function h2(ctx: Ctx, text: string) {
   ctx.y -= 14;
 }
 
-function p(ctx: Ctx, text: string, opts?: { size?: number; color?: unknown; bold?: boolean }) {
+function p(ctx: Ctx, text: string, opts?: { size?: number; color?: unknown; bold?: boolean; italic?: boolean }) {
   const size = opts?.size ?? 10;
   ensureSpace(ctx, size + 6);
   ctx.page.drawText(safe(text), {
     x: MARGIN_X, y: ctx.y, size,
-    font: opts?.bold ? ctx.bold : ctx.font,
+    font: opts?.italic ? ctx.italic : (opts?.bold ? ctx.bold : ctx.font),
     // deno-lint-ignore no-explicit-any
     color: (opts?.color as any) ?? INK,
   });
@@ -331,9 +347,34 @@ function targetRow(
 }
 
 // ── Horizontale Balken (Automaten) ──────────────────────────────────────
+// Dezente Werteachse oberhalb der Balken — gleiches Tick-Muster wie in
+// trendChart() (shortEur()-Beschriftung), damit die Balkenlängen nicht nur
+// relativ zueinander, sondern auch an einer Skala ablesbar sind.
 function barList(ctx: Ctx, rows: Array<{ label: string; value: number; text: string }>) {
   if (rows.length === 0) return;
   const max = rows.reduce((a, r) => Math.max(a, r.value), 0);
+
+  if (max > 0) {
+    ensureSpace(ctx, 24);
+    const TICKS = 4;
+    const labelSize = 6.5;
+    const axisY = ctx.y;
+    for (let i = 0; i <= TICKS; i++) {
+      const tx = MARGIN_X + (i / TICKS) * CONTENT_W;
+      ctx.page.drawLine({
+        start: { x: tx, y: axisY }, end: { x: tx, y: axisY - 4 },
+        thickness: 0.4, color: MUTED,
+      });
+      const label = safe(shortEur((max * i) / TICKS));
+      const lw = ctx.font.widthOfTextAtSize(label, labelSize);
+      const lx = i === 0 ? tx : i === TICKS ? tx - lw : tx - lw / 2;
+      ctx.page.drawText(label, {
+        x: lx, y: axisY - 12, size: labelSize, font: ctx.font, color: MUTED,
+      });
+    }
+    ctx.y -= 20;
+  }
+
   for (const r of rows) {
     ensureSpace(ctx, 28);
     ctx.page.drawText(safe(r.label), {
@@ -428,17 +469,42 @@ function comparisonChart(
 ) {
   ensureSpace(ctx, 175);
   const chartH = 110;
-  const yBase = ctx.y - chartH;
+  const yTop = ctx.y;
+  const yBase = yTop - chartH;
   const max = groups.reduce((a, g) => Math.max(a, Math.abs(g.revenue), Math.abs(g.result)), 0);
-  const cellW = CONTENT_W / groups.length;
+
+  // Dezente Y-Achse mit shortEur()-Beschriftung — gleiches Muster wie in
+  // trendChart(), damit auch dieser Chart eine ablesbare Werteskala hat
+  // statt nur relativ vergleichbarer Balkenhöhen.
+  const TICKS = 4;
+  const labelSize = 6.5;
+  const tickLabels = Array.from({ length: TICKS + 1 }, (_, i) =>
+    safe(shortEur((max * i) / TICKS)));
+  const axisLabelW = Math.max(
+    ...tickLabels.map((t) => ctx.font.widthOfTextAtSize(t, labelSize)),
+  ) + 6;
+
+  const chartX = MARGIN_X + axisLabelW;
+  const chartW = CONTENT_W - axisLabelW;
+  const cellW = chartW / groups.length;
   const barW = Math.min(46, cellW * 0.28);
-  ctx.page.drawLine({
-    start: { x: MARGIN_X, y: yBase }, end: { x: MARGIN_X + CONTENT_W, y: yBase },
-    thickness: 0.5, color: MUTED,
-  });
+
+  for (let i = 0; i <= TICKS; i++) {
+    const ty = yBase + (i / TICKS) * chartH;
+    ctx.page.drawLine({
+      start: { x: chartX, y: ty }, end: { x: chartX + chartW, y: ty },
+      thickness: i === 0 ? 0.6 : 0.35, color: i === 0 ? MUTED : TRACK,
+    });
+    const label = tickLabels[i];
+    const lw = ctx.font.widthOfTextAtSize(label, labelSize);
+    ctx.page.drawText(label, {
+      x: chartX - lw - 4, y: ty - labelSize / 2 + 1, size: labelSize, font: ctx.font, color: MUTED,
+    });
+  }
+
   for (let i = 0; i < groups.length; i++) {
     const g = groups[i];
-    const gx = MARGIN_X + i * cellW + cellW / 2;
+    const gx = chartX + i * cellW + cellW / 2;
     const hRev = max > 0 ? (Math.max(g.revenue, 0) / max) * chartH : 0;
     const hRes = max > 0 ? (Math.max(g.result, 0) / max) * chartH : 0;
     const revX = gx - barW - 3;
@@ -585,7 +651,7 @@ Deno.serve(async (req) => {
     h1(ctx, "Finanzauswertung");
     p(ctx, `Zeitraum: ${dateStr(from)} bis ${dateStr(to)} (${periodDays} Tage)`, { size: 11, bold: true });
     p(ctx, `Erstellt am ${new Date().toISOString().substring(0, 10)}`, { size: 9, color: MUTED });
-    ctx.y -= 4;
+    ctx.y -= 14;
 
     h2(ctx, "Rentabilität");
     const revenue = Number(cur.revenue_net ?? 0);
@@ -607,10 +673,10 @@ Deno.serve(async (req) => {
       { label: "Op. Cashflow", value: eur(der.cashflow_operating) },
     ]);
 
-    ctx.y -= 4;
+    ctx.y -= 16;
     h2(ctx, "Zielwerte (Benchmarks Automaten-Business)");
     p(ctx, "Rot gestrichelt = Zielkorridor, rote Linie = Einzel-Zielwert, goldene Marke = Ist-Wert.",
-      { size: 8, color: MUTED });
+      { size: 8, color: MUTED, italic: true });
     ctx.y -= 2;
     targetRow(ctx, "Ø Umsatz / Tag (je Automat)", eur(revenuePerDay), revenuePerDay, 15, 50, 80, "Ziel 15 - 50 EUR");
     targetRow(ctx, "Wareneinsatzquote", pct(wareneinsatz), wareneinsatz, 30, 40, 100, "Ziel 30 - 40 %");
@@ -633,11 +699,11 @@ Deno.serve(async (req) => {
       { label: "Vorjahr",  revenue: Number(py.revenue_net ?? 0),  result: Number(py.result_net ?? 0) },
     ]);
 
-    ctx.y -= 4;
+    ctx.y -= 14;
     h2(ctx, "Cashflow-Entwicklung (letzte 12 Monate)");
     trendChart(ctx, trend);
 
-    ctx.y -= 4;
+    ctx.y -= 14;
     h2(ctx, "Konten (SKR 03)");
     // deno-lint-ignore no-explicit-any
     const accounts = (cur.accounts as Array<any>) ?? [];
@@ -674,7 +740,7 @@ Deno.serve(async (req) => {
       })));
     }
 
-    ctx.y -= 4;
+    ctx.y -= 14;
     h2(ctx, "App-Kunden im Zeitraum");
     kv(ctx, "Aktive Kunden",       String(cust.active_customers ?? 0));
     kv(ctx, "Kaufanzahl",          String(cust.purchases_count  ?? 0));
@@ -682,7 +748,7 @@ Deno.serve(async (req) => {
     kv(ctx, "Ø-Warenkorb",         eur(cust.avg_basket));
 
     if (products.length > 0) {
-      ctx.y -= 4;
+      ctx.y -= 14;
       h2(ctx, "Top-Produkte nach Umsatz");
       table(
         ctx,

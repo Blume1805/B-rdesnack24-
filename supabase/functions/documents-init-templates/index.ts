@@ -40,7 +40,7 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
     page.drawText(ISSUER.cityLine, { x: 320, y: hy - 20, size: 7.5, font, color: MUTED });
     page.drawText(`Steuernummer: ${ISSUER.taxNumber}`, { x: 320, y: hy - 30, size: 7.5, font, color: MUTED });
     page.drawText(`USt-IdNr.: ${ISSUER.vatId}`, { x: 320, y: hy - 40, size: 7.5, font, color: MUTED });
-    page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: INK });
+    page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
   }
 
   // Titel + Ordner-Label, goldene Sektionslinie darunter.
@@ -78,7 +78,7 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
     page.drawText(placeholder, { x: 200, y, size: 9, font, color: MUTED });
     y -= 18;
   }
-  y -= 10;
+  y -= 24;
 
   // Unterschriftsblock
   page.drawText("Unterschriften", { x: 40, y, size: 12, font: bold, color: INK });
@@ -107,9 +107,9 @@ async function buildBlankPdf(folderLabel: string): Promise<Uint8Array> {
   page.drawLine({ start: { x: 40, y: 52 }, end: { x: 555, y: 52 }, thickness: 0.5, color: MUTED });
   page.drawText(
     `${ISSUER.name} · ${ISSUER.street}, ${ISSUER.cityLine} · St-Nr. ${ISSUER.taxNumber} · USt-IdNr. ${ISSUER.vatId}`,
-    { x: 40, y: 42, size: 7, font, color: MUTED });
+    { x: 40, y: 42, size: 6.5, font, color: MUTED });
   page.drawText(`Vorlage · Version 1 · Erstellt am ${new Date().toISOString().substring(0,10)}`,
-    { x: 40, y: 32, size: 7, font: italic, color: MUTED });
+    { x: 40, y: 32, size: 6.5, font: italic, color: MUTED });
 
   return await pdf.save();
 }
