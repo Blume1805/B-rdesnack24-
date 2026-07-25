@@ -101,15 +101,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   /// Kontrollfrage vor jeder Bestellung: nennt die konkreten Konditionen
   /// und verlangt eine ausdrückliche Bestätigung (Button-Lösung analog
-  /// § 312j BGB). Bei Lifetime zusätzlich der Endgültigkeits-Hinweis und
-  /// die Pflicht-Checkbox nach § 356 Abs. 5 BGB (Zustimmung zur sofortigen
-  /// Bereitstellung + Kenntnisnahme vom Erlöschen des Widerrufsrechts) —
-  /// ohne Haken bleibt der Bestell-Button deaktiviert; das Flag wird
-  /// serverseitig verlangt und revisionssicher gespeichert.
+  /// § 312j BGB). Für JEDEN Plan Pflicht: die Altersbestätigung nach
+  /// §§ 106 ff. BGB (volljährig oder Zustimmung der gesetzlichen
+  /// Vertreter — der Taschengeldparagraph trägt Abos nicht). Bei Lifetime
+  /// zusätzlich der Endgültigkeits-Hinweis und die Pflicht-Checkbox nach
+  /// § 356 Abs. 5 BGB. Ohne Haken bleibt der Bestell-Button deaktiviert;
+  /// beide Flags werden serverseitig verlangt und revisionssicher
+  /// gespeichert.
   Future<bool> _confirmOrder(_Plan plan) async {
     final isSwitch = _currentPlan != null;
     final lifetime = plan.key == 'lifetime';
     var withdrawalConsent = false;
+    var ageConsent = false;
     final ok = await showDialog<bool>(
       context: context,
       builder: (dctx) => StatefulBuilder(
@@ -186,7 +189,26 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: AppSpacing.s3),
+                const SizedBox(height: AppSpacing.s2),
+                // §§ 106 ff. BGB: Pflicht-Checkbox für jeden Abschluss —
+                // ohne Haken bleibt der Bestell-Button deaktiviert
+                // (zusätzlich Server-Prüfung + Speicherung als Nachweis).
+                CheckboxListTile(
+                  value: ageConsent,
+                  onChanged: (v) => setDialog(() => ageConsent = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: AppColors.brand,
+                  checkColor: AppColors.ink,
+                  title: Text(
+                    'Ich bin mindestens 18 Jahre alt oder handle mit '
+                    'Zustimmung meiner gesetzlichen Vertreter.',
+                    style: AppTypography.body(size: 12, color: AppColors.ink)
+                        .copyWith(height: 1.35),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
                 Text(
                   'Die Abrechnung erfolgt über den App Store bzw. Google Play, '
                   'sobald die App dort veröffentlicht ist. Du erhältst eine '
@@ -204,7 +226,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               child: const Text('Abbrechen'),
             ),
             FilledButton(
-              onPressed: (lifetime && !withdrawalConsent)
+              onPressed: (!ageConsent || (lifetime && !withdrawalConsent))
                   ? null
                   : () => Navigator.of(dctx).pop(true),
               child: Text(
@@ -217,13 +239,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ),
       ),
     );
-    if (ok == true) _pendingWithdrawalConsent = withdrawalConsent;
+    if (ok == true) {
+      _pendingWithdrawalConsent = withdrawalConsent;
+      _pendingAgeConsent = ageConsent;
+    }
     return ok == true;
   }
 
-  /// Consent aus dem zuletzt bestätigten Dialog — wird der Edge Function
+  /// Consents aus dem zuletzt bestätigten Dialog — werden der Edge Function
   /// mitgegeben und dort serverseitig erneut geprüft.
   bool _pendingWithdrawalConsent = false;
+  bool _pendingAgeConsent = false;
 
   Future<void> _choose(_Plan plan) async {
     if (_busy) return;
@@ -236,6 +262,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         body: {
           'plan': plan.key,
           'withdrawal_consent': _pendingWithdrawalConsent,
+          'age_consent': _pendingAgeConsent,
         },
       );
       final data = Map<String, dynamic>.from(res.data as Map);
@@ -349,6 +376,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   'Die Abrechnung erfolgt über den App Store bzw. Google '
                   'Play, sobald die App dort veröffentlicht ist. Preise '
                   'inkl. USt.',
+                  style:
+                      AppTypography.body(size: 11, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                Text(
+                  'Kostenpflichtige Abos nur für Volljährige bzw. mit '
+                  'Zustimmung der Erziehungsberechtigten (§§ 106 ff. BGB). '
+                  'App, Bonusprogramm und Rabatte ohne Abo stehen allen '
+                  'Altersgruppen offen.',
                   style:
                       AppTypography.body(size: 11, color: AppColors.textMuted),
                 ),

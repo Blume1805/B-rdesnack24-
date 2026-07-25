@@ -54,6 +54,10 @@ function confirmationHtml(opts: {
              vollständiger Bereitstellung erlischt (§ 356 Abs. 5 BGB).</p>`
         : `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
              Du kannst dein Abo-Modell jederzeit im Kundenbereich unter &bdquo;Mein Abo&ldquo; wechseln.</p>`}
+      <p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
+        Du hast beim Abschluss bestätigt, volljährig zu sein oder mit Zustimmung deiner gesetzlichen
+        Vertreter zu handeln (§§ 106 ff. BGB).
+      </p>
       <p style="font-size:13px;line-height:1.5;margin:0;color:#6F6A5E;">
         Die Abrechnung erfolgt über den App Store bzw. Google Play, sobald die App dort veröffentlicht ist.
       </p>
@@ -87,20 +91,33 @@ Deno.serve(async (req) => {
 
     let plan = "";
     let withdrawalConsent = false;
+    let ageConsent = false;
     try {
       const body = await req.json();
       plan = String(body.plan);
       withdrawalConsent = body.withdrawal_consent === true;
+      ageConsent = body.age_consent === true;
       if (!["monthly", "yearly", "lifetime"].includes(plan)) throw new Error("invalid");
     } catch {
       return jsonResponse({ error: "plan (monthly|yearly|lifetime) erforderlich" }, 400);
+    }
+
+    // §§ 106 ff. BGB: ohne bestätigte Volljährigkeit bzw. Zustimmung der
+    // gesetzlichen Vertreter kein Vertragsschluss (Prüfung zusätzlich in
+    // der RPC, dort mit revisionssicherer Speicherung an der Historie).
+    if (!ageConsent) {
+      return jsonResponse({
+        error: "Bitte bestätige, dass du volljährig bist oder mit " +
+               "Zustimmung deiner gesetzlichen Vertreter handelst.",
+      }, 400);
     }
 
     // Planwechsel — sämtliche Geschäftsregeln (Lifetime-Sperre, Doppelwahl,
     // Preise) liegen in der RPC; Fehlermeldungen gehen 1:1 an die App.
     const { data: result, error: rpcErr } =
       await caller.rpc("choose_subscription_plan",
-        { p_plan: plan, p_withdrawal_consent: withdrawalConsent });
+        { p_plan: plan, p_withdrawal_consent: withdrawalConsent,
+          p_age_consent: ageConsent });
     if (rpcErr) {
       return jsonResponse({ error: rpcErr.message }, 400);
     }

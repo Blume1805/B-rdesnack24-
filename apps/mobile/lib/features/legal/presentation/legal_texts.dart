@@ -154,6 +154,13 @@ Rechtsgeschäfte über Waren kommen am Automaten zustande.
      Abrechnung über den Apple App Store bzw. Google Play; ergänzend gelten deren
      Bedingungen. Bis dahin ist die Auswahl eine unverbindliche Vormerkung, es
      erfolgt keine Abbuchung.
+  f) Mindestalter: Kostenpflichtige Abonnements können nur von volljährigen
+     Personen abgeschlossen werden. Minderjährige benötigen die Zustimmung
+     ihrer gesetzlichen Vertreter (§§ 106 ff. BGB); der Taschengeldparagraph
+     (§ 110 BGB) findet auf fortlaufende Abonnements regelmäßig keine
+     Anwendung. Vor jedem Abschluss ist die Volljährigkeit bzw. das Vorliegen
+     der Zustimmung zu bestätigen. Die kostenlose Nutzung der App sowie das
+     Bonus- und Rabattprogramm ohne Abo stehen allen Altersgruppen offen.
 
 5) Kündigung der Abos
   a) Monats- und Jahres-Abo können jederzeit zum Ende des laufenden
