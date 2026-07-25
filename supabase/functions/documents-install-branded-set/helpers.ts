@@ -107,68 +107,71 @@ export async function drawFlow(
 
   for (const b of blocks) {
     switch (b.type) {
+      // Skill-Vorgabe (boerdesnack24-pdf): Fließtext 11 pt, Zeilenabstand 1,2
+      // (-> 14 pt Leading), Hinweise/Bildunterschriften 9 pt grau kursiv,
+      // vor Überschriften „doppelte Zeile + Zusatzluft".
       case "h2": {
-        await ensure(36);
-        y -= 20;
+        await ensure(46);
+        y -= 26;
         page.drawText(b.text, { x: marginLeft, y, size: 12, font: ctx.bold, color: INK });
         y -= 6;
         page.drawLine({ start: { x: marginLeft, y }, end: { x: 555, y }, thickness: 0.7, color: GOLD });
-        y -= 10;
+        y -= 12;
         break;
       }
       case "h3": {
-        await ensure(28);
-        y -= 15;
-        page.drawText(b.text, { x: marginLeft, y, size: 10, font: ctx.bold, color: INK });
+        await ensure(38);
+        y -= 20;
+        page.drawText(b.text, { x: marginLeft, y, size: 11, font: ctx.bold, color: INK });
         y -= 5;
-        const h3Width = ctx.bold.widthOfTextAtSize(b.text, 10);
+        const h3Width = ctx.bold.widthOfTextAtSize(b.text, 11);
         page.drawLine({ start: { x: marginLeft, y }, end: { x: marginLeft + h3Width, y }, thickness: 0.6, color: GOLD });
-        y -= 8;
+        y -= 10;
         break;
       }
       case "p": {
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth);
+        const lines = wrapLines(b.text, ctx.font, 11, contentWidth);
         for (const line of lines) {
-          await ensure(14);
-          page.drawText(line, { x: marginLeft, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          await ensure(15);
+          page.drawText(line, { x: marginLeft, y, size: 11, font: ctx.font, color: INK });
+          y -= 14;
         }
-        y -= 4;
+        y -= 5;
         break;
       }
       case "italic-note": {
         const lines = wrapLines(b.text, ctx.italic, 9, contentWidth);
         for (const line of lines) {
-          await ensure(13);
+          await ensure(15);
           page.drawText(line, { x: marginLeft, y, size: 9, font: ctx.italic, color: MUTED });
-          y -= 12;
+          y -= 14;
         }
-        y -= 4;
+        y -= 5;
         break;
       }
       case "li": {
         const indent = (b.indent ?? 0) * 12 + 14;
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth - indent);
+        const lines = wrapLines(b.text, ctx.font, 11, contentWidth - indent);
         for (let i = 0; i < lines.length; i++) {
-          await ensure(14);
+          await ensure(15);
           if (i === 0) {
-            page.drawText("•", { x: marginLeft + indent - 12, y, size: 10, font: ctx.bold, color: INK });
+            page.drawText("•", { x: marginLeft + indent - 12, y, size: 11, font: ctx.bold, color: INK });
           }
-          page.drawText(lines[i], { x: marginLeft + indent, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          page.drawText(lines[i], { x: marginLeft + indent, y, size: 11, font: ctx.font, color: INK });
+          y -= 14;
         }
         break;
       }
       case "sub-li": {
         const indent = 28;
-        const lines = wrapLines(b.text, ctx.font, 10, contentWidth - indent);
+        const lines = wrapLines(b.text, ctx.font, 11, contentWidth - indent);
         for (let i = 0; i < lines.length; i++) {
-          await ensure(14);
+          await ensure(15);
           if (i === 0) {
             page.drawText("·", { x: marginLeft + indent - 12, y, size: 12, font: ctx.bold, color: MUTED });
           }
-          page.drawText(lines[i], { x: marginLeft + indent, y, size: 10, font: ctx.font, color: INK });
-          y -= 13;
+          page.drawText(lines[i], { x: marginLeft + indent, y, size: 11, font: ctx.font, color: INK });
+          y -= 14;
         }
         break;
       }

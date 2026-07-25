@@ -164,7 +164,8 @@ function h2(ctx: Ctx, text: string) {
 }
 
 function p(ctx: Ctx, text: string, opts?: { size?: number; color?: unknown; bold?: boolean; italic?: boolean }) {
-  const size = opts?.size ?? 10;
+  // Skill-Vorgabe (boerdesnack24-pdf): Fließtext 11 pt.
+  const size = opts?.size ?? 11;
   ensureSpace(ctx, size + 6);
   ctx.page.drawText(safe(text), {
     x: MARGIN_X, y: ctx.y, size,
@@ -675,8 +676,9 @@ Deno.serve(async (req) => {
 
     ctx.y -= 16;
     h2(ctx, "Zielwerte (Benchmarks Automaten-Business)");
+    // Skill-Vorgabe: graue Zusatzinfo zu Grafiken = 9 pt, grau, kursiv.
     p(ctx, "Rot gestrichelt = Zielkorridor, rote Linie = Einzel-Zielwert, goldene Marke = Ist-Wert.",
-      { size: 8, color: MUTED, italic: true });
+      { size: 9, color: MUTED, italic: true });
     ctx.y -= 2;
     targetRow(ctx, "Ø Umsatz / Tag (je Automat)", eur(revenuePerDay), revenuePerDay, 15, 50, 80, "Ziel 15 - 50 EUR");
     targetRow(ctx, "Wareneinsatzquote", pct(wareneinsatz), wareneinsatz, 30, 40, 100, "Ziel 30 - 40 %");

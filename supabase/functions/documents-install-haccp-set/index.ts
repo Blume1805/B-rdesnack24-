@@ -142,16 +142,18 @@ export async function drawFlow(
   // Listen- und Hinweiszeilen -> überall identischer Zeilenabstand. Graue
   // Zusatzhinweise (italic-note) sind bewusst kleiner als der Fließtext
   // (NOTE_SIZE < BODY_SIZE), behalten aber denselben Zeilenabstand.
-  const BODY_SIZE = 10;
-  const NOTE_SIZE = 8.5;
-  const LEADING = 13;
+  // Skill-Vorgabe (boerdesnack24-pdf): Fließtext 11 pt, Zeilenabstand 1,2
+  // (-> 14 pt Leading), graue Zusatzhinweise = Fließtext - 2 pt = 9 pt.
+  const BODY_SIZE = 11;
+  const NOTE_SIZE = 9;
+  const LEADING = 14;
 
   // Überschriften-Abstände: bewusst mehr Luft VOR als NACH der Überschrift
-  // (optische Zuordnung zum folgenden Abschnitt statt zum vorherigen).
-  const H2_BEFORE = 18;
+  // (Skill: „doppelte Zeile + Zusatzluft" vor jeder Überschrift).
+  const H2_BEFORE = 26;
   const H2_AFTER = 14;
-  const H3_BEFORE = 14;
-  const H3_AFTER = 11;
+  const H3_BEFORE = 20;
+  const H3_AFTER = 12;
 
   // Grobschätzung der Höhe der ERSTEN maxLines-Zeilen eines Blocks — für die
   // „Überschrift nie allein am Seitenende"-Regel (keep-with-next).
