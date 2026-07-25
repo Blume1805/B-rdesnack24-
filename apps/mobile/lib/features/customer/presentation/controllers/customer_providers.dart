@@ -40,6 +40,22 @@ final myPurchasesProvider = FutureProvider.autoDispose<List<Purchase>>(
   (ref) => ref.watch(customerRepositoryProvider).myPurchases(),
 );
 
+/// Eigene Reklamations-Tickets, gruppiert nach Kauf (jüngstes Ticket je
+/// Kauf gewinnt). RLS liefert nur die eigenen Zeilen.
+final myComplaintsByPurchaseProvider =
+    FutureProvider.autoDispose<Map<String, Map<String, dynamic>>>((ref) async {
+  final rows = await ref
+      .watch(supabaseClientProvider)
+      .from('purchase_complaints')
+      .select('id, purchase_id, kind, status, resolution_note, created_at')
+      .order('created_at', ascending: false);
+  final byPurchase = <String, Map<String, dynamic>>{};
+  for (final r in List<Map<String, dynamic>>.from(rows as List)) {
+    byPurchase.putIfAbsent(r['purchase_id'] as String, () => r);
+  }
+  return byPurchase;
+});
+
 final myRecommendationsProvider =
     FutureProvider.autoDispose<List<Recommendation>>(
   (ref) => ref.watch(customerRepositoryProvider).myRecommendations(),

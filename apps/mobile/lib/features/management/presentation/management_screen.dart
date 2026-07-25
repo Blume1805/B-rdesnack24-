@@ -8,6 +8,7 @@ import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../finance/presentation/screens/datev_export_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
+import 'screens/complaints_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
 import 'screens/disposal_screen.dart';
@@ -164,6 +165,13 @@ class ManagementScreen extends ConsumerWidget {
         'Abo-Kündigungen prüfen',
         Icons.unsubscribe_outlined,
         const CancellationsScreen(),
+        visible: p.contains('customers.manage'),
+      ),
+      _Module(
+        'Reklamationen',
+        'Kundenmeldungen je Kauf',
+        Icons.flag_outlined,
+        const ComplaintsScreen(),
         visible: p.contains('customers.manage'),
       ),
       const _Module(
