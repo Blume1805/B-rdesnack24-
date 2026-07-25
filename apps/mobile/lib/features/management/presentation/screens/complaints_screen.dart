@@ -152,8 +152,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
             return Center(
               child: Text(
                 'Keine Reklamationen — sehr gut!',
-                style:
-                    AppTypography.body(size: 13, color: AppColors.textMuted),
+                style: AppTypography.body(size: 13, color: AppColors.textMuted),
               ),
             );
           }
@@ -226,8 +225,7 @@ class _ComplaintCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   border: Border.all(color: st.color),
                   borderRadius: BorderRadius.circular(AppRadii.pill),

@@ -275,7 +275,11 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
     var kind = 'not_received';
     final commentCtrl = TextEditingController();
     const kinds = <(String, String, IconData)>[
-      ('not_received', 'Produkt nicht erhalten', Icons.remove_shopping_cart_outlined),
+      (
+        'not_received',
+        'Produkt nicht erhalten',
+        Icons.remove_shopping_cart_outlined
+      ),
       ('damaged', 'Produkt beschädigt', Icons.broken_image_outlined),
       ('wrong_product', 'Falsches Produkt', Icons.swap_horiz_outlined),
       ('other', 'Sonstiges', Icons.help_outline),
@@ -380,9 +384,8 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
         'purchase_id': purchase.purchaseId,
         'customer_id': client.auth.currentUser!.id,
         'kind': kind,
-        'comment': commentCtrl.text.trim().isEmpty
-            ? null
-            : commentCtrl.text.trim(),
+        'comment':
+            commentCtrl.text.trim().isEmpty ? null : commentCtrl.text.trim(),
       });
       ref.invalidate(myComplaintsByPurchaseProvider);
       if (!mounted) return;
@@ -393,11 +396,11 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
       );
     } catch (e) {
       if (!mounted) return;
-      final duplicate = e.toString().contains('uq_complaints_open_per_purchase');
+      final duplicate =
+          e.toString().contains('uq_complaints_open_per_purchase');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor:
-              duplicate ? AppColors.ink : AppColors.statusCritical,
+          backgroundColor: duplicate ? AppColors.ink : AppColors.statusCritical,
           content: Text(
             duplicate
                 ? 'Zu diesem Kauf läuft bereits eine Reklamation.'
@@ -411,11 +414,17 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
   static ({String label, Color color}) _complaintBadge(String status) {
     switch (status) {
       case 'in_progress':
-        return (label: 'Reklamation in Bearbeitung', color: AppColors.brandDark);
+        return (
+          label: 'Reklamation in Bearbeitung',
+          color: AppColors.brandDark
+        );
       case 'resolved':
         return (label: 'Reklamation erledigt', color: AppColors.statusPositive);
       case 'rejected':
-        return (label: 'Reklamation abgelehnt', color: AppColors.statusCritical);
+        return (
+          label: 'Reklamation abgelehnt',
+          color: AppColors.statusCritical
+        );
       case 'open':
       default:
         return (label: 'Reklamation eingegangen', color: AppColors.brandDark);
@@ -599,8 +608,7 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
                         label: const Text('Problem melden'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.ink,
-                          side:
-                              const BorderSide(color: AppColors.borderSubtle),
+                          side: const BorderSide(color: AppColors.borderSubtle),
                           padding: const EdgeInsets.symmetric(vertical: 8),
                         ),
                       )
