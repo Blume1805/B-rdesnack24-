@@ -50,7 +50,7 @@ class HistoryTab extends ConsumerWidget {
         children: [
           const SectionHeader(
             eyebrow: 'Mein Konto',
-            title: 'Verlauf',
+            title: 'Meine Spenden',
           ),
           const SizedBox(height: AppSpacing.s5),
 
@@ -162,8 +162,8 @@ class HistoryTab extends ConsumerWidget {
             'weise. Im Live-Betrieb ersetzt der Nayax-Webhook diesen '
             'Trigger und liefert Datum, Produkt, Menge und Zahlungsart '
             'automatisch. Bei Unternehmer-Kunden wird zusätzlich die '
-            'Rechnung erzeugt (mit sevDesk versendet, im Verlauf als '
-            'PDF verfügbar).',
+            'Rechnung erzeugt (mit sevDesk versendet, unter „Meine Spenden" '
+            'als PDF verfügbar).',
             style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s3),

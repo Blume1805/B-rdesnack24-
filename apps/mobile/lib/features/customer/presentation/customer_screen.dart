@@ -103,9 +103,9 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
               ),
               const SizedBox(width: 56), // Platz für den FAB
               _NavItem(
-                icon: Icons.receipt_long_outlined,
-                selectedIcon: Icons.receipt_long,
-                label: 'Verlauf',
+                icon: Icons.volunteer_activism_outlined,
+                selectedIcon: Icons.volunteer_activism,
+                label: 'Meine Spenden',
                 selected: _index == 2,
                 onTap: () => setState(() => _index = 2),
               ),
