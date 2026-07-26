@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -43,6 +44,13 @@ class _Plan {
   final String description;
   final String? badge;
 }
+
+/// Zweiseitiger Mehrwert-Vergleich (Kostenlos vs. App) als PDF — liegt im
+/// Web-Build unter apps/mobile/web/marketing/ und damit auf GitHub Pages;
+/// die absolute URL funktioniert auch aus den nativen Apps.
+final _mehrwertPdf = Uri.parse(
+  'https://blume1805.github.io/B-rdesnack24-/marketing/app-mehrwert.pdf',
+);
 
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   static const _plans = <_Plan>[
@@ -373,6 +381,23 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     ),
                     icon: const Icon(Icons.calculate_outlined, size: 18),
                     label: const Text('Ab wann rechnet sich das Abo?'),
+                  ),
+                ),
+                // Zweiseitiger Vorteils-Vergleich (Kostenlos vs. App) als PDF.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.brandDark,
+                      padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () => launchUrl(
+                      _mehrwertPdf,
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    label:
+                        const Text('Kostenlos vs. App — Vorteile im Überblick'),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
