@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<title>Bördesnack24 — Dein Mehrwert mit der App</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #14110E; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .page { width: 210mm; height: 297mm; padding: 14mm 16mm 12mm; position: relative; page-break-after: always; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── Stammdaten-Kopf (nur „Bördesnack24", ohne Gesellschafter) ── */
+  .head { display:flex; justify-content: space-between; align-items:flex-start;
+          border-bottom: 2px solid #FDC102; padding-bottom: 4mm; margin-bottom: 7mm; }
+  .head .brand { font-weight: 900; letter-spacing: 2px; font-size: 17px; color:#14110E; }
+  .head .stamm { text-align: left; font-size: 8.5px; color:#6F6A5E; line-height: 1.5; }
+  .head .stamm b { color:#14110E; font-weight: 800; letter-spacing:.3px; }
+
+  .eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color:#B8860B; }
+  h1 { font-size: 23px; font-weight: 900; margin: 2mm 0 2.5mm; line-height: 1.15; }
+  h1 .g { color:#B8860B; }
+  .lead { font-size: 11.5px; color:#6F6A5E; line-height: 1.6; max-width: 172mm; }
+
+  /* ── Karten ─────────────────────────────────────────────── */
+  .cards { display:flex; gap: 7mm; margin-top: 8mm; align-items: stretch; }
+  .card { flex:1; border-radius: 4mm; padding: 7mm 6.5mm 7mm; position: relative; }
+  .card.free { background:#FFFFFF; border: 1.5px solid #E8E2D6; }
+  .card.pro  { background:#14110E; color:#F9F5EC; }
+
+  .badge { position:absolute; top: 6mm; right: 6mm; font-size: 8.5px; font-weight: 800;
+           letter-spacing:.4px; padding: 1.4mm 2.6mm; border-radius: 6mm; }
+  .card.free .badge { background:#F9F5EC; color:#6F6A5E; }
+  .card.pro  .badge { background:#FDC102; color:#14110E; }
+
+  .card .ct { font-size: 18px; font-weight: 900; margin-bottom: 1.5mm; }
+  .card.pro .ct .spark { color:#FDC102; }
+  .card .cd { font-size: 10.5px; line-height: 1.5; margin-bottom: 5mm; min-height: 15mm; }
+  .card.free .cd { color:#6F6A5E; }
+  .card.pro  .cd { color:#D9D2C4; }
+
+  .price { display:flex; align-items:flex-end; gap: 2.5mm; margin-bottom: 1.5mm; }
+  .price .old { font-size: 13px; color:#9B958A; text-decoration: line-through; }
+  .price .now { font-size: 30px; font-weight: 900; line-height: 1; }
+  .price .per { font-size: 12px; color:#9B958A; padding-bottom: 1mm; }
+  .card.pro .price .per { color:#B8B1A2; }
+  .subprice { font-size: 9.5px; margin-bottom: 5.5mm; }
+  .card.free .subprice { color:#6F6A5E; }
+  .card.pro  .subprice { color:#B8B1A2; }
+
+  .divider { height:1px; margin: 0 0 5mm; }
+  .card.free .divider { background:#E8E2D6; }
+  .card.pro  .divider { background: rgba(249,245,236,.16); }
+
+  .feat { list-style:none; }
+  .feat li { display:flex; align-items:flex-start; gap: 3mm; font-size: 10.5px;
+             line-height: 1.4; padding: 2.2mm 0; }
+  .feat li .ic { flex:0 0 auto; width: 4.5mm; height: 4.5mm; border-radius: 50%;
+                 display:flex; align-items:center; justify-content:center;
+                 font-size: 8px; font-weight: 900; margin-top: .2mm; }
+  .card.free .feat li .ic { background:#E9F3E4; color:#3F7A2E; }
+  .card.pro  .feat li .ic { background: rgba(253,193,2,.18); color:#FDC102; }
+  .feat li.off { color:#B8B1A2; }
+  .feat li.off .ic { background:#F1EEE7; color:#B8B1A2; }
+  .card.free .feat li b { color:#14110E; }
+
+  .allin { display:flex; align-items:center; gap: 3mm; background: rgba(253,193,2,.12);
+           border-left: 3px solid #FDC102; border-radius: 2mm; padding: 3mm 3.5mm;
+           margin-bottom: 3mm; font-size: 10.5px; font-weight: 800; color:#F9F5EC; }
+  .allin .ic { color:#FDC102; font-weight: 900; }
+
+  .off-label { font-size: 9px; font-weight: 800; letter-spacing:.5px; text-transform: uppercase;
+               color:#B8B1A2; margin: 3.5mm 0 1mm; }
+
+  /* ── Seite 2 ────────────────────────────────────────────── */
+  .sec-title { font-size: 15px; font-weight: 900; margin-bottom: 1mm; }
+  .sec-sub { font-size: 10.5px; color:#6F6A5E; line-height: 1.55; margin-bottom: 6mm; }
+
+  .detail { list-style:none; }
+  .detail li { display:flex; gap: 4mm; padding: 3.4mm 0; border-bottom: 1px solid #F0ECE3; }
+  .detail li:last-child { border-bottom: none; }
+  .detail .dn { flex: 0 0 62mm; font-size: 11px; font-weight: 800; color:#14110E; }
+  .detail .dn .chip { display:inline-block; margin-top: 1mm; font-size: 8px; font-weight: 800;
+                      letter-spacing:.3px; color:#B8860B; }
+  .detail .dt { flex:1; font-size: 10.5px; color:#6F6A5E; line-height: 1.55; }
+
+  .ladder { display:flex; gap: 4mm; margin: 5mm 0 0; }
+  .rung { flex:1; border:1.5px solid #E8E2D6; border-radius: 3mm; padding: 4mm 4.5mm; }
+  .rung .rt { font-size: 9px; font-weight: 800; letter-spacing:.6px; text-transform: uppercase; color:#6F6A5E; }
+  .rung .rv { font-size: 22px; font-weight: 900; color:#14110E; margin: 1mm 0; }
+  .rung .rn { font-size: 9px; color:#6F6A5E; line-height: 1.4; }
+  .rung.gold { background:#14110E; border-color:#14110E; }
+  .rung.gold .rt { color:#FDC102; } .rung.gold .rv { color:#F9F5EC; } .rung.gold .rn { color:#B8B1A2; }
+
+  .callout { background:#14110E; color:#F9F5EC; border-radius: 3mm; padding: 5mm 6mm; margin-top: 7mm; }
+  .callout .h { color:#FDC102; font-weight: 900; font-size: 12.5px; margin-bottom: 1.8mm; }
+  .callout p { font-size: 10.5px; line-height: 1.55; color:#EDE8DD; }
+
+  .steps { display:flex; gap: 6mm; margin-top: 8mm; }
+  .step { flex:1; }
+  .step .no { width: 8mm; height: 8mm; border-radius: 50%; background:#FDC102; color:#14110E;
+              font-weight: 900; font-size: 12px; display:flex; align-items:center; justify-content:center; margin-bottom: 2.5mm; }
+  .step .st { font-size: 11px; font-weight: 800; color:#14110E; margin-bottom: 1mm; }
+  .step .sp { font-size: 10px; color:#6F6A5E; line-height: 1.5; }
+
+  .foot { position:absolute; left: 16mm; right: 16mm; bottom: 10mm;
+          border-top: 1px solid #E8E2D6; padding-top: 2.5mm;
+          font-size: 8px; color:#9B958A; line-height: 1.45; }
+  .foot b { color:#6F6A5E; font-weight: 800; }
+</style></head><body>
+
+<!-- ══════════════════════ SEITE 1 ══════════════════════ -->
+<div class="page">
+  <div class="head">
+    <div class="brand">BÖRDESNACK24</div>
+    <div class="stamm">
+      <b>Bördesnack24</b><br>
+      Sülldorfer Str. 3A · 39171 Sülzetal OT Osterweddingen<br>
+      Steuernummer 102/178/01635 · USt-IdNr. DE 458804058
+    </div>
+  </div>
+
+  <div class="eyebrow">Dein Mehrwert auf einen Blick</div>
+  <h1>Kostenlos nutzen — oder <span class="g">mit der App richtig sparen.</span></h1>
+  <div class="lead">
+    Die Bördesnack24-App gibt es kostenlos für alle. Wer ein Abo wählt, bekommt
+    <b>alles aus der kostenlosen Variante</b> — und obendrauf jeden Spar- und
+    Extra-Vorteil. Hier stehen beide Varianten direkt nebeneinander.
+  </div>
+
+  <div class="cards">
+    <!-- Kostenlos -->
+    <div class="card free">
+      <div class="badge">FÜR ALLE</div>
+      <div class="ct">Kostenlos</div>
+      <div class="cd">Alles, was du zum Snacken brauchst — ganz ohne Abo.</div>
+      <div class="price">
+        <span class="now">0 €</span>
+        <span class="per">für immer</span>
+      </div>
+      <div class="subprice">Keine Anmeldung ans Abo nötig.</div>
+      <div class="divider"></div>
+      <ul class="feat">
+        <li><span class="ic">✓</span><span>Automatenfinder mit Navigation</span></li>
+        <li><span class="ic">✓</span><span>Produktbestand in Echtzeit</span></li>
+        <li><span class="ic">✓</span><span>Produktinfos mit Nährwerten &amp; Allergenen</span></li>
+        <li><span class="ic">✓</span><span>Digitale Kundenkarte (QR) &amp; Kaufhistorie</span></li>
+        <li><span class="ic">✓</span><span>News, Favoriten &amp; Automaten-Karte</span></li>
+        <li><span class="ic">✓</span><span>Kontakt &amp; digitale Reklamation</span></li>
+      </ul>
+      <div class="off-label">Nicht enthalten</div>
+      <ul class="feat">
+        <li class="off"><span class="ic">–</span><span>5 % Dauerrabatt auf jeden Einkauf</span></li>
+        <li class="off"><span class="ic">–</span><span>Status-Rabatt bis 10 % (lebenslang)</span></li>
+        <li class="off"><span class="ic">–</span><span>Deals &amp; Wochenangebote (−10 %)</span></li>
+        <li class="off"><span class="ic">–</span><span>Bonuspunkte &amp; Treue-Coupons (5–25 %)</span></li>
+        <li class="off"><span class="ic">–</span><span>Geburtstagsgutschein &amp; persönliche Aktionen</span></li>
+      </ul>
+    </div>
+
+    <!-- App-Abo -->
+    <div class="card pro">
+      <div class="badge">AB 0,99 € / MONAT</div>
+      <div class="ct"><span class="spark">✦</span> App-Vorteile</div>
+      <div class="cd">Enthält alles aus der kostenlosen Variante — plus jeden Spar- und Extra-Vorteil.</div>
+      <div class="price">
+        <span class="now">0,99 €</span>
+        <span class="per">/ Monat</span>
+      </div>
+      <div class="subprice">oder 9,99 € / Jahr (2 Monate geschenkt) · 79,99 € Lifetime (Founders Edition, nur 20×)</div>
+      <div class="divider"></div>
+      <div class="allin"><span class="ic">✓</span> Alles aus der kostenlosen Variante</div>
+      <ul class="feat">
+        <li><span class="ic">✓</span><span><b style="color:#F9F5EC">5 % Dauerrabatt</b> auf jeden Einkauf am Automaten</span></li>
+        <li><span class="ic">✓</span><span>Lebenslanger <b style="color:#F9F5EC">Status-Rabatt</b> bis 10 %</span></li>
+        <li><span class="ic">✓</span><span>Frühstücks-/Feierabend-Deals &amp; Wochenangebote (−10 %)</span></li>
+        <li><span class="ic">✓</span><span>Bonuspunkte &amp; Treue-Coupons von 5 bis 25 %</span></li>
+        <li><span class="ic">✓</span><span>Persönliche Angebote &amp; Geburtstagsgutschein</span></li>
+        <li><span class="ic">✓</span><span>Digitale Belege &amp; schnellere Reklamationsabwicklung</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SEITE 2 ══════════════════════ -->
+<div class="page">
+  <div class="sec-title">Was die App-Vorteile konkret bedeuten</div>
+  <div class="sec-sub">
+    Jeder Punkt der App-Variante — kurz erklärt, was du davon hast.
+  </div>
+
+  <ul class="detail">
+    <li>
+      <div class="dn">5 % Dauerrabatt<br><span class="chip">AUF JEDEN EINKAUF</span></div>
+      <div class="dt">Mit Abo zahlst du an jedem Automaten immer 5 % weniger als am Display.
+      Den App-Preis siehst du direkt an jedem Produkt.</div>
+    </li>
+    <li>
+      <div class="dn">Status-Rabatt bis 10 %<br><span class="chip">LEBENSLANG, KEIN RESET</span></div>
+      <div class="dt">Dein Gesamtumsatz schaltet dauerhaft mehr Rabatt frei: Bronze ab 150 € → 6 %,
+      Silber ab 500 € → 7,5 %, Gold ab 1000 € → 10 %. Einmal erreicht, bleibt er dir.</div>
+    </li>
+    <li>
+      <div class="dn">Deals &amp; Wochenangebote<br><span class="chip">−10 % EXTRA</span></div>
+      <div class="dt">Frühstücks- und Feierabend-Deals sowie Tages- und Wochenangebote geben
+      zusätzlich 10 % auf den App-Preis — zusammen bis zu 14,5 % Ersparnis.</div>
+    </li>
+    <li>
+      <div class="dn">Bonuspunkte &amp; Coupons<br><span class="chip">5 – 25 %</span></div>
+      <div class="dt">Für jeden Einkauf sammelst du Punkte. Treue-Meilensteine schalten
+      persönliche Coupons von 5 bis 25 % auf einzelne Produkte frei.</div>
+    </li>
+    <li>
+      <div class="dn">Persönliche Aktionen<br><span class="chip">+ GEBURTSTAG</span></div>
+      <div class="dt">Angebote, die zu deinen Favoriten passen — und ein Gutschein pünktlich
+      zum Geburtstag.</div>
+    </li>
+    <li>
+      <div class="dn">Digitale Belege<br><span class="chip">+ SCHNELLE REKLAMATION</span></div>
+      <div class="dt">Zu jedem Kauf ein digitaler Beleg im Archiv — und im Reklamationsfall
+      bist du mit hinterlegtem Kaufnachweis schneller dran.</div>
+    </li>
+  </ul>
+
+  <div class="sec-title" style="margin-top:8mm;">Dein Dauerrabatt wächst mit</div>
+  <div class="ladder">
+    <div class="rung"><div class="rt">Bronze · ab 150 €</div><div class="rv">6 %</div><div class="rn">5 % Abo + 1 % Status</div></div>
+    <div class="rung"><div class="rt">Silber · ab 500 €</div><div class="rv">7,5 %</div><div class="rn">5 % Abo + 2,5 % Status</div></div>
+    <div class="rung gold"><div class="rt">Gold · ab 1000 €</div><div class="rv">10 %</div><div class="rn">5 % Abo + 5 % Status</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="h">Ab wann rechnet sich das Abo?</div>
+    <p>Wer im Monat für rund 20 € am Automaten kauft, spart mit den 5 % schon 1 € —
+    mehr als das Monats-Abo (0,99 €) kostet. Jeder weitere Vorteil (Deals, Coupons,
+    Status-Rabatt) kommt on top. Bei normaler Nutzung rechnet sich das Jahres-Abo
+    schon ab etwa 8,90 € Einkauf im Monat.</p>
+  </div>
+
+  <div class="sec-title" style="margin-top:9mm;">So aktivierst du deine Vorteile</div>
+  <div class="steps">
+    <div class="step">
+      <div class="no">1</div>
+      <div class="st">App öffnen</div>
+      <div class="sp">Im Kundenbereich unter „Profil" auf „Mein Abo" tippen.</div>
+    </div>
+    <div class="step">
+      <div class="no">2</div>
+      <div class="st">Modell wählen</div>
+      <div class="sp">Monat, Jahr oder die limitierte Lifetime Founders Edition.</div>
+    </div>
+    <div class="step">
+      <div class="no">3</div>
+      <div class="st">Sofort sparen</div>
+      <div class="sp">Vorteile sind direkt aktiv. Wechsel jederzeit möglich — nur Lifetime ist endgültig.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Bördesnack24</b> · Sülldorfer Str. 3A · 39171 Sülzetal OT Osterweddingen ·
+    Steuernummer 102/178/01635 · USt-IdNr. DE 458804058<br>
+    Preise inkl. gesetzlicher USt. Das Lifetime-Abo ist auf 20 Konten limitiert (Founders Edition);
+    ein Anspruch auf Abschluss besteht nicht. Stand 07/2026 — Angaben ohne Gewähr, Preise können sich ändern.
+  </div>
+</div>
+
+</body></html>
