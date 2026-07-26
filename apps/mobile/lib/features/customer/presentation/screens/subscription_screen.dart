@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/billing/subscription_billing.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -85,6 +86,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   bool _loading = true;
   bool _busy = false;
 
+  /// Plan eines noch nicht freigegebenen Kaufs (Jugendschutz-Wartestatus).
+  /// Solange gesetzt, ist NICHTS freigeschaltet — es wird nur der Hinweis
+  /// „Warte auf Freigabe der Eltern" angezeigt.
+  String? _pendingPlan;
+
   // Founders-Edition-Kontingent (serverseitig, nur Anzeige der Restplätze).
   int _foundersRemaining = 20;
   int _foundersLimit = 20;
@@ -119,10 +125,33 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         }
         _loading = false;
       });
+      // Jugendschutz-Resume: prüfen, ob ein zuvor hängender Kauf inzwischen
+      // von den Eltern freigegeben wurde (Ask to Buy / Family Link).
+      await _resumePending();
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
     }
+  }
+
+  /// Beim Öffnen: einen offenen Wartestatus auflösen. Wurde der Kauf
+  /// freigegeben, wird das Abo entsperrt; sonst bleibt der Hinweis stehen.
+  Future<void> _resumePending() async {
+    try {
+      final outcome =
+          await ref.read(subscriptionBillingProvider).resolvePending();
+      if (outcome == null || !mounted) return;
+      if (outcome.isSuccess) {
+        setState(() {
+          _currentPlan = outcome.planKey;
+          _locked = outcome.planKey == 'lifetime';
+          _pendingPlan = null;
+        });
+        ref.invalidate(hasSubscriptionProvider);
+      } else if (outcome.isPending) {
+        setState(() => _pendingPlan = outcome.planKey);
+      }
+    } catch (_) {/* still pending / offline */}
   }
 
   /// Kontrollfrage vor jeder Bestellung: nennt die konkreten Konditionen
@@ -283,46 +312,105 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
     setState(() => _busy = true);
     try {
-      final res = await ref.read(supabaseClientProvider).functions.invoke(
-        'subscription-choose',
-        body: {
-          'plan': plan.key,
-          'withdrawal_consent': _pendingWithdrawalConsent,
-          'age_consent': _pendingAgeConsent,
-        },
-      );
-      final data = Map<String, dynamic>.from(res.data as Map);
-      if (data['ok'] != true) {
-        throw Exception(data['error'] ?? 'Unbekannter Fehler');
+      final outcome = await ref.read(subscriptionBillingProvider).purchase(
+            planKey: plan.key,
+            withdrawalConsent: _pendingWithdrawalConsent,
+            ageConsent: _pendingAgeConsent,
+          );
+      if (!mounted) return;
+
+      switch (outcome.phase) {
+        case PurchasePhase.success:
+          setState(() {
+            _currentPlan = plan.key;
+            _locked = plan.key == 'lifetime';
+            _pendingPlan = null;
+          });
+          // Gating im Kundenbereich sofort entsperren.
+          ref.invalidate(hasSubscriptionProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${plan.title} aktiviert. Bestätigung an '
+                '${outcome.emailTo} gesendet.',
+              ),
+            ),
+          );
+        case PurchasePhase.pending:
+          // Jugendschutz: KEINE Freischaltung — nur Wartehinweis.
+          setState(() => _pendingPlan = plan.key);
+          _showPendingSheet(plan);
+        case PurchasePhase.cancelled:
+          break;
+        case PurchasePhase.error:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.statusCritical,
+              content: Text('Kauf fehlgeschlagen: ${outcome.message}'),
+            ),
+          );
       }
-      final emailTo = (data['email_to'] ?? '').toString();
-      if (!mounted) return;
-      setState(() {
-        _currentPlan = plan.key;
-        _locked = plan.key == 'lifetime';
-      });
-      // Gating im Kundenbereich sofort entsperren.
-      ref.invalidate(hasSubscriptionProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${plan.title} aktiviert. Eine Bestätigung wurde an '
-            '$emailTo gesendet.',
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      final msg = e.toString().replaceFirst('Exception: ', '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCritical,
-          content: Text('Abo-Wechsel fehlgeschlagen: $msg'),
-        ),
-      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Wartestatus-Sheet: Ladedialog ist zu, Inhalte bleiben gesperrt, klarer
+  /// Hinweis auf die ausstehende Eltern-Freigabe (Apple „Ask to Buy" /
+  /// Google „Kaufgenehmigungen"). Freischaltung erst nach Store-Bestätigung.
+  void _showPendingSheet(_Plan plan) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.surfaceCard,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.s5,
+          0,
+          AppSpacing.s5,
+          AppSpacing.s5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.hourglass_top, color: AppColors.brandDark, size: 34),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Kaufanfrage an deine Eltern gesendet',
+              style: AppTypography.display(
+                size: 19,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Dein ${plan.title} wartet auf die Freigabe deiner Eltern. '
+              'Sobald sie zustimmen, wird dein Zugang beim nächsten App-Start '
+              'automatisch freigeschaltet — du musst nichts weiter tun.',
+              style: AppTypography.body(size: 13.5, color: AppColors.textDefault)
+                  .copyWith(height: 1.45),
+            ),
+            const SizedBox(height: AppSpacing.s4),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.ink,
+                  foregroundColor: AppColors.brand,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                  ),
+                ),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Verstanden'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -353,6 +441,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   style:
                       AppTypography.body(size: 13, color: AppColors.textMuted),
                 ),
+                if (_pendingPlan != null) ...[
+                  const SizedBox(height: AppSpacing.s3),
+                  _PendingBanner(planKey: _pendingPlan!),
+                ],
                 const SizedBox(height: AppSpacing.s4),
                 // Vergleich Kostenlos vs. App direkt inline (keine PDF/kein
                 // Extra-Screen) — Feature-Matrix mit Haken/Strich.
@@ -531,6 +623,52 @@ class _EmployerBenefitTeaser extends StatelessWidget {
             Icons.chevron_right,
             color: AppColors.textMuted,
             size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hinweisbanner für einen Kauf im Jugendschutz-Wartestatus (Ask to Buy /
+/// Family Link). Signalisiert klar, dass noch nichts freigeschaltet ist.
+class _PendingBanner extends StatelessWidget {
+  const _PendingBanner({required this.planKey});
+  final String planKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      topStripeColor: AppColors.statusWarning,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.hourglass_top, color: AppColors.brandDark, size: 22),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Warte auf Freigabe der Eltern',
+                  style: AppTypography.body(
+                    size: 13.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Kauf gesendet — Freischaltung erfolgt automatisch nach '
+                  'Zustimmung.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ).copyWith(height: 1.35),
+                ),
+              ],
+            ),
           ),
         ],
       ),
