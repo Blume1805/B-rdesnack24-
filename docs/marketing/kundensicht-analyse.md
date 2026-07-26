@@ -33,6 +33,10 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
   Gekühlt) statt drei gestapelter Blöcke.
 - **Profil**: Hauptaktionen als Icon-Kachel-Grid (Stammdaten, Passwort,
   Abo, Status, Belege) statt Listenzeilen mit Untertext-Sätzen.
+- **Belegarchiv**: Filter-Chips mit Trefferzahl („Snacks (7)"), Anzahl und
+  Summe der Auswahl als Kennzahl-Kacheln, CSV-Export als Icon-Button.
+- **Spenden**: Restbetrag bis zur Auszahlung als Zahl („noch 128,40 € bis
+  zur Auszahlung") statt nur Ist/Ziel zum Selbstausrechnen.
 
 ## Priorisierte Empfehlungen je Screen
 
@@ -79,6 +83,6 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
 
 ## Nächste konkrete Schritte (empfohlene Reihenfolge)
 
-1. Belegarchiv: Filter-Chips mit Trefferzahl, Summe je Zeitraum als Zahl.
-2. Spenden: Fortschritt je Projekt als „X von 500 €" statt Fließtext.
+1. Meine Spenden: Spendensumme je Zeitraum als Kennzahl-Kachel.
+2. News: Teaser auf Titel + Datum kürzen, kein Vorschautext-Absatz.
 3. Entfernung im Finder (siehe „Offen" — braucht Geodaten + Consent).

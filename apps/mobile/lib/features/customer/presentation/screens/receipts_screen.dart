@@ -40,6 +40,13 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   static String _two(int n) => n.toString().padLeft(2, '0');
   static String _time(DateTime d) => '${_two(d.hour)}:${_two(d.minute)}';
 
+  /// Trefferzahl je Filter-Chip — berücksichtigt die laufende Suche, damit
+  /// die Zahl zu dem passt, was der Tap tatsächlich anzeigen würde.
+  int _countFor(List<Receipt> all, String? category) => all
+      .where((r) => category == null || r.category == category)
+      .where((r) => r.matches(_query))
+      .length;
+
   List<Receipt> _filter(List<Receipt> all) => all
       .where((r) => _category == null || r.category == _category)
       .where((r) => r.matches(_query))
@@ -176,20 +183,21 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s3),
-                  // Kategorie-Filter
+                  // Kategorie-Filter — jede Chip trägt ihre Trefferzahl,
+                  // damit man vor dem Tippen sieht, was dahinter steckt.
                   SizedBox(
                     height: 34,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
                         _FilterChip(
-                          label: 'Alle',
+                          label: 'Alle (${_countFor(all, null)})',
                           selected: _category == null,
                           onTap: () => setState(() => _category = null),
                         ),
                         for (final c in cats)
                           _FilterChip(
-                            label: c,
+                            label: '$c (${_countFor(all, c)})',
                             selected: _category == c,
                             onTap: () => setState(() => _category = c),
                           ),
@@ -197,31 +205,40 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s3),
-                  // Summenzeile + Export
+                  // Key-Facts der aktuellen Auswahl: Anzahl + Summe als
+                  // große Zahlen, daneben der CSV-Export.
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          '${rows.length} Belege · ${Formatters.euro(sum)}',
-                          style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w700,
-                            color: AppColors.ink,
-                          ),
+                        child: _SummaryTile(
+                          value: '${rows.length}',
+                          label: rows.length == 1 ? 'Beleg' : 'Belege',
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: _exporting ? null : () => _export(rows),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.brandDark,
-                          padding: EdgeInsets.zero,
+                      const SizedBox(width: AppSpacing.s2),
+                      Expanded(
+                        flex: 2,
+                        child: _SummaryTile(
+                          value: Formatters.euro(sum),
+                          label: 'Summe der Auswahl',
                         ),
-                        icon: const Icon(Icons.download_outlined, size: 18),
-                        label: const Text('CSV'),
+                      ),
+                      const SizedBox(width: AppSpacing.s2),
+                      IconButton(
+                        onPressed: _exporting ? null : () => _export(rows),
+                        tooltip: 'Als CSV exportieren',
+                        style: IconButton.styleFrom(
+                          foregroundColor: AppColors.brandDark,
+                          backgroundColor: AppColors.surfaceCard,
+                          side: const BorderSide(
+                            color: AppColors.borderSubtle,
+                          ),
+                        ),
+                        icon: const Icon(Icons.download_outlined, size: 20),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.s2),
+                  const SizedBox(height: AppSpacing.s3),
                   if (rows.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -289,6 +306,57 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.lg)),
       ),
       builder: (_) => _ReceiptDetailSheet(receipt: r, srcLabel: _srcLabel),
+    );
+  }
+}
+
+/// Kennzahl-Kachel für die aktuelle Filter-Auswahl: Zahl groß, Label klein.
+class _SummaryTile extends StatelessWidget {
+  const _SummaryTile({required this.value, required this.label});
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s3,
+        vertical: AppSpacing.s2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCard,
+        border: Border.all(color: AppColors.borderSubtle),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: AppTypography.display(
+                size: 19,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.body(
+              size: 10.5,
+              weight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

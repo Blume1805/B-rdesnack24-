@@ -65,15 +65,21 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Titel + beide Produkte sichtbar, Summe stimmt (2 × 2,60 = 5,20).
+    // Titel sichtbar; Kennzahl-Kacheln zeigen Anzahl und Summe getrennt
+    // (Zahl groß, Label klein).
     expect(find.text('Belegarchiv'), findsWidgets);
-    expect(find.textContaining('2 Belege'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('Belege'), findsOneWidget);
     expect(find.text('Coca-Cola 0,5 l'), findsNothing); // erst im Detail-Sheet
 
-    // Kategorie-Filter „Getränke" (erster Treffer = Filter-Chip) reduziert
-    // auf einen Beleg.
-    await tester.tap(find.text('Getränke').first);
+    // Filter-Chips tragen ihre Trefferzahl.
+    expect(find.text('Alle (2)'), findsOneWidget);
+
+    // Kategorie-Filter „Getränke" reduziert auf einen Beleg — Kachel-Label
+    // wechselt dabei in den Singular.
+    await tester.tap(find.textContaining('Getränke').first);
     await tester.pumpAndSettle();
-    expect(find.textContaining('1 Belege'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Beleg'), findsOneWidget);
   });
 }

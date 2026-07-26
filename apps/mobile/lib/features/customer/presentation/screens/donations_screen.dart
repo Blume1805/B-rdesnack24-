@@ -809,18 +809,29 @@ class _GoalProgress extends StatelessWidget {
             ],
           ),
         ),
-        if (reached) ...[
-          const SizedBox(height: 4),
+        const SizedBox(height: 5),
+        if (reached)
           Text(
-            'Ziel erreicht — Auszahlung startet, sobald alle drei Projekte '
-            '${Formatters.euro(_kProjectGoal)} zusammenhaben.',
+            'Ziel erreicht — Auszahlung, sobald alle drei Projekte '
+            '${Formatters.euro(_kProjectGoal)} haben.',
             style: AppTypography.body(
               size: 11,
               weight: FontWeight.w700,
               color: AppColors.statusPositive,
             ),
+          )
+        else
+          // Der handlungsleitende Wert: was noch fehlt — als Zahl, nicht
+          // als Rechenaufgabe aus Ist und Ziel.
+          Text(
+            'noch ${Formatters.euro(_kProjectGoal - collected)} bis zur '
+            'Auszahlung',
+            style: AppTypography.body(
+              size: 11,
+              weight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ),
           ),
-        ],
       ],
     );
   }
