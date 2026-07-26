@@ -37,6 +37,18 @@ abstract final class Pricing {
   static double effectiveDiscountRate(String? tierCode) =>
       appDiscountRate + statusBonusRate(tierCode);
 
+  /// Abo-Preise (brutto, inkl. USt) — Spiegel der Server-RPC
+  /// choose_subscription_plan (Migration 0061). Einzige Quelle für alle
+  /// Anzeigen und Break-even-Rechnungen im Client.
+  static const subMonthlyEur = 0.99;
+  static const subYearlyEur = 9.99;
+  static const subLifetimeEur = 79.99;
+
+  /// Lifetime ist eine limitierte „Founders Edition": nur die ersten 20
+  /// Konten können es abschließen (Kontingent serverseitig durchgesetzt,
+  /// siehe app.lifetime_founders_limit()).
+  static const lifetimeFoundersLimit = 20;
+
   /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben
   /// zusätzlich 10 % Rabatt — multiplikativ auf den App-Preis.
   static const dealExtraDiscountRate = 0.10;

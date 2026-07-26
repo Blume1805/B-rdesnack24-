@@ -56,15 +56,15 @@ void main() {
   });
 
   group('Pricing Break-even (Marketing-Hochrechnung)', () {
-    test('Monats-Abo 1 € rentiert sich ab 20 € Monatseinkauf', () {
+    test('1 € Abokosten rentieren sich ab 20 € Monatseinkauf', () {
       expect(Pricing.breakEvenMonthlySpend(1.00), 20.0);
     });
 
-    test('Jahres-Abo 10 € (0,833 €/Monat) rentiert sich ab ~16,67 €', () {
+    test('0,833 €/Monat Abokosten rentieren sich ab ~16,67 €', () {
       expect(Pricing.breakEvenMonthlySpend(10 / 12), closeTo(16.67, 0.01));
     });
 
-    test('Netto-Ersparnis: 40 € Monatseinkauf mit Monats-Abo = +1 €', () {
+    test('Netto-Ersparnis: 40 € Monatseinkauf bei 1 € Abokosten = +1 €', () {
       expect(Pricing.monthlyNetSavings(40, 1.00), closeTo(1.00, 0.001));
     });
 
@@ -95,36 +95,52 @@ void main() {
     test('Break-even sinkt im normalen Szenario deutlich', () {
       expect(
         Pricing.breakEvenMonthlySpend(
-          1.00,
+          Pricing.subMonthlyEur,
           savingsRate: Pricing.normalSavingsRate,
         ),
-        closeTo(10.70, 0.01),
+        closeTo(10.59, 0.01),
       );
       expect(
         Pricing.breakEvenMonthlySpend(
-          10 / 12,
+          Pricing.subYearlyEur / 12,
           savingsRate: Pricing.normalSavingsRate,
         ),
-        closeTo(8.91, 0.01),
+        closeTo(8.90, 0.01),
       );
-      // Lifetime: 60 € / 9,35 % ≈ 642 € kumulierter Einkauf.
-      expect(60 / Pricing.normalSavingsRate, closeTo(641.71, 0.5));
+      // Lifetime: 79,99 € / 9,35 % ≈ 856 € kumulierter Einkauf.
+      expect(
+        Pricing.subLifetimeEur / Pricing.normalSavingsRate,
+        closeTo(855.51, 0.5),
+      );
     });
   });
 
   group('Abo-Preismodell (Konsistenz zur Server-RPC)', () {
-    // Preise müssen mit choose_subscription_plan (Migration 0049) und dem
+    // Preise müssen mit choose_subscription_plan (Migration 0061) und dem
     // SubscriptionScreen übereinstimmen.
-    const monthlyCents = 100;
-    const yearlyCents = 1000;
-    const lifetimeCents = 6000;
+    const monthlyCents = 99;
+    const yearlyCents = 999;
+    const lifetimeCents = 7999;
 
-    test('Jahres-Abo entspricht 10 Monaten — 2 Monate geschenkt', () {
-      expect(yearlyCents, 10 * monthlyCents);
+    test('Pricing-Konstanten spiegeln die Server-Preise in Cent', () {
+      expect((Pricing.subMonthlyEur * 100).round(), monthlyCents);
+      expect((Pricing.subYearlyEur * 100).round(), yearlyCents);
+      expect((Pricing.subLifetimeEur * 100).round(), lifetimeCents);
     });
 
-    test('Lifetime amortisiert sich gegenüber Jahres-Abo nach 6 Jahren', () {
-      expect(lifetimeCents / yearlyCents, 6);
+    test('Jahres-Abo entspricht rund 10 Monaten — 2 Monate geschenkt', () {
+      // 9,99 € ≈ 10,09 Monatsbeiträge; gegenüber 12 × 0,99 € = 11,88 €
+      // sind das knapp zwei geschenkte Monate.
+      expect(yearlyCents / monthlyCents, closeTo(10, 0.2));
+      expect((12 * monthlyCents - yearlyCents) / monthlyCents, closeTo(2, 0.2));
+    });
+
+    test('Lifetime amortisiert sich gegenüber Jahres-Abo nach 8 Jahren', () {
+      expect((lifetimeCents / yearlyCents).floor(), 8);
+    });
+
+    test('Lifetime ist auf 20 Founders-Plätze limitiert', () {
+      expect(Pricing.lifetimeFoundersLimit, 20);
     });
   });
 }

@@ -2168,7 +2168,7 @@ class _SubscriptionLockCard extends ConsumerWidget {
                 // Tab sofort.
                 ref.invalidate(hasSubscriptionProvider);
               },
-              child: const Text('Abo wählen — ab 1 € im Monat'),
+              child: const Text('Abo wählen — ab 0,99 € im Monat'),
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

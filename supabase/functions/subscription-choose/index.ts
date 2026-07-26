@@ -2,9 +2,10 @@
 // Edge Function: subscription-choose
 // ----------------------------------------------------------------------------
 // Wählt/wechselt das Abo-Modell des angemeldeten Kunden über die RPC
-// choose_subscription_plan (Preise + Lifetime-Sperre liegen serverseitig
-// in der DB) und versendet anschließend die Bestätigungs-E-Mail an die
-// hinterlegte Adresse des Kontos.
+// choose_subscription_plan (Preise, Lifetime-Sperre und das auf 20 Konten
+// limitierte Founders-Kontingent liegen serverseitig in der DB) und
+// versendet anschließend die Bestätigungs-E-Mail an die hinterlegte
+// Adresse des Kontos.
 //
 // E-Mail-Versand: Resend (RESEND_API_KEY). Ohne Key wird der Versand nur
 // geloggt (Dev-Modus), der Planwechsel gilt trotzdem — die App zeigt dem
@@ -19,7 +20,7 @@ const RESEND_KEY = Deno.env.get("RESEND_API_KEY");
 const PLAN_NAMES: Record<string, string> = {
   monthly: "Monats-Abo",
   yearly: "Jahres-Abo",
-  lifetime: "Lifetime-Abo",
+  lifetime: "Lifetime-Abo (Founders Edition)",
 };
 
 function confirmationHtml(opts: {
@@ -49,7 +50,8 @@ function confirmationHtml(opts: {
       </div>
       ${opts.lifetime
         ? `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
-             Hinweis: Das Lifetime-Abo ist endgültig — ein späterer Wechsel in ein anderes Modell ist nicht mehr möglich.
+             Hinweis: Das Lifetime-Abo ist Teil der auf 20 Konten limitierten Founders Edition und endgültig —
+             ein späterer Wechsel in ein anderes Modell ist nicht mehr möglich.
              Du hast der sofortigen Bereitstellung ausdrücklich zugestimmt und bestätigt, dass dein Widerrufsrecht mit
              vollständiger Bereitstellung erlischt (§ 356 Abs. 5 BGB).</p>`
         : `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
@@ -112,8 +114,9 @@ Deno.serve(async (req) => {
       }, 400);
     }
 
-    // Planwechsel — sämtliche Geschäftsregeln (Lifetime-Sperre, Doppelwahl,
-    // Preise) liegen in der RPC; Fehlermeldungen gehen 1:1 an die App.
+    // Planwechsel — sämtliche Geschäftsregeln (Lifetime-Sperre, Founders-
+    // Kontingent, Doppelwahl, Preise) liegen in der RPC; Fehlermeldungen
+    // gehen 1:1 an die App.
     const { data: result, error: rpcErr } =
       await caller.rpc("choose_subscription_plan",
         { p_plan: plan, p_withdrawal_consent: withdrawalConsent,

@@ -18,15 +18,19 @@ Die App zu den Bördesnack24-Automaten in Sülzetal und Umgebung: Snacks,
 Getränke und Kaffeespezialitäten rund um die Uhr — mit der App wird jeder
 Einkauf günstiger.
 
-DEINE VORTEILE MIT ABO (ab 1 € im Monat)
+DEINE VORTEILE MIT ABO (ab 0,99 € im Monat)
 • Immer 5 % App-Preis auf alle Produkte — an jedem Automaten
+• Lebenslanger Status-Rabatt obendrauf: 6 % ab Bronze (150 € Umsatz),
+  7,5 % ab Silber (500 €), 10 % ab Gold (1000 €) — ohne Reset
 • Frühstücks- & Feierabend-Deals sowie Tages- und Wochenangebote mit
   weiteren 10 % Rabatt
 • Treuepunkte: 1 Cent Umsatz = 1 Punkt, Meilenstein-Coupons mit
   5–25 % Rabatt
 • Persönliche Angebote und ein Geschenk zum Geburtstag
-• Faire Modelle: 1 € pro Monat, 10 € pro Jahr (2 Monate geschenkt) oder
-  60 € einmalig (Lifetime) — Kündigung jederzeit direkt in der App
+• Digitale Belege zu jedem Kauf und schnellere Reklamationsabwicklung
+• Faire Modelle: 0,99 € pro Monat, 9,99 € pro Jahr (2 Monate geschenkt)
+  oder 79,99 € einmalig (Lifetime, limitierte Founders Edition für die
+  ersten 20 Konten) — Kündigung jederzeit direkt in der App
 
 KOSTENLOS FÜR ALLE
 • Automatenfinder mit Navigation
@@ -98,5 +102,7 @@ nachschießen.
   Listing).
 * Support-URL/E-Mail: boerdesnack24@gmail.com.
 * Abo-Hinweis fürs Review: Abos werden über In-App-Purchase abgebildet,
-  Preise 1 €/Monat, 10 €/Jahr, 60 € Lifetime (non-consumable bzw.
+  Preise 0,99 €/Monat, 9,99 €/Jahr, 79,99 € Lifetime (non-consumable bzw.
   auto-renewable) — StoreKit-/Billing-Anbindung folgt vor Einreichung.
+  Das Lifetime-Produkt ist auf 20 Käufe limitiert (Founders Edition); die
+  Obergrenze wird serverseitig durchgesetzt und in der App angezeigt.

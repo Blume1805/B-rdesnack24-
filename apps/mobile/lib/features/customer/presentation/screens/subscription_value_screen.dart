@@ -36,14 +36,17 @@ class SubscriptionValueScreen extends ConsumerWidget {
     // Lifetime) — konservativ vs. normal, aus derselben Formel.
     const conservative = Pricing.appDiscountRate;
     final normal = Pricing.normalSavingsRate;
-    final beMonthlyCons = Pricing.breakEvenMonthlySpend(1.00);
+    const monthly = Pricing.subMonthlyEur;
+    const yearly = Pricing.subYearlyEur;
+    const lifetime = Pricing.subLifetimeEur;
+    final beMonthlyCons = Pricing.breakEvenMonthlySpend(monthly);
     final beMonthlyNorm =
-        Pricing.breakEvenMonthlySpend(1.00, savingsRate: normal);
-    final beYearlyCons = Pricing.breakEvenMonthlySpend(10 / 12);
+        Pricing.breakEvenMonthlySpend(monthly, savingsRate: normal);
+    final beYearlyCons = Pricing.breakEvenMonthlySpend(yearly / 12);
     final beYearlyNorm =
-        Pricing.breakEvenMonthlySpend(10 / 12, savingsRate: normal);
-    const beLifetimeCons = 60 / conservative;
-    final beLifetimeNorm = 60 / normal;
+        Pricing.breakEvenMonthlySpend(yearly / 12, savingsRate: normal);
+    const beLifetimeCons = lifetime / conservative;
+    final beLifetimeNorm = lifetime / normal;
 
     return Scaffold(
       appBar: const HeroAppBar(title: Text('Wann rechnet sich das Abo?')),
@@ -62,12 +65,15 @@ class SubscriptionValueScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s2),
           Text(
             'Mit Abo zahlst du an jedem Automaten immer 5 % weniger. '
-            'Dazu kommen Frühstücks- & Feierabend-Deals, Tages- und '
-            'Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis, '
-            'Treue-Meilensteine mit Coupons von 5 bis 25 % und ein '
-            'Geburtstagsangebot. Hier siehst du, ab welchem Einkaufswert '
-            'sich welches Abo rechnet — einmal vorsichtig gerechnet und '
-            'einmal mit normaler Nutzung der Vorteile.',
+            'Mit deinem Status wächst der Dauerrabatt lebenslang mit — '
+            'auf 6 % (Bronze), 7,5 % (Silber) und 10 % (Gold). Dazu kommen '
+            'Frühstücks- & Feierabend-Deals, Tages- und Wochenangebote mit '
+            'weiteren 10 % Rabatt auf den App-Preis, Treue-Meilensteine mit '
+            'Coupons von 5 bis 25 % und ein Geburtstagsangebot. Hier siehst '
+            'du, ab welchem Einkaufswert sich welches Abo rechnet — einmal '
+            'vorsichtig gerechnet und einmal mit normaler Nutzung der '
+            'Vorteile. Der Status-Rabatt ist dabei nicht eingerechnet, er '
+            'kommt obendrauf.',
             style: AppTypography.body(size: 13.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),
@@ -153,21 +159,21 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 const Divider(height: 1, color: AppColors.borderSubtle),
                 _BreakEvenRow(
                   plan: 'Monats-Abo',
-                  cost: '1 € / Monat',
+                  cost: '${Formatters.euro(monthly)} / Monat',
                   conservative: '${Formatters.euro(beMonthlyCons)} / Monat',
                   normal: '${Formatters.euro(beMonthlyNorm)} / Monat',
                 ),
                 const Divider(height: 1, color: AppColors.borderSubtle),
                 _BreakEvenRow(
                   plan: 'Jahres-Abo',
-                  cost: '10 € / Jahr',
+                  cost: '${Formatters.euro(yearly)} / Jahr',
                   conservative: '${Formatters.euro(beYearlyCons)} / Monat',
                   normal: '${Formatters.euro(beYearlyNorm)} / Monat',
                 ),
                 const Divider(height: 1, color: AppColors.borderSubtle),
                 _BreakEvenRow(
-                  plan: 'Lifetime',
-                  cost: '60 € einmalig',
+                  plan: 'Lifetime · Founders Edition',
+                  cost: '${Formatters.euro(lifetime)} einmalig',
                   conservative: '${Formatters.euro(beLifetimeCons)} gesamt',
                   normal: '${Formatters.euro(beLifetimeNorm)} gesamt',
                 ),
@@ -234,7 +240,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 onPressed: () => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
                 ),
-                child: const Text('Abo wählen — ab 1 € im Monat'),
+                child: const Text('Abo wählen — ab 0,99 € im Monat'),
               ),
             )
           else

@@ -138,23 +138,28 @@ Rechtsgeschäfte über Waren kommen am Automaten zustande.
 4) Abo-Modelle
   a) Für erweiterte App-Funktionen bieten wir drei Abo-Modelle an
      (alle Preise inklusive gesetzlicher Umsatzsteuer):
-       * Monats-Abo:  1 € pro Monat
-       * Jahres-Abo:  10 € pro Jahr
-       * Lifetime-Abo: 60 € einmalig, dauerhafte Nutzung
+       * Monats-Abo:  0,99 € pro Monat
+       * Jahres-Abo:  9,99 € pro Jahr
+       * Lifetime-Abo: 79,99 € einmalig, dauerhafte Nutzung
   b) Laufzeit und Verlängerung: Das Monats-Abo verlängert sich jeweils um einen
      Monat, das Jahres-Abo jeweils um ein Jahr, sofern nicht zum Ende des laufenden
      Abrechnungszeitraums gekündigt wird. Das Lifetime-Abo ist eine Einmalzahlung
      ohne Verlängerung.
-  c) Wechsel: Ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit möglich und
+  c) Kontingent Lifetime-Abo („Founders Edition"): Das Lifetime-Abo wird nur in
+     begrenzter Stückzahl angeboten. Insgesamt können höchstens 20 Kundenkonten
+     ein Lifetime-Abo abschließen. Ist das Kontingent ausgeschöpft, steht das
+     Modell nicht mehr zur Auswahl; ein Anspruch auf Abschluss besteht nicht.
+     Die Zahl der verbleibenden Plätze wird in der App angezeigt.
+  d) Wechsel: Ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit möglich und
      wird zum nächsten Abrechnungszeitraum wirksam. Nach Abschluss des Lifetime-Abos
      ist ein Wechsel ausgeschlossen; hierauf wird vor Abschluss gesondert hingewiesen.
-  d) Jede Auswahl und jeder Wechsel wird per E-Mail an die hinterlegte Adresse
+  e) Jede Auswahl und jeder Wechsel wird per E-Mail an die hinterlegte Adresse
      bestätigt.
-  e) Zahlungsabwicklung: Nach Veröffentlichung der App in den Stores erfolgt die
+  f) Zahlungsabwicklung: Nach Veröffentlichung der App in den Stores erfolgt die
      Abrechnung über den Apple App Store bzw. Google Play; ergänzend gelten deren
      Bedingungen. Bis dahin ist die Auswahl eine unverbindliche Vormerkung, es
      erfolgt keine Abbuchung.
-  f) Mindestalter: Kostenpflichtige Abonnements können nur von volljährigen
+  g) Mindestalter: Kostenpflichtige Abonnements können nur von volljährigen
      Personen abgeschlossen werden. Minderjährige benötigen die Zustimmung
      ihrer gesetzlichen Vertreter (§§ 106 ff. BGB); der Taschengeldparagraph
      (§ 110 BGB) findet auf fortlaufende Abonnements regelmäßig keine

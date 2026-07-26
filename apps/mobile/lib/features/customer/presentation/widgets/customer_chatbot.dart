@@ -120,9 +120,11 @@ const _kFaq = <_FaqCategory>[
   _FaqCategory('Abo & Preise', Icons.workspace_premium_outlined, [
     _FaqEntry(
       'Welche Abo-Modelle gibt es?',
-      'Drei Modelle: 1 € pro Monat, 10 € pro Jahr (2 Monate geschenkt) oder '
-          '60 € einmalig (Lifetime). Nach jeder Wahl oder jedem Wechsel '
-          'bekommst du eine Bestätigung an deine hinterlegte E-Mail-Adresse.',
+      'Drei Modelle: 0,99 € pro Monat, 9,99 € pro Jahr (2 Monate geschenkt) '
+          'oder 79,99 € einmalig (Lifetime). Das Lifetime-Abo ist eine '
+          'limitierte Founders Edition — nur die ersten 20 Konten können es '
+          'abschließen. Nach jeder Wahl oder jedem Wechsel bekommst du eine '
+          'Bestätigung an deine hinterlegte E-Mail-Adresse.',
       deepLink: 'abo',
     ),
     _FaqEntry(
@@ -136,26 +138,29 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Was spare ich mit dem Abo?',
       'Mit Abo zahlst du an jedem Automaten immer 5 % weniger — den '
-          'App-Preis siehst du direkt an jedem Produkt. Obendrauf: '
-          'Frühstücks- & Feierabend-Deals sowie Tages- und Wochenangebote '
-          'mit weiteren 10 % Rabatt auf den App-Preis und Treue-Coupons '
-          'von 5 bis 25 %.',
+          'App-Preis siehst du direkt an jedem Produkt. Mit deinem Status '
+          'wächst der Dauerrabatt lebenslang: 6 % ab Bronze (150 € '
+          'Gesamtumsatz), 7,5 % ab Silber (500 €), 10 % ab Gold (1000 €). '
+          'Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- und '
+          'Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis und '
+          'Treue-Coupons von 5 bis 25 %.',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
       'Ab wann rechnet sich das Abo?',
-      'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,67 € '
-          'Einkauf im Monat. Bei normaler Nutzung von Deals und Coupons '
-          '(zusammen ≈ 9,4 % Ersparnis) schon ab rund 9 € im Monat. Die '
-          'komplette Beispielrechnung mit allen Annahmen:',
+      'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,65 € '
+          'Einkauf im Monat, Monats-Abo ab 19,80 €. Bei normaler Nutzung '
+          'von Deals und Coupons (zusammen ≈ 9,4 % Ersparnis) sind es rund '
+          '8,90 € bzw. 10,60 € im Monat. Der Status-Rabatt kommt noch '
+          'obendrauf. Die komplette Beispielrechnung mit allen Annahmen:',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
       'Was kann ich ohne Abo nutzen?',
       'Kostenlos bleiben: Automatenfinder, Bestände in Echtzeit, Produkt-'
           'infos mit Nährwerten, Kaufhistorie, News und Favoriten. Die '
-          'Rabatt-Vorteile (App-Preis −5 %, Deals, Coupons, Treuepunkte) '
-          'gibt es mit Abo ab 1 € im Monat.',
+          'Rabatt-Vorteile (App-Preis −5 %, Status-Rabatt bis 10 %, Deals, '
+          'Coupons, Treuepunkte) gibt es mit Abo ab 0,99 € im Monat.',
       deepLink: 'abo',
     ),
     _FaqEntry(
