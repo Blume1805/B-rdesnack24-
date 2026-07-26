@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/pricing/pricing.dart';
 import '../../data/customer_remote_data_source.dart';
 import '../../data/personal_offer_cache.dart';
 import '../../data/customer_repository_impl.dart';
@@ -40,13 +41,25 @@ final myPurchasesProvider = FutureProvider.autoDispose<List<Purchase>>(
   (ref) => ref.watch(customerRepositoryProvider).myPurchases(),
 );
 
-/// Gamification-Status (Stufe, Cashback, Challenges, Badges) — alles
+/// Gamification-Status (Stufe, Statusrabatt, Challenges, Badges) — alles
 /// serverseitig aus der Kaufhistorie berechnet (RPC my_gamification_status).
 final myGamificationProvider =
     FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final res =
       await ref.watch(supabaseClientProvider).rpc('my_gamification_status');
   return Map<String, dynamic>.from(res as Map);
+});
+
+/// Effektiver App-Rabatt (Bruchzahl) für die Preisanzeige: 5 % Abo-Rabatt
+/// plus lebenslanger Status-Zusatzrabatt (Bronze/Silber/Gold). Nur für
+/// Abonnent:innen; ohne Abo 0 (Automatenpreis). Fällt bei Ladefehlern auf
+/// die 5 % Basis zurück.
+final myEffectiveDiscountProvider = Provider.autoDispose<double>((ref) {
+  final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+  if (!hasSub) return 0.0;
+  final tier = ref.watch(myGamificationProvider).valueOrNull?['tier']
+      as Map<String, dynamic>?;
+  return Pricing.effectiveDiscountRate(tier?['code'] as String?);
 });
 
 /// Eigene Reklamations-Tickets, gruppiert nach Kauf (jüngstes Ticket je

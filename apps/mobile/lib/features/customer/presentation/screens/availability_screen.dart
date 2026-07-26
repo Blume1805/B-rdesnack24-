@@ -66,6 +66,8 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
   Widget build(BuildContext context) {
     final stock = ref.watch(machineStockProvider(widget.machineId));
     final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+    // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
+    final effRate = ref.watch(myEffectiveDiscountProvider);
     return Scaffold(
       appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
@@ -122,7 +124,11 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s5),
                     for (final s in items) ...[
-                      _StockRow(item: s, hasSubscription: hasSub),
+                      _StockRow(
+                        item: s,
+                        hasSubscription: hasSub,
+                        effectiveRate: effRate,
+                      ),
                       const SizedBox(height: AppSpacing.s2),
                     ],
                   ],
@@ -134,9 +140,14 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
 }
 
 class _StockRow extends StatelessWidget {
-  const _StockRow({required this.item, required this.hasSubscription});
+  const _StockRow({
+    required this.item,
+    required this.hasSubscription,
+    required this.effectiveRate,
+  });
   final StockItem item;
   final bool hasSubscription;
+  final double effectiveRate;
 
   ({String label, StatusTone tone, IconData icon}) _status() {
     switch (item.availability) {
@@ -208,6 +219,7 @@ class _StockRow extends StatelessWidget {
           if (item.grossPrice != null) ...[
             const SizedBox(height: AppSpacing.s3),
             _PriceLine(
+              effectiveRate: effectiveRate,
               gross: item.grossPrice!,
               hasSubscription: hasSubscription,
             ),
@@ -274,13 +286,22 @@ class _StockRow extends StatelessWidget {
 /// durchgestrichenem Automatenpreis, alle anderen den Automatenpreis
 /// plus Hinweis auf den Abo-Vorteil.
 class _PriceLine extends StatelessWidget {
-  const _PriceLine({required this.gross, required this.hasSubscription});
+  const _PriceLine({
+    required this.gross,
+    required this.hasSubscription,
+    required this.effectiveRate,
+  });
   final double gross;
   final bool hasSubscription;
+  final double effectiveRate;
 
   @override
   Widget build(BuildContext context) {
-    final appPrice = Pricing.appPriceGross(gross);
+    final effR = effectiveRate > 0 ? effectiveRate : Pricing.appDiscountRate;
+    final appPrice = Pricing.appPriceGross(gross, rate: effR);
+    final pctText = (effR * 100)
+        .toStringAsFixed(effR * 100 % 1 == 0 ? 0 : 1)
+        .replaceAll('.', ',');
     if (hasSubscription) {
       return Row(
         children: [
@@ -288,13 +309,13 @@ class _PriceLine extends StatelessWidget {
             child: PriceRow(
               regular: gross,
               discounted: appPrice,
-              discountPercent: Pricing.appDiscountRate * 100,
+              discountPercent: effR * 100,
               size: 20,
               showBadge: false,
             ),
           ),
           Text(
-            'Dein App-Preis · −5 %',
+            'Dein App-Preis · −$pctText %',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,

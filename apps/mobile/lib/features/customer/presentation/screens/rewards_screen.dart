@@ -8,19 +8,19 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
 
 /// „Status & Belohnungen" — Gamification-Übersicht für Kund:innen.
-/// Zeigt die kumulative Status-Stufe (Bronze/Silber/Gold/Platin) mit
-/// Fortschritt zur nächsten Stufe, den Cashback-Vorteil, laufende
-/// Challenges mit Fortschritt und die Sammel-Badges. Alle Werte kommen
-/// aus der RPC my_gamification_status (Berechnung serverseitig aus der
-/// Kaufhistorie).
+/// Zeigt die kumulative Status-Stufe (Bronze/Silber/Gold) mit Fortschritt
+/// zur nächsten Stufe, den lebenslangen Status-Rabatt (zusätzlich zu den
+/// 5 % Abo-Rabatt), laufende Challenges mit Fortschritt und die Sammel-
+/// Badges. Alle Werte kommen aus der RPC my_gamification_status
+/// (Berechnung serverseitig aus der Kaufhistorie).
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
 
   static const _tierColors = <String, Color>{
+    'basis': Color(0xFF9AA0A6),
     'bronze': Color(0xFFB08D57),
     'silber': Color(0xFF9AA0A6),
     'gold': AppColors.brand,
-    'platin': Color(0xFF6C7BD6),
   };
 
   static IconData _badgeIcon(String key) {
@@ -73,7 +73,7 @@ class RewardsScreen extends ConsumerWidget {
             children: [
               _TierCard(data: data),
               const SizedBox(height: AppSpacing.s4),
-              _CashbackCard(data: data),
+              _DiscountCard(data: data),
               const SizedBox(height: AppSpacing.s5),
               const _SectionTitle(
                 eyebrow: 'Challenges',
@@ -138,14 +138,14 @@ class _TierCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tier = Map<String, dynamic>.from(data['tier'] as Map? ?? {});
-    final code = (tier['code'] as String?) ?? 'bronze';
-    final label = (tier['label'] as String?) ?? 'Bronze';
+    final code = (tier['code'] as String?) ?? 'basis';
+    final label = (tier['label'] as String?) ?? 'Basis';
     final color = RewardsScreen._tierColors[code] ?? AppColors.brand;
     final progress = ((tier['progress'] as num?) ?? 0).toDouble();
     final nextLabel = tier['next_label'] as String?;
     final nextMin = ((tier['next_min_eur'] as num?) ?? 0).toDouble();
     final gross = ((data['lifetime_gross'] as num?) ?? 0).toDouble();
-    final cashbackPct = ((tier['cashback_pct'] as num?) ?? 0).toDouble();
+    final totalPct = ((tier['total_discount_pct'] as num?) ?? 5).toDouble();
     final toNext = (nextMin - gross).clamp(0, double.infinity).toDouble();
 
     return AppCard(
@@ -180,7 +180,7 @@ class _TierCard extends StatelessWidget {
                     ),
                     Text(
                       'Gesamtumsatz ${Formatters.euro(gross)} · '
-                      '${cashbackPct.toStringAsFixed(0)} % Cashback',
+                      '${_fmtPct(totalPct)} % Dauerrabatt',
                       style: AppTypography.body(
                         size: 12,
                         color: AppColors.textMuted,
@@ -205,7 +205,8 @@ class _TierCard extends StatelessWidget {
           Text(
             nextLabel == null
                 ? 'Höchste Stufe erreicht — danke für deine Treue!'
-                : 'Noch ${Formatters.euro(toNext)} bis $nextLabel.',
+                : 'Noch ${Formatters.euro(toNext)} bis $nextLabel '
+                    '(${_fmtPct(5 + ((tier['next_discount_pct'] as num?) ?? 0).toDouble())} % Rabatt).',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
@@ -218,26 +219,37 @@ class _TierCard extends StatelessWidget {
   }
 }
 
-class _CashbackCard extends StatelessWidget {
-  const _CashbackCard({required this.data});
+/// Prozent hübsch: ganze Zahlen ohne Nachkomma, sonst mit Komma (7,5).
+String _fmtPct(double pct) => pct % 1 == 0
+    ? pct.toStringAsFixed(0)
+    : pct.toStringAsFixed(1).replaceAll('.', ',');
+
+/// Dauerrabatt-Karte: zeigt den effektiven App-Rabatt (5 % Abo + Status-
+/// Zusatzrabatt) als große Zahl, mit Aufschlüsselung Abo + Status.
+class _DiscountCard extends StatelessWidget {
+  const _DiscountCard({required this.data});
   final Map<String, dynamic> data;
 
   @override
   Widget build(BuildContext context) {
-    final cashback = ((data['cashback_eur'] as num?) ?? 0).toDouble();
+    final tier = Map<String, dynamic>.from(data['tier'] as Map? ?? {});
+    final basePct = ((data['base_discount_pct'] as num?) ?? 5).toDouble();
+    final bonusPct = ((tier['discount_pct'] as num?) ?? 0).toDouble();
+    final totalPct =
+        ((tier['total_discount_pct'] as num?) ?? basePct).toDouble();
     return AppCard(
       color: AppColors.ink,
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Row(
         children: [
-          const Icon(Icons.savings_outlined, color: AppColors.brand, size: 30),
+          const Icon(Icons.sell_outlined, color: AppColors.brand, size: 30),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Cashback-Guthaben',
+                  'Dein Dauerrabatt',
                   style: AppTypography.body(
                     size: 12,
                     weight: FontWeight.w700,
@@ -245,17 +257,20 @@ class _CashbackCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  Formatters.euro(cashback),
+                  '${_fmtPct(totalPct)} %',
                   style: AppTypography.display(
-                    size: 24,
+                    size: 28,
                     weight: FontWeight.w800,
                     color: AppColors.onDark,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Wächst mit deiner Status-Stufe. Einlösung am Automaten '
-                  'kommt mit der Automaten-Anbindung.',
+                  bonusPct > 0
+                      ? '${_fmtPct(basePct)} % Abo-Rabatt + ${_fmtPct(bonusPct)} % Status — '
+                          'auf jeden Einkauf im Abo, lebenslang.'
+                      : '${_fmtPct(basePct)} % Abo-Rabatt auf jeden Einkauf. Ab 150 € '
+                          'Gesamtumsatz kommt der lebenslange Status-Rabatt dazu.',
                   style: AppTypography.body(
                     size: 11,
                     color: AppColors.onDark.withValues(alpha: 0.7),

@@ -14,6 +14,29 @@ abstract final class Pricing {
   /// App-Vorteil: Abonnenten sparen gegenüber dem Automatenpreis immer 5 %.
   static const appDiscountRate = 0.05;
 
+  /// Lebenslanger Status-Zusatzrabatt (ON TOP auf die 5 % Abo-Rabatt),
+  /// gestaffelt nach kumulativem Umsatz — Spiegel der Server-RPC
+  /// my_gamification_status / app.status_tiers:
+  ///   Bronze ab 150 € → +1 % (gesamt 6 %)
+  ///   Silber ab 500 € → +2,5 % (gesamt 7,5 %)
+  ///   Gold ab 1000 € → +5 % (gesamt 10 %)
+  static double statusBonusRate(String? tierCode) {
+    switch (tierCode) {
+      case 'bronze':
+        return 0.01;
+      case 'silber':
+        return 0.025;
+      case 'gold':
+        return 0.05;
+      default:
+        return 0.0;
+    }
+  }
+
+  /// Effektiver App-Rabatt eines Abonnenten inkl. Status-Zusatzrabatt.
+  static double effectiveDiscountRate(String? tierCode) =>
+      appDiscountRate + statusBonusRate(tierCode);
+
   /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben
   /// zusätzlich 10 % Rabatt — multiplikativ auf den App-Preis.
   static const dealExtraDiscountRate = 0.10;
@@ -76,10 +99,14 @@ abstract final class Pricing {
     return ekNetto / vkNetto;
   }
 
-  /// App-Preis (brutto) für Abonnenten: 5 % unter dem Automatenpreis,
-  /// auf den Cent gerundet.
-  static double appPriceGross(double automatGross) =>
-      (automatGross * (1 - appDiscountRate) * 100).round() / 100;
+  /// App-Preis (brutto) für Abonnenten: standardmäßig 5 % unter dem
+  /// Automatenpreis, auf den Cent gerundet. Mit [rate] lässt sich der
+  /// effektive Rabatt (inkl. Status-Zusatzrabatt) übergeben.
+  static double appPriceGross(
+    double automatGross, {
+    double rate = appDiscountRate,
+  }) =>
+      (automatGross * (1 - rate) * 100).round() / 100;
 
   /// Monatlicher Einkaufswert, ab dem sich Abo-Kosten von
   /// [subCostPerMonth] allein durch die Ersparnisquote [savingsRate]

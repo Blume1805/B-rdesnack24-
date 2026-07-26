@@ -153,7 +153,13 @@ class _PriceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
-    final appPrice = Pricing.appPriceGross(gross);
+    // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
+    final rate = ref.watch(myEffectiveDiscountProvider);
+    final effRate = rate > 0 ? rate : Pricing.appDiscountRate;
+    final appPrice = Pricing.appPriceGross(gross, rate: effRate);
+    final pctText = (effRate * 100)
+        .toStringAsFixed(effRate * 100 % 1 == 0 ? 0 : 1)
+        .replaceAll('.', ',');
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,12 +168,13 @@ class _PriceCard extends ConsumerWidget {
             PriceRow(
               regular: gross,
               discounted: appPrice,
-              discountPercent: Pricing.appDiscountRate * 100,
+              discountPercent: effRate * 100,
               showBadge: false,
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Dein App-Preis mit Abo — immer 5 % unter dem Automatenpreis.',
+              'Dein App-Preis mit Abo — $pctText % unter dem Automatenpreis '
+              '(inkl. Status-Rabatt).',
               style: AppTypography.body(
                 size: 13,
                 weight: FontWeight.w600,

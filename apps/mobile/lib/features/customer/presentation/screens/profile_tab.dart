@@ -118,7 +118,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.emoji_events_outlined,
               title: 'Status & Belohnungen',
-              subtitle: 'Stufe, Cashback, Challenges & Abzeichen',
+              subtitle: 'Stufe, Dauerrabatt, Challenges & Abzeichen',
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RewardsScreen()),
