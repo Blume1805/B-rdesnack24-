@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1109,10 +1112,21 @@ class _BalanceSection extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                OutlinedButton.icon(
-                  onPressed: () => _showBalanceDialog(context, ref, null),
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('Bilanzwerte erfassen'),
+                Wrap(
+                  spacing: AppSpacing.s2,
+                  runSpacing: AppSpacing.s2,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _showBalanceDialog(context, ref, null),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Bilanzwerte erfassen'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _runBalanceSync(context, ref),
+                      icon: const Icon(Icons.sync, size: 18),
+                      label: const Text('sevDesk abrufen'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1200,6 +1214,11 @@ class _BalanceSection extends ConsumerWidget {
                   ),
                 ),
                 TextButton.icon(
+                  onPressed: () => _runBalanceSync(context, ref),
+                  icon: const Icon(Icons.sync, size: 16),
+                  label: const Text('sevDesk'),
+                ),
+                TextButton.icon(
                   onPressed: () => _showBalanceDialog(context, ref, b),
                   icon: const Icon(Icons.edit_outlined, size: 16),
                   label: const Text('Aktualisieren'),
@@ -1209,6 +1228,52 @@ class _BalanceSection extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Stößt den sevDesk-Bilanz-Sync an (Edge Function finance-balance-sync).
+/// Ohne hinterlegtes Token meldet die Funktion sauber „nicht verbunden" —
+/// der Weg über Demo/BWA-Import/manuell bleibt.
+Future<void> _runBalanceSync(BuildContext context, WidgetRef ref) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger.showSnackBar(
+    const SnackBar(content: Text('sevDesk-Bilanz wird abgerufen …')),
+  );
+  try {
+    final res = await ref
+        .read(supabaseClientProvider)
+        .functions
+        .invoke('finance-balance-sync', body: {});
+    final data = Map<String, dynamic>.from(res.data as Map);
+    messenger.hideCurrentSnackBar();
+    if (data['configured'] == false) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'sevDesk ist noch nicht verbunden. Bitte Bilanz manuell erfassen '
+            'oder per BWA/CSV importieren — der Sync übernimmt später automatisch.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (data['ok'] == true) {
+      ref.invalidate(financeBalanceProvider);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Bilanz aus sevDesk übernommen (${data['as_of']}).'),
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Sync-Fehler: ${data['error'] ?? 'unbekannt'}')),
+      );
+    }
+  } catch (e) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(content: Text('Sync fehlgeschlagen: $e')),
     );
   }
 }
@@ -1299,6 +1364,102 @@ class _BalanceDialogState extends State<_BalanceDialog> {
     return double.tryParse(raw) ?? 0;
   }
 
+  void _fill(Map<String, double> values) {
+    for (final (key, _) in _fields) {
+      final v = values[key];
+      if (v != null) {
+        _ctrl[key]!.text = v.toStringAsFixed(2).replaceAll('.', ',');
+      }
+    }
+    setState(() {});
+  }
+
+  /// Demo-Bilanz für die Vorführung ohne sevDesk (ausgeglichene Beispiel-
+  /// bilanz einer kleinen Automaten-GbR).
+  void _loadDemo() {
+    _fill(const {
+      'cash_and_bank': 8500,
+      'receivables': 1200,
+      'inventory_value': 3400,
+      'other_current_assets': 300,
+      'fixed_assets': 22000,
+      'current_liabilities': 4200,
+      'long_term_liabilities': 9000,
+      'equity': 22200,
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Demo-Bilanz geladen — bitte prüfen.')),
+    );
+  }
+
+  /// BWA/Bilanz aus einer CSV übernehmen. Erwartet je Zeile „schluessel;wert"
+  /// (Trenner ; oder ,), Schlüssel = Feldname oder deutsche Bezeichnung.
+  Future<void> _importCsv() async {
+    // Aliase: deutsche Begriffe -> interner Feldschlüssel.
+    const alias = <String, String>{
+      'flüssige mittel': 'cash_and_bank',
+      'kasse': 'cash_and_bank',
+      'bank': 'cash_and_bank',
+      'forderungen': 'receivables',
+      'vorräte': 'inventory_value',
+      'warenbestand': 'inventory_value',
+      'sonstiges umlaufvermögen': 'other_current_assets',
+      'anlagevermögen': 'fixed_assets',
+      'kurzfristige verbindlichkeiten': 'current_liabilities',
+      'langfristige verbindlichkeiten': 'long_term_liabilities',
+      'eigenkapital': 'equity',
+    };
+    final validKeys = {for (final (k, _) in _fields) k};
+    try {
+      final res = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'txt'],
+        withData: true,
+      );
+      final bytes = res?.files.single.bytes;
+      if (bytes == null) return;
+      final text = utf8.decode(bytes, allowMalformed: true);
+      final parsed = <String, double>{};
+      for (final line in const LineSplitter().convert(text)) {
+        final parts = line.split(RegExp('[;,\t]'));
+        if (parts.length < 2) continue;
+        final rawKey = parts[0].trim().toLowerCase();
+        final key = validKeys.contains(rawKey) ? rawKey : alias[rawKey];
+        if (key == null) continue;
+        final rawVal = parts
+            .sublist(1)
+            .join()
+            .trim()
+            .replaceAll('€', '')
+            .replaceAll(' ', '')
+            .replaceAll('.', '')
+            .replaceAll(',', '.');
+        final v = double.tryParse(rawVal);
+        if (v != null) parsed[key] = v;
+      }
+      if (!mounted) return;
+      if (parsed.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Keine Bilanzwerte erkannt. Format: „Feld;Betrag" je Zeile.',
+            ),
+          ),
+        );
+        return;
+      }
+      _fill(parsed);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${parsed.length} Werte aus Datei übernommen.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Import fehlgeschlagen: $e')),
+      );
+    }
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
@@ -1367,6 +1528,27 @@ class _BalanceDialogState extends State<_BalanceDialog> {
                 label: Text(
                   'Stichtag: ${_asOf.toIso8601String().substring(0, 10)}',
                 ),
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              // Fallbacks ohne sevDesk: Demo-Bilanz oder BWA/CSV-Import.
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _saving ? null : _importCsv,
+                      icon: const Icon(Icons.upload_file_outlined, size: 16),
+                      label: const Text('BWA/CSV'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.s2),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _saving ? null : _loadDemo,
+                      icon: const Icon(Icons.science_outlined, size: 16),
+                      label: const Text('Demo'),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.s3),
               for (final (key, label) in _fields) ...[
