@@ -111,7 +111,7 @@ function signatureTable(): string {
 function headerXml(): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  ${para("Bördesnack24 GbR · Pia & Philipp Blume", { bold: true, size: 18, color: INK_HEX, align: "right" })}
+  ${para("Bördesnack24 GbR", { bold: true, size: 18, color: INK_HEX, align: "right" })}
   ${para("Sülldorfer Str. 3A · 39171 Sülzetal OT Osterweddingen", { size: 16, color: MUTED_HEX, align: "right" })}
   ${para(`Steuernummer 102/178/01635 · USt-IdNr. DE 458804058`, { size: 16, color: MUTED_HEX, align: "right" })}
 </w:hdr>`;

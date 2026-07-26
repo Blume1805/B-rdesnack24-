@@ -13,7 +13,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 // Helpers shared between PDF builders.
 
 export const ISSUER = {
-  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  name: "Bördesnack24 GbR",
   street: "Sülldorfer Str. 3A",
   cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",
@@ -453,7 +453,7 @@ export async function buildHaccpPdf(ctx: Ctx): Promise<Uint8Array> {
       columns: ["Merkmal", "Angabe"],
       widths: [3, 7],
       rows: [
-        ["Firma", "Bördesnack24 GbR (Pia & Philipp Blume)"],
+        ["Firma", "Bördesnack24 GbR"],
         ["Anschrift", "Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen"],
         ["Steuernummer", "102/178/01635"],
         ["USt-IdNr.", "DE 458804058"],
@@ -567,7 +567,7 @@ export async function buildVerfahrensdokuPdf(ctx: Ctx): Promise<Uint8Array> {
       columns: ["Merkmal", "Inhalt"],
       widths: [3, 7],
       rows: [
-        ["Firma", "Bördesnack24 GbR (Pia & Philipp Blume)"],
+        ["Firma", "Bördesnack24 GbR"],
         ["Rechtsform", "GbR (§§ 705 ff. BGB / MoPeG)"],
         ["Sitz", "Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen"],
         ["Tätigkeitsbereich", "Betrieb von Snack- und Getränkeautomaten (3 Standorte)"],

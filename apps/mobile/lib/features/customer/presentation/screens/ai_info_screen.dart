@@ -65,7 +65,7 @@ class AiInfoScreen extends StatelessWidget {
                 'auswertet, um dir Wochenangebote, Bonus-Angebote und '
                 'personalisierte Coupons vorzuschlagen. Zusätzlich wählt '
                 'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
-                'den Feierabend-Deal je eine Heißgetränk-/Snack-Paarung '
+                'den Feierabend-Deal je eine Getränk-/Snack-Paarung '
                 'aus dem Produktkatalog aus. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),

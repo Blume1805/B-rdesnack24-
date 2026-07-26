@@ -52,7 +52,7 @@ function confirmationHtml(opts: {
       </p>
     </div>
     <p style="font-size:11px;color:#9B958A;margin:16px 8px;">
-      B&ouml;rdesnack24 GbR (Pia &amp; Philipp Blume) &middot; S&uuml;lldorfer Str. 3A &middot; 39171 S&uuml;lzetal OT Osterweddingen<br>
+      B&ouml;rdesnack24 GbR &middot; S&uuml;lldorfer Str. 3A &middot; 39171 S&uuml;lzetal OT Osterweddingen<br>
       Steuernummer: 102/178/01635 &middot; USt-IdNr.: DE 458804058
     </p>
   </div>

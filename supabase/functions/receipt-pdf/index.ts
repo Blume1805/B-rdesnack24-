@@ -13,7 +13,7 @@ import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 
 const ISSUER = {
-  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  name: "Bördesnack24 GbR",
   street: "Sülldorfer Str. 3A",
   cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",
@@ -207,15 +207,7 @@ Deno.serve(async (req) => {
 
     // Skill: graue Zusatzinfo 9 pt kursiv.
     page.drawText(
-      "Dieser digitale Beleg wurde automatisch zu deinem Automaten-Kauf erstellt und ist",
-      { x: 40, y, size: 9, font: italic, color: MUTED });
-    y -= 14;
-    page.drawText(
-      "jederzeit im Kundenbereich unter „Verlauf“ abrufbar. Kein Anspruch auf Vorsteuerabzug —",
-      { x: 40, y, size: 9, font: italic, color: MUTED });
-    y -= 14;
-    page.drawText(
-      "Unternehmer erhalten zusätzlich eine Rechnung nach § 14 UStG.",
+      "Dieser Beleg wurde automatisch erstellt und erhebt keinen Anspruch auf Vorsteuerabzug gemäß § 15 UStG.",
       { x: 40, y, size: 9, font: italic, color: MUTED });
 
     // Footer (eine Seite — Stammdatenzeile + Erstellungsdatum).

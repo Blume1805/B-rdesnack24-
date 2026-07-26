@@ -2,7 +2,7 @@
 import { PDFDocument, PDFPage, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 
 export const ISSUER = {
-  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  name: "Bördesnack24 GbR",
   street: "Sülldorfer Str. 3A",
   cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",

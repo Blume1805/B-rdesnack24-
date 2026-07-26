@@ -1603,7 +1603,7 @@ class _DealsCarouselState extends State<_DealsCarousel> {
   }
 }
 
-/// Zeitgebundener Kombi-Deal mit zwei Slots: **Heißgetränk + Snack**.
+/// Zeitgebundener Kombi-Deal mit zwei Slots: **Getränk + Snack**.
 ///
 /// Die konkrete Auswahl wird täglich zufällig neu getriggert
 /// (Client-seitiger Date-Seed über die Top-Community-Favoriten). Da wir
@@ -1666,7 +1666,7 @@ class _TimeDealCard extends ConsumerWidget {
               ),
               const Spacer(),
               // Kennzeichnung nach Art. 50 EU AI Act: die tägliche
-              // Heißgetränk-/Snack-Kombi wird algorithmisch ausgewählt →
+              // Getränk-/Snack-Kombi wird algorithmisch ausgewählt →
               // KI-Chip mit Sprung in die AI-Info-Seite.
               const _DealAiBadge(),
             ],
@@ -1676,7 +1676,7 @@ class _TimeDealCard extends ConsumerWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text: 'Heißgetränk + Snack.',
+                  text: 'Getränk + Snack.',
                   style: AppTypography.display(
                     size: 22,
                     weight: FontWeight.w800,
@@ -1710,7 +1710,7 @@ class _TimeDealCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _DealSlot(
-                    label: 'Heißgetränk',
+                    label: 'Getränk',
                     product: drink,
                   ),
                 ),

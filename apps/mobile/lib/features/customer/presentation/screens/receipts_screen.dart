@@ -245,6 +245,33 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                       const SizedBox(height: AppSpacing.s3),
                     ],
                 ],
+                const SizedBox(height: AppSpacing.s6),
+                // Demo-Testkäufe: erzeugen einen Kauf am Automaten (Live
+                // ersetzt der Nayax-Webhook diesen Trigger). Hier gebündelt
+                // mit der Kaufhistorie/den Belegen.
+                const Row(
+                  children: [
+                    Icon(
+                      Icons.science_outlined,
+                      size: 16,
+                      color: AppColors.brand,
+                    ),
+                    SizedBox(width: 6),
+                    Eyebrow('Demo-Testkauf'),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                Text(
+                  'Simuliert einen Kauf am Automaten. Im Live-Betrieb liefert '
+                  'der Nayax-Webhook Datum, Produkt, Menge und Zahlungsart '
+                  'automatisch.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                const _DemoPurchaseButtons(),
               ],
             ),
           );
@@ -429,9 +456,168 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
     }
   }
 
+  static ({String label, Color color}) _complaintBadge(String status) {
+    switch (status) {
+      case 'in_progress':
+        return (
+          label: 'Reklamation in Bearbeitung',
+          color: AppColors.brandDark
+        );
+      case 'resolved':
+        return (label: 'Reklamation erledigt', color: AppColors.statusPositive);
+      case 'rejected':
+        return (
+          label: 'Reklamation abgelehnt',
+          color: AppColors.statusCritical
+        );
+      case 'open':
+      default:
+        return (label: 'Reklamation eingegangen', color: AppColors.brandDark);
+    }
+  }
+
+  /// Reklamation zum Kauf melden — Bottom-Sheet mit Problemart + Kommentar.
+  Future<void> _reportProblem() async {
+    final r = widget.receipt;
+    var kind = 'not_received';
+    final commentCtrl = TextEditingController();
+    const kinds = <(String, String, IconData)>[
+      (
+        'not_received',
+        'Produkt nicht erhalten',
+        Icons.remove_shopping_cart_outlined
+      ),
+      ('damaged', 'Produkt beschädigt', Icons.broken_image_outlined),
+      ('wrong_product', 'Falsches Produkt', Icons.swap_horiz_outlined),
+      ('other', 'Sonstiges', Icons.help_outline),
+    ];
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.lg)),
+      ),
+      builder: (sctx) => StatefulBuilder(
+        builder: (sctx, setSheet) => Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.s5,
+            right: AppSpacing.s5,
+            top: AppSpacing.s5,
+            bottom: MediaQuery.of(sctx).viewInsets.bottom + AppSpacing.s5,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Eyebrow('Reklamation'),
+              const SizedBox(height: 2),
+              Text(
+                'Problem mit diesem Kauf melden',
+                style: AppTypography.display(
+                  size: 18,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              Text(
+                'Kauf vom ${Formatters.date(r.purchasedAt)} über '
+                '${Formatters.euro(r.totalGross)}. Den Status siehst du '
+                'danach hier am Beleg.',
+                style: AppTypography.body(size: 12, color: AppColors.textMuted)
+                    .copyWith(height: 1.4),
+              ),
+              const SizedBox(height: AppSpacing.s3),
+              for (final k in kinds)
+                RadioListTile<String>(
+                  value: k.$1,
+                  // ignore: deprecated_member_use
+                  groupValue: kind,
+                  // ignore: deprecated_member_use
+                  onChanged: (v) => setSheet(() => kind = v ?? kind),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.brand,
+                  title: Row(
+                    children: [
+                      Icon(k.$3, size: 16, color: AppColors.ink),
+                      const SizedBox(width: 6),
+                      Text(
+                        k.$2,
+                        style:
+                            AppTypography.body(size: 13, color: AppColors.ink),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.s2),
+              TextField(
+                controller: commentCtrl,
+                maxLines: 3,
+                maxLength: 500,
+                decoration: const InputDecoration(
+                  labelText: 'Was ist passiert? (optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s3),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.of(sctx).pop(true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.ink,
+                    foregroundColor: AppColors.brand,
+                  ),
+                  icon: const Icon(Icons.send_outlined, size: 18),
+                  label: const Text('Reklamation absenden'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (submitted != true) return;
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.from('purchase_complaints').insert({
+        'purchase_id': r.id,
+        'customer_id': client.auth.currentUser!.id,
+        'kind': kind,
+        'comment':
+            commentCtrl.text.trim().isEmpty ? null : commentCtrl.text.trim(),
+      });
+      ref.invalidate(myComplaintsByPurchaseProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Reklamation eingegangen — wir prüfen das.'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      final duplicate =
+          e.toString().contains('uq_complaints_open_per_purchase');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: duplicate ? AppColors.ink : AppColors.statusCritical,
+          content: Text(
+            duplicate
+                ? 'Zu diesem Kauf läuft bereits eine Reklamation.'
+                : 'Reklamation fehlgeschlagen: $e',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final r = widget.receipt;
+    final complaint =
+        ref.watch(myComplaintsByPurchaseProvider).valueOrNull?[r.id];
     final warranty = r.warrantyUntil == null
         ? 'Lebensmittel — Gewährleistung an MHD/Verbrauch gebunden.'
         : 'Gewährleistung bis ${Formatters.date(r.warrantyUntil!)} (§ 438 BGB).';
@@ -566,8 +752,122 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
               label: const Text('Beleg als PDF'),
             ),
           ),
+          const SizedBox(height: AppSpacing.s2),
+          if (complaint == null)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _reportProblem,
+                icon: const Icon(Icons.flag_outlined, size: 18),
+                label: const Text('Problem melden'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  side: const BorderSide(color: AppColors.borderSubtle),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                ),
+              ),
+            )
+          else
+            Builder(
+              builder: (context) {
+                final badge =
+                    _complaintBadge(complaint['status'] as String? ?? 'open');
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.s3,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    border: Border.all(color: badge.color),
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    badge.label,
+                    style: AppTypography.body(
+                      size: 12,
+                      weight: FontWeight.w700,
+                      color: badge.color,
+                    ),
+                  ),
+                );
+              },
+            ),
         ],
       ),
+    );
+  }
+}
+
+/// Vier Chip-Buttons zum Anlegen einer Demo-Transaktion je Zahlungsart —
+/// erzeugt einen Kauf, der sofort als Beleg erscheint.
+class _DemoPurchaseButtons extends ConsumerStatefulWidget {
+  const _DemoPurchaseButtons();
+  @override
+  ConsumerState<_DemoPurchaseButtons> createState() =>
+      _DemoPurchaseButtonsState();
+}
+
+class _DemoPurchaseButtonsState extends ConsumerState<_DemoPurchaseButtons> {
+  bool _busy = false;
+
+  Future<void> _add(String method, String label) async {
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(customerRepositoryProvider)
+          .addDemoPurchase(paymentMethod: method);
+      ref
+        ..invalidate(myReceiptsProvider)
+        ..invalidate(myPurchasesProvider)
+        ..invalidate(myDonationsByPurchaseProvider)
+        ..invalidate(myDonationSummaryProvider)
+        ..invalidate(myGamificationProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Demo-Kauf ($label) angelegt.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(String, String, IconData)>[
+      ('cash', 'Bar', Icons.euro_symbol),
+      ('card_ec', 'EC', Icons.credit_card),
+      ('card_credit', 'Kredit', Icons.credit_card_outlined),
+      ('card_contactless', 'Kontaktlos', Icons.contactless_outlined),
+    ];
+    return Wrap(
+      spacing: AppSpacing.s2,
+      runSpacing: AppSpacing.s2,
+      children: [
+        for (final e in entries)
+          OutlinedButton.icon(
+            onPressed: _busy ? null : () => _add(e.$1, e.$2),
+            icon: Icon(e.$3, size: 16, color: AppColors.ink),
+            label: Text(e.$2),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.ink,
+              side: const BorderSide(color: AppColors.brand),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s3,
+                vertical: 10,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

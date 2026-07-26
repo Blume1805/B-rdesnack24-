@@ -11,7 +11,7 @@ import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 
 const ISSUER = {
-  name: "Bördesnack24 GbR (Pia & Philipp Blume)",
+  name: "Bördesnack24 GbR",
   street: "Sülldorfer Str. 3A",
   cityLine: "39171 Sülzetal OT Osterweddingen",
   taxNumber: "102/178/01635",

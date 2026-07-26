@@ -65,7 +65,7 @@ function confirmationHtml(opts: {
       </p>
     </div>
     <p style="font-size:11px;color:#9B958A;margin:16px 8px;">
-      Bördesnack24 GbR (Pia &amp; Philipp Blume) &middot; Sülldorfer Str. 3A &middot; 39171 Sülzetal OT Osterweddingen<br>
+      Bördesnack24 GbR &middot; Sülldorfer Str. 3A &middot; 39171 Sülzetal OT Osterweddingen<br>
       Steuernummer: 102/178/01635 &middot; USt-IdNr.: DE 458804058
     </p>
   </div>

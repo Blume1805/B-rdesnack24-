@@ -1,22 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/presentation/widgets/pdf_inline_stub.dart'
-    if (dart.library.js_interop) '../../../management/presentation/widgets/pdf_inline_web.dart';
 import '../../domain/entities/donations_news.dart';
 import '../controllers/customer_providers.dart';
 import 'donations_screen.dart';
-import 'invoice_preview_screen.dart';
+import 'receipts_screen.dart';
 
-/// Verlauf: Spendenanteil, Kaufhistorie mit Zahlungsart-Icon und (bei
-/// Unternehmern) PDF-Rechnung. Preise und Empfehlungen wurden entfernt.
+/// „Meine Spenden": Spenden-Übersicht + Spendenanteil je Kauf. Käufe,
+/// Belege (PDF), Reklamation und Demo-Testkäufe liegen im Belegarchiv.
 class HistoryTab extends ConsumerWidget {
   const HistoryTab({super.key});
 
@@ -24,21 +19,13 @@ class HistoryTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final donations = ref.watch(myDonationsByPurchaseProvider);
     final donationSummary = ref.watch(myDonationSummaryProvider);
-    // Rechnungen werden hier passiv geladen, damit die PDF-Vorschau
-    // sofort verfügbar ist, wenn der Kunde den Button drückt.
-    ref.watch(myInvoicesProvider);
-
-    // Reklamations-Status passiv vorladen (Chips an den Kauf-Zeilen).
-    ref.watch(myComplaintsByPurchaseProvider);
 
     return RefreshIndicator(
       color: AppColors.brand,
       onRefresh: () async {
         ref
-          ..invalidate(myPurchasesProvider)
           ..invalidate(myDonationsByPurchaseProvider)
-          ..invalidate(myDonationSummaryProvider)
-          ..invalidate(myComplaintsByPurchaseProvider);
+          ..invalidate(myDonationSummaryProvider);
       },
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -126,8 +113,8 @@ class HistoryTab extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.s5),
           const _SectionEyebrow(
-            eyebrow: 'Kaufhistorie',
-            icon: Icons.receipt_long_outlined,
+            eyebrow: 'Deine Spende je Kauf',
+            icon: Icons.volunteer_activism_outlined,
           ),
           const SizedBox(height: AppSpacing.s3),
           donations.when(
@@ -145,29 +132,14 @@ class HistoryTab extends ConsumerWidget {
                     ],
                   ),
           ),
-          const SizedBox(height: AppSpacing.s6),
-          // Demo-Testkäufe. Zukünftig kommt die Transaktion automatisch
-          // vom Automaten (Nayax-Webhook): Verifizierung des Kunden am
-          // Automaten → Kauf der Produkte → Automatischer Eintrag mit
-          // Datum, Produkt, Menge, Bezahlweise. Bei Unternehmern zusätzlich
-          // sevDesk-Rechnung + E-Mail. Diese Buttons hier sind reines
-          // Demo-Werkzeug für die manuelle Simulation.
-          const _SectionEyebrow(
-            eyebrow: 'Demo-Testkauf',
-            icon: Icons.science_outlined,
+          const SizedBox(height: AppSpacing.s5),
+          // Käufe, Belege (PDF), Reklamation und Demo-Testkäufe liegen jetzt
+          // gebündelt im Belegarchiv.
+          _ArchiveLinkCard(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ReceiptsScreen()),
+            ),
           ),
-          const SizedBox(height: AppSpacing.s2),
-          Text(
-            'Simuliert einen Kauf am Automaten mit der gewählten Zahlungs-'
-            'weise. Im Live-Betrieb ersetzt der Nayax-Webhook diesen '
-            'Trigger und liefert Datum, Produkt, Menge und Zahlungsart '
-            'automatisch. Bei Unternehmer-Kunden wird zusätzlich die '
-            'Rechnung erzeugt (mit sevDesk versendet, unter „Meine Spenden" '
-            'als PDF verfügbar).',
-            style: AppTypography.body(size: 12, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          const _DemoPurchaseButtons(),
         ],
       ),
     );
@@ -208,20 +180,11 @@ class _SectionEyebrow extends StatelessWidget {
   }
 }
 
-/// Ein Kauf mit Brutto, Netto, Spendenbetrag und relativer Quote.
-class _PurchaseDonationRow extends ConsumerStatefulWidget {
+/// Spende je Kauf: Betrag, Datum, Zahlungsart und der Spendenanteil.
+/// Kauf-Aktionen (Beleg-PDF, Reklamation) liegen jetzt im Belegarchiv.
+class _PurchaseDonationRow extends StatelessWidget {
   const _PurchaseDonationRow({required this.purchase});
   final PurchaseDonation purchase;
-
-  @override
-  ConsumerState<_PurchaseDonationRow> createState() =>
-      _PurchaseDonationRowState();
-}
-
-class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
-  bool _bonBusy = false;
-
-  PurchaseDonation get purchase => widget.purchase;
 
   static ({IconData icon, String label}) _paymentInfo(String method) {
     switch (method) {
@@ -239,204 +202,9 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
     }
   }
 
-  /// Digitalen Kassenbon serverseitig erzeugen (receipt-pdf) und im
-  /// nativen PDF-Viewer öffnen — gleiche Pipeline wie Protokoll-Exporte.
-  Future<void> _openReceipt() async {
-    if (_bonBusy) return;
-    setState(() => _bonBusy = true);
-    try {
-      final res = await ref.read(supabaseClientProvider).functions.invoke(
-        'receipt-pdf',
-        body: {'purchase_id': purchase.purchaseId},
-      );
-      final data = res.data;
-      if (data is! Map || data['base64'] is! String) {
-        throw Exception((data is Map ? data['error'] : null) ?? 'Kein PDF');
-      }
-      await sharePdfBytes(
-        base64Decode(data['base64'] as String),
-        (data['filename'] as String?) ?? 'kassenbon.pdf',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCritical,
-          content: Text('Bon konnte nicht erzeugt werden: $e'),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _bonBusy = false);
-    }
-  }
-
-  /// Reklamation zum Kauf melden — Bottom-Sheet mit Problemart + Kommentar.
-  Future<void> _reportProblem() async {
-    var kind = 'not_received';
-    final commentCtrl = TextEditingController();
-    const kinds = <(String, String, IconData)>[
-      (
-        'not_received',
-        'Produkt nicht erhalten',
-        Icons.remove_shopping_cart_outlined
-      ),
-      ('damaged', 'Produkt beschädigt', Icons.broken_image_outlined),
-      ('wrong_product', 'Falsches Produkt', Icons.swap_horiz_outlined),
-      ('other', 'Sonstiges', Icons.help_outline),
-    ];
-    final submitted = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surfaceCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.lg)),
-      ),
-      builder: (sctx) => StatefulBuilder(
-        builder: (sctx, setSheet) => Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.s5,
-            right: AppSpacing.s5,
-            top: AppSpacing.s5,
-            bottom: MediaQuery.of(sctx).viewInsets.bottom + AppSpacing.s5,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Eyebrow('Reklamation'),
-              const SizedBox(height: 2),
-              Text(
-                'Problem mit diesem Kauf melden',
-                style: AppTypography.display(
-                  size: 18,
-                  weight: FontWeight.w800,
-                  color: AppColors.ink,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s2),
-              Text(
-                'Kauf vom ${Formatters.date(purchase.purchasedAt)} über '
-                '${Formatters.euro(purchase.totalGross)}. Wir melden uns '
-                'nach Prüfung — den Status siehst du direkt am Kauf.',
-                style: AppTypography.body(size: 12, color: AppColors.textMuted)
-                    .copyWith(height: 1.4),
-              ),
-              const SizedBox(height: AppSpacing.s3),
-              for (final k in kinds)
-                RadioListTile<String>(
-                  value: k.$1,
-                  // RadioGroup-Migration folgt mit dem nächsten
-                  // Flutter-Upgrade (gleiches Muster wie
-                  // cancellation_screen.dart).
-                  // ignore: deprecated_member_use
-                  groupValue: kind,
-                  // ignore: deprecated_member_use
-                  onChanged: (v) => setSheet(() => kind = v ?? kind),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: AppColors.brand,
-                  title: Row(
-                    children: [
-                      Icon(k.$3, size: 16, color: AppColors.ink),
-                      const SizedBox(width: 6),
-                      Text(
-                        k.$2,
-                        style: AppTypography.body(
-                          size: 13,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: AppSpacing.s2),
-              TextField(
-                controller: commentCtrl,
-                maxLines: 3,
-                maxLength: 500,
-                decoration: const InputDecoration(
-                  labelText: 'Was ist passiert? (optional)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s3),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () => Navigator.of(sctx).pop(true),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.ink,
-                    foregroundColor: AppColors.brand,
-                  ),
-                  icon: const Icon(Icons.send_outlined, size: 18),
-                  label: const Text('Reklamation absenden'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (submitted != true) return;
-    try {
-      final client = ref.read(supabaseClientProvider);
-      await client.from('purchase_complaints').insert({
-        'purchase_id': purchase.purchaseId,
-        'customer_id': client.auth.currentUser!.id,
-        'kind': kind,
-        'comment':
-            commentCtrl.text.trim().isEmpty ? null : commentCtrl.text.trim(),
-      });
-      ref.invalidate(myComplaintsByPurchaseProvider);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Reklamation eingegangen — wir prüfen das.'),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      final duplicate =
-          e.toString().contains('uq_complaints_open_per_purchase');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: duplicate ? AppColors.ink : AppColors.statusCritical,
-          content: Text(
-            duplicate
-                ? 'Zu diesem Kauf läuft bereits eine Reklamation.'
-                : 'Reklamation fehlgeschlagen: $e',
-          ),
-        ),
-      );
-    }
-  }
-
-  static ({String label, Color color}) _complaintBadge(String status) {
-    switch (status) {
-      case 'in_progress':
-        return (
-          label: 'Reklamation in Bearbeitung',
-          color: AppColors.brandDark
-        );
-      case 'resolved':
-        return (label: 'Reklamation erledigt', color: AppColors.statusPositive);
-      case 'rejected':
-        return (
-          label: 'Reklamation abgelehnt',
-          color: AppColors.statusCritical
-        );
-      case 'open':
-      default:
-        return (label: 'Reklamation eingegangen', color: AppColors.brandDark);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final pay = _paymentInfo(purchase.paymentMethod);
-    final complaint = ref
-        .watch(myComplaintsByPurchaseProvider)
-        .valueOrNull?[purchase.purchaseId];
     return AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s4,
@@ -545,188 +313,57 @@ class _PurchaseDonationRowState extends ConsumerState<_PurchaseDonationRow> {
                   const AlwaysStoppedAnimation<Color>(AppColors.statusPositive),
             ),
           ),
-          if (purchase.hasInvoice) ...[
-            const SizedBox(height: AppSpacing.s2),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-              label: Text(
-                'Rechnung ${purchase.invoiceNumber ?? ''} — PDF öffnen',
-              ),
-              onPressed: () async {
-                final invoice =
-                    ref.read(myInvoicesProvider).valueOrNull?.firstWhere(
-                          (i) => i.id == purchase.invoiceId,
-                          orElse: () =>
-                              ref.read(myInvoicesProvider).valueOrNull!.first,
-                        );
-                if (invoice == null) return;
-                if (!context.mounted) return;
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => InvoicePreviewScreen(invoice: invoice),
-                  ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.ink,
-                side: const BorderSide(color: AppColors.brand),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.s2),
-          // Digitaler Bon + Reklamation direkt am Kauf (Vertrauensfunktionen).
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _bonBusy ? null : _openReceipt,
-                  icon: _bonBusy
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.brand,
-                          ),
-                        )
-                      : const Icon(Icons.receipt_outlined, size: 16),
-                  label: const Text('Bon (PDF)'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
-                    side: const BorderSide(color: AppColors.borderSubtle),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(
-                child: complaint == null
-                    ? OutlinedButton.icon(
-                        onPressed: _reportProblem,
-                        icon: const Icon(Icons.flag_outlined, size: 16),
-                        label: const Text('Problem melden'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.ink,
-                          side: const BorderSide(color: AppColors.borderSubtle),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      )
-                    : Builder(
-                        builder: (context) {
-                          final badge = _complaintBadge(
-                            complaint['status'] as String? ?? 'open',
-                          );
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.s2,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceAlt,
-                              border: Border.all(color: badge.color),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadii.pill),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              badge.label,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.body(
-                                size: 11,
-                                weight: FontWeight.w700,
-                                color: badge.color,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-          if (complaint != null &&
-              (complaint['resolution_note'] as String?)?.isNotEmpty ==
-                  true) ...[
-            const SizedBox(height: AppSpacing.s2),
-            Text(
-              'Antwort: ${complaint['resolution_note']}',
-              style: AppTypography.body(size: 11, color: AppColors.textMuted)
-                  .copyWith(height: 1.35),
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-/// Vier Chip-Buttons zum Anlegen einer Demo-Transaktion je Zahlungsart.
-/// Sitzt unten im Verlauf und simuliert einen Kauf am Automaten.
-class _DemoPurchaseButtons extends ConsumerStatefulWidget {
-  const _DemoPurchaseButtons();
-  @override
-  ConsumerState<_DemoPurchaseButtons> createState() =>
-      _DemoPurchaseButtonsState();
-}
-
-class _DemoPurchaseButtonsState extends ConsumerState<_DemoPurchaseButtons> {
-  bool _busy = false;
-
-  Future<void> _add(String method, String label) async {
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(customerRepositoryProvider)
-          .addDemoPurchase(paymentMethod: method);
-      ref
-        ..invalidate(myPurchasesProvider)
-        ..invalidate(myDonationsByPurchaseProvider)
-        ..invalidate(myDonationSummaryProvider)
-        ..invalidate(myInvoicesProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Demo-Kauf ($label) angelegt.')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
+/// Verweis auf das Belegarchiv (Käufe, Belege-PDF, Reklamation, Demo).
+class _ArchiveLinkCard extends StatelessWidget {
+  const _ArchiveLinkCard({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final entries = <(String, String, IconData)>[
-      ('cash', 'Bar', Icons.euro_symbol),
-      ('card_ec', 'EC', Icons.credit_card),
-      ('card_credit', 'Kredit', Icons.credit_card_outlined),
-      ('card_contactless', 'Kontaktlos', Icons.contactless_outlined),
-    ];
-    return Wrap(
-      spacing: AppSpacing.s2,
-      runSpacing: AppSpacing.s2,
-      children: [
-        for (final e in entries)
-          OutlinedButton.icon(
-            onPressed: _busy ? null : () => _add(e.$1, e.$2),
-            icon: Icon(e.$3, size: 16, color: AppColors.ink),
-            label: Text(e.$2),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.ink,
-              side: const BorderSide(color: AppColors.brand),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s3,
-                vertical: 10,
-              ),
+    return AppCard(
+      onTap: onTap,
+      color: AppColors.ink,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Row(
+        children: [
+          const Icon(Icons.receipt_long, color: AppColors.brand, size: 26),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Belegarchiv',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  'Käufe, Belege als PDF, Reklamation & Demo-Testkäufe.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.onDark.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
             ),
           ),
-      ],
+          Icon(
+            Icons.chevron_right,
+            color: AppColors.onDark.withValues(alpha: 0.6),
+            size: 20,
+          ),
+        ],
+      ),
     );
   }
 }
