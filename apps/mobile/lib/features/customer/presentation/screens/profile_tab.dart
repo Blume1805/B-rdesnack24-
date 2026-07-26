@@ -15,6 +15,7 @@ import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'master_data_screen.dart';
+import 'receipts_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
 
@@ -109,7 +110,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.workspace_premium_outlined,
               title: 'Mein Abo',
-              subtitle: 'Monats-, Jahres- oder Lifetime-Abo wählen',
+              subtitle: 'Monats- oder Jahres-Abo wählen',
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
@@ -122,6 +123,15 @@ class ProfileTab extends ConsumerWidget {
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RewardsScreen()),
+              ),
+            ),
+            _ProfileRow(
+              icon: Icons.receipt_long_outlined,
+              title: 'Belegarchiv',
+              subtitle: 'Käufe durchsuchen, Beleg als PDF, CSV-Export',
+              iconColor: AppColors.brand,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ReceiptsScreen()),
               ),
             ),
           ],

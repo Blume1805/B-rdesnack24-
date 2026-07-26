@@ -12,6 +12,7 @@ import '../../domain/entities/notification.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
+import '../../domain/entities/receipt.dart';
 import '../../domain/repositories/customer_repository.dart';
 
 final customerRepositoryProvider = Provider<CustomerRepository>(
@@ -40,6 +41,17 @@ final myPricesProvider = FutureProvider.autoDispose<List<CustomerPrice>>(
 final myPurchasesProvider = FutureProvider.autoDispose<List<Purchase>>(
   (ref) => ref.watch(customerRepositoryProvider).myPurchases(),
 );
+
+/// Strukturiertes Belegarchiv (RPC my_receipts): je Kauf ein Beleg mit
+/// Positionen, Kategorie, Automat und regelbasierter Gewährleistungsfrist.
+/// Suche/Filter passieren clientseitig auf dieser Liste.
+final myReceiptsProvider =
+    FutureProvider.autoDispose<List<Receipt>>((ref) async {
+  final res = await ref.watch(supabaseClientProvider).rpc('my_receipts');
+  return (res as List)
+      .map((e) => Receipt.fromJson(Map<String, dynamic>.from(e as Map)))
+      .toList();
+});
 
 /// Gamification-Status (Stufe, Statusrabatt, Challenges, Badges) — alles
 /// serverseitig aus der Kaufhistorie berechnet (RPC my_gamification_status).
