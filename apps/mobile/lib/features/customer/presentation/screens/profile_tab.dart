@@ -15,6 +15,7 @@ import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'master_data_screen.dart';
+import 'rewards_screen.dart';
 import 'subscription_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -112,6 +113,15 @@ class ProfileTab extends ConsumerWidget {
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+              ),
+            ),
+            _ProfileRow(
+              icon: Icons.emoji_events_outlined,
+              title: 'Status & Belohnungen',
+              subtitle: 'Stufe, Cashback, Challenges & Abzeichen',
+              iconColor: AppColors.brand,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const RewardsScreen()),
               ),
             ),
           ],

@@ -74,8 +74,8 @@ Deno.serve(async (req) => {
     let machineLabel = "";
     if (purchase.machine_id) {
       const { data: m } = await caller
-        .from("machines").select("label, code").eq("id", purchase.machine_id).maybeSingle();
-      if (m) machineLabel = `${m.label ?? ""}${m.code ? ` (${m.code})` : ""}`.trim();
+        .from("machines").select("name, code").eq("id", purchase.machine_id).maybeSingle();
+      if (m) machineLabel = `${m.name ?? ""}${m.code ? ` (${m.code})` : ""}`.trim();
     }
     const { data: cust } = await caller
       .from("customers").select("customer_number").eq("id", purchase.customer_id).maybeSingle();

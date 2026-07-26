@@ -40,6 +40,15 @@ final myPurchasesProvider = FutureProvider.autoDispose<List<Purchase>>(
   (ref) => ref.watch(customerRepositoryProvider).myPurchases(),
 );
 
+/// Gamification-Status (Stufe, Cashback, Challenges, Badges) — alles
+/// serverseitig aus der Kaufhistorie berechnet (RPC my_gamification_status).
+final myGamificationProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+  final res =
+      await ref.watch(supabaseClientProvider).rpc('my_gamification_status');
+  return Map<String, dynamic>.from(res as Map);
+});
+
 /// Eigene Reklamations-Tickets, gruppiert nach Kauf (jüngstes Ticket je
 /// Kauf gewinnt). RLS liefert nur die eigenen Zeilen.
 final myComplaintsByPurchaseProvider =
