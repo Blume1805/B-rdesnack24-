@@ -1399,7 +1399,7 @@ class _NewsTeaser extends ConsumerWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        'Alle Beiträge lesen →',
+                        'Alle Beiträge lesen »',
                         style: AppTypography.body(
                           size: 13,
                           weight: FontWeight.w800,
@@ -2015,7 +2015,7 @@ class _HeroNewsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Mehr erfahren →',
+                      'Mehr erfahren »',
                       style: AppTypography.body(
                         size: 12,
                         weight: FontWeight.w800,

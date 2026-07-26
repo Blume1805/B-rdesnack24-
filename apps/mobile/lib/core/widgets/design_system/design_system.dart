@@ -17,3 +17,4 @@ export 'product_image.dart';
 export 'rating_stars.dart';
 export 'section_header.dart';
 export 'status_badge.dart';
+export 'tier_tiles.dart';

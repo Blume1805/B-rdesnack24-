@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/pricing/pricing.dart';
@@ -46,13 +45,6 @@ class _Plan {
   final String description;
   final String? badge;
 }
-
-/// Zweiseitiger Mehrwert-Vergleich (Kostenlos vs. App) als PDF — liegt im
-/// Web-Build unter apps/mobile/web/marketing/ und damit auf GitHub Pages;
-/// die absolute URL funktioniert auch aus den nativen Apps.
-final _mehrwertPdf = Uri.parse(
-  'https://blume1805.github.io/B-rdesnack24-/marketing/app-mehrwert.pdf',
-);
 
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   static const _plans = <_Plan>[
@@ -362,50 +354,56 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                       AppTypography.body(size: 13, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.s4),
-                // Mehrwert klar kommunizieren: alle Abo-Vorteile auf einen
-                // Blick + konkretes Amortisationsbeispiel.
-                const _BenefitsCard(),
+                // Vergleich Kostenlos vs. App direkt inline (keine PDF/kein
+                // Extra-Screen) — Feature-Matrix mit Haken/Strich.
+                const Eyebrow('Vergleich'),
+                const SizedBox(height: 2),
+                Text(
+                  'Kostenlos vs. App',
+                  style: AppTypography.display(
+                    size: 18,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'App = alles aus Kostenlos + jeder Spar-Vorteil.',
+                  style:
+                      AppTypography.body(size: 12.5, color: AppColors.textMuted),
+                ),
                 const SizedBox(height: AppSpacing.s3),
-                // In-App-Vergleich Kostenlos vs. App (Karten nebeneinander).
-                _CompareTeaser(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const AppBenefitsCompareScreen(),
-                    ),
+                const AppBenefitsCompareCard(),
+                const SizedBox(height: AppSpacing.s5),
+                // Metallische Status-Kacheln: Dauerrabatt wächst mit.
+                const Eyebrow('Dauerrabatt'),
+                const SizedBox(height: 2),
+                Text(
+                  'Dein Rabatt wächst mit',
+                  style: AppTypography.display(
+                    size: 18,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                // Break-even-Rechnung + Vergleich als PDF (sekundär).
-                Wrap(
-                  spacing: AppSpacing.s3,
-                  runSpacing: 0,
-                  children: [
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.brandDark,
-                        padding: EdgeInsets.zero,
-                      ),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const SubscriptionValueScreen(),
-                        ),
-                      ),
-                      icon: const Icon(Icons.calculate_outlined, size: 18),
-                      label: const Text('Rechnet sich das?'),
+                const TierTiles(),
+                const SizedBox(height: AppSpacing.s3),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.brandDark,
+                      padding: EdgeInsets.zero,
                     ),
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.brandDark,
-                        padding: EdgeInsets.zero,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SubscriptionValueScreen(),
                       ),
-                      onPressed: () => launchUrl(
-                        _mehrwertPdf,
-                        mode: LaunchMode.externalApplication,
-                      ),
-                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                      label: const Text('Als PDF'),
                     ),
-                  ],
+                    icon: const Icon(Icons.calculate_outlined, size: 18),
+                    label: const Text('Rechnet sich das?'),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 // Marketing-Hinweis: Sachbezugsfreigrenze — Arbeitgeber
@@ -532,133 +530,6 @@ class _EmployerBenefitTeaser extends StatelessWidget {
           const Icon(
             Icons.chevron_right,
             color: AppColors.textMuted,
-            size: 20,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Mehrwert-Karte: alle Abo-Vorteile auf einen Blick plus ein konkretes
-/// Amortisationsbeispiel (20 € Monatseinkauf) — macht sichtbar, dass sich
-/// schon das kleinste Abo rechnet.
-class _BenefitsCard extends StatelessWidget {
-  const _BenefitsCard();
-
-  static const _benefits = <(IconData, String)>[
-    (Icons.percent, '5 % Dauerrabatt auf jeden Einkauf'),
-    (Icons.stars_outlined, 'Bonuspunkte für jeden Kauf'),
-    (Icons.savings_outlined, 'Cashback-Aktionen'),
-    (Icons.receipt_long_outlined, 'Digitale Belege & Kaufhistorie'),
-    (Icons.local_offer_outlined, 'Exklusive Angebote & Deals'),
-    (Icons.cake_outlined, 'Geburtstagsgutschein'),
-    (Icons.auto_awesome_outlined, 'Personalisierte Aktionen'),
-    (Icons.support_agent_outlined, 'Schnellere Reklamationsabwicklung'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      color: AppColors.ink,
-      padding: const EdgeInsets.all(AppSpacing.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Das steckt in deinem Abo',
-            style: AppTypography.body(
-              size: 14,
-              weight: FontWeight.w800,
-              color: AppColors.brand,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          for (final (icon, label) in _benefits)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s2),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(icon, size: 18, color: AppColors.brand),
-                  const SizedBox(width: AppSpacing.s2),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: AppTypography.body(
-                        size: 13,
-                        weight: FontWeight.w600,
-                        color: AppColors.onDark,
-                      ).copyWith(height: 1.3),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: AppSpacing.s1),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.s3),
-            decoration: BoxDecoration(
-              color: AppColors.brand.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadii.sm),
-            ),
-            child: Text(
-              '20 € Einkauf/Monat → 1 € gespart. Das Abo (0,99 €) ist damit '
-              'schon raus.',
-              style: AppTypography.body(
-                size: 12,
-                color: AppColors.onDark.withValues(alpha: 0.85),
-              ).copyWith(height: 1.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Einstieg in den In-App-Vergleich „Kostenlos vs. App" (Karten nebeneinander).
-class _CompareTeaser extends StatelessWidget {
-  const _CompareTeaser({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      onTap: onTap,
-      color: AppColors.ink,
-      padding: const EdgeInsets.all(AppSpacing.s4),
-      child: Row(
-        children: [
-          const Icon(Icons.compare_arrows, color: AppColors.brand, size: 26),
-          const SizedBox(width: AppSpacing.s3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kostenlos vs. App',
-                  style: AppTypography.body(
-                    size: 14,
-                    weight: FontWeight.w800,
-                    color: AppColors.brand,
-                  ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  'Beide Varianten nebeneinander im Vergleich.',
-                  style: AppTypography.body(
-                    size: 12,
-                    color: AppColors.onDark.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: AppColors.onDark.withValues(alpha: 0.6),
             size: 20,
           ),
         ],

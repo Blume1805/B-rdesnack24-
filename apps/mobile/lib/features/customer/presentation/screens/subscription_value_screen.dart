@@ -201,7 +201,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack ≈ 6 €. Normal reichen 2 Besuche im Monat fürs '
+            'Kaffee + Snack ca. 6 €. Normal reichen 2 Besuche im Monat fürs '
             'Jahres-Abo (vorsichtig: 3).',
             style: AppTypography.body(size: 12.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
@@ -223,12 +223,12 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.local_cafe_outlined,
-                  text: 'Deals & Angebote: −10 % extra (≈ 30 % der Käufe)',
+                  text: 'Deals & Angebote: −10 % extra (ca. 30 % der Käufe)',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.star_outline,
-                  text: 'Coupons 5–25 % + Geburtstag (≈ 1,5 Pp.)',
+                  text: 'Coupons 5–25 % + Geburtstag (ca. 1,5 Pp.)',
                 ),
               ],
             ),
@@ -325,7 +325,7 @@ class _ScenarioCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s2),
           Text(
-            '≈ $pct %',
+            'ca. $pct %',
             style: AppTypography.display(
               size: 26,
               weight: FontWeight.w800,

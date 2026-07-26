@@ -23,6 +23,14 @@ class RewardsScreen extends ConsumerWidget {
     'gold': AppColors.brand,
   };
 
+  /// Bronze/Silber/Gold-Akzente für die Challenge-Kacheln (rotierend nach
+  /// Position), damit die Herausforderungen die Status-Farbwelt aufgreifen.
+  static const _challengeTierColors = <Color>[
+    Color(0xFFB08D57), // Bronze
+    Color(0xFF9AA0A6), // Silber
+    Color(0xFFD9A400), // Gold (etwas dunkler für Kontrast auf Weiß)
+  ];
+
   static IconData _badgeIcon(String key) {
     switch (key) {
       case 'bolt':
@@ -76,14 +84,29 @@ class RewardsScreen extends ConsumerWidget {
               _DiscountCard(data: data),
               const SizedBox(height: AppSpacing.s5),
               const _SectionTitle(
+                eyebrow: 'Dauerrabatt',
+                title: 'Dein Rabatt wächst mit',
+              ),
+              const SizedBox(height: AppSpacing.s3),
+              TierTiles(
+                currentCode: (Map<String, dynamic>.from(
+                  data['tier'] as Map? ?? const {},
+                )['code'] as String?),
+              ),
+              const SizedBox(height: AppSpacing.s5),
+              const _SectionTitle(
                 eyebrow: 'Challenges',
                 title: 'Aktuelle Herausforderungen',
               ),
               const SizedBox(height: AppSpacing.s3),
-              for (final c in (data['challenges'] as List? ?? const []))
+              for (final (i, c)
+                  in (data['challenges'] as List? ?? const []).indexed)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-                  child: _ChallengeCard(c: Map<String, dynamic>.from(c as Map)),
+                  child: _ChallengeCard(
+                    c: Map<String, dynamic>.from(c as Map),
+                    tierColor: _challengeTierColors[i % 3],
+                  ),
                 ),
               const SizedBox(height: AppSpacing.s2),
               const _SectionTitle(
@@ -286,8 +309,9 @@ class _DiscountCard extends StatelessWidget {
 }
 
 class _ChallengeCard extends StatelessWidget {
-  const _ChallengeCard({required this.c});
+  const _ChallengeCard({required this.c, required this.tierColor});
   final Map<String, dynamic> c;
+  final Color tierColor;
 
   @override
   Widget build(BuildContext context) {
@@ -295,9 +319,10 @@ class _ChallengeCard extends StatelessWidget {
     final target = ((c['target'] as num?) ?? 1).toInt();
     final done = c['done'] == true;
     final ratio = target <= 0 ? 1.0 : (progress / target).clamp(0.0, 1.0);
-    final color = done ? AppColors.statusPositive : AppColors.brand;
+    final color = done ? AppColors.statusPositive : tierColor;
 
     return AppCard(
+      topStripeColor: color,
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

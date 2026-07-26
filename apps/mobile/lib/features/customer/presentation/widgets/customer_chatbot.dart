@@ -150,7 +150,7 @@ const _kFaq = <_FaqCategory>[
       'Ab wann rechnet sich das Abo?',
       'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,65 € '
           'Einkauf im Monat, Monats-Abo ab 19,80 €. Bei normaler Nutzung '
-          'von Deals und Coupons (zusammen ≈ 9,4 % Ersparnis) sind es rund '
+          'von Deals und Coupons (zusammen ca. 9,4 % Ersparnis) sind es rund '
           '8,90 € bzw. 10,60 € im Monat. Der Status-Rabatt kommt noch '
           'obendrauf. Die komplette Beispielrechnung mit allen Annahmen:',
       deepLink: 'abo-rechnung',
