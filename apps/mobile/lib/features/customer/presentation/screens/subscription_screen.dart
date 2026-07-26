@@ -374,7 +374,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.hourglass_top, color: AppColors.brandDark, size: 34),
+            const Icon(Icons.hourglass_top,
+                color: AppColors.brandDark, size: 34),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Kaufanfrage an deine Eltern gesendet',
@@ -389,8 +390,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               'Dein ${plan.title} wartet auf die Freigabe deiner Eltern. '
               'Sobald sie zustimmen, wird dein Zugang beim nächsten App-Start '
               'automatisch freigeschaltet — du musst nichts weiter tun.',
-              style: AppTypography.body(size: 13.5, color: AppColors.textDefault)
-                  .copyWith(height: 1.45),
+              style:
+                  AppTypography.body(size: 13.5, color: AppColors.textDefault)
+                      .copyWith(height: 1.45),
             ),
             const SizedBox(height: AppSpacing.s4),
             SizedBox(
@@ -461,8 +463,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 const SizedBox(height: 2),
                 Text(
                   'App = alles aus Kostenlos + jeder Spar-Vorteil.',
-                  style:
-                      AppTypography.body(size: 12.5, color: AppColors.textMuted),
+                  style: AppTypography.body(
+                      size: 12.5, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 const AppBenefitsCompareCard(),

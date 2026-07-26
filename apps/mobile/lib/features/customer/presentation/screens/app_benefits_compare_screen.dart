@@ -41,8 +41,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
           const _CompareHeader(),
           const Divider(height: 1, color: AppColors.borderSubtle),
           const _GroupLabel('In allen Varianten'),
-          for (final f in _shared)
-            _CompareRow(label: f, free: true, app: true),
+          for (final f in _shared) _CompareRow(label: f, free: true, app: true),
           const _GroupLabel('Nur mit App'),
           for (final f in _appOnly)
             _CompareRow(label: f, free: false, app: true),
