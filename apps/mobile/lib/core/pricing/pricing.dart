@@ -49,6 +49,12 @@ abstract final class Pricing {
   /// siehe app.lifetime_founders_limit()).
   static const lifetimeFoundersLimit = 20;
 
+  /// Steuert, ob das Lifetime-Abo im Kundenbereich sichtbar angeboten wird.
+  /// Aktuell `false`: Plan, Server-RPC und Founders-Kontingent bleiben voll
+  /// im Code, die Kunden-UI blendet Lifetime aber aus. Für spätere Aktionen
+  /// einfach auf `true` setzen — dann erscheint die Karte wieder überall.
+  static const lifetimePubliclyOffered = false;
+
   /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben
   /// zusätzlich 10 % Rabatt — multiplikativ auf den App-Preis.
   static const dealExtraDiscountRate = 0.10;

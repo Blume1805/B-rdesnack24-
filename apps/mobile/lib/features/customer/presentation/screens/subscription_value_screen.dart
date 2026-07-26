@@ -62,20 +62,36 @@ class SubscriptionValueScreen extends ConsumerWidget {
             eyebrow: 'Beispielrechnung',
             title: 'Die App zahlt sich aus.',
           ),
+          const SizedBox(height: AppSpacing.s3),
+          // Kernfakten kurz als Stichpunkte statt Fließtext.
+          const AppCard(
+            color: AppColors.surfaceAlt,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _AssumptionRow(icon: Icons.percent, text: '5 % auf jeden Kauf'),
+                SizedBox(height: AppSpacing.s2),
+                _AssumptionRow(
+                  icon: Icons.workspace_premium_outlined,
+                  text: 'Status-Rabatt bis 10 % — lebenslang',
+                ),
+                SizedBox(height: AppSpacing.s2),
+                _AssumptionRow(
+                  icon: Icons.local_offer_outlined,
+                  text: 'Deals & Wochenangebote: −10 % extra',
+                ),
+                SizedBox(height: AppSpacing.s2),
+                _AssumptionRow(
+                  icon: Icons.star_outline,
+                  text: 'Coupons 5–25 % + Geburtstagsgutschein',
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: AppSpacing.s2),
           Text(
-            'Mit Abo zahlst du an jedem Automaten immer 5 % weniger. '
-            'Mit deinem Status wächst der Dauerrabatt lebenslang mit — '
-            'auf 6 % (Bronze), 7,5 % (Silber) und 10 % (Gold). Dazu kommen '
-            'Frühstücks- & Feierabend-Deals, Tages- und Wochenangebote mit '
-            'weiteren 10 % Rabatt auf den App-Preis, Treue-Meilensteine mit '
-            'Coupons von 5 bis 25 % und ein Geburtstagsangebot. Hier siehst '
-            'du, ab welchem Einkaufswert sich welches Abo rechnet — einmal '
-            'vorsichtig gerechnet und einmal mit normaler Nutzung der '
-            'Vorteile. Der Status-Rabatt ist dabei nicht eingerechnet, er '
-            'kommt obendrauf.',
-            style: AppTypography.body(size: 13.5, color: AppColors.textMuted)
-                .copyWith(height: 1.5),
+            'Zwei Szenarien — Status-Rabatt kommt obendrauf.',
+            style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s3),
 
@@ -170,29 +186,30 @@ class SubscriptionValueScreen extends ConsumerWidget {
                   conservative: '${Formatters.euro(beYearlyCons)} / Monat',
                   normal: '${Formatters.euro(beYearlyNorm)} / Monat',
                 ),
-                const Divider(height: 1, color: AppColors.borderSubtle),
-                _BreakEvenRow(
-                  plan: 'Lifetime · Founders Edition',
-                  cost: '${Formatters.euro(lifetime)} einmalig',
-                  conservative: '${Formatters.euro(beLifetimeCons)} gesamt',
-                  normal: '${Formatters.euro(beLifetimeNorm)} gesamt',
-                ),
+                // Lifetime bleibt im Code, wird aber nur bei Aktionen gezeigt.
+                if (Pricing.lifetimePubliclyOffered) ...[
+                  const Divider(height: 1, color: AppColors.borderSubtle),
+                  _BreakEvenRow(
+                    plan: 'Lifetime · Founders Edition',
+                    cost: '${Formatters.euro(lifetime)} einmalig',
+                    conservative: '${Formatters.euro(beLifetimeCons)} gesamt',
+                    normal: '${Formatters.euro(beLifetimeNorm)} gesamt',
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Beispiel: Ein Kaffee und ein Snack kosten zusammen rund 6 €. '
-            'Im normalen Szenario reichen dafür schon etwa zwei Automaten-'
-            'Besuche im Monat, damit sich das Jahres-Abo rechnet — beim '
-            'vorsichtigen Rechnen sind es drei.',
+            'Kaffee + Snack ≈ 6 €. Normal reichen 2 Besuche im Monat fürs '
+            'Jahres-Abo (vorsichtig: 3).',
             style: AppTypography.body(size: 12.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),
           const SizedBox(height: AppSpacing.s5),
 
           // ── Was steckt im normalen Szenario? ──────────────────────────
-          const Eyebrow('So kommt die normale Ersparnis zustande'),
+          const Eyebrow('So entsteht die normale Ersparnis'),
           const SizedBox(height: AppSpacing.s3),
           const AppCard(
             color: AppColors.surfaceAlt,
@@ -201,23 +218,17 @@ class SubscriptionValueScreen extends ConsumerWidget {
               children: [
                 _AssumptionRow(
                   icon: Icons.percent,
-                  text: '5 % App-Preis auf jeden Kauf — garantiert.',
+                  text: '5 % auf jeden Kauf — garantiert',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.local_cafe_outlined,
-                  text: 'Frühstücks- & Feierabend-Deals sowie Tages- und '
-                      'Wochenangebote: zusätzlich 10 % auf den App-Preis — '
-                      'zusammen 14,5 % Ersparnis. Angenommen für rund '
-                      '30 % deiner Käufe.',
+                  text: 'Deals & Angebote: −10 % extra (≈ 30 % der Käufe)',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.star_outline,
-                  text: 'Treue-Meilensteine: persönliche Coupons mit 5, 10, '
-                      '15 oder 25 % auf einzelne Produkte plus '
-                      'Geburtstagsangebot — vorsichtig mit 1,5 '
-                      'Prozentpunkten angesetzt.',
+                  text: 'Coupons 5–25 % + Geburtstag (≈ 1,5 Pp.)',
                 ),
               ],
             ),

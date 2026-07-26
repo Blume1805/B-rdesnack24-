@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../legal/presentation/cancellation_screen.dart';
 import '../controllers/customer_providers.dart';
+import 'app_benefits_compare_screen.dart';
 import 'employer_benefit_screen.dart';
 import 'subscription_value_screen.dart';
 
@@ -59,16 +61,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       title: 'Monats-Abo',
       price: '0,99 €',
       cadence: 'pro Monat',
-      description: 'Monatlich kündbar, voller Zugang zu allen '
-          'Kundenfunktionen. Jederzeit wechselbar.',
+      description: 'Monatlich kündbar. Jederzeit wechselbar.',
     ),
     _Plan(
       key: 'yearly',
       title: 'Jahres-Abo',
       price: '9,99 €',
       cadence: 'pro Jahr',
-      description: 'Ein Jahr voller Zugang — im Vergleich zum Monats-Abo '
-          'sind 2 Monate geschenkt. Jederzeit wechselbar.',
+      description: '2 Monate geschenkt. Jederzeit wechselbar.',
       badge: '2 Monate geschenkt',
     ),
     _Plan(
@@ -76,12 +76,17 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       title: 'Lifetime-Abo',
       price: '79,99 €',
       cadence: 'einmalig',
-      description: 'Einmal zahlen, für immer nutzen — inkl. aller künftigen '
-          'Funktionen. Streng limitiert auf die ersten 20 Konten. Achtung: '
-          'endgültig, ein späterer Wechsel ist nicht mehr möglich.',
+      description: 'Einmal zahlen, für immer nutzen. Limitiert auf 20 Konten. '
+          'Endgültig — kein späterer Wechsel.',
       badge: 'Founders Edition',
     ),
   ];
+
+  /// Im Kundenbereich sichtbare Modelle: Lifetime bleibt im Code, wird aber
+  /// nur angeboten, wenn Pricing.lifetimePubliclyOffered aktiv ist.
+  List<_Plan> get _visiblePlans => _plans
+      .where((p) => p.key != 'lifetime' || Pricing.lifetimePubliclyOffered)
+      .toList();
 
   String? _currentPlan;
   bool _locked = false;
@@ -352,12 +357,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
-                  _locked
-                      ? 'Du nutzt das Lifetime-Abo. Ein Wechsel ist nicht '
-                          'mehr möglich.'
-                      : 'Ein Wechsel ist jederzeit möglich — nur das '
-                          'Lifetime-Abo ist endgültig. Nach jeder Auswahl '
-                          'bekommst du eine Bestätigung per E-Mail.',
+                  'Wechsel jederzeit möglich. Bestätigung per E-Mail.',
                   style:
                       AppTypography.body(size: 13, color: AppColors.textMuted),
                 ),
@@ -366,39 +366,46 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 // Blick + konkretes Amortisationsbeispiel.
                 const _BenefitsCard(),
                 const SizedBox(height: AppSpacing.s3),
-                // Marketing-Rechnung: Break-even konservativ vs. normal.
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.brandDark,
-                      padding: EdgeInsets.zero,
+                // In-App-Vergleich Kostenlos vs. App (Karten nebeneinander).
+                _CompareTeaser(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AppBenefitsCompareScreen(),
                     ),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const SubscriptionValueScreen(),
-                      ),
-                    ),
-                    icon: const Icon(Icons.calculate_outlined, size: 18),
-                    label: const Text('Ab wann rechnet sich das Abo?'),
                   ),
                 ),
-                // Zweiseitiger Vorteils-Vergleich (Kostenlos vs. App) als PDF.
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.brandDark,
-                      padding: EdgeInsets.zero,
+                const SizedBox(height: AppSpacing.s3),
+                // Break-even-Rechnung + Vergleich als PDF (sekundär).
+                Wrap(
+                  spacing: AppSpacing.s3,
+                  runSpacing: 0,
+                  children: [
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.brandDark,
+                        padding: EdgeInsets.zero,
+                      ),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SubscriptionValueScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.calculate_outlined, size: 18),
+                      label: const Text('Rechnet sich das?'),
                     ),
-                    onPressed: () => launchUrl(
-                      _mehrwertPdf,
-                      mode: LaunchMode.externalApplication,
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.brandDark,
+                        padding: EdgeInsets.zero,
+                      ),
+                      onPressed: () => launchUrl(
+                        _mehrwertPdf,
+                        mode: LaunchMode.externalApplication,
+                      ),
+                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                      label: const Text('Als PDF'),
                     ),
-                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                    label:
-                        const Text('Kostenlos vs. App — Vorteile im Überblick'),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 // Marketing-Hinweis: Sachbezugsfreigrenze — Arbeitgeber
@@ -412,7 +419,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                for (final plan in _plans) ...[
+                for (final plan in _visiblePlans) ...[
                   _PlanCard(
                     plan: plan,
                     active: _currentPlan == plan.key,
@@ -597,14 +604,62 @@ class _BenefitsCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.sm),
             ),
             child: Text(
-              'Beispiel: Wer im Monat für 20 € am Automaten kauft, spart mit '
-              '5 % schon 1 € — mehr als das Monats-Abo (0,99 €) kostet. Ab '
-              'dann ist jeder weitere Vorteil geschenkt.',
+              '20 € Einkauf/Monat → 1 € gespart. Das Abo (0,99 €) ist damit '
+              'schon raus.',
               style: AppTypography.body(
                 size: 12,
                 color: AppColors.onDark.withValues(alpha: 0.85),
               ).copyWith(height: 1.4),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Einstieg in den In-App-Vergleich „Kostenlos vs. App" (Karten nebeneinander).
+class _CompareTeaser extends StatelessWidget {
+  const _CompareTeaser({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      color: AppColors.ink,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Row(
+        children: [
+          const Icon(Icons.compare_arrows, color: AppColors.brand, size: 26),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Kostenlos vs. App',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  'Beide Varianten nebeneinander im Vergleich.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.onDark.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right,
+            color: AppColors.onDark.withValues(alpha: 0.6),
+            size: 20,
           ),
         ],
       ),

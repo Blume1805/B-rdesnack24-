@@ -32,7 +32,9 @@ void main() {
     expect(find.text('NORMAL'), findsWidgets);
     expect(find.text('Monats-Abo'), findsOneWidget);
     expect(find.text('Jahres-Abo'), findsOneWidget);
-    expect(find.text('Lifetime · Founders Edition'), findsOneWidget);
+    // Lifetime ist derzeit ausgeblendet (Pricing.lifetimePubliclyOffered):
+    // die Zeile darf NICHT erscheinen.
+    expect(find.text('Lifetime · Founders Edition'), findsNothing);
 
     // Ohne Abo wirbt der CTA für die Abo-Wahl.
     expect(find.text('Abo wählen — ab 0,99 € im Monat'), findsOneWidget);
