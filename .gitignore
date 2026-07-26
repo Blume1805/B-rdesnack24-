@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────────────────────────────────
+# Bördesnack24 — Monorepo .gitignore
+# ──────────────────────────────────────────────────────────────────────────
+
+# Secrets / Env (NIEMALS committen)
+.env
+.env.*
+!.env.example
+*.local
+config.*.php
+!config.*.example.php
+**/secrets/*
+!**/secrets/.gitkeep
+*.pem
+*.key
+*.keystore
+*.jks
+key.properties
+
+# Flutter dart-define Umgebungsdateien (Beispiele bleiben)
+apps/mobile/env/*.json
+!apps/mobile/env/*.example.json
+
+# Flutter / Dart
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/build/
+apps/mobile/.packages
+apps/mobile/pubspec.lock
+**/*.g.dart
+**/*.freezed.dart
+**/*.config.dart
+**/generated_plugin_registrant.dart
+coverage/
+*.lcov
+
+# Android
+apps/mobile/android/.gradle/
+apps/mobile/android/app/debug/
+apps/mobile/android/app/profile/
+apps/mobile/android/app/release/
+apps/mobile/android/local.properties
+
+# iOS
+apps/mobile/ios/Pods/
+apps/mobile/ios/.symlinks/
+apps/mobile/ios/Flutter/Flutter.framework
+apps/mobile/ios/Flutter/Flutter.podspec
+**/*.xcworkspace/xcuserdata/
+**/xcuserdata/
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# Node (Edge Functions Tooling, Skripte)
+node_modules/
+npm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+.DS_Store
+Thumbs.db
+*.swp
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Generierte Lokalisierung (via flutter gen-l10n)
+apps/mobile/lib/l10n/generated/
+/assets/

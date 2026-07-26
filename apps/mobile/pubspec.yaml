@@ -1,0 +1,89 @@
+name: boerdesnack24
+description: Bördesnack24 — Unternehmensplattform (Finanzen, Verwaltung, Kundenbereich).
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State-Management & DI
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.6.2
+
+  # Backend
+  supabase_flutter: ^2.8.0
+
+  # Passwort-Leak-Prüfung (HaveIBeenPwned, k-Anonymity) — clientseitig,
+  # weil die Supabase-Variante Pro-Plan-Feature ist.
+  crypto: ^3.0.3
+  http: ^1.2.0
+
+  # Observability (consent-gated initialisiert; nur nativ).
+  # Hinweis: PostHog/Sentry werden in der Web-Demo nicht eingebunden, da deren
+  # Web-Plugins sich beim Import selbst initialisieren und im Demo-Build sonst
+  # zu Start-Fehlern führen. Für native Builds wieder aktivieren.
+  # sentry_flutter: ^8.12.0
+  # posthog_flutter: ^4.10.0
+
+  # PDF teilen/drucken (Export Finanzauswertung)
+  printing: ^5.13.4
+
+  # Design-System-Fonts (Bricolage Grotesque + Hanken Grotesk)
+  google_fonts: ^6.2.1
+
+  # Externe Links (Navigation zu Maps, Google-Bewertung)
+  url_launcher: ^6.3.1
+
+  # QR-Code für die Kundenkarte (Automaten-Verifizierung)
+  qr_flutter: ^4.1.0
+
+  # Diagramme im Finanzdashboard (KPI-Trend, Cashflow, Vergleich Vorjahr).
+  fl_chart: ^0.68.0
+
+  # Push-Benachrichtigungen (FCM) — nur native Builds; für die Web-Demo
+  # deaktiviert, weil firebase_messaging_web sich beim Plugin-Register ohne
+  # firebase_options.dart synchron initialisiert und crasht.
+  # firebase_core: ^3.8.0
+  # firebase_messaging: ^15.1.5
+
+  # Medien/Dateien (Foto-/Signatur-/Dokument-Upload)
+  image_picker: ^1.1.2
+  file_picker: ^8.1.6
+
+  # Signatur-Draw-Pad (IfSG-Belehrung, Mitarbeiter-Signatur)
+  signature: ^5.5.0
+
+  # Offline-Fähigkeit
+  connectivity_plus: ^6.1.0
+  shared_preferences: ^2.3.3
+
+  # Utility
+  equatable: ^2.0.7
+  intl: ^0.20.2
+
+  # Web-Interop (Inline-PDF-Viewer in Flutter Web)
+  web: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
