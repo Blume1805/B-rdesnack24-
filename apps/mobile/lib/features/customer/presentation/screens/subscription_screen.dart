@@ -374,8 +374,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.hourglass_top,
-                color: AppColors.brandDark, size: 34),
+            const Icon(
+              Icons.hourglass_top,
+              color: AppColors.brandDark,
+              size: 34,
+            ),
             const SizedBox(height: AppSpacing.s2),
             Text(
               'Kaufanfrage an deine Eltern gesendet',
@@ -464,7 +467,9 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 Text(
                   'App = alles aus Kostenlos + jeder Spar-Vorteil.',
                   style: AppTypography.body(
-                      size: 12.5, color: AppColors.textMuted),
+                    size: 12.5,
+                    color: AppColors.textMuted,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 const AppBenefitsCompareCard(),
