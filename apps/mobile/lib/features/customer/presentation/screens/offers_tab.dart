@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
@@ -55,7 +56,15 @@ class OffersTab extends ConsumerWidget {
         children: [
           // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
           const _ProductSearchBar(),
-          const SizedBox(height: AppSpacing.s5),
+          const SizedBox(height: AppSpacing.s4),
+
+          // 0.1. ── Key-Facts: Rabatt · Punkte · Coupons auf einen Blick ─
+          // Die drei Zahlen, die den Kunden interessieren — ohne Lesen
+          // erfassbar, direkt über den Angeboten.
+          if (hasSub) ...[
+            const _KeyFactsRow(),
+            const SizedBox(height: AppSpacing.s5),
+          ],
 
           // Ohne Abo: ein Freischalt-Hinweis ersetzt die Abo-Vorteile
           // (Deals, Aktionen, Loyalty, persönliche + Wochenangebote).
@@ -244,6 +253,108 @@ class OffersTab extends ConsumerWidget {
           const _FavoritesSection(category: 'Snacks'),
           const SizedBox(height: AppSpacing.s4),
           const _FavoritesSection(category: 'Eis'),
+        ],
+      ),
+    );
+  }
+}
+
+/// Key-Facts-Zeile über den Angeboten: Dauerrabatt, Punktestand und Anzahl
+/// verfügbarer Coupons als drei große Zahlen. Marketing-Prinzip: die Fakten
+/// stehen vorn, der Kontext klein darunter — kein Fließtext.
+class _KeyFactsRow extends ConsumerWidget {
+  const _KeyFactsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rate = ref.watch(myEffectiveDiscountProvider);
+    final effRate = rate > 0 ? rate : Pricing.appDiscountRate;
+    final pct = (effRate * 100)
+        .toStringAsFixed(effRate * 100 % 1 == 0 ? 0 : 1)
+        .replaceAll('.', ',');
+    final points = ref.watch(myLoyaltyStatusProvider).valueOrNull?.points;
+    final coupons = ref.watch(myPersonalOffersProvider).valueOrNull?.length;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _FactTile(
+            icon: Icons.sell_outlined,
+            value: '$pct %',
+            label: 'Dauerrabatt',
+          ),
+        ),
+        const SizedBox(width: AppSpacing.s2),
+        Expanded(
+          child: _FactTile(
+            icon: Icons.stars_outlined,
+            value: points == null ? '—' : '$points',
+            label: 'Punkte',
+          ),
+        ),
+        const SizedBox(width: AppSpacing.s2),
+        Expanded(
+          child: _FactTile(
+            icon: Icons.confirmation_number_outlined,
+            value: coupons == null ? '—' : '$coupons',
+            label: coupons == 1 ? 'Coupon' : 'Coupons',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Einzelne Fakten-Kachel: Zahl groß, Label klein — bewusst ohne Satz.
+class _FactTile extends StatelessWidget {
+  const _FactTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s2,
+        vertical: AppSpacing.s3,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceCard,
+        border: Border.all(color: AppColors.borderSubtle),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 16, color: AppColors.brandDark),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: AppTypography.display(
+                size: 20,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.body(
+              size: 10.5,
+              weight: FontWeight.w700,
+              color: AppColors.textMuted,
+            ),
+          ),
         ],
       ),
     );

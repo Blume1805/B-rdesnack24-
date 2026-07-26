@@ -81,6 +81,9 @@ class ProductDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s3),
               RatingStars(rating: p.avgRating, count: p.reviewCount, size: 18),
+              const SizedBox(height: AppSpacing.s3),
+              // Key-Facts ohne Lesen erfassbar (kcal · Zucker · Allergene).
+              _KeyFactChips(detail: p),
               const SizedBox(height: AppSpacing.s5),
 
               // Preisblock (Automatenpreis vs. App-Preis −5 %)
@@ -173,11 +176,10 @@ class _PriceCard extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Dein App-Preis mit Abo — $pctText % unter dem Automatenpreis '
-              '(inkl. Status-Rabatt).',
+              'Dein App-Preis · $pctText % gespart',
               style: AppTypography.body(
                 size: 13,
-                weight: FontWeight.w600,
+                weight: FontWeight.w800,
                 color: AppColors.brandDark,
               ),
             ),
@@ -205,19 +207,114 @@ class _PriceCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s2),
-            Text(
-              'Mit Bördesnack24-Abo nur ${Formatters.euro(appPrice)} — '
-              'App-Nutzer sparen immer 5 %.',
-              style: AppTypography.body(
-                size: 13,
-                weight: FontWeight.w600,
-                color: AppColors.textMuted,
+            const SizedBox(height: AppSpacing.s3),
+            // Spar-Fakt als Badge statt als Satz: Preis + Rabatt sofort
+            // erfassbar, ohne den Automatenpreis zu verfälschen.
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.s3,
+                vertical: 7,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.brandLight,
+                border: Border.all(color: AppColors.brand),
+                borderRadius: BorderRadius.circular(AppRadii.pill),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.sell_outlined,
+                    size: 15,
+                    color: AppColors.brandDark,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Mit Abo ${Formatters.euro(appPrice)} · '
+                    '−$pctText % ',
+                    style: AppTypography.body(
+                      size: 12.5,
+                      weight: FontWeight.w800,
+                      color: AppColors.brandDark,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Key-Facts als Chip-Reihe direkt unter dem Titel: die drei Werte, nach
+/// denen Kund:innen am häufigsten entscheiden (Energie · Zucker · Allergene)
+/// — erfassbar ohne Lesen. Die vollständige LMIV-Tabelle folgt weiter unten.
+class _KeyFactChips extends StatelessWidget {
+  const _KeyFactChips({required this.detail});
+  final ProductDetail detail;
+
+  @override
+  Widget build(BuildContext context) {
+    String g(double v) => '${v.toStringAsFixed(1).replaceAll('.', ',')} g';
+
+    final facts = <(IconData, String, Color)>[
+      if (detail.energyKcal != null)
+        (
+          Icons.local_fire_department_outlined,
+          '${detail.energyKcal!.toStringAsFixed(0)} kcal',
+          AppColors.ink,
+        ),
+      if (detail.sugarsG != null)
+        (
+          Icons.icecream_outlined,
+          '${g(detail.sugarsG!)} Zucker',
+          AppColors.ink,
+        ),
+      (
+        detail.allergens.isEmpty
+            ? Icons.check_circle_outline
+            : Icons.info_outline,
+        detail.allergens.isEmpty
+            ? 'Ohne Allergene'
+            : '${detail.allergens.length} Allergene',
+        detail.allergens.isEmpty
+            ? AppColors.statusPositive
+            : AppColors.brandDark,
+      ),
+    ];
+    if (facts.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(
+      spacing: AppSpacing.s2,
+      runSpacing: AppSpacing.s2,
+      children: [
+        for (final (icon, label, color) in facts)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              border: Border.all(color: AppColors.borderSubtle),
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14, color: color),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

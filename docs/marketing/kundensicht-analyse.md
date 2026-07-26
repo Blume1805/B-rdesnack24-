@@ -13,7 +13,7 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
 | Intuitiv | Versteht man ohne Anleitung, was zu tun ist? |
 | Übersichtlich | Key-Facts ohne Lesen erfassbar? |
 
-## Bereits in dieser Runde umgesetzt
+## Bereits umgesetzt
 
 - **Abo-Screen**: Vergleich Kostenlos vs. App inline als Feature-Matrix
   (Haken/Strich statt Textblock); schwarze Fließtext-Karte entfernt;
@@ -21,6 +21,11 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
 - **Status & Belohnungen**: Bronze/Silber/Gold-Kacheln + farbcodierte
   Challenge-Karten.
 - **Glyphen/Umbrüche**: nicht darstellbare Zeichen ersetzt, Umbruchschutz.
+- **Produktdetail**: Key-Fact-Chips (kcal · Zucker · Allergene) direkt unter
+  dem Titel; Spar-Fakt als Badge („Mit Abo X,XX € · −5 %") statt als Satz;
+  Abonnenten-Zeile auf „Dein App-Preis · X % gespart" gekürzt.
+- **Home/Angebote**: Key-Facts-Zeile über den Angeboten — Dauerrabatt,
+  Punktestand und Coupon-Anzahl als drei große Zahlen.
 
 ## Priorisierte Empfehlungen je Screen
 
@@ -60,6 +65,6 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
 
 ## Nächste konkrete Schritte (empfohlene Reihenfolge)
 
-1. Produktdetail: Preis-Stapel + Nährwert-Chips.
-2. Home: Key-Fact-Zeile + Deal-Ersparnis als Zahl.
-3. Angebote: Ersparnis-Badges + Snap-Kacheln.
+1. Angebote: Ersparnis-Badges je Karte + horizontale Snap-Kacheln.
+2. Automatenfinder: Standort-Zeile Name · Entfernung · Status-Chip.
+3. Profil: Aktionen als Icon-Kacheln statt Liste mit Untertext.
