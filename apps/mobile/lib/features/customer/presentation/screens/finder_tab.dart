@@ -259,44 +259,38 @@ class _MachineLocationCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Text(
+                  machine.name,
+                  style: AppTypography.body(
+                    size: 20,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                // Key-Facts in EINER Zeile statt gestapelter Blöcke:
+                // Ort · Öffnungszeit · Ausstattung — sofort erfassbar.
+                Wrap(
+                  spacing: AppSpacing.s2,
+                  runSpacing: 6,
                   children: [
-                    Expanded(
-                      child: Text(
-                        machine.name,
-                        style: AppTypography.body(
-                          size: 20,
-                          weight: FontWeight.w800,
-                          color: AppColors.ink,
-                        ),
+                    if (machine.city != null && machine.city!.isNotEmpty)
+                      _FactChip(
+                        icon: Icons.place_outlined,
+                        label: machine.city!,
                       ),
+                    const _FactChip(
+                      icon: Icons.schedule,
+                      label: '24/7 offen',
+                      positive: true,
                     ),
-                    const SizedBox(width: AppSpacing.s3),
-                    const StatusBadge(
-                      label: 'offen 24/7',
-                      tone: StatusTone.positive,
-                    ),
+                    if (machine.isCooled)
+                      const _FactChip(
+                        icon: Icons.ac_unit,
+                        label: 'Gekühlt',
+                      ),
                   ],
                 ),
-                if (machine.city != null && machine.city!.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    machine.city!,
-                    style: AppTypography.body(
-                      size: 13,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-                if (machine.isCooled) ...[
-                  const SizedBox(height: AppSpacing.s3),
-                  const StatusBadge(
-                    label: 'Kühlung',
-                    tone: StatusTone.info,
-                    icon: Icons.ac_unit,
-                  ),
-                ],
                 const SizedBox(height: AppSpacing.s4),
                 Row(
                   children: [
@@ -343,6 +337,46 @@ class _MachineLocationCard extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kompakter Fakten-Chip für die Standort-Zeile (Ort · Zeit · Ausstattung).
+class _FactChip extends StatelessWidget {
+  const _FactChip({
+    required this.icon,
+    required this.label,
+    this.positive = false,
+  });
+  final IconData icon;
+  final String label;
+  final bool positive;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = positive ? AppColors.statusPositive : AppColors.textDefault;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        border: Border.all(color: AppColors.borderSubtle),
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppTypography.body(
+              size: 11.5,
+              weight: FontWeight.w700,
+              color: color,
             ),
           ),
         ],

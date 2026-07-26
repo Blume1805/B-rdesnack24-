@@ -229,6 +229,12 @@ class OffersTab extends ConsumerWidget {
                   height: 440,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
+                    // Snap-Verhalten: jede Karte rastet ein, statt frei
+                    // auszulaufen — wirkt dynamischer und lässt keine
+                    // halben Karten am Rand stehen.
+                    physics: const _CardSnapPhysics(
+                      itemExtent: _weeklyCardWidth + AppSpacing.s3,
+                    ),
                     itemCount: list.length,
                     separatorBuilder: (_, __) =>
                         const SizedBox(width: AppSpacing.s3),
@@ -1088,6 +1094,53 @@ class _MilestoneChip extends StatelessWidget {
   }
 }
 
+/// Breite einer Wochenangebots-Karte — auch Basis für das Snap-Raster.
+const double _weeklyCardWidth = 260;
+
+/// Scroll-Physik, die auf ganze Karten einrastet (wie ein Karussell), aber
+/// mehrere Karten pro Wisch erlaubt. Bewusst leichtgewichtig statt PageView:
+/// die Liste bleibt eine normale ListView mit Lazy-Building.
+class _CardSnapPhysics extends ScrollPhysics {
+  const _CardSnapPhysics({required this.itemExtent, super.parent});
+
+  final double itemExtent;
+
+  @override
+  _CardSnapPhysics applyTo(ScrollPhysics? ancestor) =>
+      _CardSnapPhysics(itemExtent: itemExtent, parent: buildParent(ancestor));
+
+  double _target(ScrollMetrics position, double velocity) {
+    final raw = position.pixels + velocity * 0.15;
+    final index = (raw / itemExtent).roundToDouble();
+    return (index * itemExtent)
+        .clamp(position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    // Über-/Unterscroll dem Parent überlassen (Bounce am Rand bleibt).
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final target = _target(position, velocity);
+    if ((target - position.pixels).abs() < 0.5) return null;
+    return ScrollSpringSimulation(
+      spring,
+      position.pixels,
+      target,
+      velocity,
+      tolerance: toleranceFor(position),
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
+
 /// Wochenangebots-Slot mit Rating, Aktivieren-Button und Tap→Produkt-Detail.
 class _WeeklyOfferSlot extends ConsumerWidget {
   const _WeeklyOfferSlot({required this.offer});
@@ -1119,7 +1172,7 @@ class _WeeklyOfferSlot extends ConsumerWidget {
       discountPercent: offer.discountPercent ?? 10,
       imageUrl: offer.imageUrl,
       validUntil: offer.validTo,
-      width: 260,
+      width: _weeklyCardWidth,
       onTap: offer.productId == null ? null : openDetail,
       rating: ratingSummary?.avgRating,
       reviewCount: ratingSummary?.reviewCount,

@@ -26,6 +26,13 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
   Abonnenten-Zeile auf „Dein App-Preis · X % gespart" gekürzt.
 - **Home/Angebote**: Key-Facts-Zeile über den Angeboten — Dauerrabatt,
   Punktestand und Coupon-Anzahl als drei große Zahlen.
+- **Angebotskarten**: Ersparnis als konkreter Euro-Betrag („spart 0,30 €")
+  als Badge über dem Bild, zusätzlich zum %-Anker; Wochenangebote rasten
+  beim Wischen auf ganze Karten ein (Snap).
+- **Automatenfinder**: Standort-Fakten in einer Chip-Zeile (Ort · 24/7 ·
+  Gekühlt) statt drei gestapelter Blöcke.
+- **Profil**: Hauptaktionen als Icon-Kachel-Grid (Stammdaten, Passwort,
+  Abo, Status, Belege) statt Listenzeilen mit Untertext-Sätzen.
 
 ## Priorisierte Empfehlungen je Screen
 
@@ -63,8 +70,15 @@ Leitprinzip: **Key-Facts sofort sichtbar — kurze Stichpunkte statt Fließtext.
 4. **Font-sichere Zeichen** (keine Pfeile/≈, die im App-Font fehlen).
 5. **CTA immer als Pille** in Ink mit Gold-Text — ein klarer Nächster-Schritt.
 
+## Offen / bewusst nicht umgesetzt
+
+* **Entfernung im Automatenfinder.** Die `machines`-Tabelle führt keine
+  Geo-Koordinaten, und die App fragt keine Standortfreigabe ab. Eine
+  Entfernungsangabe wäre erfunden. Voraussetzung wären: lat/long je Automat
+  (Migration) + Standort-Consent (DSGVO) + `geolocator`-Paket.
+
 ## Nächste konkrete Schritte (empfohlene Reihenfolge)
 
-1. Angebote: Ersparnis-Badges je Karte + horizontale Snap-Kacheln.
-2. Automatenfinder: Standort-Zeile Name · Entfernung · Status-Chip.
-3. Profil: Aktionen als Icon-Kacheln statt Liste mit Untertext.
+1. Belegarchiv: Filter-Chips mit Trefferzahl, Summe je Zeitraum als Zahl.
+2. Spenden: Fortschritt je Projekt als „X von 500 €" statt Fließtext.
+3. Entfernung im Finder (siehe „Offen" — braucht Geodaten + Consent).

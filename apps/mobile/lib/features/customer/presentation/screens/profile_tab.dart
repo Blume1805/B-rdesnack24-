@@ -89,47 +89,52 @@ class ProfileTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.s5),
-        _ProfileGroup(
-          eyebrow: 'Zugang & Profil',
+        // Hauptaktionen als Icon-Kacheln: kurzes Label statt Untertext-Satz,
+        // alles auf einen Blick statt fünf gestapelter Listenzeilen.
+        const Eyebrow('Zugang & Profil'),
+        const SizedBox(height: AppSpacing.s3),
+        GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: AppSpacing.s2,
+          crossAxisSpacing: AppSpacing.s2,
+          childAspectRatio: 0.95,
           children: [
-            _ProfileRow(
+            _ActionTile(
               key: CustomerAnchors.kundennummer,
               icon: Icons.badge_outlined,
-              title: 'Stammdaten',
-              subtitle: 'Kundennummer, Name, Anschrift',
+              label: 'Stammdaten',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const MasterDataScreen()),
               ),
             ),
-            _ProfileRow(
+            _ActionTile(
               key: CustomerAnchors.passwordRow,
               icon: Icons.lock_outline,
-              title: 'Passwort ändern',
+              label: 'Passwort',
               onTap: () => _changePassword(context, ref, repo),
             ),
-            _ProfileRow(
+            _ActionTile(
               icon: Icons.workspace_premium_outlined,
-              title: 'Mein Abo',
-              subtitle: 'Monats- oder Jahres-Abo wählen',
-              iconColor: AppColors.brand,
+              label: 'Mein Abo',
+              highlight: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
               ),
             ),
-            _ProfileRow(
+            _ActionTile(
               icon: Icons.emoji_events_outlined,
-              title: 'Status & Belohnungen',
-              subtitle: 'Stufe, Dauerrabatt, Challenges & Abzeichen',
-              iconColor: AppColors.brand,
+              label: 'Status',
+              highlight: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RewardsScreen()),
               ),
             ),
-            _ProfileRow(
+            _ActionTile(
               icon: Icons.receipt_long_outlined,
-              title: 'Belegarchiv',
-              subtitle: 'Käufe durchsuchen, Beleg als PDF, CSV-Export',
-              iconColor: AppColors.brand,
+              label: 'Belege',
+              highlight: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ReceiptsScreen()),
               ),
@@ -502,6 +507,74 @@ class ProfileTab extends ConsumerWidget {
       return;
     }
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+}
+
+/// Kompakte Aktions-Kachel: Icon + Kurzlabel, kein Untertext-Satz.
+/// [highlight] hebt die Abo-/Vorteils-Aktionen in Markenfarbe hervor.
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.highlight = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: AppColors.surfaceCard,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 6,
+              vertical: AppSpacing.s3,
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: highlight ? AppColors.brand : AppColors.borderSubtle,
+                width: highlight ? 1.4 : 1,
+              ),
+              borderRadius: BorderRadius.circular(AppRadii.md),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 26,
+                  color: highlight ? AppColors.brandDark : AppColors.ink,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.body(
+                    size: 11.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ).copyWith(height: 1.15),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

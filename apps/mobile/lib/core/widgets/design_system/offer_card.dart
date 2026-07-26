@@ -94,6 +94,30 @@ class OfferCard extends StatelessWidget {
                   ),
                 ),
               ),
+            // Ersparnis als konkreter Euro-Betrag — die Zahl, die zählt,
+            // ohne dass man die beiden Preise voneinander abziehen muss.
+            if (regularPrice - offerPrice > 0.004)
+              Positioned(
+                top: AppSpacing.s2,
+                right: AppSpacing.s2,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.brand,
+                    border: Border.all(color: AppColors.ink, width: 1.2),
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                  ),
+                  child: Text(
+                    'spart ${Formatters.euro(regularPrice - offerPrice)}',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
         Container(
