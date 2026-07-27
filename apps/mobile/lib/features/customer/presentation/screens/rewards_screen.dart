@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/motion/feedback.dart';
+import '../../../../core/motion/motion.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -13,8 +15,17 @@ import '../controllers/customer_providers.dart';
 /// 5 % Abo-Rabatt), laufende Challenges mit Fortschritt und die Sammel-
 /// Badges. Alle Werte kommen aus der RPC my_gamification_status
 /// (Berechnung serverseitig aus der Kaufhistorie).
-class RewardsScreen extends ConsumerWidget {
+class RewardsScreen extends ConsumerStatefulWidget {
   const RewardsScreen({super.key});
+
+  @override
+  ConsumerState<RewardsScreen> createState() => _RewardsScreenState();
+}
+
+class _RewardsScreenState extends ConsumerState<RewardsScreen> {
+  /// Zuletzt gefeierte Stufe — verhindert, dass die Feier bei jedem
+  /// Rebuild erneut losgeht. Nur ein echter Aufstieg löst sie aus.
+  static String? _celebratedTier;
 
   static const _tierColors = <String, Color>{
     'basis': Color(0xFF9AA0A6),
@@ -54,8 +65,25 @@ class RewardsScreen extends ConsumerWidget {
     }
   }
 
+  /// Feiert einen Stufenaufstieg genau einmal — und nur ab Bronze
+  /// (Basis ist kein Aufstieg). Sparsam: nur echte Meilensteine.
+  void _maybeCelebrate(Map<String, dynamic> data) {
+    final tier = Map<String, dynamic>.from(data['tier'] as Map? ?? const {});
+    final code = tier['code'] as String?;
+    if (code == null || code == 'basis') return;
+    if (_celebratedTier == code) return;
+    final first = _celebratedTier == null;
+    _celebratedTier = code;
+    // Beim allerersten Laden nicht feiern — sonst knallt es bei jedem
+    // App-Start, obwohl gar nichts erreicht wurde.
+    if (first) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showCelebration(context);
+    });
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final async = ref.watch(myGamificationProvider);
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
@@ -73,57 +101,60 @@ class RewardsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        data: (data) => RefreshIndicator(
-          color: AppColors.brand,
-          onRefresh: () async => ref.invalidate(myGamificationProvider),
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.s4),
-            children: [
-              _TierCard(data: data),
-              const SizedBox(height: AppSpacing.s4),
-              _DiscountCard(data: data),
-              const SizedBox(height: AppSpacing.s5),
-              const _SectionTitle(
-                eyebrow: 'Dauerrabatt',
-                title: 'Dein Rabatt wächst mit',
-              ),
-              const SizedBox(height: AppSpacing.s3),
-              TierTiles(
-                currentCode: (Map<String, dynamic>.from(
-                  data['tier'] as Map? ?? const {},
-                )['code'] as String?),
-              ),
-              const SizedBox(height: AppSpacing.s5),
-              const _SectionTitle(
-                eyebrow: 'Challenges',
-                title: 'Aktuelle Herausforderungen',
-              ),
-              const SizedBox(height: AppSpacing.s3),
-              for (final (i, c)
-                  in (data['challenges'] as List? ?? const []).indexed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-                  child: _ChallengeCard(
-                    c: Map<String, dynamic>.from(c as Map),
-                    tierColor: _challengeTierColors[i % 3],
-                  ),
+        data: (data) {
+          _maybeCelebrate(data);
+          return RefreshIndicator(
+            color: AppColors.brand,
+            onRefresh: () async => ref.invalidate(myGamificationProvider),
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.s4),
+              children: [
+                _TierCard(data: data),
+                const SizedBox(height: AppSpacing.s4),
+                _DiscountCard(data: data),
+                const SizedBox(height: AppSpacing.s5),
+                const _SectionTitle(
+                  eyebrow: 'Dauerrabatt',
+                  title: 'Dein Rabatt wächst mit',
                 ),
-              const SizedBox(height: AppSpacing.s2),
-              const _SectionTitle(
-                eyebrow: 'Sammlung',
-                title: 'Deine Abzeichen',
-              ),
-              const SizedBox(height: AppSpacing.s3),
-              _BadgeGrid(
-                badges: (data['badges'] as List? ?? const [])
-                    .map((b) => Map<String, dynamic>.from(b as Map))
-                    .toList(),
-                iconOf: _badgeIcon,
-              ),
-              const SizedBox(height: AppSpacing.s4),
-            ],
-          ),
-        ),
+                const SizedBox(height: AppSpacing.s3),
+                TierTiles(
+                  currentCode: (Map<String, dynamic>.from(
+                    data['tier'] as Map? ?? const {},
+                  )['code'] as String?),
+                ),
+                const SizedBox(height: AppSpacing.s5),
+                const _SectionTitle(
+                  eyebrow: 'Challenges',
+                  title: 'Aktuelle Herausforderungen',
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                for (final (i, c)
+                    in (data['challenges'] as List? ?? const []).indexed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s3),
+                    child: _ChallengeCard(
+                      c: Map<String, dynamic>.from(c as Map),
+                      tierColor: _challengeTierColors[i % 3],
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.s2),
+                const _SectionTitle(
+                  eyebrow: 'Sammlung',
+                  title: 'Deine Abzeichen',
+                ),
+                const SizedBox(height: AppSpacing.s3),
+                _BadgeGrid(
+                  badges: (data['badges'] as List? ?? const [])
+                      .map((b) => Map<String, dynamic>.from(b as Map))
+                      .toList(),
+                  iconOf: _badgeIcon,
+                ),
+                const SizedBox(height: AppSpacing.s4),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -163,7 +194,7 @@ class _TierCard extends StatelessWidget {
     final tier = Map<String, dynamic>.from(data['tier'] as Map? ?? {});
     final code = (tier['code'] as String?) ?? 'basis';
     final label = (tier['label'] as String?) ?? 'Basis';
-    final color = RewardsScreen._tierColors[code] ?? AppColors.brand;
+    final color = _RewardsScreenState._tierColors[code] ?? AppColors.brand;
     final progress = ((tier['progress'] as num?) ?? 0).toDouble();
     final nextLabel = tier['next_label'] as String?;
     final nextMin = ((tier['next_min_eur'] as num?) ?? 0).toDouble();
@@ -215,13 +246,23 @@ class _TierCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s3),
+          // Fortschritt baut sich beim Erscheinen auf, statt fertig
+          // dazustehen — macht den Abstand zur nächsten Stufe spürbar.
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
-              minHeight: 10,
-              backgroundColor: AppColors.borderSubtle,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: progress.clamp(0.0, 1.0)),
+              duration: Motion.duration(
+                context,
+                const Duration(milliseconds: 700),
+              ),
+              curve: AppMotion.easeOut,
+              builder: (context, v, _) => LinearProgressIndicator(
+                value: v,
+                minHeight: 10,
+                backgroundColor: AppColors.borderSubtle,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

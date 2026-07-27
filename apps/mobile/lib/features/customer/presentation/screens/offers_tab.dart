@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/motion/feedback.dart';
 import '../../../../core/motion/motion.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -723,9 +724,7 @@ class _PersonalActivationFooter extends ConsumerWidget {
                     ClipboardData(text: offer.redemptionCode),
                   );
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Code kopiert.')),
-                    );
+                    showSuccessToast(context, 'Code kopiert.');
                   }
                 },
               ),
@@ -1337,7 +1336,15 @@ class _ActivationButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
-        onPressed: busy ? null : onActivate,
+        // Erfolgs-Feedback direkt an der Aktion: Haken-Toast + Haptik.
+        onPressed: busy
+            ? null
+            : () async {
+                await onActivate();
+                if (context.mounted) {
+                  showSuccessToast(context, 'Coupon aktiviert.');
+                }
+              },
         icon: busy
             ? const SizedBox(
                 width: 14,
