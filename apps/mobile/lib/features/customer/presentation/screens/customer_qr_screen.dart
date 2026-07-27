@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../../core/motion/motion.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../auth/presentation/controllers/auth_providers.dart';
@@ -58,24 +59,28 @@ class CustomerQrScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.s6),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.s5),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadii.lg),
-                ),
-                child: QrImageView(
-                  data: payload,
-                  version: QrVersions.auto,
-                  size: 260,
-                  gapless: true,
-                  eyeStyle: const QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: AppColors.ink,
+              // Ruhiger Gold-Puls um den Code: führt den Blick auf die
+              // Fläche, die an den Scanner gehalten wird.
+              PulseGlow(
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.s5),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadii.lg),
                   ),
-                  dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: AppColors.ink,
+                  child: QrImageView(
+                    data: payload,
+                    version: QrVersions.auto,
+                    size: 260,
+                    gapless: true,
+                    eyeStyle: const QrEyeStyle(
+                      eyeShape: QrEyeShape.square,
+                      color: AppColors.ink,
+                    ),
+                    dataModuleStyle: const QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.square,
+                      color: AppColors.ink,
+                    ),
                   ),
                 ),
               ),

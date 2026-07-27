@@ -22,11 +22,51 @@ import 'subscription_value_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
 
-class OffersTab extends ConsumerWidget {
+class OffersTab extends ConsumerStatefulWidget {
   const OffersTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OffersTab> createState() => _OffersTabState();
+}
+
+class _OffersTabState extends ConsumerState<OffersTab> {
+  final _scroll = ScrollController();
+
+  /// Sichtbarkeit der Suchleiste: blendet beim Herunterscrollen weich aus
+  /// und beim Hochscrollen wieder ein — mehr Platz für die Inhalte, ohne
+  /// die Suche zu verstecken.
+  bool _searchVisible = true;
+  double _lastOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final offset = _scroll.offset;
+    // Kleine Schwelle: verhindert Flackern bei minimalen Bewegungen.
+    if ((offset - _lastOffset).abs() < 12) return;
+    final scrollingDown = offset > _lastOffset;
+    _lastOffset = offset;
+    // Ganz oben bleibt die Suche immer sichtbar.
+    final visible = !scrollingDown || offset < 80;
+    if (visible != _searchVisible) {
+      setState(() => _searchVisible = visible);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final offers = ref.watch(offersProvider);
     final personals = ref.watch(myPersonalOffersProvider);
     final loyalty = ref.watch(myLoyaltyStatusProvider);
@@ -49,6 +89,7 @@ class OffersTab extends ConsumerWidget {
       },
       color: AppColors.brand,
       child: ListView(
+        controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s5,
           AppSpacing.s5,
@@ -57,8 +98,25 @@ class OffersTab extends ConsumerWidget {
         ),
         children: [
           // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
-          const _ProductSearchBar(),
-          const SizedBox(height: AppSpacing.s4),
+          // Blendet beim Herunterscrollen weich aus (Höhe + Deckkraft),
+          // damit die Angebote mehr Platz bekommen. Bei reduzierter
+          // Bewegung schaltet AnimatedSize/Opacity auf Duration.zero.
+          ClipRect(
+            child: AnimatedAlign(
+              alignment: Alignment.topCenter,
+              heightFactor: _searchVisible ? 1 : 0,
+              duration: Motion.duration(context, AppMotion.base),
+              curve: AppMotion.easeOut,
+              child: AnimatedOpacity(
+                opacity: _searchVisible ? 1 : 0,
+                duration: Motion.duration(context, AppMotion.fast),
+                child: const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.s4),
+                  child: _ProductSearchBar(),
+                ),
+              ),
+            ),
+          ),
 
           // 0.1. ── Key-Facts: Rabatt · Punkte · Coupons auf einen Blick ─
           // Die drei Zahlen, die den Kunden interessieren — ohne Lesen
@@ -200,10 +258,17 @@ class OffersTab extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.s4),
             offers.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.s6),
-                  child: CircularProgressIndicator(color: AppColors.brand),
+              // Skeleton statt Spinner: die Seite behält ihre Form, der
+              // Inhalt „füllt sich" — kein Layout-Sprung beim Eintreffen.
+              loading: () => SizedBox(
+                height: 440,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 3,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AppSpacing.s3),
+                  itemBuilder: (_, __) => const _OfferCardSkeleton(),
                 ),
               ),
               error: (e, _) => AppCard(
@@ -398,13 +463,60 @@ class _FactTile extends StatelessWidget {
   }
 }
 
+/// Platzhalter einer Angebotskarte während des Ladens — gleiche Maße wie
+/// die echte Karte, damit beim Eintreffen nichts springt.
+class _OfferCardSkeleton extends StatelessWidget {
+  const _OfferCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _weeklyCardWidth,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          border: Border.all(color: AppColors.borderSubtle),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 1.1,
+              child: SkeletonBox(radius: 0, height: double.infinity),
+            ),
+            Padding(
+              padding: EdgeInsets.all(AppSpacing.s3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(height: 22),
+                  SizedBox(height: AppSpacing.s3),
+                  SkeletonBox(height: 14),
+                  SizedBox(height: 8),
+                  SkeletonBox(width: 130, height: 12),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PersonalLoading extends StatelessWidget {
   const _PersonalLoading();
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.s6),
-      child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
+    // Skeleton statt Spinner — die Liste behält ihre Form beim Laden.
+    return const Column(
+      children: [
+        SkeletonCard(),
+        SizedBox(height: AppSpacing.s2),
+        SkeletonCard(),
+      ],
     );
   }
 }
@@ -1393,42 +1505,49 @@ class _FavoritesSection extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.s2),
-        top.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.brand),
-            ),
+        // Weicher Wechsel Skeleton → Karten: kein Sprung, keine leere
+        // Lücke zwischen Ladezustand und Inhalt.
+        AnimatedSwitcher(
+          duration: Motion.duration(context, AppMotion.base),
+          switchInCurve: AppMotion.easeOut,
+          switchOutCurve: AppMotion.easeOut,
+          child: top.when(
+            loading: () => const _FavoritesSkeleton(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (list) => list.isEmpty
+                ? AppCard(
+                    color: AppColors.surfaceAlt,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s4,
+                      vertical: AppSpacing.s3,
+                    ),
+                    child: Text(
+                      'Noch keine Bewertungen in dieser Kategorie.',
+                      style: AppTypography.body(
+                        size: 13,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  )
+                : SizedBox(
+                    key: ValueKey('fav-$category-${list.length}'),
+                    height: 220,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppSpacing.s3),
+                      // Gestaffeltes Einlaufen: Platz 1 zuerst, dann 2 und 3.
+                      itemBuilder: (context, i) => FadeInUp(
+                        index: i,
+                        child: _FavoriteCard(
+                          product: list[i],
+                          rank: i + 1,
+                        ),
+                      ),
+                    ),
+                  ),
           ),
-          error: (_, __) => const SizedBox.shrink(),
-          data: (list) => list.isEmpty
-              ? AppCard(
-                  color: AppColors.surfaceAlt,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s4,
-                    vertical: AppSpacing.s3,
-                  ),
-                  child: Text(
-                    'Noch keine Bewertungen in dieser Kategorie.',
-                    style: AppTypography.body(
-                      size: 13,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                )
-              : SizedBox(
-                  height: 220,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.s3),
-                    itemBuilder: (context, i) => _FavoriteCard(
-                      product: list[i],
-                      rank: i + 1,
-                    ),
-                  ),
-                ),
         ),
       ],
     );
@@ -1440,6 +1559,38 @@ class _FavoritesSection extends ConsumerWidget {
         'Eis' => Icons.icecream_outlined,
         _ => Icons.category_outlined,
       };
+}
+
+/// Ladezustand der Favoriten-Sektion: drei Karten-Platzhalter in exakt der
+/// Größe der echten Karten, damit beim Datenwechsel nichts springt.
+class _FavoritesSkeleton extends StatelessWidget {
+  const _FavoritesSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 220,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 3,
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s3),
+        itemBuilder: (context, __) => const SizedBox(
+          width: 180,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SkeletonBox(height: 135, radius: AppRadii.md),
+              SizedBox(height: AppSpacing.s3),
+              SkeletonBox(height: 12),
+              SizedBox(height: 8),
+              SkeletonBox(width: 90, height: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _FavoriteCard extends StatelessWidget {

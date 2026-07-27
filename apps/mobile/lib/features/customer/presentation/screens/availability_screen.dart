@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/motion/motion.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -71,8 +72,17 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     return Scaffold(
       appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brand),
+        // Skeletons statt Spinner: die Liste steht schon in ihrer späteren
+        // Form da, der Wechsel auf echte Daten wirkt dadurch ruhiger.
+        loading: () => ListView(
+          padding: const EdgeInsets.all(AppSpacing.s5),
+          children: const [
+            SkeletonCard(height: 120),
+            SizedBox(height: AppSpacing.s2),
+            SkeletonCard(height: 120),
+            SizedBox(height: AppSpacing.s2),
+            SkeletonCard(height: 120),
+          ],
         ),
         error: (e, _) => Center(
           child: Padding(
@@ -229,8 +239,12 @@ class _StockRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                '$qty',
+              // Live-Bestand: die Stückzahl zählt weich auf den neuen Wert,
+              // wenn ein Verkauf per Realtime hereinkommt — kein harter
+              // Zahlensprung.
+              AnimatedCountUp(
+                value: qty.toDouble(),
+                format: (v) => v.round().toString(),
                 style: AppTypography.display(
                   size: 28,
                   weight: FontWeight.w800,
@@ -262,16 +276,21 @@ class _StockRow extends StatelessWidget {
             const SizedBox(height: AppSpacing.s3),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadii.pill),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 6,
-                backgroundColor: AppColors.borderSubtle,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ratio < 0.15
-                      ? AppColors.statusCritical
-                      : ratio < 0.35
-                          ? AppColors.statusWarning
-                          : AppColors.brand,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: ratio, end: ratio),
+                duration: Motion.duration(context, AppMotion.slow),
+                curve: AppMotion.easeOut,
+                builder: (context, v, _) => LinearProgressIndicator(
+                  value: v,
+                  minHeight: 6,
+                  backgroundColor: AppColors.borderSubtle,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ratio < 0.15
+                        ? AppColors.statusCritical
+                        : ratio < 0.35
+                            ? AppColors.statusWarning
+                            : AppColors.brand,
+                  ),
                 ),
               ),
             ),

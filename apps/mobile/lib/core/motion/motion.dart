@@ -247,6 +247,115 @@ class _SkeletonBoxState extends State<SkeletonBox>
   }
 }
 
+/// Blendet das Kind beim Erscheinen weich ein und schiebt es dabei leicht
+/// nach oben.
+///
+/// [index] staffelt den Start (Stagger), damit Listen nicht als Block
+/// aufploppen, sondern nacheinander „einlaufen". Umgesetzt über eine
+/// [Interval]-Kurve statt Timer — dadurch bleibt das Widget stateless und
+/// es laufen keine Timer weiter, wenn die Liste vorher weggeräumt wird.
+class FadeInUp extends StatelessWidget {
+  const FadeInUp({
+    super.key,
+    required this.child,
+    this.index = 0,
+    this.offset = 12,
+  });
+
+  final Widget child;
+  final int index;
+  final double offset;
+
+  @override
+  Widget build(BuildContext context) {
+    const step = Duration(milliseconds: 70);
+    final delay = step * index;
+    final total = AppMotion.slow + delay;
+    final start = delay.inMilliseconds / total.inMilliseconds;
+    final dy = Motion.offset(context, offset);
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Motion.duration(context, total),
+      curve: Interval(start, 1, curve: AppMotion.easeOut),
+      builder: (context, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * dy),
+          child: child,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Ruhiger Puls-Ring um ein Element — signalisiert „hier passiert etwas".
+///
+/// Eingesetzt am QR-Code der Kundenkarte: der wandernde Glow lenkt den Blick
+/// auf die Fläche, die an den Scanner gehalten werden soll. Bewusst langsam
+/// (1,8 s) und mit geringer Deckkraft, damit es nicht blinkt. Bei reduzierter
+/// Bewegung entfällt der Puls komplett.
+class PulseGlow extends StatefulWidget {
+  const PulseGlow({
+    super.key,
+    required this.child,
+    this.color = AppColors.brand,
+    this.maxSpread = 18,
+  });
+
+  final Widget child;
+  final Color color;
+  final double maxSpread;
+
+  @override
+  State<PulseGlow> createState() => _PulseGlowState();
+}
+
+class _PulseGlowState extends State<PulseGlow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _c.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (Motion.reduced(context)) return widget.child;
+    return AnimatedBuilder(
+      animation: CurvedAnimation(parent: _c, curve: AppMotion.easeInOut),
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_c.value);
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: 0.10 + 0.22 * t),
+                blurRadius: 12 + widget.maxSpread * t,
+                spreadRadius: widget.maxSpread * t * 0.5,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
 /// Fertige Skeleton-Karte für Listen (Bild-/Textzeilen-Platzhalter).
 class SkeletonCard extends StatelessWidget {
   const SkeletonCard({super.key, this.height = 92});
