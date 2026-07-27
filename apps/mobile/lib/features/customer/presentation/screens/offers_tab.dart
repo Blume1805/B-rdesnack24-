@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/motion/motion.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -238,8 +239,11 @@ class OffersTab extends ConsumerWidget {
                     itemCount: list.length,
                     separatorBuilder: (_, __) =>
                         const SizedBox(width: AppSpacing.s3),
-                    itemBuilder: (context, i) =>
-                        _WeeklyOfferSlot(offer: list[i]),
+                    itemBuilder: (context, i) => _CarouselItem(
+                      index: i,
+                      itemExtent: _weeklyCardWidth + AppSpacing.s3,
+                      child: _WeeklyOfferSlot(offer: list[i]),
+                    ),
                   ),
                 );
               },
@@ -287,6 +291,9 @@ class _KeyFactsRow extends ConsumerWidget {
           child: _FactTile(
             icon: Icons.sell_outlined,
             value: '$pct %',
+            numeric: effRate * 100,
+            format: (v) =>
+                '${v.toStringAsFixed(v % 1 == 0 ? 0 : 1).replaceAll('.', ',')} %',
             label: 'Dauerrabatt',
           ),
         ),
@@ -295,6 +302,8 @@ class _KeyFactsRow extends ConsumerWidget {
           child: _FactTile(
             icon: Icons.stars_outlined,
             value: points == null ? '—' : '$points',
+            numeric: points?.toDouble(),
+            format: (v) => v.round().toString(),
             label: 'Punkte',
           ),
         ),
@@ -303,6 +312,8 @@ class _KeyFactsRow extends ConsumerWidget {
           child: _FactTile(
             icon: Icons.confirmation_number_outlined,
             value: coupons == null ? '—' : '$coupons',
+            numeric: coupons?.toDouble(),
+            format: (v) => v.round().toString(),
             label: coupons == 1 ? 'Coupon' : 'Coupons',
           ),
         ),
@@ -317,10 +328,17 @@ class _FactTile extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
+    this.numeric,
+    this.format,
   });
   final IconData icon;
   final String value;
   final String label;
+
+  /// Optionaler Zahlenwert — wenn gesetzt, wird animiert hochgezählt
+  /// (sonst steht [value] statisch, z. B. „—" beim Laden).
+  final double? numeric;
+  final String Function(double)? format;
 
   @override
   Widget build(BuildContext context) {
@@ -340,15 +358,27 @@ class _FactTile extends StatelessWidget {
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              maxLines: 1,
-              style: AppTypography.display(
-                size: 20,
-                weight: FontWeight.w800,
-                color: AppColors.ink,
-              ),
-            ),
+            // Zahlen zählen beim Erscheinen hoch — der Blick bleibt an der
+            // Kennzahl hängen, ohne dass der Wert später „springt".
+            child: numeric == null
+                ? Text(
+                    value,
+                    maxLines: 1,
+                    style: AppTypography.display(
+                      size: 20,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  )
+                : AnimatedCountUp(
+                    value: numeric!,
+                    format: format!,
+                    style: AppTypography.display(
+                      size: 20,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
           ),
           const SizedBox(height: 1),
           Text(
@@ -1096,6 +1126,54 @@ class _MilestoneChip extends StatelessWidget {
 
 /// Breite einer Wochenangebots-Karte — auch Basis für das Snap-Raster.
 const double _weeklyCardWidth = 260;
+
+/// Karussell-Effekt: die Karte am linken Rand (Fokusposition) steht auf
+/// 100 %, weiter außen liegende Karten werden leicht verkleinert und in der
+/// Deckkraft reduziert. Dadurch führt der Blick automatisch zur aktiven
+/// Karte, ohne dass Inhalte verschwinden.
+///
+/// Umgesetzt über die Scroll-Position statt über einen PageView, damit die
+/// Liste lazy bleibt. Bei „Bewegung reduzieren" wird der Effekt deaktiviert.
+class _CarouselItem extends StatelessWidget {
+  const _CarouselItem({
+    required this.index,
+    required this.itemExtent,
+    required this.child,
+  });
+
+  final int index;
+  final double itemExtent;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Motion.reduced(context)) return child;
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position == null) return child;
+
+    return AnimatedBuilder(
+      animation: position,
+      builder: (context, inner) {
+        // Abstand dieser Karte zur Fokusposition in Karten-Einheiten.
+        final offset = position.hasPixels
+            ? (index * itemExtent - position.pixels) / itemExtent
+            : 0.0;
+        final d = offset.abs().clamp(0.0, 1.0);
+        final scale = 1.0 - 0.06 * d; // 100 % → 94 %
+        final opacity = 1.0 - 0.35 * d; // 100 % → 65 %
+        return Opacity(
+          opacity: opacity,
+          child: Transform.scale(
+            scale: scale,
+            alignment: Alignment.center,
+            child: inner,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
 
 /// Scroll-Physik, die auf ganze Karten einrastet (wie ein Karussell), aber
 /// mehrere Karten pro Wisch erlaubt. Bewusst leichtgewichtig statt PageView:

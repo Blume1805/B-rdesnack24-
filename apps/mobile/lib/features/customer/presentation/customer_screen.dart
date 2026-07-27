@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,47 +78,56 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
         child: const Icon(Icons.qr_code_2, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: AppColors.surfaceCard,
-        elevation: 8,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        padding: EdgeInsets.zero,
-        child: SizedBox(
-          height: 68,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                icon: Icons.local_offer_outlined,
-                selectedIcon: Icons.local_offer,
-                label: 'Angebote',
-                selected: _index == 0,
-                onTap: () => setState(() => _index = 0),
+      // Schwebende Navigation mit Blur-Hintergrund: der Inhalt scrollt
+      // sichtbar darunter durch, bleibt aber durch die Milchglas-Schicht
+      // lesbar. ClipRect begrenzt den teuren BackdropFilter exakt auf die
+      // Leiste (sonst filtert er den halben Baum).
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: BottomAppBar(
+            color: AppColors.surfaceCard.withValues(alpha: 0.82),
+            elevation: 0,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 8,
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: 68,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavItem(
+                    icon: Icons.local_offer_outlined,
+                    selectedIcon: Icons.local_offer,
+                    label: 'Angebote',
+                    selected: _index == 0,
+                    onTap: () => setState(() => _index = 0),
+                  ),
+                  _NavItem(
+                    icon: Icons.place_outlined,
+                    selectedIcon: Icons.place,
+                    label: 'Automaten',
+                    selected: _index == 1,
+                    onTap: () => setState(() => _index = 1),
+                  ),
+                  const SizedBox(width: 56), // Platz für den FAB
+                  _NavItem(
+                    icon: Icons.volunteer_activism_outlined,
+                    selectedIcon: Icons.volunteer_activism,
+                    label: 'Meine Spenden',
+                    selected: _index == 2,
+                    onTap: () => setState(() => _index = 2),
+                  ),
+                  _NavItem(
+                    icon: Icons.person_outline,
+                    selectedIcon: Icons.person,
+                    label: 'Profil',
+                    selected: _index == 3,
+                    onTap: () => setState(() => _index = 3),
+                  ),
+                ],
               ),
-              _NavItem(
-                icon: Icons.place_outlined,
-                selectedIcon: Icons.place,
-                label: 'Automaten',
-                selected: _index == 1,
-                onTap: () => setState(() => _index = 1),
-              ),
-              const SizedBox(width: 56), // Platz für den FAB
-              _NavItem(
-                icon: Icons.volunteer_activism_outlined,
-                selectedIcon: Icons.volunteer_activism,
-                label: 'Meine Spenden',
-                selected: _index == 2,
-                onTap: () => setState(() => _index = 2),
-              ),
-              _NavItem(
-                icon: Icons.person_outline,
-                selectedIcon: Icons.person,
-                label: 'Profil',
-                selected: _index == 3,
-                onTap: () => setState(() => _index = 3),
-              ),
-            ],
+            ),
           ),
         ),
       ),

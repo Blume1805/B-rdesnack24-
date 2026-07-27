@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../motion/motion.dart';
 import 'app_tokens.dart';
 import 'app_typography.dart';
 
@@ -34,6 +35,19 @@ abstract final class AppTheme {
       textTheme: text,
       splashFactory: InkRipple.splashFactory,
       visualDensity: VisualDensity.adaptivePlatformDensity,
+
+      // Einheitlicher Seitenwechsel: Fade + leichter Slide-Up statt der
+      // je Plattform unterschiedlichen Default-Übergänge. Respektiert
+      // „Bewegung reduzieren" (dann reines Fade) — siehe core/motion.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.windows: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.linux: FadeSlidePageTransitionsBuilder(),
+        },
+      ),
 
       // AppBar — cream mit ink-text und dünner unterer Border via Elevation 0
       appBarTheme: AppBarTheme(
