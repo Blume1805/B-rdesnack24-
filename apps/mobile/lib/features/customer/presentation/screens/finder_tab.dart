@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
@@ -35,9 +36,8 @@ class _FinderTabState extends ConsumerState<FinderTab> {
           child: Text('$e', style: AppTypography.body(size: 14)),
         ),
       ),
-      data: (list) => RefreshIndicator(
+      data: (list) => BrandRefresh(
         onRefresh: () async => ref.invalidate(machinesProvider),
-        color: AppColors.brand,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.s5,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -20,8 +21,7 @@ class HistoryTab extends ConsumerWidget {
     final donations = ref.watch(myDonationsByPurchaseProvider);
     final donationSummary = ref.watch(myDonationSummaryProvider);
 
-    return RefreshIndicator(
-      color: AppColors.brand,
+    return BrandRefresh(
       onRefresh: () async {
         ref
           ..invalidate(myDonationsByPurchaseProvider)

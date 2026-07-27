@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -124,8 +125,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
             ..sort();
           final rows = _filter(all);
           final sum = rows.fold<double>(0, (a, r) => a + r.totalGross);
-          return RefreshIndicator(
-            color: AppColors.brand,
+          return BrandRefresh(
             onRefresh: () async => ref.invalidate(myReceiptsProvider),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(

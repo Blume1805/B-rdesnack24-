@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/motion/feedback.dart';
 import '../../../../core/motion/motion.dart';
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -103,8 +104,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
         ),
         data: (data) {
           _maybeCelebrate(data);
-          return RefreshIndicator(
-            color: AppColors.brand,
+          return BrandRefresh(
             onRefresh: () async => ref.invalidate(myGamificationProvider),
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.s4),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -17,8 +18,7 @@ class NewsScreen extends ConsumerWidget {
     final news = ref.watch(newsProvider);
     return Scaffold(
       appBar: const HeroAppBar(title: Text('News')),
-      body: RefreshIndicator(
-        color: AppColors.brand,
+      body: BrandRefresh(
         onRefresh: () async => ref.invalidate(newsProvider),
         child: news.when(
           loading: () => const Center(

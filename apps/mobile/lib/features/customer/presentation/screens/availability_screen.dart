@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/motion/motion.dart';
 import '../../../../core/pricing/pricing.dart';
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -90,10 +91,9 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
             child: Text('$e', style: AppTypography.body(size: 14)),
           ),
         ),
-        data: (items) => RefreshIndicator(
+        data: (items) => BrandRefresh(
           onRefresh: () async =>
               ref.invalidate(machineStockProvider(widget.machineId)),
-          color: AppColors.brand,
           child: items.isEmpty
               ? ListView(
                   children: [

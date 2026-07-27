@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/motion/feedback.dart';
 import '../../../../core/motion/motion.dart';
 import '../../../../core/pricing/pricing.dart';
+import '../../../../core/motion/brand_refresh.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
@@ -75,7 +76,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
     // ohnehin zusätzlich serverseitig in den Aktivierungs-RPCs.
     final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? true;
 
-    return RefreshIndicator(
+    return BrandRefresh(
       onRefresh: () async {
         ref
           ..invalidate(offersProvider)
@@ -87,7 +88,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           ..invalidate(topProductsProvider('Snacks'))
           ..invalidate(topProductsProvider('Eis'));
       },
-      color: AppColors.brand,
       child: ListView(
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
