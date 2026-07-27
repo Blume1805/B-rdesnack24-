@@ -1366,18 +1366,12 @@ class _CarouselItem extends StatelessWidget {
         final offset = position.hasPixels
             ? (index * itemExtent - position.pixels) / itemExtent
             : 0.0;
-        final d = offset.abs().clamp(0.0, 1.0);
-        // Gleiche Werte wie MotionSlider, damit sich alle Karussells in
-        // der App identisch anfühlen.
-        final scale = 1.0 - 0.16 * d; // 100 % → 84 %
-        final opacity = 1.0 - 0.55 * d; // 100 % → 45 %
-        return Opacity(
-          opacity: opacity,
-          child: Transform.scale(
-            scale: scale,
-            alignment: Alignment.center,
-            child: inner,
-          ),
+        // Fokus-Effekt zentral aus CarouselFocus (Skalierung + Blende +
+        // Weichzeichner), damit sich alle Karussells identisch anfühlen.
+        return CarouselFocus.wrap(
+          context: context,
+          distance: offset,
+          child: inner!,
         );
       },
       child: child,
@@ -2110,10 +2104,10 @@ class _PageFocus extends StatelessWidget {
         final page = controller.hasClients && controller.position.haveDimensions
             ? (controller.page ?? controller.initialPage.toDouble())
             : controller.initialPage.toDouble();
-        final d = (index - page).abs().clamp(0.0, 1.0);
-        return Opacity(
-          opacity: 1.0 - 0.55 * d,
-          child: Transform.scale(scale: 1.0 - 0.16 * d, child: inner),
+        return CarouselFocus.wrap(
+          context: context,
+          distance: index - page,
+          child: inner!,
         );
       },
       child: child,
@@ -2368,8 +2362,14 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
     // Punktestand ist raus: die Zahl steht schon oben in der
     // Key-Facts-Zeile, und die ist von dort aus anklickbar. Zweimal
     // dieselbe Kennzahl auf einem Screen ist Verwässerung.
+    //
+    // Die News-Karte ist IMMER dabei — auch offline oder wenn noch keine
+    // Meldung geladen ist (dann mit Sammel-Titel). Sonst verschwindet die
+    // Kachel bei fehlendem Empfang ganz, was wie ein Fehler wirkt.
     final slides = <Widget>[
-      if (news != null && news.isNotEmpty) _HeroNewsCard(article: news.first),
+      _HeroNewsCard(
+        article: (news != null && news.isNotEmpty) ? news.first : null,
+      ),
       _HeroDonationCard(totalDonated: donation?.totalDonated ?? 0),
     ];
     return Column(
@@ -2410,10 +2410,13 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
 }
 
 class _HeroNewsCard extends StatelessWidget {
-  const _HeroNewsCard({required this.article});
-  final NewsArticle article;
+  const _HeroNewsCard({this.article});
+
+  /// `null`, wenn (noch) keine Meldung geladen ist — dann Sammel-Titel.
+  final NewsArticle? article;
   @override
   Widget build(BuildContext context) {
+    final title = article?.title ?? 'Schau, was es Neues gibt';
     return Material(
       color: AppColors.ink,
       borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -2453,7 +2456,7 @@ class _HeroNewsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      article.title,
+                      title,
                       style: AppTypography.display(
                         size: 18,
                         weight: FontWeight.w800,

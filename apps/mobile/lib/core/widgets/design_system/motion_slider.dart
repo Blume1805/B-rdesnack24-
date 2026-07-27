@@ -76,7 +76,6 @@ class _MotionSliderState extends State<MotionSlider> {
   @override
   Widget build(BuildContext context) {
     if (widget.children.isEmpty) return const SizedBox.shrink();
-    final reduced = Motion.reduced(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -92,21 +91,14 @@ class _MotionSliderState extends State<MotionSlider> {
               widget.onPageChanged?.call(i);
             },
             itemBuilder: (context, i) {
-              // 0 = im Fokus, 1 = eine Karte daneben.
-              final distance = (i - _offset).abs().clamp(0.0, 1.0);
-              // Deutlicher Fokus: die Nachbarn schrumpfen auf 84 % und
-              // fallen auf 45 % Deckkraft. Schwächere Werte wirken auf dem
-              // Handy wie ein Rendering-Zufall statt wie Absicht.
-              final scale = reduced ? 1.0 : 1 - 0.16 * distance;
-              final opacity = reduced ? 1.0 : 1 - 0.55 * distance;
+              // Fokus-Effekt (Skalierung + Blende + Weichzeichner) zentral aus
+              // CarouselFocus, damit sich alle Karussells identisch anfühlen.
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Opacity(
-                  opacity: opacity,
-                  child: Transform.scale(
-                    scale: scale,
-                    child: widget.children[i],
-                  ),
+                child: CarouselFocus.wrap(
+                  context: context,
+                  distance: i - _offset,
+                  child: widget.children[i],
                 ),
               );
             },

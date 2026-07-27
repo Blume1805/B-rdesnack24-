@@ -27,7 +27,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
     '5 % Dauerrabatt',
     'Status-Rabatt bis 10 %',
     'Deals & Angebote −10 %',
-    'Bonuspunkte & Coupons 5–25 %',
+    'Bonuspunkte & Coupons\n5–25 %',
     'Geburtstagsgutschein',
     'Digitale Belege',
   ];
@@ -113,7 +113,18 @@ class _CompareHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Expanded(child: SizedBox()),
+          // Zeilenkopf für die Feature-Spalte — füllt die sonst leere weiße
+          // Fläche links neben den beiden Preis-Spalten.
+          Expanded(
+            child: Text(
+              'Was du bekommst',
+              style: AppTypography.body(
+                size: 13,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
           SizedBox(
             width: _colFree,
             child: Column(

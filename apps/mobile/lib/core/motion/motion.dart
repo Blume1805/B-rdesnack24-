@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -395,6 +397,57 @@ class SkeletonCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Fokus-Effekt für Karussells (Hero-Slides, Angebote, Status-Stufen,
+/// Abo-Modelle). Die Fokuskarte bleibt voll; Nachbarn treten deutlich
+/// zurück — kleiner, blasser und **unscharf**. Zentral definiert, damit sich
+/// jedes Karussell in der App identisch anfühlt.
+///
+/// [distance] = Abstand zur Fokusposition in Karten-Einheiten (0 = im Fokus,
+/// 1 = eine Karte daneben). Zwischenwerte kommen beim Wischen laufend rein.
+abstract final class CarouselFocus {
+  /// Nachbarn schrumpfen auf 76 % (vorher 84 %) — die Fokuskarte wirkt
+  /// dadurch deutlich präsenter.
+  static const double _shrink = 0.24;
+
+  /// Nachbarn fallen auf 38 % Deckkraft (vorher 45 %).
+  static const double _fade = 0.62;
+
+  /// Nachbarn werden bis zu 4 px unscharf — der Blick bleibt auf der
+  /// scharfen Fokuskarte.
+  static const double _blur = 4.0;
+
+  /// Umhüllt [child] mit Skalierung, Blende und (bei Nachbarn) Weichzeichner.
+  /// Bei reduzierter Bewegung bleibt [child] unverändert.
+  static Widget wrap({
+    required BuildContext context,
+    required double distance,
+    required Widget child,
+  }) {
+    if (Motion.reduced(context)) return child;
+    final d = distance.abs().clamp(0.0, 1.0);
+    var visual = child;
+    // sigma 0 ist auf Web teuer/fehleranfällig — Blur nur für echte Nachbarn.
+    if (d > 0.01) {
+      visual = ImageFiltered(
+        imageFilter: ImageFilter.blur(
+          sigmaX: _blur * d,
+          sigmaY: _blur * d,
+          tileMode: TileMode.decal,
+        ),
+        child: visual,
+      );
+    }
+    return Opacity(
+      opacity: 1 - _fade * d,
+      child: Transform.scale(
+        scale: 1 - _shrink * d,
+        alignment: Alignment.center,
+        child: visual,
       ),
     );
   }
