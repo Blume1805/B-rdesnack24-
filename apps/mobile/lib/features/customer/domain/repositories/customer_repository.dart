@@ -51,6 +51,9 @@ abstract interface class CustomerRepository {
   /// Bewertung des aktuellen Kunden.
   Future<void> rateProduct(String productId, int rating);
 
+  /// Katalogsuche nach Name/Kategorie.
+  Future<List<RankedProduct>> searchProducts(String query);
+
   /// 5 % Netto-Umsatz wandern in einen Spendentopf. Diese Methoden geben die
   /// kumulierte Spende des Kunden und die Aufschlüsselung je Kauf zurück.
   Future<DonationSummary> myDonationSummary();

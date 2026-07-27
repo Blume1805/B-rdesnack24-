@@ -118,6 +118,13 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _guard(() => _remote.rateProduct(productId, rating));
 
   @override
+  Future<List<RankedProduct>> searchProducts(String query) => _guard(
+        () async => (await _remote.searchProducts(query))
+            .map(RankedProduct.fromJson)
+            .toList(),
+      );
+
+  @override
   Future<DonationSummary> myDonationSummary() => _guard(() async {
         final row = await _remote.myDonationSummary();
         return row == null

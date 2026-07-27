@@ -260,17 +260,26 @@ class FadeInUp extends StatelessWidget {
     required this.child,
     this.index = 0,
     this.offset = 12,
+    this.duration,
+    this.step = const Duration(milliseconds: 70),
   });
 
   final Widget child;
   final int index;
   final double offset;
 
+  /// Eigene Laufzeit. Ohne Angabe [AppMotion.slow] — für den Einlauf
+  /// ganzer Seiten darf es länger sein, sonst nimmt man ihn nicht wahr.
+  final Duration? duration;
+
+  /// Versatz zwischen den gestaffelten Elementen.
+  final Duration step;
+
   @override
   Widget build(BuildContext context) {
-    const step = Duration(milliseconds: 70);
+    final step = this.step;
     final delay = step * index;
-    final total = AppMotion.slow + delay;
+    final total = (duration ?? AppMotion.slow) + delay;
     final start = delay.inMilliseconds / total.inMilliseconds;
     final dy = Motion.offset(context, offset);
     return TweenAnimationBuilder<double>(

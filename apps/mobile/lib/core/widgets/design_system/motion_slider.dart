@@ -94,8 +94,11 @@ class _MotionSliderState extends State<MotionSlider> {
             itemBuilder: (context, i) {
               // 0 = im Fokus, 1 = eine Karte daneben.
               final distance = (i - _offset).abs().clamp(0.0, 1.0);
-              final scale = reduced ? 1.0 : 1 - 0.06 * distance;
-              final opacity = reduced ? 1.0 : 1 - 0.35 * distance;
+              // Deutlicher Fokus: die Nachbarn schrumpfen auf 84 % und
+              // fallen auf 45 % Deckkraft. Schwächere Werte wirken auf dem
+              // Handy wie ein Rendering-Zufall statt wie Absicht.
+              final scale = reduced ? 1.0 : 1 - 0.16 * distance;
+              final opacity = reduced ? 1.0 : 1 - 0.55 * distance;
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Opacity(

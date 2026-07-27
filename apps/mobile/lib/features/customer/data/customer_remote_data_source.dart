@@ -186,6 +186,16 @@ class CustomerRemoteDataSource {
     await _client.rpc('mark_all_notifications_read');
   }
 
+  /// Katalogsuche (Name/Kategorie). Leerer Begriff = ganzer Katalog.
+  Future<List<Map<String, dynamic>>> searchProducts(String query) async {
+    final rows = await _client.rpc(
+      'search_products',
+      params: {'p_query': query, 'p_limit': 40},
+    );
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
   Future<Map<String, dynamic>?> productDetail(String productId) async {
     final rows = await _client.rpc(
       'product_detail',

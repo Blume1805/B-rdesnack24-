@@ -22,6 +22,7 @@ import 'subscription_screen.dart';
 import 'subscription_value_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
+import 'product_search_screen.dart';
 import 'rewards_screen.dart';
 
 /// Soll die Suchleiste sichtbar sein?
@@ -58,21 +59,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
   bool _searchVisible = true;
   double _lastOffset = 0;
 
-  /// Hat das Suchfeld gerade den Fokus? Dann darf der Scroll-Ausblender
-  /// **nie** greifen: beim Öffnen der Tastatur scrollt Flutter das Feld
-  /// selbst in den sichtbaren Bereich, das zählte bisher als „nach unten
-  /// gescrollt" — und klappte das Feld auf Höhe null zusammen, während man
-  /// hineintippte.
-  bool _searchFocused = false;
-
-  void _onSearchFocusChange(bool focused) {
-    if (!mounted || focused == _searchFocused) return;
-    setState(() {
-      _searchFocused = focused;
-      if (focused) _searchVisible = true;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -88,16 +74,15 @@ class _OffersTabState extends ConsumerState<OffersTab> {
   }
 
   void _onScroll() {
-    // Solange getippt wird, bleibt die Suche stehen — egal wie gescrollt
-    // wird. Sonst verschwindet das Feld unter dem eigenen Finger.
-    if (_searchFocused) return;
     final offset = _scroll.offset;
     // Kleine Schwelle: verhindert Flackern bei minimalen Bewegungen.
     if ((offset - _lastOffset).abs() < 12) return;
     final scrollingDown = offset > _lastOffset;
     _lastOffset = offset;
     final visible = searchBarVisible(
-      focused: _searchFocused,
+      // Der Öffner ist kein Eingabefeld mehr — es gibt hier keinen Fokus,
+      // der die Regel überstimmen müsste.
+      focused: false,
       scrollingDown: scrollingDown,
       offset: offset,
     );
@@ -153,11 +138,9 @@ class _OffersTabState extends ConsumerState<OffersTab> {
               child: AnimatedOpacity(
                 opacity: _searchVisible ? 1 : 0,
                 duration: Motion.duration(context, AppMotion.fast),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                  child: _ProductSearchBar(
-                    onFocusChange: _onSearchFocusChange,
-                  ),
+                child: const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.s4),
+                  child: _ProductSearchBar(),
                 ),
               ),
             ),
@@ -1372,8 +1355,10 @@ class _CarouselItem extends StatelessWidget {
             ? (index * itemExtent - position.pixels) / itemExtent
             : 0.0;
         final d = offset.abs().clamp(0.0, 1.0);
-        final scale = 1.0 - 0.06 * d; // 100 % → 94 %
-        final opacity = 1.0 - 0.35 * d; // 100 % → 65 %
+        // Gleiche Werte wie MotionSlider, damit sich alle Karussells in
+        // der App identisch anfühlen.
+        final scale = 1.0 - 0.16 * d; // 100 % → 84 %
+        final opacity = 1.0 - 0.55 * d; // 100 % → 45 %
         return Opacity(
           opacity: opacity,
           child: Transform.scale(
@@ -1969,153 +1954,55 @@ class _NewsPreviewRow extends StatelessWidget {
   }
 }
 
-/// Suchleiste oben im Angebote-Tab. Filtert die Community-Favoriten-Sektion
-/// nach eingegebenem Text (leichtgewichtige Suche ohne Backend-Roundtrip).
-class _ProductSearchBar extends ConsumerStatefulWidget {
-  const _ProductSearchBar({this.onFocusChange});
-
-  /// Meldet dem Tab, ob gerade getippt wird — der Scroll-Ausblender muss
-  /// dann pausieren, sonst klappt das Feld unter dem Finger zu.
-  final ValueChanged<bool>? onFocusChange;
-
-  @override
-  ConsumerState<_ProductSearchBar> createState() => _ProductSearchBarState();
-}
-
-class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
-  final _ctrl = TextEditingController();
-  final _focus = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _focus
-      ..addListener(_rebuild)
-      ..addListener(_notifyFocus);
-    _ctrl.addListener(_rebuild);
-  }
-
-  @override
-  void dispose() {
-    _focus
-      ..removeListener(_rebuild)
-      ..removeListener(_notifyFocus)
-      ..dispose();
-    _ctrl
-      ..removeListener(_rebuild)
-      ..dispose();
-    super.dispose();
-  }
-
-  void _rebuild() {
-    if (mounted) setState(() {});
-  }
-
-  void _notifyFocus() {
-    widget.onFocusChange?.call(_focus.hasFocus);
-  }
-
-  void _search(String value) {
-    // Spring zur Favoriten-Sektion und filtere (Frontend-Filter).
-    // Aktuell simuliert: SnackBar zeigt die Query. Für die volle
-    // Umsetzung wird eine Produkt-Detail-Suche später ergänzt.
-    if (value.trim().isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Suche nach: „${value.trim()}"'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+/// Sucheinstieg oben im Angebote-Tab.
+///
+/// Bewusst nur ein *Öffner*, kein echtes Eingabefeld: Ein Feld mitten in
+/// einer langen Liste verschwindet beim Tippen hinter der Tastatur — der
+/// mobile Browser verkleinert das Layout-Viewport nicht zuverlässig. Der
+/// Tipp öffnet deshalb die Suchseite, wo das Feld fest oben sitzt.
+class _ProductSearchBar extends StatelessWidget {
+  const _ProductSearchBar();
 
   @override
   Widget build(BuildContext context) {
-    final focused = _focus.hasFocus;
-    final hasText = _ctrl.text.isNotEmpty;
-
-    // Fokus-Choreografie nach Vorlage: das Feld sackt beim Antippen kurz
-    // ein und kommt gefedert zurück, Rahmen und Lupe wechseln auf Gold.
-    return AnimatedScale(
-      scale: focused ? 1.0 : 0.995,
-      duration: Motion.duration(context, AppMotion.base),
-      curve: AppMotion.easeOut,
-      child: AnimatedContainer(
-        duration: Motion.duration(context, AppMotion.base),
-        curve: AppMotion.easeOut,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          border: Border.all(
-            color: focused ? AppColors.brand : AppColors.borderSubtle,
-            width: focused ? 2 : 1,
+    return PressableScale(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ProductSearchScreen()),
+      ),
+      child: Semantics(
+        button: true,
+        label: 'Produkte suchen',
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            border: Border.all(color: AppColors.borderSubtle),
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            boxShadow: AppShadows.sm,
           ),
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          boxShadow: focused ? AppShadows.gold : AppShadows.sm,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-        child: Row(
-          children: [
-            AnimatedScale(
-              scale: focused ? 1.12 : 1,
-              duration: Motion.duration(context, AppMotion.base),
-              curve: AppMotion.easeOut,
-              child: Icon(
-                Icons.search,
-                color: focused ? AppColors.brandDark : AppColors.textMuted,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _ctrl,
-                focusNode: _focus,
-                textInputAction: TextInputAction.search,
-                onSubmitted: _search,
-                // Textstil explizit: die Eingabe muss deutlich dunkler
-                // stehen als der Platzhalter, sonst sieht man beim Tippen
-                // kaum, was man geschrieben hat.
-                style: AppTypography.body(
-                  size: 15,
-                  weight: FontWeight.w600,
-                  color: AppColors.ink,
-                ),
-                cursorColor: AppColors.brandDark,
-                decoration: InputDecoration(
-                  hintText: 'Finde dein Lieblingsprodukt',
-                  hintStyle: AppTypography.body(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s4,
+            vertical: 14,
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search, color: AppColors.textMuted, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Finde dein Lieblingsprodukt',
+                  style: AppTypography.body(
                     size: 14,
                     color: AppColors.textMuted,
                   ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: false,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
-            ),
-            // Löschen erscheint erst, wenn etwas drinsteht.
-            AnimatedSize(
-              duration: Motion.duration(context, AppMotion.fast),
-              curve: AppMotion.easeOut,
-              child: hasText
-                  ? IconButton(
-                      tooltip: 'Eingabe löschen',
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(
-                        Icons.close,
-                        size: 18,
-                        color: AppColors.textMuted,
-                      ),
-                      onPressed: () {
-                        Motion.tap();
-                        _ctrl.clear();
-                      },
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2169,7 +2056,7 @@ class _DealsCarouselState extends State<_DealsCarousel> {
             onPageChanged: (i) => setState(() => _page = i),
             itemBuilder: (_, i) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: slides[i],
+              child: _PageFocus(controller: _ctrl, index: i, child: slides[i]),
             ),
           ),
         ),
@@ -2191,6 +2078,42 @@ class _DealsCarouselState extends State<_DealsCarousel> {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Fokus-Effekt für PageView-Karussells: die vordere Karte steht auf
+/// 100 %, die Nachbarn schrumpfen und werden blasser. Gleiche Werte wie
+/// [MotionSlider] und die Wochenangebote — ein Karussell soll sich überall
+/// in der App gleich anfühlen.
+class _PageFocus extends StatelessWidget {
+  const _PageFocus({
+    required this.controller,
+    required this.index,
+    required this.child,
+  });
+
+  final PageController controller;
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Motion.reduced(context)) return child;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, inner) {
+        // Vor dem ersten Layout hat der Controller noch keine Seite.
+        final page = controller.hasClients && controller.position.haveDimensions
+            ? (controller.page ?? controller.initialPage.toDouble())
+            : controller.initialPage.toDouble();
+        final d = (index - page).abs().clamp(0.0, 1.0);
+        return Opacity(
+          opacity: 1.0 - 0.55 * d,
+          child: Transform.scale(scale: 1.0 - 0.16 * d, child: inner),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -2456,7 +2379,8 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
             onPageChanged: (i) => setState(() => _page = i),
             itemBuilder: (_, i) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: slides[i],
+              child:
+                  _PageFocus(controller: _pageCtrl, index: i, child: slides[i]),
             ),
           ),
         ),

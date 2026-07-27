@@ -68,15 +68,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const HeroBackdrop(
-                      tagline: 'Immer da, wenn der Hunger kommt.',
+                    const FadeInUp(
+                      offset: 0,
+                      duration: Duration(milliseconds: 520),
+                      child: HeroBackdrop(
+                        tagline: 'Immer da, wenn der Hunger kommt.',
+                      ),
                     ),
                     // Die ganze weiße Karte schiebt sich beim Öffnen unter
                     // dem Hero hervor — das ist die Kernbewegung der
                     // Vorlage. Die Felder darin laufen anschließend
                     // gestaffelt ein (siehe FadeInUp weiter unten).
                     FadeInUp(
-                      offset: 28,
+                      offset: 64,
+                      duration: const Duration(milliseconds: 620),
                       child: _FormPanel(
                         formKey: _formKey,
                         emailCtrl: _emailCtrl,
@@ -152,9 +157,17 @@ class _FormPanel extends StatelessWidget {
                 // dann die Felder nacheinander, zuletzt der Button. Das
                 // führt den Blick von oben nach unten durch das Formular,
                 // statt alles gleichzeitig aufblitzen zu lassen.
-                const FadeInUp(child: Eyebrow('Willkommen zurück')),
+                const FadeInUp(
+                  index: 1,
+                  offset: 24,
+                  step: Duration(milliseconds: 90),
+                  child: Eyebrow('Willkommen zurück'),
+                ),
                 const SizedBox(height: AppSpacing.s2),
                 FadeInUp(
+                  index: 1,
+                  offset: 24,
+                  step: const Duration(milliseconds: 90),
                   child: Text(
                     l10n.signInTitle,
                     style: AppTypography.display(
@@ -165,7 +178,9 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 FadeInUp(
-                  index: 1,
+                  index: 2,
+                  offset: 24,
+                  step: const Duration(milliseconds: 90),
                   child: Text(
                     'Melde dich mit deinem Konto an oder wähle einen '
                     'Demo-Zugang.',
@@ -177,7 +192,9 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s6),
                 FadeInUp(
-                  index: 2,
+                  index: 3,
+                  offset: 24,
+                  step: const Duration(milliseconds: 90),
                   child: TextFormField(
                     controller: emailCtrl,
                     keyboardType: TextInputType.emailAddress,
@@ -195,7 +212,9 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s4),
                 FadeInUp(
-                  index: 3,
+                  index: 4,
+                  offset: 24,
+                  step: const Duration(milliseconds: 90),
                   child: TextFormField(
                     controller: passwordCtrl,
                     obscureText: obscure,
@@ -226,7 +245,9 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s5),
                 FadeInUp(
-                  index: 4,
+                  index: 5,
+                  offset: 24,
+                  step: const Duration(milliseconds: 90),
                   child: FilledButton(
                     onPressed: isLoading ? null : onSubmit,
                     child: isLoading

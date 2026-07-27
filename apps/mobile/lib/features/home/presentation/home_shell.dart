@@ -469,7 +469,10 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
     // Damit wirkt der linke Header wie eine Fortsetzung der Bild-
     // Hintergrundatmosphäre statt eines fremden kalten Ink-Blocks.
     return PreferredSize(
-      preferredSize: const Size.fromHeight(220),
+      // 150 statt 220: der Header nahm auf einem iPhone rund ein Fünftel
+      // der Bildschirmhöhe ein — im mobilen Browser kommen Adressleiste
+      // und Toolbar noch dazu, dann bleibt für die Inhalte zu wenig.
+      preferredSize: const Size.fromHeight(150),
       child: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF0C0A07),
@@ -487,7 +490,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         child: SafeArea(
           bottom: false,
           child: SizedBox(
-            height: 220,
+            height: 150,
             child: Stack(
               children: [
                 // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
@@ -539,9 +542,9 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.s5,
-                      AppSpacing.s5,
+                      AppSpacing.s3,
                       AppSpacing.s2,
-                      AppSpacing.s5,
+                      AppSpacing.s3,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,7 +554,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         Text(
                           'immer da, wenn der',
                           style: AppTypography.body(
-                            size: 12,
+                            size: 11,
                             weight: FontWeight.w700,
                             color: AppColors.brand,
                           ).copyWith(letterSpacing: 0.3, height: 1.2),
@@ -561,18 +564,18 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         Text(
                           'Hunger kommt',
                           style: AppTypography.body(
-                            size: 12,
+                            size: 11,
                             weight: FontWeight.w700,
                             color: AppColors.brand,
                           ).copyWith(letterSpacing: 0.3, height: 1.2),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: AppSpacing.s3),
+                        const SizedBox(height: AppSpacing.s2),
                         Text(
                           'Moin,',
                           style: AppTypography.display(
-                            size: 26,
+                            size: 21,
                             weight: FontWeight.w800,
                             color: AppColors.onDark,
                           ).copyWith(height: 1.0),
@@ -580,22 +583,22 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         Text(
                           '$firstName.',
                           style: AppTypography.display(
-                            size: 26,
+                            size: 21,
                             weight: FontWeight.w800,
                             color: AppColors.onDark,
                           ).copyWith(height: 1.05),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 3),
                         Text(
                           'Snack gefällig?',
                           style: AppTypography.body(
-                            size: 12,
+                            size: 11,
                             weight: FontWeight.w500,
                             color: AppColors.brandLight,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],

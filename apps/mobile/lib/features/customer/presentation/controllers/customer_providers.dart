@@ -202,6 +202,14 @@ final donationCausesProvider = FutureProvider.autoDispose<List<DonationCause>>(
   (ref) => ref.watch(customerRepositoryProvider).donationCauses(),
 );
 
+/// Ergebnisse der Produktsuche. Familie über den Suchbegriff, damit jeder
+/// Begriff seinen eigenen Cache-Eintrag bekommt und Zurücktippen nicht neu
+/// lädt. Leerer Begriff liefert den Katalog.
+final productSearchProvider =
+    FutureProvider.autoDispose.family<List<RankedProduct>, String>(
+  (ref, query) => ref.watch(customerRepositoryProvider).searchProducts(query),
+);
+
 final newsProvider = FutureProvider.autoDispose<List<NewsArticle>>(
   (ref) => ref.watch(customerRepositoryProvider).listNews(),
 );
