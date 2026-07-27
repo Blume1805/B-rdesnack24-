@@ -38,6 +38,8 @@ class _Plan {
     required this.cadence,
     required this.description,
     this.badge,
+    this.strikePrice,
+    this.discountNote,
   });
   final String key;
   final String title;
@@ -45,6 +47,13 @@ class _Plan {
   final String cadence;
   final String description;
   final String? badge;
+
+  /// Referenzpreis (durchgestrichen, rot) — z. B. der auf 12 Monate
+  /// hochgerechnete Monatspreis beim Jahres-Abo.
+  final String? strikePrice;
+
+  /// Kurzer Rabatt-Hinweis neben dem Streichpreis (z. B. „−16 %").
+  final String? discountNote;
 }
 
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
@@ -63,6 +72,10 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       cadence: 'pro Jahr',
       description: '2 Monate geschenkt. Jederzeit wechselbar.',
       badge: '2 Monate geschenkt',
+      // 12 × 0,99 € = 11,88 € bei monatlicher Zahlung → 9,99 € sind rund
+      // 16 % günstiger.
+      strikePrice: '11,88 €',
+      discountNote: '−16 %',
     ),
     _Plan(
       key: 'lifetime',
@@ -84,7 +97,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   /// Höhe des Abo-Sliders. Fest, weil ein PageView eine begrenzte Höhe
   /// braucht — bemessen an der höchsten Karte (Lifetime mit
   /// Founders-Restplätzen und Widerrufs-Hinweis).
-  static const double _planSliderHeight = 240;
+  static const double _planSliderHeight = 214;
 
   /// Karte, die beim Öffnen vorn steht: das laufende Abo, sonst das
   /// Jahresmodell — das ist das Angebot mit dem besten Verhältnis.
@@ -697,145 +710,190 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      borderColor: active ? AppColors.brand : null,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.s4,
-        vertical: AppSpacing.s3,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  plan.title,
+    // topCenter: die Karte wird nur so hoch wie ihr Inhalt. Ohne das füllt
+    // sie die feste Slider-Höhe und es bleibt unten eine große weiße Fläche.
+    return Align(
+      alignment: Alignment.topCenter,
+      child: AppCard(
+        borderColor: active ? AppColors.brand : null,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s4,
+          vertical: AppSpacing.s3,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    plan.title,
+                    style: AppTypography.display(
+                      size: 16,
+                      weight: FontWeight.w800,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                ),
+                if (active)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand,
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                    ),
+                    child: Text(
+                      'AKTIV',
+                      style: AppTypography.body(
+                        size: 10,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ).copyWith(letterSpacing: 0.8),
+                    ),
+                  )
+                else if (plan.badge != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.brand, width: 1),
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                    ),
+                    child: Text(
+                      plan.badge!.toUpperCase(),
+                      style: AppTypography.body(
+                        size: 10,
+                        weight: FontWeight.w800,
+                        color: AppColors.ink,
+                      ).copyWith(letterSpacing: 0.6),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.s2),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  plan.price,
                   style: AppTypography.display(
-                    size: 16,
+                    size: 28,
                     weight: FontWeight.w800,
                     color: AppColors.ink,
                   ),
                 ),
-              ),
-              if (active)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.brand,
-                    borderRadius: BorderRadius.circular(AppRadii.pill),
-                  ),
-                  child: Text(
-                    'AKTIV',
-                    style: AppTypography.body(
-                      size: 10,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink,
-                    ).copyWith(letterSpacing: 0.8),
-                  ),
-                )
-              else if (plan.badge != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.brand, width: 1),
-                    borderRadius: BorderRadius.circular(AppRadii.pill),
-                  ),
-                  child: Text(
-                    plan.badge!.toUpperCase(),
-                    style: AppTypography.body(
-                      size: 10,
-                      weight: FontWeight.w800,
-                      color: AppColors.ink,
-                    ).copyWith(letterSpacing: 0.6),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s2),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                plan.price,
-                style: AppTypography.display(
-                  size: 28,
-                  weight: FontWeight.w800,
-                  color: AppColors.ink,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  plan.cadence,
-                  style:
-                      AppTypography.body(size: 13, color: AppColors.textMuted),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s2),
-          Text(
-            plan.description,
-            style: AppTypography.body(size: 13, color: AppColors.textMuted)
-                .copyWith(height: 1.4),
-          ),
-          if (foundersRemaining != null && foundersLimit != null) ...[
-            const SizedBox(height: AppSpacing.s3),
-            Row(
-              children: [
-                Icon(
-                  foundersSoldOut ? Icons.lock_outline : Icons.bolt,
-                  size: 16,
-                  color: foundersSoldOut
-                      ? AppColors.textMuted
-                      : AppColors.brandDark,
-                ),
                 const SizedBox(width: 6),
-                Expanded(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
-                    foundersSoldOut
-                        ? 'Alle $foundersLimit Founders-Plätze vergeben.'
-                        : 'Nur noch $foundersRemaining von $foundersLimit '
-                            'Plätzen frei.',
+                    plan.cadence,
                     style: AppTypography.body(
-                      size: 12,
-                      weight: FontWeight.w800,
-                      color: foundersSoldOut
-                          ? AppColors.textMuted
-                          : AppColors.brandDark,
+                      size: 13,
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ),
+                if (plan.strikePrice != null) ...[
+                  const SizedBox(width: 8),
+                  // Referenzpreis durchgestrichen in Rot.
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      plan.strikePrice!,
+                      style: AppTypography.body(
+                        size: 15,
+                        weight: FontWeight.w700,
+                        color: AppColors.statusCritical,
+                      ).copyWith(
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: AppColors.statusCritical,
+                        decorationThickness: 2,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
-          ],
-          const SizedBox(height: AppSpacing.s2),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: disabled ? null : onChoose,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.ink,
-                foregroundColor: AppColors.brand,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
+            if (plan.discountNote != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.statusCritical,
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
+                child: Text(
+                  '${plan.discountNote!} Preisnachlass',
+                  style: AppTypography.body(
+                    size: 11,
+                    weight: FontWeight.w800,
+                    color: AppColors.onDark,
+                  ),
+                ),
               ),
-              child: Text(
-                active
-                    ? 'Aktuelles Abo'
-                    : foundersSoldOut
-                        ? 'Ausverkauft'
-                        : 'Auswählen',
+            ],
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              plan.description,
+              style: AppTypography.body(size: 13, color: AppColors.textMuted)
+                  .copyWith(height: 1.4),
+            ),
+            if (foundersRemaining != null && foundersLimit != null) ...[
+              const SizedBox(height: AppSpacing.s3),
+              Row(
+                children: [
+                  Icon(
+                    foundersSoldOut ? Icons.lock_outline : Icons.bolt,
+                    size: 16,
+                    color: foundersSoldOut
+                        ? AppColors.textMuted
+                        : AppColors.brandDark,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      foundersSoldOut
+                          ? 'Alle $foundersLimit Founders-Plätze vergeben.'
+                          : 'Nur noch $foundersRemaining von $foundersLimit '
+                              'Plätzen frei.',
+                      style: AppTypography.body(
+                        size: 12,
+                        weight: FontWeight.w800,
+                        color: foundersSoldOut
+                            ? AppColors.textMuted
+                            : AppColors.brandDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: AppSpacing.s2),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: disabled ? null : onChoose,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.ink,
+                  foregroundColor: AppColors.brand,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                  ),
+                ),
+                child: Text(
+                  active
+                      ? 'Aktuelles Abo'
+                      : foundersSoldOut
+                          ? 'Ausverkauft'
+                          : 'Auswählen',
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

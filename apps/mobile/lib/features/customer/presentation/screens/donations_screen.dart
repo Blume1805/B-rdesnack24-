@@ -784,20 +784,24 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                       style: FilledButton.styleFrom(
                         backgroundColor:
                             c.votedByMe ? AppColors.ink : AppColors.brand,
+                        // Aktiv (abgestimmt): Gold-Schrift auf dunklem Pill —
+                        // reines Weiß wirkte dort flau und war kaum lesbar.
                         foregroundColor:
-                            c.votedByMe ? AppColors.onDark : AppColors.ink,
+                            c.votedByMe ? AppColors.brand : AppColors.ink,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.s3,
                           vertical: 10,
                         ),
                       ),
                       child: _busy
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.onDark,
+                                color: c.votedByMe
+                                    ? AppColors.brand
+                                    : AppColors.ink,
                               ),
                             )
                           : Text(
@@ -805,6 +809,9 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                               style: AppTypography.body(
                                 size: 12,
                                 weight: FontWeight.w800,
+                                color: c.votedByMe
+                                    ? AppColors.brand
+                                    : AppColors.ink,
                               ),
                             ),
                     ),
