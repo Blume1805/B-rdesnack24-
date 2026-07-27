@@ -1877,10 +1877,28 @@ class _ProductSearchBar extends ConsumerStatefulWidget {
 
 class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
   final _ctrl = TextEditingController();
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(_rebuild);
+    _ctrl.addListener(_rebuild);
+  }
+
   @override
   void dispose() {
-    _ctrl.dispose();
+    _focus
+      ..removeListener(_rebuild)
+      ..dispose();
+    _ctrl
+      ..removeListener(_rebuild)
+      ..dispose();
     super.dispose();
+  }
+
+  void _rebuild() {
+    if (mounted) setState(() {});
   }
 
   void _search(String value) {
@@ -1898,35 +1916,81 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceCard,
-        border: Border.all(color: AppColors.borderSubtle),
-        borderRadius: BorderRadius.circular(AppRadii.pill),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-      child: Row(
-        children: [
-          const Icon(Icons.search, color: AppColors.textMuted, size: 22),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: _ctrl,
-              textInputAction: TextInputAction.search,
-              onSubmitted: _search,
-              decoration: InputDecoration(
-                hintText: 'Finde dein Lieblingsprodukt',
-                hintStyle: AppTypography.body(
-                  size: 14,
-                  color: AppColors.textMuted,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+    final focused = _focus.hasFocus;
+    final hasText = _ctrl.text.isNotEmpty;
+
+    // Fokus-Choreografie nach Vorlage: das Feld sackt beim Antippen kurz
+    // ein und kommt gefedert zurück, Rahmen und Lupe wechseln auf Gold.
+    return AnimatedScale(
+      scale: focused ? 1.0 : 0.995,
+      duration: Motion.duration(context, AppMotion.base),
+      curve: AppMotion.easeOut,
+      child: AnimatedContainer(
+        duration: Motion.duration(context, AppMotion.base),
+        curve: AppMotion.easeOut,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          border: Border.all(
+            color: focused ? AppColors.brand : AppColors.borderSubtle,
+            width: focused ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          boxShadow: focused ? AppShadows.gold : AppShadows.sm,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
+        child: Row(
+          children: [
+            AnimatedScale(
+              scale: focused ? 1.12 : 1,
+              duration: Motion.duration(context, AppMotion.base),
+              curve: AppMotion.easeOut,
+              child: Icon(
+                Icons.search,
+                color: focused ? AppColors.brandDark : AppColors.textMuted,
+                size: 22,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                focusNode: _focus,
+                textInputAction: TextInputAction.search,
+                onSubmitted: _search,
+                decoration: InputDecoration(
+                  hintText: 'Finde dein Lieblingsprodukt',
+                  hintStyle: AppTypography.body(
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            // Löschen erscheint erst, wenn etwas drinsteht.
+            AnimatedSize(
+              duration: Motion.duration(context, AppMotion.fast),
+              curve: AppMotion.easeOut,
+              child: hasText
+                  ? IconButton(
+                      tooltip: 'Eingabe löschen',
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color: AppColors.textMuted,
+                      ),
+                      onPressed: () {
+                        Motion.tap();
+                        _ctrl.clear();
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }

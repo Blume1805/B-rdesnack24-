@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/pricing/pricing.dart';
+import '../../../../core/motion/feedback.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -548,8 +549,9 @@ class _MyRatingCardState extends ConsumerState<_MyRatingCard> {
           .rateProduct(widget.productId, v);
       ref.invalidate(productDetailProvider(widget.productId));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bewertung gespeichert. Danke!')),
+        showSuccessToast(
+          context,
+          'Danke! Gespeichert als „${RatingPicker.labelFor(v)}".',
         );
       }
     } catch (e) {
@@ -572,17 +574,21 @@ class _MyRatingCardState extends ConsumerState<_MyRatingCard> {
           Text(
             _value == null
                 ? 'Wie schmeckt dir das Produkt?'
-                : 'Deine Bewertung: $_value ${_value == 1 ? 'Stern' : 'Sterne'}',
+                : 'Deine Bewertung: ${RatingPicker.labelFor(_value!)}',
             style: AppTypography.body(
               size: 14,
               weight: FontWeight.w700,
               color: AppColors.ink,
             ),
           ),
-          const SizedBox(height: AppSpacing.s2),
-          RatingInput(
+          const SizedBox(height: AppSpacing.s3),
+          // Gesichter statt Sternen: „Wie schmeckt es dir" ist eine Frage
+          // nach dem Gefühl, nicht nach einer Punktzahl. Die Skala bleibt
+          // 1–5 und damit kompatibel zur Sterne-Anzeige der Community.
+          RatingPicker(
             value: _value,
-            onChanged: _saving ? (_) {} : _rate,
+            enabled: !_saving,
+            onChanged: _rate,
           ),
         ],
       ),

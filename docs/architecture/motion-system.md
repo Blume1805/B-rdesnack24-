@@ -105,3 +105,37 @@ darf den Flow nie stören.
   dem hellen Cream-Hintergrund bringt ein Blur kaum sichtbaren Effekt,
   kostet aber auf Web spürbar Rasterzeit — kommt erst, wenn es dunklere
   Hintergrundflächen gibt, auf denen es wirkt.
+
+## Aus Lottie-Vorlagen nachgebaut (2026-07-27)
+
+Fünf LottieFiles-Vorlagen dienten als **gestalterische Referenz**; die
+Bewegungen sind nativ in Flutter nachgebaut, die Dateien selbst liegen
+nicht im Repository.
+
+Warum nicht eingebettet:
+
+* **Lizenz.** Vorlage 1 hatte *SF Pro Display* als base64-Font eingebettet —
+  Apples Schrift, deren Lizenz das Weiterverteilen in einer eigenen App
+  nicht deckt.
+* **Gewicht.** 4,1 MB JSON, davon rund 3,2 MB eingebettete Schriften (fünf
+  Familien, keine davon die Marken-Schrift). Die Web-Startzeit ist in
+  diesem Projekt ein wiederkehrendes Problem.
+* **Funktion.** Alle fünf zeigen *interaktive* Komponenten — Suchfeld,
+  Bewertung, Login, Chat, Code-Eingabe. Als Video über einer echten
+  Bedienoberfläche wären sie nicht bedienbar.
+
+Übernommene Choreografie:
+
+| Vorlage | Nachbau | Übernommene Bewegung |
+|---|---|---|
+| Suchleiste | `_ProductSearchBar` | Fokus: Rahmen + Lupe auf Gold, Gold-Schein, Löschen-Symbol blendet ein |
+| Bewertung | `RatingPicker` | Fünf Gesichter, gewählte Stufe wächst auf 118 % und färbt sich, andere treten auf 45 % zurück |
+| Login | `SignInScreen` | Gestaffelter Einlauf: Überschrift → Felder → Button (`FadeInUp`, 70 ms Versatz) |
+| Chat | `TypingDots` / `TypingBubble` | Drei Punkte als Welle, ~1,4 s Denkpause vor der Antwort (Vorlage: 2 s) |
+| Code-Eingabe | `CodeInput` / `MorphButton` | Ziffer springt beim Tippen auf, aktives Feld in Gold, Button klappt bei Erfolg auf Grün um |
+
+Angepasst gegenüber den Vorlagen: deutsche Beschriftungen, Gold/Ink statt
+Violett/Türkis/Grün-Template-Farben, und alles respektiert
+`Motion.reduced` — bei reduzierter Bewegung stehen die Tipp-Punkte still
+und die Denkpause im Chat entfällt (eine künstliche Wartezeit ohne
+sichtbare Gegenleistung wäre nur eine träge App).

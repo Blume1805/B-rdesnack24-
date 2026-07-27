@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/motion/motion.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -332,46 +333,74 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
   _FaqCategory? _openCategory;
   final _scrollCtrl = ScrollController();
 
+  /// Läuft der Tippindikator gerade? Solange sind die Frage-Chips gesperrt,
+  /// damit nicht zwei Antworten übereinander kippen.
+  bool _typing = false;
+
   @override
   void dispose() {
     _scrollCtrl.dispose();
     super.dispose();
   }
 
+  /// Antwortet mit kurzer Denkpause und sichtbarem Tippindikator.
+  ///
+  /// Die Pause ist Absicht: eine Antwort, die im selben Frame erscheint wie
+  /// die eigene Frage, liest sich wie ein Formularfehler, nicht wie ein
+  /// Gespräch. Bei reduzierter Bewegung entfällt sie — dort wäre es nur
+  /// eine träge App ohne sichtbare Gegenleistung.
+  Future<void> _botReply(_ChatbotMsg reply) async {
+    if (Motion.reduced(context)) {
+      setState(() => _log.add(reply));
+      _scrollToBottom();
+      return;
+    }
+    setState(() => _typing = true);
+    _scrollToBottom();
+    await Future<void>.delayed(TypingBubble.thinkTime);
+    if (!mounted) return;
+    setState(() {
+      _typing = false;
+      _log.add(reply);
+    });
+    _scrollToBottom();
+  }
+
   void _pickCategory(_FaqCategory c) {
     setState(() {
       _openCategory = c;
       _log.add(_ChatbotMsg(role: 'user', text: c.title));
-      _log.add(
+    });
+    unawaited(
+      _botReply(
         _ChatbotMsg(
           role: 'bot',
           text: 'Welche Frage zu „${c.title}" hast du? Tippe auf eine der '
               'folgenden Fragen.',
         ),
-      );
-    });
-    _scrollToBottom();
+      ),
+    );
   }
 
   void _pickQuestion(_FaqEntry e) {
-    setState(() {
-      _log.add(_ChatbotMsg(role: 'user', text: e.question));
-      _log.add(_ChatbotMsg(role: 'bot', text: e.answer, deepLink: e.deepLink));
-    });
-    _scrollToBottom();
+    setState(() => _log.add(_ChatbotMsg(role: 'user', text: e.question)));
+    unawaited(
+      _botReply(
+        _ChatbotMsg(role: 'bot', text: e.answer, deepLink: e.deepLink),
+      ),
+    );
   }
 
   void _backToCategories() {
-    setState(() {
-      _openCategory = null;
-      _log.add(
+    setState(() => _openCategory = null);
+    unawaited(
+      _botReply(
         const _ChatbotMsg(
           role: 'bot',
           text: 'Alles klar. Womit kann ich dir sonst helfen?',
         ),
-      );
-    });
-    _scrollToBottom();
+      ),
+    );
   }
 
   /// Führt einen `deepLink`-String aus einer Bot-Antwort aus.
@@ -513,13 +542,24 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
                 child: ListView.separated(
                   controller: _scrollCtrl,
                   padding: const EdgeInsets.all(AppSpacing.s4),
-                  itemCount: _log.length,
+                  // Ein Eintrag mehr, solange der Assistent „tippt".
+                  itemCount: _log.length + (_typing ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.s3),
-                  itemBuilder: (context, i) => _Bubble(
-                    msg: _log[i],
-                    onLink: _handleDeepLink,
-                  ),
+                  itemBuilder: (context, i) {
+                    if (i >= _log.length) {
+                      return const Align(
+                        alignment: Alignment.centerLeft,
+                        child: TypingBubble(
+                          label: 'Assistent antwortet',
+                        ),
+                      );
+                    }
+                    return _Bubble(
+                      msg: _log[i],
+                      onLink: _handleDeepLink,
+                    );
+                  },
                 ),
               ),
 
@@ -540,17 +580,26 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
                     AppSpacing.s4,
                     AppSpacing.s3,
                   ),
-                  child: _openCategory == null
-                      ? _CategoryChips(
-                          onPick: _pickCategory,
-                          onHandoff: _handoff,
-                        )
-                      : _QuestionChips(
-                          category: _openCategory!,
-                          onPick: _pickQuestion,
-                          onBack: _backToCategories,
-                          onHandoff: _handoff,
-                        ),
+                  // Während der Assistent tippt, sind die Chips gesperrt —
+                  // sonst kippen zwei Antworten übereinander.
+                  child: AnimatedOpacity(
+                    opacity: _typing ? 0.5 : 1,
+                    duration: Motion.duration(context, AppMotion.fast),
+                    child: AbsorbPointer(
+                      absorbing: _typing,
+                      child: _openCategory == null
+                          ? _CategoryChips(
+                              onPick: _pickCategory,
+                              onHandoff: _handoff,
+                            )
+                          : _QuestionChips(
+                              category: _openCategory!,
+                              onPick: _pickQuestion,
+                              onBack: _backToCategories,
+                              onHandoff: _handoff,
+                            ),
+                    ),
+                  ),
                 ),
               ),
             ],

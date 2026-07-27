@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/motion/motion.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -140,74 +141,98 @@ class _FormPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Eyebrow('Willkommen zurück'),
+                // Einlauf-Choreografie nach Vorlage: Überschrift zuerst,
+                // dann die Felder nacheinander, zuletzt der Button. Das
+                // führt den Blick von oben nach unten durch das Formular,
+                // statt alles gleichzeitig aufblitzen zu lassen.
+                const FadeInUp(child: Eyebrow('Willkommen zurück')),
                 const SizedBox(height: AppSpacing.s2),
-                Text(
-                  l10n.signInTitle,
-                  style:
-                      AppTypography.display(size: 28, weight: FontWeight.w800),
-                ),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  'Melde dich mit deinem Konto an oder wähle einen Demo-Zugang.',
-                  style:
-                      AppTypography.body(size: 14, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: AppSpacing.s6),
-                TextFormField(
-                  controller: emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: const [AutofillHints.email],
-                  decoration: InputDecoration(
-                    labelText: l10n.email,
-                    prefixIcon: const Icon(Icons.mail_outline, size: 20),
-                  ),
-                  validator: (v) => switch (Validators.email(v)) {
-                    'required' => l10n.fieldRequired,
-                    'invalid' => l10n.emailInvalid,
-                    _ => null,
-                  },
-                ),
-                const SizedBox(height: AppSpacing.s4),
-                TextFormField(
-                  controller: passwordCtrl,
-                  obscureText: obscure,
-                  autofillHints: const [AutofillHints.password],
-                  decoration: InputDecoration(
-                    labelText: l10n.password,
-                    prefixIcon: const Icon(Icons.lock_outline, size: 20),
-                    suffixIcon: IconButton(
-                      tooltip:
-                          obscure ? 'Passwort anzeigen' : 'Passwort verbergen',
-                      onPressed: onToggleObscure,
-                      icon: Icon(
-                        obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        size: 20,
-                      ),
+                FadeInUp(
+                  child: Text(
+                    l10n.signInTitle,
+                    style: AppTypography.display(
+                      size: 28,
+                      weight: FontWeight.w800,
                     ),
                   ),
-                  onFieldSubmitted: (_) => onSubmit(),
-                  validator: (v) => switch (Validators.password(v)) {
-                    'required' => l10n.fieldRequired,
-                    'tooShort' => l10n.passwordTooShort,
-                    _ => null,
-                  },
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                FadeInUp(
+                  index: 1,
+                  child: Text(
+                    'Melde dich mit deinem Konto an oder wähle einen '
+                    'Demo-Zugang.',
+                    style: AppTypography.body(
+                      size: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s6),
+                FadeInUp(
+                  index: 2,
+                  child: TextFormField(
+                    controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
+                    decoration: InputDecoration(
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.mail_outline, size: 20),
+                    ),
+                    validator: (v) => switch (Validators.email(v)) {
+                      'required' => l10n.fieldRequired,
+                      'invalid' => l10n.emailInvalid,
+                      _ => null,
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                FadeInUp(
+                  index: 3,
+                  child: TextFormField(
+                    controller: passwordCtrl,
+                    obscureText: obscure,
+                    autofillHints: const [AutofillHints.password],
+                    decoration: InputDecoration(
+                      labelText: l10n.password,
+                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                      suffixIcon: IconButton(
+                        tooltip: obscure
+                            ? 'Passwort anzeigen'
+                            : 'Passwort verbergen',
+                        onPressed: onToggleObscure,
+                        icon: Icon(
+                          obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    onFieldSubmitted: (_) => onSubmit(),
+                    validator: (v) => switch (Validators.password(v)) {
+                      'required' => l10n.fieldRequired,
+                      'tooShort' => l10n.passwordTooShort,
+                      _ => null,
+                    },
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s5),
-                FilledButton(
-                  onPressed: isLoading ? null : onSubmit,
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.ink,
-                          ),
-                        )
-                      : Text(l10n.signIn),
+                FadeInUp(
+                  index: 4,
+                  child: FilledButton(
+                    onPressed: isLoading ? null : onSubmit,
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.ink,
+                            ),
+                          )
+                        : Text(l10n.signIn),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
                 // Wrap statt Row: bei schmalen Panels brechen die beiden
