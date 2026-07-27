@@ -19,7 +19,7 @@ class TierTiles extends StatelessWidget {
     _Tier(
       code: 'bronze',
       name: 'BRONZE',
-      threshold: 'ab 150 €',
+      threshold: 'ab 150 € Umsatz',
       percent: '6 %',
       breakdown: '5 % Abo + 1 % Status',
       // Bronze-Verlauf, heller oben.
@@ -29,7 +29,7 @@ class TierTiles extends StatelessWidget {
     _Tier(
       code: 'silber',
       name: 'SILBER',
-      threshold: 'ab 500 €',
+      threshold: 'ab 500 € Umsatz',
       percent: '7,5 %',
       breakdown: '5 % Abo + 2,5 % Status',
       gradient: [Color(0xFFDDE1E6), Color(0xFFB2B8BF)],
@@ -38,7 +38,7 @@ class TierTiles extends StatelessWidget {
     _Tier(
       code: 'gold',
       name: 'GOLD',
-      threshold: 'ab 1.000 €',
+      threshold: 'ab 1.000 € Umsatz',
       percent: '10 %',
       breakdown: '5 % Abo + 5 % Status',
       gradient: [Color(0xFFFDD65A), Color(0xFFE0A500)],
@@ -127,7 +127,7 @@ class _TierTile extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -147,20 +147,28 @@ class _TierTile extends StatelessWidget {
                 Icon(Icons.check_circle, size: 15, color: tier.onColor),
             ],
           ),
-          const Spacer(),
-          Text(
-            tier.percent,
-            maxLines: 1,
-            style: AppTypography.display(
-              size: 28,
-              weight: FontWeight.w800,
-              color: tier.onColor,
+          // Die Prozentzahl ist die eigentliche Aussage der Kachel:
+          // mittig und groß, damit sie im Slider sofort trägt.
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  tier.percent,
+                  maxLines: 1,
+                  style: AppTypography.display(
+                    size: 44,
+                    weight: FontWeight.w800,
+                    color: tier.onColor,
+                  ).copyWith(height: 1),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 2),
           Text(
             tier.breakdown,
             maxLines: 1,
+            textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.body(size: 11, color: muted),
           ),

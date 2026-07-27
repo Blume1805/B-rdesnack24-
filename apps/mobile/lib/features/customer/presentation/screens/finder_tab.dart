@@ -81,19 +81,27 @@ class _FinderTabState extends ConsumerState<FinderTab> {
                 ),
               )
             else
-              for (final m in list) ...[
-                _MachineLocationCard(
-                  machine: m,
-                  onOpen: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          AvailabilityScreen(machineId: m.id, title: m.name),
+              // Standorte als Stapel: bei drei bis vier Automaten sieht man
+              // vorn einen vollständig und hinten, dass es weitergeht,
+              // statt vier Karten untereinander zu scrollen.
+              StackSlider(
+                height: 188,
+                children: [
+                  for (final m in list)
+                    _MachineLocationCard(
+                      machine: m,
+                      onOpen: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => AvailabilityScreen(
+                            machineId: m.id,
+                            title: m.name,
+                          ),
+                        ),
+                      ),
+                      onNavigate: () => _navigate(m.name, m.city),
                     ),
-                  ),
-                  onNavigate: () => _navigate(m.name, m.city),
-                ),
-                const SizedBox(height: AppSpacing.s4),
-              ],
+                ],
+              ),
           ],
         ),
       ),

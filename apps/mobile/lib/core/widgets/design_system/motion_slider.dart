@@ -137,3 +137,116 @@ class _MotionSliderState extends State<MotionSlider> {
     );
   }
 }
+
+/// Kachel-Raster, seitenweise wischbar.
+///
+/// Teilt [children] in Seiten zu [rows] × [columns] Kacheln und legt sie in
+/// einen [MotionSlider]. Gedacht für Raster, die sonst die Seite in die
+/// Länge ziehen — Profil-Aktionen, Abzeichen.
+///
+/// Wichtig: die erste Seite zeigt die wichtigsten Kacheln vollständig.
+/// Anders als bei einem vertikalen Stapel bleibt damit alles Wesentliche
+/// ohne Geste sichtbar; gewischt wird nur für den Rest.
+class PagedTileGrid extends StatelessWidget {
+  const PagedTileGrid({
+    super.key,
+    required this.children,
+    required this.tileHeight,
+    this.columns = 3,
+    this.rows = 2,
+    this.spacing = AppSpacing.s2,
+  });
+
+  final List<Widget> children;
+  final double tileHeight;
+  final int columns;
+  final int rows;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    if (children.isEmpty) return const SizedBox.shrink();
+    final perPage = columns * rows;
+    final pages = <List<Widget>>[
+      for (var i = 0; i < children.length; i += perPage)
+        children.sublist(
+          i,
+          i + perPage > children.length ? children.length : i + perPage,
+        ),
+    ];
+
+    // Passt alles auf eine Seite, braucht es keinen Slider — dann wäre die
+    // Punktleiste nur Dekoration.
+    if (pages.length == 1) {
+      return _GridPage(
+        tiles: pages.first,
+        columns: columns,
+        tileHeight: tileHeight,
+        spacing: spacing,
+      );
+    }
+
+    // Höhe der höchsten Seite: die letzte Seite kann weniger Zeilen haben,
+    // der Slider braucht aber eine feste Höhe.
+    final maxRows = pages
+        .map((p) => (p.length / columns).ceil())
+        .reduce((a, b) => a > b ? a : b);
+    final height = maxRows * tileHeight + (maxRows - 1) * spacing;
+
+    return MotionSlider(
+      height: height,
+      viewportFraction: 0.94,
+      children: [
+        for (final page in pages)
+          _GridPage(
+            tiles: page,
+            columns: columns,
+            tileHeight: tileHeight,
+            spacing: spacing,
+          ),
+      ],
+    );
+  }
+}
+
+class _GridPage extends StatelessWidget {
+  const _GridPage({
+    required this.tiles,
+    required this.columns,
+    required this.tileHeight,
+    required this.spacing,
+  });
+
+  final List<Widget> tiles;
+  final int columns;
+  final double tileHeight;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += columns) {
+      final slice = tiles.sublist(
+        i,
+        i + columns > tiles.length ? tiles.length : i + columns,
+      );
+      rows.add(
+        SizedBox(
+          height: tileHeight,
+          child: Row(
+            children: [
+              for (var c = 0; c < columns; c++) ...[
+                if (c > 0) SizedBox(width: spacing),
+                // Leere Plätze in der letzten Zeile bleiben frei, damit die
+                // Kacheln nicht auf volle Breite auseinandergezogen werden.
+                Expanded(child: c < slice.length ? slice[c] : const SizedBox()),
+              ],
+            ],
+          ),
+        ),
+      );
+      if (i + columns < tiles.length) rows.add(SizedBox(height: spacing));
+    }
+    return Column(mainAxisSize: MainAxisSize.min, children: rows);
+  }
+}

@@ -240,12 +240,15 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                           action: _AiSectionBadge(context: context),
                         ),
                         const SizedBox(height: AppSpacing.s4),
-                        for (final o in specials)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.s4),
-                            child: _PersonalOfferCard(offer: o),
-                          ),
+                        // Coupons als Stapel: man löst einen nach dem
+                        // anderen ein, und die Liste wächst mit der Zeit.
+                        StackSlider(
+                          height: 300,
+                          children: [
+                            for (final o in specials)
+                              _PersonalOfferCard(offer: o),
+                          ],
+                        ),
                         const SizedBox(height: AppSpacing.s5),
                       ],
                       if (loyalty.isNotEmpty) ...[
@@ -255,12 +258,15 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                           action: _AiSectionBadge(context: context),
                         ),
                         const SizedBox(height: AppSpacing.s4),
-                        for (final o in loyalty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.s4),
-                            child: _PersonalOfferCard(offer: o),
-                          ),
+                        // Coupons als Stapel: man löst einen nach dem
+                        // anderen ein, und die Liste wächst mit der Zeit.
+                        StackSlider(
+                          height: 300,
+                          children: [
+                            for (final o in loyalty)
+                              _PersonalOfferCard(offer: o),
+                          ],
+                        ),
                         const SizedBox(height: AppSpacing.s5),
                       ],
                       if (basis.isNotEmpty) ...[
@@ -270,12 +276,14 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                           action: _AiSectionBadge(context: context),
                         ),
                         const SizedBox(height: AppSpacing.s4),
-                        for (final o in basis)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.s4),
-                            child: _PersonalOfferCard(offer: o),
-                          ),
+                        // Coupons als Stapel: man löst einen nach dem
+                        // anderen ein, und die Liste wächst mit der Zeit.
+                        StackSlider(
+                          height: 300,
+                          children: [
+                            for (final o in basis) _PersonalOfferCard(offer: o),
+                          ],
+                        ),
                         const SizedBox(height: AppSpacing.s5),
                       ],
                     ],
@@ -1169,6 +1177,14 @@ class _TierTimeline extends StatelessWidget {
   final List<int> tiers;
   final int points;
 
+  /// Meilenstein, der beim Öffnen vorn steht: der zuletzt erreichte,
+  /// sonst der erste noch offene.
+  static int _focusMilestone(List<int> tiers, int points) {
+    final reached = tiers.lastIndexWhere((t) => points >= t);
+    if (reached < 0) return 0;
+    return (reached + 1).clamp(0, tiers.length - 1);
+  }
+
   /// Rabattprozent je Meilenstein — muss mit der DB-Funktion
   /// app.grant_loyalty_bonuses() übereinstimmen (5/10/15/25 %).
   static const _rewards = {500: 5, 1200: 10, 2000: 15, 3000: 25};
@@ -1205,23 +1221,21 @@ class _TierTimeline extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.s3),
         // Belohnungs-Kacheln je Meilenstein
-        LayoutBuilder(
-          builder: (context, c) {
-            final w = (c.maxWidth - AppSpacing.s2 * (tiers.length - 1)) /
-                tiers.length;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final t in tiers)
-                  _MilestoneChip(
-                    width: w,
-                    tier: t,
-                    percent: _rewards[t] ?? 0,
-                    reached: points >= t,
-                  ),
-              ],
-            );
-          },
+        // Meilensteine als Slider wie die Status-Stufen — vier Kacheln
+        // nebeneinander waren auf schmalen Displays kaum lesbar, und der
+        // erreichte Meilenstein steht jetzt vorn.
+        MotionSlider(
+          height: 108,
+          viewportFraction: 0.42,
+          initialPage: _focusMilestone(tiers, points),
+          children: [
+            for (final t in tiers)
+              _MilestoneChip(
+                tier: t,
+                percent: _rewards[t] ?? 0,
+                reached: points >= t,
+              ),
+          ],
         ),
       ],
     );
@@ -1232,13 +1246,11 @@ class _TierTimeline extends StatelessWidget {
 /// grauer Kachel, Rabattprozent groß, Punktzahl klein darunter.
 class _MilestoneChip extends StatelessWidget {
   const _MilestoneChip({
-    required this.width,
     required this.tier,
     required this.percent,
     required this.reached,
   });
 
-  final double width;
   final int tier;
   final int percent;
   final bool reached;
@@ -1246,8 +1258,8 @@ class _MilestoneChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const ink = AppColors.ink;
-    return SizedBox(
-      width: width,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1616,23 +1628,14 @@ class _FavoritesSection extends ConsumerWidget {
                       ),
                     ),
                   )
-                : SizedBox(
+                : MotionSlider(
                     key: ValueKey('fav-$category-${list.length}'),
                     height: 220,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(width: AppSpacing.s3),
-                      // Gestaffeltes Einlaufen: Platz 1 zuerst, dann 2 und 3.
-                      itemBuilder: (context, i) => FadeInUp(
-                        index: i,
-                        child: _FavoriteCard(
-                          product: list[i],
-                          rank: i + 1,
-                        ),
-                      ),
-                    ),
+                    viewportFraction: 0.56,
+                    children: [
+                      for (final (i, p) in list.indexed)
+                        _FavoriteCard(product: p, rank: i + 1),
+                    ],
                   ),
           ),
         ),

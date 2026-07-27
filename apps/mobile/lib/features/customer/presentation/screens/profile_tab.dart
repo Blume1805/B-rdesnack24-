@@ -93,13 +93,11 @@ class ProfileTab extends ConsumerWidget {
         // alles auf einen Blick statt fünf gestapelter Listenzeilen.
         const Eyebrow('Zugang & Profil'),
         const SizedBox(height: AppSpacing.s3),
-        GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppSpacing.s2,
-          crossAxisSpacing: AppSpacing.s2,
-          childAspectRatio: 0.95,
+        // Seitenweise statt endlos untereinander: die erste Seite zeigt
+        // Stammdaten, Passwort und Abo vollständig — nichts Wichtiges
+        // liegt hinter einer Wischgeste.
+        PagedTileGrid(
+          tileHeight: 92,
           children: [
             _ActionTile(
               key: CustomerAnchors.kundennummer,

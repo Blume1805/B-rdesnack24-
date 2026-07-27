@@ -123,12 +123,19 @@ class HistoryTab extends ConsumerWidget {
             error: (e, _) => _errorCard('$e'),
             data: (list) => list.isEmpty
                 ? _empty('Noch keine Käufe erfasst.')
-                : Column(
+                // Stapel statt endloser Spalte: bei vielen Käufen wuchs die
+                // Seite sonst ins Unendliche. Über „Alle Belege" kommt man
+                // weiterhin an die vollständige Liste.
+                : StackSlider(
+                    height: 76,
+                    showAllLabel: 'Alle Belege',
+                    onShowAll: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ReceiptsScreen(),
+                      ),
+                    ),
                     children: [
-                      for (final p in list) ...[
-                        _PurchaseDonationRow(purchase: p),
-                        const SizedBox(height: AppSpacing.s2),
-                      ],
+                      for (final p in list) _PurchaseDonationRow(purchase: p),
                     ],
                   ),
           ),

@@ -129,15 +129,19 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                   title: 'Aktuelle Herausforderungen',
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                for (final (i, c)
-                    in (data['challenges'] as List? ?? const []).indexed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-                    child: _ChallengeCard(
-                      c: Map<String, dynamic>.from(c as Map),
-                      tierColor: _challengeTierColors[i % 3],
-                    ),
-                  ),
+                // Herausforderungen als Stapel — man bearbeitet ohnehin
+                // eine nach der anderen.
+                StackSlider(
+                  height: 118,
+                  children: [
+                    for (final (i, c)
+                        in (data['challenges'] as List? ?? const []).indexed)
+                      _ChallengeCard(
+                        c: Map<String, dynamic>.from(c as Map),
+                        tierColor: _challengeTierColors[i % 3],
+                      ),
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.s2),
                 const _SectionTitle(
                   eyebrow: 'Sammlung',
@@ -443,13 +447,11 @@ class _BadgeGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cols = constraints.maxWidth < 420 ? 3 : 4;
-        return GridView.count(
-          crossAxisCount: cols,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppSpacing.s2,
-          crossAxisSpacing: AppSpacing.s2,
-          childAspectRatio: 0.82,
+        // Zwei Zeilen je Seite, der Rest wird gewischt — die Sammlung
+        // wächst mit der Zeit und würde die Seite sonst zuwachsen.
+        return PagedTileGrid(
+          columns: cols,
+          tileHeight: 104,
           children: [
             for (final b in badges)
               _BadgeTile(
