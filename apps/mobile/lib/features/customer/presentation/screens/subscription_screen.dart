@@ -81,6 +81,21 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       .where((p) => p.key != 'lifetime' || Pricing.lifetimePubliclyOffered)
       .toList();
 
+  /// Höhe des Abo-Sliders. Fest, weil ein PageView eine begrenzte Höhe
+  /// braucht — bemessen an der höchsten Karte (Lifetime mit
+  /// Founders-Restplätzen und Widerrufs-Hinweis).
+  static const double _planSliderHeight = 268;
+
+  /// Karte, die beim Öffnen vorn steht: das laufende Abo, sonst das
+  /// Jahresmodell — das ist das Angebot mit dem besten Verhältnis.
+  int get _initialPlanIndex {
+    final plans = _visiblePlans;
+    final current = plans.indexWhere((p) => p.key == _currentPlan);
+    if (current >= 0) return current;
+    final yearly = plans.indexWhere((p) => p.key == 'yearly');
+    return yearly >= 0 ? yearly : 0;
+  }
+
   String? _currentPlan;
   bool _locked = false;
   bool _loading = true;
@@ -516,23 +531,34 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
-                for (final plan in _visiblePlans) ...[
-                  _PlanCard(
-                    plan: plan,
-                    active: _currentPlan == plan.key,
-                    disabled: _busy ||
-                        _locked ||
-                        _currentPlan == plan.key ||
-                        (plan.key == 'lifetime' && _foundersSoldOut),
-                    foundersRemaining:
-                        plan.key == 'lifetime' ? _foundersRemaining : null,
-                    foundersLimit:
-                        plan.key == 'lifetime' ? _foundersLimit : null,
-                    foundersSoldOut: plan.key == 'lifetime' && _foundersSoldOut,
-                    onChoose: () => _choose(plan),
-                  ),
-                  const SizedBox(height: AppSpacing.s3),
-                ],
+                // Die Modelle sind Alternativen, keine Liste: im Slider
+                // steht immer genau eines im Fokus, die Nachbarn treten
+                // zurück. Startkarte ist das laufende Abo — sonst das
+                // Jahres-Abo, weil es das beste Verhältnis bietet.
+                MotionSlider(
+                  height: _planSliderHeight,
+                  viewportFraction: 0.86,
+                  initialPage: _initialPlanIndex,
+                  children: [
+                    for (final plan in _visiblePlans)
+                      _PlanCard(
+                        plan: plan,
+                        active: _currentPlan == plan.key,
+                        disabled: _busy ||
+                            _locked ||
+                            _currentPlan == plan.key ||
+                            (plan.key == 'lifetime' && _foundersSoldOut),
+                        foundersRemaining:
+                            plan.key == 'lifetime' ? _foundersRemaining : null,
+                        foundersLimit:
+                            plan.key == 'lifetime' ? _foundersLimit : null,
+                        foundersSoldOut:
+                            plan.key == 'lifetime' && _foundersSoldOut,
+                        onChoose: () => _choose(plan),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.s3),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   'Die Abrechnung erfolgt über den App Store bzw. Google '

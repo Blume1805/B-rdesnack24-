@@ -139,3 +139,55 @@ Violett/Türkis/Grün-Template-Farben, und alles respektiert
 `Motion.reduced` — bei reduzierter Bewegung stehen die Tipp-Punkte still
 und die Denkpause im Chat entfällt (eine künstliche Wartezeit ohne
 sichtbare Gegenleistung wäre nur eine träge App).
+
+## Nachtrag 2026-07-27 — zwei eigene Fehler + Slider-Set
+
+### „Meine Spenden" war leer
+
+Die Kennzahl-Kacheln standen in `Row(crossAxisAlignment: stretch)`. In
+einer ListView bekommt eine Row unbegrenzte Höhe, `stretch` verlangt aber
+eine endliche — Flutter wirft `BoxConstraints forces an infinite height`.
+Im Debug-Build sieht man den roten Balken, im **Release-Build bleibt die
+Fläche einfach leer**. Genau so ist es aufgefallen.
+
+Behoben mit `IntrinsicHeight`. Im Abo-Screen stand für denselben Fall
+schon ein Warnkommentar — die Spenden-Karte hatte ihn nicht bekommen.
+Regressionstest rendert die Karte jetzt in einer ListView und prüft auf
+`takeException`.
+
+**Merksatz:** `Row(stretch)` in einer Scrollansicht immer in
+`IntrinsicHeight` wickeln.
+
+### Suchleiste klappte beim Tippen zu
+
+Die Suche blendet beim Herunterscrollen aus. Beim Öffnen der Tastatur
+scrollt Flutter das fokussierte Feld aber **selbst** in den sichtbaren
+Bereich — das zählte als Herunterscrollen und setzte `heightFactor: 0`,
+während man hineintippte. Dazu verdeckte die Tastatur das untere Drittel
+der Liste.
+
+Behoben: `searchBarVisible()` gibt bei Fokus immer `true` zurück (als
+freie Funktion ausgelagert und getestet), das Tastatur-Inset kommt als
+Bottom-Padding dazu, und das Feld hat jetzt einen expliziten Textstil.
+
+### MotionSlider
+
+`MotionSlider` (Designsystem) zeigt Alternativen als Karussell: Fokuskarte
+100 %, Nachbarn 94 % / 65 % Deckkraft, Punktleiste darunter. Eingesetzt
+für die **Status-Stufen** (startet auf der erreichten Stufe) und die
+**Abo-Modelle** (startet auf dem laufenden Abo, sonst Jahresmodell).
+
+### Toast-Set
+
+`showAppToast(context, message, tone:, title:)` mit vier Tonalitäten
+(Success · Info · Warning · Error) nach der vierteiligen Vorlage: farbige
+Kante links, Symbol, optionaler Titel. Farben aus den Status-Tokens statt
+aus der Vorlage. Haptik nur bei Erfolg und Fehler — sonst vibriert die App
+bei jeder Kleinigkeit. `showSuccessToast()` bleibt als Kurzform bestehen.
+
+### Punktestand-Slide entfernt
+
+Der Punktestand stand doppelt auf der Startseite: als Key-Fact-Kachel und
+als erste Karte im Hero-Karussell. Die Karussell-Karte ist raus; die
+Kachel ist dafür anklickbar und führt zu Status und Challenges. Ebenso
+Dauerrabatt → Abo, Coupons → Sprung zur Coupon-Sektion.

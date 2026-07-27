@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
+import 'motion_slider.dart';
 import '../../theme/app_typography.dart';
 
 /// Metallische Status-Kacheln (Bronze · Silber · Gold) für den lebenslangen
@@ -47,23 +48,26 @@ class TierTiles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Feste Kachelbreite + horizontales Scrollen: verhindert Umbrüche wegen
-    // einzelner Zeichen (%/€) auf schmalen Displays und hält die Fakten
-    // gut lesbar nebeneinander.
-    return SizedBox(
-      height: 118,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: _tiers.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s3),
-        itemBuilder: (context, i) => _TierTile(
-          tier: _tiers[i],
-          reached: currentCode != null &&
-              _rank(currentCode!) >= _rank(_tiers[i].code),
-        ),
-      ),
+    // Slide statt Nebeneinander: die drei Stufen sind Alternativen, keine
+    // Liste. Im Slider steht immer genau eine im Fokus, die Nachbarn
+    // treten zurück — man vergleicht sie nacheinander statt sie zu
+    // überfliegen. Startkarte ist die erreichte Stufe.
+    final startIndex = currentCode == null
+        ? 0
+        : _tiers.indexWhere((t) => t.code == currentCode).clamp(0, 2);
+
+    return MotionSlider(
+      height: 128,
+      initialPage: startIndex,
+      viewportFraction: 0.62,
+      children: [
+        for (final tier in _tiers)
+          _TierTile(
+            tier: tier,
+            reached:
+                currentCode != null && _rank(currentCode!) >= _rank(tier.code),
+          ),
+      ],
     );
   }
 
@@ -103,8 +107,7 @@ class _TierTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final muted = tier.onColor.withValues(alpha: 0.72);
     return Container(
-      width: 172,
-      padding: const EdgeInsets.all(AppSpacing.s3),
+      padding: const EdgeInsets.all(AppSpacing.s4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,

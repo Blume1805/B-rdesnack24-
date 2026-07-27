@@ -27,6 +27,7 @@ class CustomerAnchors {
       GlobalKey(debugLabel: 'feierabend-deal');
   static final GlobalKey loyaltyCard = GlobalKey(debugLabel: 'loyalty-card');
   static final GlobalKey weeklyOffers = GlobalKey(debugLabel: 'weekly-offers');
+  static final GlobalKey coupons = GlobalKey(debugLabel: 'coupons');
 
   // ── Profil-Tab ──────────────────────────────────────────────────
   static final GlobalKey profileHeader =
@@ -59,6 +60,7 @@ class CustomerAnchors {
     'feierabend': feierabendDeal,
     'punkte': loyaltyCard,
     'wochenangebote': weeklyOffers,
+    'coupons': coupons,
     'profile': profileHeader,
     'kundennummer': kundennummer,
     'password': passwordRow,

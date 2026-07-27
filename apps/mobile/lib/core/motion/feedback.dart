@@ -11,8 +11,51 @@ import 'motion.dart';
 /// Ersetzt die nüchterne SnackBar bei abgeschlossenen Aktionen (Kauf,
 /// Coupon aktiviert, Bonus erhalten). Bewusst code-basiert statt Lottie:
 /// keine zusätzliche Abhängigkeit, kein Asset, exakt in Markenfarben.
-void showSuccessToast(BuildContext context, String message) {
-  Motion.success();
+void showSuccessToast(BuildContext context, String message) =>
+    showAppToast(context, message, tone: ToastTone.success);
+
+/// Tonalität einer Kurzmeldung.
+///
+/// Nachbau des vierteiligen Vorlagen-Sets (Success · Information · Error ·
+/// Warning). Die Farben kommen aus den Status-Tokens statt aus der
+/// Vorlage — deren Grün/Blau/Rot/Gelb stehen neben dem Marken-Gold sonst
+/// wie Fremdkörper.
+enum ToastTone {
+  success(AppColors.statusPositive, Icons.check_circle),
+  info(AppColors.statusInfo, Icons.info),
+  warning(AppColors.statusWarning, Icons.warning_amber_rounded),
+  error(AppColors.statusCritical, Icons.error);
+
+  const ToastTone(this.accent, this.icon);
+
+  final Color accent;
+  final IconData icon;
+}
+
+/// Kurzmeldung am unteren Rand — mit farbiger Kante, Symbol und optionalem
+/// Titel.
+///
+/// [title] setzt die Meldung zweizeilig (fette Überschrift, Erklärung
+/// darunter) wie in der Vorlage; ohne Titel bleibt es einzeilig.
+void showAppToast(
+  BuildContext context,
+  String message, {
+  ToastTone tone = ToastTone.info,
+  String? title,
+  Duration duration = const Duration(seconds: 3),
+}) {
+  // Erfolg darf spürbar sein, Fehler auch — Info und Warnung bleiben still,
+  // sonst vibriert die App bei jeder Kleinigkeit.
+  switch (tone) {
+    case ToastTone.success:
+      Motion.success();
+    case ToastTone.error:
+      Motion.tap();
+    case ToastTone.info:
+    case ToastTone.warning:
+      break;
+  }
+
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
   messenger
@@ -21,24 +64,56 @@ void showSuccessToast(BuildContext context, String message) {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.ink,
-        duration: const Duration(seconds: 3),
+        duration: duration,
+        padding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         content: Row(
           children: [
-            const AnimatedCheck(size: 22),
+            // Farbige Kante links: die Tonalität ist erkennbar, bevor man
+            // liest — genau wie in der Vorlage.
+            Container(width: 5, height: 46, color: tone.accent),
+            const SizedBox(width: AppSpacing.s3),
+            if (tone == ToastTone.success)
+              const AnimatedCheck(size: 22)
+            else
+              Icon(tone.icon, size: 22, color: tone.accent),
             const SizedBox(width: AppSpacing.s3),
             Expanded(
-              child: Text(
-                message,
-                style: AppTypography.body(
-                  size: 13.5,
-                  weight: FontWeight.w700,
-                  color: AppColors.onDark,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.s3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title != null) ...[
+                      Text(
+                        title,
+                        style: AppTypography.body(
+                          size: 13.5,
+                          weight: FontWeight.w800,
+                          color: AppColors.onDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                    Text(
+                      message,
+                      style: AppTypography.body(
+                        size: title == null ? 13.5 : 12.5,
+                        weight:
+                            title == null ? FontWeight.w700 : FontWeight.w500,
+                        color: title == null
+                            ? AppColors.onDark
+                            : AppColors.onDark.withValues(alpha: 0.86),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+            const SizedBox(width: AppSpacing.s3),
           ],
         ),
       ),

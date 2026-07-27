@@ -71,17 +71,24 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     const HeroBackdrop(
                       tagline: 'Immer da, wenn der Hunger kommt.',
                     ),
-                    _FormPanel(
-                      formKey: _formKey,
-                      emailCtrl: _emailCtrl,
-                      passwordCtrl: _passwordCtrl,
-                      obscure: _obscure,
-                      onToggleObscure: () =>
-                          setState(() => _obscure = !_obscure),
-                      isLoading: isLoading,
-                      onSubmit: _submit,
-                      onFillDemo: _fillDemo,
-                      l10n: l10n,
+                    // Die ganze weiße Karte schiebt sich beim Öffnen unter
+                    // dem Hero hervor — das ist die Kernbewegung der
+                    // Vorlage. Die Felder darin laufen anschließend
+                    // gestaffelt ein (siehe FadeInUp weiter unten).
+                    FadeInUp(
+                      offset: 28,
+                      child: _FormPanel(
+                        formKey: _formKey,
+                        emailCtrl: _emailCtrl,
+                        passwordCtrl: _passwordCtrl,
+                        obscure: _obscure,
+                        onToggleObscure: () =>
+                            setState(() => _obscure = !_obscure),
+                        isLoading: isLoading,
+                        onSubmit: _submit,
+                        onFillDemo: _fillDemo,
+                        l10n: l10n,
+                      ),
                     ),
                   ],
                 ),

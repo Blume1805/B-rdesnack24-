@@ -22,6 +22,25 @@ import 'subscription_screen.dart';
 import 'subscription_value_screen.dart';
 import 'news_screen.dart';
 import 'product_detail_screen.dart';
+import 'rewards_screen.dart';
+
+/// Soll die Suchleiste sichtbar sein?
+///
+/// Ausgelagert und öffentlich, weil genau diese Regel schon einmal falsch
+/// war: beim Öffnen der Tastatur scrollt Flutter das fokussierte Feld in
+/// den sichtbaren Bereich. Das zählte als „nach unten gescrollt" und
+/// klappte die Suche auf Höhe null — man tippte blind. [focused] hat
+/// deshalb Vorrang vor allem anderen.
+@visibleForTesting
+bool searchBarVisible({
+  required bool focused,
+  required bool scrollingDown,
+  required double offset,
+}) {
+  if (focused) return true;
+  // Ganz oben bleibt die Suche immer stehen.
+  return !scrollingDown || offset < 80;
+}
 
 class OffersTab extends ConsumerStatefulWidget {
   const OffersTab({super.key});
@@ -39,6 +58,21 @@ class _OffersTabState extends ConsumerState<OffersTab> {
   bool _searchVisible = true;
   double _lastOffset = 0;
 
+  /// Hat das Suchfeld gerade den Fokus? Dann darf der Scroll-Ausblender
+  /// **nie** greifen: beim Öffnen der Tastatur scrollt Flutter das Feld
+  /// selbst in den sichtbaren Bereich, das zählte bisher als „nach unten
+  /// gescrollt" — und klappte das Feld auf Höhe null zusammen, während man
+  /// hineintippte.
+  bool _searchFocused = false;
+
+  void _onSearchFocusChange(bool focused) {
+    if (!mounted || focused == _searchFocused) return;
+    setState(() {
+      _searchFocused = focused;
+      if (focused) _searchVisible = true;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -54,13 +88,19 @@ class _OffersTabState extends ConsumerState<OffersTab> {
   }
 
   void _onScroll() {
+    // Solange getippt wird, bleibt die Suche stehen — egal wie gescrollt
+    // wird. Sonst verschwindet das Feld unter dem eigenen Finger.
+    if (_searchFocused) return;
     final offset = _scroll.offset;
     // Kleine Schwelle: verhindert Flackern bei minimalen Bewegungen.
     if ((offset - _lastOffset).abs() < 12) return;
     final scrollingDown = offset > _lastOffset;
     _lastOffset = offset;
-    // Ganz oben bleibt die Suche immer sichtbar.
-    final visible = !scrollingDown || offset < 80;
+    final visible = searchBarVisible(
+      focused: _searchFocused,
+      scrollingDown: scrollingDown,
+      offset: offset,
+    );
     if (visible != _searchVisible) {
       setState(() => _searchVisible = visible);
     }
@@ -90,11 +130,14 @@ class _OffersTabState extends ConsumerState<OffersTab> {
       },
       child: ListView(
         controller: _scroll,
-        padding: const EdgeInsets.fromLTRB(
+        // Die Tastatur überdeckt sonst das untere Drittel der Liste. Ihr
+        // Inset kommt als zusätzlicher Innenabstand dazu, damit man auch
+        // bei offener Tastatur bis zum letzten Element scrollen kann.
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.s5,
           AppSpacing.s5,
           AppSpacing.s5,
-          AppSpacing.s8,
+          AppSpacing.s8 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
           // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
@@ -110,9 +153,11 @@ class _OffersTabState extends ConsumerState<OffersTab> {
               child: AnimatedOpacity(
                 opacity: _searchVisible ? 1 : 0,
                 duration: Motion.duration(context, AppMotion.fast),
-                child: const Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.s4),
-                  child: _ProductSearchBar(),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.s4),
+                  child: _ProductSearchBar(
+                    onFocusChange: _onSearchFocusChange,
+                  ),
                 ),
               ),
             ),
@@ -188,65 +233,72 @@ class _OffersTabState extends ConsumerState<OffersTab> {
             ),
             if (loyalty.valueOrNull != null)
               const SizedBox(height: AppSpacing.s5),
-            personals.when(
-              loading: () => const _PersonalLoading(),
-              error: (_, __) => const SizedBox.shrink(),
-              data: (list) {
-                final specials = list.where((o) => o.isSpecial).toList();
-                final loyalty = list
-                    .where((o) => o.source == PersonalOfferSource.loyalty)
-                    .toList();
-                final basis = list
-                    .where((o) => o.source == PersonalOfferSource.auto)
-                    .toList();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (specials.isNotEmpty) ...[
-                      SectionHeader(
-                        eyebrow: 'Für dich persönlich',
-                        title: 'Sonderangebote',
-                        action: _AiSectionBadge(context: context),
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      for (final o in specials)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
+            // Sprungziel der Coupons-Kachel oben.
+            KeyedSubtree(
+              key: CustomerAnchors.coupons,
+              child: personals.when(
+                loading: () => const _PersonalLoading(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (list) {
+                  final specials = list.where((o) => o.isSpecial).toList();
+                  final loyalty = list
+                      .where((o) => o.source == PersonalOfferSource.loyalty)
+                      .toList();
+                  final basis = list
+                      .where((o) => o.source == PersonalOfferSource.auto)
+                      .toList();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (specials.isNotEmpty) ...[
+                        SectionHeader(
+                          eyebrow: 'Für dich persönlich',
+                          title: 'Sonderangebote',
+                          action: _AiSectionBadge(context: context),
                         ),
-                      const SizedBox(height: AppSpacing.s5),
-                    ],
-                    if (loyalty.isNotEmpty) ...[
-                      SectionHeader(
-                        eyebrow: 'Belohnung',
-                        title: 'Bonus-Angebote',
-                        action: _AiSectionBadge(context: context),
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      for (final o in loyalty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
+                        const SizedBox(height: AppSpacing.s4),
+                        for (final o in specials)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.s4),
+                            child: _PersonalOfferCard(offer: o),
+                          ),
+                        const SizedBox(height: AppSpacing.s5),
+                      ],
+                      if (loyalty.isNotEmpty) ...[
+                        SectionHeader(
+                          eyebrow: 'Belohnung',
+                          title: 'Bonus-Angebote',
+                          action: _AiSectionBadge(context: context),
                         ),
-                      const SizedBox(height: AppSpacing.s5),
-                    ],
-                    if (basis.isNotEmpty) ...[
-                      SectionHeader(
-                        eyebrow: 'Nur für dich',
-                        title: 'Dein Angebot',
-                        action: _AiSectionBadge(context: context),
-                      ),
-                      const SizedBox(height: AppSpacing.s4),
-                      for (final o in basis)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
+                        const SizedBox(height: AppSpacing.s4),
+                        for (final o in loyalty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.s4),
+                            child: _PersonalOfferCard(offer: o),
+                          ),
+                        const SizedBox(height: AppSpacing.s5),
+                      ],
+                      if (basis.isNotEmpty) ...[
+                        SectionHeader(
+                          eyebrow: 'Nur für dich',
+                          title: 'Dein Angebot',
+                          action: _AiSectionBadge(context: context),
                         ),
-                      const SizedBox(height: AppSpacing.s5),
+                        const SizedBox(height: AppSpacing.s4),
+                        for (final o in basis)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.s4),
+                            child: _PersonalOfferCard(offer: o),
+                          ),
+                        const SizedBox(height: AppSpacing.s5),
+                      ],
                     ],
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
 
             // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
@@ -351,6 +403,9 @@ class _KeyFactsRow extends ConsumerWidget {
     final points = ref.watch(myLoyaltyStatusProvider).valueOrNull?.points;
     final coupons = ref.watch(myPersonalOffersProvider).valueOrNull?.length;
 
+    // Jede Kennzahl führt dorthin, wo man etwas damit anfangen kann —
+    // die Zahl allein wirft sonst nur eine Frage auf, die man nirgends
+    // beantwortet bekommt.
     return Row(
       children: [
         Expanded(
@@ -361,6 +416,10 @@ class _KeyFactsRow extends ConsumerWidget {
             format: (v) =>
                 '${v.toStringAsFixed(v % 1 == 0 ? 0 : 1).replaceAll('.', ',')} %',
             label: 'Dauerrabatt',
+            semanticHint: 'Abo und Status-Rabatt ansehen',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.s2),
@@ -371,6 +430,10 @@ class _KeyFactsRow extends ConsumerWidget {
             numeric: points?.toDouble(),
             format: (v) => v.round().toString(),
             label: 'Punkte',
+            semanticHint: 'Status und Challenges ansehen',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RewardsScreen()),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.s2),
@@ -381,6 +444,10 @@ class _KeyFactsRow extends ConsumerWidget {
             numeric: coupons?.toDouble(),
             format: (v) => v.round().toString(),
             label: coupons == 1 ? 'Coupon' : 'Coupons',
+            semanticHint: 'Zu deinen Coupons springen',
+            // Die Coupons stehen weiter unten auf derselben Seite —
+            // scrollen statt eine neue Seite öffnen.
+            onTap: () => CustomerAnchors.scrollTo('coupons'),
           ),
         ),
       ],
@@ -396,10 +463,19 @@ class _FactTile extends StatelessWidget {
     required this.label,
     this.numeric,
     this.format,
+    this.onTap,
+    this.semanticHint,
   });
   final IconData icon;
   final String value;
   final String label;
+
+  /// Sprungziel der Kachel. `null` = reine Anzeige.
+  final VoidCallback? onTap;
+
+  /// Wohin es geht — für Screenreader, weil „6 %" allein nichts über das
+  /// Ziel aussagt.
+  final String? semanticHint;
 
   /// Optionaler Zahlenwert — wenn gesetzt, wird animiert hochgezählt
   /// (sonst steht [value] statisch, z. B. „—" beim Laden).
@@ -408,19 +484,37 @@ class _FactTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final tile = Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s2,
         vertical: AppSpacing.s3,
       ),
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(
+          // Anklickbare Kacheln bekommen einen Gold-Rand — man sieht der
+          // Kachel dann an, dass dahinter etwas liegt.
+          color: onTap == null ? AppColors.borderSubtle : AppColors.brand,
+        ),
         borderRadius: BorderRadius.circular(AppRadii.md),
+        boxShadow: onTap == null ? null : AppShadows.sm,
       ),
       child: Column(
         children: [
-          Icon(icon, size: 16, color: AppColors.brandDark),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: AppColors.brandDark),
+              if (onTap != null) ...[
+                const SizedBox(width: 2),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 14,
+                  color: AppColors.textMuted,
+                ),
+              ],
+            ],
+          ),
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -459,6 +553,14 @@ class _FactTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null) return tile;
+    return Semantics(
+      button: true,
+      label: '$value $label',
+      hint: semanticHint,
+      child: PressableScale(onTap: onTap, child: tile),
     );
   }
 }
@@ -1870,7 +1972,12 @@ class _NewsPreviewRow extends StatelessWidget {
 /// Suchleiste oben im Angebote-Tab. Filtert die Community-Favoriten-Sektion
 /// nach eingegebenem Text (leichtgewichtige Suche ohne Backend-Roundtrip).
 class _ProductSearchBar extends ConsumerStatefulWidget {
-  const _ProductSearchBar();
+  const _ProductSearchBar({this.onFocusChange});
+
+  /// Meldet dem Tab, ob gerade getippt wird — der Scroll-Ausblender muss
+  /// dann pausieren, sonst klappt das Feld unter dem Finger zu.
+  final ValueChanged<bool>? onFocusChange;
+
   @override
   ConsumerState<_ProductSearchBar> createState() => _ProductSearchBarState();
 }
@@ -1882,7 +1989,9 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
   @override
   void initState() {
     super.initState();
-    _focus.addListener(_rebuild);
+    _focus
+      ..addListener(_rebuild)
+      ..addListener(_notifyFocus);
     _ctrl.addListener(_rebuild);
   }
 
@@ -1890,6 +1999,7 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
   void dispose() {
     _focus
       ..removeListener(_rebuild)
+      ..removeListener(_notifyFocus)
       ..dispose();
     _ctrl
       ..removeListener(_rebuild)
@@ -1899,6 +2009,10 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
 
   void _rebuild() {
     if (mounted) setState(() {});
+  }
+
+  void _notifyFocus() {
+    widget.onFocusChange?.call(_focus.hasFocus);
   }
 
   void _search(String value) {
@@ -1957,6 +2071,15 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
                 focusNode: _focus,
                 textInputAction: TextInputAction.search,
                 onSubmitted: _search,
+                // Textstil explizit: die Eingabe muss deutlich dunkler
+                // stehen als der Platzhalter, sonst sieht man beim Tippen
+                // kaum, was man geschrieben hat.
+                style: AppTypography.body(
+                  size: 15,
+                  weight: FontWeight.w600,
+                  color: AppColors.ink,
+                ),
+                cursorColor: AppColors.brandDark,
                 decoration: InputDecoration(
                   hintText: 'Finde dein Lieblingsprodukt',
                   hintStyle: AppTypography.body(
@@ -1964,6 +2087,9 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
                     color: AppColors.textMuted,
                   ),
                   border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: false,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -2310,12 +2436,13 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final loyalty = ref.watch(myLoyaltyStatusProvider).valueOrNull;
     final news = ref.watch(newsProvider).valueOrNull;
     final donation = ref.watch(myDonationSummaryProvider).valueOrNull;
 
+    // Punktestand ist raus: die Zahl steht schon oben in der
+    // Key-Facts-Zeile, und die ist von dort aus anklickbar. Zweimal
+    // dieselbe Kennzahl auf einem Screen ist Verwässerung.
     final slides = <Widget>[
-      _HeroLoyaltyCard(status: loyalty),
       if (news != null && news.isNotEmpty) _HeroNewsCard(article: news.first),
       _HeroDonationCard(totalDonated: donation?.totalDonated ?? 0),
     ];
@@ -2351,77 +2478,6 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _HeroLoyaltyCard extends StatelessWidget {
-  const _HeroLoyaltyCard({required this.status});
-  final LoyaltyStatus? status;
-  @override
-  Widget build(BuildContext context) {
-    final points = status?.points ?? 0;
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.brand, Color(0xFFE5A800)],
-        ),
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-      ),
-      padding: const EdgeInsets.all(AppSpacing.s4),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.stars_rounded,
-              color: AppColors.brand,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'DEIN PUNKTESTAND',
-                  style: AppTypography.body(
-                    size: 11,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ).copyWith(letterSpacing: 1),
-                ),
-                Text(
-                  '$points Punkte',
-                  style: AppTypography.display(
-                    size: 26,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
-                ),
-                Text(
-                  'Nächster Meilenstein bringt weitere % Rabatt',
-                  style: AppTypography.body(
-                    size: 12,
-                    color: AppColors.ink,
-                  ),
-                  maxLines: 2,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -47,7 +47,7 @@ class DonationsScreen extends ConsumerWidget {
               loading: () =>
                   const LinearProgressIndicator(color: AppColors.brand),
               error: (e, _) => _errorCard('$e'),
-              data: (s) => _SummaryCard(summary: s),
+              data: (s) => DonationSummaryCard(summary: s),
             ),
             const SizedBox(height: AppSpacing.s4),
             pool.when(
@@ -174,8 +174,14 @@ class DonationsScreen extends ConsumerWidget {
       );
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.summary});
+/// Spendenkonto-Karte: drei Kennzahlen nebeneinander.
+///
+/// Öffentlich, damit der Regressionstest sie in einer ListView rendern
+/// kann — dort ist der Layoutfehler aufgetreten, der die Seite leer
+/// erscheinen ließ.
+@visibleForTesting
+class DonationSummaryCard extends StatelessWidget {
+  const DonationSummaryCard({super.key, required this.summary});
   final DonationSummary summary;
 
   @override
@@ -212,36 +218,44 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.s3),
           // Kennzahl-Kacheln statt Fließtext: die drei Zahlen stehen
           // nebeneinander und sind ohne Lesen erfassbar.
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _DonationFact(
-                  label: 'gespendet',
-                  value: summary.totalDonated,
-                  format: Formatters.euro,
-                  highlight: true,
+          //
+          // IntrinsicHeight ist hier Pflicht, nicht Kosmetik: `stretch`
+          // verlangt eine endliche Höhe, die Karte steht aber in einer
+          // ListView und bekommt darin unbegrenzte Höhe. Ohne die Zeile
+          // wirft die Row „BoxConstraints forces an infinite height" —
+          // im Release-Build bleibt die Seite dann einfach leer.
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _DonationFact(
+                    label: 'gespendet',
+                    value: summary.totalDonated,
+                    format: Formatters.euro,
+                    highlight: true,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(
-                child: _DonationFact(
-                  label: summary.purchaseCount == 1 ? 'Einkauf' : 'Einkäufe',
-                  value: summary.purchaseCount.toDouble(),
-                  format: (v) => v.round().toString(),
-                ),
-              ),
-              if (perPurchase != null) ...[
                 const SizedBox(width: AppSpacing.s2),
                 Expanded(
                   child: _DonationFact(
-                    label: 'Ø je Einkauf',
-                    value: perPurchase,
-                    format: Formatters.euro,
+                    label: summary.purchaseCount == 1 ? 'Einkauf' : 'Einkäufe',
+                    value: summary.purchaseCount.toDouble(),
+                    format: (v) => v.round().toString(),
                   ),
                 ),
+                if (perPurchase != null) ...[
+                  const SizedBox(width: AppSpacing.s2),
+                  Expanded(
+                    child: _DonationFact(
+                      label: 'Ø je Einkauf',
+                      value: perPurchase,
+                      format: Formatters.euro,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),
