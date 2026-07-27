@@ -24,6 +24,13 @@ class BoerdesnackApp extends ConsumerWidget {
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      // Feste Sprache Deutsch (Vorgabe A4). Ohne diese Zeile zieht ein
+      // Gerät mit englischer Systemsprache das englische ARB — während
+      // der weitaus größte Teil der Oberfläche fest deutsch ist. Das
+      // Ergebnis war eine gemischte UI („Sign in" über „Willkommen
+      // zurück"). Die ARB-Struktur bleibt bestehen: sobald eine zweite
+      // Sprache wirklich vollständig ist, fällt diese Zeile wieder weg.
+      locale: const Locale('de'),
     );
   }
 }
