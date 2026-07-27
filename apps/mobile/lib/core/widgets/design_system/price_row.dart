@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../motion/motion.dart';
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/formatters.dart';
@@ -36,9 +37,13 @@ class PriceRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Rabattierter Preis prominent, in Marken-Ink.
-        Text(
-          Formatters.euro(discounted),
+        // Rabattierter Preis prominent, in Marken-Ink. Ändert sich der
+        // Rabatt (Abo abgeschlossen, Status-Stufe erreicht, Coupon
+        // aktiviert), zählt der Preis sichtbar auf den neuen Wert —
+        // genau die Zahl, auf die es dem Kunden ankommt.
+        AnimatedCountUp(
+          value: discounted,
+          format: Formatters.euro,
           style: AppTypography.display(
             size: size,
             weight: FontWeight.w800,

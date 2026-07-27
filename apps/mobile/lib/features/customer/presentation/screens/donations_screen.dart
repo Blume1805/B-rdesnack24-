@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/motion/brand_refresh.dart';
+import '../../../../core/motion/motion.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
@@ -179,49 +180,132 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ø je Einkauf nur zeigen, wenn es überhaupt Einkäufe gab — sonst
+    // stünde dort eine Null, die nichts aussagt.
+    final perPurchase = summary.purchaseCount > 0
+        ? summary.totalDonated / summary.purchaseCount
+        : null;
+
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.s5),
-      child: Row(
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.brand,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.volunteer_activism,
-              color: AppColors.ink,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.s4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  Formatters.euro(summary.totalDonated),
-                  style: AppTypography.display(
-                    size: 28,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
+          Row(
+            children: [
+              const Icon(
+                Icons.volunteer_activism,
+                color: AppColors.brandDark,
+                size: 20,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Dein Spendenkonto',
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
                 ),
-                Text(
-                  'aus ${summary.purchaseCount} '
-                  '${summary.purchaseCount == 1 ? 'Einkauf' : 'Einkäufen'} '
-                  'gespendet',
-                  style: AppTypography.body(
-                    size: 13,
-                    weight: FontWeight.w600,
-                    color: AppColors.textMuted,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          // Kennzahl-Kacheln statt Fließtext: die drei Zahlen stehen
+          // nebeneinander und sind ohne Lesen erfassbar.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _DonationFact(
+                  label: 'gespendet',
+                  value: summary.totalDonated,
+                  format: Formatters.euro,
+                  highlight: true,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s2),
+              Expanded(
+                child: _DonationFact(
+                  label: summary.purchaseCount == 1 ? 'Einkauf' : 'Einkäufe',
+                  value: summary.purchaseCount.toDouble(),
+                  format: (v) => v.round().toString(),
+                ),
+              ),
+              if (perPurchase != null) ...[
+                const SizedBox(width: AppSpacing.s2),
+                Expanded(
+                  child: _DonationFact(
+                    label: 'Ø je Einkauf',
+                    value: perPurchase,
+                    format: Formatters.euro,
                   ),
                 ),
               ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Eine Kennzahl-Kachel im Spendenkonto: große Zahl, kurzes Label.
+class _DonationFact extends StatelessWidget {
+  const _DonationFact({
+    required this.label,
+    required this.value,
+    required this.format,
+    this.highlight = false,
+  });
+
+  final String label;
+  final double value;
+  final String Function(double) format;
+
+  /// Die Hauptkennzahl bekommt den Marken-Hintergrund.
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s3,
+        vertical: AppSpacing.s3,
+      ),
+      decoration: BoxDecoration(
+        color: highlight ? AppColors.brand : AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        border: Border.all(
+          color: highlight ? AppColors.brand : AppColors.borderSubtle,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: AnimatedCountUp(
+              value: value,
+              format: format,
+              style: AppTypography.display(
+                size: 22,
+                weight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
             ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: AppTypography.body(
+              size: 11,
+              weight: FontWeight.w700,
+              color: highlight ? AppColors.ink : AppColors.textMuted,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

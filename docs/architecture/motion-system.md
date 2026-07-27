@@ -30,6 +30,9 @@ Stand: 2026-07-26 · Code: `apps/mobile/lib/core/motion/motion.dart`
 | `PressableScale` | Tap-Skalierung auf 96 % + Federung + Haptik |
 | `AnimatedCountUp` | Zahlen zählen hoch (Preise, Punkte, Ersparnis) |
 | `SkeletonBox` / `SkeletonCard` | Skeleton-Loading mit Shimmer statt Spinner |
+| `FadeInUp` | Gestaffeltes Einlaufen von Listenelementen |
+| `PulseGlow` | Ruhiger Marken-Puls als Blickführung |
+| `BrandRefresh` | Pull-to-Refresh mit Marken-Puck statt Material-Spinner |
 
 Haptik ist in `try/catch` gekapselt: Web/Desktop haben keine Haptik, das
 darf den Flow nie stören.
@@ -58,6 +61,39 @@ darf den Flow nie stören.
   der Ripple wäre unter dem Bild kaum sichtbar, die Skalierung ist das
   klarere Feedback und liefert die Haptik gleich mit).
 
+* **Suchleiste** im Angebote-Tab blendet beim Herunterscrollen weich aus
+  und beim Hochscrollen wieder ein. Schwelle 12 px gegen Flackern, ganz
+  oben bleibt sie immer sichtbar.
+* **Skeleton-Loading** statt Spinner: Wochenangebote, persönliche Coupons,
+  Favoriten-Sektion, Echtzeit-Bestand. Die Platzhalter haben die Maße der
+  echten Karten — beim Datenwechsel springt nichts.
+* **Pull-to-Refresh** (`BrandRefresh`) im gesamten Kundenbereich: der
+  Marken-Puck wächst aus dem oberen Rand, gibt an der Auslöseschwelle einen
+  haptischen Tick und dreht sich während des Ladens.
+* **Live-Bestand**: Stückzahl zählt hoch, Bestandsbalken läuft weich auf
+  den neuen Anteil, wenn ein Verkauf per Realtime hereinkommt.
+* **QR-Kundenkarte**: ruhiger Gold-Puls (1,8 s) um den Code als
+  Blickführung auf die Scan-Fläche.
+* **Preise** (`PriceRow`) zählen auf den neuen Wert, wenn sich der Rabatt
+  ändert (Abo, Status-Stufe, Coupon).
+* **Favoriten-Sektion**: Karten laufen gestaffelt ein (70 ms Versatz),
+  Wechsel Skeleton → Inhalt über `AnimatedSwitcher`.
+
+## Bewusste Abweichungen von der Vorgabe
+
+* **Tap-Skalierung nach unten (96 %)** statt nach oben (103–106 %): in
+  Zeilen mit fester Höhe würde eine Vergrößerung an den Nachbarn
+  anschneiden.
+* **Karussell 94 % / 65 %** statt 105–110 % / 60–80 %: die Fokus-Karte
+  bleibt bei 100 %, die Nachbarn schrumpfen — sonst müsste die
+  Karussell-Höhe für den Überstand wachsen.
+* **`BrandRefresh` nur im Kundenbereich.** Finanzen und Verwaltung
+  behalten den Plattform-Indikator: Arbeitswerkzeuge profitieren mehr von
+  vertrautem Systemverhalten als von Markenauftritt.
+* **Kein Kategorie-Umschalter animiert**, weil es keinen gibt — die
+  Kategorien stehen als eigene Sektionen untereinander. Ein Tab-Wechsel
+  wäre eine Informationsarchitektur-Änderung, keine Animation.
+
 ## Noch offen
 
 * **Lottie-Animationen** für QR-Scan / Bonus / Kaufabschluss. Braucht
@@ -65,7 +101,7 @@ darf den Flow nie stören.
   nicht gibt. Ohne eigene Assets wäre es Stock-Material. Der Erfolgsfall ist
   inzwischen code-basiert gelöst (gezeichneter Haken) — Lottie lohnt erst
   mit echten Marken-Assets.
-* Suchleiste beim Scrollen ein-/ausblenden.
-* Skeleton-Loading in den Listen (Bausteine stehen, Einbau folgt).
-* Pull-to-Refresh mit Markenanimation.
-* Kategoriewechsel mit weichem Übergang.
+* **Glassmorphism** bisher nur auf der Bottom-Navigation. Auf Karten über
+  dem hellen Cream-Hintergrund bringt ein Blur kaum sichtbaren Effekt,
+  kostet aber auf Web spürbar Rasterzeit — kommt erst, wenn es dunklere
+  Hintergrundflächen gibt, auf denen es wirkt.

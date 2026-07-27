@@ -1746,7 +1746,7 @@ class _NewsTeaser extends ConsumerWidget {
       error: (_, __) => const SizedBox.shrink(),
       data: (list) {
         if (list.isEmpty) return const SizedBox.shrink();
-        final preview = list.take(2).toList();
+        final preview = list.take(3).toList();
         return AppCard(
           padding: EdgeInsets.zero,
           child: Material(
@@ -1827,11 +1827,12 @@ class _NewsPreviewRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Bild-Platzhalter für das News-Bild (72×72)
+        // Kompakter Teaser: Bild klein halten, damit drei Meldungen in
+        // die Karte passen, ohne dass die Startseite zuwächst.
         ProductImage(
           imageUrl: article.imageUrl,
           productName: article.title,
-          size: 72,
+          size: 56,
           icon: Icons.campaign,
         ),
         const SizedBox(width: AppSpacing.s3),
@@ -1855,7 +1856,7 @@ class _NewsPreviewRow extends StatelessWidget {
                   weight: FontWeight.w800,
                   color: AppColors.ink,
                 ),
-                maxLines: 3,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
