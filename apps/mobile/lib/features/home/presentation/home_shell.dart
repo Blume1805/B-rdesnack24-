@@ -605,10 +605,9 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
-                // Notification-Bell oben rechts.
                 const Positioned(
                   top: 4,
-                  right: 4,
+                  left: 4,
                   child: _NotificationBell(),
                 ),
               ],

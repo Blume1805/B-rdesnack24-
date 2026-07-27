@@ -132,15 +132,31 @@ class _TierTile extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  '${tier.name} · ${tier.threshold}',
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: tier.name,
+                        style: AppTypography.body(
+                          size: 10,
+                          weight: FontWeight.w800,
+                          color: tier.onColor,
+                        ).copyWith(letterSpacing: 0.4),
+                      ),
+                      const TextSpan(text: '  '),
+                      TextSpan(
+                        text: tier.threshold,
+                        style: AppTypography.body(
+                          size: 10,
+                          weight: FontWeight.w500,
+                          color: muted,
+                        ).copyWith(letterSpacing: 0.4),
+                      ),
+                    ],
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.body(
-                    size: 10,
-                    weight: FontWeight.w800,
-                    color: muted,
-                  ).copyWith(letterSpacing: 0.4),
+                  textAlign: TextAlign.center,
                 ),
               ),
               if (reached)

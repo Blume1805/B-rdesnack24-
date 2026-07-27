@@ -84,7 +84,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   /// Höhe des Abo-Sliders. Fest, weil ein PageView eine begrenzte Höhe
   /// braucht — bemessen an der höchsten Karte (Lifetime mit
   /// Founders-Restplätzen und Widerrufs-Hinweis).
-  static const double _planSliderHeight = 268;
+  static const double _planSliderHeight = 240;
 
   /// Karte, die beim Öffnen vorn steht: das laufende Abo, sonst das
   /// Jahresmodell — das ist das Angebot mit dem besten Verhältnis.
@@ -455,12 +455,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     color: AppColors.ink,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  'Wechsel jederzeit möglich. Bestätigung per E-Mail.',
-                  style:
-                      AppTypography.body(size: 13, color: AppColors.textMuted),
-                ),
                 if (_pendingPlan != null) ...[
                   const SizedBox(height: AppSpacing.s3),
                   _PendingBanner(planKey: _pendingPlan!),
@@ -476,14 +470,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     size: 18,
                     weight: FontWeight.w800,
                     color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'App = alles aus Kostenlos + jeder Spar-Vorteil.',
-                  style: AppTypography.body(
-                    size: 12.5,
-                    color: AppColors.textMuted,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
@@ -557,24 +543,6 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                         onChoose: () => _choose(plan),
                       ),
                   ],
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  'Die Abrechnung erfolgt über den App Store bzw. Google '
-                  'Play, sobald die App dort veröffentlicht ist. Preise '
-                  'inkl. USt.',
-                  style:
-                      AppTypography.body(size: 11, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  'Kostenpflichtige Abos nur für Volljährige bzw. mit '
-                  'Zustimmung der Erziehungsberechtigten (§§ 106 ff. BGB). '
-                  'App, Bonusprogramm und Rabatte ohne Abo stehen allen '
-                  'Altersgruppen offen.',
-                  style:
-                      AppTypography.body(size: 11, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.s4),
                 // § 312k BGB: Kündigungsmöglichkeit auch im Kundenbereich —
@@ -731,7 +699,10 @@ class _PlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       borderColor: active ? AppColors.brand : null,
-      padding: const EdgeInsets.all(AppSpacing.s4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s4,
+        vertical: AppSpacing.s3,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -842,7 +813,7 @@ class _PlanCard extends StatelessWidget {
               ],
             ),
           ],
-          const SizedBox(height: AppSpacing.s3),
+          const SizedBox(height: AppSpacing.s2),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
@@ -850,6 +821,7 @@ class _PlanCard extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.ink,
                 foregroundColor: AppColors.brand,
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
