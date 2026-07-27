@@ -308,7 +308,11 @@ class _ScenarioCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = (rate * 100).toStringAsFixed(1).replaceAll('.', ',');
+    // Der exakte Normal-Wert ist 9,35 %; als Fließkomma liegt er minimal
+    // darunter, weshalb toStringAsFixed sonst auf 9,3 abrundet. Ein kleines
+    // Epsilon erzwingt die kaufmännische Rundung → 9,4 %, konsistent mit der
+    // PDF-Beispielrechnung.
+    final pct = (rate * 100 + 1e-6).toStringAsFixed(1).replaceAll('.', ',');
     return AppCard(
       color: highlighted ? AppColors.ink : AppColors.surfaceAlt,
       borderColor: highlighted ? AppColors.brand : null,

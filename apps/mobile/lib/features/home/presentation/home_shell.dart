@@ -605,9 +605,12 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
+                // Oben rechts in der Ecke — über dem Marken-Bild, nicht über
+                // dem Slogan links. Der eigene dunkle Scrim in _NotificationBell
+                // hält das Symbol lesbar, egal was vom Bild dahinter liegt.
                 const Positioned(
-                  top: 4,
-                  left: 4,
+                  top: 6,
+                  right: 6,
                   child: _NotificationBell(),
                 ),
               ],
@@ -628,23 +631,32 @@ class _NotificationBell extends ConsumerWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        IconButton(
-          tooltip: 'Benachrichtigungen',
-          icon: const Icon(
-            Icons.notifications_none,
-            color: AppColors.onDark,
-            size: 24,
+        // Runder, halbtransparenter Scrim: hält das Glocken-Symbol lesbar,
+        // egal ob dahinter die helle Wortmarke oder der dunkle Bildrand liegt.
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.32),
+            shape: BoxShape.circle,
           ),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            );
-          },
+          child: IconButton(
+            tooltip: 'Benachrichtigungen',
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(
+              Icons.notifications_none,
+              color: AppColors.onDark,
+              size: 22,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+              );
+            },
+          ),
         ),
         if (unread > 0)
           Positioned(
-            top: 6,
-            right: 4,
+            top: 4,
+            right: 2,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
