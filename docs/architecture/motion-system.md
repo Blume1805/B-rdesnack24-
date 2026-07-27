@@ -44,15 +44,28 @@ darf den Flow nie stören.
   (Fokus-Karte 100 %, äußere Karten bis 94 % Skalierung / 65 % Deckkraft).
 * **Key-Facts (Angebote-Start)**: Rabatt, Punkte und Coupons zählen hoch.
 
+* **Erfolgs-Feedback** (`feedback.dart`): `showSuccessToast()` mit
+  selbstzeichnendem Haken (`CustomPainter`: Kreis 0–0,6, Häkchen 0,5–1) und
+  Haptik. Ersetzt die Standard-SnackBar bei Coupon-Aktivierung und
+  Code-Kopieren.
+* **Konfetti** (`showCelebration()`) — nur bei echtem Stufenaufstieg
+  (Bronze/Silber/Gold), nie beim ersten Laden, `IgnorePointer`, damit die
+  Feier die Bedienung nie blockiert.
+* **Fortschrittsbalken** der Status-Stufe baut sich beim Erscheinen auf.
+* **Hero-Übergang** Produktbild: Angebotskarte → Detailansicht
+  (Tag `product-<id>`).
+* **Tap-Skalierung** auf der Angebotskarte (`PressableScale` statt InkWell —
+  der Ripple wäre unter dem Bild kaum sichtbar, die Skalierung ist das
+  klarere Feedback und liefert die Haptik gleich mit).
+
 ## Noch offen
 
 * **Lottie-Animationen** für QR-Scan / Bonus / Kaufabschluss. Braucht
   (a) das `lottie`-Paket und (b) **Marken-Animationsdateien**, die es noch
-  nicht gibt. Ohne eigene Assets wäre es Stock-Material — deshalb bewusst
-  nicht eingebaut. Alternative ohne Paket: code-basierte Erfolgs-Animation
-  (Haken, der sich zeichnet) über `CustomPainter`.
-* Konfetti bei Stufenaufstieg (sparsam, nur Bronze/Silber/Gold-Wechsel).
+  nicht gibt. Ohne eigene Assets wäre es Stock-Material. Der Erfolgsfall ist
+  inzwischen code-basiert gelöst (gezeichneter Haken) — Lottie lohnt erst
+  mit echten Marken-Assets.
 * Suchleiste beim Scrollen ein-/ausblenden.
-* Hero-Übergänge Produktkarte → Detailansicht.
 * Skeleton-Loading in den Listen (Bausteine stehen, Einbau folgt).
 * Pull-to-Refresh mit Markenanimation.
+* Kategoriewechsel mit weichem Übergang.

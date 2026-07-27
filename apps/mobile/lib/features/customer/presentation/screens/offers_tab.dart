@@ -1251,6 +1251,7 @@ class _WeeklyOfferSlot extends ConsumerWidget {
       validUntil: offer.validTo,
       width: _weeklyCardWidth,
       onTap: offer.productId == null ? null : openDetail,
+      heroTag: offer.productId == null ? null : 'product-${offer.productId}',
       rating: ratingSummary?.avgRating,
       reviewCount: ratingSummary?.reviewCount,
       footer: _ActivationButton(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../motion/motion.dart';
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/formatters.dart';
@@ -36,7 +37,12 @@ class OfferCard extends StatelessWidget {
     this.footer,
     this.rating,
     this.reviewCount,
+    this.heroTag,
   });
+
+  /// Tag für den Hero-Übergang des Produktbilds in die Detailansicht.
+  /// `null` = kein Hero (z. B. wenn die Karte nirgendwohin führt).
+  final String? heroTag;
 
   final String title;
   final double regularPrice;
@@ -55,6 +61,10 @@ class OfferCard extends StatelessWidget {
   final double? rating;
   final int? reviewCount;
 
+  /// Wickelt [child] nur dann in einen Hero, wenn ein Tag gesetzt ist.
+  static Widget _maybeHero({required String? tag, required Widget child}) =>
+      tag == null ? child : Hero(tag: tag, child: child);
+
   @override
   Widget build(BuildContext context) {
     final body = Column(
@@ -67,9 +77,14 @@ class OfferCard extends StatelessWidget {
               aspectRatio: 1.1,
               child: DecoratedBox(
                 decoration: const BoxDecoration(color: Colors.white),
-                child: ProductImage.expand(
-                  imageUrl: imageUrl,
-                  productName: title,
+                // Hero-Übergang in die Detailansicht: das Produktbild
+                // fliegt mit, statt hart geschnitten zu werden.
+                child: _maybeHero(
+                  tag: heroTag,
+                  child: ProductImage.expand(
+                    imageUrl: imageUrl,
+                    productName: title,
+                  ),
                 ),
               ),
             ),
@@ -209,10 +224,14 @@ class OfferCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Nur der Kartenkörper (Bild + Preis + Titel + Rating) ist
-              // per InkWell klickbar → Produkt-Detail. Der Footer mit dem
-              // Aktivieren/Deaktivieren-Button liegt außerhalb, damit ein
-              // Klick dort NICHT die Detailseite triggert.
-              InkWell(
+              // klickbar → Produkt-Detail. Der Footer mit dem Aktivieren-/
+              // Deaktivieren-Button liegt außerhalb, damit ein Klick dort
+              // NICHT die Detailseite triggert.
+              //
+              // PressableScale statt InkWell: die Skalierung ist hier das
+              // klarere Feedback als ein Ripple, der unter dem Bild kaum
+              // sichtbar wäre — und liefert zugleich die Haptik.
+              PressableScale(
                 onTap: onTap,
                 child: body,
               ),

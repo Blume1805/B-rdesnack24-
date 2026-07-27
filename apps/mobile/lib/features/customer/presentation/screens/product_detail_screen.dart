@@ -52,12 +52,16 @@ class ProductDetailScreen extends ConsumerWidget {
               AppSpacing.s8,
             ),
             children: [
-              // Produktbild
+              // Produktbild — Gegenstück zum Hero der Angebotskarte:
+              // das Bild fliegt beim Öffnen mit herüber.
               AspectRatio(
                 aspectRatio: 4 / 3,
-                child: ProductImage.expand(
-                  imageUrl: p.imageUrl,
-                  productName: p.name,
+                child: Hero(
+                  tag: 'product-$productId',
+                  child: ProductImage.expand(
+                    imageUrl: p.imageUrl,
+                    productName: p.name,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.s4),
