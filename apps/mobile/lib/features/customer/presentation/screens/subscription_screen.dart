@@ -11,6 +11,7 @@ import '../../../legal/presentation/cancellation_screen.dart';
 import '../controllers/customer_providers.dart';
 import 'app_benefits_compare_screen.dart';
 import 'employer_benefit_screen.dart';
+import 'referral_screen.dart';
 import 'subscription_value_screen.dart';
 
 /// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
@@ -519,6 +520,15 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
+                // Empfehlungsprogramm anteasern: der Hinweis steht bewusst
+                // NACH dem Vergleich — erst der Mehrwert, dann die Bitte
+                // weiterzuempfehlen.
+                _ReferralTeaser(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ReferralScreen()),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s3),
                 // Marketing-Hinweis: Sachbezugsfreigrenze — Arbeitgeber
                 // können Abo + Automaten-Käufe im Rahmen von § 8 Abs. 2
                 // Satz 11 EStG steuerfrei mitfinanzieren.
@@ -894,6 +904,54 @@ class _PlanCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+/// Anreißer fürs Empfehlungsprogramm im Abo-Bereich.
+class _ReferralTeaser extends StatelessWidget {
+  const _ReferralTeaser({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      color: AppColors.brandLight,
+      borderColor: AppColors.brand,
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.s4),
+      child: Row(
+        children: [
+          const Icon(Icons.group_add_outlined, color: AppColors.ink, size: 26),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Freunde werben, Monate schenken',
+                  style: AppTypography.body(
+                    size: 14.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Empfiehl Bördesnack24 weiter und sichere dir kostenlose '
+                  'Premium-Monate. Für jede erfolgreiche Empfehlung '
+                  'profitieren beide Seiten.',
+                  style: AppTypography.body(size: 12, color: AppColors.ink)
+                      .copyWith(height: 1.35),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s2),
+          const Icon(Icons.chevron_right, color: AppColors.ink),
+        ],
       ),
     );
   }

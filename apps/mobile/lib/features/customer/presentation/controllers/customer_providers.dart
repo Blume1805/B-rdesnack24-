@@ -13,6 +13,7 @@ import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_availability.dart';
 import '../../domain/entities/product_detail.dart';
+import '../../domain/entities/referral.dart';
 import '../../domain/entities/receipt.dart';
 import '../../domain/repositories/customer_repository.dart';
 
@@ -242,3 +243,50 @@ final myNotificationsProvider =
 final unreadNotificationCountProvider = FutureProvider.autoDispose<int>(
   (ref) => ref.watch(customerRepositoryProvider).unreadNotificationsCount(),
 );
+
+/// Stand des Empfehlungsprogramms („Freunde werben") — RPC my_referral_status.
+final myReferralStatusProvider =
+    FutureProvider.autoDispose<ReferralStatusSummary>((ref) async {
+  final res = await ref.watch(supabaseClientProvider).rpc('my_referral_status');
+  return ReferralStatusSummary.fromJson(Map<String, dynamic>.from(res as Map));
+});
+
+/// Erzeugt den persönlichen Empfehlungscode beim ersten Aufruf und gibt ihn
+/// zurück. Bewusst eine eigene Aktion statt Teil des Status: der Code soll
+/// erst entstehen, wenn jemand ihn wirklich braucht.
+final referralActionsProvider =
+    Provider.autoDispose<ReferralActions>(ReferralActions.new);
+
+class ReferralActions {
+  ReferralActions(this._ref);
+  final Ref _ref;
+
+  Future<String> ensureCode() async {
+    final res =
+        await _ref.read(supabaseClientProvider).rpc('my_referral_code');
+    _ref.invalidate(myReferralStatusProvider);
+    return res as String;
+  }
+
+  /// Löst einen Empfehlungscode für das eigene, frisch angelegte Konto ein.
+  /// Gibt den Grund zurück, wenn es nicht geklappt hat (sonst `null`).
+  Future<String?> redeem(String code) async {
+    final res = await _ref
+        .read(supabaseClientProvider)
+        .rpc('register_referral', params: {'p_code': code});
+    final map = Map<String, dynamic>.from(res as Map);
+    _ref.invalidate(myReferralStatusProvider);
+    if (map['ok'] == true) return null;
+    return switch (map['reason'] as String?) {
+      'code_unbekannt' => 'Diesen Empfehlungscode gibt es nicht.',
+      'eigenwerbung' => 'Du kannst dich nicht selbst werben.',
+      'werber_ohne_abo' =>
+        'Der Code gehört zu einem Konto ohne Abo — er ist noch nicht gültig.',
+      'schon_abonnent' =>
+        'Empfehlungen gelten nur vor dem ersten Abo-Abschluss.',
+      'bereits_geworben' => 'Für dein Konto wurde schon ein Code eingelöst.',
+      'programm_inaktiv' => 'Das Empfehlungsprogramm ist gerade pausiert.',
+      _ => 'Der Code konnte nicht eingelöst werden.',
+    };
+  }
+}

@@ -10,6 +10,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/security/pwned_password_checker.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../customer/data/referral_code_inbox.dart';
 import '../controllers/auth_providers.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 
@@ -42,6 +43,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _vatIdCtrl = TextEditingController();
 
   DateTime? _birthDate;
+  final _referralCtrl = TextEditingController();
   bool _acceptPrivacy = false;
   bool _acceptTerms = false;
   bool _triedSubmit = false;
@@ -59,6 +61,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _countryCtrl.dispose();
     _taxNumberCtrl.dispose();
     _vatIdCtrl.dispose();
+    _referralCtrl.dispose();
     super.dispose();
   }
 
@@ -180,6 +183,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       // Nach erfolgreicher Anmeldung: Consent im Log persistieren
       // (kann fehlschlagen, ohne die Registrierung zu blockieren).
       unawaited(_persistConsents());
+      if (_referralCtrl.text.trim().isNotEmpty) {
+        unawaited(ReferralCodeInbox.remember(_referralCtrl.text));
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.registerSuccess)),
       );
@@ -307,6 +313,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       label: _requiredLabel(l10n.confirmPassword),
                     ),
                     onFieldSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Optional: Empfehlungscode. Eingelöst wird er erst nach
+                  // dem ersten Login — register_referral braucht eine
+                  // angemeldete Sitzung, und dazwischen liegt die
+                  // E-Mail-Bestätigung.
+                  TextFormField(
+                    controller: _referralCtrl,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      labelText: 'Empfehlungscode (optional)',
+                      helperText: 'Von Freunden bekommen? Dann hier eintragen '
+                          '— ihr bekommt beide Gratis-Monate.',
+                      helperMaxLines: 2,
+                    ),
                   ),
                   if (_customerType == 'business') ...[
                     const SizedBox(height: 16),

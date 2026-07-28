@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../data/referral_code_inbox.dart';
+import 'controllers/customer_providers.dart';
 import 'screens/customer_qr_screen.dart';
 import 'screens/finder_tab.dart';
 import 'screens/history_tab.dart';
@@ -37,7 +39,27 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     // Onboarding-Stories beim ersten Öffnen zeigen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       maybeShowOnboardingStories(context);
+      _redeemPendingReferral();
     });
+  }
+
+  /// Löst einen vorgemerkten Empfehlungscode ein (Deeplink oder Feld bei der
+  /// Registrierung). Läuft still im Hintergrund: klappt es, erscheint die
+  /// Empfehlung beim Werber — klappt es nicht, ist das kein Grund, dem
+  /// frisch angemeldeten Kunden eine Fehlermeldung zu zeigen.
+  Future<void> _redeemPendingReferral() async {
+    final code = await ReferralCodeInbox.take();
+    if (code == null || !mounted) return;
+    final error = await ref.read(referralActionsProvider).redeem(code);
+    if (!mounted || error != null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Empfehlungscode gespeichert — mit deinem ersten Abo bekommt ihr '
+          'beide Gratis-Monate.',
+        ),
+      ),
+    );
   }
 
   void _openQr() {

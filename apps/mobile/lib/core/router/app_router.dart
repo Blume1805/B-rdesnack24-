@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
 import '../../features/legal/presentation/cancellation_screen.dart';
 import '../../features/legal/presentation/legal_screens.dart';
+import '../../features/customer/data/referral_code_inbox.dart';
 import '../di/providers.dart';
 
 /// Routenpfade als Konstanten (vermeidet Tippfehler/Magic-Strings).
@@ -26,6 +28,10 @@ abstract final class AppRoutes {
   static const privacy = '/legal/privacy';
   static const terms = '/legal/terms';
   static const cancellation = '/legal/kuendigung';
+
+  /// Empfehlungslink: /r/<CODE>. Merkt den Code lokal vor und schickt
+  /// zur Registrierung — eingelöst wird er nach dem ersten Login.
+  static const referral = '/r/:code';
 }
 
 /// Auth-Flow-Routen: ohne Login erreichbar, für Angemeldete sinnlos
@@ -71,6 +77,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.referral,
+        redirect: (context, state) {
+          final code = state.pathParameters['code'];
+          if (code != null && code.trim().isNotEmpty) {
+            // Fire-and-forget: das Vormerken darf die Navigation nicht
+            // aufhalten, und ein Fehlschlag kostet nur den Bonus.
+            unawaited(ReferralCodeInbox.remember(code));
+          }
+          return AppRoutes.register;
+        },
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,

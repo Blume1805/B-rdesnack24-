@@ -16,6 +16,7 @@ import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'master_data_screen.dart';
 import 'receipts_screen.dart';
+import 'referral_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
 
@@ -135,6 +136,14 @@ class ProfileTab extends ConsumerWidget {
               highlight: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ReceiptsScreen()),
+              ),
+            ),
+            _ActionTile(
+              icon: Icons.group_add_outlined,
+              label: 'Freunde werben',
+              highlight: true,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ReferralScreen()),
               ),
             ),
           ],

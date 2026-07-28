@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../motion/motion.dart';
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
+import 'footnote_mark.dart';
 import '../../utils/formatters.dart';
 
 /// Preiszeile für Rabatt-Angebote: neuer Preis groß, alter Preis
@@ -92,8 +93,8 @@ class DiscountBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.pill),
         boxShadow: AppShadows.sm,
       ),
-      child: Text(
-        '-${percent.toStringAsFixed(0)} % *',
+      child: StarredText(
+        '-${percent.toStringAsFixed(0)} %',
         style: AppTypography.body(
           size: dense ? 12 : 14,
           weight: FontWeight.w800,

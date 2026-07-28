@@ -795,8 +795,8 @@ class _PersonalOfferCard extends ConsumerWidget {
                 if (isWildcard)
                   Row(
                     children: [
-                      Text(
-                        '-${offer.discountPercent.toStringAsFixed(0)} % *',
+                      StarredText(
+                        '-${offer.discountPercent.toStringAsFixed(0)} %',
                         style: AppTypography.display(
                           size: 40,
                           weight: FontWeight.w800,
@@ -2280,14 +2280,7 @@ class _TimeDealCard extends StatelessWidget {
                     color: AppColors.ink,
                   ).copyWith(height: 1.1),
                 ),
-                TextSpan(
-                  text: '  *',
-                  style: AppTypography.body(
-                    size: 12,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
-                ),
+                footnoteStarSpan(fontSize: 26, color: AppColors.ink),
               ],
             ),
           ),

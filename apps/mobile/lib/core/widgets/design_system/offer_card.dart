@@ -5,6 +5,7 @@ import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/formatters.dart';
 import 'brand_marks.dart';
+import 'footnote_mark.dart';
 import 'product_image.dart';
 import 'rating_stars.dart';
 
@@ -318,8 +319,8 @@ class _DiscountAnchor extends StatelessWidget {
         children: [
           const BrandIcon(size: 26),
           const SizedBox(height: 2),
-          Text(
-            '-${percent.toStringAsFixed(0)} % *',
+          StarredText(
+            '-${percent.toStringAsFixed(0)} %',
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,

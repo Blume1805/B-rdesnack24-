@@ -6,6 +6,7 @@ export 'app_card.dart';
 export 'brand_marks.dart';
 export 'code_input.dart';
 export 'eyebrow.dart';
+export 'footnote_mark.dart';
 export 'hero_app_bar.dart';
 export 'hero_action_bar.dart';
 export 'hero_backdrop.dart';
