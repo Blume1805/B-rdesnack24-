@@ -76,6 +76,37 @@ abstract final class AppShadows {
   static const List<BoxShadow> gold = [
     BoxShadow(color: Color(0x4DFDC102), blurRadius: 20, offset: Offset(0, 4)),
   ];
+
+  /// Karten-Elevation (Standard für [AppCard]).
+  ///
+  /// Zwei Ebenen, weil erst die Kombination als Höhe gelesen wird: ein enger,
+  /// dunklerer Kontaktschatten direkt unter der Kante verankert die Karte auf
+  /// dem Untergrund, ein weiter, weicher Umgebungsschatten hebt sie davon ab.
+  /// Ein einzelner Blur wirkt dagegen nur wie ein grauer Rand.
+  ///
+  /// Der negative `spreadRadius` zieht den weiten Schatten unter der Karte
+  /// zusammen, damit er seitlich nicht ausfranst.
+  static const List<BoxShadow> card = [
+    BoxShadow(color: Color(0x14202321), blurRadius: 3, offset: Offset(0, 1)),
+    BoxShadow(
+      color: Color(0x26202321),
+      blurRadius: 16,
+      offset: Offset(0, 9),
+      spreadRadius: -3,
+    ),
+  ];
+
+  /// Stärkere Variante für Karten, die deutlich vor dem Hintergrund stehen
+  /// sollen — Karussell-Kacheln, Angebotskarten, hervorgehobene Panels.
+  static const List<BoxShadow> raised = [
+    BoxShadow(color: Color(0x1F202321), blurRadius: 4, offset: Offset(0, 2)),
+    BoxShadow(
+      color: Color(0x38202321),
+      blurRadius: 30,
+      offset: Offset(0, 18),
+      spreadRadius: -6,
+    ),
+  ];
 }
 
 /// Motion.

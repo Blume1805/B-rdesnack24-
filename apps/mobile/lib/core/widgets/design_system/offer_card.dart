@@ -209,43 +209,52 @@ class OfferCard extends StatelessWidget {
 
     return SizedBox(
       width: width,
-      child: Material(
-        color: AppColors.surfaceCard,
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.borderSubtle, width: 1),
-            borderRadius: BorderRadius.circular(AppRadii.lg),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Nur der Kartenkörper (Bild + Preis + Titel + Rating) ist
-              // klickbar → Produkt-Detail. Der Footer mit dem Aktivieren-/
-              // Deaktivieren-Button liegt außerhalb, damit ein Klick dort
-              // NICHT die Detailseite triggert.
-              //
-              // PressableScale statt InkWell: die Skalierung ist hier das
-              // klarere Feedback als ein Ripple, der unter dem Bild kaum
-              // sichtbar wäre — und liefert zugleich die Haptik.
-              PressableScale(
-                onTap: onTap,
-                child: body,
-              ),
-              if (footer != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.s3,
-                    0,
-                    AppSpacing.s3,
-                    AppSpacing.s3,
-                  ),
-                  child: footer!,
+      // Schatten außen um das Material herum: `clipBehavior: antiAlias` würde
+      // ihn sonst an der Kartenkante abschneiden. Die kräftigere Stufe, weil
+      // diese Karten im Karussell deutlich vor dem Hintergrund stehen sollen.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          boxShadow: AppShadows.raised,
+        ),
+        child: Material(
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.borderSubtle, width: 1),
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Nur der Kartenkörper (Bild + Preis + Titel + Rating) ist
+                // klickbar → Produkt-Detail. Der Footer mit dem Aktivieren-/
+                // Deaktivieren-Button liegt außerhalb, damit ein Klick dort
+                // NICHT die Detailseite triggert.
+                //
+                // PressableScale statt InkWell: die Skalierung ist hier das
+                // klarere Feedback als ein Ripple, der unter dem Bild kaum
+                // sichtbar wäre — und liefert zugleich die Haptik.
+                PressableScale(
+                  onTap: onTap,
+                  child: body,
                 ),
-            ],
+                if (footer != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.s3,
+                      0,
+                      AppSpacing.s3,
+                      AppSpacing.s3,
+                    ),
+                    child: footer!,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

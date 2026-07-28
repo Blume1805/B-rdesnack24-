@@ -338,22 +338,10 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                 }
                 return SizedBox(
                   height: 440,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    // Snap-Verhalten: jede Karte rastet ein, statt frei
-                    // auszulaufen — wirkt dynamischer und lässt keine
-                    // halben Karten am Rand stehen.
-                    physics: const _CardSnapPhysics(
-                      itemExtent: _weeklyCardWidth + AppSpacing.s3,
-                    ),
+                  child: _SnapCarousel(
                     itemCount: list.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.s3),
-                    itemBuilder: (context, i) => _CarouselItem(
-                      index: i,
-                      itemExtent: _weeklyCardWidth + AppSpacing.s3,
-                      child: _WeeklyOfferSlot(offer: list[i]),
-                    ),
+                    itemBuilder: (context, i) =>
+                        _WeeklyOfferSlot(offer: list[i]),
                   ),
                 );
               },
@@ -1338,22 +1326,69 @@ class _MilestoneChip extends StatelessWidget {
 /// Breite einer Wochenangebots-Karte — auch Basis für das Snap-Raster.
 const double _weeklyCardWidth = 260;
 
-/// Karussell-Effekt: die Karte am linken Rand (Fokusposition) steht auf
-/// 100 %, weiter außen liegende Karten werden leicht verkleinert und in der
-/// Deckkraft reduziert. Dadurch führt der Blick automatisch zur aktiven
-/// Karte, ohne dass Inhalte verschwinden.
+/// Horizontales Snap-Karussell: die Karte in der Viewport-MITTE steht auf
+/// 100 %, die Nachbarn sind kleiner, blasser und unscharf.
+///
+/// Die seitliche Polsterung ist der entscheidende Teil. Ohne sie endet der
+/// Scrollbereich, bevor die letzte Karte die Fokusposition erreichen kann —
+/// `_CardSnapPhysics` klemmt das Snap-Ziel dann auf `maxScrollExtent`, das
+/// Raster verrutscht und die letzte Karte bleibt dauerhaft unscharf und
+/// „nicht auswählbar". Mit `pad = (Viewportbreite − Kartenbreite) / 2` gilt
+/// `maxScrollExtent == (itemCount − 1) × itemExtent`, jede Karte lässt sich
+/// also exakt zentrieren.
 ///
 /// Umgesetzt über die Scroll-Position statt über einen PageView, damit die
 /// Liste lazy bleibt. Bei „Bewegung reduzieren" wird der Effekt deaktiviert.
+class _SnapCarousel extends StatelessWidget {
+  const _SnapCarousel({required this.itemCount, required this.itemBuilder});
+
+  final int itemCount;
+  final Widget Function(BuildContext, int) itemBuilder;
+
+  static const _extent = _weeklyCardWidth + AppSpacing.s3;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Auf sehr schmalen Viewports (< Kartenbreite) bleibt die Polsterung
+        // bei 0 — dort ist ohnehin nie mehr als eine Karte sichtbar.
+        final pad = CarouselFocus.sidePadding(
+          viewport: constraints.maxWidth,
+          cardWidth: _weeklyCardWidth,
+        );
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: pad),
+          // Snap-Verhalten: jede Karte rastet ein, statt frei auszulaufen —
+          // wirkt dynamischer und lässt keine halben Karten am Rand stehen.
+          physics: const _CardSnapPhysics(itemExtent: _extent),
+          itemCount: itemCount,
+          separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s3),
+          itemBuilder: (context, i) => _CarouselItem(
+            index: i,
+            itemExtent: _extent,
+            leadingPad: pad,
+            child: itemBuilder(context, i),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Eine Karte im [_SnapCarousel] mit dem Fokus-Effekt.
 class _CarouselItem extends StatelessWidget {
   const _CarouselItem({
     required this.index,
     required this.itemExtent,
+    required this.leadingPad,
     required this.child,
   });
 
   final int index;
   final double itemExtent;
+  final double leadingPad;
   final Widget child;
 
   @override
@@ -1365,9 +1400,19 @@ class _CarouselItem extends StatelessWidget {
     return AnimatedBuilder(
       animation: position,
       builder: (context, inner) {
-        // Abstand dieser Karte zur Fokusposition in Karten-Einheiten.
-        final offset = position.hasPixels
-            ? (index * itemExtent - position.pixels) / itemExtent
+        // Abstand dieser Karte zur Fokusposition (Viewport-Mitte) in
+        // Karten-Einheiten. Bei der Standard-Polsterung kürzt sich das zu
+        // (index × extent − pixels) / extent; ausgeschrieben stimmt es auch
+        // dann noch, wenn die Polsterung auf schmalen Viewports gekappt wird.
+        final offset = position.hasPixels && position.hasViewportDimension
+            ? CarouselFocus.distanceToCenter(
+                index: index,
+                itemExtent: itemExtent,
+                cardWidth: _weeklyCardWidth,
+                leadingPad: leadingPad,
+                pixels: position.pixels,
+                viewport: position.viewportDimension,
+              )
             : 0.0;
         // Fokus-Effekt zentral aus CarouselFocus (Skalierung + Blende +
         // Weichzeichner), damit sich alle Karussells identisch anfühlen.

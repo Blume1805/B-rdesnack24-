@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -420,6 +421,48 @@ abstract final class CarouselFocus {
   /// Nachbarn werden bis zu 4 px unscharf — der Blick bleibt auf der
   /// scharfen Fokuskarte.
   static const double _blur = 4.0;
+
+  /// Seitliche Polsterung, die eine [cardWidth] breite Karte in einem
+  /// [viewport] breiten Karussell zentrierbar macht.
+  ///
+  /// Ohne diese Polsterung endet der Scrollbereich, bevor die letzte Karte
+  /// die Fokusposition erreichen kann — sie bleibt dauerhaft unscharf und
+  /// lässt sich nicht auswählen. Mit ihr gilt
+  /// `maxScrollExtent == (itemCount − 1) × itemExtent`, jede Karte ist also
+  /// exakt zentrierbar (siehe [maxScrollExtentFor]).
+  static double sidePadding({
+    required double viewport,
+    required double cardWidth,
+  }) =>
+      math.max(0.0, (viewport - cardWidth) / 2);
+
+  /// Erwarteter `maxScrollExtent` eines mit [sidePadding] gepolsterten
+  /// Karussells. Existiert, damit die Geometrie testbar bleibt.
+  static double maxScrollExtentFor({
+    required double viewport,
+    required double cardWidth,
+    required double gap,
+    required int itemCount,
+  }) {
+    if (itemCount <= 0) return 0;
+    final pad = sidePadding(viewport: viewport, cardWidth: cardWidth);
+    final content = 2 * pad + itemCount * cardWidth + (itemCount - 1) * gap;
+    return math.max(0.0, content - viewport);
+  }
+
+  /// Abstand der Karte [index] zur Fokusposition (Viewport-Mitte), gemessen
+  /// in Karten-Einheiten. 0 = im Fokus, ±1 = ein Platz daneben.
+  static double distanceToCenter({
+    required int index,
+    required double itemExtent,
+    required double cardWidth,
+    required double leadingPad,
+    required double pixels,
+    required double viewport,
+  }) {
+    final cardCenter = leadingPad + index * itemExtent + cardWidth / 2;
+    return (cardCenter - pixels - viewport / 2) / itemExtent;
+  }
 
   /// Umhüllt [child] mit Skalierung, Blende und (bei Nachbarn) Weichzeichner.
   /// Bei reduzierter Bewegung bleibt [child] unverändert.
