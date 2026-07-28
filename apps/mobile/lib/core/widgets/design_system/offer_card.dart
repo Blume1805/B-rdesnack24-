@@ -23,6 +23,20 @@ import 'rating_stars.dart';
 ///
 /// Optional: Gültigkeits-Badge oben rechts überm Bild, Kartensteg unten
 /// (Karten-Pill) für Aktionen wie „Zur Karte hinzufügen".
+/// Sternchen-Text zu jedem Rabatt-Badge.
+///
+/// Steht bewusst IN der Karte (nicht als grauer Absatz darunter): der „*"
+/// am Prozentwert und seine Auflösung gehören zusammen, und bei einem
+/// horizontalen Karussell ist eine Fußnote unter der Liste keiner
+/// bestimmten Karte mehr zuzuordnen.
+/// Gegenüber der früheren Fassung gekürzt, aber inhaltlich vollständig:
+/// nicht kombinierbar + bei mehreren aktivierten Coupons gilt automatisch
+/// der günstigste Preis. In einer 260 px breiten Karte kostet jede
+/// zusätzliche Zeile spürbar Höhe.
+const String kCouponFootnote =
+    '* Nicht mit anderen Coupons/Aktionen kombinierbar. Bei mehreren '
+    'aktivierten Coupons gilt automatisch der günstigste Preis.';
+
 class OfferCard extends StatelessWidget {
   const OfferCard({
     super.key,
@@ -38,7 +52,12 @@ class OfferCard extends StatelessWidget {
     this.rating,
     this.reviewCount,
     this.heroTag,
+    this.showFootnote = false,
   });
+
+  /// Blendet [kCouponFootnote] am Kartenfuß ein — überall dort, wo das
+  /// Rabatt-Badge ein „*" trägt.
+  final bool showFootnote;
 
   /// Tag für den Hero-Übergang des Produktbilds in die Detailansicht.
   /// `null` = kein Hero (z. B. wenn die Karte nirgendwohin führt).
@@ -252,6 +271,23 @@ class OfferCard extends StatelessWidget {
                       AppSpacing.s3,
                     ),
                     child: footer!,
+                  ),
+                if (showFootnote)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.s3,
+                      0,
+                      AppSpacing.s3,
+                      AppSpacing.s3,
+                    ),
+                    child: Text(
+                      kCouponFootnote,
+                      style: AppTypography.body(
+                        size: 9,
+                        weight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ).copyWith(height: 1.3),
+                    ),
                   ),
               ],
             ),

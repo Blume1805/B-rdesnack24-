@@ -293,7 +293,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                         // Coupons als Stapel: man löst einen nach dem
                         // anderen ein, und die Liste wächst mit der Zeit.
                         StackSlider(
-                          height: 300,
+                          height: 350,
                           children: [
                             for (final o in specials)
                               _PersonalOfferCard(offer: o),
@@ -311,7 +311,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                         // Coupons als Stapel: man löst einen nach dem
                         // anderen ein, und die Liste wächst mit der Zeit.
                         StackSlider(
-                          height: 300,
+                          height: 350,
                           children: [
                             for (final o in loyalty)
                               _PersonalOfferCard(offer: o),
@@ -329,7 +329,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                         // Coupons als Stapel: man löst einen nach dem
                         // anderen ein, und die Liste wächst mit der Zeit.
                         StackSlider(
-                          height: 300,
+                          height: 350,
                           children: [
                             for (final o in basis) _PersonalOfferCard(offer: o),
                           ],
@@ -361,7 +361,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
               // Skeleton statt Spinner: die Seite behält ihre Form, der
               // Inhalt „füllt sich" — kein Layout-Sprung beim Eintreffen.
               loading: () => SizedBox(
-                height: 440,
+                height: 530,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const NeverScrollableScrollPhysics(),
@@ -393,7 +393,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                   );
                 }
                 return SizedBox(
-                  height: 440,
+                  height: 530,
                   child: _SnapCarousel(
                     itemCount: list.length,
                     itemBuilder: (context, i) =>
@@ -403,7 +403,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
               },
             ),
           ),
-          if (hasSub) const _CouponFootnote(),
           const SizedBox(height: AppSpacing.s4),
 
           // 4. ── Bewertung der Community (Eure Favoriten) ────────────
@@ -686,29 +685,6 @@ class _AiSectionBadge extends StatelessWidget {
   }
 }
 
-/// Fußnote unter Coupon-/Angebots-Sektionen. Bezieht sich auf das „*"
-/// hinter jedem Rabatt und macht die Kombinierbarkeits-Einschränkung
-/// transparent. Wird nach jeder Coupon-Liste gerendert.
-class _CouponFootnote extends StatelessWidget {
-  const _CouponFootnote();
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.s2, bottom: AppSpacing.s3),
-      child: Text(
-        '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind mehrere '
-        'Coupons für dasselbe Produkt aktiviert, wird automatisch der '
-        'günstigste Preis für dich angewandt.',
-        style: AppTypography.body(
-          size: 11,
-          weight: FontWeight.w600,
-          color: AppColors.textMuted,
-        ).copyWith(height: 1.35),
-      ),
-    );
-  }
-}
-
 /// Personalisiertes Angebot — dunkle Ink-Karte, prominenter Preisunterschied,
 /// 6-stelliger Code, „Einlösen"-Button.  Styling wird durch `source` bestimmt.
 class _PersonalOfferCard extends ConsumerWidget {
@@ -850,6 +826,25 @@ class _PersonalOfferCard extends ConsumerWidget {
             ),
           ),
           _PersonalActivationFooter(offer: offer),
+          // Sternchen-Auflösung in der Karte statt als grauer Absatz
+          // darunter — der „*" am Prozentwert und sein Text gehören
+          // zusammen.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.s5,
+              AppSpacing.s3,
+              AppSpacing.s5,
+              AppSpacing.s4,
+            ),
+            child: Text(
+              kCouponFootnote,
+              style: AppTypography.body(
+                size: 9,
+                weight: FontWeight.w600,
+                color: AppColors.brandLight,
+              ).copyWith(height: 1.3),
+            ),
+          ),
         ],
       ),
     );
@@ -1563,6 +1558,7 @@ class _WeeklyOfferSlot extends ConsumerWidget {
       heroTag: offer.productId == null ? null : 'product-${offer.productId}',
       rating: ratingSummary?.avgRating,
       reviewCount: ratingSummary?.reviewCount,
+      showFootnote: true,
       footer: _ActivationButton(
         activated: activated,
         busy: busy,
