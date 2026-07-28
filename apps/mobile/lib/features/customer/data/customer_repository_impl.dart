@@ -7,6 +7,7 @@ import '../domain/entities/invoice.dart';
 import '../domain/entities/notification.dart';
 import '../domain/entities/loyalty_status.dart';
 import '../domain/entities/offer.dart';
+import '../domain/entities/product_availability.dart';
 import '../domain/entities/product_detail.dart';
 import '../domain/repositories/customer_repository.dart';
 import 'customer_remote_data_source.dart';
@@ -118,9 +119,26 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _guard(() => _remote.rateProduct(productId, rating));
 
   @override
-  Future<List<RankedProduct>> searchProducts(String query) => _guard(
-        () async => (await _remote.searchProducts(query))
+  Future<List<RankedProduct>> searchProducts(
+    String query, {
+    String? category,
+    String? subcategory,
+  }) =>
+      _guard(
+        () async => (await _remote.searchProducts(
+          query,
+          category: category,
+          subcategory: subcategory,
+        ))
             .map(RankedProduct.fromJson)
+            .toList(),
+      );
+
+  @override
+  Future<List<ProductAvailability>> productAvailability(String productId) =>
+      _guard(
+        () async => (await _remote.productAvailability(productId))
+            .map(ProductAvailability.fromJson)
             .toList(),
       );
 

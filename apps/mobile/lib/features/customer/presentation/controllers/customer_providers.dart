@@ -11,6 +11,7 @@ import '../../domain/entities/invoice.dart';
 import '../../domain/entities/notification.dart';
 import '../../domain/entities/loyalty_status.dart';
 import '../../domain/entities/offer.dart';
+import '../../domain/entities/product_availability.dart';
 import '../../domain/entities/product_detail.dart';
 import '../../domain/entities/receipt.dart';
 import '../../domain/repositories/customer_repository.dart';
@@ -205,9 +206,24 @@ final donationCausesProvider = FutureProvider.autoDispose<List<DonationCause>>(
 /// Ergebnisse der Produktsuche. Familie über den Suchbegriff, damit jeder
 /// Begriff seinen eigenen Cache-Eintrag bekommt und Zurücktippen nicht neu
 /// lädt. Leerer Begriff liefert den Katalog.
+/// Aktiver Filter der Produktsuche (Begriff + Kategorie + Unterkategorie).
+final productFilterProvider =
+    StateProvider.autoDispose<ProductFilter>((ref) => const ProductFilter());
+
 final productSearchProvider =
-    FutureProvider.autoDispose.family<List<RankedProduct>, String>(
-  (ref, query) => ref.watch(customerRepositoryProvider).searchProducts(query),
+    FutureProvider.autoDispose.family<List<RankedProduct>, ProductFilter>(
+  (ref, filter) => ref.watch(customerRepositoryProvider).searchProducts(
+        filter.query,
+        category: filter.category,
+        subcategory: filter.subcategory,
+      ),
+);
+
+/// Automaten, an denen es ein Produkt gibt — vorrätige zuerst.
+final productAvailabilityProvider =
+    FutureProvider.autoDispose.family<List<ProductAvailability>, String>(
+  (ref, productId) =>
+      ref.watch(customerRepositoryProvider).productAvailability(productId),
 );
 
 final newsProvider = FutureProvider.autoDispose<List<NewsArticle>>(

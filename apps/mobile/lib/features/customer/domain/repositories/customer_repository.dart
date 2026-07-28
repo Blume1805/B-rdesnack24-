@@ -4,6 +4,7 @@ import '../entities/invoice.dart';
 import '../entities/notification.dart';
 import '../entities/loyalty_status.dart';
 import '../entities/offer.dart';
+import '../entities/product_availability.dart';
 import '../entities/product_detail.dart';
 
 abstract interface class CustomerRepository {
@@ -52,7 +53,14 @@ abstract interface class CustomerRepository {
   Future<void> rateProduct(String productId, int rating);
 
   /// Katalogsuche nach Name/Kategorie.
-  Future<List<RankedProduct>> searchProducts(String query);
+  Future<List<RankedProduct>> searchProducts(
+    String query, {
+    String? category,
+    String? subcategory,
+  });
+
+  /// Automaten, die [productId] führen — vorrätige zuerst.
+  Future<List<ProductAvailability>> productAvailability(String productId);
 
   /// 5 % Netto-Umsatz wandern in einen Spendentopf. Diese Methoden geben die
   /// kumulierte Spende des Kunden und die Aufschlüsselung je Kauf zurück.

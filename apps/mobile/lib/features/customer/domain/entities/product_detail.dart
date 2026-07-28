@@ -8,18 +8,28 @@ class RankedProduct extends Equatable {
     required this.category,
     required this.avgRating,
     required this.reviewCount,
+    this.subcategory,
     this.imageUrl,
     this.listPriceNet,
     this.taxRate,
+    this.availableMachines = 0,
   });
 
   final String id;
   final String name;
   final String category;
+
+  /// Feingliederung, aktuell nur bei Getränken gesetzt
+  /// (Energy Drinks / Kaltgetränke / Heißgetränke).
+  final String? subcategory;
+
   final double avgRating;
   final int reviewCount;
   final String? imageUrl;
   final double? listPriceNet;
+
+  /// Zahl der Automaten, an denen der Artikel gerade vorrätig ist.
+  final int availableMachines;
 
   /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
   final double? taxRate;
@@ -35,11 +45,13 @@ class RankedProduct extends Equatable {
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         category: j['category'] as String? ?? '',
+        subcategory: j['subcategory'] as String?,
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
         taxRate: (j['tax_rate'] as num?)?.toDouble(),
         avgRating: (j['avg_rating'] as num?)?.toDouble() ?? 0,
         reviewCount: (j['review_count'] as num?)?.toInt() ?? 0,
+        availableMachines: (j['available_machines'] as num?)?.toInt() ?? 0,
       );
 
   @override

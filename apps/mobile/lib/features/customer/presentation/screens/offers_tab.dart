@@ -110,6 +110,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           ..invalidate(activatedOfferIdsProvider)
           ..invalidate(hasSubscriptionProvider)
           ..invalidate(topProductsProvider('Getränke'))
+          ..invalidate(topProductsProvider('Süßwaren'))
           ..invalidate(topProductsProvider('Snacks'))
           ..invalidate(topProductsProvider('Eis'));
       },
@@ -368,6 +369,8 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           ),
           const SizedBox(height: AppSpacing.s4),
           const _FavoritesSection(category: 'Getränke'),
+          const SizedBox(height: AppSpacing.s4),
+          const _FavoritesSection(category: 'Süßwaren'),
           const SizedBox(height: AppSpacing.s4),
           const _FavoritesSection(category: 'Snacks'),
           const SizedBox(height: AppSpacing.s4),
@@ -1639,7 +1642,8 @@ class _FavoritesSection extends ConsumerWidget {
 
   IconData _iconFor(String c) => switch (c) {
         'Getränke' => Icons.local_drink_outlined,
-        'Snacks' => Icons.cookie_outlined,
+        'Süßwaren' => Icons.cookie_outlined,
+        'Snacks' => Icons.lunch_dining_outlined,
         'Eis' => Icons.icecream_outlined,
         _ => Icons.category_outlined,
       };

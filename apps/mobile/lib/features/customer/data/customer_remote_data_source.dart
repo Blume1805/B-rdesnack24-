@@ -187,10 +187,32 @@ class CustomerRemoteDataSource {
   }
 
   /// Katalogsuche (Name/Kategorie). Leerer Begriff = ganzer Katalog.
-  Future<List<Map<String, dynamic>>> searchProducts(String query) async {
+  /// [category] und [subcategory] filtern zusätzlich; `null` heißt „alle".
+  Future<List<Map<String, dynamic>>> searchProducts(
+    String query, {
+    String? category,
+    String? subcategory,
+  }) async {
     final rows = await _client.rpc(
       'search_products',
-      params: {'p_query': query, 'p_limit': 40},
+      params: {
+        'p_query': query,
+        'p_limit': 60,
+        'p_category': category,
+        'p_subcategory': subcategory,
+      },
+    );
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
+  /// Automaten, die ein Produkt führen — inkl. Bestand und Standort.
+  Future<List<Map<String, dynamic>>> productAvailability(
+    String productId,
+  ) async {
+    final rows = await _client.rpc(
+      'product_availability',
+      params: {'p_product_id': productId},
     );
     if (rows is List) return rows.cast<Map<String, dynamic>>();
     return const [];
