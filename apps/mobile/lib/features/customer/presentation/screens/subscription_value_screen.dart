@@ -13,9 +13,9 @@ import 'subscription_screen.dart';
 /// Marketing-Rechnung „Wann rechnet sich das Abo?" — der One-Pager als
 /// In-App-Screen. Zwei Szenarien aus der zentralen Preislogik (Pricing):
 ///   * konservativ: nur der garantierte 5-%-App-Preis,
-///   * normal: zusätzlich Frühstücks-/Feierabend-Deals, Tages- und
-///     Wochenangebote (weitere 10 % auf den App-Preis) sowie
-///     Treue-Meilensteine (Coupons 5–25 %).
+///   * normal: zusätzlich Tages- und Wochenangebote (weitere 10 % auf den
+///     App-Preis), Frühstücks-/Feierabend-Deals (5 % auf den Warenkorb)
+///     sowie Treue-Meilensteine (Coupons 5–25 %).
 /// Wird Nicht-Abonnenten als Kaufargument gezeigt; Abonnenten können die
 /// Rechnung ebenfalls öffnen.
 class SubscriptionValueScreen extends ConsumerWidget {
@@ -308,10 +308,10 @@ class _ScenarioCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Der exakte Normal-Wert ist 9,35 %; als Fließkomma liegt er minimal
-    // darunter, weshalb toStringAsFixed sonst auf 9,3 abrundet. Ein kleines
-    // Epsilon erzwingt die kaufmännische Rundung → 9,4 %, konsistent mit der
-    // PDF-Beispielrechnung.
+    // Halbe Promille kaufmännisch aufrunden: toStringAsFixed rundet zur
+    // nächsten geraden Ziffer bzw. leidet an Fließkomma-Untergrenzen (der
+    // frühere Normal-Wert 9,35 % wurde so zu 9,3). Das Epsilon hält die
+    // Anzeige deckungsgleich mit der PDF-Beispielrechnung.
     final pct = (rate * 100 + 1e-6).toStringAsFixed(1).replaceAll('.', ',');
     return AppCard(
       color: highlighted ? AppColors.ink : AppColors.surfaceAlt,

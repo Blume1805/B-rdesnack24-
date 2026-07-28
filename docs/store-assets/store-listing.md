@@ -22,8 +22,9 @@ DEINE VORTEILE MIT ABO (ab 0,99 € im Monat)
 • Immer 5 % App-Preis auf alle Produkte — an jedem Automaten
 • Lebenslanger Status-Rabatt obendrauf: 6 % ab Bronze (150 € Umsatz),
   7,5 % ab Silber (500 €), 10 % ab Gold (1000 €) — ohne Reset
-• Frühstücks- & Feierabend-Deals sowie Tages- und Wochenangebote mit
-  weiteren 10 % Rabatt
+• Tages- und Wochenangebote mit weiteren 10 % Rabatt
+• Frühstücks- & Feierabend-Deals: Getränk + Snack im Zeitfenster =
+  5 % extra auf den ganzen Einkauf
 • Treuepunkte: 1 Cent Umsatz = 1 Punkt, Meilenstein-Coupons mit
   5–25 % Rabatt
 • Persönliche Angebote und ein Geschenk zum Geburtstag

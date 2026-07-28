@@ -142,17 +142,17 @@ const _kFaq = <_FaqCategory>[
           'App-Preis siehst du direkt an jedem Produkt. Mit deinem Status '
           'wächst der Dauerrabatt lebenslang: 6 % ab Bronze (150 € '
           'Gesamtumsatz), 7,5 % ab Silber (500 €), 10 % ab Gold (1000 €). '
-          'Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- und '
-          'Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis und '
-          'Treue-Coupons von 5 bis 25 %.',
+          'Obendrauf: Tages- und Wochenangebote mit weiteren 10 % Rabatt auf '
+          'den App-Preis, Frühstücks- & Feierabend-Deals mit 5 % auf den '
+          'ganzen Einkauf und Treue-Coupons von 5 bis 25 %.',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
       'Ab wann rechnet sich das Abo?',
       'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,65 € '
           'Einkauf im Monat, Monats-Abo ab 19,80 €. Bei normaler Nutzung '
-          'von Deals und Coupons (zusammen ca. 9,4 % Ersparnis) sind es rund '
-          '8,90 € bzw. 10,60 € im Monat. Der Status-Rabatt kommt noch '
+          'von Deals und Coupons (zusammen ca. 8,9 % Ersparnis) sind es rund '
+          '9,40 € bzw. 11,15 € im Monat. Der Status-Rabatt kommt noch '
           'obendrauf. Die komplette Beispielrechnung mit allen Annahmen:',
       deepLink: 'abo-rechnung',
     ),
@@ -200,9 +200,12 @@ const _kFaq = <_FaqCategory>[
     ),
     _FaqEntry(
       'Was sind Frühstücks- und Feierabend-Deals?',
-      'Wechselnde Aktionen für morgens und für den Feierabend: zusätzlich '
-          '10 % Rabatt auf deinen App-Preis — zusammen also 14,5 % unter dem '
-          'Automatenpreis. Du findest sie ganz oben im Angebote-Tab.',
+      'Feste Zeitfenster: morgens 6 bis 8 Uhr und zum Feierabend 16 bis '
+          '17 Uhr. Kaufst du in dieser Zeit ein Getränk zusammen mit einer '
+          'Süßware oder einem Snack, bekommst du auf den ganzen Einkauf '
+          '5 % zusätzlich zu deinem Dauerrabatt — zusammen also 9,75 % '
+          'unter dem Automatenpreis. Welche Artikel es genau sind, ist '
+          'egal. Du findest die Deals ganz oben im Angebote-Tab.',
       deepLink: 'tab:0',
     ),
     _FaqEntry(

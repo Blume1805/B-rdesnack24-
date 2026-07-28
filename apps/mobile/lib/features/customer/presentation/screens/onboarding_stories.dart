@@ -48,9 +48,10 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       title: 'Immer 5 % günstiger',
       body: 'Mit Abo (ab 0,99 € im Monat) zahlst du an jedem Automaten immer '
           '5 % weniger — mit Bronze-, Silber- und Gold-Status wächst der '
-          'Dauerrabatt lebenslang auf bis zu 10 %. Frühstücks- und '
-          'Feierabend-Deals sparen weitere 10 %. Ob sich das lohnt, zeigt '
-          'dir die Beispielrechnung im Angebote-Tab.',
+          'Dauerrabatt lebenslang auf bis zu 10 %. Tages- und Wochenangebote '
+          'sparen weitere 10 %, Frühstücks- und Feierabend-Deals 5 % auf den '
+          'ganzen Einkauf. Ob sich das lohnt, zeigt dir die Beispielrechnung '
+          'im Angebote-Tab.',
     ),
     _StoryPage(
       icon: Icons.stars_rounded,

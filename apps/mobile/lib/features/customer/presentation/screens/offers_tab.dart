@@ -2047,10 +2047,14 @@ class _DealsCarouselState extends State<_DealsCarousel> {
         icon: Icons.nights_stay_outlined,
       ),
     ];
+    // Ohne die zwei Produkt-Slots ist die Karte deutlich flacher. Die Höhe
+    // wächst mit der Textskalierung mit, sonst läuft die Karte bei großer
+    // Schrift über (PageView braucht eine feste Höhe).
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
     return Column(
       children: [
         SizedBox(
-          height: 440,
+          height: 340 * scale.clamp(1.0, 1.6),
           child: PageView.builder(
             controller: _ctrl,
             itemCount: slides.length,
@@ -2119,14 +2123,15 @@ class _PageFocus extends StatelessWidget {
   }
 }
 
-/// Zeitgebundener Kombi-Deal mit zwei Slots: **Getränk + Snack**.
+/// Frühstücks-/Feierabend-Deal.
 ///
-/// Die konkrete Auswahl wird täglich zufällig neu getriggert
-/// (Client-seitiger Date-Seed über die Top-Community-Favoriten). Da wir
-/// aktuell noch keine echten Produktbilder pflegen, bleiben die zwei
-/// Slots als Bild-Platzhalter mit Bördesnack24-Markenkreis stehen —
-/// sobald echte Assets hinterlegt sind, ziehen sie automatisch nach.
-class _TimeDealCard extends ConsumerWidget {
+/// Bewusst OHNE Produktvorschläge: der Deal ist eine Warenkorb-Regel, keine
+/// Auswahl. Wer im Zeitfenster ein Getränk und etwas zu essen kauft, bekommt
+/// 5 % zusätzlich zum Dauerrabatt — unabhängig davon, welche Artikel es sind.
+/// Früher standen hier zwei täglich gewürfelte Produkte mit Bild-Platzhaltern;
+/// das legte nahe, der Rabatt gelte nur für genau diese beiden. Damit fällt
+/// auch der KI-Chip weg — es wird nichts mehr algorithmisch ausgewählt.
+class _TimeDealCard extends StatelessWidget {
   const _TimeDealCard({
     super.key,
     required this.eyebrow,
@@ -2138,24 +2143,8 @@ class _TimeDealCard extends ConsumerWidget {
   final String timeRange;
   final IconData icon;
 
-  RankedProduct? _pickDaily(List<RankedProduct> list) {
-    if (list.isEmpty) return null;
-    // Deterministischer „Tages-Zufall": alle Kunden sehen am gleichen
-    // Tag die gleiche Kombi, aber sie wechselt zum Datumswechsel.
-    final today = DateTime.now();
-    final seed = today.year * 10000 + today.month * 100 + today.day;
-    return list[seed % list.length];
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final drinks =
-        ref.watch(topProductsProvider('Getränke')).valueOrNull ?? const [];
-    final snacks =
-        ref.watch(topProductsProvider('Snacks')).valueOrNull ?? const [];
-    final drink = _pickDaily(drinks);
-    final snack = _pickDaily(snacks);
-
+  Widget build(BuildContext context) {
     return AppCard(
       color: AppColors.brand,
       borderColor: AppColors.brand,
@@ -2180,11 +2169,6 @@ class _TimeDealCard extends ConsumerWidget {
                   color: AppColors.ink,
                 ).copyWith(letterSpacing: 2, height: 1),
               ),
-              const Spacer(),
-              // Kennzeichnung nach Art. 50 EU AI Act: die tägliche
-              // Getränk-/Snack-Kombi wird algorithmisch ausgewählt →
-              // KI-Chip mit Sprung in die AI-Info-Seite.
-              const _DealAiBadge(),
             ],
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -2192,9 +2176,9 @@ class _TimeDealCard extends ConsumerWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text: 'Getränk + Snack.',
+                  text: '5 % extra.',
                   style: AppTypography.display(
-                    size: 22,
+                    size: 26,
                     weight: FontWeight.w800,
                     color: AppColors.ink,
                   ).copyWith(height: 1.1),
@@ -2210,6 +2194,15 @@ class _TimeDealCard extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            'zusätzlich zu deinem Dauerrabatt',
+            style: AppTypography.body(
+              size: 13.5,
+              weight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
+          ),
           const SizedBox(height: AppSpacing.s2),
           Text(
             timeRange,
@@ -2217,34 +2210,40 @@ class _TimeDealCard extends ConsumerWidget {
               size: 13,
               weight: FontWeight.w700,
               color: AppColors.ink,
-            ),
+            ).copyWith(height: 1.35),
           ),
           const SizedBox(height: AppSpacing.s4),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _DealSlot(
-                    label: 'Getränk',
-                    product: drink,
-                  ),
+          // Die Regel als zwei Bedingungen — kein Produktvorschlag, weil der
+          // Deal für jedes Getränk und jede Süßware/jeden Snack gilt.
+          const _ComboRule(
+            icon: Icons.local_drink_outlined,
+            text: '1 Getränk',
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Row(
+            children: [
+              const SizedBox(width: 13),
+              Text(
+                '+',
+                style: AppTypography.display(
+                  size: 16,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
                 ),
-                const SizedBox(width: AppSpacing.s3),
-                Expanded(
-                  child: _DealSlot(
-                    label: 'Snack',
-                    product: snack,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          const _ComboRule(
+            icon: Icons.cookie_outlined,
+            text: '1 Süßware oder Snack',
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind '
-            'mehrere Coupons für dasselbe Produkt aktiviert, wird '
-            'automatisch der günstigste Preis für dich angewandt.',
+            '* Gilt für den gesamten Einkauf, sobald beides im Warenkorb '
+            'liegt — egal welche Artikel. Nicht mit anderen '
+            'Coupons/Aktionen kombinierbar; sind mehrere Rabatte möglich, '
+            'wird automatisch der günstigste Preis für dich angewandt.',
             style: AppTypography.body(
               size: 9,
               weight: FontWeight.w600,
@@ -2257,80 +2256,40 @@ class _TimeDealCard extends ConsumerWidget {
   }
 }
 
-/// KI-Chip auf der Deal-Karte. Öffnet die AI-Info-Seite mit Art.-50-
-/// Angaben. Muss ein eigenes Widget sein, weil `_TimeDealCard` als
-/// ConsumerWidget keinen direkten BuildContext-Push macht — wir wollen
-/// den Chip als kleinen Header-Action verbauen.
-class _DealAiBadge extends StatelessWidget {
-  const _DealAiBadge();
-  @override
-  Widget build(BuildContext context) {
-    return AiBadge(
-      dense: true,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const AiInfoScreen()),
-      ),
-    );
-  }
-}
-
-/// Ein Deal-Slot (Bild-Platzhalter + Produktname), wie er in Frühstücks-
-/// und Feierabend-Deal-Karte eingesetzt wird. Falls kein Produkt geladen
-/// werden konnte, bleibt der Slot bei „wird generiert".
+/// Eine Bedingung des Kombi-Deals („1 Getränk", „1 Süßware oder Snack").
 ///
-/// Der Slot wird über `IntrinsicHeight + CrossAxisAlignment.stretch` in
-/// der Row auf die Höhe des jeweils höheren Nachbarn gezogen. Damit
-/// sowohl die Bild-Kachel gleich groß bleibt (AspectRatio 1:1) als auch
-/// die zwei Slots exakt gleich hoch aussehen, füllt eine `Spacer`-Zeile
-/// den freien Raum zwischen Bild und Produktname aus.
-class _DealSlot extends StatelessWidget {
-  const _DealSlot({required this.label, required this.product});
-  final String label;
-  final RankedProduct? product;
+/// Bewusst als dunkle Pille auf dem goldenen Karten-Grund: die Regel muss
+/// auf einen Blick lesbar sein, ohne mit dem großen „5 % extra." zu
+/// konkurrieren. Kein Bild — es gibt kein konkretes Produkt zu zeigen.
+class _ComboRule extends StatelessWidget {
+  const _ComboRule({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.s2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s3,
+        vertical: AppSpacing.s2,
+      ),
       decoration: BoxDecoration(
         color: AppColors.ink,
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.body(
-              size: 10,
-              weight: FontWeight.w800,
-              color: AppColors.brand,
-            ).copyWith(letterSpacing: 1.2),
-          ),
-          const SizedBox(height: 6),
-          AspectRatio(
-            aspectRatio: 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadii.sm),
-              child: ProductImage.expand(
-                imageUrl: product?.imageUrl,
-                productName: product?.name ?? label,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
+          Icon(icon, size: 18, color: AppColors.brand),
+          const SizedBox(width: AppSpacing.s2),
           Expanded(
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                product?.name ?? 'wird täglich generiert',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.body(
-                  size: 12,
-                  weight: FontWeight.w800,
-                  color: AppColors.onDark,
-                ).copyWith(height: 1.2),
-              ),
+            child: Text(
+              text,
+              style: AppTypography.body(
+                size: 14,
+                weight: FontWeight.w800,
+                color: AppColors.onDark,
+              ).copyWith(height: 1.2),
             ),
           ),
         ],

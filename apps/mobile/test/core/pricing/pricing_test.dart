@@ -87,9 +87,16 @@ void main() {
       expect(Pricing.dealSavingsRate, closeTo(0.145, 0.0001));
     });
 
-    test('effektive Ersparnisquote liegt bei ≈ 9,35 %', () {
-      // 30 % Deal-Anteil × 14,5 % + 70 % × 5 % + 1,5 pp Treue-Effekt.
-      expect(Pricing.normalSavingsRate, closeTo(0.0935, 0.0001));
+    test('Kombi-Kauf im Zeitfenster spart 9,75 % (5 % + 5 %, multiplikativ)',
+        () {
+      expect(Pricing.comboDealSavingsRate, closeTo(0.0975, 0.0001));
+    });
+
+    test('effektive Ersparnisquote liegt bei ≈ 8,875 %', () {
+      // 20 % × 14,5 % + 10 % × 9,75 % + 70 % × 5 % + 1,5 pp Treue-Effekt.
+      expect(Pricing.normalSavingsRate, closeTo(0.08875, 0.0001));
+      // Der Deal-Anteil bleibt in Summe bei 30 %.
+      expect(Pricing.normalDealShare, closeTo(0.30, 0.0001));
     });
 
     test('Break-even sinkt im normalen Szenario deutlich', () {
@@ -98,19 +105,67 @@ void main() {
           Pricing.subMonthlyEur,
           savingsRate: Pricing.normalSavingsRate,
         ),
-        closeTo(10.59, 0.01),
+        closeTo(11.15, 0.01),
       );
       expect(
         Pricing.breakEvenMonthlySpend(
           Pricing.subYearlyEur / 12,
           savingsRate: Pricing.normalSavingsRate,
         ),
-        closeTo(8.90, 0.01),
+        closeTo(9.38, 0.01),
       );
-      // Lifetime: 79,99 € / 9,35 % ≈ 856 € kumulierter Einkauf.
+      // Lifetime: 79,99 € / 8,875 % ≈ 901 € kumulierter Einkauf.
       expect(
         Pricing.subLifetimeEur / Pricing.normalSavingsRate,
-        closeTo(855.51, 0.5),
+        closeTo(901.30, 0.5),
+      );
+    });
+  });
+
+  group('Frühstücks-/Feierabend-Deal (Warenkorb-Regel)', () {
+    DateTime at(int hour) => DateTime(2026, 7, 28, hour, 30);
+
+    test('erkennt beide Zeitfenster und die Lücken dazwischen', () {
+      expect(Pricing.activeComboWindow(at(6)), 'fruehstueck');
+      expect(Pricing.activeComboWindow(at(7)), 'fruehstueck');
+      expect(Pricing.activeComboWindow(at(16)), 'feierabend');
+      // Ende exklusiv: 8 Uhr und 17 Uhr gehören nicht mehr dazu.
+      expect(Pricing.activeComboWindow(at(8)), isNull);
+      expect(Pricing.activeComboWindow(at(17)), isNull);
+      expect(Pricing.activeComboWindow(at(5)), isNull);
+      expect(Pricing.activeComboWindow(at(12)), isNull);
+      expect(Pricing.activeComboWindow(at(22)), isNull);
+    });
+
+    test('braucht Getränk UND Süßware/Snack im Warenkorb', () {
+      expect(
+        Pricing.qualifiesForComboDeal(['Getränke', 'Süßwaren'], now: at(7)),
+        isTrue,
+      );
+      expect(
+        Pricing.qualifiesForComboDeal(['Getränke', 'Snacks'], now: at(16)),
+        isTrue,
+      );
+      // Nur eine der beiden Seiten reicht nicht.
+      expect(
+        Pricing.qualifiesForComboDeal(['Getränke'], now: at(7)),
+        isFalse,
+      );
+      expect(
+        Pricing.qualifiesForComboDeal(['Snacks', 'Süßwaren'], now: at(7)),
+        isFalse,
+      );
+      // Eis zählt bewusst nicht als „etwas zu essen" im Sinne der Regel.
+      expect(
+        Pricing.qualifiesForComboDeal(['Getränke', 'Eis'], now: at(7)),
+        isFalse,
+      );
+    });
+
+    test('greift außerhalb der Zeitfenster nicht', () {
+      expect(
+        Pricing.qualifiesForComboDeal(['Getränke', 'Snacks'], now: at(12)),
+        isFalse,
       );
     });
   });

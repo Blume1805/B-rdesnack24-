@@ -55,29 +55,88 @@ abstract final class Pricing {
   /// einfach auf `true` setzen — dann erscheint die Karte wieder überall.
   static const lifetimePubliclyOffered = false;
 
-  /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben
-  /// zusätzlich 10 % Rabatt — multiplikativ auf den App-Preis.
+  /// Tages- und Wochenangebote geben auf das beworbene EINZELPRODUKT
+  /// zusätzlich 10 % — multiplikativ auf den App-Preis.
   static const dealExtraDiscountRate = 0.10;
 
-  /// Ersparnis eines Deal-Kaufs gegenüber dem Automatenpreis:
+  /// Ersparnis eines Angebots-Kaufs gegenüber dem Automatenpreis:
   /// 1 − 0,95 × 0,90 = 14,5 %.
   static double get dealSavingsRate =>
       1 - (1 - appDiscountRate) * (1 - dealExtraDiscountRate);
 
-  /// Annahme „normales" Nutzungsszenario: Anteil des Einkaufswerts, der
-  /// über Deals/Angebote läuft (Frühstück, Feierabend, Tages-/Wochenaktion).
-  static const normalDealShare = 0.30;
+  /// Frühstücks-/Feierabend-Deal: im Zeitfenster gibt es auf den GESAMTEN
+  /// Kauf 5 % obendrauf, sobald er ein Getränk und etwas zu essen
+  /// (Süßware oder Snack) enthält. Bewusst getrennt von
+  /// [dealExtraDiscountRate] — das ist ein Warenkorb-Bonus, kein Rabatt auf
+  /// ein einzelnes beworbenes Produkt.
+  static const comboDealDiscountRate = 0.05;
+
+  /// Ersparnis eines Kombi-Kaufs im Zeitfenster gegenüber dem
+  /// Automatenpreis: 1 − 0,95 × 0,95 = 9,75 %.
+  static double get comboDealSavingsRate =>
+      1 - (1 - appDiscountRate) * (1 - comboDealDiscountRate);
+
+  /// Zeitfenster des Frühstücks-Deals (Stunden, lokale Zeit; Ende exklusiv).
+  static const breakfastDealFrom = 6;
+  static const breakfastDealTo = 8;
+
+  /// Zeitfenster des Feierabend-Deals.
+  static const afterWorkDealFrom = 16;
+  static const afterWorkDealTo = 17;
+
+  /// Warengruppen, die als „etwas zu essen" für den Kombi-Deal zählen.
+  static const comboFoodCategories = <String>{'Süßwaren', 'Snacks'};
+
+  /// Warengruppe, die als Getränk zählt.
+  static const comboDrinkCategory = 'Getränke';
+
+  /// Läuft zur angegebenen Zeit ein Deal-Zeitfenster? `null` = gerade keins.
+  /// [now] ist injizierbar, damit die Regel testbar bleibt.
+  static String? activeComboWindow([DateTime? now]) {
+    final h = (now ?? DateTime.now()).hour;
+    if (h >= breakfastDealFrom && h < breakfastDealTo) return 'fruehstueck';
+    if (h >= afterWorkDealFrom && h < afterWorkDealTo) return 'feierabend';
+    return null;
+  }
+
+  /// Greift der Kombi-Bonus? Nur wenn der Warenkorb mindestens ein Getränk
+  /// UND mindestens eine Süßware/einen Snack enthält — und die Uhrzeit im
+  /// Zeitfenster liegt.
+  static bool qualifiesForComboDeal(
+    Iterable<String> categoriesInBasket, {
+    DateTime? now,
+  }) {
+    if (activeComboWindow(now) == null) return false;
+    final cats = categoriesInBasket.toSet();
+    return cats.contains(comboDrinkCategory) &&
+        cats.intersection(comboFoodCategories).isNotEmpty;
+  }
+
+  /// Annahme „normales" Nutzungsszenario: Anteil des Einkaufswerts über
+  /// Tages-/Wochenangebote. Die sparen 14,5 % (5 % + 10 % auf das beworbene
+  /// Einzelprodukt).
+  static const normalOfferShare = 0.20;
+
+  /// Anteil des Einkaufswerts über Frühstücks-/Feierabend-Kombis. Die sparen
+  /// nur 9,75 %, dafür auf den ganzen Warenkorb. Bewusst getrennt vom
+  /// Angebots-Anteil — bis zur Umstellung auf die Warenkorb-Regel wurden
+  /// beide mit 14,5 % gerechnet, was die Ersparnis zu hoch auswies.
+  static const normalComboShare = 0.10;
+
+  /// Anteil des Einkaufswerts, der über irgendeinen Deal läuft (30 %).
+  static double get normalDealShare => normalOfferShare + normalComboShare;
 
   /// Annahme „normales" Szenario: Zusatzeffekt der Treue-Meilensteine
   /// (persönliche Coupons 5–25 % auf einzelne Produkte, Geburtstags-
   /// angebot) — konservativ 1,5 Prozentpunkte vom Einkaufswert.
   static const normalLoyaltyEffect = 0.015;
 
-  /// Effektive Ersparnisquote im „normalen" Szenario (≈ 9,4 %):
-  /// 30 % der Käufe als Deal (14,5 %), Rest zum App-Preis (5 %),
-  /// plus Treue-Effekt.
+  /// Effektive Ersparnisquote im „normalen" Szenario (≈ 8,9 %):
+  /// 20 % Tages-/Wochenangebote (14,5 %), 10 % Kombi-Deals (9,75 %),
+  /// Rest zum App-Preis (5 %), plus Treue-Effekt.
   static double get normalSavingsRate =>
-      normalDealShare * dealSavingsRate +
+      normalOfferShare * dealSavingsRate +
+      normalComboShare * comboDealSavingsRate +
       (1 - normalDealShare) * appDiscountRate +
       normalLoyaltyEffect;
 
