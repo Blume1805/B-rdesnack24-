@@ -100,7 +100,7 @@ _.w=e
 _.x=f
 _.cT$=g
 _.i1$=h
-_.oQ$=i
+_.oR$=i
 _.fk$=j
 _.i2$=k
 _.c=_.a=null},
@@ -413,8 +413,8 @@ case 6:case 1:return A.o(v,w)
 case 2:return A.n(t.at(-1),w)}})
 return A.p($async$B4,w)},
 q(d){var x,w,v,u,t=this,s=null,r=B.aj.es(0.14),q=A.aA(4),p=A.cp(B.aj.es(0.5),1),o=y.p
-q=A.ak(A.b([D.a8R,A.aT(s,A.ak(A.b([D.acp,B.cf,A.i("DATEV",s,s,s,s,A.y(B.aj,11,B.o).fj(0.4),s,s,s)],o),B.k,s,B.f,B.K,0,s,s),B.p,s,s,new A.aP(r,s,p,q,s,s,B.B),s,s,s,s,B.l_,s,s,s)],o),B.k,s,B.f,B.i,0,s,s)
-p=A.i("Erzeugt eine CSV-Datei im DATEV-Format (EXTF-Buchungsstapel, SKR 03). Enthalten sind die Tageslosungen der App-Verk\xe4ufe je Steuersatz: Kasse (1000) an Erl\xf6se 7 % (8300) bzw. 19 % (8400) \u2014 entsprechend der GoBD-Verfahrensdokumentation. Buchhaltung und Steuererkl\xe4rungen erstellt Gesellschafter Philipp Blume; die Datei l\xe4sst sich direkt in eine DATEV-f\xe4hige Buchhaltungssoftware importieren.",s,s,s,s,A.y(B.q,13,B.m).di(1.4),s,s,s)
+q=A.ak(A.b([D.a8R,A.aT(s,A.ak(A.b([D.acp,B.cf,A.i("DATEV",s,s,s,s,A.y(B.aj,11,B.o).fj(0.4),s,s,s)],o),B.k,s,B.f,B.J,0,s,s),B.p,s,s,new A.aP(r,s,p,q,s,s,B.B),s,s,s,s,B.l0,s,s,s)],o),B.k,s,B.f,B.i,0,s,s)
+p=A.i("Erzeugt eine CSV-Datei im DATEV-Format (EXTF-Buchungsstapel, SKR 03). Enthalten sind die Tageslosungen der App-Verk\xe4ufe je Steuersatz: Kasse (1000) an Erl\xf6se 7 % (8300) bzw. 19 % (8400) \u2014 entsprechend der GoBD-Verfahrensdokumentation. Buchhaltung und Steuererkl\xe4rungen erstellt Gesellschafter Philipp Blume; die Datei l\xe4sst sich direkt in eine DATEV-f\xe4hige Buchhaltungssoftware importieren.",s,s,s,s,A.y(B.q,13,B.m).de(1.4),s,s,s)
 r=t.z?s:t.gaHC()
 x=t.goo()
 w=$.dR()
@@ -423,10 +423,10 @@ w=A.f2(s,B.aW,!1,s,!0,B.t,s,A.ff(),t.x,s,s,s,s,s,2,D.aeT,B.ab,!0,s,!0,s,!1,s,B.b
 x=A.f2(s,B.aW,!1,s,!0,B.t,s,A.ff(),t.y,s,s,s,s,s,2,D.af0,B.ab,!0,s,!0,s,!1,s,B.b_,s,s,s,s,B.dI,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.E,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.as,s,B.a3,s,s,s,s)
 v=t.z?s:t.gauT()
 u=A.dM(B.n,B.h,s,B.ei,s,s,s)
-return A.de(D.aa2,s,A.dB(A.b([q,B.F,p,B.R,A.by(s,A.aa(A.b([r,B.v,w,B.F,x,B.R,A.h0(t.z?D.Zo:D.EQ,D.aG5,v,u)],o),B.a9,B.f,B.i),s,s,B.E,s,3),B.v,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.q,11,B.m).di(1.35),s,s,s)],o),s,B.E,s,B.D,!1),s,s,s)}}
+return A.de(D.aa2,s,A.dB(A.b([q,B.F,p,B.R,A.by(s,A.aa(A.b([r,B.v,w,B.F,x,B.R,A.h0(t.z?D.Zo:D.EQ,D.aG5,v,u)],o),B.a9,B.f,B.i),s,s,B.E,s,3),B.v,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.q,11,B.m).de(1.35),s,s,s)],o),s,B.E,s,B.D,!1),s,s,s)}}
 C.nF.prototype={
-zx(d,e,f,g,h){return this.aZI(d,e,f,g,h)},
-aZI(d,e,f,g,h){var x=0,w=A.q(y.N),v,u=this,t,s,r,q
+zx(d,e,f,g,h){return this.aZJ(d,e,f,g,h)},
+aZJ(d,e,f,g,h){var x=0,w=A.q(y.N),v,u=this,t,s,r,q
 var $async$zx=A.m(function(i,j){if(i===1)return A.n(j,w)
 for(;;)switch(x){case 0:t=u.a
 s=y.N
@@ -443,8 +443,8 @@ x=1
 break
 case 1:return A.o(v,w)}})
 return A.p($async$zx,w)},
-L1(d,e,f){return this.aRe(d,e,f)},
-aRe(d,e,f){var x=0,w=A.q(y.H),v=this,u,t,s
+L1(d,e,f){return this.aRf(d,e,f)},
+aRf(d,e,f){var x=0,w=A.q(y.H),v=this,u,t,s
 var $async$L1=A.m(function(g,h){if(g===1)return A.n(h,w)
 for(;;)switch(x){case 0:u=v.a
 t=y.N
@@ -469,9 +469,9 @@ x=1
 break
 case 1:return A.o(v,w)}})
 return A.p($async$Gs,w)},
-yV(d,e){return this.aVW(0,!1)},
-aVV(d){return this.yV(0,!1)},
-aVW(a8,a9){var x=0,w=A.q(y.D),v,u=2,t=[],s=this,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,a0,a1,a2,a3,a4,a5,a6,a7
+yV(d,e){return this.aVX(0,!1)},
+aVW(d){return this.yV(0,!1)},
+aVX(a8,a9){var x=0,w=A.q(y.D),v,u=2,t=[],s=this,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,a0,a1,a2,a3,a4,a5,a6,a7
 var $async$yV=A.m(function(b0,b1){if(b0===1){t.push(b1)
 x=u}for(;;)switch(x){case 0:e=s.a
 d=y.N
@@ -572,10 +572,10 @@ u.toString
 x=new A.lF(v,u,y.T)}else x=null
 v=w.c
 v.toString
-A.ba(v,!1).dh(x)},
+A.ba(v,!1).di(x)},
 RJ(){var x=this.c
 x.toString
-A.ba(x,!1).dh(null)},
+A.ba(x,!1).di(null)},
 RO(){this.J(new C.b7W(this))},
 I1(d){var x=this.a
 if(d.nV(x.d)||d.lB(x.e))return!1
@@ -939,7 +939,7 @@ t=A.bDW(w,v,b4)
 s=B.d.hX((u+t)/7)
 x=y.p
 r=A.b([],x)
-for(q=0-t+1,p=b1.gauV(),o=y.v;q<=u;++q)if(q<1)r.push(B.lj)
+for(q=0-t+1,p=b1.gauV(),o=y.v;q<=u;++q)if(q<1)r.push(B.lk)
 else{b1.a.toString
 n=A.bN(w,v,q,0,0,0,0)
 m=b1.a
@@ -1002,7 +1002,7 @@ m=A.W(b5)
 m=m.bj.ok
 if(m==null){A.W(b5)
 m=A.mo(b5)
-m=m.gvN()}m=new A.Dt(m,!0,B.lj,b2)}else m=B.lj
+m=m.gvN()}m=new A.Dt(m,!0,B.lk,b2)}else m=B.lk
 B.b.hz(a5,0,m)
 m=r.length
 if(!(a4<m))m=a4===m&&B.e.ae(m,7)===0
@@ -1025,7 +1025,7 @@ m=A.W(b5)
 m=m.bj.ok
 if(m==null){A.W(b5)
 m=A.mo(b5)
-m=m.gvN()}m=new A.Dt(m,!0,B.lj,b2)}else m=B.lj
+m=m.gvN()}m=new A.Dt(m,!0,B.lk,b2)}else m=B.lk
 a5.push(m)}B.b.K(a1,a5)}b0=A.bu(b5,B.dK,y.w).w.giZ(0)===B.f2?384:480
 return A.aa(A.b([new A.dW(new A.at(0,b0,0,1/0).O6(58),new A.ae(B.hL,new A.e5(B.be,b2,b2,new A.mN(!0,A.i(b4.DY(b1.a.x),b2,b2,b2,b2,b3.ok.z.kC(b3.ax.k3),b2,b2,b2),b2),b2),b2),b2),new A.dW(new A.at(0,b0,0,s*42+(s-1)*8),A.bxa(A.acK(a1,!0,!1,!0),D.C4,B.id,!1),b2),B.v],x),B.k,B.f,B.i)}}
 C.UI.prototype={
@@ -1142,12 +1142,12 @@ n=A.bI3(k.Q,k.z,w===B.f2,w,o,s,p)
 x=A.dF(A.i(k.y,j,j,j,j,j,j,j,j),j,j,k.w,j,j)
 t=y.p
 m=new A.dW(B.Bv,new A.ae(B.fl,new A.e5(B.mz,j,j,A.bxR(j,A.b([x,A.dF(A.i(k.x,j,j,j,j,j,j,j,j),j,j,k.r,j,j)],t),B.TU,B.b0,0,8),j),j),j)
-x=A.b6(d,B.b6)
+x=A.b6(d,B.b7)
 x=x==null?j:x.gcQ()
 x=(x==null?B.aO:x).mL(0,1.3).bk(0,14)
 l=B.A9.az(0,x/14)
 switch(w.a){case 0:return A.k3(new C.bdH(k,!0,l,n,m))
-case 1:return A.ak(A.b([n,new A.h1(1,B.cp,A.aa(A.b([A.ay(k.f,1),m],t),B.a9,B.f,B.K),j)],t),B.a9,j,B.f,B.K,0,j,j)}}}
+case 1:return A.ak(A.b([n,new A.h1(1,B.cp,A.aa(A.b([A.ay(k.f,1),m],t),B.a9,B.f,B.J),j)],t),B.a9,j,B.f,B.J,0,j,j)}}}
 C.VR.prototype={
 W(){return new C.Im()}}
 C.Im.prototype={
@@ -1451,7 +1451,7 @@ $2(d,e){var x=this,w=Math.min(x.c.b,270),v=A.b([],y.p)
 if(e.d>=w)v.push(x.d)
 v.push(A.ay(x.a.f,1))
 v.push(x.e)
-return A.aa(v,B.a9,B.f,B.K)},
+return A.aa(v,B.a9,B.f,B.J)},
 $S:965}
 C.bdK.prototype={
 $0(){var x=this.b
@@ -1543,4 +1543,4 @@ D.aLE=new C.Ih(0,"none")
 D.a_w=new C.Ih(1,"highlightLeading")
 D.AQ=new C.Ih(2,"highlightTrailing")
 D.a_x=new C.Ih(3,"highlightAll")})()};
-(a=>{a["oNEi3DEfVQON71NxLCEjyMKqa68="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["TQVi1Emrrv5MmUskN9HPwdgoHbc="]=a.current})($__dart_deferred_initializers__);
