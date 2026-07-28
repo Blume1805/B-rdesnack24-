@@ -9,6 +9,8 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/donations_news.dart';
 import '../controllers/customer_providers.dart';
+import '../widgets/subscription_lock.dart';
+import 'subscription_screen.dart';
 
 /// Spenden-Screen: eigener Spendenstand, Abstimmung über Empfänger,
 /// Vorschlags-Formular für neue Zwecke.
@@ -20,6 +22,9 @@ class DonationsScreen extends ConsumerWidget {
     final summary = ref.watch(myDonationSummaryProvider);
     final pool = ref.watch(donationPoolSummaryProvider);
     final causes = ref.watch(donationCausesProvider);
+    // Abstimmen und Vorschlagen sind Abo-Funktionen; die Zwecke selbst
+    // bleiben für alle sichtbar (Transparenz über die 5 %).
+    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
 
     return Scaffold(
       appBar: const HeroAppBar(title: Text('Meine Spenden')),
@@ -28,7 +33,8 @@ class DonationsScreen extends ConsumerWidget {
           ref
             ..invalidate(myDonationSummaryProvider)
             ..invalidate(donationPoolSummaryProvider)
-            ..invalidate(donationCausesProvider);
+            ..invalidate(donationCausesProvider)
+            ..invalidate(hasSubscriptionProvider);
         },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -69,9 +75,13 @@ class DonationsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Wähle einen oder mehrere Zwecke — jede Stimme zählt gleich. '
-              'Du kannst deine Stimme jederzeit widerrufen oder eigene '
-              'Vorschläge einreichen.',
+              hasSub
+                  ? 'Wähle einen oder mehrere Zwecke — jede Stimme zählt '
+                      'gleich. Du kannst deine Stimme jederzeit widerrufen '
+                      'oder eigene Vorschläge einreichen.'
+                  : 'Wohin die 5 % fließen, siehst du hier immer. '
+                      'Mitbestimmen — abstimmen und eigene Projekte '
+                      'vorschlagen — gehört zur kostenpflichtigen Version.',
               style: AppTypography.body(
                 size: 13,
                 color: AppColors.textMuted,
@@ -157,7 +167,12 @@ class DonationsScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.s3),
-            const _SuggestForm(),
+            SubscriptionLock(
+              locked: !hasSub,
+              note: 'Eigene gemeinnützige Projekte vorschlagen und über die '
+                  'Empfänger abstimmen.',
+              child: const _SuggestForm(),
+            ),
           ],
         ),
       ),
@@ -691,6 +706,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
   @override
   Widget build(BuildContext context) {
     final c = widget.cause;
+    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
     return AppCard(
       color: c.votedByMe ? AppColors.brandLight : AppColors.surfaceCard,
       borderColor: c.votedByMe ? AppColors.brand : AppColors.borderSubtle,
@@ -779,48 +795,100 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                       ),
                     ],
                     const Spacer(),
-                    FilledButton(
-                      onPressed: _busy ? null : _toggle,
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            c.votedByMe ? AppColors.ink : AppColors.brand,
-                        // Aktiv (abgestimmt): Gold-Schrift auf dunklem Pill —
-                        // reines Weiß wirkte dort flau und war kaum lesbar.
-                        foregroundColor:
-                            c.votedByMe ? AppColors.brand : AppColors.ink,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.s3,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: _busy
-                          ? SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: c.votedByMe
-                                    ? AppColors.brand
-                                    : AppColors.ink,
-                              ),
-                            )
-                          : Text(
-                              c.votedByMe ? 'Stimme entfernen' : 'Abstimmen',
-                              style: AppTypography.body(
-                                size: 12,
-                                weight: FontWeight.w800,
-                                color: c.votedByMe
-                                    ? AppColors.brand
-                                    : AppColors.ink,
-                              ),
+                    // Abstimmen gehört zur kostenpflichtigen Version. Die
+                    // Zwecke selbst bleiben für alle sichtbar — wohin die
+                    // 5 % fließen, ist eine Transparenz-Information.
+                    if (!hasSub)
+                      _VoteLockedButton(
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SubscriptionScreen(),
                             ),
-                    ),
+                          );
+                          ref.invalidate(hasSubscriptionProvider);
+                        },
+                      )
+                    else
+                      FilledButton(
+                        onPressed: _busy ? null : _toggle,
+                        style: FilledButton.styleFrom(
+                          backgroundColor:
+                              c.votedByMe ? AppColors.ink : AppColors.brand,
+                          // Aktiv (abgestimmt): Gold-Schrift auf dunklem
+                          // Pill — reines Weiß wirkte dort flau.
+                          foregroundColor:
+                              c.votedByMe ? AppColors.brand : AppColors.ink,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s3,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: _busy
+                            ? SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: c.votedByMe
+                                      ? AppColors.brand
+                                      : AppColors.ink,
+                                ),
+                              )
+                            : Text(
+                                c.votedByMe ? 'Stimme entfernen' : 'Abstimmen',
+                                style: AppTypography.body(
+                                  size: 12,
+                                  weight: FontWeight.w800,
+                                  color: c.votedByMe
+                                      ? AppColors.brand
+                                      : AppColors.ink,
+                                ),
+                              ),
+                      ),
                   ],
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Ersatz für den Abstimmen-Button ohne Abo: ausgegraut, mit Schloss, und
+/// führt statt zur Stimmabgabe auf die Abo-Seite.
+///
+/// Bewusst klickbar (statt `onPressed: null`): ein toter Button lässt den
+/// Kunden ratlos zurück, dieser hier erklärt sich und bietet den Ausweg an.
+class _VoteLockedButton extends StatelessWidget {
+  const _VoteLockedButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Abstimmen gibt es in der kostenpflichtigen Version',
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textMuted,
+          side: const BorderSide(color: AppColors.borderSubtle),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.s3,
+            vertical: 10,
+          ),
+        ),
+        icon: const Icon(Icons.lock_outline, size: 14),
+        label: Text(
+          'Nur mit Abo',
+          style: AppTypography.body(
+            size: 12,
+            weight: FontWeight.w800,
+            color: AppColors.textMuted,
+          ),
+        ),
       ),
     );
   }

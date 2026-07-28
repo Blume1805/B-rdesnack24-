@@ -122,6 +122,31 @@ void main() {
     });
   });
 
+  group('Beispiel-Warenkorb und Besuchszahlen', () {
+    test('Kaffee 1,80 € + Riegel 1,50 € = 3,30 €', () {
+      // Automatenpreise aus dem Katalog. Die frühere Kommunikation nannte
+      // „ca. 6 €" — das lag über dem teuersten denkbaren Paar aus Heiß-
+      // getränk und Süßware und machte den Break-even zu optimistisch.
+      expect(Pricing.sampleBasketEur, closeTo(3.30, 0.001));
+    });
+
+    test('Jahres-Abo: 3 Besuche normal, 6 konservativ', () {
+      expect(
+        Pricing.visitsToBreakEven(
+          Pricing.subYearlyEur / 12,
+          savingsRate: Pricing.normalSavingsRate,
+        ),
+        3,
+      );
+      expect(Pricing.visitsToBreakEven(Pricing.subYearlyEur / 12), 6);
+    });
+
+    test('wird aufgerundet — ein halber Besuch zählt nicht', () {
+      // 10 € Break-even / 3 € Korb = 3,33 → 4 Besuche.
+      expect(Pricing.visitsToBreakEven(0.5, savingsRate: 0.05, basket: 3), 4);
+    });
+  });
+
   group('Frühstücks-/Feierabend-Deal (Warenkorb-Regel)', () {
     DateTime at(int hour) => DateTime(2026, 7, 28, hour, 30);
 

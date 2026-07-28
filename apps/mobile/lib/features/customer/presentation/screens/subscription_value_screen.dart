@@ -47,6 +47,12 @@ class SubscriptionValueScreen extends ConsumerWidget {
         Pricing.breakEvenMonthlySpend(yearly / 12, savingsRate: normal);
     const beLifetimeCons = lifetime / conservative;
     final beLifetimeNorm = lifetime / normal;
+    // Besuche pro Monat fürs Jahres-Abo — abgeleitet statt hartkodiert,
+    // damit die Zahl bei Preis- oder Rabattänderungen nicht auseinanderläuft
+    // (die alte Angabe „ca. 6 €" lag fast beim Doppelten des echten Korbs).
+    final visitsNorm =
+        Pricing.visitsToBreakEven(yearly / 12, savingsRate: normal);
+    final visitsCons = Pricing.visitsToBreakEven(yearly / 12);
 
     return Scaffold(
       appBar: const HeroAppBar(title: Text('Wann rechnet sich das Abo?')),
@@ -201,8 +207,9 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack ca. 6 €. Normal reichen 2 Besuche im Monat fürs '
-            'Jahres-Abo (vorsichtig: 3).',
+            'Kaffee + Snack ${Formatters.euro(Pricing.sampleBasketEur)}. '
+            'Normal reichen $visitsNorm Besuche im Monat fürs Jahres-Abo '
+            '(vorsichtig: $visitsCons).',
             style: AppTypography.body(size: 12.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),

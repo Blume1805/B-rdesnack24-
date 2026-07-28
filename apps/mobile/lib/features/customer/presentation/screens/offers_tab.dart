@@ -16,6 +16,7 @@ import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
 import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
+import '../widgets/subscription_lock.dart';
 import 'ai_info_screen.dart';
 import 'donations_screen.dart';
 import 'subscription_screen.dart';
@@ -150,33 +151,81 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           // 0.1. ── Key-Facts: Rabatt · Punkte · Coupons auf einen Blick ─
           // Die drei Zahlen, die den Kunden interessieren — ohne Lesen
           // erfassbar, direkt über den Angeboten.
+          // Ohne Abo werden die kostenpflichtigen Bereiche NICHT mehr
+          // ausgeblendet, sondern ausgegraut und gesperrt gezeigt — mit
+          // Hinweis und Wechsel-Link. Wer nicht sieht, was ihm entgeht,
+          // hat auch keinen Grund zu wechseln.
           if (hasSub) ...[
             const _KeyFactsRow(),
             const SizedBox(height: AppSpacing.s5),
+          ] else ...[
+            const SubscriptionLock(
+              locked: true,
+              note: 'Dauerrabatt, Punktestand und aktive Coupons auf einen '
+                  'Blick.',
+              dense: true,
+              child: LockedSectionPreview(
+                icon: Icons.percent,
+                text: 'Rabatt · Punkte · Coupons',
+                height: 112,
+              ),
+            ),
+            // Bleibt frei erreichbar: die Beispielrechnung ist genau das
+            // Argument, das vor der Entscheidung fehlt.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.brandDark,
+                  padding: EdgeInsets.zero,
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const SubscriptionValueScreen(),
+                  ),
+                ),
+                icon: const Icon(Icons.calculate_outlined, size: 18),
+                label: const Text('Ab wann rechnet sich das?'),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s4),
           ],
 
-          // Ohne Abo: ein Freischalt-Hinweis ersetzt die Abo-Vorteile
-          // (Deals, Aktionen, Loyalty, persönliche + Wochenangebote).
-          if (!hasSub) ...[
-            const _SubscriptionLockCard(),
-            const SizedBox(height: AppSpacing.s6),
-          ],
+          // 0.3. ── Frühstücks-Deal + Feierabend-Deal (Karussell) ───
+          SubscriptionLock(
+            locked: !hasSub,
+            note: 'Frühstücks- & Feierabend-Deals: 5 % extra auf den ganzen '
+                'Einkauf.',
+            child: const _DealsCarousel(),
+          ),
+          const SizedBox(height: AppSpacing.s5),
 
-          if (hasSub) ...[
-            // 0.3. ── Frühstücks-Deal + Feierabend-Deal (Karussell) ───
-            const _DealsCarousel(),
-            const SizedBox(height: AppSpacing.s5),
-
-            // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ───────
-            const _HeroCarousel(),
-            const SizedBox(height: AppSpacing.s6),
-          ],
+          // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ───────
+          // Bleibt frei: News und Spendenstand sind Basis-Inhalte.
+          const _HeroCarousel(),
+          const SizedBox(height: AppSpacing.s6),
 
           // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
           const _NewsTeaser(),
           const SizedBox(height: AppSpacing.s6),
 
           // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
+          // Ohne Abo gibt es hier keine echten Daten (keine Punkte, keine
+          // Coupons) — statt erfundener Zahlen steht ein neutraler
+          // Platzhalter unter der Sperre.
+          if (!hasSub) ...[
+            const SubscriptionLock(
+              locked: true,
+              note: 'Bonuspunkte mit Meilenstein-Coupons (5–25 %), '
+                  'persönliche Angebote und dein Geburtstagsgutschein.',
+              child: LockedSectionPreview(
+                icon: Icons.card_giftcard_outlined,
+                text: 'Hier erscheinen dein Punktestand\nund deine Coupons.',
+                height: 210,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s6),
+          ],
           if (hasSub) ...[
             // Offline-Hinweis: Coupons kommen aus dem lokalen Snapshot.
             if (ref.watch(personalOffersOfflineProvider)) ...[
@@ -292,16 +341,23 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                 },
               ),
             ),
+          ],
 
-            // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
-            SectionHeader(
-              key: CustomerAnchors.weeklyOffers,
-              eyebrow: 'Für alle',
-              title: 'Wochen­angebote',
-              action: _AiSectionBadge(context: context),
-            ),
-            const SizedBox(height: AppSpacing.s4),
-            offers.when(
+          // 3. ── Wochenangebote als horizontale Scroll-Karten ────────
+          // Immer sichtbar: der Überblick ist Basis, das Einlösen nicht.
+          // Ohne Abo liegen die Karten deshalb ausgegraut unter der Sperre.
+          SectionHeader(
+            key: CustomerAnchors.weeklyOffers,
+            eyebrow: 'Für alle',
+            title: 'Wochen­angebote',
+            action: _AiSectionBadge(context: context),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          SubscriptionLock(
+            locked: !hasSub,
+            note: 'Wochen- und Aktionsangebote aktivieren und am Automaten '
+                'einlösen.',
+            child: offers.when(
               // Skeleton statt Spinner: die Seite behält ihre Form, der
               // Inhalt „füllt sich" — kein Layout-Sprung beim Eintreffen.
               loading: () => SizedBox(
@@ -346,9 +402,9 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                 );
               },
             ),
-            const _CouponFootnote(),
-            const SizedBox(height: AppSpacing.s4),
-          ],
+          ),
+          if (hasSub) const _CouponFootnote(),
+          const SizedBox(height: AppSpacing.s4),
 
           // 4. ── Bewertung der Community (Eure Favoriten) ────────────
           const SectionHeader(
@@ -2559,96 +2615,6 @@ class _HeroDonationCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Freischalt-Hinweis für Nicht-Abonnenten: ersetzt die Abo-Vorteile
-/// (Deals, Aktionen, Loyalty, persönliche + Wochenangebote) durch eine
-/// prominente Karte mit CTA zum Abo-Screen.
-class _SubscriptionLockCard extends ConsumerWidget {
-  const _SubscriptionLockCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return AppCard(
-      color: AppColors.ink,
-      borderColor: AppColors.brand,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.workspace_premium_outlined,
-                color: AppColors.brand,
-                size: 26,
-              ),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(
-                child: Text(
-                  'Deine Vorteile warten',
-                  style: AppTypography.display(
-                    size: 18,
-                    weight: FontWeight.w800,
-                    color: AppColors.onDark,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          Text(
-            'Mit dem Bördesnack24-Abo schaltest du frei:\n'
-            '•  Frühstücks- & Feierabend-Deals\n'
-            '•  Wochen- und Aktionsangebote mit Coupons\n'
-            '•  Loyalty-Punkte mit Meilenstein-Boni\n'
-            '•  Persönliche Angebote nur für dich',
-            style: AppTypography.body(size: 14, color: AppColors.brandLight)
-                .copyWith(height: 1.6),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brand,
-                foregroundColor: AppColors.ink,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadii.pill),
-                ),
-              ),
-              onPressed: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
-                );
-                // Nach Rückkehr neu prüfen — bei Abo-Wahl entsperrt der
-                // Tab sofort.
-                ref.invalidate(hasSubscriptionProvider);
-              },
-              child: const Text('Abo wählen — ab 0,99 € im Monat'),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s2),
-          // Marketing-Rechnung: ab welchem Einkaufswert sich das Abo lohnt.
-          SizedBox(
-            width: double.infinity,
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.brandLight,
-              ),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const SubscriptionValueScreen(),
-                ),
-              ),
-              icon: const Icon(Icons.calculate_outlined, size: 18),
-              label: const Text('Ab wann rechnet sich das? Zur Rechnung'),
-            ),
-          ),
-        ],
       ),
     );
   }

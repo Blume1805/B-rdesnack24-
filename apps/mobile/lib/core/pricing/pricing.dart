@@ -140,6 +140,27 @@ abstract final class Pricing {
       (1 - normalDealShare) * appDiscountRate +
       normalLoyaltyEffect;
 
+  /// Beispiel-Warenkorb für die Break-even-Kommunikation: ein Kaffee
+  /// (1,80 €) plus ein typischer Riegel/Snack (1,50 €, z. B. Snickers oder
+  /// Haribo). Beide Werte sind Automatenpreise aus dem aktuellen Katalog —
+  /// bei Preisänderungen hier mitziehen, dann stimmen alle Besuchszahlen
+  /// automatisch wieder.
+  static const sampleBasketEur = 3.30;
+
+  /// Wie viele Besuche mit [basket] Warenkorb es im Monat braucht, damit
+  /// sich ein Abo für [subCostPerMonth] rechnet. Aufgerundet — ein halber
+  /// Besuch zählt nicht.
+  static int visitsToBreakEven(
+    double subCostPerMonth, {
+    double savingsRate = appDiscountRate,
+    double basket = sampleBasketEur,
+  }) {
+    if (basket <= 0) return 0;
+    return (breakEvenMonthlySpend(subCostPerMonth, savingsRate: savingsRate) /
+            basket)
+        .ceil();
+  }
+
   /// Ziel-Wareneinsatzquote (EK netto / VK netto) für die Kalkulation.
   static const targetWareneinsatz = 0.35;
 

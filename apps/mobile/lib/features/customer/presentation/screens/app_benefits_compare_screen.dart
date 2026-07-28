@@ -19,6 +19,9 @@ class AppBenefitsCompareCard extends StatelessWidget {
     'Kundenkarte & Kaufhistorie',
     'News & Favoriten',
     'Kontakt & Reklamation',
+    // Wohin die 5 % fließen, sieht jede:r — nur das Mitbestimmen ist
+    // Abo-Sache (siehe _appOnly).
+    'Spendenstand einsehen',
   ];
 
   // Nur mit App (Spar- und Extra-Vorteile). Non-breaking spaces vor %/€/−,
@@ -30,6 +33,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
     'Bonuspunkte & Coupons\n5–25 %',
     'Geburtstagsgutschein',
     'Digitale Belege',
+    'Spenden: Projekte\nvorschlagen & abstimmen',
   ];
 
   @override
