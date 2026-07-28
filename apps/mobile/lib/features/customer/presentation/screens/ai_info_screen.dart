@@ -66,7 +66,12 @@ class AiInfoScreen extends StatelessWidget {
                 'personalisierte Coupons vorzuschlagen. Zusätzlich wählt '
                 'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
                 'den Feierabend-Deal je eine Getränk-/Snack-Paarung '
-                'aus dem Produktkatalog aus. '
+                'aus dem Produktkatalog aus. Der Tages-Deal wird zusätzlich '
+                'nach der Wetterlage gewichtet: an heißen Tagen werden Eis '
+                'und Kaltgetränke bevorzugt, an kalten Tagen Heißgetränke. '
+                'Grundlage ist die Vorhersage des Deutschen Wetterdienstes '
+                'für den Automaten-Standort — dein eigener Standort wird '
+                'dafür nicht verwendet. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
@@ -81,7 +86,9 @@ class AiInfoScreen extends StatelessWidget {
             body: '• Deine Kaufhistorie an unseren Automaten\n'
                 '• Deine Kategorie-Präferenzen (Getränke, Snacks, Eis)\n'
                 '• Loyalty-Punktestand und -Meilensteine\n'
-                '• Aktive Coupons\n\n'
+                '• Aktive Coupons\n'
+                '• Wettervorhersage für den Automaten-Standort '
+                '(nicht für deinen)\n\n'
                 'Keine Weitergabe an Dritte für Werbezwecke. Keine automatisierten '
                 'Einzelentscheidungen mit rechtlicher Wirkung im Sinne von '
                 'Art. 22 DSGVO.',
