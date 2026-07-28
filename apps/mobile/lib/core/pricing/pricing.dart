@@ -118,13 +118,20 @@ abstract final class Pricing {
   }
 
   /// App-Preis (brutto) für Abonnenten: standardmäßig 5 % unter dem
-  /// Automatenpreis, auf den Cent gerundet. Mit [rate] lässt sich der
-  /// effektive Rabatt (inkl. Status-Zusatzrabatt) übergeben.
+  /// Automatenpreis, kaufmännisch auf den Cent gerundet. Mit [rate] lässt
+  /// sich der effektive Rabatt (inkl. Status-Zusatzrabatt) übergeben.
   static double appPriceGross(
     double automatGross, {
     double rate = appDiscountRate,
-  }) =>
-      (automatGross * (1 - rate) * 100).round() / 100;
+  }) {
+    // Das Epsilon rettet die halben Cent. 1,50 × 0,95 × 100 ergibt in
+    // Fließkomma 142,49999999999997 statt 142,5 und wurde deshalb auf 1,42
+    // ABgerundet — während 2,50 € (exakt 237,5) korrekt auf 2,38 aufrundete.
+    // Zwei mathematisch gleiche Fälle liefen also auseinander. Jetzt rundet
+    // beides kaufmännisch auf: 1,43 € und 2,38 €.
+    final cents = automatGross * (1 - rate) * 100;
+    return (cents + 1e-9).round() / 100;
+  }
 
   /// Monatlicher Einkaufswert, ab dem sich Abo-Kosten von
   /// [subCostPerMonth] allein durch die Ersparnisquote [savingsRate]

@@ -314,26 +314,41 @@ class _ResultTile extends StatelessWidget {
           ),
           if (gross != null) ...[
             const SizedBox(width: AppSpacing.s2),
+            // Beide Preise untereinander: oben der Automatenpreis
+            // (durchgestrichen), darunter der App-Preis. Auch ohne Abo
+            // sichtbar — dort wirbt der App-Preis für den Vorteil, genau
+            // wie im Produktdetail.
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  Formatters.euro(hasSubscription ? appPrice! : gross),
-                  style: AppTypography.display(
-                    size: 16,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
+                  Formatters.euro(gross),
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ).copyWith(
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: AppColors.textMuted,
                   ),
                 ),
-                if (hasSubscription)
-                  Text(
-                    'App-Preis',
-                    style: AppTypography.body(
-                      size: 10,
-                      weight: FontWeight.w700,
-                      color: AppColors.brandDark,
-                    ),
+                Text(
+                  Formatters.euro(appPrice!),
+                  style: AppTypography.display(
+                    size: 17,
+                    weight: FontWeight.w800,
+                    color: AppColors.brandDark,
+                  ).copyWith(height: 1.1),
+                ),
+                Text(
+                  hasSubscription ? 'App-Preis' : 'mit App',
+                  style: AppTypography.body(
+                    size: 9.5,
+                    weight: FontWeight.w700,
+                    color: AppColors.brandDark,
                   ),
+                ),
               ],
             ),
           ],
