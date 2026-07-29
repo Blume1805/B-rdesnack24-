@@ -121,14 +121,14 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   _NavItem(
                     icon: Icons.local_offer_outlined,
                     selectedIcon: Icons.local_offer,
-                    label: 'Angebote',
+                    label: 'Sparen',
                     selected: _index == 0,
                     onTap: () => setState(() => _index = 0),
                   ),
                   _NavItem(
                     icon: Icons.place_outlined,
                     selectedIcon: Icons.place,
-                    label: 'Automaten',
+                    label: 'In der Nähe',
                     selected: _index == 1,
                     onTap: () => setState(() => _index = 1),
                   ),
@@ -136,7 +136,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   _NavItem(
                     icon: Icons.volunteer_activism_outlined,
                     selectedIcon: Icons.volunteer_activism,
-                    label: 'Meine Spenden',
+                    label: 'Gutes tun',
                     selected: _index == 2,
                     onTap: () => setState(() => _index = 2),
                   ),

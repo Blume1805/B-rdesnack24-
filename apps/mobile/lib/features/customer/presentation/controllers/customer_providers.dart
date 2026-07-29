@@ -290,3 +290,18 @@ class ReferralActions {
     };
   }
 }
+
+/// Katalog-Kennzahlen für die Wert-Zeile auf der Startseite
+/// (RPC catalog_facts). Live statt hartkodiert, damit „62 Produkte" nicht
+/// irgendwann falsch dasteht.
+final catalogFactsProvider =
+    FutureProvider.autoDispose<({int products, int machines, int categories})>(
+        (ref) async {
+  final res = await ref.watch(supabaseClientProvider).rpc('catalog_facts');
+  final map = Map<String, dynamic>.from(res as Map);
+  return (
+    products: (map['products'] as num?)?.toInt() ?? 0,
+    machines: (map['machines'] as num?)?.toInt() ?? 0,
+    categories: (map['categories'] as num?)?.toInt() ?? 0,
+  );
+});

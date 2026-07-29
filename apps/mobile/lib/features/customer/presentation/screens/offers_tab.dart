@@ -127,6 +127,14 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           AppSpacing.s8 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
+          // 0. ── Wert-Zeile: worum es hier geht ──────────────────────
+          // Steht ganz oben, weil der 3-Sekunden-Eindruck hier entsteht.
+          // „5 % sparen. 5 % spenden." ist die einzige Aussage, die Preis
+          // UND Haltung in vier Wörtern trägt — und sie stimmt für jeden,
+          // auch ohne Abo (sparen mit, spenden immer).
+          const _ValueHeader(),
+          const SizedBox(height: AppSpacing.s4),
+
           // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
           // Blendet beim Herunterscrollen weich aus (Höhe + Deckkraft),
           // damit die Angebote mehr Platz bekommen. Bei reduzierter
@@ -159,6 +167,17 @@ class _OffersTabState extends ConsumerState<OffersTab> {
             const _KeyFactsRow(),
             const SizedBox(height: AppSpacing.s5),
           ] else ...[
+            // Erst der Nutzen, dann der Preis. Vorher stand hier zuerst
+            // das Schloss — wer den Wert nicht kennt, liest eine Sperre
+            // als Abweisung statt als Angebot.
+            _BreakEvenTeaser(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SubscriptionValueScreen(),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s3),
             const SubscriptionLock(
               locked: true,
               note: 'Dauerrabatt, Punktestand und aktive Coupons auf einen '
@@ -168,24 +187,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                 icon: Icons.percent,
                 text: 'Rabatt · Punkte · Coupons',
                 height: 112,
-              ),
-            ),
-            // Bleibt frei erreichbar: die Beispielrechnung ist genau das
-            // Argument, das vor der Entscheidung fehlt.
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.brandDark,
-                  padding: EdgeInsets.zero,
-                ),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SubscriptionValueScreen(),
-                  ),
-                ),
-                icon: const Icon(Icons.calculate_outlined, size: 18),
-                label: const Text('Ab wann rechnet sich das?'),
               ),
             ),
             const SizedBox(height: AppSpacing.s4),
@@ -274,68 +275,40 @@ class _OffersTabState extends ConsumerState<OffersTab> {
                 error: (_, __) => const SizedBox.shrink(),
                 data: (list) {
                   final specials = list.where((o) => o.isSpecial).toList();
-                  final loyalty = list
-                      .where((o) => o.source == PersonalOfferSource.loyalty)
-                      .toList();
-                  final basis = list
-                      .where((o) => o.source == PersonalOfferSource.auto)
-                      .toList();
+                  // Früher drei Sektionen — „Sonderangebote",
+                  // „Bonus-Angebote", „Dein Angebot". Das sind interne
+                  // Herkunftsarten (Wildcard / Meilenstein / automatisch),
+                  // kein Unterschied, den ein Kunde erkennen oder brauchen
+                  // könnte. Jetzt EIN Stapel: alle Coupons, die mir
+                  // gehören, in einer Reihe — Sonderangebote zuerst.
+                  final mine = [
+                    ...specials,
+                    ...list.where(
+                      (o) => o.source == PersonalOfferSource.loyalty,
+                    ),
+                    ...list.where(
+                      (o) => o.source == PersonalOfferSource.auto,
+                    ),
+                  ];
+                  if (mine.isEmpty) return const SizedBox.shrink();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (specials.isNotEmpty) ...[
-                        SectionHeader(
-                          eyebrow: 'Für dich persönlich',
-                          title: 'Sonderangebote',
-                          action: _AiSectionBadge(context: context),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        // Coupons als Stapel: man löst einen nach dem
-                        // anderen ein, und die Liste wächst mit der Zeit.
-                        StackSlider(
-                          height: 350,
-                          children: [
-                            for (final o in specials)
-                              _PersonalOfferCard(offer: o),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s5),
-                      ],
-                      if (loyalty.isNotEmpty) ...[
-                        SectionHeader(
-                          eyebrow: 'Belohnung',
-                          title: 'Bonus-Angebote',
-                          action: _AiSectionBadge(context: context),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        // Coupons als Stapel: man löst einen nach dem
-                        // anderen ein, und die Liste wächst mit der Zeit.
-                        StackSlider(
-                          height: 350,
-                          children: [
-                            for (final o in loyalty)
-                              _PersonalOfferCard(offer: o),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s5),
-                      ],
-                      if (basis.isNotEmpty) ...[
-                        SectionHeader(
-                          eyebrow: 'Nur für dich',
-                          title: 'Dein Angebot',
-                          action: _AiSectionBadge(context: context),
-                        ),
-                        const SizedBox(height: AppSpacing.s4),
-                        // Coupons als Stapel: man löst einen nach dem
-                        // anderen ein, und die Liste wächst mit der Zeit.
-                        StackSlider(
-                          height: 350,
-                          children: [
-                            for (final o in basis) _PersonalOfferCard(offer: o),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s5),
-                      ],
+                      SectionHeader(
+                        eyebrow: 'Nur für dich',
+                        title: 'Deine Coupons',
+                        action: _AiSectionBadge(context: context),
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      // Coupons als Stapel: man löst einen nach dem anderen
+                      // ein, und die Liste wächst mit der Zeit.
+                      StackSlider(
+                        height: 350,
+                        children: [
+                          for (final o in mine) _PersonalOfferCard(offer: o),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s5),
                     ],
                   );
                 },
@@ -411,13 +384,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
             title: 'Eure Favoriten',
           ),
           const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Getränke'),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Süßwaren'),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Snacks'),
-          const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Eis'),
+          const _FavoritesBrowser(),
         ],
       ),
     );
@@ -1674,7 +1641,7 @@ class _ActivationButton extends StatelessWidget {
 
 /// Eure-Favoriten-Sektion pro Kategorie — Top 3 als horizontaler Slider.
 class _FavoritesSection extends ConsumerWidget {
-  const _FavoritesSection({required this.category});
+  const _FavoritesSection({super.key, required this.category});
   final String category;
 
   @override
@@ -2602,6 +2569,262 @@ class _HeroDonationCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Die Kernaussage der App plus drei harte Zahlen.
+///
+/// Ersetzt den früheren Einstieg über Suchleiste + gesperrte Kachel: ein
+/// neuer Nutzer sah dort zuerst ein Schloss und erfuhr nie, worum es geht.
+class _ValueHeader extends ConsumerWidget {
+  const _ValueHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final facts = ref.watch(catalogFactsProvider).valueOrNull;
+    return AppCard(
+      color: AppColors.ink,
+      borderColor: AppColors.brand,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.s5,
+        AppSpacing.s4,
+        AppSpacing.s5,
+        AppSpacing.s4,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '5 % sparen.',
+            style: AppTypography.display(
+              size: 24,
+              weight: FontWeight.w800,
+              color: AppColors.brand,
+            ).copyWith(height: 1.1),
+          ),
+          Text(
+            '5 % spenden.',
+            style: AppTypography.display(
+              size: 24,
+              weight: FontWeight.w800,
+              color: AppColors.onDark,
+            ).copyWith(height: 1.1),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          // Zahlen statt Sätze: drei Fakten, die man nicht liest, sondern
+          // erkennt. Die Werte kommen live aus dem Katalog.
+          Row(
+            children: [
+              _FactChip(
+                icon: Icons.local_mall_outlined,
+                value: facts == null ? '—' : '${facts.products}',
+                label: 'Produkte',
+              ),
+              const SizedBox(width: AppSpacing.s2),
+              _FactChip(
+                icon: Icons.place_outlined,
+                value: facts == null ? '—' : '${facts.machines}',
+                label: facts?.machines == 1 ? 'Automat' : 'Automaten',
+              ),
+              const SizedBox(width: AppSpacing.s2),
+              const _FactChip(
+                icon: Icons.access_time,
+                value: '24/7',
+                label: 'geöffnet',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ein Fakt der Wert-Zeile: Icon, Zahl, ein Wort.
+class _FactChip extends StatelessWidget {
+  const _FactChip({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s2,
+          vertical: AppSpacing.s2,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(AppRadii.md),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 16, color: AppColors.brand),
+            const SizedBox(height: 3),
+            Text(
+              value,
+              style: AppTypography.display(
+                size: 16,
+                weight: FontWeight.w800,
+                color: AppColors.onDark,
+              ).copyWith(height: 1),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.body(
+                size: 9.5,
+                weight: FontWeight.w600,
+                color: AppColors.brandLight,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Der Break-even als Karte statt als Textlink.
+///
+/// „Ab 9,38 € im Monat" ist das stärkste Argument fürs Abo und stand
+/// vorher als grauer Textbutton unter dem Schloss.
+class _BreakEvenTeaser extends StatelessWidget {
+  const _BreakEvenTeaser({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final monthly = Pricing.breakEvenMonthlySpend(
+      Pricing.subYearlyEur / 12,
+      savingsRate: Pricing.normalSavingsRate,
+    );
+    return AppCard(
+      color: AppColors.brandLight,
+      borderColor: AppColors.brand,
+      onTap: onTap,
+      child: Row(
+        children: [
+          const Icon(Icons.savings_outlined, size: 28, color: AppColors.ink),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ab ${Formatters.euro(monthly)} im Monat lohnt es sich.',
+                  style: AppTypography.body(
+                    size: 14.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ).copyWith(height: 1.25),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Die Rechnung mit allen Annahmen ansehen',
+                  style: AppTypography.body(size: 12, color: AppColors.ink),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: AppColors.ink),
+        ],
+      ),
+    );
+  }
+}
+
+/// „Beliebt" — ein Karussell statt vier.
+///
+/// Vier gestapelte Karussells (Getränke, Süßwaren, Snacks, Eis) haben den
+/// Start-Tab endlos gemacht; wer bis unten scrollte, hatte die Angebote
+/// längst vergessen. Jetzt eine Reihe mit Kategorie-Filter.
+class _FavoritesBrowser extends StatefulWidget {
+  const _FavoritesBrowser();
+
+  @override
+  State<_FavoritesBrowser> createState() => _FavoritesBrowserState();
+}
+
+class _FavoritesBrowserState extends State<_FavoritesBrowser> {
+  static const _categories = ['Getränke', 'Süßwaren', 'Snacks', 'Eis'];
+  String _selected = _categories.first;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final c in _categories) ...[
+                _CategoryChip(
+                  label: c,
+                  selected: c == _selected,
+                  onTap: () => setState(() => _selected = c),
+                ),
+                const SizedBox(width: AppSpacing.s2),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        _FavoritesSection(key: ValueKey(_selected), category: _selected),
+      ],
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: Motion.duration(context, AppMotion.fast),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s4,
+          vertical: AppSpacing.s2,
+        ),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.ink : AppColors.surfaceCard,
+          border: Border.all(
+            color: selected ? AppColors.ink : AppColors.borderSubtle,
+          ),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.body(
+            size: 13,
+            weight: FontWeight.w800,
+            color: selected ? AppColors.brand : AppColors.ink,
           ),
         ),
       ),

@@ -491,7 +491,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         child: SafeArea(
           bottom: false,
           child: SizedBox(
-            height: 150,
+            height: 120,
             child: Stack(
               children: [
                 // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
