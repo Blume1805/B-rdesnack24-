@@ -10,7 +10,7 @@ import '../../theme/app_typography.dart';
 ///
 /// [showTaglineOverlay] blendet den Slogan noch einmal als eigene Text-Zeile
 /// unter dem Bild ein (nützlich für den Login, wo der Slogan „Immer da, wenn
-/// der Hunger kommt." ergänzend zum Bild erscheinen soll).
+/// Gutes tun." ergänzend zum Bild erscheinen soll).
 class HeroBackdrop extends StatelessWidget {
   const HeroBackdrop({
     super.key,

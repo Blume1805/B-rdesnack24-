@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/greeting.dart';
 import '../../../../core/widgets/design_system/brand_marks.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
@@ -550,9 +551,11 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Slogan zweizeilig, ohne Punkt-Präfix.
+                        // Slogan zweizeilig. „Genießen. Geben. Gutes tun."
+                        // rückt den Spendenanteil nach vorn — der ist das
+                        // Unterscheidungsmerkmal, nicht die Öffnungszeit.
                         Text(
-                          'immer da, wenn der',
+                          'Genießen. Geben.',
                           style: AppTypography.body(
                             size: 11,
                             weight: FontWeight.w700,
@@ -562,7 +565,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Hunger kommt',
+                          'Gutes tun.',
                           style: AppTypography.body(
                             size: 11,
                             weight: FontWeight.w700,
@@ -573,12 +576,14 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         ),
                         const SizedBox(height: AppSpacing.s2),
                         Text(
-                          'Moin,',
+                          '${Greeting.forTime()},',
                           style: AppTypography.display(
                             size: 21,
                             weight: FontWeight.w800,
                             color: AppColors.onDark,
                           ).copyWith(height: 1.0),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           '$firstName.',
@@ -587,17 +592,6 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                             weight: FontWeight.w800,
                             color: AppColors.onDark,
                           ).copyWith(height: 1.05),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Snack gefällig?',
-                          style: AppTypography.body(
-                            size: 11,
-                            weight: FontWeight.w500,
-                            color: AppColors.brandLight,
-                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

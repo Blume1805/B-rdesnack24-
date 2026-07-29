@@ -72,7 +72,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       offset: 0,
                       duration: Duration(milliseconds: 520),
                       child: HeroBackdrop(
-                        tagline: 'Immer da, wenn der Hunger kommt.',
+                        tagline: 'Genießen. Geben. Gutes tun.',
                       ),
                     ),
                     // Die ganze weiße Karte schiebt sich beim Öffnen unter

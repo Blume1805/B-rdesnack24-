@@ -12,7 +12,7 @@ Stand: 19.07.2026 · Texte auf Deutsch (einzige Store-Sprache zum Start).
 
 ## Beschreibung (beide Stores)
 
-Bördesnack24 — immer da, wenn der Hunger kommt.
+Bördesnack24 — Genießen. Geben. Gutes tun.
 
 Die App zu den Bördesnack24-Automaten in Sülzetal und Umgebung: Snacks,
 Getränke und Kaffeespezialitäten rund um die Uhr — mit der App wird jeder
