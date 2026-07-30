@@ -474,8 +474,10 @@ abstract final class CarouselFocus {
     if (Motion.reduced(context)) return child;
     final d = distance.abs().clamp(0.0, 1.0);
     var visual = child;
-    // sigma 0 ist auf Web teuer/fehleranfällig — Blur nur für echte Nachbarn.
-    if (d > 0.01) {
+    // Schwelle bewusst hoch: bei jedem Scroll-Frame einen ImageFilter für
+    // Karten zu bauen, die 2 % daneben liegen, kostet auf Web (CanvasKit)
+    // spürbar Bildrate — sichtbar ist der Unterschied dort ohnehin nicht.
+    if (d > 0.12) {
       visual = ImageFiltered(
         imageFilter: ImageFilter.blur(
           sigmaX: _blur * d,

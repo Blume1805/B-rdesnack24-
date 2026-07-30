@@ -135,27 +135,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           const _ValueHeader(),
           const SizedBox(height: AppSpacing.s4),
 
-          // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
-          // Blendet beim Herunterscrollen weich aus (Höhe + Deckkraft),
-          // damit die Angebote mehr Platz bekommen. Bei reduzierter
-          // Bewegung schaltet AnimatedSize/Opacity auf Duration.zero.
-          ClipRect(
-            child: AnimatedAlign(
-              alignment: Alignment.topCenter,
-              heightFactor: _searchVisible ? 1 : 0,
-              duration: Motion.duration(context, AppMotion.base),
-              curve: AppMotion.easeOut,
-              child: AnimatedOpacity(
-                opacity: _searchVisible ? 1 : 0,
-                duration: Motion.duration(context, AppMotion.fast),
-                child: const Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.s4),
-                  child: _ProductSearchBar(),
-                ),
-              ),
-            ),
-          ),
-
           // 0.1. ── Key-Facts: Rabatt · Punkte · Coupons auf einen Blick ─
           // Die drei Zahlen, die den Kunden interessieren — ohne Lesen
           // erfassbar, direkt über den Angeboten.
@@ -195,8 +174,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           // 0.3. ── Frühstücks-Deal + Feierabend-Deal (Karussell) ───
           SubscriptionLock(
             locked: !hasSub,
-            note: 'Frühstücks- & Feierabend-Deals: 5 % extra auf den ganzen '
-                'Einkauf.',
+            showHint: false,
             child: const _DealsCarousel(),
           ),
           const SizedBox(height: AppSpacing.s5),
@@ -205,6 +183,27 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           // Bleibt frei: News und Spendenstand sind Basis-Inhalte.
           const _HeroCarousel(),
           const SizedBox(height: AppSpacing.s6),
+          // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
+          // Blendet beim Herunterscrollen weich aus (Höhe + Deckkraft),
+          // damit die Angebote mehr Platz bekommen. Bei reduzierter
+          // Bewegung schaltet AnimatedSize/Opacity auf Duration.zero.
+          ClipRect(
+            child: AnimatedAlign(
+              alignment: Alignment.topCenter,
+              heightFactor: _searchVisible ? 1 : 0,
+              duration: Motion.duration(context, AppMotion.base),
+              curve: AppMotion.easeOut,
+              child: AnimatedOpacity(
+                opacity: _searchVisible ? 1 : 0,
+                duration: Motion.duration(context, AppMotion.fast),
+                child: const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.s4),
+                  child: _ProductSearchBar(),
+                ),
+              ),
+            ),
+          ),
+
 
           // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
           const _NewsTeaser(),
@@ -217,8 +216,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           if (!hasSub) ...[
             const SubscriptionLock(
               locked: true,
-              note: 'Bonuspunkte mit Meilenstein-Coupons (5–25 %), '
-                  'persönliche Angebote und dein Geburtstagsgutschein.',
+              showHint: false,
               child: LockedSectionPreview(
                 icon: Icons.card_giftcard_outlined,
                 text: 'Hier erscheinen dein Punktestand\nund deine Coupons.',
@@ -328,8 +326,7 @@ class _OffersTabState extends ConsumerState<OffersTab> {
           const SizedBox(height: AppSpacing.s4),
           SubscriptionLock(
             locked: !hasSub,
-            note: 'Wochen- und Aktionsangebote aktivieren und am Automaten '
-                'einlösen.',
+            showHint: false,
             child: offers.when(
               // Skeleton statt Spinner: die Seite behält ihre Form, der
               // Inhalt „füllt sich" — kein Layout-Sprung beim Eintreffen.
@@ -2719,12 +2716,15 @@ class _BreakEvenTeaser extends StatelessWidget {
       savingsRate: Pricing.normalSavingsRate,
     );
     return AppCard(
-      color: AppColors.brandLight,
       borderColor: AppColors.brand,
       onTap: onTap,
       child: Row(
         children: [
-          const Icon(Icons.savings_outlined, size: 28, color: AppColors.ink),
+          const Icon(
+            Icons.savings_outlined,
+            size: 28,
+            color: AppColors.brandDark,
+          ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
@@ -2845,7 +2845,8 @@ class _DonationCounter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pool = ref.watch(donationPoolSummaryProvider).valueOrNull;
-    if (pool == null) return const SizedBox.shrink();
+    // Bei 0,00 € arbeitet der Zähler gegen sich selbst — dann lieber nichts.
+    if (pool == null || pool.totalPool <= 0) return const SizedBox.shrink();
     return Row(
       children: [
         const Icon(Icons.volunteer_activism, size: 16, color: AppColors.brand),

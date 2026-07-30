@@ -24,6 +24,7 @@ class SubscriptionLock extends ConsumerWidget {
     required this.child,
     this.note,
     this.dense = false,
+    this.showHint = true,
   });
 
   /// Sperren? `false` gibt [child] unverändert durch (kein Overhead für
@@ -37,6 +38,12 @@ class SubscriptionLock extends ConsumerWidget {
   /// Kompakte Variante für kleine Bereiche (einzelne Karte statt Sektion):
   /// kleinere Schrift, weniger Innenabstand.
   final bool dense;
+
+  /// Den Hinweis-Kasten zeigen? Auf einer Seite mit mehreren gesperrten
+  /// Bereichen bekommt nur der erste einen — viermal dieselbe Aufforderung
+  /// untereinander liest sich als Mauer, nicht als Angebot. Die übrigen
+  /// werden nur ausgegraut und gesperrt.
+  final bool showHint;
 
   final Widget child;
 
@@ -72,10 +79,11 @@ class SubscriptionLock extends ConsumerWidget {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.s3),
-          child: _LockHint(note: note, dense: dense),
-        ),
+        if (showHint)
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.s3),
+            child: _LockHint(note: note, dense: dense),
+          ),
       ],
     );
   }
