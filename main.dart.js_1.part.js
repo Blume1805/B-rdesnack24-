@@ -1715,8 +1715,8 @@ s=t.r
 r=s.c
 w=r>0?s.b/r:0
 s=x.p
-r=B.b([D.awe,C.r,B.jp(new A.bfS(v,q,100-t.w.a,w,p)),C.r,new A.alN(u),C.az,D.awd,C.r,new A.ahX(t,u),C.az,D.aw7,C.r,B.bA(u,!0,u,B.k5(u,B.bj(u,new A.Uj(t,220,u),u,u,C.C,u,u,3),C.ab,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new A.bfT(v,d),u,u,u,u,u,u),!1,u,u,!1,u,!1,u,u,u,u,u,u,u,u,u,"Cashflow-Entwicklung \u2014 Diagramm vergr\xf6\xdfern",u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,C.N,u),C.az,D.aw1,C.r,B.bA(u,!0,u,B.k5(u,new A.UA(t,200,!1,u),C.ab,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new A.bfU(v,d),u,u,u,u,u,u),!1,u,u,!1,u,!1,u,u,u,u,u,u,u,u,u,"Aktueller vs. Vergleichszeitraum \u2014 Diagramm vergr\xf6\xdfern",u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,C.N,u),C.az,D.aw5,C.r,new A.anw(t,u),C.az,D.aw2,C.r,new A.ajL(t,u)],s)
-if(t.f.length!==0)C.b.K(r,B.b([C.az,D.aw9,C.r,new A.atn(t,u)],s))
+r=B.b([D.awf,C.r,B.jp(new A.bfS(v,q,100-t.w.a,w,p)),C.r,new A.alN(u),C.az,D.awe,C.r,new A.ahX(t,u),C.az,D.aw8,C.r,B.bA(u,!0,u,B.k5(u,B.bj(u,new A.Uj(t,220,u),u,u,C.C,u,u,3),C.ab,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new A.bfT(v,d),u,u,u,u,u,u),!1,u,u,!1,u,!1,u,u,u,u,u,u,u,u,u,"Cashflow-Entwicklung \u2014 Diagramm vergr\xf6\xdfern",u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,C.N,u),C.az,D.aw1,C.r,B.bA(u,!0,u,B.k5(u,new A.UA(t,200,!1,u),C.ab,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new A.bfU(v,d),u,u,u,u,u,u),!1,u,u,!1,u,!1,u,u,u,u,u,u,u,u,u,"Aktueller vs. Vergleichszeitraum \u2014 Diagramm vergr\xf6\xdfern",u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,C.N,u),C.az,D.aw5,C.r,new A.anw(t,u),C.az,D.aw3,C.r,new A.ajL(t,u)],s)
+if(t.f.length!==0)C.b.K(r,B.b([C.az,D.awa,C.r,new A.atn(t,u)],s))
 return B.a5(r,C.a9,C.f,C.i)}}
 A.alN.prototype={
 p(d){var w=null
@@ -1974,7 +1974,7 @@ p(d){var w,v,u,t,s=this,r=null,q=B.i("Bilanzwerte erfassen",r,r,r,r,B.bt(C.h,18,
 o===$&&B.a()
 p=B.fO(D.adr,B.i("Stichtag: "+C.c.a1(o.eh(),0,10),r,r,r,r,r,r,r,r),p,r)
 o=s.f
-w=B.as(B.fO(D.aeB,D.aF4,o?r:s.gaDx(),r),1)
+w=B.as(B.fO(D.aeB,D.aF5,o?r:s.gaDx(),r),1)
 v=x.p
 w=B.b([p,C.D,B.ag(B.b([w,C.an,B.as(B.fO(D.aen,D.aEU,o?r:s.gaEu(),r),1)],v),C.j,r,C.f,C.i,0,r,r),C.r],v)
 for(u=0;u<8;++u){p=D.pJ[u]
@@ -3954,7 +3954,7 @@ $1(d){var w,v,u,t,s,r,q,p,o,n=this,m=null
 if(d==null){w=n.b
 v=n.c
 u=x.p
-return B.bj(m,B.a5(B.b([B.i("Noch keine Bilanzdaten erfasst.",m,m,m,m,B.y(C.h,14,C.H),m,m,m),C.D,B.i("Liquidit\xe4t 1\u20133, EK-Quote und ROI erscheinen hier, sobald ein Bilanz-Stichtag erfasst ist. Sp\xe4ter \xfcbernimmt der sevDesk-Sync die Werte automatisch.",m,m,m,m,B.y(C.p,12.5,C.l),m,m,m),C.r,B.ku(C.cm,B.b([B.fO(C.F8,D.aGV,new A.b4K(w,v),m),B.fO(D.ads,D.aFP,new A.b4L(w,v),m)],u),C.dx,8,8)],u),C.y,C.f,C.i),C.a6,m,C.C,m,m,3)}w=new A.b4T(d)
+return B.bj(m,B.a5(B.b([B.i("Noch keine Bilanzdaten erfasst.",m,m,m,m,B.y(C.h,14,C.H),m,m,m),C.D,B.i("Liquidit\xe4t 1\u20133, EK-Quote und ROI erscheinen hier, sobald ein Bilanz-Stichtag erfasst ist. Sp\xe4ter \xfcbernimmt der sevDesk-Sync die Werte automatisch.",m,m,m,m,B.y(C.p,12.5,C.l),m,m,m),C.r,B.ku(C.cm,B.b([B.fO(C.F8,D.aGV,new A.b4K(w,v),m),B.fO(D.ads,D.aFQ,new A.b4L(w,v),m)],u),C.dx,8,8)],u),C.y,C.f,C.i),C.a6,m,C.C,m,m,3)}w=new A.b4T(d)
 t=C.b.fA(n.a.e.d,0,new A.b4M())
 s=w.$1("equity")
 if(s==null)s=0
@@ -3966,7 +3966,7 @@ v=J.d(v.h(d,"source"),"sevdesk")?"sevDesk-Sync":"manuell erfasst"
 q=n.b
 p=n.c
 o=x.p
-return B.a5(B.b([w,C.D,B.ag(B.b([B.as(B.i("Stand: "+u+" \xb7 Quelle: "+v,m,m,m,m,B.y(C.p,11,C.l),m,m,m),1),B.qg(D.aeH,D.aG9,new A.b4O(q,p),m),B.qg(D.aeh,D.aFV,new A.b4P(q,p,d),m)],o),C.j,m,C.f,C.i,0,m,m)],o),C.a9,C.f,C.i)},
+return B.a5(B.b([w,C.D,B.ag(B.b([B.as(B.i("Stand: "+u+" \xb7 Quelle: "+v,m,m,m,m,B.y(C.p,11,C.l),m,m,m),1),B.qg(D.aeH,D.aGa,new A.b4O(q,p),m),B.qg(D.aeh,D.aFW,new A.b4P(q,p,d),m)],o),C.j,m,C.f,C.i,0,m,m)],o),C.a9,C.f,C.i)},
 $S:283}
 A.b4K.prototype={
 $0(){return A.avZ(this.a,this.b,null)},
@@ -4579,31 +4579,31 @@ D.amW=w([],B.ax("C<n4>"))
 D.amX=w([],B.ax("C<ns>"))
 D.Yn=new A.Qr(D.amW,D.amX)
 D.aw1=new B.fR("Vergleich","Aktueller vs. Vergleichszeitraum",null,null)
-D.aw2=new B.fR("Automaten-Business","App-K\xe4ufe im Zeitraum",null,null)
+D.aw3=new B.fR("Automaten-Business","App-K\xe4ufe im Zeitraum",null,null)
 D.aw5=new B.fR("Automaten-Business","Umsatz je Automat",null,null)
-D.aw7=new B.fR("Trend & Vergleich","Cashflow-Entwicklung",null,null)
-D.aw9=new B.fR("Top","Meistverkaufte Produkte",null,null)
-D.awd=new B.fR("Bilanz","Liquidit\xe4t & Eigenkapital",null,null)
-D.awe=new B.fR("Kennzahlen","Rentabilit\xe4t",null,null)
+D.aw8=new B.fR("Trend & Vergleich","Cashflow-Entwicklung",null,null)
+D.awa=new B.fR("Top","Meistverkaufte Produkte",null,null)
+D.awe=new B.fR("Bilanz","Liquidit\xe4t & Eigenkapital",null,null)
+D.awf=new B.fR("Kennzahlen","Rentabilit\xe4t",null,null)
 D.Z3=new B.ti(C.J,C.v,0)
 D.aEK=new B.ai("sevDesk-Bilanz wird abgerufen \u2026",null,null,null,null,null,null,null,null,null)
 D.ayT=new B.dW(D.aEK,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.aGJ=new B.ai('Keine Bilanzwerte erkannt. Format: \u201eFeld;Betrag" je Zeile.',null,null,null,null,null,null,null,null,null)
 D.ayW=new B.dW(D.aGJ,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aEX=new B.ai("sevDesk ist noch nicht verbunden. Bitte Bilanz manuell erfassen oder per BWA/CSV importieren \u2014 der Sync \xfcbernimmt sp\xe4ter automatisch.",null,null,null,null,null,null,null,null,null)
-D.ayX=new B.dW(D.aEX,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aEY=new B.ai("sevDesk ist noch nicht verbunden. Bitte Bilanz manuell erfassen oder per BWA/CSV importieren \u2014 der Sync \xfcbernimmt sp\xe4ter automatisch.",null,null,null,null,null,null,null,null,null)
+D.ayX=new B.dW(D.aEY,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.aGC=new B.ai("PDF-Export fehlgeschlagen.",null,null,null,null,null,null,null,null,null)
 D.ayZ=new B.dW(D.aGC,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aG5=new B.ai("Bilanzwerte gespeichert.",null,null,null,null,null,null,null,null,null)
-D.az_=new B.dW(D.aG5,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aG2=new B.ai("Demo-Bilanz geladen \u2014 bitte pr\xfcfen.",null,null,null,null,null,null,null,null,null)
-D.azj=new B.dW(D.aG2,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aG6=new B.ai("Bilanzwerte gespeichert.",null,null,null,null,null,null,null,null,null)
+D.az_=new B.dW(D.aG6,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aG3=new B.ai("Demo-Bilanz geladen \u2014 bitte pr\xfcfen.",null,null,null,null,null,null,null,null,null)
+D.azj=new B.dW(D.aG3,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.aPB=new B.T(!0,C.E,null,null,null,null,14,C.H,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aEU=new B.ai("Demo",null,null,null,null,null,null,null,null,null)
-D.aF4=new B.ai("BWA/CSV",null,null,null,null,null,null,null,null,null)
-D.aFP=new B.ai("sevDesk abrufen",null,null,null,null,null,null,null,null,null)
-D.aFV=new B.ai("Aktualisieren",null,null,null,null,null,null,null,null,null)
-D.aG9=new B.ai("sevDesk",null,null,null,null,null,null,null,null,null)
+D.aF5=new B.ai("BWA/CSV",null,null,null,null,null,null,null,null,null)
+D.aFQ=new B.ai("sevDesk abrufen",null,null,null,null,null,null,null,null,null)
+D.aFW=new B.ai("Aktualisieren",null,null,null,null,null,null,null,null,null)
+D.aGa=new B.ai("sevDesk",null,null,null,null,null,null,null,null,null)
 D.aGV=new B.ai("Bilanzwerte erfassen",null,null,null,null,null,null,null,null,null)
 D.a_j=new A.aev(0,"auto")
 D.aHy=new A.aev(1,"top")
@@ -4618,4 +4618,4 @@ w($,"cfI","bxe",()=>C.aF.$1$1(new A.but(),x.h))
 w($,"cfH","bxd",()=>B.b01(A.c66(),x.F,x.b))
 w($,"c8X","bwQ",()=>new A.ayo())
 v($,"ccd","lE",()=>new A.b2H())})()};
-(a=>{a["civ2O8rPOitUALBfh4VD97VCfNk="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["Gr4mu8J+LKJwaMBwtGUtaECQ+wU="]=a.current})($__dart_deferred_initializers__);

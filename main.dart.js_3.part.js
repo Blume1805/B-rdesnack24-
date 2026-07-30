@@ -1390,7 +1390,7 @@ t=A.Q(new A.b8(A.b([new B.fV(w,"Bestand je Automat",C.o4,D.agA,t,v,v,v,v),new B.
 return t}}
 B.anX.prototype={
 p(d){var w=null
-return A.dn(A.b([D.awa,C.D,A.i("Digitale HACCP-, Reinigungs- und Bestandsprotokolle \u2014 revisionssicher und GoBD-konform.",w,w,w,w,A.y(C.p,13,C.l),w,w,w),C.az,A.jp(new B.bhw(this))],x.p),w,C.cF,w,C.F,!1)}}
+return A.dn(A.b([D.awb,C.D,A.i("Digitale HACCP-, Reinigungs- und Bestandsprotokolle \u2014 revisionssicher und GoBD-konform.",w,w,w,w,A.y(C.p,13,C.l),w,w,w),C.az,A.jp(new B.bhw(this))],x.p),w,C.cF,w,C.F,!1)}}
 B.akY.prototype={
 p(d){var w=null
 return A.cK(new A.ac(C.el,A.a5(A.b([A.aQ(w,D.aeb,C.q,w,w,new A.aD(C.aG,w,A.cm(C.m,1),w,w,w,C.df),w,72,w,w,w,w,w,72),C.Q,A.i("Keine Module freigeschaltet",w,w,w,w,A.bt(C.h,20,C.H),C.bs,w,w),C.D,A.i("F\xfcr dein Konto sind noch keine Module aktiviert. Bitte wende dich an einen Gesellschafter.",w,w,w,w,A.y(C.p,14,C.l),C.bs,w,w)],x.p),C.j,C.f,C.G),w),w,w)}}
@@ -1451,7 +1451,7 @@ k=s==null?"?":$.dO().ap(s)
 i=r==null?"":" \xb7 angefragt "+$.dO().ap(r)
 i=A.b([d,C.aW,A.i("Zeitraum: "+e+" \u2013 "+k+i,f,f,f,f,A.y(C.p,11,C.l),f,f,f),C.r],j)
 for(e=J.bk(v);e.u();)i.push(new B.ak0(e.gN(e),f))
-if(a1==="pending"&&w==="pending")C.b.K(i,A.b([C.r,A.ag(A.b([A.as(A.fv(C.o8,D.aFw,new B.b45(g,a2,a3),A.dD(C.ac,C.o,f,f,f,f,f)),1),C.an,A.as(A.fO(C.Fa,C.vq,new B.b46(g,a2,a3),A.l5(f,f,f,f,f,f,f,f,f,C.aa,f,f,f,f,f,D.BA,f,f,f,f)),1)],j),C.j,f,C.f,C.i,0,f,f)],j))
+if(a1==="pending"&&w==="pending")C.b.K(i,A.b([C.r,A.ag(A.b([A.as(A.fv(C.o8,D.aFx,new B.b45(g,a2,a3),A.dD(C.ac,C.o,f,f,f,f,f)),1),C.an,A.as(A.fO(C.Fa,C.vq,new B.b46(g,a2,a3),A.l5(f,f,f,f,f,f,f,f,f,C.aa,f,f,f,f,f,D.BA,f,f,f,f)),1)],j),C.j,f,C.f,C.i,0,f,f)],j))
 if(n)C.b.K(i,A.b([C.r,A.ag(A.b([D.F6,C.aN,A.as(A.i("Tippen zum \xd6ffnen des signierten PDFs",f,f,f,f,A.y(C.m,11,C.H),f,f,f),1),D.aet],j),C.j,f,C.f,C.i,0,f,f)],j))
 h=A.bj(f,A.a5(i,C.y,C.f,C.i),f,a0,C.aj,f,p,3)
 return new A.ac(C.fm,q?A.nc(h,0.6):h,f)},
@@ -1470,7 +1470,7 @@ if(p==null||p.length===0){m=A.dQ("Kein Signed-URL verf\xfcgbar")
 throw A.e(m)}w=8
 return A.k(A.mD(A.cv(p,0,null),C.e0,"_blank"),$async$C4)
 case 8:o=h
-if(!o&&d.e!=null)r.bh(A.c4(new B.GQ("Link kopieren",new B.b44(p),null),null,null,null,null,C.t,null,D.aFg,null,C.L,null,null,null,null,null,null,null,null,null,null))
+if(!o&&d.e!=null)r.bh(A.c4(new B.GQ("Link kopieren",new B.b44(p),null),null,null,null,null,C.t,null,D.aFh,null,C.L,null,null,null,null,null,null,null,null,null,null))
 t=2
 w=6
 break
@@ -1680,11 +1680,11 @@ q=J.a3(q,n)
 q=q==null?o:J.am(q)
 if(q==null)q=""
 l.push(A.aQ(C.U,A.aJE(q,new B.bo0(),C.iQ,o,o,o,o),C.q,o,o,new A.aD(C.a6,o,s,r,o,o,C.A),o,80,o,C.fm,o,o,o,o))}s=p.y||!w?o:p.gaLk()
-l.push(A.fv(D.aem,D.aFZ,s,A.dD(C.m,C.h,o,C.ek,o,o,o)))
+l.push(A.fv(D.aem,D.aG_,s,A.dD(C.m,C.h,o,C.ek,o,o,o)))
 if(!w)l.push(new A.ac(C.l_,A.i("Kein DocuSign-Signatur-Slot hinterlegt.",o,o,o,o,A.y(C.p,10,C.l),o,o,o),o))
 l.push(C.D)
 s=p.y?o:p.gaN5()
-l.push(A.fO(D.adx,D.aF3,s,A.l5(o,o,o,o,o,o,o,o,o,C.h,o,o,C.ek,o,o,C.mL,o,o,o,o)))
+l.push(A.fO(D.adx,D.aF4,s,A.l5(o,o,o,o,o,o,o,o,o,C.h,o,o,C.ek,o,o,C.mL,o,o,o,o)))
 l.push(C.D)
 s=p.y?o:new B.bo1(d)
 l.push(A.dJ(A.i(v?"Diese Signatur verwenden":"Ohne Signatur freigeben (Platzhalter)",o,o,o,o,o,o,o,o),o,o,s,o,o))
@@ -1761,11 +1761,11 @@ return A.p($async$Hw,v)},
 p(d){var w,v=this,u=null,t=A.i("Exportiert alle Unternehmer-Kunden (customer_type = business) als CSV-Datei im sevDesk-Import-Format. Semikolon-getrennt, UTF-8, eine Zeile pro Kunde. Import in sevDesk unter Stammdaten \u2192 Kunden \u2192 Importieren.",u,u,u,u,A.y(C.p,13,C.l),u,u,u),s=v.x,r=s?u:v.gasg()
 s=s?C.mg:D.Fc
 w=x.p
-r=A.b([t,C.az,A.fv(s,D.aFB,r,A.dD(C.m,C.h,u,C.fn,u,u,u)),C.r],w)
-if(v.w!=null){t=A.fO(E.F7,D.aFu,v.gaw8(),A.l5(u,u,u,u,u,u,u,u,u,C.h,u,u,C.fn,u,u,C.iO,u,u,u,u))
+r=A.b([t,C.az,A.fv(s,D.aFC,r,A.dD(C.m,C.h,u,C.fn,u,u,u)),C.r],w)
+if(v.w!=null){t=A.fO(E.F7,D.aFv,v.gaw8(),A.l5(u,u,u,u,u,u,u,u,u,C.h,u,u,C.fn,u,u,C.iO,u,u,u,u))
 s=v.w
 s.toString
-C.b.K(r,A.b([t,C.r,A.bj(u,A.acL(s,A.y(C.h,12,C.l).aQ_("monospace")),u,u,C.bU,u,u,3)],w))}return A.dd(D.aae,u,A.dn(r,u,C.C,u,C.F,!1),u,u,u)}}
+C.b.K(r,A.b([t,C.r,A.bj(u,A.acL(s,A.y(C.h,12,C.l).aQ_("monospace")),u,u,C.bU,u,u,3)],w))}return A.dd(D.aaf,u,A.dn(r,u,C.C,u,C.F,!1),u,u,u)}}
 B.Lt.prototype={
 V(){return new B.Ug()}}
 B.Ug.prototype={
@@ -1826,7 +1826,7 @@ t=A.b([u,C.D,i,A.i("Eingegangen: "+v+t,q,q,q,q,A.y(C.p,12,C.l),q,q,q)],s)
 i=n.h(o,"reason")
 if(J.am(i==null?"":i).length!==0)C.b.K(t,A.b([C.D,A.i("Grund: "+A.j(n.h(o,"reason")),q,q,q,q,A.y(C.aV,12,C.l),q,q,q)],s))
 if(l)t.push(A.i("Bearbeitet: "+A.j(w.$1(A.af(n.h(o,r)))),q,q,q,q,A.y(C.ac,12,C.l),q,q,q))
-if(m)C.b.K(t,A.b([C.r,A.fO(D.ae_,D.aFt,this.e,q)],s))
+if(m)C.b.K(t,A.b([C.r,A.fO(D.ae_,D.aFu,this.e,q)],s))
 return A.bj(j,A.a5(t,C.y,C.f,C.i),q,q,C.C,q,q,3)}}
 B.a20.prototype={
 p(d){return B.Qa("collected_at","cash",new B.azF(),new B.azG(),new B.azH(),"cash_collection_logs","Geldentnahme")}}
@@ -1934,7 +1934,7 @@ case 1:return A.o(u,v)}})
 return A.p($async$xq,v)},
 p(d){var w=this.w
 w===$&&A.a()
-return A.dd(D.aal,C.a6,A.En(new B.b7G(this),w,x.D),null,null,null)}}
+return A.dd(D.aam,C.a6,A.En(new B.b7G(this),w,x.D),null,null,null)}}
 B.HT.prototype={
 p(a2){var w,v,u,t,s,r,q,p,o,n,m,l,k,j,i,h,g=this,f=null,e="resolution_note",d=g.c,a0=J.Z(d),a1=A.af(a0.h(d,"kind"))
 if(a1==null)a1="other"
@@ -2448,7 +2448,7 @@ case"ok":return D.azv
 default:return C.am}}}
 B.a5p.prototype={
 de(d,e){var w=null,v=e.al($.bDc(),x.w),u=B.a62(w,w,D.aex,D.AG,new B.aEE(this,d,e))
-return A.dd(D.aaf,w,A.da(v,new B.aEF(),new B.aEG(),new B.aEH(),!1,!0,!1,x.D,x.E),w,u,w)},
+return A.dd(D.aag,w,A.da(v,new B.aEF(),new B.aEG(),new B.aEH(),!1,!0,!1,x.D,x.E),w,u,w)},
 BM(d,e){return this.aDX(d,e)},
 aDX(d,e){var w=0,v=A.q(x.H),u,t=2,s=[],r,q,p,o,n
 var $async$BM=A.m(function(f,g){if(f===1){s.push(g)
@@ -2573,7 +2573,7 @@ o=C.c.a1(m.ay.eh(),0,10)
 n=m.ch
 w.dj(A.a6(["machine_id",v,"product_id",k,"quantity",u,"removed_spoiled",t,"mhd_checked",s,"filled_at",r,"unit_cost",q,"invoice_number",p,"invoice_date",o,"lot_expiry",n==null?l:C.c.a1(n.eh(),0,10)],x.N,x.X))},
 p(d){var w,v=this,u=null,t=v.gc_().al($.bDJ(),x.w),s=A.bx(d,u,x.m).w,r=A.i("Bef\xfcllung erfassen",u,u,u,u,A.V(d).ok.r,u,u,u),q=B.OO(new B.bcn(v),v.as),p=B.axZ(t,new B.bco(v),new B.bcp(),x.D,x.l),o=A.d6(u,!1,v.x,D.afH,u,C.dJ,1,!1,u,u,C.a5,new B.bcq()),n=A.d6(u,!1,v.y,D.afX,u,C.dJ,1,!1,u,u,C.a5,u),m=A.d6(u,!1,v.z,D.ag0,u,C.ix,1,!1,u,u,C.a5,new B.bcr()),l=A.d6(u,!1,v.Q,D.afE,u,u,1,!1,u,u,C.a5,new B.bcs()),k=v.ay,j=x.p
-k=A.a7g(u,A.ag(A.b([A.as(A.i(C.c.cY(C.e.j(A.c0(k)),2,"0")+"."+C.c.cY(C.e.j(A.bi(k)),2,"0")+"."+A.aZ(k),u,u,u,u,u,u,u,u),1),A.qg(D.li,D.aGd,v.gaHO(),u)],j),C.j,u,C.f,C.i,0,u,u),D.afj,!1,!1,!1,!1,u,u)
+k=A.a7g(u,A.ag(A.b([A.as(A.i(C.c.cY(C.e.j(A.c0(k)),2,"0")+"."+C.c.cY(C.e.j(A.bi(k)),2,"0")+"."+A.aZ(k),u,u,u,u,u,u,u,u),1),A.qg(D.li,D.aGe,v.gaHO(),u)],j),C.j,u,C.f,C.i,0,u,u),D.afj,!1,!1,!1,!1,u,u)
 w=v.ch
 return new A.ac(new A.ah(0,0,0,s.f.d),A.f4(A.k1(u,A.a5(A.b([r,C.Q,q,C.r,p,C.r,o,C.r,n,C.r,m,C.r,l,C.r,k,C.r,A.a7g(u,A.ag(A.b([A.as(A.i(w==null?"\u2014 nicht gesetzt \u2014":C.c.cY(C.e.j(A.c0(w)),2,"0")+"."+C.c.cY(C.e.j(A.bi(w)),2,"0")+"."+A.aZ(w),u,u,u,u,u,u,u,u),1),A.qg(D.li,D.aES,v.gaHP(),u)],j),C.j,u,C.f,C.i,0,u,u),D.afL,!1,!1,!1,!1,u,u),C.aW,A.b0D(C.a4,new B.bct(v),u,D.aEJ,v.ax),A.e_(C.ey,v.gawZ(),u)],j),C.a9,C.f,C.G),v.w),C.aj,C.F),u)}}
 B.Ob.prototype={
@@ -2717,7 +2717,7 @@ q.push(C.c9)
 o=s.Q
 if(o!=null&&!o.ga_(o)){o=s.Q
 o.toString
-q.push(new B.arQ(o,r))}C.b.K(p,q)}}return A.dd(D.aao,r,A.dn(p,r,C.C,r,C.F,!1),r,r,r)}}
+q.push(new B.arQ(o,r))}C.b.K(p,q)}}return A.dd(D.aap,r,A.dn(p,r,C.C,r,C.F,!1),r,r,r)}}
 B.apz.prototype={
 p(c2){var w,v,u,t,s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7=null,b8=this.d,b9=J.cE(b8),c0=J.a3(b9.ga3(b8),"product_name"),c1=c0==null?b7:J.am(c0)
 if(c1==null)c1=""
@@ -2869,7 +2869,7 @@ p(d){var w=null
 return A.aQ(w,w,C.q,C.h,w,w,w,1,w,D.a8h,w,w,w,w)}}
 B.a7j.prototype={
 de(d,e){var w=null
-return A.dd(D.aaq,w,A.da(e.al($.awH(),x.b),new B.aKu(),new B.aKv(),new B.aKw(),!1,!0,!1,x.U,x.E),w,w,w)}}
+return A.dd(D.aar,w,A.da(e.al($.awH(),x.b),new B.aKu(),new B.aKv(),new B.aKw(),!1,!0,!1,x.U,x.E),w,w,w)}}
 B.zo.prototype={
 V(){return new B.anz()}}
 B.anz.prototype={
@@ -3002,7 +3002,7 @@ B.BQ.prototype={
 p(d){var w=this,v=null,u=w.f?C.aa:C.h,t=A.aw(12),s=A.cm(C.a3,1)
 return A.aQ(v,A.ag(A.b([A.c_(w.c,u,v,16),C.aN,A.i(w.d+": ",v,v,v,v,A.y(C.p,11,C.l),v,v,v),A.i(w.e,v,v,v,v,A.y(u,13,C.n),v,v,v)],x.p),C.j,v,C.f,C.G,0,v,v),C.q,v,v,new A.aD(C.a6,v,s,t,v,v,C.A),v,v,v,v,C.hP,v,v,v)}}
 B.apE.prototype={
-de(d,e){var w=null,v=e.al($.bx6(),x.w),u=B.a62(C.m,C.h,D.o9,D.aF_,new B.bkd(this,d,e))
+de(d,e){var w=null,v=e.al($.bx6(),x.w),u=B.a62(C.m,C.h,D.o9,D.aF0,new B.bkd(this,d,e))
 return A.dd(w,w,A.da(v,new B.bke(),new B.bkf(),new B.bkg(),!1,!0,!1,x.D,x.E),w,u,w)},
 IB(d,e){return this.aGB(d,e)},
 aGB(d,e){var w=0,v=A.q(x.H),u
@@ -4247,7 +4247,7 @@ $0(){return A.r0(new A.o0(this.a))},
 $S:0}
 B.b42.prototype={
 $1(d){var w=null,v=this.a,u=A.f5(w,C.aX,!1,w,!0,C.t,w,A.fh(),v,w,w,w,w,w,2,D.afW,C.ab,!0,w,!0,w,!1,w,C.b3,w,w,w,w,w,w,w,w,3,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,C.C,w,w,w,w,w,w,w,w,w,w,w,w,!0,C.au,w,C.a5,w,w,w,w),t=this.b
-return A.lH(A.b([A.dJ(C.cY,w,w,new B.b40(t),w,w),A.e_(C.vq,new B.b41(v,t),w)],x.p),w,u,D.aFv)},
+return A.lH(A.b([A.dJ(C.cY,w,w,new B.b40(t),w,w),A.e_(C.vq,new B.b41(v,t),w)],x.p),w,u,D.aFw)},
 $S:56}
 B.b40.prototype={
 $0(){A.ba(this.a,!1).dj(null)
@@ -5250,7 +5250,7 @@ $0(){return this.a.B5(this.b,this.c)},
 $S:0}
 B.bgx.prototype={
 $1(d){var w=null,v=A.i("Korrektur: "+this.a.c,w,w,w,w,w,w,w,w),u=this.b,t=A.f5(w,C.aX,!1,w,!0,C.t,w,A.fh(),u,w,w,w,w,w,2,D.aga,C.ab,!0,w,!0,w,!1,w,C.b3,w,w,w,w,D.aAf,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,C.C,w,w,w,w,w,w,w,w,w,w,w,w,!0,C.au,w,C.a5,w,w,w,w),s=this.c
-return A.lH(A.b([A.dJ(C.cY,w,w,new B.bgv(s),w,w),A.e_(D.aGs,new B.bgw(s,u),w)],x.p),w,t,v)},
+return A.lH(A.b([A.dJ(C.cY,w,w,new B.bgv(s),w,w),A.e_(D.aGt,new B.bgw(s,u),w)],x.p),w,t,v)},
 $S:56}
 B.bgv.prototype={
 $0(){A.ba(this.a,!1).dj(null)
@@ -5945,11 +5945,11 @@ D.C2=new B.a60()
 D.a3k=new B.aon()
 D.a3v=new B.Lt(null)
 D.a3B=new B.a20(null)
-D.aGl=new A.ai("Kein Bestand erfasst.",null,null,null,null,null,null,null,null,null)
-D.a3D=new A.h3(C.U,null,null,D.aGl,null)
+D.aGm=new A.ai("Kein Bestand erfasst.",null,null,null,null,null,null,null,null,null)
+D.a3D=new A.h3(C.U,null,null,D.aGm,null)
 D.aeM=new A.az(E.hW,40,C.p,null,null)
-D.aG4=new A.ai("Keine Freigabe-Anfragen offen.",null,null,null,null,null,null,null,null,null)
-D.ang=w([D.aeM,C.D,D.aG4],x.p)
+D.aG5=new A.ai("Keine Freigabe-Anfragen offen.",null,null,null,null,null,null,null,null,null)
+D.ang=w([D.aeM,C.D,D.aG5],x.p)
 D.a5U=new A.fH(C.F,C.f,C.G,C.j,null,C.aT,null,0,D.ang,null)
 D.at4=new A.ac(C.el,D.a5U,null)
 D.a3E=new A.h3(C.U,null,null,D.at4,null)
@@ -5959,16 +5959,16 @@ D.a3R=new B.a2m(null)
 D.a52=new A.E(1,0.9529411764705882,0.9725490196078431,0.9294117647058824,C.k)
 D.D2=new A.E(1,0.9803921568627451,0.9137254901960784,0.8941176470588236,C.k)
 D.a62=new B.M1(null)
-D.aFL=new A.ai("",null,null,null,null,null,null,null,null,null)
-D.kS=new B.i5(D.aFL)
+D.aFM=new A.ai("",null,null,null,null,null,null,null,null,null)
+D.kS=new B.i5(D.aFM)
 D.a7b=new B.a5d(null)
 D.kW=new A.lP(1,null,null)
 D.a7i=new B.a5e(null)
 D.a7j=new B.MG(null)
-D.aFa=new A.ai("\u2014 kein Produkt \u2014",null,null,null,null,null,null,null,null,null)
-D.a7u=new A.ej(null,D.aFa,C.bf,null,x.r)
-D.aF8=new A.ai("\u2014 freie Eingabe \u2014",null,null,null,null,null,null,null,null,null)
-D.a7w=new A.ej(null,D.aF8,C.bf,null,x.r)
+D.aFb=new A.ai("\u2014 kein Produkt \u2014",null,null,null,null,null,null,null,null,null)
+D.a7u=new A.ej(null,D.aFb,C.bf,null,x.r)
+D.aF9=new A.ai("\u2014 freie Eingabe \u2014",null,null,null,null,null,null,null,null,null)
+D.a7w=new A.ej(null,D.aF9,C.bf,null,x.r)
 D.a8h=new A.ah(0,0,0,2)
 D.a8p=new A.ah(0,3,0,3)
 D.xa=new A.ah(20,12,20,0)
@@ -5976,20 +5976,20 @@ D.a91=new A.ah(7,3,7,3)
 D.a95=new B.a5p(null)
 D.a9B=new A.dC("Abo-Verwaltung",!1,null)
 D.a9S=new B.a5I(null)
-D.aFx=new A.ai("Freigaben",null,null,null,null,null,null,null,null,null)
-D.aa8=new A.el(D.aFx,null,null)
-D.aGn=new A.ai("K\xfcndigungen",null,null,null,null,null,null,null,null,null)
-D.aab=new A.el(D.aGn,null,null)
+D.aFy=new A.ai("Freigaben",null,null,null,null,null,null,null,null,null)
+D.aa8=new A.el(D.aFy,null,null)
+D.aGo=new A.ai("K\xfcndigungen",null,null,null,null,null,null,null,null,null)
+D.aab=new A.el(D.aGo,null,null)
 D.aGO=new A.ai("B2B-Kunden \u2014 sevDesk-Export",null,null,null,null,null,null,null,null,null)
-D.aae=new A.el(D.aGO,null,null)
-D.aFn=new A.ai("Mitarbeiter",null,null,null,null,null,null,null,null,null)
-D.aaf=new A.el(D.aFn,null,null)
-D.aGh=new A.ai("Reklamationen",null,null,null,null,null,null,null,null,null)
-D.aal=new A.el(D.aGh,null,null)
+D.aaf=new A.el(D.aGO,null,null)
+D.aFo=new A.ai("Mitarbeiter",null,null,null,null,null,null,null,null,null)
+D.aag=new A.el(D.aFo,null,null)
+D.aGi=new A.ai("Reklamationen",null,null,null,null,null,null,null,null,null)
+D.aam=new A.el(D.aGi,null,null)
 D.aH6=new A.ai("Inventur \u2014 FIFO-Bewegungsreport",null,null,null,null,null,null,null,null,null)
-D.aao=new A.el(D.aH6,null,null)
-D.aFk=new A.ai("Inventur",null,null,null,null,null,null,null,null,null)
-D.aaq=new A.el(D.aFk,null,null)
+D.aap=new A.el(D.aH6,null,null)
+D.aFl=new A.ai("Inventur",null,null,null,null,null,null,null,null,null)
+D.aar=new A.el(D.aFl,null,null)
 D.aEN=new A.ai("Dokumente",null,null,null,null,null,null,null,null,null)
 D.aax=new A.el(D.aEN,null,null)
 D.aEH=new A.ai("Telemetrie / IoT",null,null,null,null,null,null,null,null,null)
@@ -6092,51 +6092,51 @@ D.agy=new B.O9(null)
 D.agz=new B.Ob(null)
 D.agA=new B.a7j(null)
 D.yr=new A.op(null,null,null,null,null,null,null,null)
-D.aEY=new A.ai("Rechnung",null,null,null,null,null,null,null,null,null)
-D.Di=new B.hq(D.aEY,!1)
-D.aFd=new A.ai("Rg-Datum",null,null,null,null,null,null,null,null,null)
-D.a6J=new B.hq(D.aFd,!1)
+D.aEZ=new A.ai("Rechnung",null,null,null,null,null,null,null,null,null)
+D.Di=new B.hq(D.aEZ,!1)
+D.aFe=new A.ai("Rg-Datum",null,null,null,null,null,null,null,null,null)
+D.a6J=new B.hq(D.aFe,!1)
 D.aGS=new A.ai("Rest",null,null,null,null,null,null,null,null,null)
 D.a6L=new B.hq(D.aGS,!0)
 D.aGx=new A.ai("EK/Stk.",null,null,null,null,null,null,null,null,null)
 D.Dg=new B.hq(D.aGx,!0)
-D.aFY=new A.ai("MHD",null,null,null,null,null,null,null,null,null)
-D.Dh=new B.hq(D.aFY,!1)
-D.aFC=new A.ai("Restlaufzeit",null,null,null,null,null,null,null,null,null)
-D.a6M=new B.hq(D.aFC,!0)
+D.aFZ=new A.ai("MHD",null,null,null,null,null,null,null,null,null)
+D.Dh=new B.hq(D.aFZ,!1)
+D.aFD=new A.ai("Restlaufzeit",null,null,null,null,null,null,null,null,null)
+D.a6M=new B.hq(D.aFD,!0)
 D.aGY=new A.ai("Abschlag %",null,null,null,null,null,null,null,null,null)
 D.a6E=new B.hq(D.aGY,!0)
-D.aFo=new A.ai("AK-Wert",null,null,null,null,null,null,null,null,null)
-D.a6R=new B.hq(D.aFo,!0)
+D.aFp=new A.ai("AK-Wert",null,null,null,null,null,null,null,null,null)
+D.a6R=new B.hq(D.aFp,!0)
 D.aGZ=new A.ai("Abschlag \u20ac",null,null,null,null,null,null,null,null,null)
 D.a6F=new B.hq(D.aGZ,!0)
 D.aGw=new A.ai("Bilanz",null,null,null,null,null,null,null,null,null)
 D.a6D=new B.hq(D.aGw,!0)
 D.akc=w([D.Di,D.a6J,D.a6L,D.Dg,D.Dh,D.a6M,D.a6E,D.a6R,D.a6F,D.a6D],x.M)
-D.aFS=new A.ai("Datum",null,null,null,null,null,null,null,null,null)
-D.a6P=new B.hq(D.aFS,!1)
-D.aF7=new A.ai("Vorgang",null,null,null,null,null,null,null,null,null)
-D.a6N=new B.hq(D.aF7,!1)
-D.aFe=new A.ai("Menge",null,null,null,null,null,null,null,null,null)
-D.a6G=new B.hq(D.aFe,!0)
-D.aG6=new A.ai("Bemerkung",null,null,null,null,null,null,null,null,null)
-D.a6H=new B.hq(D.aG6,!1)
+D.aFT=new A.ai("Datum",null,null,null,null,null,null,null,null,null)
+D.a6P=new B.hq(D.aFT,!1)
+D.aF8=new A.ai("Vorgang",null,null,null,null,null,null,null,null,null)
+D.a6N=new B.hq(D.aF8,!1)
+D.aFf=new A.ai("Menge",null,null,null,null,null,null,null,null,null)
+D.a6G=new B.hq(D.aFf,!0)
+D.aG7=new A.ai("Bemerkung",null,null,null,null,null,null,null,null,null)
+D.a6H=new B.hq(D.aG7,!1)
 D.akt=w([D.a6P,D.a6N,D.a6G,D.Dg,D.Di,D.Dh,D.a6H],x.M)
-D.aFh=new A.ai("Au\xdfenreinigung",null,null,null,null,null,null,null,null,null)
-D.a7o=new A.ej("exterior",D.aFh,C.bf,null,x.r)
-D.aF5=new A.ai("Innenreinigung",null,null,null,null,null,null,null,null,null)
-D.a7v=new A.ej("interior",D.aF5,C.bf,null,x.r)
-D.aFc=new A.ai("Vollreinigung + Desinfektion",null,null,null,null,null,null,null,null,null)
-D.a7r=new A.ej("full",D.aFc,C.bf,null,x.r)
+D.aFi=new A.ai("Au\xdfenreinigung",null,null,null,null,null,null,null,null,null)
+D.a7o=new A.ej("exterior",D.aFi,C.bf,null,x.r)
+D.aF6=new A.ai("Innenreinigung",null,null,null,null,null,null,null,null,null)
+D.a7v=new A.ej("interior",D.aF6,C.bf,null,x.r)
+D.aFd=new A.ai("Vollreinigung + Desinfektion",null,null,null,null,null,null,null,null,null)
+D.a7r=new A.ej("full",D.aFd,C.bf,null,x.r)
 D.akV=w([D.a7o,D.a7v,D.a7r],x.I)
-D.aF6=new A.ai("MHD \xfcberschritten",null,null,null,null,null,null,null,null,null)
-D.a7s=new A.ej("mhd",D.aF6,C.bf,null,x.r)
-D.aFq=new A.ai("Besch\xe4digung",null,null,null,null,null,null,null,null,null)
-D.a7z=new A.ej("damage",D.aFq,C.bf,null,x.r)
-D.aGf=new A.ai("Hygienemangel",null,null,null,null,null,null,null,null,null)
-D.a7x=new A.ej("hygiene",D.aGf,C.bf,null,x.r)
-D.aFz=new A.ai("Sonstiges",null,null,null,null,null,null,null,null,null)
-D.a7A=new A.ej("other",D.aFz,C.bf,null,x.r)
+D.aF7=new A.ai("MHD \xfcberschritten",null,null,null,null,null,null,null,null,null)
+D.a7s=new A.ej("mhd",D.aF7,C.bf,null,x.r)
+D.aFr=new A.ai("Besch\xe4digung",null,null,null,null,null,null,null,null,null)
+D.a7z=new A.ej("damage",D.aFr,C.bf,null,x.r)
+D.aGg=new A.ai("Hygienemangel",null,null,null,null,null,null,null,null,null)
+D.a7x=new A.ej("hygiene",D.aGg,C.bf,null,x.r)
+D.aFA=new A.ai("Sonstiges",null,null,null,null,null,null,null,null,null)
+D.a7A=new A.ej("other",D.aFA,C.bf,null,x.r)
 D.al9=w([D.a7s,D.a7z,D.a7x,D.a7A],x.I)
 D.an6=w(["> 4 Wochen","0 % Abschlag","0 %","normale Verwertbarkeit"],x.s)
 D.aoq=w(["2\u20134 Wochen","10\u201330 %","20 %","eingeschr\xe4nkte Verkaufszeit, ggf. erh\xf6hte Preisaktionen"],x.s)
@@ -6145,14 +6145,14 @@ D.ajE=w(["< 1 Woche","50\u201380 %","65 %","Risiko des Nichtverkaufs deutlich er
 D.aoj=w(["MHD \xfcberschritten","100 % Abschreibung","100 %","keine wirtschaftliche Verwertbarkeit"],x.s)
 D.alB=w([D.an6,D.aoq,D.amw,D.ajE,D.aoj],A.ax("C<u<f>>"))
 D.alX=w(["Live","Provider","Ger\xe4te","Slots","Events"],x.s)
-D.aGa=new A.ai("Generic (kanonisch)",null,null,null,null,null,null,null,null,null)
-D.a7p=new A.ej("generic",D.aGa,C.bf,null,x.r)
+D.aGb=new A.ai("Generic (kanonisch)",null,null,null,null,null,null,null,null,null)
+D.a7p=new A.ej("generic",D.aGb,C.bf,null,x.r)
 D.aGA=new A.ai("CleverMetrics",null,null,null,null,null,null,null,null,null)
 D.a7y=new A.ej("clevermetrics",D.aGA,C.bf,null,x.r)
 D.aGz=new A.ai("Nayax",null,null,null,null,null,null,null,null,null)
 D.a7q=new A.ej("nayax",D.aGz,C.bf,null,x.r)
-D.aF1=new A.ai("Custom",null,null,null,null,null,null,null,null,null)
-D.a7t=new A.ej("custom",D.aF1,C.bf,null,x.r)
+D.aF2=new A.ai("Custom",null,null,null,null,null,null,null,null,null)
+D.a7t=new A.ej("custom",D.aF2,C.bf,null,x.r)
 D.amd=w([D.a7p,D.a7y,D.a7q,D.a7t],x.I)
 D.amF=w([],A.ax("C<bL>"))
 D.aPs=w([],A.ax("C<mp>"))
@@ -6164,14 +6164,14 @@ D.aNp=new B.x_("1\u20132 Wochen","30\u201350 %","40 %","erheblicher Verkaufsdruc
 D.aNo=new B.x_("< 1 Woche","50\u201380 %","65 %","Risiko Nichtverkauf deutlich erh\xf6ht")
 D.aNr=new B.x_("MHD \xfcberschritten","100 %","100 %","keine wirtschaftl. Verwertbarkeit")
 D.aoe=w([D.aNq,D.aNs,D.aNp,D.aNo,D.aNr],A.ax("C<x_>"))
-D.aGe=new A.ai("Rest-MHD am Stichtag",null,null,null,null,null,null,null,null,null)
-D.a6I=new B.hq(D.aGe,!1)
+D.aGf=new A.ai("Rest-MHD am Stichtag",null,null,null,null,null,null,null,null,null)
+D.a6I=new B.hq(D.aGf,!1)
 D.aGQ=new A.ai("Typischer Ansatz",null,null,null,null,null,null,null,null,null)
 D.a6K=new B.hq(D.aGQ,!1)
-D.aGb=new A.ai("B\xf6rdesnack24 wendet an",null,null,null,null,null,null,null,null,null)
-D.a6O=new B.hq(D.aGb,!0)
-D.aFp=new A.ai("Begr\xfcndung",null,null,null,null,null,null,null,null,null)
-D.a6Q=new B.hq(D.aFp,!1)
+D.aGc=new A.ai("B\xf6rdesnack24 wendet an",null,null,null,null,null,null,null,null,null)
+D.a6O=new B.hq(D.aGc,!0)
+D.aFq=new A.ai("Begr\xfcndung",null,null,null,null,null,null,null,null,null)
+D.a6Q=new B.hq(D.aFq,!1)
 D.aoy=w([D.a6I,D.a6K,D.a6O,D.a6Q],x.M)
 D.aoC=w(["pdf","docx","doc","jpg","jpeg","png"],x.s)
 D.aqh=new B.a7U(null)
@@ -6214,27 +6214,27 @@ D.ae9=new A.az(D.abt,18,C.h,null,null)
 D.a9v=new A.dC("Bilanzwert der Vorr\xe4te",!1,null)
 D.ajA=w([D.ae9,C.aN,D.a9v],x.p)
 D.avP=new A.hT(C.ai,C.f,C.i,C.j,null,C.aT,null,0,D.ajA,null)
-D.awa=new A.fR("Verwaltung","Betriebsprotokolle",null,null)
+D.awb=new A.fR("Verwaltung","Betriebsprotokolle",null,null)
 D.ayu=new A.cr(16,16,C.Cr,null)
 D.ayz=new A.cr(null,48,null,null)
 D.ayN=new A.oH(0,"action")
-D.aFM=new A.ai("F\xfcr dieses Dokument ist noch keine Version hochgeladen.",null,null,null,null,null,null,null,null,null)
-D.ayY=new A.dW(D.aFM,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aGo=new A.ai("Signiertes PDF wird ge\xf6ffnet \u2026",null,null,null,null,null,null,null,null,null)
-D.az1=new A.dW(D.aGo,null,null,null,null,null,null,null,null,null,null,null,null,C.no,!1,null,null,null,C.t,null)
-D.aEZ=new A.ai("Export fehlgeschlagen.",null,null,null,null,null,null,null,null,null)
-D.az4=new A.dW(D.aEZ,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aFN=new A.ai("F\xfcr dieses Dokument ist noch keine Version hochgeladen.",null,null,null,null,null,null,null,null,null)
+D.ayY=new A.dW(D.aFN,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aGp=new A.ai("Signiertes PDF wird ge\xf6ffnet \u2026",null,null,null,null,null,null,null,null,null)
+D.az1=new A.dW(D.aGp,null,null,null,null,null,null,null,null,null,null,null,null,C.no,!1,null,null,null,C.t,null)
+D.aF_=new A.ai("Export fehlgeschlagen.",null,null,null,null,null,null,null,null,null)
+D.az4=new A.dW(D.aF_,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.aGB=new A.ai("Einladung versendet.",null,null,null,null,null,null,null,null,null)
 D.az8=new A.dW(D.aGB,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aFW=new A.ai("Eintrag gespeichert.",null,null,null,null,null,null,null,null,null)
-D.aza=new A.dW(D.aFW,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.aFX=new A.ai("Eintrag gespeichert.",null,null,null,null,null,null,null,null,null)
+D.aza=new A.dW(D.aFX,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.aGN=new A.ai("Speichern fehlgeschlagen (Berechtigung?).",null,null,null,null,null,null,null,null,null)
 D.azb=new A.dW(D.aGN,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
-D.aGg=new A.ai("Format nicht direkt anzeigbar \u2014 Datei wurde heruntergeladen. Tipp: k\xfcnftige Versionen als PDF hochladen f\xfcr Inline-Vorschau.",null,null,null,null,null,null,null,null,null)
+D.aGh=new A.ai("Format nicht direkt anzeigbar \u2014 Datei wurde heruntergeladen. Tipp: k\xfcnftige Versionen als PDF hochladen f\xfcr Inline-Vorschau.",null,null,null,null,null,null,null,null,null)
 D.a80=new A.bv(5e6)
-D.azd=new A.dW(D.aGg,null,null,null,null,null,null,null,null,null,null,null,null,D.a80,!1,null,null,null,C.t,null)
-D.aGi=new A.ai('Keine Mitarbeiter angelegt \u2014 zuerst \xfcber \u201eMitarbeiter" einladen.',null,null,null,null,null,null,null,null,null)
-D.azg=new A.dW(D.aGi,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
+D.azd=new A.dW(D.aGh,null,null,null,null,null,null,null,null,null,null,null,null,D.a80,!1,null,null,null,C.t,null)
+D.aGj=new A.ai('Keine Mitarbeiter angelegt \u2014 zuerst \xfcber \u201eMitarbeiter" einladen.',null,null,null,null,null,null,null,null,null)
+D.azg=new A.dW(D.aGj,null,null,null,null,null,null,null,null,null,null,null,null,C.L,!1,null,null,null,C.t,null)
 D.azu=new A.ko("l\xe4uft bald",C.kc,null,null)
 D.azv=new A.ko("g\xfcltig",C.ht,null,null)
 D.azw=new A.ko("abgelaufen",C.mk,null,null)
@@ -6255,19 +6255,19 @@ D.aEG=new A.ai("Nachweis",null,D.aAw,null,null,null,null,null,null,null)
 D.aEJ=new A.ai("MHD gepr\xfcft",null,null,null,null,null,null,null,null,null)
 D.aEP=new A.ai("In Bearbeitung",null,null,null,null,null,null,null,null,null)
 D.aES=new A.ai("setzen",null,null,null,null,null,null,null,null,null)
-D.aF_=new A.ai("Provider anlegen",null,null,null,null,null,null,null,null,null)
-D.aF3=new A.ai("Bild hochladen",null,null,null,null,null,null,null,null,null)
-D.aFg=new A.ai("PDF konnte nicht ge\xf6ffnet werden.",null,null,null,null,null,null,null,null,null)
+D.aF0=new A.ai("Provider anlegen",null,null,null,null,null,null,null,null,null)
+D.aF4=new A.ai("Bild hochladen",null,null,null,null,null,null,null,null,null)
+D.aFh=new A.ai("PDF konnte nicht ge\xf6ffnet werden.",null,null,null,null,null,null,null,null,null)
 D.AG=new A.ai("Einladen",null,null,null,null,null,null,null,null,null)
-D.aFt=new A.ai("Als bearbeitet markieren",null,null,null,null,null,null,null,null,null)
-D.aFu=new A.ai("CSV herunterladen (b2b_customers.csv)",null,null,null,null,null,null,null,null,null)
-D.aFv=new A.ai("Ablehnung begr\xfcnden",null,null,null,null,null,null,null,null,null)
-D.aFw=new A.ai("Freigeben",null,null,null,null,null,null,null,null,null)
-D.aFB=new A.ai("Datens\xe4tze laden",null,null,null,null,null,null,null,null,null)
+D.aFu=new A.ai("Als bearbeitet markieren",null,null,null,null,null,null,null,null,null)
+D.aFv=new A.ai("CSV herunterladen (b2b_customers.csv)",null,null,null,null,null,null,null,null,null)
+D.aFw=new A.ai("Ablehnung begr\xfcnden",null,null,null,null,null,null,null,null,null)
+D.aFx=new A.ai("Freigeben",null,null,null,null,null,null,null,null,null)
+D.aFC=new A.ai("Datens\xe4tze laden",null,null,null,null,null,null,null,null,null)
 D.a_d=new A.ai("Anlegen",null,null,null,null,null,null,null,null,null)
-D.aFZ=new A.ai("Aus DocuSign holen",null,null,null,null,null,null,null,null,null)
-D.aGd=new A.ai("\xe4ndern",null,null,null,null,null,null,null,null,null)
-D.aGs=new A.ai("Buchen",null,null,null,null,null,null,null,null,null)
+D.aG_=new A.ai("Aus DocuSign holen",null,null,null,null,null,null,null,null,null)
+D.aGe=new A.ai("\xe4ndern",null,null,null,null,null,null,null,null,null)
+D.aGt=new A.ai("Buchen",null,null,null,null,null,null,null,null,null)
 D.aGy=new A.ai("Bild nicht geladen",null,null,null,null,null,null,null,null,null)
 D.aGG=new A.ai("Mitarbeiter zur Signatur einladen",null,null,null,null,null,null,null,null,null)
 D.aGL=new A.ai("Neues Dokument",null,null,null,null,null,null,null,null,null)
@@ -6327,4 +6327,4 @@ w($,"cet","bx6",()=>C.aF.$1$1(new B.bts(),x.D))
 w($,"cdr","bCY",()=>C.aF.$1$1(new B.bsq(),x.D))
 w($,"cdv","bCZ",()=>C.aF.$1$1(new B.bsx(),x.D))
 w($,"c9q","bNe",()=>A.c_r())})()};
-(a=>{a["9X6f+b0SIAkCYnRoFNvb6FqIKOg="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["eiVe5M8wflRweVTpbL80UA+li7Y="]=a.current})($__dart_deferred_initializers__);

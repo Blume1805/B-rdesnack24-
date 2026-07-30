@@ -423,7 +423,7 @@ w=A.f5(s,B.aX,!1,s,!0,B.t,s,A.fh(),t.x,s,s,s,s,s,2,D.aft,B.ab,!0,s,!0,s,!1,s,B.b
 x=A.f5(s,B.aX,!1,s,!0,B.t,s,A.fh(),t.y,s,s,s,s,s,2,D.afC,B.ab,!0,s,!0,s,!1,s,B.b3,s,s,s,s,B.dJ,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.C,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.au,s,B.a5,s,s,s,s)
 v=t.z?s:t.gav8()
 u=A.dD(B.m,B.h,s,B.ek,s,s,s)
-return A.dd(D.aas,s,A.dn(A.b([q,B.D,p,B.Q,A.bj(s,A.a5(A.b([r,B.r,w,B.D,x,B.Q,A.fv(t.z?D.ZE:D.F7,D.aHh,v,u)],o),B.a9,B.f,B.i),s,s,B.C,s,s,3),B.r,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.p,11,B.l).cq(1.35),s,s,s)],o),s,B.C,s,B.F,!1),s,s,s)}}
+return A.dd(D.aat,s,A.dn(A.b([q,B.D,p,B.Q,A.bj(s,A.a5(A.b([r,B.r,w,B.D,x,B.Q,A.fv(t.z?D.ZE:D.F7,D.aHh,v,u)],o),B.a9,B.f,B.i),s,s,B.C,s,s,3),B.r,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.p,11,B.l).cq(1.35),s,s,s)],o),s,B.C,s,B.F,!1),s,s,s)}}
 C.nR.prototype={
 zA(d,e,f,g,h){return this.b__(d,e,f,g,h)},
 b__(d,e,f,g,h){var x=0,w=A.q(y.N),v,u=this,t,s,r,q
@@ -1520,7 +1520,7 @@ D.a7e=new A.lP(0,null,null)
 D.aw0=new A.fR("Schnittstelle","Buchungsstapel f\xfcr die Buchhaltung",null,null)
 D.a9d=new A.jl(1,B.di,D.aw0,null)
 D.aEL=new A.ai("DATEV-Export",null,null,null,null,null,null,null,null,null)
-D.aas=new A.el(D.aEL,null,null)
+D.aat=new A.el(D.aEL,null,null)
 D.aaJ=new A.a4(57504,"MaterialIcons",null,!1)
 D.acS=new A.az(B.fQ,14,B.ac,null,null)
 D.F7=new A.az(B.y7,null,null,null,null)
@@ -1531,10 +1531,10 @@ D.afC=new A.cg(null,null,null,"Mandantennummer (optional)",null,null,null,"Bleib
 D.ay3=new A.G(1/0,64)
 D.ayg=new A.G(496,164)
 D.ZE=new A.cr(18,18,B.mV,null)
-D.aFj=new A.ai("Freigabe angefordert.",null,null,null,null,null,null,null,null,null)
-D.vi=new A.dW(D.aFj,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-D.aG3=new A.ai("Keine Ums\xe4tze im gew\xe4hlten Zeitraum.",null,null,null,null,null,null,null,null,null)
-D.azh=new A.dW(D.aG3,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+D.aFk=new A.ai("Freigabe angefordert.",null,null,null,null,null,null,null,null,null)
+D.vi=new A.dW(D.aFk,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+D.aG4=new A.ai("Keine Ums\xe4tze im gew\xe4hlten Zeitraum.",null,null,null,null,null,null,null,null,null)
+D.azh=new A.dW(D.aG4,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 D.vo=new A.ai("Anfordern",null,null,null,null,null,null,null,null,null)
 D.vp=new A.ai("Freigabe anfordern",null,null,null,null,null,null,null,null,null)
 D.aHh=new A.ai("DATEV-Datei herunterladen",null,null,null,null,null,null,null,null,null)
@@ -1543,4 +1543,4 @@ D.aMQ=new C.It(0,"none")
 D.a_M=new C.It(1,"highlightLeading")
 D.B2=new C.It(2,"highlightTrailing")
 D.a_N=new C.It(3,"highlightAll")})()};
-(a=>{a["SPYgl/6twnF3ttm11EVvA9ViBig="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["WCz/BS1gG4eMsVd7qsCQQi/gdIE="]=a.current})($__dart_deferred_initializers__);

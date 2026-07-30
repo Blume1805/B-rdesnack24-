@@ -61397,7 +61397,7 @@ return s.a.r.aI(0,$.bDk(),t.na).L6(s.b,s.c,s.d)},
 $S:2}
 A.CY.prototype={
 de(a,b){var s=null
-return A.dd(B.aam,s,A.da(b.al($.bDF(),t.sE),new A.axH(this,b.al($.bDj(),t.ie).gje(),b),new A.axI(),new A.axJ(),!1,!0,!1,t.Sd,t.jK),s,s,s)},
+return A.dd(B.aan,s,A.da(b.al($.bDF(),t.sE),new A.axH(this,b.al($.bDj(),t.ie).gje(),b),new A.axI(),new A.axJ(),!1,!0,!1,t.Sd,t.jK),s,s,s)},
 B9(a,b,c,d){return this.avf(a,b,c,d)},
 avf(a,b,c,d){var s=0,r=A.q(t.H),q,p,o,n
 var $async$B9=A.m(function(e,f){if(e===1)return A.n(f,r)
@@ -63748,7 +63748,7 @@ m=A.aQ(r,A.c_(q?s.d:s.c,o,r,18),B.q,r,r,new A.aD(p,r,r,m,r,r,B.A),r,32,r,r,r,r,r
 return A.as(A.byM(!1,r,!0,new A.ac(B.a8s,A.a5(A.b([m,B.aW,A.i(s.e,r,r,r,r,A.j0(r,r,n,r,r,r,r,r,r,r,r,11,r,r,q?B.n:B.aB,r,r,!0,r,r,r,r,r,r,r,r),r,r,r)],t.p),B.j,B.ch,B.G),r),!1,r,!0,!1,r,r,r,B.df,r,r,r,r,r,r,r,r,r,r,r,r,r,r,s.r,r,r,r,r,44,r,r,r),1)}}
 A.CS.prototype={
 p(a){var s=null,r=t.p
-return A.dd(B.aap,B.a6,A.dn(A.b([A.ag(A.b([B.a00,B.ap,A.as(A.i("Wo B\xf6rdesnack24 KI einsetzt",s,s,s,s,A.bt(B.h,22,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.Q,A.i("Wir informieren dich hier transparent nach Artikel 50 EU AI Act (Verordnung (EU) 2024/1689), an welchen Stellen unsere App automatisierte, algorithmische oder KI-basierte Entscheidungen trifft, welchen Zweck sie verfolgen und welche Rechte du hast.",s,s,s,s,A.y(B.p,14,B.l).cq(1.4),s,s,s),B.az,B.aMU,B.aN0,B.aMW,B.aMZ,B.aMX,B.aN_,B.az,A.fO(B.aeF,B.aGu,new A.axc(),A.l5(s,s,s,s,s,s,s,s,s,B.h,s,s,B.dh,s,s,B.mL,s,s,s,s))],r),s,B.cF,s,B.F,!1),s,s,s)}}
+return A.dd(B.aaq,B.a6,A.dn(A.b([A.ag(A.b([B.a00,B.ap,A.as(A.i("Wo B\xf6rdesnack24 KI einsetzt",s,s,s,s,A.bt(B.h,22,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.Q,A.i("Wir informieren dich hier transparent nach Artikel 50 EU AI Act (Verordnung (EU) 2024/1689), an welchen Stellen unsere App automatisierte, algorithmische oder KI-basierte Entscheidungen trifft, welchen Zweck sie verfolgen und welche Rechte du hast.",s,s,s,s,A.y(B.p,14,B.l).cq(1.4),s,s,s),B.az,B.aMU,B.aN0,B.aMW,B.aMZ,B.aMX,B.aN_,B.az,A.fO(B.aeF,B.aGu,new A.axc(),A.l5(s,s,s,s,s,s,s,s,s,B.h,s,s,B.dh,s,s,B.mL,s,s,s,s))],r),s,B.cF,s,B.F,!1),s,s,s)}}
 A.axc.prototype={
 $0(){return A.mD(A.cv("https://data.consilium.europa.eu/doc/document/PE-24-2024-INIT/en/pdf",0,null),B.e0,null)},
 $S:0}
@@ -63888,7 +63888,7 @@ p.bh(A.c4(null,null,null,null,null,B.t,null,A.i(b?"Einwilligung erteilt.":"Einwi
 return A.p($async$B1,r)},
 p(a){var s,r,q,p=null,o=t.p,n=A.b([A.i("Deine Einwilligungen sind jederzeit widerrufbar. Der Widerruf wirkt in die Zukunft und l\xe4sst bereits erfolgte Verarbeitungen unber\xfchrt.",p,p,p,p,A.y(B.aV,14,B.l),p,p,p),B.az],o)
 for(s=this.w,r=0;r<3;++r){q=B.amg[r]
-B.b.K(n,A.b([new A.aj3(q,s.h(0,q.a),new A.b7P(this,q),new A.b7Q(this,q),p),B.Q],o))}return A.dd(B.aad,p,A.dn(n,p,B.cF,p,B.F,!1),p,p,p)}}
+B.b.K(n,A.b([new A.aj3(q,s.h(0,q.a),new A.b7P(this,q),new A.b7Q(this,q),p),B.Q],o))}return A.dd(B.aae,p,A.dn(n,p,B.cF,p,B.F,!1),p,p,p)}}
 A.b7O.prototype={
 $0(){var s=this.c
 this.a.w.m(0,this.b,s)
@@ -63918,7 +63918,7 @@ q=r}else q=r
 if(q==null)q=""
 s=s?p:o.a
 if(s==null)s=""
-return A.dd(B.aar,B.h,A.cK(new A.ac(B.el,A.a5(A.b([A.i("Am Automaten scannen",p,p,p,p,A.y(B.m,13,B.n).fj(1),p,p,p),B.D,A.i(q,p,p,p,p,A.bt(B.o,22,B.n),B.bs,p,p),B.aW,A.i("Kd.-Nr. "+m,p,p,p,p,A.y(B.aG,14,B.H),p,p,p),B.c9,new A.Qf(A.aQ(p,new A.Qi("BS24:"+m+":"+s,-1,260,!0,B.auo,B.aum,p),B.q,p,p,new A.aD(B.o,p,p,A.aw(16),p,p,B.A),p,p,p,p,B.C,p,p,p),p),B.c9,A.i("Halte den QR-Code an den Scanner des Automaten. Rabatte und Rechnung werden automatisch verkn\xfcpft.",p,p,p,p,A.y(B.aG,12,B.l),B.bs,p,p)],t.p),B.j,B.f,B.G),p),p,p),p,p,p)}}
+return A.dd(B.aas,B.h,A.cK(new A.ac(B.el,A.a5(A.b([A.i("Am Automaten scannen",p,p,p,p,A.y(B.m,13,B.n).fj(1),p,p,p),B.D,A.i(q,p,p,p,p,A.bt(B.o,22,B.n),B.bs,p,p),B.aW,A.i("Kd.-Nr. "+m,p,p,p,p,A.y(B.aG,14,B.H),p,p,p),B.c9,new A.Qf(A.aQ(p,new A.Qi("BS24:"+m+":"+s,-1,260,!0,B.auo,B.aum,p),B.q,p,p,new A.aD(B.o,p,p,A.aw(16),p,p,B.A),p,p,p,p,B.C,p,p,p),p),B.c9,A.i("Halte den QR-Code an den Scanner des Automaten. Rabatte und Rechnung werden automatisch verkn\xfcpft.",p,p,p,p,A.y(B.aG,12,B.l),B.bs,p,p)],t.p),B.j,B.f,B.G),p),p,p),p,p,p)}}
 A.DZ.prototype={
 de(a,b){var s,r,q,p,o=null,n=b.al($.Ki(),t.fC),m=b.al($.bxc(),t.TN),l=b.al($.awF(),t.Ax),k=A.dA(b.al($.jS(),t._e))
 if(k==null)k=!1
@@ -63926,7 +63926,7 @@ s=t.l7
 r=A.da(n,new A.aDb(),new A.aDc(this),new A.aDd(),!1,!0,!1,t.jZ,s)
 q=A.da(m,new A.aDe(),new A.aDf(this),new A.aDg(),!1,!0,!1,t.ud,s)
 p=k?"W\xe4hle einen oder mehrere Zwecke \u2014 jede Stimme z\xe4hlt gleich. Du kannst deine Stimme jederzeit widerrufen oder eigene Vorschl\xe4ge einreichen.":"Wohin die 5 % flie\xdfen, siehst du hier immer. Mitbestimmen \u2014 abstimmen und eigene Projekte vorschlagen \u2014 geh\xf6rt zur kostenpflichtigen Version."
-return A.dd(B.aac,o,new A.h2(new A.aDh(b),A.dn(A.b([B.awf,B.Q,r,B.Q,q,B.c9,B.avO,B.D,A.i(p,o,o,o,o,A.y(B.p,13,B.l),o,o,o),B.r,A.da(l,new A.aDi(m),new A.aDj(this),new A.aDk(),!1,!0,!1,t.oW,s),B.c9,B.avJ,B.r,A.b0o(B.aOD,!k,"Eigene gemeinn\xfctzige Projekte vorschlagen und \xfcber die Empf\xe4nger abstimmen.")],t.p),o,B.cF,o,B.F,!1),o),o,o,o)},
+return A.dd(B.aac,o,new A.h2(new A.aDh(b),A.dn(A.b([B.aw7,B.Q,r,B.Q,q,B.c9,B.avO,B.D,A.i(p,o,o,o,o,A.y(B.p,13,B.l),o,o,o),B.r,A.da(l,new A.aDi(m),new A.aDj(this),new A.aDk(),!1,!0,!1,t.oW,s),B.c9,B.avJ,B.r,A.b0o(B.aOD,!k,"Eigene gemeinn\xfctzige Projekte vorschlagen und \xfcber die Empf\xe4nger abstimmen.")],t.p),o,B.cF,o,B.F,!1),o),o,o,o)},
 QX(a){var s=null
 return A.bj(B.aa,A.i(a,s,s,s,s,A.y(B.h,13,B.l),s,s,s),B.ff,s,B.C,s,s,3)}}
 A.aDh.prototype={
@@ -64208,7 +64208,7 @@ $0(){return this.a.y=!1},
 $S:0}
 A.E5.prototype={
 p(a){var s=null,r=t.p
-return A.dd(B.aaj,B.a6,A.dn(A.b([B.a9s,B.b0,A.i("Bis zu 50 \u20ac im Monat \u2014 steuerfrei vom Arbeitgeber",s,s,s,s,A.bt(B.h,22,B.n),s,s,s),B.r,A.i("Arbeitgeber d\xfcrfen ihren Besch\xe4ftigten monatlich Sachbez\xfcge bis zu 50 \u20ac steuer- und sozialversicherungsfrei gew\xe4hren \u2014 das l\xe4sst sich auch f\xfcr K\xe4ufe an unseren Automaten nutzen: Snacks, Getr\xe4nke, Eis. Hier erf\xe4hrst du, was rechtlich dahintersteckt und was das f\xfcr dein Gehalt bedeuten kann.",s,s,s,s,A.y(B.p,13.5,B.l).cq(1.5),s,s,s),B.Q,A.bj(B.m,A.a5(A.b([A.i("SACHBEZUGSFREIGRENZE",s,s,s,s,A.y(B.m,11,B.n).fj(0.6),s,s,s),B.D,A.i("50 \u20ac / Monat",s,s,s,s,A.bt(B.o,30,B.n),s,s,s),A.i("steuer- und SV-frei \u2014 \xa7 8 Abs. 2 Satz 11 EStG",s,s,s,s,A.y(B.aG,11.5,B.aB),s,s,s)],r),B.y,B.f,B.i),B.h,s,B.C,s,s,3),B.az,B.aMV,B.aMY,B.aMS,B.D,A.bj(B.bY,A.a5(A.b([A.ag(A.b([B.ae8,B.an,A.as(A.i("Wichtige Abgrenzung: kein Verpflegungszuschuss",s,s,s,s,A.bt(B.h,15,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.D,A.i('Ein Verpflegungszuschuss bzw. die Bezuschussung von Mahlzeiten (z. B. per Essensmarken) folgt einer anderen steuerlichen Regel: Bewertung nach den amtlichen Sachbezugswerten (Sozialversicherungsentgeltverordnung) und ggf. Pauschalversteuerung durch den Arbeitgeber nach \xa7 40 Abs. 2 EStG. Voraussetzung daf\xfcr ist aber eine \u201eMahlzeit" im steuerlichen Sinne (R 8.1 Lohnsteuer-Richtlinien) \u2014 zum Beispiel ein belegtes Br\xf6tchen. Ein reiner Snack oder ein Getr\xe4nk allein z\xe4hlt nicht als Mahlzeit.',s,s,s,s,A.y(B.h,13,B.l).cq(1.5),s,s,s),B.D,A.i("Unsere Automaten bieten aktuell keine vollwertigen Mahlzeiten an. F\xfcr K\xe4ufe bei uns gilt deshalb ausschlie\xdflich die 50-\u20ac-Sachbezugsfreigrenze \u2014 nicht die Verpflegungszuschuss-Regel. Bieten wir k\xfcnftig zum Beispiel belegte Br\xf6tchen an, k\xf6nnte zus\xe4tzlich die Mahlzeiten-Regelung greifen und Arbeitgebern weitere steuerlich beg\xfcnstigte Beteiligungsm\xf6glichkeiten er\xf6ffnen.",s,s,s,s,A.y(B.aV,13,B.aB).cq(1.5),s,s,s)],r),B.y,B.f,B.i),B.a6,s,B.C,s,B.bY,3),B.az,B.aMT,B.D,A.eu(!1,s,!0,new A.ac(B.nr,A.ag(A.b([new A.fL(1,B.cf,A.i("Als PDF f\xfcr deinen Arbeitgeber herunterladen",s,s,s,s,A.y(B.h,14.5,B.n).uY(B.hv,B.h,2),s,s,s),s),B.cj,B.Fj],r),B.j,s,B.f,B.G,0,s,s),s),s,!0,s,s,s,s,s,s,s,s,s,s,s,new A.aEI(),s,s,s,s,s,s,s),B.az,A.i("Allgemeine Information, keine Steuerberatung im Einzelfall. Die konkrete Umsetzung (z. B. Wahl einer ZAG-konformen Guthaben-karte, Ausgestaltung als Zusatzleistung) sollte jeder Arbeitgeber mit seinem Steuerberater bzw. seiner Lohnbuch-haltung abstimmen. Rechtsstand: Juli 2026, Angaben ohne Gew\xe4hr.",s,s,s,s,A.y(B.p,11,B.l).cq(1.45),s,s,s)],r),s,B.cF,s,B.F,!1),s,s,s)}}
+return A.dd(B.aak,B.a6,A.dn(A.b([B.a9s,B.b0,A.i("Bis zu 50 \u20ac im Monat \u2014 steuerfrei vom Arbeitgeber",s,s,s,s,A.bt(B.h,22,B.n),s,s,s),B.r,A.i("Arbeitgeber d\xfcrfen ihren Besch\xe4ftigten monatlich Sachbez\xfcge bis zu 50 \u20ac steuer- und sozialversicherungsfrei gew\xe4hren \u2014 das l\xe4sst sich auch f\xfcr K\xe4ufe an unseren Automaten nutzen: Snacks, Getr\xe4nke, Eis. Hier erf\xe4hrst du, was rechtlich dahintersteckt und was das f\xfcr dein Gehalt bedeuten kann.",s,s,s,s,A.y(B.p,13.5,B.l).cq(1.5),s,s,s),B.Q,A.bj(B.m,A.a5(A.b([A.i("SACHBEZUGSFREIGRENZE",s,s,s,s,A.y(B.m,11,B.n).fj(0.6),s,s,s),B.D,A.i("50 \u20ac / Monat",s,s,s,s,A.bt(B.o,30,B.n),s,s,s),A.i("steuer- und SV-frei \u2014 \xa7 8 Abs. 2 Satz 11 EStG",s,s,s,s,A.y(B.aG,11.5,B.aB),s,s,s)],r),B.y,B.f,B.i),B.h,s,B.C,s,s,3),B.az,B.aMV,B.aMY,B.aMS,B.D,A.bj(B.bY,A.a5(A.b([A.ag(A.b([B.ae8,B.an,A.as(A.i("Wichtige Abgrenzung: kein Verpflegungszuschuss",s,s,s,s,A.bt(B.h,15,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.D,A.i('Ein Verpflegungszuschuss bzw. die Bezuschussung von Mahlzeiten (z. B. per Essensmarken) folgt einer anderen steuerlichen Regel: Bewertung nach den amtlichen Sachbezugswerten (Sozialversicherungsentgeltverordnung) und ggf. Pauschalversteuerung durch den Arbeitgeber nach \xa7 40 Abs. 2 EStG. Voraussetzung daf\xfcr ist aber eine \u201eMahlzeit" im steuerlichen Sinne (R 8.1 Lohnsteuer-Richtlinien) \u2014 zum Beispiel ein belegtes Br\xf6tchen. Ein reiner Snack oder ein Getr\xe4nk allein z\xe4hlt nicht als Mahlzeit.',s,s,s,s,A.y(B.h,13,B.l).cq(1.5),s,s,s),B.D,A.i("Unsere Automaten bieten aktuell keine vollwertigen Mahlzeiten an. F\xfcr K\xe4ufe bei uns gilt deshalb ausschlie\xdflich die 50-\u20ac-Sachbezugsfreigrenze \u2014 nicht die Verpflegungszuschuss-Regel. Bieten wir k\xfcnftig zum Beispiel belegte Br\xf6tchen an, k\xf6nnte zus\xe4tzlich die Mahlzeiten-Regelung greifen und Arbeitgebern weitere steuerlich beg\xfcnstigte Beteiligungsm\xf6glichkeiten er\xf6ffnen.",s,s,s,s,A.y(B.aV,13,B.aB).cq(1.5),s,s,s)],r),B.y,B.f,B.i),B.a6,s,B.C,s,B.bY,3),B.az,B.aMT,B.D,A.eu(!1,s,!0,new A.ac(B.nr,A.ag(A.b([new A.fL(1,B.cf,A.i("Als PDF f\xfcr deinen Arbeitgeber herunterladen",s,s,s,s,A.y(B.h,14.5,B.n).uY(B.hv,B.h,2),s,s,s),s),B.cj,B.Fj],r),B.j,s,B.f,B.G,0,s,s),s),s,!0,s,s,s,s,s,s,s,s,s,s,s,new A.aEI(),s,s,s,s,s,s,s),B.az,A.i("Allgemeine Information, keine Steuerberatung im Einzelfall. Die konkrete Umsetzung (z. B. Wahl einer ZAG-konformen Guthaben-karte, Ausgestaltung als Zusatzleistung) sollte jeder Arbeitgeber mit seinem Steuerberater bzw. seiner Lohnbuch-haltung abstimmen. Rechtsstand: Juli 2026, Angaben ohne Gew\xe4hr.",s,s,s,s,A.y(B.p,11,B.l).cq(1.45),s,s,s)],r),s,B.cF,s,B.F,!1),s,s,s)}}
 A.aEI.prototype={
 $0(){return A.mD($.bNn(),B.e0,null)},
 $S:0}
@@ -64237,7 +64237,7 @@ return A.cK(new A.ac(B.C,A.i(A.j(a),s,s,s,s,A.y(B.aV,14,B.l),s,s,s),s),s,s)},
 $S:32}
 A.bcD.prototype={
 $1(a){var s,r,q,p=null,o=this.a,n=t.y,m=t.p
-n=A.b([B.aw3,B.Q,A.bzO(new A.bcz(o),B.aoi,A.dy([o.w],n),n),B.az],m)
+n=A.b([B.aw2,B.Q,A.bzO(new A.bcz(o),B.aoi,A.dy([o.w],n),n),B.az],m)
 if(o.w)n.push(new A.anC(a,p))
 else{s=J.Z(a)
 if(s.ga_(a))n.push(A.bj(p,A.i("Aktuell sind keine Automaten hinterlegt.",p,p,p,p,A.y(B.p,14,B.l),p,p,p),B.a6,p,B.C,p,p,3))
@@ -64284,7 +64284,7 @@ for(s=this.c,r=J.Z(s),q=0;q<r.gt(s);q=o){p=new A.aW(4,4)
 o=q+1
 j.push(new A.q2(40+q*55,60+B.e.ae(q,3)*55,n,n,n,n,A.a5(A.b([B.ad9,A.aQ(n,A.i("A"+o,n,n,n,n,A.y(B.o,10,B.n),n,n,n),B.q,n,n,new A.aD(B.h,n,n,new A.d4(p,p,p,p),n,n,B.A),n,n,n,n,B.a90,n,n,n)],k),B.j,B.f,B.G),n))}s=A.aw(4)
 j.push(A.hz(8,A.aQ(n,A.i("Karten-Vorschau",n,n,n,n,A.y(B.m,10,B.n),n,n,n),B.q,n,n,new A.aD(B.h,n,n,s,n,n,B.A),n,n,n,n,B.l3,n,n,n),n,n,n,8,n,n))
-return A.a5(A.b([new A.mI(1.3333333333333333,A.aQ(n,A.eU(B.bS,j,B.t,B.bj,n),B.q,n,n,new A.aD(B.aG,n,m,l,n,n,B.A),n,n,n,n,n,n,n,n),n),B.r,A.fv(B.Fk,B.aFR,new A.bgL(),A.dD(B.m,B.h,n,B.fn,n,n,n))],k),B.a9,B.f,B.i)}}
+return A.a5(A.b([new A.mI(1.3333333333333333,A.aQ(n,A.eU(B.bS,j,B.t,B.bj,n),B.q,n,n,new A.aD(B.aG,n,m,l,n,n,B.A),n,n,n,n,n,n,n,n),n),B.r,A.fv(B.Fk,B.aFS,new A.bgL(),A.dD(B.m,B.h,n,B.fn,n,n,n))],k),B.a9,B.f,B.i)}}
 A.bgL.prototype={
 $0(){var s=0,r=A.q(t.H)
 var $async$$0=A.m(function(a,b){if(a===1)return A.n(b,r)
@@ -64401,7 +64401,7 @@ return A.bj(s,A.ag(A.b([B.acT,B.ap,A.as(A.a5(A.b([A.i("Belegarchiv",s,s,s,s,A.y(
 A.F3.prototype={
 a4k(a){return B.c.cY(B.e.j(A.c0(a)),2,"0")+"."+B.c.cY(B.e.j(A.bi(a)),2,"0")+"."+A.aZ(a)},
 de(a,b){var s=null
-return A.dd(B.aan,s,A.da(b.al($.CI(),t.oM),new A.aMa(this,a,b),new A.aMb(),new A.aMc(),!1,!0,!1,t.g,t.jK),s,s,s)}}
+return A.dd(B.aao,s,A.da(b.al($.CI(),t.oM),new A.aMa(this,a,b),new A.aMb(),new A.aMc(),!1,!0,!1,t.g,t.jK),s,s,s)}}
 A.aMc.prototype={
 $0(){return B.bI},
 $S:24}
@@ -64471,7 +64471,7 @@ if(a6===!0){d.toString
 a6=d}else a6=a9
 s.push(A.bj(a8,A.a5(A.b([new A.ln(B.EH,"Firmenname",a0,a8,a8),B.c4,new A.ln(B.EU,"Stra\xdfe + Hausnr.",a1,a8,a8),B.c4,new A.ln(B.yc,"PLZ + Ort",a2,a8,a8),B.c4,new A.ln(B.abh,"Land",f,a8,a8),B.c4,new A.ln(B.fQ,"Steuernummer",a3,a8,a8),B.c4,new A.ln(B.le,"USt-IdNr.",a6,a8,a8)],a5),B.j,B.f,B.i),a8,a8,B.a4,a8,a8,3))
 s.push(B.r)
-s.push(A.fv(B.F8,B.aFU,new A.aM8(a7.b,b0,a7.c),A.dD(B.m,B.h,a8,B.fn,a8,a8,a8)))
+s.push(A.fv(B.F8,B.aFV,new A.aM8(a7.b,b0,a7.c),A.dD(B.m,B.h,a8,B.fn,a8,a8,a8)))
 B.b.K(a4,s)}a4.push(B.az)
 a4.push(A.i("Geschlecht",a8,a8,a8,a8,A.y(B.h,14,B.H),a8,a8,a8))
 a4.push(B.r)
@@ -64630,7 +64630,7 @@ s=A.f5(o,B.aX,!1,o,!0,B.t,o,A.fh(),p.gUc(),o,o,o,o,o,2,B.afS,B.ab,!0,o,!0,o,!1,o
 r=p.ax
 q=r?o:p.gaEM()
 r=r?B.mg:B.ada
-return A.dd(B.aat,o,A.dn(A.b([l,B.Q,k,B.r,j,B.r,h,B.r,g,B.r,m,B.r,s,B.Q,A.fv(r,B.ey,q,A.dD(B.m,B.h,o,B.ek,o,o,o))],i),o,B.C,o,B.F,!1),o,o,o)}}
+return A.dd(B.aau,o,A.dn(A.b([l,B.Q,k,B.r,j,B.r,h,B.r,g,B.r,m,B.r,s,B.Q,A.fv(r,B.ey,q,A.dD(B.m,B.h,o,B.ek,o,o,o))],i),o,B.C,o,B.F,!1),o,o,o)}}
 A.bbG.prototype={
 $0(){return this.a.ax=!0},
 $S:0}
@@ -64685,7 +64685,7 @@ p.push(A.i(q.d,r,r,r,r,A.y(B.h,14,B.l),r,r,r))
 return A.bj(r,A.a5(A.b([new A.mI(1.7777777777777777,o,r),new A.ac(B.aj,A.a5(p,B.y,B.f,B.i),r)],n),B.a9,B.f,B.i),r,r,B.a4,r,r,3)}}
 A.Fi.prototype={
 de(a,b){var s=null,r=b.al($.awK(),t.a0)
-return A.dd(A.v9(A.b([A.dJ(A.i("Alle gelesen",s,s,s,s,A.y(B.m,13,B.H),s,s,s),s,s,new A.aQi(b),s,s)],t.p),B.aFE),s,new A.h2(new A.aQj(b),A.da(r,new A.aQk(b),new A.aQl(),new A.aQm(),!1,!0,!1,t.gE,t.l7),s),s,s,s)}}
+return A.dd(A.v9(A.b([A.dJ(A.i("Alle gelesen",s,s,s,s,A.y(B.m,13,B.H),s,s,s),s,s,new A.aQi(b),s,s)],t.p),B.aFF),s,new A.h2(new A.aQj(b),A.da(r,new A.aQk(b),new A.aQl(),new A.aQm(),!1,!0,!1,t.gE,t.l7),s),s,s,s)}}
 A.aQi.prototype={
 $0(){var s=0,r=A.q(t.H),q=this,p,o
 var $async$$0=A.m(function(a,b){if(a===1)return A.n(b,r)
@@ -64809,7 +64809,7 @@ B.b.K(q,p)}q.push(new A.fR("F\xfcr alle","Wochen\xadangebote",new A.HI(a,l),$.bC
 q.push(B.Q)
 q.push(A.b0o(A.da(j,new A.bik(),new A.bil(),new A.bim(),!1,!0,!1,t.Dp,t.l7),r,"Wochen- und Aktionsangebote aktivieren und am Automaten einl\xf6sen."))
 q.push(B.Q)
-q.push(B.awc)
+q.push(B.awd)
 q.push(B.Q)
 q.push(B.aMF)
 return new A.h2(new A.bin(m),A.dn(q,m.w,new A.ah(20,20,20,32+s.f.d),l,B.F,!1),l)}}
@@ -65795,7 +65795,7 @@ this.z=A.dz(B.a7R,new A.bjN(this))},
 p(a){var s,r=this,q=null,p=r.gc_(),o=p.al($.bDI(),t.RH),n=new A.iT(r.y,o.b,o.c),m=p.al($.bQM().$1(n),t.TA),l=A.dA(p.al($.jS(),t._e))
 if(l==null)l=!1
 s=p.al($.awI(),t.i)
-return A.dd(B.aav,q,A.a5(A.b([new A.ac(B.a8P,new A.Ym(r.w,r.x,q),q),new A.alm(n,q),A.as(A.da(m,new A.bjQ(r,n,l,s>0?s:0.05),new A.bjR(),new A.bjS(),!1,!0,!1,t.OQ,t.l7),1)],t.p),B.j,B.f,B.i),q,q,q)}}
+return A.dd(B.aad,q,A.a5(A.b([new A.ac(B.a8P,new A.Ym(r.w,r.x,q),q),new A.alm(n,q),A.as(A.da(m,new A.bjQ(r,n,l,s>0?s:0.05),new A.bjR(),new A.bjS(),!1,!0,!1,t.OQ,t.l7),1)],t.p),B.j,B.f,B.i),q,q,q)}}
 A.bjN.prototype={
 $0(){var s,r=this.a
 if(r.c==null)return
@@ -65998,7 +65998,7 @@ k=A.i(k,q,q,q,q,A.bt(B.o,18,B.n),q,q,q)
 l=l?q:n.b
 if(l==null)l=""
 s=t.p
-return A.dn(A.b([A.bj(B.h,A.ag(A.b([m,B.ap,A.as(A.a5(A.b([B.a9A,B.b0,k,A.i(l,q,q,q,q,A.y(B.aG,12,B.l),q,q,q)],s),B.y,B.f,B.i),1)],s),B.j,q,B.f,B.i,0,q,q),B.h,q,B.C,q,q,3),B.az,B.a9n,B.r,A.bHo(A.b([new A.tL(B.le,"Stammdaten",new A.aSJ(a),!1,$.bCj()),new A.tL(B.hV,"Passwort",new A.aSK(r,a,b,o),!1,$.bCl()),new A.tL(B.o7,"Mein Abo",new A.aSL(a),!0,q),new A.tL(B.abU,"Status",new A.aSP(a),!0,q),new A.tL(B.fQ,"Belege",new A.aSQ(a),!0,q),new A.tL(B.ya,"Freunde werben",new A.aSR(a),!0,q)],s),3,92),B.Q,new A.C1("Benachrichtigungen",A.b([new A.WV(q)],s),q),B.Q,new A.C1("Kontakt",A.b([new A.qz(B.nY,"Kontakt / Feedback",q,new A.aSS(r,a,o),q,$.bCf()),new A.qz(B.o1,"Bei Google bewerten",q,new A.aST(r,a,b),B.m,q)],s),q),B.Q,new A.C1("Rechtliches",A.b([new A.qz(B.lg,"Einwilligungen","Analyse, Marketing, Karten",new A.aSU(a),q,q),new A.qz(B.EQ,"Impressum",q,new A.aSV(a),q,q),new A.qz(B.acf,"Datenschutzerkl\xe4rung",q,new A.aSW(a),q,q),new A.qz(B.ED,"Nutzungsbedingungen",q,new A.aSM(a),q,q)],s),q),B.Q,new A.C1("Konto beenden",A.b([new A.qz(B.Ev,"Konto l\xf6schen","Antrag stellen \u2014 wir bearbeiten manuell.",new A.aSN(r,a,b),B.aa,q)],s),q),B.az,A.fO(B.acX,B.aG8,new A.aSO(b),q)],s),q,B.cF,q,B.F,!1)},
+return A.dn(A.b([A.bj(B.h,A.ag(A.b([m,B.ap,A.as(A.a5(A.b([B.a9A,B.b0,k,A.i(l,q,q,q,q,A.y(B.aG,12,B.l),q,q,q)],s),B.y,B.f,B.i),1)],s),B.j,q,B.f,B.i,0,q,q),B.h,q,B.C,q,q,3),B.az,B.a9n,B.r,A.bHo(A.b([new A.tL(B.le,"Stammdaten",new A.aSJ(a),!1,$.bCj()),new A.tL(B.hV,"Passwort",new A.aSK(r,a,b,o),!1,$.bCl()),new A.tL(B.o7,"Mein Abo",new A.aSL(a),!0,q),new A.tL(B.abU,"Status",new A.aSP(a),!0,q),new A.tL(B.fQ,"Belege",new A.aSQ(a),!0,q),new A.tL(B.ya,"Freunde werben",new A.aSR(a),!0,q)],s),3,92),B.Q,new A.C1("Benachrichtigungen",A.b([new A.WV(q)],s),q),B.Q,new A.C1("Kontakt",A.b([new A.qz(B.nY,"Kontakt / Feedback",q,new A.aSS(r,a,o),q,$.bCf()),new A.qz(B.o1,"Bei Google bewerten",q,new A.aST(r,a,b),B.m,q)],s),q),B.Q,new A.C1("Rechtliches",A.b([new A.qz(B.lg,"Einwilligungen","Analyse, Marketing, Karten",new A.aSU(a),q,q),new A.qz(B.EQ,"Impressum",q,new A.aSV(a),q,q),new A.qz(B.acf,"Datenschutzerkl\xe4rung",q,new A.aSW(a),q,q),new A.qz(B.ED,"Nutzungsbedingungen",q,new A.aSM(a),q,q)],s),q),B.Q,new A.C1("Konto beenden",A.b([new A.qz(B.Ev,"Konto l\xf6schen","Antrag stellen \u2014 wir bearbeiten manuell.",new A.aSN(r,a,b),B.aa,q)],s),q),B.az,A.fO(B.acX,B.aG9,new A.aSO(b),q)],s),q,B.cF,q,B.F,!1)},
 Cl(a,b){return this.aJ1(a,b)},
 aJ1(a,b){var s=0,r=A.q(t.H),q,p=2,o=[],n,m,l,k,j,i,h
 var $async$Cl=A.m(function(c,d){if(c===1){o.push(d)
@@ -66200,8 +66200,8 @@ A.aSO.prototype={
 $0(){return this.a.aI(0,$.Kg().ghR(),t.nT).oe()},
 $S:0}
 A.aSC.prototype={
-$1(a){var s=null,r=t.p,q=A.a5(A.b([B.aFJ,B.r,A.f5(s,B.aX,!1,s,!0,B.t,s,A.fh(),this.a,s,s,s,s,s,2,B.afk,B.ab,!0,s,!0,s,!1,s,B.b3,s,s,s,s,s,s,s,s,2,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.C,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.au,s,B.a5,s,s,s,s)],r),B.j,B.f,B.G),p=this.b
-return A.lH(A.b([A.dJ(B.cY,s,s,new A.aSA(p),s,s),A.e_(B.aFG,new A.aSB(p),A.dD(B.zg,s,s,s,s,s,s))],r),s,q,B.aG7)},
+$1(a){var s=null,r=t.p,q=A.a5(A.b([B.aFK,B.r,A.f5(s,B.aX,!1,s,!0,B.t,s,A.fh(),this.a,s,s,s,s,s,2,B.afk,B.ab,!0,s,!0,s,!1,s,B.b3,s,s,s,s,s,s,s,s,2,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.C,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.au,s,B.a5,s,s,s,s)],r),B.j,B.f,B.G),p=this.b
+return A.lH(A.b([A.dJ(B.cY,s,s,new A.aSA(p),s,s),A.e_(B.aFH,new A.aSB(p),A.dD(B.zg,s,s,s,s,s,s))],r),s,q,B.aG8)},
 $S:56}
 A.aSA.prototype={
 $0(){A.ba(this.a,!1).dj(!1)
@@ -66222,7 +66222,7 @@ m.push(B.r)
 k=s.f
 m.push(new A.eb(B.de,r,r,A.qg(B.aes,B.aHg,new A.aSr(s.b,k,s.r,s.w),r),r))
 m=A.f4(A.a5(m,B.a9,B.f,B.G),r,B.F)
-return A.lH(A.b([A.dJ(B.cY,r,r,new A.aSs(k),r,r),A.e_(B.aGc,new A.aSt(l,p,b,o,q,k),r)],n),r,m,B.aGX)},
+return A.lH(A.b([A.dJ(B.cY,r,r,new A.aSs(k),r,r),A.e_(B.aGd,new A.aSt(l,p,b,o,q,k),r)],n),r,m,B.aGX)},
 $S:118}
 A.aSr.prototype={
 $0(){var s=0,r=A.q(t.H),q=this
@@ -66262,7 +66262,7 @@ $0(){return this.a.a="Aktuelles Passwort erforderlich."},
 $S:0}
 A.aSz.prototype={
 $1(a){var s=null,r=A.i("Wir senden eine Zur\xfccksetzen-Mail an "+this.a+". Klicke den Link, um ein neues Passwort zu vergeben.",s,s,s,s,s,s,s,s),q=this.b
-return A.lH(A.b([A.dJ(B.cY,s,s,new A.aSx(q),s,s),A.e_(B.aH8,new A.aSy(q),s)],t.p),s,r,B.aGr)},
+return A.lH(A.b([A.dJ(B.cY,s,s,new A.aSx(q),s,s),A.e_(B.aH8,new A.aSy(q),s)],t.p),s,r,B.aGs)},
 $S:56}
 A.aSx.prototype={
 $0(){A.ba(this.a,!1).dj(!1)
@@ -66359,7 +66359,7 @@ if(r.length===0)r=null
 p.dj(new A.aj8(s,r,B.c.aS(q.f.a.a)))},
 p(a){var s,r,q,p=this,o=null,n=A.bx(a,o,t.l).w,m=A.i("Kontakt / Feedback",o,o,o,o,A.V(a).ok.r,o,o,o),l=p.r,k=A.b([],t.FG)
 for(s=B.Sj.giG(B.Sj),s=s.gZ(s),r=t.b7;s.u();){q=s.gN(s)
-k.push(new A.ej(q.a,A.i(q.b,o,o,o,o,o,o,o,o),B.bf,o,r))}return new A.ac(new A.ah(0,0,0,n.f.d),A.f4(A.k1(o,A.a5(A.b([m,B.r,A.oa(B.afK,l,!1,k,new A.b7T(p),o,t.N),B.r,A.d6(o,!1,p.e,B.ag4,o,o,1,!1,o,o,B.a5,o),B.r,A.d6(o,!1,p.f,B.afR,o,o,4,!1,o,o,B.a5,new A.b7U()),B.r,B.aFX,B.Q,A.e_(B.aGD,p.gaI8(),o)],t.p),B.a9,B.f,B.G),p.d),B.aj,B.F),o)}}
+k.push(new A.ej(q.a,A.i(q.b,o,o,o,o,o,o,o,o),B.bf,o,r))}return new A.ac(new A.ah(0,0,0,n.f.d),A.f4(A.k1(o,A.a5(A.b([m,B.r,A.oa(B.afK,l,!1,k,new A.b7T(p),o,t.N),B.r,A.d6(o,!1,p.e,B.ag4,o,o,1,!1,o,o,B.a5,o),B.r,A.d6(o,!1,p.f,B.afR,o,o,4,!1,o,o,B.a5,new A.b7U()),B.r,B.aFY,B.Q,A.e_(B.aGD,p.gaI8(),o)],t.p),B.a9,B.f,B.G),p.d),B.aj,B.F),o)}}
 A.b7T.prototype={
 $1(a){var s=this.a
 return s.J(new A.b7S(s,a))},
@@ -66421,7 +66421,7 @@ break
 case 6:case 1:return A.o(q,r)
 case 2:return A.n(o.at(-1),r)}})
 return A.p($async$Hz,r)},
-p(a){return A.dd(B.aai,B.a6,A.da(this.gc_().al($.bxj(),t.MY),new A.blg(this),new A.blh(),new A.bli(),!1,!0,!1,t.Kl,t.jK),null,null,null)},
+p(a){return A.dd(B.aaj,B.a6,A.da(this.gc_().al($.bxj(),t.MY),new A.blg(this),new A.blh(),new A.bli(),!1,!0,!1,t.Kl,t.jK),null,null,null)},
 aKI(a){var s=this.c
 s.toString
 A.j9(B.o,new A.bl5(a),s,!0,B.Yt,null,t.H)}}
@@ -66764,7 +66764,7 @@ $S:0}
 A.Ge.prototype={
 de(a,b){var s=null,r=A.dA(b.al($.jS(),t._e))
 if(r==null)r=!1
-return A.dd(B.aak,B.a6,new A.h2(new A.aVe(b),A.dn(A.b([B.awb,B.r,A.da(b.al($.awL(),t.UQ),new A.aVf(r),new A.aVg(),new A.aVh(),!1,!0,!1,t.w3,t.l7)],t.p),s,B.cF,s,B.F,!1),s),s,s,s)}}
+return A.dd(B.aal,B.a6,new A.h2(new A.aVe(b),A.dn(A.b([B.awc,B.r,A.da(b.al($.awL(),t.UQ),new A.aVf(r),new A.aVg(),new A.aVh(),!1,!0,!1,t.w3,t.l7)],t.p),s,B.cF,s,B.F,!1),s),s,s,s)}}
 A.aVe.prototype={
 $0(){var s=0,r=A.q(t.H),q=this,p,o
 var $async$$0=A.m(function(a,b){if(a===1)return A.n(b,r)
@@ -66845,7 +66845,7 @@ r=A.i("Wird erst erzeugt, wenn du ihn brauchst.",m,m,m,m,A.y(B.p,13,B.l),m,m,m)
 q=n.w
 p=q?m:n.gauV()
 q=q?B.mg:B.aeA
-return A.bj(m,A.a5(A.b([s,B.D,r,B.Q,A.fv(q,B.aFm,p,A.dD(B.m,B.h,m,B.DC,new A.d0(A.aw(9999),B.I),m,m))],t.p),B.a9,B.f,B.i),m,m,B.C,m,m,3)}s="https://blume1805.github.io/B-rdesnack24-/#/r/"+l
+return A.bj(m,A.a5(A.b([s,B.D,r,B.Q,A.fv(q,B.aFn,p,A.dD(B.m,B.h,m,B.DC,new A.d0(A.aw(9999),B.I),m,m))],t.p),B.a9,B.f,B.i),m,m,B.C,m,m,3)}s="https://blume1805.github.io/B-rdesnack24-/#/r/"+l
 s.toString
 r=A.i("Dein Code",m,m,m,m,A.y(B.p,12,B.n).fj(0.8),m,m,m)
 q=A.acL(l,A.bt(B.h,30,B.n).y_(1.1,4))
@@ -66933,7 +66933,7 @@ if(r===s)return
 $.bK7=s
 if(r==null)return
 $.ap.x1$.push(new A.bmB(this))},
-p(a){return A.dd(B.aag,B.a6,A.da(this.gc_().al($.awJ(),t.QW),new A.bmE(this),new A.bmF(),new A.bmG(),!1,!0,!1,t.a,t.jK),null,null,null)}}
+p(a){return A.dd(B.aah,B.a6,A.da(this.gc_().al($.awJ(),t.QW),new A.bmE(this),new A.bmF(),new A.bmG(),!1,!0,!1,t.a,t.jK),null,null,null)}}
 A.bmB.prototype={
 $1(a){var s=this.a.c
 if(s!=null)A.c8b(s)},
@@ -67246,7 +67246,7 @@ r.push(A.i("Dein Rabatt w\xe4chst mit",f,f,f,f,A.bt(B.h,18,B.n),f,f,f))
 r.push(B.r)
 r.push(B.aHq)
 r.push(B.r)
-r.push(new A.eb(B.de,f,f,A.qg(B.adE,B.aFf,new A.bpo(a),A.qh(f,f,f,f,f,f,f,f,f,B.aZ,f,f,f,B.a4,f,f,f,f,f,f,f)),f))
+r.push(new A.eb(B.de,f,f,A.qg(B.adE,B.aFg,new A.bpo(a),A.qh(f,f,f,f,f,f,f,f,f,B.aZ,f,f,f,B.a4,f,f,f,f,f,f,f)),f))
 r.push(B.r)
 r.push(B.aOR)
 r.push(B.r)
@@ -67362,7 +67362,7 @@ $0(){return this.a.z=!1},
 $S:0}
 A.bpi.prototype={
 $1(a){var s=null
-return new A.ac(B.DJ,A.a5(A.b([B.adc,B.D,A.i("Kaufanfrage an deine Eltern gesendet",s,s,s,s,A.bt(B.h,19,B.n),s,s,s),B.D,A.i("Dein "+this.a.b+" wartet auf die Freigabe deiner Eltern. Sobald sie zustimmen, wird dein Zugang beim n\xe4chsten App-Start automatisch freigeschaltet \u2014 du musst nichts weiter tun.",s,s,s,s,A.y(B.aV,13.5,B.l).cq(1.45),s,s,s),B.Q,A.bN(A.e_(B.aFF,new A.bph(a),A.dD(B.h,B.m,s,s,new A.d0(A.aw(9999),B.I),s,s)),s,1/0)],t.p),B.y,B.f,B.G),s)},
+return new A.ac(B.DJ,A.a5(A.b([B.adc,B.D,A.i("Kaufanfrage an deine Eltern gesendet",s,s,s,s,A.bt(B.h,19,B.n),s,s,s),B.D,A.i("Dein "+this.a.b+" wartet auf die Freigabe deiner Eltern. Sobald sie zustimmen, wird dein Zugang beim n\xe4chsten App-Start automatisch freigeschaltet \u2014 du musst nichts weiter tun.",s,s,s,s,A.y(B.aV,13.5,B.l).cq(1.45),s,s,s),B.Q,A.bN(A.e_(B.aFG,new A.bph(a),A.dD(B.h,B.m,s,s,new A.d0(A.aw(9999),B.I),s,s)),s,1/0)],t.p),B.y,B.f,B.G),s)},
 $S:344}
 A.bph.prototype={
 $0(){return A.ba(this.a,!1).eS()},
@@ -67458,12 +67458,12 @@ k=t.p
 j=A.eu(!1,g,!0,new A.ac(B.nr,A.ag(A.b([new A.fL(1,B.cf,A.i("Beispielrechnung hier klicken",g,g,g,g,A.y(B.h,14.5,B.n).uY(B.hv,B.h,2),g,g,g),g),B.cj,B.Fj],k),B.j,g,B.f,B.G,0,g,g),g),g,!0,g,g,g,g,g,g,g,g,g,g,g,new A.b0q(),g,g,g,g,g,g,g)
 i=A.ag(A.b([B.a9e,B.ap,A.as(new A.Yc("Normal",s,"Mit Deals (\u221210 % extra), Wochen-/Tagesangeboten und Treue-Boni.",!0,g),1)],k),B.a9,g,B.f,B.i,0,g,g)
 h=$.dr()
-h=A.b([B.aw8,B.r,B.a0b,B.D,l,B.r,j,B.Q,new A.Oa(i,g),B.az,B.a9I,B.r,A.bj(g,A.a5(A.b([B.aLd,B.c4,new A.U6("Monats-Abo",h.ap(0.99)+" / Monat",h.ap(r)+" / Monat",h.ap(q)+" / Monat",g),B.c4,new A.U6("Jahres-Abo",h.ap(9.99)+" / Jahr",h.ap(p)+" / Monat",h.ap(o)+" / Monat",g)],k),B.j,B.f,B.i),g,g,B.a4,g,g,3),B.r,A.i("Kaffee + Snack "+h.ap(3.3)+". Normal reichen "+n+" Besuche im Monat f\xfcrs Jahres-Abo (vorsichtig: "+m+").",g,g,g,g,A.y(B.p,12.5,B.l).cq(1.5),g,g,g),B.az,B.a9w,B.r,B.a0a,B.c9],k)
+h=A.b([B.aw9,B.r,B.a0b,B.D,l,B.r,j,B.Q,new A.Oa(i,g),B.az,B.a9I,B.r,A.bj(g,A.a5(A.b([B.aLd,B.c4,new A.U6("Monats-Abo",h.ap(0.99)+" / Monat",h.ap(r)+" / Monat",h.ap(q)+" / Monat",g),B.c4,new A.U6("Jahres-Abo",h.ap(9.99)+" / Jahr",h.ap(p)+" / Monat",h.ap(o)+" / Monat",g)],k),B.j,B.f,B.i),g,g,B.a4,g,g,3),B.r,A.i("Kaffee + Snack "+h.ap(3.3)+". Normal reichen "+n+" Besuche im Monat f\xfcrs Jahres-Abo (vorsichtig: "+m+").",g,g,g,g,A.y(B.p,12.5,B.l).cq(1.5),g,g,g),B.az,B.a9w,B.r,B.a0a,B.c9],k)
 if(!f)h.push(A.bN(A.e_(B.aHc,new A.b0r(a),A.dD(B.m,B.h,g,B.DC,new A.d0(A.aw(9999),B.I),g,g)),g,1/0))
 else h.push(A.bj(g,A.ag(A.b([B.Fh,B.an,A.as(A.i("Du hast bereits ein Abo \u2014 deine Vorteile sind aktiv.",g,g,g,g,A.y(B.aV,13,B.l),g,g,g),1)],k),B.j,g,B.f,B.i,0,g,g),B.a6,g,B.C,g,g,3))
 h.push(B.Q)
 h.push(A.i("Kalkulationsbasis: Produktkatalog 03/2026, Preise inkl. USt. Das normale Szenario ist eine Beispielrechnung \u2014 deine tats\xe4chliche Ersparnis h\xe4ngt davon ab, wie oft du Deals und Coupons nutzt. Angaben ohne Gew\xe4hr, Preise k\xf6nnen sich \xe4ndern.",g,g,g,g,A.y(B.p,11,B.l).cq(1.45),g,g,g))
-return A.dd(B.aau,g,A.dn(h,g,B.cF,g,B.F,!1),g,g,g)}}
+return A.dd(B.aav,g,A.dn(h,g,B.cF,g,B.F,!1),g,g,g)}}
 A.b0q.prototype={
 $0(){return A.mD($.bOr(),B.e0,null)},
 $S:0}
@@ -67724,7 +67724,7 @@ p(a){var s,r,q,p,o,n=this,m=null,l=t.p,k=A.b([],l)
 for(s=n.c.c,r=s.length,q=0;q<r;++q){p=s[q]
 o=A.l5(B.de,m,m,m,m,m,m,m,m,B.h,m,m,B.l0,m,m,B.d1,m,m,m,m)
 k.push(new A.ac(B.a8i,A.bze(A.i(p.a,m,m,m,m,A.y(B.h,12,B.H),m,m,m),new A.bkj(n,p),o),m))}k.push(B.cH)
-k.push(A.ag(A.b([A.as(A.qg(B.adL,B.aFI,n.e,m),1),A.as(new A.VY(n.f,m),1)],l),B.j,m,B.f,B.i,0,m,m))
+k.push(A.ag(A.b([A.as(A.qg(B.adL,B.aFJ,n.e,m),1),A.as(new A.VY(n.f,m),1)],l),B.j,m,B.f,B.i,0,m,m))
 return A.a5(k,B.a9,B.f,B.G)}}
 A.bkj.prototype={
 $0(){return this.a.d.$1(this.b)},
@@ -67743,7 +67743,7 @@ B.b.K(o,A.b([B.cH,A.i(this.e,r,r,r,r,A.y(B.o,q?11.5:12.5,B.l).cq(1.35),r,r,r)],n
 o.push(A.bN(r,q?8:12,r))
 n=q?9:12
 s=A.y(B.aV,q?12.5:13.5,B.n)
-o.push(A.bN(A.e_(B.aFA,new A.bgo(a,b),A.dD(B.m,B.h,r,new A.ah(0,n,0,n),new A.d0(A.aw(9999),B.I),r,s)),r,1/0))
+o.push(A.bN(A.e_(B.aFB,new A.bgo(a,b),A.dD(B.m,B.h,r,new A.ah(0,n,0,n),new A.d0(A.aw(9999),B.I),r,s)),r,1/0))
 return new A.dU(B.a1_,A.bj(B.m,A.a5(o,B.y,B.f,B.G),B.h,r,new A.ah(p,p,p,p),B.Kx,r,3),r)}}
 A.bgo.prototype={
 $0(){var s=0,r=A.q(t.H),q=this,p,o
@@ -67835,7 +67835,7 @@ A.Cn.prototype={}
 A.anP.prototype={
 de(a,b){var s=null,r=b.al($.bDA(),t.y),q=A.dA(b.al($.bQE(),t._e))
 if(r||q!==!1)return B.am
-return A.dF(!1,B.W,!0,s,new A.ac(B.a8H,A.ag(A.b([B.acP,B.an,A.as(A.i("Konto absichern: Zwei-Faktor-Authentifizierung einrichten.",s,s,s,s,A.y(B.h,12.5,B.aB),s,s,s),1),A.dJ(B.aFN,s,s,new A.bhi(a),s,s),A.fj(s,s,B.Fe,s,s,new A.bhj(b),s,s,"Sp\xe4ter",s)],t.p),B.j,s,B.f,B.i,0,s,s),s),B.q,B.wN,0,s,s,s,s,s,B.bn)}}
+return A.dF(!1,B.W,!0,s,new A.ac(B.a8H,A.ag(A.b([B.acP,B.an,A.as(A.i("Konto absichern: Zwei-Faktor-Authentifizierung einrichten.",s,s,s,s,A.y(B.h,12.5,B.aB),s,s,s),1),A.dJ(B.aFO,s,s,new A.bhi(a),s,s),A.fj(s,s,B.Fe,s,s,new A.bhj(b),s,s,"Sp\xe4ter",s)],t.p),B.j,s,B.f,B.i,0,s,s),s),B.q,B.wN,0,s,s,s,s,s,B.bn)}}
 A.bhi.prototype={
 $0(){return A.rl(this.a).dN("/security/mfa",t.X)},
 $S:0}
@@ -67980,8 +67980,8 @@ if(k.Q===i)B.b.K(m,A.b([B.D,A.d6(j,!1,k.z,B.afw,j,j,3,!1,j,j,B.a5,new A.b6d(k))]
 m.push(B.az)
 r=k.as?j:k.gaLh()
 q=A.dD(B.h,B.m,j,B.ek,new A.d0(A.aw(9999),B.I),j,j)
-m.push(A.e_(k.as?B.ZG:B.aF9,r,q))
-B.b.K(g,A.b([B.a9p,B.b0,f,B.D,s,B.Q,A.bj(j,A.k1(j,A.a5(m,B.a9,B.f,B.i),k.w),j,j,B.C,j,j,3),B.r,A.i("Hinweis: Nach Ver\xf6ffentlichung in den App-Stores kann ein dort abgeschlossenes Abo zus\xe4tzlich \xfcber die Abo-Verwaltung des jeweiligen Stores gek\xfcndigt werden.",j,j,j,j,A.y(B.p,11,B.l),j,j,j)],h))}return A.dd(B.aah,B.a6,A.dn(g,j,B.aj,j,B.F,!1),j,j,j)}}
+m.push(A.e_(k.as?B.ZG:B.aFa,r,q))
+B.b.K(g,A.b([B.a9p,B.b0,f,B.D,s,B.Q,A.bj(j,A.k1(j,A.a5(m,B.a9,B.f,B.i),k.w),j,j,B.C,j,j,3),B.r,A.i("Hinweis: Nach Ver\xf6ffentlichung in den App-Stores kann ein dort abgeschlossenes Abo zus\xe4tzlich \xfcber die Abo-Verwaltung des jeweiligen Stores gek\xfcndigt werden.",j,j,j,j,A.y(B.p,11,B.l),j,j,j)],h))}return A.dd(B.aai,B.a6,A.dn(g,j,B.aj,j,B.F,!1),j,j,j)}}
 A.b65.prototype={
 $0(){return this.a.as=!0},
 $S:0}
@@ -68027,7 +68027,7 @@ return s?"Bitte den wichtigen Grund angeben":null},
 $S:14}
 A.aj2.prototype={
 p(a){var s=null,r=t.p
-return A.bj(B.ac,A.a5(A.b([A.ag(A.b([B.adT,B.an,A.as(A.i("K\xfcndigung eingegangen",s,s,s,s,A.bt(B.h,18,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.r,A.i("Ihre K\xfcndigungserkl\xe4rung ist am "+this.c+" Uhr bei uns eingegangen (Best\xe4tigung gem\xe4\xdf \xa7 312k Abs. 2 BGB). Eine Best\xe4tigung in Textform wurde an "+this.d+" gesendet \u2014 bitte als Nachweis aufbewahren.",s,s,s,s,A.y(B.aV,14,B.l).cq(1.45),s,s,s),B.r,A.i("Die K\xfcndigung wird zum n\xe4chstm\xf6glichen Zeitpunkt wirksam. Wir melden uns, falls R\xfcckfragen bestehen.",s,s,s,s,A.y(B.p,12,B.l),s,s,s),B.Q,A.bze(B.aFl,new A.b7M(a),s)],r),B.y,B.f,B.i),s,s,B.C,s,s,3)}}
+return A.bj(B.ac,A.a5(A.b([A.ag(A.b([B.adT,B.an,A.as(A.i("K\xfcndigung eingegangen",s,s,s,s,A.bt(B.h,18,B.n),s,s,s),1)],r),B.j,s,B.f,B.i,0,s,s),B.r,A.i("Ihre K\xfcndigungserkl\xe4rung ist am "+this.c+" Uhr bei uns eingegangen (Best\xe4tigung gem\xe4\xdf \xa7 312k Abs. 2 BGB). Eine Best\xe4tigung in Textform wurde an "+this.d+" gesendet \u2014 bitte als Nachweis aufbewahren.",s,s,s,s,A.y(B.aV,14,B.l).cq(1.45),s,s,s),B.r,A.i("Die K\xfcndigung wird zum n\xe4chstm\xf6glichen Zeitpunkt wirksam. Wir melden uns, falls R\xfcckfragen bestehen.",s,s,s,s,A.y(B.p,12,B.l),s,s,s),B.Q,A.bze(B.aFm,new A.b7M(a),s)],r),B.y,B.f,B.i),s,s,B.C,s,s,3)}}
 A.b7M.prototype={
 $0(){return A.ba(this.a,!1).z1()},
 $S:0}
@@ -68542,7 +68542,7 @@ p(a){var s=this,r=null,q=A.bx(a,r,t.l).w,p=A.i("Unterschrift zeichnen",r,r,r,r,A
 l===$&&A.a()
 m=A.aQ(r,A.bN(new A.RW(l,B.J,r),220,r),B.q,r,r,new A.aD(B.a6,r,n,m,r,r,B.A),r,r,r,r,r,r,r,r)
 n=t.p
-m=A.b([p,B.D,o,B.r,m,B.D,A.ag(A.b([A.qg(B.ad_,B.aFr,s.x?r:new A.bnZ(s),r),B.d8],n),B.j,r,B.f,B.i,0,r,r)],n)
+m=A.b([p,B.D,o,B.r,m,B.D,A.ag(A.b([A.qg(B.ad_,B.aFs,s.x?r:new A.bnZ(s),r),B.d8],n),B.j,r,B.f,B.i,0,r,r)],n)
 p=s.y
 if(p!=null)m.push(new A.ac(B.l_,A.i(p,r,r,r,r,A.y(B.aa,12,B.l),r,r,r),r))
 m.push(B.r)
@@ -129333,7 +129333,7 @@ A.ar9.prototype={}
 A.Eb.prototype={
 p(a){var s=null,r=this.c
 r=r==null?s:"GoException: "+r.a
-return A.le(!0,A.cK(A.a5(A.b([B.aFT,B.Q,A.i(r==null?"page not found":r,s,s,s,s,s,s,s,s),B.Q,new A.U7(new A.aFa(a),B.aFi,s)],t.p),B.j,B.ch,B.i),s,s),!0,!1,B.a4,!0,!0)}}
+return A.le(!0,A.cK(A.a5(A.b([B.aFU,B.Q,A.i(r==null?"page not found":r,s,s,s,s,s,s,s,s),B.Q,new A.U7(new A.aFa(a),B.aFj,s)],t.p),B.j,B.ch,B.i),s,s),!0,!1,B.a4,!0,!0)}}
 A.aFa.prototype={
 $0(){return A.rl(this.a).qW(0,"/",null)},
 $S:0}
@@ -129382,7 +129382,7 @@ A.zM.prototype={}
 A.F5.prototype={
 p(a){var s=null,r=A.bEi(s,s,s,s,s,s,s,s,B.aH5),q=this.c
 q=q==null?s:"GoException: "+q.a
-return A.dd(r,s,A.cK(A.a5(A.b([A.acL(q==null?"page not found":q,s),A.dJ(B.aFQ,s,s,new A.aOl(a),s,s)],t.p),B.j,B.ch,B.i),s,s),s,s,s)}}
+return A.dd(r,s,A.cK(A.a5(A.b([A.acL(q==null?"page not found":q,s),A.dJ(B.aFR,s,s,new A.aOl(a),s,s)],t.p),B.j,B.ch,B.i),s,s),s,s,s)}}
 A.aOl.prototype={
 $0(){return A.rl(this.a).qW(0,"/",null)},
 $S:0}
@@ -144731,7 +144731,7 @@ if(s==null){throw"DeferredLoading state error: code with hash '"+a+"' was not lo
 v.deferredInitialized[a]=true},
 deferredLibraryParts:{finance:[0,1],management:[0,2]},
 deferredPartUris:["main.dart.js_2.part.js","main.dart.js_1.part.js","main.dart.js_3.part.js"],
-deferredPartHashes:["SPYgl/6twnF3ttm11EVvA9ViBig=","civ2O8rPOitUALBfh4VD97VCfNk=","9X6f+b0SIAkCYnRoFNvb6FqIKOg="],
+deferredPartHashes:["WCz/BS1gG4eMsVd7qsCQQi/gdIE=","Gr4mu8J+LKJwaMBwtGUtaECQ+wU=","eiVe5M8wflRweVTpbL80UA+li7Y="],
 typeUniverse:{eC:new Map(),tR:{},eT:{},tPV:{},sEA:[]},
 mangledGlobalNames:{v:"int",F:"double",bu:"num",f:"String",D:"bool",br:"Null",u:"List",B:"Object",a1:"Map",au:"JSObject"},
 mangledNames:{},
@@ -145309,8 +145309,8 @@ B.a3u=new A.pn(null,null)
 B.fL=new A.xP(3,"experimentalWebParagraph")
 B.a3z=new A.xQ(null,null,null,null,null,null,null)
 B.a3A=new A.Lw(null,null,null,null,null,null)
-B.aGq=new A.ai("Keine offenen Freigaben.",null,null,null,null,null,null,null,null,null)
-B.a3C=new A.h3(B.U,null,null,B.aGq,null)
+B.aGr=new A.ai("Keine offenen Freigaben.",null,null,null,null,null,null,null,null,null)
+B.a3C=new A.h3(B.U,null,null,B.aGr,null)
 B.aPD=new A.b3q(0,"material")
 B.a3O=new A.jW(null,null,null,null,null,null,null,null,null,null)
 B.hK=new A.h3(B.U,null,null,B.a3O,null)
@@ -146007,34 +146007,34 @@ B.aHk=new A.ai("News",null,null,null,null,null,null,null,null,null)
 B.aa9=new A.el(B.aHk,null,null)
 B.aEM=new A.ai("Mein Abo",null,null,null,null,null,null,null,null,null)
 B.aaa=new A.el(B.aEM,null,null)
-B.aEV=new A.ai("Meine Spenden",null,null,null,null,null,null,null,null,null)
-B.aac=new A.el(B.aEV,null,null)
+B.aEW=new A.ai("Meine Spenden",null,null,null,null,null,null,null,null,null)
+B.aac=new A.el(B.aEW,null,null)
+B.aEV=new A.ai("Was suchst du?",null,null,null,null,null,null,null,null,null)
+B.aad=new A.el(B.aEV,null,null)
 B.aHj=new A.ai("Einwilligungen",null,null,null,null,null,null,null,null,null)
-B.aad=new A.el(B.aHj,null,null)
+B.aae=new A.el(B.aHj,null,null)
 B.aGK=new A.ai("Status & Belohnungen",null,null,null,null,null,null,null,null,null)
-B.aag=new A.el(B.aGK,null,null)
+B.aah=new A.el(B.aGK,null,null)
 B.a_c=new A.ai("Vertr\xe4ge hier k\xfcndigen",null,null,null,null,null,null,null,null,null)
-B.aah=new A.el(B.a_c,null,null)
+B.aai=new A.el(B.a_c,null,null)
 B.aGP=new A.ai("Belegarchiv",null,null,null,null,null,null,null,null,null)
-B.aai=new A.el(B.aGP,null,null)
-B.aEW=new A.ai("Steuerfreier Zuschuss",null,null,null,null,null,null,null,null,null)
-B.aaj=new A.el(B.aEW,null,null)
-B.aFD=new A.ai("Freunde werben",null,null,null,null,null,null,null,null,null)
-B.aak=new A.el(B.aFD,null,null)
-B.aG1=new A.ai("Gesellschafter-Freigaben",null,null,null,null,null,null,null,null,null)
-B.aam=new A.el(B.aG1,null,null)
+B.aaj=new A.el(B.aGP,null,null)
+B.aEX=new A.ai("Steuerfreier Zuschuss",null,null,null,null,null,null,null,null,null)
+B.aak=new A.el(B.aEX,null,null)
+B.aFE=new A.ai("Freunde werben",null,null,null,null,null,null,null,null,null)
+B.aal=new A.el(B.aFE,null,null)
+B.aG2=new A.ai("Gesellschafter-Freigaben",null,null,null,null,null,null,null,null,null)
+B.aan=new A.el(B.aG2,null,null)
 B.aHf=new A.ai("Stammdaten",null,null,null,null,null,null,null,null,null)
-B.aan=new A.el(B.aHf,null,null)
-B.aG_=new A.ai("KI-Transparenz",null,null,null,null,null,null,null,null,null)
-B.aap=new A.el(B.aG_,null,null)
-B.aF0=new A.ai("Meine Kundenkarte",null,null,null,null,null,null,null,null,null)
-B.aar=new A.el(B.aF0,null,null)
+B.aao=new A.el(B.aHf,null,null)
+B.aG0=new A.ai("KI-Transparenz",null,null,null,null,null,null,null,null,null)
+B.aaq=new A.el(B.aG0,null,null)
+B.aF1=new A.ai("Meine Kundenkarte",null,null,null,null,null,null,null,null,null)
+B.aas=new A.el(B.aF1,null,null)
 B.aGH=new A.ai("Unternehmensangaben",null,null,null,null,null,null,null,null,null)
-B.aat=new A.el(B.aGH,null,null)
-B.aG0=new A.ai("Wann rechnet sich das Abo?",null,null,null,null,null,null,null,null,null)
-B.aau=new A.el(B.aG0,null,null)
-B.aGt=new A.ai("Produkte suchen",null,null,null,null,null,null,null,null,null)
-B.aav=new A.el(B.aGt,null,null)
+B.aau=new A.el(B.aGH,null,null)
+B.aG1=new A.ai("Wann rechnet sich das Abo?",null,null,null,null,null,null,null,null,null)
+B.aav=new A.el(B.aG1,null,null)
 B.aEQ=new A.ai("Zu signieren",null,null,null,null,null,null,null,null,null)
 B.aaw=new A.el(B.aEQ,null,null)
 B.lb=new A.Eu(0,"push")
@@ -147363,8 +147363,8 @@ B.Kv=s(["\u099c\u09be\u09a8\u09c1","\u09ab\u09c7\u09ac","\u09ae\u09be\u09b0\u09c
 B.Kw=s(["eKr.","jKr."],t.s)
 B.bq=s(["h:mm:ss a zzzz","h:mm:ss a z","h:mm:ss a","h:mm a"],t.s)
 B.ayx=new A.cr(null,120,null,null)
-B.aGp=new A.ai("Aktuell nichts zu unterschreiben.",null,null,null,null,null,null,null,null,null)
-B.at9=new A.ac(B.C,B.aGp,null)
+B.aGq=new A.ai("Aktuell nichts zu unterschreiben.",null,null,null,null,null,null,null,null,null)
+B.at9=new A.ac(B.C,B.aGq,null)
 B.a3F=new A.h3(B.U,null,null,B.at9,null)
 B.amk=s([B.ayx,B.a3F],t.p)
 B.amm=s(["click","scroll"],t.s)
@@ -147919,8 +147919,8 @@ B.adU=new A.az(B.ab5,null,null,null,null)
 B.aEO=new A.ai("Liste",null,null,null,null,null,null,null,null,null)
 B.a2_=new A.jd(!1,B.adU,B.aEO,t.Mt)
 B.aew=new A.az(B.yc,null,null,null,null)
-B.aFH=new A.ai("Karte",null,null,null,null,null,null,null,null,null)
-B.a20=new A.jd(!0,B.aew,B.aFH,t.Mt)
+B.aFI=new A.ai("Karte",null,null,null,null,null,null,null,null,null)
+B.a20=new A.jd(!0,B.aew,B.aFI,t.Mt)
 B.aoi=s([B.a2_,B.a20],A.ax("C<jd<D>>"))
 B.ML=s(["1kv","2kv","3kv","4kv"],t.s)
 B.a47=new A.E(0.14901960784313725,0,0,0,B.k)
@@ -147953,12 +147953,12 @@ B.u3=s(["A","I","S","R","K","J","S"],t.s)
 B.u4=s(["vas\xe1rnap","h\xe9tf\u0151","kedd","szerda","cs\xfct\xf6rt\xf6k","p\xe9ntek","szombat"],t.s)
 B.jN=s(["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"],t.s)
 B.aeg=new A.az(B.nZ,null,null,null,null)
-B.aFb=new A.ai("Privat",null,null,null,null,null,null,null,null,null)
-B.a1Z=new A.jd("private",B.aeg,B.aFb,t.Zx)
+B.aFc=new A.ai("Privat",null,null,null,null,null,null,null,null,null)
+B.a1Z=new A.jd("private",B.aeg,B.aFc,t.Zx)
 B.EG=new A.a4(61194,"MaterialIcons",null,!1)
 B.ae1=new A.az(B.EG,null,null,null,null)
-B.aGj=new A.ai("Unternehmer",null,null,null,null,null,null,null,null,null)
-B.a21=new A.jd("business",B.ae1,B.aGj,t.Zx)
+B.aGk=new A.ai("Unternehmer",null,null,null,null,null,null,null,null,null)
+B.a21=new A.jd("business",B.ae1,B.aGk,t.Zx)
 B.aor=s([B.a1Z,B.a21],A.ax("C<jd<f>>"))
 B.dq=s(["EEEE, MMMM d, y","MMMM d, y","MMM d, y","M/d/yy"],t.s)
 B.MS=s(["\u0633\u200c\u0645\u06f1","\u0633\u200c\u0645\u06f2","\u0633\u200c\u0645\u06f3","\u0633\u200c\u0645\u06f4"],t.s)
@@ -149516,13 +149516,13 @@ B.YH=new A.Gx(3,"bottom")
 B.avY=new A.Rv(null,null,null,null,null,null,null,null,null,null,null)
 B.avZ=new A.Rw(null,null,null,null,null,null,null,null,null,null,null,null)
 B.aw_=new A.Rx(null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.aw3=new A.fR("Unsere Standorte","Automaten in der B\xf6rde",null,null)
+B.aw2=new A.fR("Hunger?","Der n\xe4chste Snack ist nah.",null,null)
 B.aw4=new A.fR("Mein Konto","Meine Spenden",null,null)
 B.aw6=new A.fR("Mein Konto","Belegarchiv",null,null)
-B.aw8=new A.fR("Beispielrechnung","Die App zahlt sich aus.",null,null)
-B.awb=new A.fR("Empfehlungsprogramm","Beide gewinnen",null,null)
-B.awc=new A.fR("Bewertet von der Community","Eure Favoriten",null,null)
-B.awf=new A.fR("5 % Netto-Umsatz","Dein Spendenbeitrag",null,null)
+B.aw7=new A.fR("Dein Einkauf hilft mit","5 % gehen weiter.",null,null)
+B.aw9=new A.fR("Beispielrechnung","Die App zahlt sich aus.",null,null)
+B.awc=new A.fR("Empfehlungsprogramm","Beide gewinnen",null,null)
+B.awd=new A.fR("Bewertet von der Community","Eure Favoriten",null,null)
 B.awg=new A.GA(null,null)
 B.ci=new A.ni(0,"tap")
 B.YI=new A.ni(1,"doubleTap")
@@ -149821,28 +149821,28 @@ B.ayR=new A.oH(5,"timeout")
 B.ayS=new A.GR(null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.aET=new A.ai("Bitte Geburtsdatum w\xe4hlen.",null,null,null,null,null,null,null,null,null)
 B.ayU=new A.dW(B.aET,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aFs=new A.ai("Aktuelles Passwort falsch.",null,null,null,null,null,null,null,null,null)
-B.ayV=new A.dW(B.aFs,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aGm=new A.ai("Passwort ge\xe4ndert. Eine Best\xe4tigungs-Mail ist unterwegs.",null,null,null,null,null,null,null,null,null)
-B.az0=new A.dW(B.aGm,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aFt=new A.ai("Aktuelles Passwort falsch.",null,null,null,null,null,null,null,null,null)
+B.ayV=new A.dW(B.aFt,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aGn=new A.ai("Passwort ge\xe4ndert. Eine Best\xe4tigungs-Mail ist unterwegs.",null,null,null,null,null,null,null,null,null)
+B.az0=new A.dW(B.aGn,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.aEI=new A.ai("Reset-Mail versendet.",null,null,null,null,null,null,null,null,null)
 B.az2=new A.dW(B.aEI,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.aGv=new A.ai('Vorschlag eingereicht \u2014 er erscheint jetzt unter \u201eVorschl\xe4ge".',null,null,null,null,null,null,null,null,null)
 B.az3=new A.dW(B.aGv,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aFy=new A.ai("Wir haben deine Anfrage an den Support weitergeleitet und melden uns per E-Mail.",null,null,null,null,null,null,null,null,null)
-B.az5=new A.dW(B.aFy,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aFz=new A.ai("Wir haben deine Anfrage an den Support weitergeleitet und melden uns per E-Mail.",null,null,null,null,null,null,null,null,null)
+B.az5=new A.dW(B.aFz,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.aH4=new A.ai("Empfehlungscode gespeichert \u2014 mit deinem ersten Abo bekommt ihr beide Gratis-Monate.",null,null,null,null,null,null,null,null,null)
 B.az6=new A.dW(B.aH4,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.aH2=new A.ai("Unternehmensangaben gespeichert.",null,null,null,null,null,null,null,null,null)
 B.az7=new A.dW(B.aH2,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aFK=new A.ai("Bitte einen aussagekr\xe4ftigen Titel angeben.",null,null,null,null,null,null,null,null,null)
-B.az9=new A.dW(B.aFK,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aFO=new A.ai("Bewertungslink noch nicht konfiguriert.",null,null,null,null,null,null,null,null,null)
-B.azc=new A.dW(B.aFO,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aF2=new A.ai("Nachricht gesendet. Danke!",null,null,null,null,null,null,null,null,null)
-B.aze=new A.dW(B.aF2,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
-B.aGk=new A.ai("Antrag gestellt. Wir melden uns per E-Mail.",null,null,null,null,null,null,null,null,null)
-B.azf=new A.dW(B.aGk,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aFL=new A.ai("Bitte einen aussagekr\xe4ftigen Titel angeben.",null,null,null,null,null,null,null,null,null)
+B.az9=new A.dW(B.aFL,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aFP=new A.ai("Bewertungslink noch nicht konfiguriert.",null,null,null,null,null,null,null,null,null)
+B.azc=new A.dW(B.aFP,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aF3=new A.ai("Nachricht gesendet. Danke!",null,null,null,null,null,null,null,null,null)
+B.aze=new A.dW(B.aF3,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
+B.aGl=new A.ai("Antrag gestellt. Wir melden uns per E-Mail.",null,null,null,null,null,null,null,null,null)
+B.azf=new A.dW(B.aGl,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.aH3=new A.ai("Reklamation eingegangen \u2014 wir pr\xfcfen das.",null,null,null,null,null,null,null,null,null)
 B.azi=new A.dW(B.aH3,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.t,null)
 B.ZK=new A.S7(0,"permissive")
@@ -150238,32 +150238,32 @@ B.aEF=new A.ai("Zustimmen",null,null,null,null,null,null,null,null,null)
 B.aER=new A.ai("An Support weiterleiten",null,null,null,null,null,null,null,null,null)
 B.ey=new A.ai("Speichern",null,null,null,null,null,null,null,null,null)
 B.cY=new A.ai("Abbrechen",null,null,null,null,null,null,null,null,null)
-B.aF9=new A.ai("Jetzt k\xfcndigen",null,null,null,null,null,null,null,null,null)
-B.aFf=new A.ai("Rechnet sich das?",null,null,null,null,null,null,null,null,null)
+B.aFa=new A.ai("Jetzt k\xfcndigen",null,null,null,null,null,null,null,null,null)
+B.aFg=new A.ai("Rechnet sich das?",null,null,null,null,null,null,null,null,null)
 B.aBw=new A.T(!0,B.o,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.aFi=new A.ai("Go to home page",null,B.aBw,null,null,null,null,null,null,null)
-B.aFl=new A.ai("Zur\xfcck",null,null,null,null,null,null,null,null,null)
-B.aFm=new A.ai("Empfehlungslink erstellen",null,null,null,null,null,null,null,null,null)
-B.aFr=new A.ai("Neu zeichnen",null,null,null,null,null,null,null,null,null)
-B.aFA=new A.ai("Zur kostenpflichtigen Version wechseln",null,null,null,null,null,null,null,null,null)
-B.aFE=new A.ai("Benachrichtigungen",null,null,null,null,null,null,null,null,null)
-B.aFF=new A.ai("Verstanden",null,null,null,null,null,null,null,null,null)
-B.aFG=new A.ai("Antrag stellen",null,null,null,null,null,null,null,null,null)
-B.aFI=new A.ai("Themen",null,null,null,null,null,null,null,null,null)
-B.aFJ=new A.ai("Wir bearbeiten deinen Antrag manuell. Wegen steuer- und lebensmittelrechtlicher Aufbewahrungspflichten werden Daten teilweise erst nach Ablauf der Frist gel\xf6scht; bis dahin werden sie gesperrt oder anonymisiert.",null,null,null,null,null,null,null,null,null)
-B.aFN=new A.ai("Einrichten",null,null,null,null,null,null,null,null,null)
-B.aFQ=new A.ai("Home",null,null,null,null,null,null,null,null,null)
-B.aFR=new A.ai("In Google Maps \xf6ffnen",null,null,null,null,null,null,null,null,null)
-B.aFT=new A.ai("Page Not Found",null,B.mp,null,null,null,null,null,null,null)
+B.aFj=new A.ai("Go to home page",null,B.aBw,null,null,null,null,null,null,null)
+B.aFm=new A.ai("Zur\xfcck",null,null,null,null,null,null,null,null,null)
+B.aFn=new A.ai("Empfehlungslink erstellen",null,null,null,null,null,null,null,null,null)
+B.aFs=new A.ai("Neu zeichnen",null,null,null,null,null,null,null,null,null)
+B.aFB=new A.ai("Zur kostenpflichtigen Version wechseln",null,null,null,null,null,null,null,null,null)
+B.aFF=new A.ai("Benachrichtigungen",null,null,null,null,null,null,null,null,null)
+B.aFG=new A.ai("Verstanden",null,null,null,null,null,null,null,null,null)
+B.aFH=new A.ai("Antrag stellen",null,null,null,null,null,null,null,null,null)
+B.aFJ=new A.ai("Themen",null,null,null,null,null,null,null,null,null)
+B.aFK=new A.ai("Wir bearbeiten deinen Antrag manuell. Wegen steuer- und lebensmittelrechtlicher Aufbewahrungspflichten werden Daten teilweise erst nach Ablauf der Frist gel\xf6scht; bis dahin werden sie gesperrt oder anonymisiert.",null,null,null,null,null,null,null,null,null)
+B.aFO=new A.ai("Einrichten",null,null,null,null,null,null,null,null,null)
+B.aFR=new A.ai("Home",null,null,null,null,null,null,null,null,null)
+B.aFS=new A.ai("In Google Maps \xf6ffnen",null,null,null,null,null,null,null,null,null)
+B.aFU=new A.ai("Page Not Found",null,B.mp,null,null,null,null,null,null,null)
 B.a_e=new A.ai("Aktivieren",null,null,null,null,null,null,null,null,null)
-B.aFU=new A.ai("Unternehmensangaben bearbeiten",null,null,null,null,null,null,null,null,null)
+B.aFV=new A.ai("Unternehmensangaben bearbeiten",null,null,null,null,null,null,null,null,null)
 B.aCU=new A.T(!0,null,null,null,null,null,11,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.aFX=new A.ai("Deine Angaben werden zur Bearbeitung der Anfrage verarbeitet. Details siehe Datenschutzerkl\xe4rung.",null,B.aCU,null,null,null,null,null,null,null)
+B.aFY=new A.ai("Deine Angaben werden zur Bearbeitung der Anfrage verarbeitet. Details siehe Datenschutzerkl\xe4rung.",null,B.aCU,null,null,null,null,null,null,null)
 B.vq=new A.ai("Ablehnen",null,null,null,null,null,null,null,null,null)
-B.aG7=new A.ai("Konto zur L\xf6schung anmelden",null,null,null,null,null,null,null,null,null)
-B.aG8=new A.ai("Abmelden",null,null,null,null,null,null,null,null,null)
-B.aGc=new A.ai("\xc4ndern",null,null,null,null,null,null,null,null,null)
-B.aGr=new A.ai("Passwort zur\xfccksetzen",null,null,null,null,null,null,null,null,null)
+B.aG8=new A.ai("Konto zur L\xf6schung anmelden",null,null,null,null,null,null,null,null,null)
+B.aG9=new A.ai("Abmelden",null,null,null,null,null,null,null,null,null)
+B.aGd=new A.ai("\xc4ndern",null,null,null,null,null,null,null,null,null)
+B.aGs=new A.ai("Passwort zur\xfccksetzen",null,null,null,null,null,null,null,null,null)
 B.aGu=new A.ai("EU AI Act \u2014 Volltext lesen",null,null,null,null,null,null,null,null,null)
 B.aGD=new A.ai("Senden",null,null,null,null,null,null,null,null,null)
 B.aGE=new A.ai("Code",null,null,null,null,null,null,null,null,null)
