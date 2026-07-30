@@ -551,30 +551,9 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Slogan zweizeilig. „Genießen. Geben. Gutes tun."
-                        // rückt den Spendenanteil nach vorn — der ist das
-                        // Unterscheidungsmerkmal, nicht die Öffnungszeit.
-                        Text(
-                          'Genießen. Geben.',
-                          style: AppTypography.body(
-                            size: 11,
-                            weight: FontWeight.w700,
-                            color: AppColors.brand,
-                          ).copyWith(letterSpacing: 0.3, height: 1.2),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Gutes tun.',
-                          style: AppTypography.body(
-                            size: 11,
-                            weight: FontWeight.w700,
-                            color: AppColors.brand,
-                          ).copyWith(letterSpacing: 0.3, height: 1.2),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: AppSpacing.s2),
+                        // Kein Slogan als Text mehr: er steht seit dem
+                        // Bildtausch im Marken-Motiv rechts. Zweimal
+                        // dasselbe nebeneinander liest sich als Fehler.
                         Text(
                           '${Greeting.forTime()},',
                           style: AppTypography.display(
