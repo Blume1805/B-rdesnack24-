@@ -47,8 +47,8 @@ class _FinderTabState extends ConsumerState<FinderTab> {
           ),
           children: [
             const SectionHeader(
-              eyebrow: 'Unsere Standorte',
-              title: 'Automaten in der Börde',
+              eyebrow: 'Hunger?',
+              title: 'Der nächste Snack ist nah.',
             ),
             const SizedBox(height: AppSpacing.s4),
             // Toggle Liste ↔ Karte

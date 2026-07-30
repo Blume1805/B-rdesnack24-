@@ -76,7 +76,7 @@ class _ProductSearchScreenState extends ConsumerState<ProductSearchScreen> {
     final effRate = rate > 0 ? rate : Pricing.appDiscountRate;
 
     return Scaffold(
-      appBar: const HeroAppBar(title: Text('Produkte suchen')),
+      appBar: const HeroAppBar(title: Text('Was suchst du?')),
       body: Column(
         children: [
           Padding(

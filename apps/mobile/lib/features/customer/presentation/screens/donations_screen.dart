@@ -45,8 +45,8 @@ class DonationsScreen extends ConsumerWidget {
           ),
           children: [
             const SectionHeader(
-              eyebrow: '5 % Netto-Umsatz',
-              title: 'Dein Spendenbeitrag',
+              eyebrow: 'Dein Einkauf hilft mit',
+              title: '5 % gehen weiter.',
             ),
             const SizedBox(height: AppSpacing.s4),
             summary.when(
