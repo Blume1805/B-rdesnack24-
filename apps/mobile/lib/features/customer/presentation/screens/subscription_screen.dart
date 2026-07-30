@@ -523,6 +523,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 // Empfehlungsprogramm anteasern: der Hinweis steht bewusst
                 // NACH dem Vergleich — erst der Mehrwert, dann die Bitte
                 // weiterzuempfehlen.
+                // Vertrauen zeigen statt verstecken: jederzeit kündbar,
+                // keine Werbung, Daten in der EU. Das sind Argumente, die
+                // sonst nur in AGB und Datenschutzerklärung stehen — genau
+                // dort, wo sie vor der Kaufentscheidung niemand liest.
+                const _TrustRow(),
+                const SizedBox(height: AppSpacing.s3),
                 _ReferralTeaser(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const ReferralScreen()),
@@ -952,6 +958,61 @@ class _ReferralTeaser extends StatelessWidget {
           const SizedBox(width: AppSpacing.s2),
           const Icon(Icons.chevron_right, color: AppColors.ink),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Drei Vertrauensbeweise als Zeile — kurz genug, um erkannt statt
+/// gelesen zu werden.
+class _TrustRow extends StatelessWidget {
+  const _TrustRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        _TrustItem(icon: Icons.event_available_outlined, label: 'Jederzeit\nkündbar'),
+        SizedBox(width: AppSpacing.s2),
+        _TrustItem(icon: Icons.block_outlined, label: 'Keine\nWerbung'),
+        SizedBox(width: AppSpacing.s2),
+        _TrustItem(icon: Icons.shield_outlined, label: 'Daten in\nder EU'),
+      ],
+    );
+  }
+}
+
+class _TrustItem extends StatelessWidget {
+  const _TrustItem({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s3),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceAlt,
+          borderRadius: BorderRadius.circular(AppRadii.md),
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 20, color: AppColors.brandDark),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTypography.body(
+                size: 11,
+                weight: FontWeight.w700,
+                color: AppColors.ink,
+              ).copyWith(height: 1.25),
+            ),
+          ],
+        ),
       ),
     );
   }

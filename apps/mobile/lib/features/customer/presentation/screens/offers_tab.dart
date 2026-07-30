@@ -2616,6 +2616,11 @@ class _ValueHeader extends ConsumerWidget {
             ).copyWith(height: 1.1),
           ),
           const SizedBox(height: AppSpacing.s3),
+          // Der Spendentopf als Zahl. Ohne ihn bleibt „5 % spenden" eine
+          // Behauptung — mit ihm ist es ein Beleg, und zwar einer, der
+          // jeden Monat größer wird.
+          const _DonationCounter(),
+          const SizedBox(height: AppSpacing.s3),
           // Zahlen statt Sätze: drei Fakten, die man nicht liest, sondern
           // erkennt. Die Werte kommen live aus dem Katalog.
           Row(
@@ -2828,6 +2833,46 @@ class _CategoryChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+/// „Bisher zusammen X € gespendet" — der USP als überprüfbare Zahl.
+class _DonationCounter extends ConsumerWidget {
+  const _DonationCounter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pool = ref.watch(donationPoolSummaryProvider).valueOrNull;
+    if (pool == null) return const SizedBox.shrink();
+    return Row(
+      children: [
+        const Icon(Icons.volunteer_activism, size: 16, color: AppColors.brand),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: 'Bisher zusammen '),
+                TextSpan(
+                  text: Formatters.euro(pool.totalPool),
+                  style: AppTypography.body(
+                    size: 12.5,
+                    weight: FontWeight.w800,
+                    color: AppColors.brand,
+                  ),
+                ),
+                const TextSpan(text: ' für gemeinnützige Projekte.'),
+              ],
+              style: AppTypography.body(
+                size: 12.5,
+                color: AppColors.brandLight,
+              ).copyWith(height: 1.3),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
