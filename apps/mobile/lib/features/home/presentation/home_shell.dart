@@ -551,9 +551,28 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Kein Slogan als Text mehr: er steht seit dem
-                        // Bildtausch im Marken-Motiv rechts. Zweimal
-                        // dasselbe nebeneinander liest sich als Fehler.
+                        // Slogan über der Anrede: Er trägt die Spenden-
+                        // Botschaft und steht dort, wo der Blick beim
+                        // Öffnen zuerst landet.
+                        Text(
+                          'Genießen. Geben.',
+                          style: AppTypography.body(
+                            size: 11,
+                            weight: FontWeight.w700,
+                            color: AppColors.brand,
+                          ).copyWith(letterSpacing: 0.3, height: 1.2),
+                          maxLines: 1,
+                        ),
+                        Text(
+                          'Gutes tun.',
+                          style: AppTypography.body(
+                            size: 11,
+                            weight: FontWeight.w700,
+                            color: AppColors.brand,
+                          ).copyWith(letterSpacing: 0.3, height: 1.2),
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: AppSpacing.s2),
                         Text(
                           '${Greeting.forTime()},',
                           style: AppTypography.display(
