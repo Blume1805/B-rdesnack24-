@@ -460,8 +460,8 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   /// Header für Kunden: Bördesnack24-Marken-Hero füllt die linke bis
-  /// mittlere Fläche, rechts sitzt ausschließlich die Notification-Bell.
-  /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
+  /// mittlere Fläche, rechts stehen Notification-Bell (oben) und Abmelden
+  /// (unten). Kundennummer und Spendenstand sitzen im Profil-Tab.
   Widget _customerHeader(BuildContext context, String? customerNumber) {
     final firstName = _firstName(user.fullName) ?? 'Kunde';
     // Farbtöne aus dem brand_hero_wide.webp-Hintergrund:
@@ -605,10 +605,48 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   right: 6,
                   child: _NotificationBell(),
                 ),
+                // Unten rechts, unter der Glocke: Abmelden. Gleicher Scrim,
+                // gleiche Größe — die beiden lesen sich so als eine Spalte
+                // und nicht als zwei zufällig verteilte Symbole.
+                Positioned(
+                  bottom: 4,
+                  right: 6,
+                  child: _HeaderSignOut(onSignOut: onSignOut),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Abmelden im Kunden-Header, unten rechts. Optisch identisch zur
+/// Notification-Bell darüber: runder halbtransparenter Scrim, damit das
+/// Symbol auch über der hellen Automatenfront lesbar bleibt.
+///
+/// Ohne Rückfrage: Abmelden ist folgenlos umkehrbar — wer versehentlich
+/// tippt, meldet sich wieder an. Ein Dialog stünde bei jedem gewollten
+/// Abmelden im Weg und bringt nichts ein.
+class _HeaderSignOut extends StatelessWidget {
+  const _HeaderSignOut({required this.onSignOut});
+
+  final VoidCallback onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = AppLocalizations.of(context).signOut;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.32),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        tooltip: label,
+        visualDensity: VisualDensity.compact,
+        icon: const Icon(Icons.logout, color: AppColors.onDark, size: 22),
+        onPressed: onSignOut,
       ),
     );
   }
