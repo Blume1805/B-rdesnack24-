@@ -470,10 +470,12 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
     // Damit wirkt der linke Header wie eine Fortsetzung der Bild-
     // Hintergrundatmosphäre statt eines fremden kalten Ink-Blocks.
     return PreferredSize(
-      // 150 statt 220: der Header nahm auf einem iPhone rund ein Fünftel
-      // der Bildschirmhöhe ein — im mobilen Browser kommen Adressleiste
-      // und Toolbar noch dazu, dann bleibt für die Inhalte zu wenig.
-      preferredSize: const Size.fromHeight(150),
+      // 170: 220 war zu viel (ein Fünftel der Bildschirmhöhe, im mobilen
+      // Browser kommen Adressleiste und Toolbar noch dazu). Mit 150 lagen
+      // Glocke, Marken-Streifen und Abmelden aber so eng übereinander,
+      // dass die Icons in die Wortmarke geschnitten hätten — die 20 pt mehr
+      // trennen die drei Ebenen und lassen die Marke deutlich größer zu.
+      preferredSize: const Size.fromHeight(170),
       child: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF0C0A07),
@@ -491,55 +493,40 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
         child: SafeArea(
           bottom: false,
           child: SizedBox(
-            height: 120,
+            height: 140,
             child: Stack(
               children: [
-                // Rechte Hälfte: Marken-Bild (Bördekreis + Wortmarke + Automat).
+                // Rechts: Marken-Streifen (Bildmarke + Wortmarke).
+                //
+                // Hier steht bewusst NICHT das volle Motiv: In den knapp
+                // 180 x 120 pt, die der Header hergibt, schrumpft ein 3:2-Bild
+                // mit Umrisskarte und Automat auf Faktor 0,12 — die Wortmarke
+                // ist dann 12 pt hoch und der Automat ein Fleck. Der Streifen
+                // zeigt nur die Marke und kommt auf Faktor 0,18.
+                // `brand_hero_wide.webp` (mit Automat und Claim) bleibt für
+                // Login-Hero und HeroAppBar erhalten.
+                //
+                // Die Kanten des Streifens laufen im Asset selbst per Alpha
+                // aus — deshalb braucht es hier keinen Verlaufs-Overlay mehr,
+                // der die Rechteckkante überdeckt.
                 Positioned(
-                  right: -12,
+                  right: 4,
                   top: 0,
                   bottom: 0,
-                  width: MediaQuery.of(context).size.width * 0.60,
+                  width: MediaQuery.of(context).size.width * 0.47,
                   child: Image.asset(
-                    'assets/images/brand_hero_wide.webp',
-                    excludeFromSemantics: true,
+                    'assets/images/brand_hero_strip.webp',
+                    semanticLabel: 'Bördesnack24',
                     fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
                   ),
                 ),
-                // Sanfter Verschmelzungs-Streifen an der linken Bild-Kante:
-                // blendet vom warm-schwarzen Header-Grund über die linken
-                // ~30 % des Bildes weich aus. Zielfarbe matcht den
-                // Header-Hintergrund, damit die Rechteck-Kante des Bild-
-                // Layers unsichtbar wird.
+                // Links: Slogan + Anrede
                 Positioned(
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  right: MediaQuery.of(context).size.width * 0.22,
-                  child: const IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Color(0xFF0C0A07),
-                            Color(0xFF0C0A07),
-                            Color(0x000C0A07),
-                          ],
-                          stops: [0.0, 0.55, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // Linke Hälfte: Anrede-Text
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  right: MediaQuery.of(context).size.width * 0.42,
+                  right: MediaQuery.of(context).size.width * 0.45,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.s5,
@@ -554,44 +541,50 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         // Slogan über der Anrede: Er trägt die Spenden-
                         // Botschaft und steht dort, wo der Blick beim
                         // Öffnen zuerst landet.
-                        Text(
-                          'Genießen. Geben.',
-                          style: AppTypography.body(
-                            size: 11,
-                            weight: FontWeight.w700,
-                            color: AppColors.brand,
-                          ).copyWith(letterSpacing: 0.3, height: 1.2),
-                          maxLines: 1,
-                        ),
-                        Text(
-                          'Gutes tun.',
-                          style: AppTypography.body(
-                            size: 11,
-                            weight: FontWeight.w700,
-                            color: AppColors.brand,
-                          ).copyWith(letterSpacing: 0.3, height: 1.2),
-                          maxLines: 1,
+                        //
+                        // Beide Zeilen liegen in EINER FittedBox, damit sie
+                        // auf schmalen Geräten gemeinsam kleiner werden und
+                        // nicht die eine Zeile schrumpft und die andere nicht.
+                        const _ShrinkToFit(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _SloganLine('Genießen. Geben.'),
+                              _SloganLine('Gutes tun.'),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.s2),
-                        Text(
-                          '${Greeting.forTime()},',
-                          style: AppTypography.display(
-                            size: 21,
-                            weight: FontWeight.w800,
-                            color: AppColors.onDark,
-                          ).copyWith(height: 1.0),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '$firstName.',
-                          style: AppTypography.display(
-                            size: 21,
-                            weight: FontWeight.w800,
-                            color: AppColors.onDark,
-                          ).copyWith(height: 1.05),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        // Auch die Anrede skaliert statt zu kürzen: „Guten
+                        // Morgen," ist deutlich breiter als „Guten Tag," und
+                        // wurde vorher am rechten Rand abgeschnitten
+                        // („Guten Morge…"). Lieber ein paar Punkt kleiner.
+                        _ShrinkToFit(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${Greeting.forTime()},',
+                                style: AppTypography.display(
+                                  size: 20,
+                                  weight: FontWeight.w800,
+                                  color: AppColors.onDark,
+                                ).copyWith(height: 1.0),
+                                maxLines: 1,
+                              ),
+                              Text(
+                                '$firstName.',
+                                style: AppTypography.display(
+                                  size: 20,
+                                  weight: FontWeight.w800,
+                                  color: AppColors.onDark,
+                                ).copyWith(height: 1.05),
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -620,6 +613,39 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
     );
   }
+}
+
+/// Skaliert den Inhalt herunter, wenn er breiter ist als der Platz — statt
+/// ihn abzuschneiden. Vergrößert nie über die Ausgangsgröße hinaus.
+class _ShrinkToFit extends StatelessWidget {
+  const _ShrinkToFit({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: child,
+      );
+}
+
+/// Eine Zeile des Header-Slogans.
+class _SloganLine extends StatelessWidget {
+  const _SloganLine(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: AppTypography.body(
+          size: 11,
+          weight: FontWeight.w700,
+          color: AppColors.brand,
+        ).copyWith(letterSpacing: 0.3, height: 1.2),
+        maxLines: 1,
+      );
 }
 
 /// Abmelden im Kunden-Header, unten rechts. Optisch identisch zur
