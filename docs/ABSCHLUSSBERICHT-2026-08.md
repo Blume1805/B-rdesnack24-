@@ -249,6 +249,36 @@ der Auskunft, dass die fehlende Unterschrift später über DocuSign kommt,
 die Tabellen verworfen (0082) — ein Unterschriftsbild ohne Zweck ist
 Datenhaltung ohne Rechtsgrundlage.
 
+### Zwei Migrationen fehlten im Repository (0027b/0027c)
+
+Beim Abgleich der angewendeten Migrationen (102) gegen die Dateien (80)
+fiel auf, dass `0032` ein `alter table public.partner_signatures` enthält,
+ohne dass die Tabelle irgendwo erzeugt wird — und dass
+`customer_notification_reads` im gesamten Repository nicht vorkommt.
+
+**Zur Einordnung, weil ich es zunächst schärfer formuliert hatte:** Das
+heißt *nicht*, dass die Datenbank nicht wiederherstellbar wäre. Supabase
+legt zu jeder angewendeten Migration das ausgeführte SQL in
+`supabase_migrations.schema_migrations.statements` ab; alle 102 haben es.
+Die Datenbank kann sich also aus eigener Kraft neu aufbauen. Was fehlte,
+war, dass das **Repository** die Quelle der Wahrheit ist.
+
+Aus demselben Grund wäre der zunächst erwogene Zweig-Datenbank-Test das
+falsche Werkzeug gewesen: Er hätte die aufgezeichnete Historie
+durchgespielt — die nachweislich vollständig ist — und über die
+Repository-Lücke nichts ausgesagt. Kosten für eine Antwort, die schon
+vorlag.
+
+Der wirksame Schritt kostete nichts: das Original-SQL aus der Datenbank
+zurückholen. Dabei zeigte sich, dass die Lücke größer war als die zwei
+Tabellen — es fehlten **fünf produktiv genutzte Funktionen**
+(`list_partner_signatures`, `my_notifications`,
+`my_notifications_unread_count`, `mark_notification_read`,
+`mark_all_notifications_read`) und die Seed-Zeilen der Gesellschafter.
+
+Gegengeprüft: Jede der 73 Tabellen in `public` und `app` hat jetzt ein
+`create table` in den Migrationsdateien.
+
 ### Barrierefreiheit
 
 Statt weiter von Hand `semanticLabel` zu verteilen — was bei
