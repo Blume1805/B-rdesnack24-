@@ -84,6 +84,57 @@ weil danach nachgemessen wurde. Der Entzug muss gegen `PUBLIC` gehen.
 
 Advisor: **90 → 85 WARN, 0 ERROR.**
 
+### Datenbank-Härtung, zweiter Durchgang (Migration 0076)
+
+Der Advisor-Lauf nach 0075 meldete 83 Treffer einer zweiten Regel:
+`SECURITY DEFINER`-Funktionen, die **jedes angemeldete Konto** aufrufen
+kann. Angemeldet heißt hier: Kundenkonto — die Registrierung steht offen,
+die Rolle `authenticated` sagt nichts über Zugehörigkeit zum Betrieb.
+
+Alle 83 wurden einzeln durchgesehen. Die Mehrheit ist unkritisch: Die
+Finanz- und Verwaltungsfunktionen prüfen die Rolle im Rumpf
+(`profiles.role in ('system_admin','shareholder')`, dann
+`raise exception`). Sie sind aufrufbar, geben aber nichts heraus. Der
+Advisor sieht das nicht — er prüft die Rechtevergabe, nicht den Code.
+
+Drei echte Befunde blieben übrig:
+
+* **`list_partner_signatures()` hebelte die eigene Policy aus.** Die
+  Tabelle `partner_signatures` hat eine enge Policy (nur system_admin,
+  shareholder, employee). Die Funktion ist aber nichts als ein
+  `select *` darauf — als `SECURITY DEFINER`. Damit lief sie mit
+  Eigentümerrechten, die Policy griff nicht, und jedes Kundenkonto
+  konnte Namen **und Unterschriftsbilder** der Partner auslesen.
+  Unterschriftsbilder sind nicht bloß personenbezogene Daten, sie sind
+  unmittelbar missbrauchbar. Dasselbe Muster, harmloser, bei
+  `list_document_folders()`. Beide laufen jetzt als `SECURITY INVOKER` —
+  die vorhandene Policy greift wieder.
+* **`generate_personal_offer(p_customer_id)` vertraute dem Parameter.**
+  Die App schickt die eigene Kunden-ID; ein direkter Aufruf gegen die
+  REST-API konnte jede beliebige schicken. Die Antwort enthielt dann das
+  offene Angebot des fremden Kontos samt Einlösecode — oder erzeugte
+  eines aus dessen Kaufhistorie der letzten 90 Tage, mit dem
+  Produktnamen als Titel. Der Code selbst war nicht verwertbar
+  (`redeem_personal_offer` löst nur ein, was `customer_id = auth.uid()`
+  erfüllt), das Kaufverhalten aber schon. Jetzt mit Prüfung gegen
+  `auth.uid()`, interne Rollen ausgenommen.
+* **Sieben Server-Funktionen ohne Aufrufer im Client** standen jedem
+  offen. Am unangenehmsten `next_invoice_number()`: Ein Aufruf in der
+  Schleife verbrennt Rechnungsnummern und reißt Lücken in eine
+  Nummernfolge, die nach § 14 Abs. 4 Nr. 4 UStG fortlaufend sein muss —
+  vergebene Nummern kommen nicht zurück. Dazu `generate_weekly_offers`,
+  das mit einem `delete` auf die Angebote der Folgewoche beginnt. Rechte
+  auf `service_role` beschränkt; die Cron-Jobs laufen als `postgres` und
+  sind nicht betroffen.
+
+Gegengeprüft statt geglaubt: Als Kundenkonto liefern beide Listen jetzt
+0 Zeilen, als `system_admin` und als `shareholder` unverändert 2
+Signaturen und 11 Ordner. Der Fremdzugriff auf
+`generate_personal_offer` wird mit 42501 abgewiesen, der eigene läuft
+durch.
+
+Advisor: **85 → 76 WARN, 0 ERROR.**
+
 `pg_net` bleibt bewusst im `public`-Schema, entgegen der
 Advisor-Empfehlung: Alle 15 Objekte der Extension liegen in `net`, in
 `public` steht nichts. Dagegen hängt der Cron-Job `weather-sync` an
@@ -169,7 +220,9 @@ Voraussetzung für ganze Mail-Kategorien.
 * `flutter analyze` (lib + test): keine Befunde
 * `flutter test`: **164 grün** (zu Beginn 154)
 * E-Mail-Modul: **18 Tests**, Webhook/Auth-Templates: **16 Tests**
-* Supabase-Advisor: 85 WARN, **0 ERROR**
+* Supabase-Advisor: 76 WARN, **0 ERROR**
+* Rechteänderungen aus 0075/0076 nach dem Lauf einzeln nachgemessen
+  (`has_function_privilege`) und gegen echte Rollen simuliert
 * Alle deployten Functions per `pg_net` auf Boot geprüft
 
 ## 7 · Empfohlene nächste Schritte
