@@ -92,6 +92,28 @@ Spalte. Simulierte Käufe waren dadurch von echten nicht zu unterscheiden
 und flossen in `datev_export_rows`, `finance_kpis` und `finance_summary`.
 Jetzt eigene Herkunft `'demo'`, dort ausgeschlossen.
 
+### Nachtrag — Migration 0079: die Rolle war gar nicht vertrauenswürdig
+
+Die Durchsicht oben prüft, **wer** eine Funktion aufrufen darf. Sie setzt
+dabei voraus, dass `profiles.role` stimmt. Genau das war nicht der Fall:
+`app.handle_new_user` übernimmt die Rolle aus den Signup-Metadaten, und
+die kommen bei einer Selbstregistrierung vom Browser.
+
+Die Schutzwirkung lag allein an `status = 'invited'`, das der Trigger für
+interne Rollen setzt — und das 23 RLS-Policies und 5 Funktionen nicht
+auswerteten. Details und Gegenprobe in `0079_role_checks_require_active_status.sql`.
+
+Für diese Liste heißt das: Die Einteilung „Rolle wird im Rumpf geprüft"
+war bis 0079 **weniger wert, als sie aussah**. Erst seit dort überall
+zusätzlich `status = 'active'` und `deleted_at is null` steht, trägt sie.
+
+### Nachtrag — neu hinzugekommen
+
+`public.subscription_plans()` (Migration 0080) ist bewusst auch für
+`anon` freigegeben und taucht deshalb unter zwei Advisor-Regeln auf. Die
+Funktion liefert die aktuell angebotenen Abo-Preise — dieselben Zahlen,
+die auf der öffentlichen Landing Page stehen. Kein Personenbezug.
+
 ## Was danach noch offen ist
 
 **Der Demo-Knopf selbst.** Technisch ist er für die Buchhaltung nicht mehr

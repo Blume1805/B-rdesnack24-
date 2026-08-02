@@ -181,6 +181,74 @@ Advisor-Empfehlung: Alle 15 Objekte der Extension liegen in `net`, in
 `net.http_post`. Ein Produktionsjob gegen eine kosmetische Meldung zu
 tauschen wäre der falsche Handel.
 
+### Rechteausweitung durch Selbstregistrierung (Migration 0079)
+
+Der schwerwiegendste Fund des gesamten Auftrags, und er kam beiläufig:
+Beim Vorbereiten der fehlenden Privat/Unternehmer-Auswahl in der Web-App
+sah ich nach, wie die Registrierung ihre Daten übergibt.
+
+Der Trigger `app.handle_new_user` übernimmt die Rolle aus
+`raw_user_meta_data`. Bei einer Selbstregistrierung kommen diese Daten
+vollständig vom Browser. Wer sich mit
+`data: { role: 'system_admin' }` anmeldete, bekam eine Profilzeile mit
+dieser Rolle.
+
+Das ist als Einladungsweg so gewollt — `invite-user` prüft
+Berechtigungen und übergibt die Rolle auf demselben Weg. Deshalb setzt
+der Trigger für interne Rollen `status = 'invited'`: Die Rolle steht da,
+gilt aber erst nach Aktivierung. Nur hat diese zweite Hälfte kaum jemand
+ausgewertet. `is_admin()`, `is_internal()` und `app_role()` prüfen den
+Status — **23 RLS-Policies auf 15 Tabellen und 5 Funktionen** prüften
+allein die Rolle.
+
+Nachgestellt statt vermutet. Ein frisch registriertes Konto erhielt:
+
+* `business_customers_csv()` — die B2B-Kundenliste mit Namen, E-Mail,
+  Anschrift, Steuernummer und USt-IdNr.
+* `datev_export_rows()` — Buchhaltungsdaten
+* `partner_signatures` — zwei Zeilen inklusive der Unterschriftsbilder
+
+Ausnutzbar von jedem mit Internetzugang, ohne Vorwissen.
+
+Beim Beheben kam ein zweiter Fund dazu: `business_customers_csv` und
+`list_employees_for_signature` prüften `v_role not in (…)`. Bei NULL
+ergibt das weder wahr noch falsch — die Bedingung greift nicht, und der
+Aufruf läuft an der Prüfung vorbei. Ohne Profilzeile waren beide offen.
+Mit behoben: deaktivierte und gelöschte Konten mit interner Rolle kamen
+bis dahin durch dieselben Policies.
+
+Gegengeprüft in beide Richtungen: Der Angriff liefert auf allen acht
+getesteten Wegen „abgewiesen" oder 0 Zeilen; Gesellschafter und Admin
+sehen unverändert alles.
+
+### Abo-Preise lesbar gemacht (Migration 0080)
+
+Für die Preisdarstellung im Web fehlte eine Quelle: Die Preise standen
+ausschließlich als CASE-Block im Schreibpfad. Die naheliegende
+Alternative `customer_subscriptions` wäre eine Falle gewesen — dort steht
+der **historisch vereinbarte** Preis. Im Bestand liegen noch Zeilen mit
+1,00 €/Monat und 10,00 €/Jahr neben dem aktuellen 9,99 €. Eine
+Ersparnisrechnung daraus hätte je nach Kunde etwas anderes ergeben.
+
+Jetzt eine schmale Tabelle als einzige Quelle, gelesen von der Web-App
+**und** von `choose_subscription_plan`. Ein Preiswechsel ist damit ein
+UPDATE an einer Stelle statt einer Änderung an Funktion und Frontends.
+
+### Vergessene Unterschriften-Zwischenablagen (0081/0082)
+
+Beim Belegen, dass die neue Preistabelle nicht direkt erreichbar ist,
+fielen zwei Tabellen im `app`-Schema auf, die volle Rechte für `anon`
+trugen — bis TRUNCATE, ohne RLS. Eine davon enthielt ein PNG, dem Namen
+nach ein Unterschriftsbild.
+
+Kein akutes Loch, und das ist gemessen: PostgREST antwortet auf einen
+Zugriff mit `Accept-Profile: app` mit `PGRST106 — Only the following
+schemas are exposed: public, graphql_public`. Aber „app" zur Liste
+hinzuzufügen ist im Dashboard ein Klick. Rechte entzogen (0081); nach
+der Auskunft, dass die fehlende Unterschrift später über DocuSign kommt,
+die Tabellen verworfen (0082) — ein Unterschriftsbild ohne Zweck ist
+Datenhaltung ohne Rechtsgrundlage.
+
 ### Barrierefreiheit
 
 Statt weiter von Hand `semanticLabel` zu verteilen — was bei
@@ -267,9 +335,19 @@ Frage, was mit den acht vorhandenen Demo-Käufen geschieht, die noch als
 * `flutter analyze` (lib + test): keine Befunde
 * `flutter test`: **164 grün** (zu Beginn 154)
 * E-Mail-Modul: **18 Tests**, Webhook/Auth-Templates: **16 Tests**
-* Supabase-Advisor: 76 WARN, **0 ERROR**
-* Rechteänderungen aus 0075/0076 nach dem Lauf einzeln nachgemessen
-  (`has_function_privilege`) und gegen echte Rollen simuliert
+* Supabase-Advisor: **78 WARN, 0 ERROR**
+
+  Die Zahl ist gegenüber 76 gestiegen, und zwar durch die eigene neue
+  Funktion: `subscription_plans()` ist bewusst für `anon` freigegeben und
+  wird deshalb unter zwei Regeln gezählt. Alle übrigen Befunde sind in
+  `RPC_AUDIT.md` einzeln eingeordnet. Eine sinkende Advisor-Zahl ist kein
+  Ziel — die 83 Treffer aus der ersten Runde enthielten überwiegend
+  Funktionen, die ihre Rolle im Rumpf prüfen und nichts herausgeben.
+* Rechteänderungen aus 0075/0076/0079/0081 nach dem Lauf einzeln
+  nachgemessen (`has_function_privilege`) und gegen echte Rollen
+  simuliert — Angreifer und legitime Nutzer jeweils getrennt
+* Schema-Exposition über die echte REST-API geprüft, nicht angenommen
+  (`net.http_get` mit `Accept-Profile`)
 * Alle deployten Functions per `pg_net` auf Boot geprüft
 
 ## 7 · Empfohlene nächste Schritte
