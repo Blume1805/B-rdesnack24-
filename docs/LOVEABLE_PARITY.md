@@ -130,6 +130,15 @@ Umstellen nicht einplant, baut eine Seite, die nach dem Datentausch
 schlechter wirkt als vorher — und korrigiert dann in die falsche
 Richtung.
 
+Nachgemessen am 02.08.2026, alle Zahlen bestätigt: 62 aktive Produkte,
+davon **0 mit Bild**, **0 mit Allergenen**; `product_ratings` **0 Zeilen**;
+94 Inventory-Zeilen, 85 mit Bestand; 4 Automaten.
+
+Dabei kam ein Detail dazu: `subcategory` ist bei **Eis, Snacks und
+Süßwaren `NULL`** — die zweite Ebene gibt es nur unter „Getränke". Eine
+Oberfläche, die stur zweistufig filtert, erzeugt dort eine leere Gruppe
+oder zeigt „null".
+
 Weitere geprüfte Eckdaten: `products.status` kennt real nur `active`,
 `serve_temp` die Werte `cold`, `hot`, `neutral`.
 `product_rating_summary` ist eine View mit `security_invoker=true` —

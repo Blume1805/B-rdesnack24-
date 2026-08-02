@@ -114,6 +114,9 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 - [ ] Preisformel enthält `/ 100` — nicht `* (1 + tax_rate)`
 - [ ] Kategorien werden aus den Daten abgeleitet, nicht hart kodiert
 - [ ] `subcategory` wird berücksichtigt (zweite Ebene geht nicht verloren)
+- [ ] **`subcategory` ist bei Eis, Snacks und Süßwaren `NULL`** — die zweite
+      Ebene gibt es nur unter „Getränke". Kein „null" in der Oberfläche,
+      keine leere Filtergruppe
 - [ ] Verfügbarkeit kommt aus `inventory`, nicht aus einem Produktfeld
 - [ ] Kein `<img>` ohne Platzhalter-Fallback, auch bei Ladefehler
 - [ ] Kein Sterne-Block ohne Bewertungen, keine „0,0 ★"
