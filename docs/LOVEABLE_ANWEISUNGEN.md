@@ -246,6 +246,55 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 
 ---
 
+## A4 · Kontraste (bereit zum Senden — Credits fehlten)
+
+> Die Preisdarstellung sitzt inhaltlich. Es gibt aber ein
+> Lesbarkeitsproblem, das ausgerechnet die neu hervorgehobenen Stellen
+> trifft — nachgemessen, nicht geschätzt.
+>
+> **Befund**
+>
+> `--gold` ist `oklch(0.82 0.145 85)` — als Akzent auf Navy großartig
+> (9,38:1), als **Text auf hellem Grund** aber unlesbar:
+>
+> | Kombination | Kontrast | verlangt |
+> |---|---|---|
+> | `text-gold` auf `bg-card` (weiß) | **1,76:1** | 4,5:1 |
+> | `text-gold` auf `bg-secondary` | **1,61:1** | 4,5:1 |
+> | `text-success` auf `bg-card` | **3,73:1** | 4,5:1 |
+>
+> Betroffen sind genau die Stellen, die wir gerade wichtig gemacht haben:
+> die Empfehlungszeile „Empfehlung · X € günstiger als 12 Einzelmonate",
+> **das Vertragsende auf der Kündigungsbestätigung** (die wichtigste
+> Angabe der Seite), sowie „mit App X €" und die „aktiv"-Markierung.
+>
+> Das ist keine Geschmacksfrage: WCAG 1.4.3 verlangt 4,5:1 für normalen
+> Text, und seit Juni 2025 gilt das Barrierefreiheitsstärkungsgesetz für
+> den elektronischen Geschäftsverkehr.
+>
+> **Korrektur** — zwei neue Token nur für Text auf hellem Grund; `--gold`
+> und `--success` bleiben unverändert, sie sind für Flächen, Rahmen und
+> Text auf Navy richtig:
+>
+> ```css
+> :root {
+>   --gold-ink:    oklch(0.545 0.145 85);   /* #966600 — 4,98:1 weiß, 4,54:1 secondary */
+>   --success-ink: oklch(0.530 0.13 148);   /* #287F3D — 4,98:1 weiß, 4,54:1 secondary */
+> }
+> ```
+>
+> Dazu `--color-gold-ink` und `--color-success-ink` im `@theme inline`-Block
+> registrieren, damit `text-gold-ink` / `text-success-ink` verfügbar sind.
+> Unverändert bleiben `text-gold` auf dunklem Grund sowie Gold als Fläche,
+> Rahmen, Icon und Verlauf. Im Dark Mode ist der helle Ton richtig — die
+> neuen Token dort **nicht** anwenden.
+>
+> **Nebenbei:** In `app.profil.tsx` steht bei der Empfehlungszeile
+> `${active ? "text-gold" : "text-gold"}` — beide Zweige gleich. Bitte
+> auflösen.
+>
+> Gestaltung sonst unverändert. Es geht ausschließlich um Lesbarkeit.
+
 ## Was diese Texte nicht lösen können
 
 **Automaten-Stammdaten.** In der Datenbank stehen „Standort 1

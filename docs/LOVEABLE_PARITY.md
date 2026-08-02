@@ -42,7 +42,8 @@ bevor die erste Nachricht rausgeht.
 | A1b · Registrierung Privat/Unternehmer | ✅ 02.08.2026, geprüft |
 | A2a · Produkte auf echte Daten | ✅ Commit `8ecbad36`, 10/10 Prüfpunkte |
 | A2b · Abo-Anzeige/-Kauf auf echte Daten | ✅ 6/6 Prüfpunkte |
-| A3 · Preise, Jahresabo, zwei Nachbesserungen | 🚧 läuft |
+| A3 · Preise, Jahresabo, zwei Nachbesserungen | ✅ inhaltlich, 4/4 Prüfpunkte |
+| A4 · Kontraste (WCAG 1.4.3 / BFSG) | ❌ Credits erschöpft, Text liegt bereit |
 
 Der offene `status`-Punkt aus A2a ist mit A2b erledigt.
 
