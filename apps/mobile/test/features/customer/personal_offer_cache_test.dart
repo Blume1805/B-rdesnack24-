@@ -7,6 +7,11 @@ import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  // Gültigkeit relativ zu heute, nicht als festes Datum: Der Cache wirft
+  // abgelaufene Coupons absichtlich raus, feste Fixture-Daten lassen den
+  // Test deshalb irgendwann von selbst umfallen. Genau das ist am
+  // 01.08.2026 passiert, als die alten Werte (01.–31.07.2026) abliefen —
+  // der Roundtrip-Test bekam plötzlich null statt zwei Coupons zurück.
   PersonalOffer offer({String id = 'o1'}) => PersonalOffer(
         id: id,
         title: 'Club-Mate',
@@ -14,8 +19,8 @@ void main() {
         offerPriceNet: 1.89,
         discountPercent: 10,
         redemptionCode: '123456',
-        validFrom: DateTime.utc(2026, 7, 1),
-        validTo: DateTime.utc(2026, 7, 31),
+        validFrom: DateTime.now().subtract(const Duration(days: 1)),
+        validTo: DateTime.now().add(const Duration(days: 30)),
         source: PersonalOfferSource.loyalty,
         imageUrl: null,
       );

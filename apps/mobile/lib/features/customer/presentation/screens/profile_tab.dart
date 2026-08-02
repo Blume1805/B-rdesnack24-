@@ -263,17 +263,31 @@ class ProfileTab extends ConsumerWidget {
     );
     if (ok != true) return;
     try {
-      await ref.read(supabaseClientProvider).rpc(
-        'request_account_deletion',
-        params: {
-          'p_reason':
+      // Über die Edge Function statt direkt per RPC: sie legt den Antrag
+      // mit derselben RPC an und verschickt zusätzlich die
+      // Eingangsbestätigung (Art. 12 Abs. 3 DSGVO) sowie eine Notiz an die
+      // Verwaltung. Vorher versprach der Dialog eine E-Mail, die nie kam.
+      final res = await ref.read(supabaseClientProvider).functions.invoke(
+        'account-deletion-request',
+        body: {
+          'reason':
               reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim(),
         },
       );
+      final data = res.data;
+      if (data is Map && data['error'] != null) {
+        throw Exception(data['error']);
+      }
       if (!context.mounted) return;
+      final deadline = data is Map ? data['deadline'] as String? : null;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Antrag gestellt. Wir melden uns per E-Mail.'),
+        SnackBar(
+          content: Text(
+            deadline == null
+                ? 'Antrag gestellt. Die Bestätigung ist unterwegs.'
+                : 'Antrag gestellt. Bestätigung per E-Mail unterwegs, '
+                    'Rückmeldung spätestens bis $deadline.',
+          ),
         ),
       );
     } catch (e) {

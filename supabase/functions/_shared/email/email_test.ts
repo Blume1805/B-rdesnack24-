@@ -7,6 +7,10 @@ import { escapeHtml, remainingPlaceholders, render, renderText } from "./render.
 import { button, page } from "./components.ts";
 import { subscriptionCancelConfirmation } from "./templates/subscription_cancel.ts";
 import { subscriptionChooseConfirmation } from "./templates/subscription_choose.ts";
+import {
+  accountDeletionRequestInternal,
+  accountDeletionRequestReceived,
+} from "./templates/account_deletion.ts";
 
 Deno.test("escapeHtml maskiert die fünf HTML-Sonderzeichen", () => {
   assertEquals(
@@ -170,4 +174,67 @@ Deno.test("Abo-Bestätigung: Vorname kann kein HTML einschleusen", () => {
   });
   assert(!mail.html.includes("<img src=x"), "rohes <img> im HTML gelandet");
   assertStringIncludes(mail.html, "&lt;img src=x");
+});
+
+Deno.test("Löschantrag: Eingangsbestätigung nennt Frist und Aufbewahrung", () => {
+  const mail = accountDeletionRequestReceived({
+    firstName: "Erika",
+    receivedAt: "01.08.2026, 12:30",
+    deadline: "31.08.2026",
+    reason: "Umzug",
+  });
+  assertEquals(mail.subject, "Bördesnack24: Dein Löschantrag ist eingegangen");
+  for (const needle of [
+    "Hallo Erika,",
+    "01.08.2026, 12:30",
+    "31.08.2026",
+    "Umzug",
+    "Art. 12 Abs. 3 DSGVO",
+    "§§ 147 AO, 257 HGB",
+  ]) {
+    assertStringIncludes(mail.html, needle);
+    assertStringIncludes(mail.text, needle);
+  }
+  assertEquals(remainingPlaceholders(mail.html), []);
+  assertEquals(remainingPlaceholders(mail.text), []);
+});
+
+Deno.test("Löschantrag: ohne Grund entfällt die Zeile ganz", () => {
+  const mail = accountDeletionRequestReceived({
+    firstName: "",
+    receivedAt: "01.08.2026, 12:30",
+    deadline: "31.08.2026",
+    reason: "",
+  });
+  // Leerer Vorname darf keine nackte Anrede „Hallo ," erzeugen.
+  assertStringIncludes(mail.html, "Hallo Kundin/Kunde,");
+  assert(!mail.html.includes("Angegebener Grund"), "leere Grund-Zeile gerendert");
+  assert(!mail.text.includes("Angegebener Grund"), "leere Grund-Zeile im Text");
+  assertEquals(remainingPlaceholders(mail.html), []);
+  assertEquals(remainingPlaceholders(mail.text), []);
+});
+
+Deno.test("Löschantrag: interne Notiz trägt Konto und Frist im Betreff", () => {
+  const mail = accountDeletionRequestInternal({
+    email: "kunde@example.org",
+    receivedAt: "01.08.2026, 12:30",
+    deadline: "31.08.2026",
+    reason: "",
+  });
+  assertEquals(mail.subject, "Löschantrag: kunde@example.org (Frist 31.08.2026)");
+  assertStringIncludes(mail.html, "kunde@example.org");
+  // Leerer Grund wird zu einem Strich, nicht zu einer leeren Zeile.
+  assertStringIncludes(mail.html, "—");
+  assertEquals(remainingPlaceholders(mail.html), []);
+});
+
+Deno.test("Löschantrag: Grund des Kunden kann kein HTML einschleusen", () => {
+  const mail = accountDeletionRequestReceived({
+    firstName: "Max",
+    receivedAt: "x",
+    deadline: "y",
+    reason: "<script>alert(1)</script>",
+  });
+  assert(!mail.html.includes("<script>"), "rohes <script> im HTML gelandet");
+  assertStringIncludes(mail.html, "&lt;script&gt;");
 });
