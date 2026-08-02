@@ -24,8 +24,8 @@ export function escapeHtml(value: unknown): string {
 /// Fehlt ein Wert, bleibt die Stelle leer und es gibt eine Log-Warnung —
 /// die Mail geht trotzdem raus. Bei einer Zugangsbestätigung nach
 /// § 312k BGB ist eine unvollständige Mail allemal besser als gar keine.
-/// Tippfehler in Platzhaltern fängt stattdessen der Test ab
-/// (`assertNoPlaceholdersLeft`).
+/// Tippfehler in Platzhaltern fängt stattdessen der Test ab, über
+/// [remainingPlaceholders].
 export function render(template: string, vars: TemplateVars): string {
   return template.replace(
     /\{\{\{\s*([A-Za-z0-9_]+)\s*\}\}\}|\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g,
