@@ -82,12 +82,30 @@ das bereits.
 ## Konsequenzen
 
 - A1 kann ohne vorherige RLS-Umbauten starten.
-- Kleine, unabhängige Härtung vorgemerkt (nicht blockierend, Track C4):
-  expliziter `auth.uid() is null`-Guard in `my_receipts()` für
-  Konsistenz mit den anderen drei anon-erreichbaren Funktionen;
-  `search_path` auf `app.lifetime_founders_limit` fixieren; `pg_net` aus
-  `public` verschieben; "leaked password protection" in Supabase Auth
-  aktivieren.
+- Die vorgemerkte Härtung ist mit Migration `0075_rpc_hardening.sql`
+  erledigt — allerdings anders als hier ursprünglich notiert:
+  - Statt eines `auth.uid() is null`-Guards in `my_receipts()` wurde den
+    vier Funktionen das Ausführungsrecht für `anon` ganz entzogen. Sie
+    werden ausschließlich aus angemeldeten Screens aufgerufen; ein
+    Endpunkt, den niemand braucht, ist Angriffsfläche ohne Nutzen.
+    **Fallstrick dabei:** `revoke ... from anon` allein wirkt nicht —
+    Postgres grantet `EXECUTE` automatisch an `PUBLIC`, worüber `anon`
+    das Recht weitererbt. Der Entzug muss gegen `PUBLIC` gehen, danach
+    brauchen `authenticated`/`service_role` einen ausdrücklichen Grant.
+  - `search_path` auf `app.lifetime_founders_limit` ist fixiert.
+  - **`pg_net` bleibt bewusst im `public`-Schema.** Nachgemessen: alle 15
+    Objekte der Extension liegen in `net`, in `public` steht nichts — die
+    Advisor-Meldung beschreibt einen Registrierungseintrag, keine
+    Angriffsfläche. Dagegen hängt der Cron-Job `weather-sync` an
+    `net.http_post`; ein Verschieben kann ihn brechen. Ein Produktionsjob
+    gegen eine kosmetische Meldung zu tauschen wäre der falsche Handel.
+  - Offen und **nur im Dashboard** setzbar: „Leaked Password Protection"
+    (Abgleich neuer Passwörter gegen HaveIBeenPwned per k-Anonymität).
+    Ein Schalter, kein Code — Empfehlung: einschalten.
+- Ergebnis des Advisor-Laufs nach der Migration: 90 → 85 WARN, 0 ERROR.
+  Die verbleibenden 83 `authenticated_security_definer_function_executable`
+  sind das erwartete Muster dieser Architektur (App-RPCs, die angemeldete
+  Nutzer selbst aufrufen).
 - `lifetime_founders_status()` dient als Vorlage für eine künftige
   öffentliche Spenden-Summen-RPC (Aggregat ohne PII, `anon`-ausführbar),
   sobald A2 echte Daten auf der Loveable-Landingpage zeigen soll.
