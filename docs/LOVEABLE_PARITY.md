@@ -40,9 +40,15 @@ bevor die erste Nachricht rausgeht.
 | A0 · RLS-/Auth-Audit vor der Anbindung | ✅ ADR 0004 |
 | A1 · Supabase-Client + Anmeldung | ✅ Commit `4104fc22`, geprüft |
 | A1b · Registrierung Privat/Unternehmer | ✅ 02.08.2026, geprüft |
-| A2a · Produkte auf echte Daten | 🚧 Anweisung fertig, MCP getrennt |
+| A2a · Produkte auf echte Daten | ✅ Commit `8ecbad36`, 10/10 Prüfpunkte |
 | A2b · Abo-Anzeige/-Kauf auf echte Daten | 🚧 Anweisung fertig |
 | A3 · Marketing-Copy + Jahresabo hervorheben | 🚧 Anweisung fertig |
+
+**Offener Punkt aus A2a**, an A2b angehängt: `fetchProduct` in
+`src/lib/products.ts` filtert `deleted_at`, aber nicht `status`. Das Enum
+`entity_status` kennt `active, inactive, archived` — ein deaktiviertes
+Produkt ließe sich per Direktlink aufrufen. Heute folgenlos, weil alle 62
+Produkte `active` sind.
 
 Die Anweisungstexte für A2a, A2b und A3 stehen wortgleich versandfertig in
 `LOVEABLE_ANWEISUNGEN.md`, jeweils mit Prüfliste für das anschließende
