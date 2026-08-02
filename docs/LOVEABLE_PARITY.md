@@ -1,5 +1,27 @@
 # Loveable-Web: Stand und vorbereitete Arbeitspakete
 
+> **Rolle geändert am 02.08.2026 (ADR 0005).** Loveable ist nicht mehr nur
+> das öffentliche Kunden-Web neben einer nativen App — es wird die
+> Plattform. Die Flutter-App wird abgelöst, der interne Bereich kommt als
+> **eigene** Loveable-App dazu. Dieses Dokument betrifft weiterhin nur die
+> Kunden-App; sie ist zuerst dran.
+
+## Demo-Zugänge
+
+Alle drei Konten sind bestätigt und einsatzbereit. Passwort für alle:
+`Boerde-Demo-2026!`
+
+| Konto | Rolle | Wofür |
+|---|---|---|
+| `demo-kunde@boerdesnack24.app` | customer | Kundenbereich der Web-App |
+| `demo-gs@boerdesnack24.app` | shareholder | Verwaltung, Finanzen |
+| `demo-admin@boerdesnack24.app` | system_admin | alles |
+
+Die Passwörter wurden am 02.08.2026 neu gesetzt, weil sie niemandem mehr
+bekannt waren. Vor dem Live-Gang gehören sie geändert oder die Konten
+gelöscht — sie stehen hier im Klartext im Repository.
+
+
 Stand: 02.08.2026 · Projekt `d5033021-6dce-4044-8bf6-bb50d80aa8ff`
 (TanStack Start), Vorschau:
 `https://id-preview--d5033021-6dce-4044-8bf6-bb50d80aa8ff.lovable.app`
@@ -17,6 +39,7 @@ bevor die erste Nachricht rausgeht.
 | Landing: alter Claim und erfundene Spendensumme raus | ✅ |
 | A0 · RLS-/Auth-Audit vor der Anbindung | ✅ ADR 0004 |
 | A1 · Supabase-Client + Anmeldung | ✅ Commit `4104fc22`, geprüft |
+| A1b · Registrierung Privat/Unternehmer | ✅ 02.08.2026, geprüft |
 | A2a · Produkte auf echte Daten | 🚧 Anweisung fertig, MCP getrennt |
 | A2b · Abo-Anzeige/-Kauf auf echte Daten | 🚧 Anweisung fertig |
 | A3 · Marketing-Copy + Jahresabo hervorheben | 🚧 Anweisung fertig |

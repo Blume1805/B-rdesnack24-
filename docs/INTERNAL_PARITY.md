@@ -8,9 +8,17 @@ Diese Liste hält fest, was davon bereits produktiv ist. Ergebnis vorweg:
 acht von neun sind da — teils deutlich umfangreicher als die Stichworte
 vermuten lassen.
 
-**Wichtig zur Einordnung:** Der interne Bereich wird laut
-Plattform-Entscheidung **nicht** nach Loveable dupliziert. Er bleibt in
-der Flutter-App. Diese Liste dient dem Abgleich, nicht der Portierung.
+**Einordnung geändert am 02.08.2026 (ADR 0005):** Die frühere Festlegung
+„bleibt in der Flutter-App, wird nicht portiert" gilt nicht mehr. Der
+interne Bereich wird als **eigene Loveable-App** neu gebaut, getrennt von
+der Kunden-App — Kunden sollen keinen Verwaltungscode ausgeliefert
+bekommen. Diese Liste ist damit von einer Abgleichsliste zur
+**Portierungsliste** geworden: Was hier als ✅ steht, muss drüben
+entstehen, bevor die Flutter-App abgeschaltet werden darf.
+
+Reihenfolge laut ADR 0005: zuerst der Kundenbereich, dann diese Liste —
+beginnend mit dem täglich Gebrauchten (Inventur, Prozessprotokolle),
+zuletzt das Seltene (Jahresabschluss).
 
 | Gefordert | Status | Wo |
 |---|---|---|
