@@ -35,6 +35,11 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   static String _srcLabel(String s) => switch (s) {
         'nayax' => 'Automat',
         'import' => 'Import',
+        // Seit Migration 0077/0078 tragen Testkäufe eine eigene Herkunft.
+        // Sie als „Manuell" auszuweisen hieße, einen simulierten Kauf wie
+        // einen echten aussehen zu lassen — im Beleg gerade die falsche
+        // Stelle dafür.
+        'demo' => 'Demo',
         _ => 'Manuell',
       };
 
