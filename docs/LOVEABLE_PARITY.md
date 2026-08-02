@@ -16,10 +16,14 @@ bevor die erste Nachricht rausgeht.
 |---|---|
 | Landing: alter Claim und erfundene Spendensumme raus | ✅ |
 | A0 · RLS-/Auth-Audit vor der Anbindung | ✅ ADR 0004 |
-| A1 · Supabase-Client + Anmeldung | 🚧 wartet auf Credits |
-| A2a · Produkte/Automaten auf echte Daten | ❌ |
-| A2b · Abo-Anzeige/-Kauf auf echte Daten | ❌ |
-| A3 · Marketing-Copy + Jahresabo hervorheben | ❌ |
+| A1 · Supabase-Client + Anmeldung | ✅ Commit `4104fc22`, geprüft |
+| A2a · Produkte auf echte Daten | 🚧 Anweisung fertig, MCP getrennt |
+| A2b · Abo-Anzeige/-Kauf auf echte Daten | 🚧 Anweisung fertig |
+| A3 · Marketing-Copy + Jahresabo hervorheben | 🚧 Anweisung fertig |
+
+Die Anweisungstexte für A2a, A2b und A3 stehen wortgleich versandfertig in
+`LOVEABLE_ANWEISUNGEN.md`, jeweils mit Prüfliste für das anschließende
+`get_diff`.
 
 ## Was der Agent über die Datenbank wissen muss
 
@@ -86,6 +90,28 @@ Für `anon` ist seit Migration 0075 **nichts** davon per RPC erreichbar. Die
 Web-App muss also angemeldet sein, bevor sie Daten zieht — deshalb steht A1
 vor A2.
 
+### Drei Felder sind leer — nachgemessen, nicht vermutet
+
+Beim Vorbereiten von A2a stellte sich heraus, dass die echten Daten an
+drei Stellen **dünner** sind als der Mock. Das ist kein Fehler, aber es
+ändert, was A2a bauen darf:
+
+| Feld | Stand | Folge für die Web-App |
+|---|---|---|
+| `products.image_url` | **0 von 62** gefüllt | Kein `<img>` ohne Fallback. Platzhalter wie in `product_image.dart`: Flächenfarbe, Warenkorb-Icon bei 35 % Deckkraft, Anfangsbuchstabe des Produktnamens. |
+| `product_ratings` | **0 Zeilen** | Der Bewertungsblock entfällt ganz. Keine „0,0 ★", keine leeren Sterne — und erst recht nicht die erfundenen Mock-Werte (§ 5 UWG). |
+| `products.allergens` | überall leer | Zeile nur bei nicht-leerem Array rendern. |
+
+Der Mock sieht also besser aus als die Wirklichkeit. Wer das beim
+Umstellen nicht einplant, baut eine Seite, die nach dem Datentausch
+schlechter wirkt als vorher — und korrigiert dann in die falsche
+Richtung.
+
+Weitere geprüfte Eckdaten: `products.status` kennt real nur `active`,
+`serve_temp` die Werte `cold`, `hot`, `neutral`.
+`product_rating_summary` ist eine View mit `security_invoker=true` —
+RLS greift also, sie ist kein Umweg an den Policies vorbei.
+
 ## Blocker, der nicht an Credits hängt
 
 **Die Automaten haben keine echten Stammdaten.** In der Datenbank stehen:
@@ -111,7 +137,7 @@ bleiben; die Automatenliste kommt danach.
 Reihenfolge einhalten — A2 ohne A1 hat keine Sitzung, an der die
 RLS-Policies greifen könnten.
 
-**A1 · Client und Anmeldung** (Text liegt fertig vor, siehe Aufgabenliste)
+**A1 · Client und Anmeldung** — ✅ erledigt, Commit `4104fc22`.
 Supabase-Client gegen `nnfsyuglkqycwenwxmuw` mit dem Publishable Key,
 Route `/anmelden` (Anmelden, Registrieren, Passwort vergessen),
 Auth-Provider mit `getSession` + `onAuthStateChange`, `/app` schützt sich,
@@ -120,7 +146,8 @@ Profil zeigt echte Nutzerdaten. Dazu zwei Altlasten in `__root.tsx`:
 
 **A2a · Produkte** Nur Produkte, keine Automaten (siehe Blocker oben).
 Bruttopreis nach der Formel oben, zweistufige Kategorien, Verfügbarkeit
-aus `inventory`, Allergene aus dem Array.
+aus `inventory`, Allergene aus dem Array — und die drei leeren Felder
+sauber abfangen. Volltext in `LOVEABLE_ANWEISUNGEN.md`.
 
 **A2b · Abo** `customer_subscriptions` lesen, Wechsel über die bestehende
 Edge Function `subscription-choose` (nicht direkt in die Tabelle
