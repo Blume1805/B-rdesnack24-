@@ -43,7 +43,15 @@ bevor die erste Nachricht rausgeht.
 | A2a · Produkte auf echte Daten | ✅ Commit `8ecbad36`, 10/10 Prüfpunkte |
 | A2b · Abo-Anzeige/-Kauf auf echte Daten | ✅ 6/6 Prüfpunkte |
 | A3 · Preise, Jahresabo, zwei Nachbesserungen | ✅ inhaltlich, 4/4 Prüfpunkte |
+| **A5 · Spendenprojekte auf echte Daten** | ❌ **zuerst senden** — § 5 UWG, Text liegt bereit |
 | A4 · Kontraste (WCAG 1.4.3 / BFSG) | ❌ Credits erschöpft, Text liegt bereit |
+| A6 · Bonus/Treue auf echte Daten | ❌ 9 Abzeichen, 4 Challenges vorhanden |
+| A7 · Belege + Benachrichtigungen | ❌ RPCs vorhanden |
+| A8 · Freunde-werben-Programm | ❌ RPCs vorhanden |
+| A9 · Automatenliste | ❌ blockiert: Stammdaten fehlen |
+
+Reihenfolge bewusst **A5 vor A4**: Erfundene gemeinnützige Organisationen
+mit erfundenen Spendenständen wiegen schwerer als ein Kontrastproblem.
 
 Der offene `status`-Punkt aus A2a ist mit A2b erledigt.
 

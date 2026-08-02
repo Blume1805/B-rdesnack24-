@@ -246,6 +246,96 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 
 ---
 
+## A5 · Spendenprojekte auf echte Daten (bereit zum Senden — zuerst)
+
+> Der Charity-Bereich zeigt drei erfundene Projekte mit erfundenen
+> Spendenständen und Stimmenzahlen. Das muss weg, bevor irgendjemand die
+> Seite zu sehen bekommt.
+>
+> **Was dort steht und was stimmt**
+>
+> | In der App (erfunden) | In Wirklichkeit |
+> |---|---|
+> | Jugendtreff Irxleben · 3.120 € · 412 Stimmen | Tafel Magdeburg |
+> | Tierheim Magdeburg · 2.480 € · 388 Stimmen | Kinderhospiz Magdeburger Elbland |
+> | SV Hermsdorf Nachwuchs · 1.890 € · 275 Stimmen | Feuerwehr Sülzetal |
+>
+> Erfundene Zahlen sind das eine. Erfundene **gemeinnützige
+> Organisationen** mit erfundenen Spendenständen sind eine Falschangabe
+> über Dritte, die es wirklich gibt (§ 5 UWG). `charityProjects` in
+> `src/lib/data.ts` bitte ersatzlos löschen.
+>
+> **Echte Quelle**
+>
+> ```ts
+> const { data } = await supabase.rpc("donation_causes_list");
+> // id, title, description, status, vote_count, voted_by_me, created_at
+> ```
+>
+> Abstimmen ist ein Umschalter — die RPC gibt `true` zurück, wenn die
+> Stimme gesetzt wurde, `false`, wenn sie zurückgezogen wurde:
+>
+> ```ts
+> const { data: nowVoted } = await supabase.rpc("vote_donation_cause",
+>   { p_cause_id: id });
+> ```
+>
+> Eigene Vorschläge (landen mit Status `suggested` und brauchen Freigabe):
+>
+> ```ts
+> await supabase.rpc("suggest_donation_cause",
+>   { p_title: titel, p_description: text });
+> ```
+>
+> **Ziele und Fortschrittsbalken gibt es nicht.** Der Mock hatte `ziel`
+> und `stand` je Projekt — dafür existiert kein Feld. Bitte keine
+> Balken erfinden; die Projekte stehen zur Abstimmung, nicht als
+> Sammelziele.
+>
+> **Der Spendenstand — bitte genau lesen**
+>
+> Es gibt zwei RPCs, und beide liefern derzeit **keine belastbaren
+> Zahlen**:
+>
+> ```ts
+> supabase.rpc("my_donation_summary");   // total_donated, purchase_count
+> supabase.rpc("donation_pool_summary"); // my_donated, total_pool,
+>                                        // my_share_pct, non_app_gross
+> ```
+>
+> Warum sie nicht taugen: Der Topf errechnet sich aus allen Käufen plus
+> dem Automatenumsatz der letzten 90 Tage. In der Datenbank stehen
+> derzeit **8 Käufe, sämtlich aus dem Demo-Testkauf-Knopf**, und
+> `machine_sales_daily` enthält 93 eingespielte Testzeilen vom 10.06. bis
+> 10.07.2026 — seither nichts. Ein echter Zahlungsweg existiert noch
+> nicht.
+>
+> Heraus kommt „129,98 € Spendentopf". Diese Zahl ist nicht erfunden,
+> aber sie bedeutet nichts — und eine ausgerechnete Zahl wirkt
+> glaubwürdiger als eine hingeschriebene. Genau deshalb ist sie
+> gefährlicher.
+>
+> Also: **Den Spendentopf nicht als große Zahl auf die Seite setzen.**
+> Entweder ganz weglassen, bis echte Käufe fließen, oder klein und mit
+> klarem Hinweis „Testdaten, noch keine echten Verkäufe". Der eigene
+> Beitrag (`my_donation_summary`) darf stehen, ebenfalls mit Hinweis —
+> er stammt aus den eigenen Demo-Käufen und ist für den Nutzer als
+> solcher erkennbar.
+>
+> Was ohne Vorbehalt gezeigt werden kann: die drei echten Projekte, ihre
+> Stimmen und die eigene Stimme.
+>
+> Gestaltung wie bisher, kein Redesign.
+
+### Prüfliste nach `get_diff` (A5)
+
+- [ ] `charityProjects` ist aus `src/lib/data.ts` verschwunden
+- [ ] Projekte kommen aus `donation_causes_list()`
+- [ ] Abstimmen ruft `vote_donation_cause()` und behandelt den Rückgabewert als Umschalter
+- [ ] Keine Fortschrittsbalken, keine Ziel-Beträge
+- [ ] Kein großer Spendentopf ohne Hinweis auf Testdaten
+- [ ] Keine Zahl auf der Seite, die nicht aus einer RPC stammt
+
 ## A4 · Kontraste (bereit zum Senden — Credits fehlten)
 
 > Die Preisdarstellung sitzt inhaltlich. Es gibt aber ein
