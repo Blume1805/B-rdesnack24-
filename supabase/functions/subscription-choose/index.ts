@@ -13,64 +13,14 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
-
-const FROM = Deno.env.get("EMAIL_FROM") ?? "Bördesnack24 <noreply@boerdesnack24.de>";
-const RESEND_KEY = Deno.env.get("RESEND_API_KEY");
+import { sendMail } from "../_shared/email/send.ts";
+import { subscriptionChooseConfirmation } from "../_shared/email/templates/subscription_choose.ts";
 
 const PLAN_NAMES: Record<string, string> = {
   monthly: "Monats-Abo",
   yearly: "Jahres-Abo",
   lifetime: "Lifetime-Abo (Founders Edition)",
 };
-
-function confirmationHtml(opts: {
-  firstName: string;
-  planName: string;
-  billingLabel: string;
-  previousPlanName: string | null;
-  lifetime: boolean;
-}): string {
-  const switched = opts.previousPlanName !== null;
-  return `<!doctype html>
-<html lang="de"><body style="margin:0;padding:0;background:#F9F5EC;font-family:Helvetica,Arial,sans-serif;color:#14110E;">
-  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
-    <div style="background:#14110E;border-radius:12px 12px 0 0;padding:18px 24px;">
-      <span style="color:#FDC102;font-size:18px;font-weight:800;letter-spacing:1px;">B&Ouml;RDESNACK24</span>
-    </div>
-    <div style="background:#FFFFFF;border:1px solid #E8E2D6;border-top:none;border-radius:0 0 12px 12px;padding:24px;">
-      <h1 style="font-size:18px;margin:0 0 12px;">${switched ? "Abo-Wechsel bestätigt" : "Abo-Auswahl bestätigt"}</h1>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 16px;">
-        Hallo ${opts.firstName},<br><br>
-        ${switched
-          ? `dein Abo wurde vom <strong>${opts.previousPlanName}</strong> auf das <strong>${opts.planName}</strong> umgestellt.`
-          : `du hast das <strong>${opts.planName}</strong> gewählt.`}
-      </p>
-      <div style="background:#F9F5EC;border-left:4px solid #FDC102;padding:12px 16px;margin:0 0 16px;">
-        <p style="font-size:14px;margin:0;"><strong>${opts.planName}</strong> &middot; ${opts.billingLabel}</p>
-      </div>
-      ${opts.lifetime
-        ? `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
-             Hinweis: Das Lifetime-Abo ist Teil der auf 20 Konten limitierten Founders Edition und endgültig —
-             ein späterer Wechsel in ein anderes Modell ist nicht mehr möglich.
-             Du hast der sofortigen Bereitstellung ausdrücklich zugestimmt und bestätigt, dass dein Widerrufsrecht mit
-             vollständiger Bereitstellung erlischt (§ 356 Abs. 5 BGB).</p>`
-        : `<p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
-             Du kannst dein Abo-Modell jederzeit im Kundenbereich unter &bdquo;Mein Abo&ldquo; wechseln.</p>`}
-      <p style="font-size:13px;line-height:1.5;margin:0 0 16px;color:#6F6A5E;">
-        Du hast beim Abschluss bestätigt, volljährig zu sein oder mit Zustimmung deiner gesetzlichen
-        Vertreter zu handeln (§§ 106 ff. BGB).
-      </p>
-      <p style="font-size:13px;line-height:1.5;margin:0;color:#6F6A5E;">
-        Die Abrechnung erfolgt über den App Store bzw. Google Play, sobald die App dort veröffentlicht ist.
-      </p>
-    </div>
-    <p style="font-size:11px;color:#9B958A;margin:16px 8px;">
-      Bördesnack24 GbR &middot; Sülldorfer Str. 3A &middot; 39171 Sülzetal OT Osterweddingen<br>
-      Steuernummer: 102/178/01635 &middot; USt-IdNr.: DE 458804058
-    </p>
-  </div>
-</body></html>`;
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -138,35 +88,20 @@ Deno.serve(async (req) => {
     const previousPlanName = prevPlan ? (PLAN_NAMES[prevPlan] ?? prevPlan) : null;
     const billingLabel = String(r.billing_label ?? "");
 
-    const subject = previousPlanName
-      ? `Bördesnack24: Wechsel zum ${planName} bestätigt`
-      : `Bördesnack24: Dein ${planName} ist aktiv`;
-    const html = confirmationHtml({
+    const mail = subscriptionChooseConfirmation({
       firstName, planName, billingLabel, previousPlanName,
       lifetime: plan === "lifetime",
     });
 
-    let emailStatus = "sent";
-    if (!RESEND_KEY) {
-      console.log("[subscription-choose] RESEND_API_KEY fehlt — Simulation:",
-        { from: FROM, to: email, subject });
-      emailStatus = "dev";
-    } else {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RESEND_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ from: FROM, to: [email], subject, html }),
-      });
-      if (!res.ok) {
-        // Planwechsel ist bereits gültig — E-Mail-Fehler nicht zum Abbruch
-        // machen, aber transparent zurückmelden.
-        console.error("[subscription-choose] resend_error", await res.text());
-        emailStatus = "failed";
-      }
-    }
+    // Planwechsel ist bereits gültig — sendMail wirft deshalb nicht, ein
+    // Mailproblem wird nur transparent zurückgemeldet.
+    const emailStatus = await sendMail({
+      to: email,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
+      tag: "subscription-choose",
+    });
 
     return jsonResponse({
       ok: true,
