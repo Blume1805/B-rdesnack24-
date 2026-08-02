@@ -33,6 +33,17 @@ enable_signup = true
 enable_confirmations = true          # E-Mail-Bestätigung Pflicht
 double_confirm_changes = true
 
+# Send-Email-Hook: leitet Auth-Mails an unsere Edge Function um, damit sie
+# über das Template-Modul und Resend laufen. Für den lokalen Stack bewusst
+# auskommentiert — sonst braucht `supabase start` zwingend einen laufenden
+# Function-Container plus Secret, und die Registrierung schlägt lokal fehl.
+# Produktiv wird der Hook im Dashboard konfiguriert, siehe
+# docs/EMAIL_TEMPLATES.md.
+# [auth.hook.send_email]
+# enabled = true
+# uri = "http://host.docker.internal:54321/functions/v1/auth-email-hook"
+# secrets = "env(SEND_EMAIL_HOOK_SECRET)"
+
 [auth.mfa]
 # MFA (TOTP) vorbereitet — vor Go-Live für interne Rollen aktivieren.
 max_enrolled_factors = 10
