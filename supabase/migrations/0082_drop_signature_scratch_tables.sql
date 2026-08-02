@@ -1,0 +1,27 @@
+-- ============================================================================
+-- 0082 · Zwischenablagen für Unterschriften entfernt
+-- ----------------------------------------------------------------------------
+-- 0081 hat den beiden Tabellen die Rechte entzogen und die Löschung bewusst
+-- offengelassen: `app._pia_sig` trug den Namen der Person, deren
+-- Unterschrift in `public.partner_signatures` fehlt, und dort hätte die
+-- einzige Kopie liegen können.
+--
+-- Der Betrieb hat entschieden: Pia Blumes Unterschrift wird später über
+-- DocuSign ergänzt. Damit ist der Inhalt der Zwischenablagen gegenstandslos.
+--
+-- Ein Unterschriftsbild, das niemand mehr braucht, in einer vergessenen
+-- Tabelle liegen zu lassen, wäre personenbezogene Datenhaltung ohne Zweck
+-- (Art. 5 Abs. 1 lit. e DSGVO, Speicherbegrenzung). Deshalb weg statt
+-- „schadet ja nicht".
+--
+-- Geprüft vor dem Verwerfen: keine Funktion und kein Fremdschlüssel
+-- referenziert die beiden Tabellen; `_sig_upload` war ohnehin redundant,
+-- weil Philipp Blumes Unterschrift ordentlich in `partner_signatures`
+-- hinterlegt ist.
+--
+-- Der Weg für Pias Unterschrift steht damit fest: DocuSign →
+-- `docusign-fetch-signature` → `partner_signatures.docusign_signature_uri`.
+-- Kein Umweg mehr über eine Base64-Zwischenablage.
+-- ============================================================================
+drop table if exists app._pia_sig;
+drop table if exists app._sig_upload;
