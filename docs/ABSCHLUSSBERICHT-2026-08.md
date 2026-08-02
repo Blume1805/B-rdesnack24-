@@ -135,6 +135,46 @@ durch.
 
 Advisor: **85 → 76 WARN, 0 ERROR.**
 
+### Demo-Käufe flossen in die Buchhaltung (Migrationen 0077/0078)
+
+Beim vollständigen Durchgang durch die verbliebenen 74 Funktionen fiel
+`dev_add_demo_purchase()` auf. Der Name klingt nach vergessenem
+Entwicklerwerkzeug, ist aber ein sichtbares Feature: im Belege-Screen
+steht ein Kasten „Demo-Testkauf" mit vier Zahlungsart-Chips, ohne
+Beschränkung für jedes Kundenkonto — gedacht für die Zeit, bis der
+Nayax-Webhook echte Käufe liefert.
+
+Geschrieben wurde `source = 'manual'`. Das ist derselbe Wert, den
+`purchases.source` als Standard trägt — simulierte und echte Käufe waren
+also nicht unterscheidbar. Und `datev_export_rows`, `finance_kpis` und
+`finance_summary` lesen die Käufe ohne jeden Filter auf die Herkunft.
+Zusammengenommen: Ein Knopfdruck im Kundenkonto erzeugte Zeilen, die im
+DATEV-Export und in der BWA landeten.
+
+Ohne Dramatik eingeordnet: Es gibt noch keinen echten Zahlungsweg, alle
+acht Käufe in der Datenbank stammen aus diesem Knopf. Das ist also kein
+laufender Schaden, sondern ein Punkt, der vor dem Start dicht sein muss —
+sobald echte und simulierte Umsätze nebeneinanderliegen, lässt sich beides
+nachträglich nicht mehr trennen.
+
+Der Knopf bleibt, er wird nur kenntlich: neue Herkunft `'demo'`,
+ausgeschlossen in den drei buchhaltungsrelevanten Funktionen.
+Unverändert bleiben Belege, Treuestatus, Gamification und der
+DSGVO-Datenexport — dort erfüllt der Demo-Kauf gerade seinen Zweck, und
+in eine Auskunft nach Art. 15 gehört ohnehin alles, was zur Person
+gespeichert ist.
+
+Gegengeprüft in einer zurückgerollten Transaktion: Ein Demo-Kauf über
+99 € erscheint im eigenen Beleg, lässt DATEV-Export und
+`revenue_net`/`vat_collected` aber unverändert bei 0. Ein *echter* Kauf
+über dieselben 99 € ergibt 92,52 € netto und 6,48 € Umsatzsteuer — der
+Filter wirkt also gezielt und sperrt nicht pauschal alles aus.
+
+Die drei Finanzfunktionen wurden nicht abgetippt, sondern über
+`pg_get_functiondef` gelesen, gezielt ergänzt und zurückgeschrieben; die
+Migration zählt vorher die Fundstellen und bricht ab, statt still das
+Falsche zu tun.
+
 `pg_net` bleibt bewusst im `public`-Schema, entgegen der
 Advisor-Empfehlung: Alle 15 Objekte der Extension liegen in `net`, in
 `public` steht nichts. Dagegen hängt der Cron-Job `weather-sync` an
@@ -192,6 +232,13 @@ umgestellt werden.
 
 **Probemonat, Payment-Anbindung, Supportformular** — jeweils
 Voraussetzung für ganze Mail-Kategorien.
+
+**Demo-Testkauf.** Der Knopf steht jedem Kundenkonto offen. Für die
+Buchhaltung ist er seit 0078 harmlos, Treuepunkte und Spendenstände lässt
+er weiter wachsen. Vor dem Start ist zu entscheiden: bleibt er (Beta),
+wird er auf interne Rollen begrenzt, oder verschwindet er? Dazu die
+Frage, was mit den acht vorhandenen Demo-Käufen geschieht, die noch als
+`'manual'` in den Zahlen stehen.
 
 ## 4 · Was nur im Dashboard erledigt werden kann
 
