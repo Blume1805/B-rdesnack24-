@@ -1,0 +1,60 @@
+-- ============================================================================
+-- 0081 · Zwischenablagen für Unterschriften: Rechte entziehen
+-- ----------------------------------------------------------------------------
+-- BEFUND, gefunden beim Gegenprüfen von 0080
+-- Nach dem Anlegen von `app.subscription_plans` wollte ich belegen, dass die
+-- Tabelle nicht direkt erreichbar ist. Beim Vergleich fiel auf, dass zwei
+-- andere Tabellen im `app`-Schema volle Rechte für `anon` und
+-- `authenticated` tragen — SELECT, INSERT, UPDATE, DELETE und TRUNCATE,
+-- ohne RLS und ohne Policy:
+--
+--     app._pia_sig      (idx integer, s text) —  2 Zeilen,  3.102 Zeichen
+--     app._sig_upload   (idx integer, s text) —  3 Zeilen, 24.000 Zeichen
+--
+-- Beides sind Zwischenablagen für einen stückweisen Base64-Upload; keine
+-- Funktion referenziert sie. `_sig_upload` beginnt mit `iVBORw0KGgo`, dem
+-- Kopf einer PNG-Datei — dort liegt also ein Bild, dem Namen nach ein
+-- Unterschriftsbild.
+--
+-- KEIN AKUTES LOCH — nachgemessen, nicht vermutet. PostgREST selbst
+-- antwortet auf einen Zugriff mit `Accept-Profile: app`:
+--
+--     PGRST106 · "Only the following schemas are exposed:
+--                 public, graphql_public"
+--
+-- Das `app`-Schema ist also von außen nicht erreichbar, und die Rechte
+-- laufen ins Leere. Aber sie sind falsch, und „app" zur Liste der
+-- exponierten Schemas hinzuzufügen ist im Dashboard ein Klick. Danach wäre
+-- ein Unterschriftsbild für jeden lesbar — und per TRUNCATE für jeden
+-- löschbar.
+--
+-- Der Entzug ist gefahrlos: Über REST war ohnehin kein Zugriff möglich, und
+-- SECURITY-DEFINER-Funktionen arbeiten mit den Rechten ihres Eigentümers.
+-- `service_role` behält den Lesezugriff.
+-- ============================================================================
+revoke all on app._pia_sig    from anon, authenticated, public;
+revoke all on app._sig_upload from anon, authenticated, public;
+
+-- ----------------------------------------------------------------------------
+-- BEWUSST NICHT GELÖSCHT — und warum das eine Entscheidung des Betriebs ist
+-- ----------------------------------------------------------------------------
+-- Der naheliegende Schritt wäre, die beiden Tabellen zu verwerfen. Ein Blick
+-- in `public.partner_signatures` rät davon ab:
+--
+--     Philipp Blume → image_url gesetzt, DocuSign-Verweis vorhanden
+--     Pia Blume     → KEIN Bild hinterlegt
+--
+-- `_pia_sig` trägt den Namen der Person, deren Unterschrift in der echten
+-- Tabelle fehlt. Es ist gut möglich, dass dort die einzige Kopie liegt —
+-- ein abgebrochener Installationsversuch. `_sig_upload` sieht dagegen
+-- redundant aus, weil Philipps Unterschrift ordentlich hinterlegt ist.
+--
+-- Zu klären, bevor die Tabellen verschwinden:
+--   1. Soll Pia Blumes Unterschrift installiert werden? Dann ist der Inhalt
+--      von `_pia_sig` die Vorlage (Edge Function `install-signature`).
+--   2. Falls nicht: löschen. Ein Unterschriftsbild in einer vergessenen
+--      Zwischenablage ist personenbezogene Datenhaltung ohne Zweck
+--      (Art. 5 Abs. 1 lit. e DSGVO, Speicherbegrenzung).
+--
+-- Beides ist eine Entscheidung über echte Daten einer echten Person —
+-- deshalb hier nur der Rechteentzug.
