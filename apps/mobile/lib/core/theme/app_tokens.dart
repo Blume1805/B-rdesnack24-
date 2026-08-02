@@ -34,6 +34,23 @@ abstract final class AppColors {
   static const Color statusCritical = Color(0xFFB31C1C);
   static const Color statusInfo = Color(0xFF0066CC);
 
+  /// Statusfarben als *Textfarbe* auf hellen Flächen.
+  ///
+  /// Gleiche Begründung wie bei [brandText]: Die Statusfarben oben sind für
+  /// Ränder, Symbole und Flächen gedacht — dort greift WCAG 1.4.3 nicht.
+  /// Als Beschriftung auf dem hellen Chip-Hintergrund verfehlen sie die
+  /// 4,5:1 aber deutlich (grün 2,9:1, gelb 1,9:1, blau 4,47:1). Diese
+  /// abgedunkelten Varianten behalten den Farbton und liegen bei rund
+  /// 4,75:1 auf dem jeweiligen Chip — mit etwas Reserve, damit nicht die
+  /// nächste Nuance wieder darunter rutscht. Auf Weiß und Creme liegen sie
+  /// bei über 5:1.
+  ///
+  /// Rot und Neutral brauchen keine Extravariante: #B31C1C erreicht auf
+  /// seinem Chip 5,2:1, das Grau 4,9:1.
+  static const Color statusPositiveText = Color(0xFF467430);
+  static const Color statusWarningText = Color(0xFF8C6104);
+  static const Color statusInfoText = Color(0xFF0062C4);
+
   static const Color onDark = Colors.white;
 }
 

@@ -17,6 +17,18 @@ import 'app_tokens.dart';
 /// Für native Builds (Android/iOS) läuft GoogleFonts normal und cached
 /// die Dateien einmalig auf das Gerät.
 abstract final class AppTypography {
+  /// Wenn true, wird die System-Sans genutzt statt der Schriften über
+  /// `google_fonts`.
+  ///
+  /// Im Web-Build ist das der Normalfall (siehe Klassenkommentar). Tests
+  /// setzen den Schalter in `test/flutter_test_config.dart` ebenfalls auf
+  /// true: Ohne Netz kann `google_fonts` die Dateien weder laden noch aus
+  /// den Assets ziehen und wirft — sonst scheitern Widget-Tests an der
+  /// Schrift statt an ihrem eigentlichen Gegenstand. Nebeneffekt, der
+  /// erwünscht ist: Tests messen dann exakt die Darstellung, die auch
+  /// Web-Nutzer bekommen.
+  static bool useSystemFallback = kIsWeb;
+
   static const List<String> _sansFallback = [
     'SF Pro Display',
     'Segoe UI',
@@ -38,7 +50,7 @@ abstract final class AppTypography {
       color: color,
       fontFamilyFallback: _sansFallback,
     );
-    if (kIsWeb) return base;
+    if (useSystemFallback) return base;
     return GoogleFonts.bricolageGrotesque(textStyle: base);
   }
 
@@ -55,7 +67,7 @@ abstract final class AppTypography {
       color: color,
       fontFamilyFallback: _sansFallback,
     );
-    if (kIsWeb) return base;
+    if (useSystemFallback) return base;
     return GoogleFonts.hankenGrotesk(textStyle: base);
   }
 

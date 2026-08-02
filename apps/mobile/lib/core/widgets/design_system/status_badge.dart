@@ -18,18 +18,22 @@ class StatusBadge extends StatelessWidget {
   final StatusTone tone;
   final IconData? icon;
 
+  /// `fg` ist die Beschriftungsfarbe und nutzt bei Grün, Gelb und Blau die
+  /// abgedunkelten *Text*-Varianten — die vollen Statusfarben verfehlen auf
+  /// dem hellen Chip die 4,5:1 nach WCAG 1.4.3. Für `border` bleibt die
+  /// kräftige Originalfarbe, dort gilt die Textregel nicht.
   ({Color bg, Color fg, Color border}) _colors() {
     switch (tone) {
       case StatusTone.positive:
         return (
           bg: const Color(0xFFE7F1E0),
-          fg: AppColors.statusPositive,
+          fg: AppColors.statusPositiveText,
           border: AppColors.statusPositive
         );
       case StatusTone.warning:
         return (
           bg: const Color(0xFFFCEECB),
-          fg: AppColors.statusWarning,
+          fg: AppColors.statusWarningText,
           border: AppColors.statusWarning
         );
       case StatusTone.critical:
@@ -41,7 +45,7 @@ class StatusBadge extends StatelessWidget {
       case StatusTone.info:
         return (
           bg: const Color(0xFFDBE8F5),
-          fg: AppColors.statusInfo,
+          fg: AppColors.statusInfoText,
           border: AppColors.statusInfo
         );
       case StatusTone.brand:
