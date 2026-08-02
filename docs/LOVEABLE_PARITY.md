@@ -41,14 +41,27 @@ bevor die erste Nachricht rausgeht.
 | A1 · Supabase-Client + Anmeldung | ✅ Commit `4104fc22`, geprüft |
 | A1b · Registrierung Privat/Unternehmer | ✅ 02.08.2026, geprüft |
 | A2a · Produkte auf echte Daten | ✅ Commit `8ecbad36`, 10/10 Prüfpunkte |
-| A2b · Abo-Anzeige/-Kauf auf echte Daten | 🚧 Anweisung fertig |
-| A3 · Marketing-Copy + Jahresabo hervorheben | 🚧 Anweisung fertig |
+| A2b · Abo-Anzeige/-Kauf auf echte Daten | ✅ 6/6 Prüfpunkte |
+| A3 · Preise, Jahresabo, zwei Nachbesserungen | 🚧 läuft |
 
-**Offener Punkt aus A2a**, an A2b angehängt: `fetchProduct` in
-`src/lib/products.ts` filtert `deleted_at`, aber nicht `status`. Das Enum
-`entity_status` kennt `active, inactive, archived` — ein deaktiviertes
-Produkt ließe sich per Direktlink aufrufen. Heute folgenlos, weil alle 62
-Produkte `active` sind.
+Der offene `status`-Punkt aus A2a ist mit A2b erledigt.
+
+**Zwei Funde aus A2b**, in A3 mitgegeben:
+
+1. **Die Kündigungsseite verwarf die Antwort der Edge Function.** Diese
+   liefert `received_at` **und `cancel_at`**; die Seite zeigte stattdessen
+   `new Date()` aus dem Browser und das Vertragsende gar nicht. Der Kunde
+   erfuhr also nicht, wann sein Abo endet — genau das gehört nach
+   § 312k Abs. 2 S. 3 BGB in die Zugangsbestätigung. Ein Zeitstempel aus
+   der Browser-Uhr ist als Nachweis zudem wertlos.
+2. **Auf den Abo-Karten stand kein Preis mehr.** Der Mock hatte welche,
+   die echten Daten brachten keine mit — weil es dafür keine lesbare
+   Quelle gab (siehe Migration 0080). § 312j Abs. 2 BGB verlangt den Preis
+   **unmittelbar vor** dem Bestellknopf.
+
+Beides ist die typische Folge eines Datentauschs: was der Mock erfunden
+hat, fällt weg, und ob dabei eine Pflichtangabe mit verschwindet, sieht
+man nur, wenn man gezielt danach schaut.
 
 Die Anweisungstexte für A2a, A2b und A3 stehen wortgleich versandfertig in
 `LOVEABLE_ANWEISUNGEN.md`, jeweils mit Prüfliste für das anschließende
