@@ -38,21 +38,21 @@ Reklamationen, Kassenverwaltung, B2B-Kunden inkl. CSV-Export,
 Automatenbestand, Kündigungen, Mitarbeiterverwaltung,
 Unterschriftenverwaltung, Telemetrie-Hub.
 
-## Offene Frage: internes Kommunikationsmodul
+## Entschieden: internes Kommunikationsmodul kommt nicht
 
-Das ist die einzige echte Lücke. Vor dem Bau ist zu klären, ob sie
-überhaupt geschlossen werden soll — und das ist eine Produktentscheidung,
-keine technische:
+**Entscheidung vom 03.08.2026:** Nachrichten zwischen Gesellschaftern und
+Mitarbeitern sind nicht erwünscht. Der Punkt ist damit erledigt und wird
+nicht gebaut.
 
-* **Dagegen spricht:** Der Betrieb ist klein. Für Absprachen gibt es
-  Telefon und Messenger. Ein eigener Kanal in der App bedeutet eine
-  weitere Stelle, in die man schauen muss, und er wird erfahrungsgemäß
-  genau dann nicht gelesen, wenn es eilt.
-* **Dafür spricht:** Vorgangsbezogene Notizen sind heute über fünf
-  Screens verstreut. Wer wissen will, was zu einem Automaten zuletzt
-  besprochen wurde, muss an mehreren Stellen nachsehen.
+Das war der letzte offene Posten aus dem ursprünglichen Auftrag. Der
+interne Bereich ist damit funktional vollständig — was jetzt noch ansteht,
+ist Portierung nach Lovable, kein Neubau.
 
-Falls gewünscht, wäre der sinnvollere Zuschnitt vermutlich nicht ein
-Chat, sondern **Notizen am Objekt** (Automat, Reklamation, Lieferung) mit
-einer gemeinsamen Übersicht „zuletzt passiert" — das löst das eigentliche
-Problem, ohne einen weiteren Posteingang zu erzeugen.
+Zur Nachvollziehbarkeit die Abwägung, die zu der Frage geführt hatte: Für
+Absprachen gibt es in einem Betrieb dieser Grösse Telefon und Messenger,
+ein eigener Kanal in der App wäre eine weitere Stelle, in die man schauen
+muss. Dem stand gegenüber, dass vorgangsbezogene Notizen über fünf Screens
+verstreut sind. Falls dieses Verstreut-Sein später doch stört, ist der
+naheliegende Zuschnitt **nicht** ein Chat, sondern Notizen am Objekt
+(Automat, Reklamation, Lieferung) — das löst das Problem, ohne einen
+zweiten Posteingang zu erzeugen.

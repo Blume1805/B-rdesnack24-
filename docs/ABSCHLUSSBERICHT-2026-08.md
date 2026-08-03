@@ -316,11 +316,12 @@ abgeschnitten — Slogan und Anrede skalieren jetzt herunter statt zu kürzen.
 
 ## 3 · Offen, weil es an einer Entscheidung hängt
 
-**Internes Kommunikationsmodul.** Einzige echte Lücke im internen
-Bereich. Empfehlung steht in `INTERNAL_PARITY.md`: Bei einem Betrieb
-dieser Größe wäre ein Chat vermutlich der falsche Zuschnitt — er erzeugt
-einen weiteren Posteingang. Das eigentliche Problem ist, dass
-vorgangsbezogene Notizen über fünf Screens verstreut sind.
+**Internes Kommunikationsmodul — entschieden am 03.08.2026: kommt nicht.**
+Nachrichten zwischen Gesellschaftern und Mitarbeitern sind ausdrücklich
+nicht erwünscht. Damit ist der letzte offene Posten aus dem
+ursprünglichen Auftrag geschlossen; für Absprachen bleiben Telefon und
+Messenger. Der interne Bereich gilt damit als vollständig — es fehlt
+nichts mehr, was gebaut werden müsste.
 
 **Automaten-Stammdaten.** In der Datenbank stehen „Standort 1
 (ANPASSEN)" bis „Standort 3 (ANPASSEN)". Die Loveable-App zeigt derzeit
@@ -385,5 +386,5 @@ Frage, was mit den acht vorhandenen Demo-Käufen geschieht, die noch als
 1. Automaten-Stammdaten eintragen — blockiert einen ganzen Web-Baustein.
 2. Redirect-URLs setzen, dann A1 in Loveable (Anweisung liegt fertig vor).
 3. Send-Email-Hook aktivieren, mit Wegwerf-Konto gegentesten.
-4. Entscheiden, ob das Kommunikationsmodul kommt — und falls ja, als
-   Notizen am Objekt statt als Chat.
+4. Liste der Spendenorganisationen liefern — Vorlage liegt in
+   `docs/SPENDENORGANISATIONEN_VORLAGE.md`, danach ist A5 startklar.

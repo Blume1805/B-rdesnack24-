@@ -175,6 +175,7 @@ ADR 0005 die **Portierungsliste**: Was dort ✅ trägt, muss drüben
 entstehen, bevor Flutter abgeschaltet wird. Nach jedem Block dort
 abhaken.
 
-Die einzige echte Lücke bleibt das interne Kommunikationsmodul — bis
-heute nicht entschieden, ob es überhaupt kommen soll. Empfehlung
-unverändert: Notizen am Objekt statt Chat.
+Das interne Kommunikationsmodul ist am 03.08.2026 entschieden worden:
+Es kommt **nicht**. Nachrichten zwischen Gesellschaftern und Mitarbeitern
+sind nicht erwünscht. Damit gibt es im internen Bereich keine offene
+Lücke mehr — alles Weitere ist Portierung, kein Neubau.
