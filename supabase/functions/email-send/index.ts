@@ -10,9 +10,8 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { sendMail } from "../_shared/email/send.ts";
 
-const FROM = Deno.env.get("EMAIL_FROM") ?? "Bördesnack24 <noreply@boerdesnack24.de>";
-const RESEND_KEY = Deno.env.get("RESEND_API_KEY");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -26,9 +25,29 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   });
 
-  // Nur Admin/Gesellschafter dürfen ausserhalb von system-Kontext senden
-  const { data: profile } = await caller.from("profiles").select("role").maybeSingle();
-  if (!profile || !["system_admin", "shareholder"].includes(profile.role)) {
+  // Nur Admin/Gesellschafter dürfen ausserhalb von system-Kontext senden.
+  //
+  // ACHTUNG, hier lag eine Lücke: Die Prüfung sah bis 03.08.2026 nur auf
+  // `role`. Der Trigger app.handle_new_user übernimmt die Rolle aber aus
+  // den Signup-Metadaten, die bei einer Selbstregistrierung vom Browser
+  // kommen — wer sich mit role: 'system_admin' anmeldete, bekam eine
+  // Profilzeile mit dieser Rolle und bestand diese Prüfung. Damit ließ
+  // sich beliebige Post von noreply@boerdesnack24.de verschicken: ein
+  // offenes Relay unter eigener Domain.
+  //
+  // Geschützt hat das nur `status`, den der Trigger für interne Rollen auf
+  // 'invited' setzt — und genau den hat diese Zeile nicht ausgewertet.
+  // Dieselbe Lücke wurde in der Datenbank mit Migration 0079 geschlossen;
+  // Edge Functions waren dort nicht erfasst.
+  const { data: profile } = await caller
+    .from("profiles")
+    .select("role, status, deleted_at")
+    .maybeSingle();
+  const darfSenden = profile !== null
+    && profile.deleted_at === null
+    && profile.status === "active"
+    && ["system_admin", "shareholder"].includes(profile.role);
+  if (!darfSenden) {
     return jsonResponse({ error: "Nicht autorisiert" }, 403);
   }
 
@@ -47,27 +66,20 @@ Deno.serve(async (req) => {
 
   const to = Array.isArray(body.to) ? body.to : [body.to];
 
-  if (!RESEND_KEY) {
-    console.log("[email-send] RESEND_API_KEY fehlt — Simulation:",
-      { from: FROM, to, subject: body.subject });
-    return jsonResponse({ ok: true, mode: "dev", to });
-  }
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${RESEND_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: FROM,
-      to,
-      subject: body.subject,
-      html: body.html,
-      text: body.text,
-    }),
+  // Versand über den gemeinsamen Sammelpunkt statt über einen eigenen
+  // fetch. Vorher ging diese Function am Protokoll vorbei — damit war
+  // „jede versendete E-Mail einsehbar" nicht einlösbar, weil
+  // approval-notify über genau diesen Weg verschickt.
+  const status = await sendMail({
+    to,
+    subject: body.subject,
+    html: body.html ?? "",
+    text: body.text,
+    tag: "email-send",
   });
-  const payload = await res.json();
-  if (!res.ok) return jsonResponse({ error: "resend_error", details: payload }, res.status);
-  return jsonResponse({ ok: true, id: payload.id });
+
+  if (status === "failed") {
+    return jsonResponse({ error: "resend_error" }, 502);
+  }
+  return jsonResponse({ ok: true, mode: status });
 });

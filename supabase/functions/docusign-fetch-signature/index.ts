@@ -40,8 +40,14 @@ Deno.serve(async (req) => {
   const admin = createClient(supabaseUrl, serviceKey);
 
   // Nur Admin/Gesellschafter dürfen Signaturen kapern.
-  const { data: profile } = await caller.from("profiles").select("role").maybeSingle();
-  if (!profile || !["system_admin", "shareholder"].includes(profile.role)) {
+  // Status mitprüfen: Der Trigger app.handle_new_user übernimmt die Rolle
+  // aus den Signup-Metadaten, die bei Selbstregistrierung vom Browser
+  // kommen. Geschützt hat bisher allein `status = 'invited'` — und den
+  // wertete diese Prüfung nicht aus (vgl. Migration 0079).
+  const { data: profile } = await caller
+    .from("profiles").select("role, status, deleted_at").maybeSingle();
+  if (!profile || profile.deleted_at !== null || profile.status !== "active"
+      || !["system_admin", "shareholder"].includes(profile.role)) {
     return jsonResponse({ error: "Nicht autorisiert" }, 403);
   }
 

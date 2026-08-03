@@ -42,9 +42,14 @@ Deno.serve(async (req) => {
     if (!isServiceRole) {
       const uid = (await caller.auth.getUser()).data.user?.id;
       if (!uid) return jsonResponse({ error: "Nicht angemeldet" }, 401);
-      const { data: prof } = await admin.from("profiles").select("role").eq("id", uid).maybeSingle();
-      const role = (prof as { role?: string } | null)?.role;
-      if (role !== "system_admin" && role !== "shareholder") {
+      // Status mitprüfen — vgl. Migration 0079: eine Rolle allein ist
+      // nicht vertrauenswürdig, solange das Konto nicht aktiviert ist.
+      const { data: prof } = await admin.from("profiles")
+        .select("role, status, deleted_at").eq("id", uid).maybeSingle();
+      const p2 = prof as { role?: string; status?: string; deleted_at?: string | null } | null;
+      const role = p2?.role;
+      if (p2?.deleted_at != null || p2?.status !== "active"
+          || (role !== "system_admin" && role !== "shareholder")) {
         return jsonResponse({ error: "Nicht autorisiert" }, 403);
       }
     }
