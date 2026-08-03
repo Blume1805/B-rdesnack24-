@@ -238,6 +238,135 @@ Reihenfolge: **I0 zuerst** (legt das Projekt an), dann I1.
 
 ---
 
+## I5a · E-Mail-Protokoll (bereit zum Senden, nach I0)
+
+> Baue die Ansicht „E-Mails" — das vollständige Protokoll aller
+> versendeten und empfangenen Nachrichten, mit Suche, Filter,
+> Detailansicht und Export.
+>
+> **Warum es das gibt:** Der Betrieb muss jede Mail nachweisen können —
+> Kündigungsbestätigungen, Rechnungen, Freigabe-Benachrichtigungen. Nicht
+> „die meisten", sondern jede. Das Protokoll wird an der einen Stelle
+> geschrieben, durch die jeder Versand läuft; deine Aufgabe ist nur noch,
+> es sichtbar zu machen.
+>
+> **Berechtigung:** Nur interne Rollen. Das prüft die Datenbank selbst —
+> ein Kunde bekommt schlicht null Zeilen zurück. Du brauchst **keine**
+> eigene Rollenabfrage. Den Menüpunkt trotzdem nur zeigen, wenn
+> `supabase.rpc("is_internal")` `true` liefert.
+>
+> ### Kopfzeile mit Kennzahlen
+>
+> ```ts
+> const { data } = await supabase.rpc("email_log_stats");
+> // gesamt, ausgehend, eingehend, gescheitert, simuliert, letzte_mail
+> ```
+>
+> Fünf Kacheln. **`gescheitert` muss auffallen** (rot), wenn > 0 — das
+> sind Mails, die der Anbieter abgelehnt hat, und die jemand ansehen
+> sollte. `simuliert` bedeutet: kein Versandschlüssel gesetzt, die Mail
+> wurde nur protokolliert. Das ist ein Betriebszustand, kein Fehler —
+> bitte neutral darstellen (grau), nicht als Warnung.
+>
+> ### Die Liste
+>
+> ```ts
+> const { data } = await supabase.rpc("email_log_list", {
+>   p_direction: null,   // 'out' | 'in' | null
+>   p_status:    null,   // 'sent' | 'failed' | 'dev' | 'received' | null
+>   p_search:    null,   // sucht in Betreff, Adressen und Anlass
+>   p_from:      null,   // ISO-Zeitstempel
+>   p_to:        null,
+>   p_limit:     50,
+>   p_offset:    0,
+> });
+> ```
+>
+> Spalten: Zeitpunkt, Richtung, Status, Empfänger, Betreff, Anlass.
+> `total_count` steht in jeder Zeile und ist die Gesamtzahl **über den
+> aktuellen Filter** — daraus die Seitenzahl bilden, keine zweite Abfrage.
+>
+> Die Liste enthält **absichtlich nicht** den Mailinhalt; bei 50 Zeilen
+> wären das schnell einige Megabyte. `has_html` und `has_text` sagen dir
+> vorab, ob es etwas anzuzeigen gibt.
+>
+> Filterleiste: Richtung (alle / ausgehend / eingehend), Status,
+> Zeitraum, Suchfeld. Die Suche bitte entprellen (~300 ms).
+>
+> ### Detailansicht
+>
+> ```ts
+> const { data } = await supabase.rpc("email_log_detail", { p_id: id });
+> ```
+>
+> Kopfdaten oben, darunter die HTML-Fassung. **Das HTML stammt aus
+> unseren eigenen Vorlagen, aber eingehende Post wird später fremdes HTML
+> enthalten** — deshalb in einem `<iframe sandbox>` anzeigen, niemals mit
+> `dangerouslySetInnerHTML`. Umschalter auf die Textfassung, wenn
+> `has_text`.
+>
+> Ist `status = 'failed'`, den Fehlertext des Anbieters sichtbar
+> anzeigen — der erklärt meistens sofort, was los war (Tippfehler in der
+> Adresse, abgelehnte Domain).
+>
+> ### Export
+>
+> Zwei Knöpfe. Beide rufen die Edge Function `email-export` mit dem Token
+> der angemeldeten Person auf und laden das Ergebnis als Datei herunter:
+>
+> ```ts
+> const { data: { session } } = await supabase.auth.getSession();
+> const res = await fetch(`${SUPABASE_URL}/functions/v1/email-export`, {
+>   method: "POST",
+>   headers: {
+>     "Authorization": `Bearer ${session.access_token}`,
+>     "Content-Type": "application/json",
+>   },
+>   body: JSON.stringify({ format: "csv", ...aktuelleFilter }),
+> });
+> const blob = await res.blob();   // dann als Download anbieten
+> ```
+>
+> * **„Liste exportieren"** — `format: "csv"`, mit **denselben Filtern,
+>   die gerade eingestellt sind**. Das ist wichtig: Wer nach „Kündigung"
+>   filtert und exportiert, erwartet die gefilterte Liste, nicht alles.
+>   Öffnet direkt in Excel.
+> * **„Diese Mail exportieren"** (in der Detailansicht) —
+>   `format: "eml", id: <id>`. Ergibt eine echte `.eml`-Datei, die sich in
+>   Outlook oder Apple Mail öffnen lässt.
+>
+> Den Dateinamen aus dem `Content-Disposition`-Kopf übernehmen, nicht
+> selbst bauen. `X-Zeilen` sagt, wie viele Zeilen drin sind — schöne
+> Rückmeldung nach dem Export („1.234 Zeilen exportiert").
+>
+> ### Wenn das Protokoll leer ist
+>
+> Am Anfang steht dort nichts, weil erst ab dem 03.08.2026 protokolliert
+> wird. Bitte einen erklärenden Leerzustand bauen, keine leere Tabelle:
+> „Noch keine E-Mails protokolliert. Aufgezeichnet wird ab dem
+> 03.08.2026."
+>
+> ### Was hier nicht hingehört
+>
+> Keine Möglichkeit, aus dieser Ansicht heraus Mails zu **senden**, zu
+> **bearbeiten** oder zu **löschen**. Es ist ein Protokoll. Die Datenbank
+> lässt Schreiben ohnehin nur serverseitig zu — ein Knopf dafür würde
+> still fehlschlagen.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Menüpunkt nur bei `is_internal() === true`
+- [ ] Keine eigene Rollenabfrage nachgebaut
+- [ ] Kennzahlen-Kacheln, `gescheitert > 0` fällt auf, `simuliert` neutral
+- [ ] Seitenzahl aus `total_count`, keine zweite Zählabfrage
+- [ ] HTML-Vorschau in `<iframe sandbox>`, **kein** `dangerouslySetInnerHTML`
+- [ ] Export übernimmt die aktuell eingestellten Filter
+- [ ] Dateiname aus `Content-Disposition`
+- [ ] Kein Senden/Bearbeiten/Löschen in der Ansicht
+- [ ] Erklärender Leerzustand statt leerer Tabelle
+
+---
+
 ## Zum Testen
 
 | Konto | Rolle | Berechtigungen |
