@@ -133,7 +133,9 @@ Deno.serve(async (req) => {
   // Status mitprüfen: Der Trigger app.handle_new_user übernimmt die Rolle
   // aus den Signup-Metadaten, die bei Selbstregistrierung vom Browser
   // kommen. Geschützt hat bisher allein `status = 'invited'` — und den
-  // wertete diese Prüfung nicht aus (vgl. Migration 0079).
+  // wertete diese Prüfung nicht aus (vgl. Migration 0079). Seit 0087
+  // entsteht eine gefälschte Rolle gar nicht mehr; diese Prüfung bleibt
+  // als zweite Schranke bestehen.
   const { data: prof } = await admin.from("profiles")
     .select("role, status, deleted_at").eq("id", uid).maybeSingle();
   const p2 = prof as { role?: string; status?: string; deleted_at?: string | null } | null;
