@@ -72,6 +72,12 @@ jobs:
       # ignorieren kann, hätte den Fund nicht verhindert.
       - name: Rollenprüfungen auf die NULL-Falle prüfen
         run: python3 scripts/check_rollenpruefung.py
+      # Ebenfalls blockierend. Sucht den Auslöser statt des Symptoms:
+      # Ruft der Code eine Datenbankfunktion auf, die keine Migration
+      # anlegt, entzieht sich deren Quelltext jeder Codeprüfung — genau
+      # dadurch blieb die NULL-Falle in acht Funktionen unentdeckt.
+      - name: Aufgerufene Datenbankfunktionen müssen im Repository stehen
+        run: python3 scripts/check_rpc_vollstaendig.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:

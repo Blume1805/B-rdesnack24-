@@ -371,13 +371,31 @@ async function renderFinance(ctx: Ctx): Promise<void> {
   const from = ctx.approval.period_from;
   const to = ctx.approval.period_to;
   const subtitle = `Zeitraum: ${from} bis ${to}`;
-  // finance_summary_range RPC liefert Kennzahlen. Fallback: nur Titel.
+  // Kennzahlen für den Zeitraum.
+  //
+  // KORRIGIERT AM 03.08.2026. Hier stand `finance_summary_range` — eine
+  // Funktion, die es weder im Repository noch in der Datenbank je gab.
+  // Aufgefallen ist das erst durch scripts/check_rpc_vollstaendig.py.
+  //
+  // Der Fehler war unsichtbar, und das war das Schlimme daran: Der
+  // Aufruf steckte in einem try/catch mit Rückfallebene. supabase-js
+  // wirft bei einem Fehler aber gar nicht, sondern liefert `{ data,
+  // error }` — `data` blieb also schlicht null, `summary` blieb null,
+  // und das PDF trug die Zeile „Keine Kennzahlen im Snapshot". Jede
+  // Finanzauswertung, die zwei Gesellschafter je freigegeben haben,
+  // enthielt damit keine einzige Zahl.
+  //
+  // Deshalb wird `error` jetzt ausgewertet und protokolliert. Eine
+  // Rückfallebene, die einen Fehler verschluckt statt ihn zu melden, ist
+  // keine Robustheit, sondern eine Falle.
   let summary: Record<string, unknown> | null = null;
-  try {
-    const { data } = await ctx.caller.rpc(
-      "finance_summary_range", { p_from: from, p_to: to });
-    summary = Array.isArray(data) ? data[0] : data;
-  } catch (_) { /* RPC nicht vorhanden — Placeholder */ }
+  const { data, error } = await ctx.caller.rpc(
+    "finance_summary", { p_from: from, p_to: to });
+  if (error) {
+    console.error("[document-finalize] finance_summary:", error.message);
+  } else {
+    summary = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null;
+  }
 
   const financeTitle = "Bördesnack24 – Finanzauswertung";
   let page = ctx.pdf.addPage([595, 842]);
@@ -388,14 +406,25 @@ async function renderFinance(ctx: Ctx): Promise<void> {
       { x: 40, y, size: 10, font: ctx.italic, color: MUTED });
     return;
   }
+  // Die Zeilen bilden ab, was `finance_summary` TATSÄCHLICH liefert:
+  // accounts, expense_net, from, result_net, revenue_net, revenue_net_19,
+  // revenue_net_7, to, vat_collected, vat_paid.
+  //
+  // Vorher standen hier „Wareneinsatz", „Rohertrag" und „Sonstige Kosten".
+  // Diese drei Felder gibt es in der Auswertung nicht — sie hätten nach
+  // der Korrektur des Funktionsnamens leere Beträge gezeigt. Eine
+  // Aufteilung der Kosten in Wareneinsatz und Sonstiges ist in den Daten
+  // nicht enthalten; sie hier zu erfinden wäre in einem Dokument, das
+  // freigegeben und unterschrieben wird, das Letzte, was man tun sollte.
+  // Stattdessen steht der Aufwand als eine Zeile, so wie er vorliegt.
   const rows: Array<[string, string]> = [
-    ["Umsatz gesamt (Netto)",   fmtEur(summary.revenue_net as number) + " EUR"],
+    ["Umsatz gesamt (Netto)",    fmtEur(summary.revenue_net as number) + " EUR"],
     ["– davon 7 %",              fmtEur(summary.revenue_net_7 as number) + " EUR"],
     ["– davon 19 %",             fmtEur(summary.revenue_net_19 as number) + " EUR"],
-    ["Wareneinsatz",             fmtEur(summary.cogs as number) + " EUR"],
-    ["Rohertrag",                fmtEur(summary.gross_profit as number) + " EUR"],
-    ["Sonstige Kosten",          fmtEur(summary.other_costs as number) + " EUR"],
-    ["Ergebnis",                 fmtEur(summary.result as number) + " EUR"],
+    ["Aufwand (Netto)",          fmtEur(summary.expense_net as number) + " EUR"],
+    ["Ergebnis (Netto)",         fmtEur(summary.result_net as number) + " EUR"],
+    ["Vereinnahmte Umsatzsteuer", fmtEur(summary.vat_collected as number) + " EUR"],
+    ["Gezahlte Vorsteuer",       fmtEur(summary.vat_paid as number) + " EUR"],
   ];
   const FOOT_Y_LIMIT = 100;
   for (const [k, v] of rows) {
