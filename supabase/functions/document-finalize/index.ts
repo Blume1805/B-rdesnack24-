@@ -381,9 +381,14 @@ async function renderFinance(ctx: Ctx): Promise<void> {
   // Aufruf steckte in einem try/catch mit Rückfallebene. supabase-js
   // wirft bei einem Fehler aber gar nicht, sondern liefert `{ data,
   // error }` — `data` blieb also schlicht null, `summary` blieb null,
-  // und das PDF trug die Zeile „Keine Kennzahlen im Snapshot". Jede
-  // Finanzauswertung, die zwei Gesellschafter je freigegeben haben,
-  // enthielt damit keine einzige Zahl.
+  // und das PDF trug die Zeile „Keine Kennzahlen im Snapshot", die sich
+  // wie eine bewusste Gestaltungsentscheidung liest.
+  //
+  // ZUM AUSMASS, damit hier nichts Falsches stehen bleibt: Dieser Zweig
+  // läuft nur für `document_kind = 'finance_period'`, und davon gab es
+  // am 03.08.2026 in der Datenbank KEINEN einzigen Vorgang. Es ist also
+  // kein bereits freigegebenes Dokument betroffen — der Fehler hätte
+  // die erste Finanzfreigabe getroffen, die jemand angelegt hätte.
   //
   // Deshalb wird `error` jetzt ausgewertet und protokolliert. Eine
   // Rückfallebene, die einen Fehler verschluckt statt ihn zu melden, ist
