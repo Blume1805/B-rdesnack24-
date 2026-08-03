@@ -29,6 +29,7 @@ import {
   authNotificationEmail,
   buildVerifyUrl,
 } from "../_shared/email/templates/auth.ts";
+import { mailInhalt } from "../_shared/email/db_templates.ts";
 import { verifyWebhookSignature, WebhookError } from "../_shared/email/webhook.ts";
 
 const TAG = "auth-email-hook";
@@ -136,17 +137,22 @@ Deno.serve(async (req) => {
       }
 
       for (const t of targets) {
-        const mail = authActionEmail({
+        const verifyUrl = buildVerifyUrl({
+          supabaseUrl,
+          tokenHash: t.hash,
           action,
-          verifyUrl: buildVerifyUrl({
-            supabaseUrl,
-            tokenHash: t.hash,
-            action,
-            redirectTo,
-          }),
-          code: t.code,
+          redirectTo,
         });
-        if (!mail) continue;
+        const codeFassung = authActionEmail({ action, verifyUrl, code: t.code });
+        // Unbekannter Typ: die Datenbank gar nicht erst fragen. Sonst
+        // könnte eine Vorlage eine Mail für einen Vorgang erzeugen, den
+        // der Code bewusst durchwinkt.
+        if (!codeFassung) continue;
+        const mail = await mailInhalt(
+          `auth_${action}`,
+          { confirmUrl: verifyUrl, otp: t.code },
+          () => codeFassung,
+        );
         const status = await sendMail({
           to: t.to,
           subject: mail.subject,
@@ -160,21 +166,28 @@ Deno.serve(async (req) => {
     }
 
     // --- Alle übrigen Aktionsmails ----------------------------------------
-    const mail = authActionEmail({
+    const verifyUrl = buildVerifyUrl({
+      supabaseUrl,
+      tokenHash: body.email_data?.token_hash ?? "",
       action,
-      verifyUrl: buildVerifyUrl({
-        supabaseUrl,
-        tokenHash: body.email_data?.token_hash ?? "",
-        action,
-        redirectTo,
-      }),
-      code: body.email_data?.token ?? "",
+      redirectTo,
     });
-    if (!mail) {
+    const otp = body.email_data?.token ?? "";
+    const codeFassung = authActionEmail({ action, verifyUrl, code: otp });
+    if (!codeFassung) {
       // Unbekannter Typ: durchwinken statt den Auth-Vorgang abzubrechen.
+      // Die Datenbank wird hier bewusst nicht gefragt — eine Vorlage soll
+      // keine Mail für einen Vorgang erzeugen, den der Code nicht kennt.
       console.warn(`[${TAG}] unbekannter email_action_type: ${action}`);
       return ok();
     }
+
+    // Vorlage aus der Datenbank, sonst die Fassung aus dem Code (0092).
+    const mail = await mailInhalt(
+      `auth_${action}`,
+      { confirmUrl: verifyUrl, otp },
+      () => codeFassung,
+    );
 
     const to = body.user?.email;
     if (!to) {

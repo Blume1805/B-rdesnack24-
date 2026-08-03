@@ -25,15 +25,32 @@ sofort für alle Mails.
 | Vorlage | Versendet von | Umgestellt im Code | Ausgerollt |
 |---|---|---|---|
 | `subscription_cancel` | `subscription-cancel` | ✅ | ❌ |
-| `subscription_choose` | `subscription-choose` | ❌ | ❌ |
-| `account_deletion_customer` | `account-deletion-request` | ❌ | ❌ |
-| `account_deletion_internal` | `account-deletion-request` | ❌ | ❌ |
-| `auth_*` (6 Stück) | `auth-email-hook` | ❌ | ❌ |
+| `subscription_choose` | `subscription-choose` | ✅ | ❌ |
+| `account_deletion_customer` | `account-deletion-request` | ✅ | ❌ |
+| `account_deletion_internal` | `account-deletion-request` | ✅ | ❌ |
+| `auth_signup` … `auth_reauthentication` (6) | `auth-email-hook` | ✅ | ❌ |
 
 **Bis eine Zeile in beiden Spalten ✅ trägt, ändert eine Bearbeitung in der
 Oberfläche nichts am tatsächlichen Versand.** Der Katalog ist trotzdem
 schon nützlich: Er zeigt, welche Mails es überhaupt gibt, welche
 Platzhalter sie kennen und wo der Wortlaut rechtlich vorgegeben ist.
+
+Im Code ist damit alles umgestellt; es fehlt nur noch das Ausrollen der
+vier Functions. Danach wirken alle zehn Vorlagen.
+
+### Was bewusst NICHT über die Datenbank läuft
+
+Die reinen Benachrichtigungen aus `auth-email-hook` — „Passwort geändert",
+„Zwei-Faktor-Authentifizierung aktiv" und die übrigen sieben. Sie haben
+keinen Link, keinen Platzhalter und keinen Gestaltungsspielraum; sie
+melden eine sicherheitsrelevante Änderung am Konto. Solche Meldungen
+gehören nicht in ein Textfeld, in dem sie jemand abschwächen oder
+versehentlich leeren kann.
+
+Ebenso wenig in der Datenbank: der Fall „unbekannter Aktionstyp". Der
+Code winkt ihn absichtlich durch, ohne eine Mail zu verschicken — und die
+Verdrahtung fragt die Datenbank dort gar nicht erst, damit eine Vorlage
+keine Mail für einen Vorgang erzeugt, den der Code nicht kennt.
 
 ## Warum das nicht in einem Zug fertig wurde
 

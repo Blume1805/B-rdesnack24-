@@ -15,6 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email/send.ts";
 import { subscriptionChooseConfirmation } from "../_shared/email/templates/subscription_choose.ts";
+import { mailInhalt } from "../_shared/email/db_templates.ts";
 
 const PLAN_NAMES: Record<string, string> = {
   monthly: "Monats-Abo",
@@ -88,10 +89,24 @@ Deno.serve(async (req) => {
     const previousPlanName = prevPlan ? (PLAN_NAMES[prevPlan] ?? prevPlan) : null;
     const billingLabel = String(r.billing_label ?? "");
 
-    const mail = subscriptionChooseConfirmation({
-      firstName, planName, billingLabel, previousPlanName,
-      lifetime: plan === "lifetime",
-    });
+    // Vorlage aus der Datenbank, sonst die Fassung aus dem Code (0092).
+    // `lifetime` und `previousPlanName` werden für die Platzhalter in Text
+    // übersetzt: Eine Vorlage kennt nur Werte, keine Bedingungen.
+    const mail = await mailInhalt(
+      "subscription_choose",
+      {
+        firstName,
+        planName,
+        billingLabel,
+        previousPlanName: previousPlanName ?? "",
+        lifetime: plan === "lifetime" ? "ja" : "nein",
+      },
+      () =>
+        subscriptionChooseConfirmation({
+          firstName, planName, billingLabel, previousPlanName,
+          lifetime: plan === "lifetime",
+        }),
+    );
 
     // Planwechsel ist bereits gültig — sendMail wirft deshalb nicht, ein
     // Mailproblem wird nur transparent zurückgemeldet.

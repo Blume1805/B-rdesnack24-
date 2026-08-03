@@ -25,6 +25,7 @@ import {
   accountDeletionRequestReceived,
 } from "../_shared/email/templates/account_deletion.ts";
 import { mailConfig } from "../_shared/email/config.ts";
+import { mailInhalt } from "../_shared/email/db_templates.ts";
 
 /// Frist nach Art. 12 Abs. 3 DSGVO: unverzüglich, spätestens einen Monat.
 const DEADLINE_DAYS = 30;
@@ -88,12 +89,12 @@ Deno.serve(async (req) => {
 
     let emailStatus = "skipped";
     if (email) {
-      const mail = accountDeletionRequestReceived({
-        firstName,
-        receivedAt,
-        deadline,
-        reason,
-      });
+      // Vorlage aus der Datenbank, sonst die Fassung aus dem Code (0092).
+      const mail = await mailInhalt(
+        "account_deletion_customer",
+        { firstName, receivedAt, deadline, reason },
+        () => accountDeletionRequestReceived({ firstName, receivedAt, deadline, reason }),
+      );
       emailStatus = await sendMail({
         to: email,
         subject: mail.subject,
@@ -105,12 +106,17 @@ Deno.serve(async (req) => {
 
     // Interne Notiz. Scheitert sie, ist das für den Kunden folgenlos —
     // deshalb nur geloggt, nicht in der Antwort.
-    const internal = accountDeletionRequestInternal({
-      email: email || "(unbekannt)",
-      receivedAt,
-      deadline,
-      reason,
-    });
+    const internal = await mailInhalt(
+      "account_deletion_internal",
+      { email: email || "(unbekannt)", receivedAt, deadline, reason },
+      () =>
+        accountDeletionRequestInternal({
+          email: email || "(unbekannt)",
+          receivedAt,
+          deadline,
+          reason,
+        }),
+    );
     await sendMail({
       to: mailConfig.supportEmail,
       subject: internal.subject,
