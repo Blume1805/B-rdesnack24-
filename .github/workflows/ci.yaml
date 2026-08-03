@@ -65,6 +65,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Bewusst OHNE `|| true`: Dieser Schritt darf den Lauf rot machen.
+      # Er sucht die NULL-Falle in der Rollenprüfung, die am 03.08.2026
+      # siebzehn Funktionen betraf und mit der sich Unterschriften
+      # ersetzen liessen (Migrationen 0093–0095). Eine Prüfung, die man
+      # ignorieren kann, hätte den Fund nicht verhindert.
+      - name: Rollenprüfungen auf die NULL-Falle prüfen
+        run: python3 scripts/check_rollenpruefung.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:
