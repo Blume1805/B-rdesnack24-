@@ -7,7 +7,21 @@ einem zusätzlichen Menüpunkt. Begründung in ADR 0005: Kunden sollen
 keinen Verwaltungscode ausgeliefert bekommen, auch nicht ungenutzt im
 JavaScript-Bündel.
 
-Reihenfolge: **I0 zuerst** (legt das Projekt an), dann I1.
+Reihenfolge: **I0 zuerst** (legt das Projekt an), danach I1 bis I5.
+
+| Block | Inhalt | Voraussetzung |
+|---|---|---|
+| **I0** | Projekt anlegen | — |
+| **I1** | Tagesgeschäft: die sechs Protokolle | I0 |
+| **I2** | Inventur und Bewertung | I1 |
+| **I3** | Finanzen | ⚠️ erst die acht `manual`-Demo-Käufe bereinigen |
+| **I4** | Dokumente und Freigaben | I0 · grösster Block |
+| **I5** | Telemetrie, Reklamationen, Kündigungen, Mitarbeitende | I0 |
+| **I5a** | E-Mail-Protokoll ansehen und exportieren | I0 |
+| **I5b** | E-Mail-Vorlagen bearbeiten | I0 |
+
+I2 bis I5b hängen nur an I0 und aneinander, wo es oben steht — sie lassen
+sich also auch parallel beauftragen, wenn Credits übrig sind.
 
 ---
 
@@ -235,6 +249,273 @@ Reihenfolge: **I0 zuerst** (legt das Projekt an), dann I1.
 - [ ] Befüllung bietet Einkaufspreis, Rechnungsnummer und Lot-MHD an
 - [ ] Keine Foto-Felder in diesem Schritt
 - [ ] Automatennamen unverändert übernommen, nichts beschönigt
+
+---
+
+## I2 · Inventur und Bewertung (bereit zum Senden, nach I1)
+
+> Baue die Inventuransicht. **Der Rechenkern liegt vollständig in der
+> Datenbank** — FIFO-Lots, Einstandspreise, MHD-Abwertung. Deine Aufgabe
+> ist anzeigen, nicht rechnen. Bitte keine Summe im Frontend nachbilden,
+> auch nicht „zur Kontrolle": Weichen die Zahlen ab, glaubt niemand mehr
+> einer von beiden.
+>
+> **Berechtigung:** über `my_permissions()`, wie in I1. Ohne die
+> Inventur-Berechtigung ist der Bereich gar nicht sichtbar.
+>
+> ### Drei Abfragen
+>
+> ```ts
+> // Bestand und Bewertung über einen Zeitraum
+> await supabase.rpc("inventory_report", { p_from: vonISO, p_to: bisISO });
+>
+> // Offene FIFO-Lose zu einem Stichtag
+> await supabase.rpc("inventory_fifo_lots", { p_as_of: stichtagISO });
+>
+> // Zu- und Abgänge über einen Zeitraum
+> await supabase.rpc("inventory_fifo_movements", { p_from: vonISO, p_to: bisISO });
+> ```
+>
+> Alle drei nehmen `timestamptz`, keine Datumszeichenketten ohne Zeitzone.
+> Schick ISO-Zeitstempel.
+>
+> ### Aufbau
+>
+> Kopfzeile mit Zeitraumwahl (Vormonat, laufender Monat, frei), darunter je
+> Automat eine aufklappbare Gruppe mit den Produkten. Spalten: Menge,
+> Einstandswert, Verkaufswert, Abwertung.
+>
+> **Die Abwertung braucht eine Erklärung in der Oberfläche.** Ware nähert
+> sich dem Mindesthaltbarkeitsdatum und wird stufenweise abgewertet — wer
+> die Zahl zum ersten Mal sieht, hält sie für einen Fehler. Ein Satz unter
+> der Spalte genügt: „Ware kurz vor dem MHD wird gestuft abgewertet."
+>
+> ### Druckansicht
+>
+> Für den Druck **nicht** das Browser-Druckbild der normalen Ansicht
+> nehmen, sondern eine eigene Route mit eigenem Layout: keine Navigation,
+> Tabellen ungeschnitten, Kopf mit Zeitraum und Erstellungsdatum. In
+> Flutter existiert das bereits als Web-Variante — das Problem ist also
+> schon einmal gelöst worden und muss nicht neu erfunden werden.
+>
+> Eine Inventurliste wird ausgedruckt und abgeheftet; sie ist ein Beleg.
+> Abgeschnittene Spalten machen sie wertlos.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Keine Summe im Frontend nachgerechnet
+- [ ] Zeitstempel mit Zeitzone an alle drei RPCs
+- [ ] Abwertung wird erklärt, nicht nur angezeigt
+- [ ] Eigene Druckroute, keine abgeschnittenen Tabellen
+- [ ] Bereich unsichtbar ohne Berechtigung
+
+---
+
+## I3 · Finanzen (bereit zum Senden — aber Reihenfolge beachten)
+
+> **Vor der Umsetzung lesen:** In den Finanzzahlen stecken noch acht
+> Demo-Käufe mit `source = 'manual'`. Sie stammen aus der Erprobung und
+> sind kein echter Umsatz. Solange sie drin sind, prüft man die neue
+> Anzeige gegen falsche Werte — und merkt den Unterschied nicht, weil beide
+> Seiten dieselbe falsche Zahl zeigen.
+>
+> Diese acht Zeilen gehören vorher bereinigt (vgl. Migration 0078, die
+> dasselbe für die als `demo` gekennzeichneten Käufe bereits erledigt).
+>
+> ### Die Abfragen
+>
+> ```ts
+> await supabase.rpc("finance_summary", { p_from: "2026-07-01", p_to: "2026-07-31" });
+> await supabase.rpc("finance_kpis",    { p_from: "2026-07-01", p_to: "2026-07-31" });
+> await supabase.rpc("finance_balance_kpis");           // ohne Zeitraum
+> await supabase.rpc("datev_export_rows", { p_from, p_to });
+> await supabase.rpc("business_customers_csv");
+> ```
+>
+> Die ersten drei liefern **`jsonb`**, kein Zeilenformat — also ein Objekt,
+> das du direkt auslesen kannst. `p_from`/`p_to` sind hier `date`
+> (`YYYY-MM-DD`), nicht `timestamptz` wie bei der Inventur. Der Unterschied
+> ist echt und kein Versehen.
+>
+> ### Bilanzwerte erfassen
+>
+> ```ts
+> await supabase.rpc("upsert_finance_balance", {
+>   p_as_of: "2026-07-31",
+>   p_cash_and_bank: 0, p_receivables: 0, p_inventory_value: 0,
+>   p_other_current_assets: 0, p_fixed_assets: 0,
+>   p_current_liabilities: 0, p_long_term_liabilities: 0, p_equity: 0,
+> });
+> ```
+>
+> Alle neun Werte sind Pflicht. Ein Formular mit Stichtag und neun
+> Betragsfeldern, gruppiert nach Aktiva und Passiva. **Bitte die Summen
+> beider Seiten anzeigen und ihre Differenz** — wer eine Bilanz eingibt,
+> will sofort sehen, ob sie aufgeht, und nicht erst nach dem Speichern.
+>
+> ### DATEV-Ausgabe
+>
+> `datev_export_rows` liefert `booking_date`, `tax_rate`, `gross`. Daraus
+> eine CSV bauen: Semikolon als Trenner, Komma als Dezimaltrennzeichen,
+> Datum als `TT.MM.JJJJ`. Das ist es, was die Steuerkanzlei erwartet — ein
+> Punkt als Dezimaltrennzeichen kostet dort Nacharbeit.
+>
+> Zwei Edge Functions gehören zu diesem Bereich (`finance-balance-sync`,
+> `finance-export-pdf`). Die bleiben unverändert — sie sind vom Client
+> unabhängig, du rufst sie nur auf.
+>
+> ### Geld sieht man an
+>
+> Beträge rechtsbündig, feste Nachkommastellen, Tausenderpunkte, Minus
+> deutlich. Kein Diagramm ohne Achsenbeschriftung. Und keine Kennzahl ohne
+> Zeitraum daneben — „Umsatz 4.812 €" ohne Angabe wofür ist keine Auskunft.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Die acht `manual`-Demo-Käufe sind vorher bereinigt
+- [ ] `date` bei Finanzen, `timestamptz` bei Inventur — nicht vertauscht
+- [ ] Bilanzformular zeigt beide Summen und die Differenz live
+- [ ] DATEV-CSV mit Semikolon, Dezimalkomma, `TT.MM.JJJJ`
+- [ ] Jede Kennzahl trägt ihren Zeitraum
+- [ ] Beträge rechtsbündig mit festen Nachkommastellen
+
+---
+
+## I4 · Dokumente und Freigaben (bereit zum Senden — der heikelste Block)
+
+> Der grösste Block, und der mit den meisten Fallstricken: Hier hängen
+> Vier-Augen-Freigaben und Unterschriften dran. Ein Fehler ist hier kein
+> Anzeigefehler, sondern ein Formfehler.
+>
+> ### Dokumente
+>
+> ```ts
+> await supabase.rpc("list_document_folders");
+> await supabase.rpc("list_documents");
+> await supabase.rpc("list_document_signature_tasks", { p_document: id });
+> await supabase.rpc("request_document_review", { p_document: id });
+> ```
+>
+> Ordnerbaum links, Dokumentenliste rechts, Versionen pro Dokument. Dateien
+> liegen im Storage-Bucket `documents`; Download über eine signierte URL,
+> **nie** über einen öffentlichen Link.
+>
+> ### Freigaben
+>
+> ```ts
+> await supabase.rpc("list_document_approvals", { p_mine_only: true });
+> await supabase.rpc("decide_document_approval", {
+>   p_approval_id: id,
+>   p_decision: "approved",   // Aufzählungstyp: approved | rejected
+>   p_comment: "…",
+> });
+> ```
+>
+> `p_mine_only: true` zeigt nur, was auf **mich** wartet — das ist die
+> Standardansicht. Ein Umschalter zeigt alle.
+>
+> **Drei Dinge, die die Datenbank erzwingt und die die Oberfläche nicht
+> unterlaufen darf:**
+>
+> 1. Wer ein Dokument eingereicht hat, darf es **nicht selbst freigeben**.
+>    Der Knopf gehört bei eigenen Vorgängen gar nicht erst hin — nicht
+>    ausgegraut, sondern weg, mit einer Zeile Erklärung.
+> 2. Eine Ablehnung **ohne Begründung** ist wertlos. Kommentar bei
+>    `rejected` zur Pflicht machen.
+> 3. Eine getroffene Entscheidung ist **endgültig**. Kein
+>    „Bearbeiten"-Knopf. Wer sich vertan hat, startet einen neuen Vorgang.
+>
+> ### Unterschriften
+>
+> ```ts
+> await supabase.rpc("list_my_signature_tasks");
+> await supabase.rpc("submit_employee_signature", { /* uuid, text, text */ });
+> await supabase.rpc("list_employees_for_signature");
+> await supabase.rpc("list_partner_signatures");
+> ```
+>
+> **Das ist der einzige Punkt, für den es keine fertige Vorlage gibt.** Die
+> Unterschrift wird auf dem Bildschirm gezeichnet — im Browser mit einem
+> Canvas-Element. Das ist Neubau, und er muss auf dem Telefon mit dem
+> Finger genauso funktionieren wie am Rechner mit der Maus.
+>
+> Worauf es dabei ankommt:
+>
+> * **Pointer Events**, nicht Maus- und Touch-Ereignisse getrennt.
+> * Canvas in **Geräteauflösung** zeichnen (`devicePixelRatio`), sonst wird
+>   die Unterschrift auf dem Telefon eine verwaschene Treppe.
+> * `touch-action: none` auf der Zeichenfläche, sonst scrollt die Seite
+>   beim Unterschreiben weg.
+> * **Zurücksetzen-Knopf**, gut erreichbar. Die erste Unterschrift gelingt
+>   selten.
+> * Absenden erst, wenn wirklich gezeichnet wurde — ein leeres Bild darf
+>   nicht als Unterschrift durchgehen.
+> * Als PNG mit durchsichtigem Hintergrund übergeben.
+>
+> Eine Unterschrift ist ein Beweismittel. Wenn etwas unklar ist, lieber
+> nachfragen als raten.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Download nur über signierte URLs
+- [ ] Kein Freigabeknopf bei eigenen Vorgängen (weg, nicht ausgegraut)
+- [ ] Kommentar bei Ablehnung ist Pflicht
+- [ ] Keine Möglichkeit, eine Entscheidung zu ändern
+- [ ] Unterschrift mit Pointer Events und `devicePixelRatio`
+- [ ] `touch-action: none`, Zurücksetzen-Knopf, leeres Bild wird abgelehnt
+
+---
+
+## I5 · Sonstiges (bereit zum Senden, jederzeit)
+
+> Vier Bereiche ohne Abhängigkeiten untereinander — in beliebiger
+> Reihenfolge baubar. (Das E-Mail-Protokoll und der Vorlagen-Editor gehören
+> ebenfalls hierher, siehe I5a und I5b.)
+>
+> ### Telemetrie
+>
+> Tabellen: `machine_devices`, `machine_health`, `machine_telemetry_events`,
+> `telemetry_providers`. Der grösste Einzelbereich, aber fachlich isoliert.
+>
+> Übersicht mit einer Kachel je Automat: erreichbar/nicht erreichbar,
+> letzte Meldung, offene Störungen. **„Zuletzt gemeldet vor 3 Stunden" ist
+> die wichtigste Zahl** — ein Automat, der schweigt, ist das eigentliche
+> Problem, nicht einer, der eine Störung meldet. Eine ausbleibende Meldung
+> darf nicht als „alles in Ordnung" durchgehen.
+>
+> ### Reklamationen
+>
+> Tabelle `purchase_complaints`. Liste mit Zustand, Detailansicht mit dem
+> zugehörigen Kauf. Bearbeitungszustand änderbar, Verlauf sichtbar.
+>
+> ### Kündigungen
+>
+> Tabelle `cancellation_requests`. **Bitte den Eingangszeitpunkt
+> unverändert anzeigen** — er ist der rechtlich maßgebliche Zeitpunkt
+> (§ 312k BGB). Kein Runden auf Tage, keine relative Angabe wie „vor
+> 2 Tagen" als einzige Information.
+>
+> ### Mitarbeitende
+>
+> Tabelle `profiles` plus Edge Function `invite-user` zum Einladen.
+>
+> **Wichtig:** Rolle und Berechtigungen einer eingeladenen Person werden
+> beim Einladen gesetzt. Die Datenbank übernimmt eine Rolle aus den
+> Anmeldedaten ausschliesslich bei einer echten Einladung — bei einer
+> Selbstregistrierung ist die Rolle immer `customer` (Migration 0087). Bau
+> also kein Formular, das bei der Registrierung eine Rolle anbietet; es
+> würde stillschweigend ignoriert.
+>
+> Eingeladene Konten stehen zunächst auf `invited` und sind **noch nicht**
+> handlungsfähig. Diesen Zustand bitte sichtbar machen, sonst wundert sich
+> jemand, warum die neue Kollegin nichts sieht.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Schweigender Automat fällt auf, nicht nur ein meldender
+- [ ] Eingangszeitpunkt von Kündigungen unverändert und absolut
+- [ ] Kein Rollenfeld bei der Registrierung
+- [ ] Zustand `invited` ist sichtbar erklärt
 
 ---
 
