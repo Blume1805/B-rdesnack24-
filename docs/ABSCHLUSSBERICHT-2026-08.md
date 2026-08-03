@@ -381,10 +381,93 @@ Frage, was mit den acht vorhandenen Demo-Käufen geschieht, die noch als
   (`net.http_get` mit `Accept-Profile`)
 * Alle deployten Functions per `pg_net` auf Boot geprüft
 
-## 7 · Empfohlene nächste Schritte
+## 7 · Nachtrag 03.08.2026 — die Rollenprüfung war systematisch kaputt
 
-1. Automaten-Stammdaten eintragen — blockiert einen ganzen Web-Baustein.
-2. Redirect-URLs setzen, dann A1 in Loveable (Anweisung liegt fertig vor).
-3. Send-Email-Hook aktivieren, mit Wegwerf-Konto gegentesten.
-4. Liste der Spendenorganisationen liefern — Vorlage liegt in
+Dieser Abschnitt korrigiert den Bericht oben. Was dort unter „umgesetzt"
+steht, war richtig, aber unvollständig: Migration 0079 hat eine
+Sicherheitsklasse repariert und dabei **siebzehn Stellen übersehen**.
+
+**Die Lücke.** Fast alle Funktionen prüfen die Berechtigung so:
+
+```sql
+select role into v_role from public.profiles where id = auth.uid();
+if v_role not in ('system_admin','shareholder') then
+  raise exception 'Nicht autorisiert';
+end if;
+```
+
+Hat der Aufrufer keine Profilzeile, ist `v_role` NULL. In SQL ergibt
+`NULL not in (…)` nicht `true`, sondern NULL — und `if NULL then` ist
+unwahr. Die Ausnahme bleibt aus, die Funktion arbeitet weiter. Dieselbe
+Falle stellt `v_role <> 'system_admin'`.
+
+**Nachgewiesen, nicht vermutet.** Mit einem angemeldeten Konto ohne
+Profilzeile liess sich
+
+* über `set_partner_signature_image` die Unterschrift eines
+  Gesellschafters durch eine beliebige URL ersetzen,
+* über `list_document_approvals` die vollständige Freigabeliste auslesen
+  (neun Vorgänge mit Titeln, Zeiträumen, Entscheidern, Kommentaren),
+* über `rotate_provider_secret` der HMAC-Schlüssel eines
+  Telemetrie-Anbieters austauschen — danach kann der Angreifer selbst
+  gültig signierte Messwerte einspeisen.
+
+Der Unterschriften-Weg ist derselbe, für den am selben Tag die Function
+`install-signature` stillgelegt wurde. Die Lücke war also nie
+geschlossen, nur die eine Tür davor.
+
+**Wie es gefunden wurde — und warum erst jetzt.** Nicht durch Nachdenken,
+sondern durch einen vollständigen Abgleich: alle Funktionen und Tabellen
+der produktiven Datenbank gegen das, was die Migrationen erzeugen.
+Ergebnis: Tabellen 77 von 77 abgedeckt, Funktionen 85 von 93. Die acht
+fehlenden waren nirgends im Repository — und sechs davon trugen die
+Falle. Die anschliessende Mustersuche über den gesamten Bestand fand neun
+weitere.
+
+Vorher hatte ich einzeln gesucht und dabei zunächst nur die
+`not in`-Form geprüft; die `<>`-Form verhält sich identisch und fiel erst
+beim Lesen der Quelltexte auf. Aus drei Treffern wurden so siebzehn.
+
+**Behoben** mit 0093 (drei RPCs zurückgeholt, zwei repariert), 0094 (acht
+RPCs zurückgeholt, sechs repariert) und 0095 (neun bestehende
+programmatisch über `pg_get_functiondef` gepatcht, statt neun Rümpfe
+abzuschreiben — es geht um Inventurbewertung und Dokumentenfreigaben).
+
+**Stand danach:** 19 Funktionen mit Rollenprüfung, **0** mit offener
+NULL-Falle, alle 19 prüfen zusätzlich `status = 'active'` und
+`deleted_at is null`. Angriff scheitert, berechtigter Zugriff unverändert
+(21 Dokumente, 11 Ordner, 94 Inventurzeilen).
+
+**Damit es nicht ein drittes Mal passiert:**
+`scripts/check_rollenpruefung.py` sucht das Muster bei jedem CI-Lauf und
+macht den Build rot — bewusst ohne `\|\| true`, anders als die übrigen
+Schritte dort. Eine Prüfung, die man ignorieren kann, hätte den Fund
+nicht verhindert.
+
+**Die eigentliche Lehre** gehört nicht in eine Fussnote: Wer eine
+Sicherheitsklasse repariert, muss die ganze Klasse suchen — nicht die
+Stellen, die ihm gerade einfallen. Die Suche dauert eine Abfrage. 0079
+hat das nicht getan, und die Lücke stand danach noch vier Tage offen.
+
+Dass das Repository die Datenbank nicht vollständig beschrieb, war die
+Voraussetzung dafür: Die zwei bzw. sechs schlimmsten Fälle standen in
+Funktionen, die es im Repository gar nicht gab, und konnten deshalb von
+keiner Codeprüfung gefunden werden. Beides ist jetzt geschlossen.
+
+## 8 · Empfohlene nächste Schritte
+
+1. Automaten-Stammdaten eintragen — Vorlage in
+   `docs/AUTOMATEN_VORLAGE.md`, blockiert A9.
+2. Liste der Spendenorganisationen liefern — Vorlage in
    `docs/SPENDENORGANISATIONEN_VORLAGE.md`, danach ist A5 startklar.
+3. Die vier Mail-Functions ausrollen — erst danach wirken die
+   Datenbank-Vorlagen aus 0092 und die Maskierung von `title`/`preheader`
+   in `components.ts`. Stand pro Vorlage in `docs/EMAIL_VORLAGEN.md`.
+   Sauberer Weg: ein `SUPABASE_ACCESS_TOKEN`, dann alle vier byte-genau
+   per CLI von der Platte.
+4. Die acht Demo-Käufe mit `source = 'manual'` bereinigen, **bevor** der
+   Finanzblock I3 portiert wird — sonst prüft man die neue Anzeige gegen
+   falsche Werte und merkt es nicht.
+5. Send-Email-Hook aktivieren, mit Wegwerf-Konto gegentesten.
+6. Posteingang aktivieren, wenn die Domain bei Resend verifiziert ist —
+   vier Schritte in `docs/POSTEINGANG_AKTIVIEREN.md`.
