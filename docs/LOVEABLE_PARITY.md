@@ -44,7 +44,7 @@ bevor die erste Nachricht rausgeht.
 | A2b · Abo-Anzeige/-Kauf auf echte Daten | ✅ 6/6 Prüfpunkte |
 | A3 · Preise, Jahresabo, zwei Nachbesserungen | ✅ inhaltlich, 4/4 Prüfpunkte |
 | **A5 · Spendenprojekte auf echte Daten** | ❌ **zuerst senden** — § 5 UWG, Text liegt bereit |
-| A4 · Kontraste (WCAG 1.4.3 / BFSG) | ❌ Credits erschöpft, Text liegt bereit |
+| A4 · Kontraste (WCAG 1.4.3 / BFSG) | ✅ 5/5 Prüfpunkte, hell/dunkel korrekt unterschieden |
 | A6 · Bonus/Treue auf echte Daten | ❌ 9 Abzeichen, 4 Challenges vorhanden |
 | A7 · Belege + Benachrichtigungen | ❌ RPCs vorhanden |
 | A8 · Freunde-werben-Programm | ❌ RPCs vorhanden |
@@ -52,6 +52,28 @@ bevor die erste Nachricht rausgeht.
 
 Reihenfolge bewusst **A5 vor A4**: Erfundene gemeinnützige Organisationen
 mit erfundenen Spendenständen wiegen schwerer als ein Kontrastproblem.
+(Tatsächlich lief A4 zuerst — A5 hängt an der echten Projektliste.)
+
+### Selbst verursacht: der Demozugang läuft leer
+
+Die Web-App hat einen Demozugang ohne Anmeldung (`enterDemo()` in
+`use-auth.tsx`, Flag im localStorage). Das Banner verspricht: „Du siehst
+die App mit Beispieldaten."
+
+Seit A2a stimmt das nicht mehr. Produkte und Bestand kommen aus Supabase,
+und für `anon` sind beide Tabellen gesperrt — nachgemessen: **0 Zeilen**.
+Wer den Demozugang nutzt, sieht einen leeren Laden.
+
+Zwei Wege:
+
+1. **Produktkatalog für `anon` freigeben.** Ein Sortiment ist kein
+   Geheimnis, die Preise stehen ohnehin auf der Landing Page, und es gibt
+   keinen Personenbezug. Nebeneffekt: Die Marketingseite könnte echte
+   Produkte zeigen, statt sie zu beschreiben.
+2. **Demozugang entfernen**, solange er nichts zeigen kann.
+
+Empfehlung: Weg 1, aber als bewusste Entscheidung — es ist eine
+Lockerung der Leserechte und gehört benannt, nicht nebenbei gemacht.
 
 Der offene `status`-Punkt aus A2a ist mit A2b erledigt.
 
