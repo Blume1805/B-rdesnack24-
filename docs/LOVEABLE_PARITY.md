@@ -45,10 +45,14 @@ bevor die erste Nachricht rausgeht.
 | A3 · Preise, Jahresabo, zwei Nachbesserungen | ✅ inhaltlich, 4/4 Prüfpunkte |
 | **A5 · Spendenprojekte auf echte Daten** | ❌ **zuerst senden** — § 5 UWG, Text liegt bereit |
 | A4 · Kontraste (WCAG 1.4.3 / BFSG) | ✅ 5/5 Prüfpunkte, hell/dunkel korrekt unterschieden |
-| A6 · Bonus/Treue auf echte Daten | ❌ 9 Abzeichen, 4 Challenges vorhanden |
-| A7 · Belege + Benachrichtigungen | ❌ RPCs vorhanden |
-| A8 · Freunde-werben-Programm | ❌ RPCs vorhanden |
-| A9 · Automatenliste | ❌ blockiert: Stammdaten fehlen |
+| A6 · Bonus/Treue auf echte Daten | 📝 Text fertig, versandbereit |
+| A7 · Belege + Benachrichtigungen | 📝 Text fertig, versandbereit |
+| A8 · Freunde-werben-Programm | 📝 Text fertig, versandbereit |
+| A9 · Automatenliste | 📝 Text fertig — **blockiert**, Stammdaten fehlen |
+
+Alle vier Texte stehen wortgleich in `LOVEABLE_ANWEISUNGEN.md`, jeweils
+mit den echten Feldnamen (aus den RPCs abgerufen, nicht vermutet) und
+einer Prüfliste. Sie müssen nur noch abgeschickt werden.
 
 Reihenfolge bewusst **A5 vor A4**: Erfundene gemeinnützige Organisationen
 mit erfundenen Spendenständen wiegen schwerer als ein Kontrastproblem.

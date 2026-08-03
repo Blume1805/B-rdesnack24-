@@ -385,6 +385,227 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 >
 > Gestaltung sonst unverändert. Es geht ausschließlich um Lesbarkeit.
 
+## A6 · Bonus, Treue, Abzeichen (bereit zum Senden)
+
+> Der Bonusbereich und die Kennzahlen im Profil stehen auf erfundenen
+> Werten. Echt sind sie über zwei RPCs zu haben.
+>
+> **Was im Profil steht und was stimmt**
+>
+> | In der App | In Wirklichkeit |
+> |---|---|
+> | 1240 Punkte | **0 Punkte** |
+> | 42,60 € gespart | kein solcher Wert; Lebensumsatz 39,92 € |
+> | „Level Gold · Lifetime-Status aktiv" | Stufe **Basis**, nächste Stufe Bronze ab 150 € |
+>
+> Die Hinweiszeile „Beispielwerte" war ein Notbehelf und kann mit dieser
+> Umstellung verschwinden.
+>
+> **Quelle 1 — Stufe, Abzeichen, Challenges**
+>
+> ```ts
+> const { data } = await supabase.rpc("my_gamification_status");
+> ```
+>
+> Rückgabe (echte Struktur, keine Vermutung):
+>
+> ```jsonc
+> {
+>   "tier": { "code": "basis", "label": "Basis", "progress": 0.2661,
+>             "next_code": "bronze", "next_label": "Bronze",
+>             "discount_pct": 0, "next_min_eur": 150,
+>             "next_discount_pct": 1, "total_discount_pct": 5 },
+>   "badges": [ { "code": "first_purchase", "title": "Erster Snack",
+>                 "earned": true, "icon_key": "bolt",
+>                 "description": "…" }, … ],       // 9 Stück
+>   "challenges": [ { "code": "weekly_3", "title": "Wochen-Snacker",
+>                     "done": false, "target": 3, "progress": 0,
+>                     "description": "…", "reward_text": "+300 Bonuspunkte",
+>                     "window_days": 7 }, … ],     // 4 Stück
+>   "lifetime_gross": 39.92, "purchase_count": 8, "base_discount_pct": 5
+> }
+> ```
+>
+> `progress` ist ein Anteil zwischen 0 und 1 — für einen Balken mit 100
+> multiplizieren. `icon_key` sind Material-Namen (`bolt`, `favorite`,
+> `workspace`, `explore`, `restaurant`, `wb_sunny`, `nightlight`); bitte
+> auf die vorhandene Icon-Bibliothek abbilden und bei unbekanntem Schlüssel
+> ein neutrales Ersatzsymbol nehmen, statt nichts zu zeigen.
+>
+> **Quelle 2 — Monatspunkte**
+>
+> ```ts
+> const { data } = await supabase.rpc("my_loyalty_status");
+> // points, next_tier, points_to_next, reached_tiers[], month_start, next_reset
+> ```
+>
+> Wichtig: Die Punkte werden **monatlich zurückgesetzt** (`next_reset`).
+> Das gehört sichtbar dazu, sonst wirkt der Rückgang wie ein Fehler.
+>
+> **Der ehrliche Vorbehalt — gleiche Sorte wie bei A5**
+>
+> `lifetime_gross`, `purchase_count` und das Abzeichen „Erster Snack"
+> stammen aus **acht Demo-Käufen**, die über den Testkauf-Knopf entstanden
+> sind. Ein echter Zahlungsweg existiert noch nicht.
+>
+> Das ist kein Grund, die Anzeige wegzulassen — anders als beim
+> Spendentopf sieht der Nutzer hier seine **eigene** Testaktivität, und
+> die ist für ihn als solche erkennbar. Aber: bitte keine dieser Zahlen in
+> Marketing-Aussagen auf der Landing Page übernehmen.
+>
+> **Was ersatzlos verschwindet**
+>
+> `bonusLevels` in `src/lib/data.ts` — die Stufen kommen aus `tier`.
+>
+> Gestaltung wie bisher, kein Redesign.
+
+### Prüfliste nach `get_diff` (A6)
+
+- [ ] „1240 Punkte" und „42,60 €" sind weg, Werte kommen aus den RPCs
+- [ ] Hinweis „Beispielwerte" entfernt
+- [ ] `progress` wird als Anteil behandelt (×100), nicht als Prozentzahl
+- [ ] Monatlicher Reset ist sichtbar erklärt
+- [ ] Unbekannter `icon_key` führt zu einem Ersatzsymbol, nicht zu einer Lücke
+- [ ] `bonusLevels` aus `data.ts` entfernt
+- [ ] Nicht verdiente Abzeichen sind erkennbar anders dargestellt, aber sichtbar
+
+---
+
+## A7 · Belege und Benachrichtigungen (bereit zum Senden)
+
+> **Belege**
+>
+> ```ts
+> const { data } = await supabase.rpc("my_receipts");   // jsonb-Array
+> ```
+>
+> Ersetzt `receipts` in `src/lib/data.ts` — die drei erfundenen Bons dort
+> fallen ersatzlos weg, samt des Hinweises „Beispielbons".
+>
+> Jeder Kauf trägt `source`. Seit Migration 0077/0078 bedeutet `demo` einen
+> Testkauf über den Demo-Knopf. Bitte diese Belege **als „Demo"
+> kennzeichnen**, so wie es die native App im Beleg tut — ein simulierter
+> Kauf darf nicht aussehen wie ein echter.
+>
+> **Benachrichtigungen**
+>
+> ```ts
+> supabase.rpc("my_notifications", { p_limit: 30 });
+> // key, kind, title, subtitle, created_at, is_read
+> supabase.rpc("my_notifications_unread_count");        // integer
+> supabase.rpc("mark_notification_read", { p_key: key });
+> supabase.rpc("mark_all_notifications_read");
+> ```
+>
+> `kind` ist `news`, `coupon`, `invoice` oder `offer` — je Art ein eigenes
+> Symbol. Der Zähler gehört an die Glocke in der Navigation.
+>
+> Gelesen-Markieren ist **einseitig**: Es gibt kein „wieder auf ungelesen".
+> Bitte keinen Umschalter bauen, der so aussieht.
+>
+> **Rechnungen** (nur Geschäftskunden): `supabase.rpc("my_invoices")`.
+> Bei Privatkunden kommt eine leere Liste — dann den Abschnitt weglassen,
+> nicht leer anzeigen.
+
+### Prüfliste nach `get_diff` (A7)
+
+- [ ] `receipts` aus `data.ts` entfernt
+- [ ] Belege mit `source = 'demo'` sind als Demo gekennzeichnet
+- [ ] Ungelesen-Zähler an der Navigation
+- [ ] Kein Umschalter für „wieder ungelesen"
+- [ ] Rechnungsabschnitt entfällt bei leerer Liste
+
+---
+
+## A8 · Freunde werben (bereit zum Senden)
+
+> ```ts
+> supabase.rpc("my_referral_code");     // text, z. B. "EFMBRRDH"
+> supabase.rpc("my_referral_status");   // siehe unten
+> supabase.rpc("register_referral", { p_code: eingabe });
+> ```
+>
+> `my_referral_status()` liefert:
+>
+> ```jsonc
+> { "code": "EFMBRRDH", "enabled": true, "history": [], "rewards": [],
+>   "months_total": 0, "months_monthly": 1, "months_yearly": 2,
+>   "pending_count": 0, "rewarded_count": 0,
+>   "next_milestone": { "label": "3 Empfehlungen — 1 Bonusmonat",
+>                       "threshold": 3, "bonus_months": 1,
+>                       "badge_code": null } }
+> ```
+>
+> `enabled: false` heißt: Programm abgeschaltet — dann den ganzen Bereich
+> ausblenden statt einen toten Knopf zu zeigen.
+>
+> **Beim Einlösen die Antwort wörtlich anzeigen.** `register_referral`
+> gibt `{ ok, reason }` zurück; die Gründe sind fachlich und auf Deutsch
+> gemeint:
+>
+> | `reason` | Bedeutung |
+> |---|---|
+> | `registriert` | hat geklappt |
+> | `code_unbekannt` | Code gibt es nicht |
+> | `eigenwerbung` | eigener Code oder eigene E-Mail-Adresse |
+> | `werber_ohne_abo` | Werber hat kein Abo |
+> | `schon_abonnent` | Geworbener hat schon ein Abo |
+> | `bereits_geworben` | schon einmal eingelöst |
+> | `programm_inaktiv` | Programm abgeschaltet |
+>
+> Bitte je Grund einen verständlichen deutschen Satz zeigen — aber **den
+> Grund nicht verschleiern**. „Das hat leider nicht geklappt" hilft
+> niemandem.
+>
+> Der eigene Code darf geteilt werden (Kopieren, QR); die Komponente
+> `share-qr-code.tsx` existiert bereits.
+
+### Prüfliste nach `get_diff` (A8)
+
+- [ ] Bereich verschwindet bei `enabled: false`
+- [ ] Jeder `reason` hat einen eigenen, verständlichen Text
+- [ ] Kein Sammel-Fehlertext
+- [ ] Kein erfundener Fortschritt — `next_milestone` kommt aus der RPC
+
+---
+
+## A9 · Automatenliste (blockiert)
+
+> **Erst umsetzen, wenn die echten Stammdaten eingetragen sind.** In der
+> Datenbank stehen heute „Automat 1" bis „Automat 3" und ein
+> „Heißgetränkeautomat", jeweils mit Standort „(ANPASSEN)".
+>
+> Sobald sie gepflegt sind:
+>
+> ```ts
+> const { data } = await supabase
+>   .from("machines")
+>   .select("id, code, name, type, is_cooled, city, location_name, lat, lng, status, image_url")
+>   .is("deleted_at", null);
+> ```
+>
+> `machines` ist für angemeldete Nutzer lesbar (`machines_read`).
+>
+> **Was der Mock hat und die Wirklichkeit nicht:**
+>
+> * `distanz` — gibt es nicht. Aus `lat`/`lng` gegen die Nutzerposition
+>   rechnen, und **nur anzeigen, wenn die Position wirklich vorliegt**.
+>   Keine erfundene Entfernung.
+> * `beliebt`, `tags` — gibt es nicht. Ersatzweise `type` und `is_cooled`.
+> * `status` — echte Werte, andere als im Mock.
+>
+> Verfügbarkeit je Automat kommt aus `inventory` (`machine_id`,
+> `product_id`, `quantity`), nicht mehr aggregiert wie in A2a.
+
+### Prüfliste nach `get_diff` (A9)
+
+- [ ] Keine Entfernung ohne echte Standortfreigabe
+- [ ] Keine erfundenen Merkmale („beliebt", Tags)
+- [ ] `machines` aus `data.ts` entfernt
+- [ ] Statuswerte kommen aus der Datenbank
+
+---
+
 ## Was diese Texte nicht lösen können
 
 **Automaten-Stammdaten.** In der Datenbank stehen „Standort 1
