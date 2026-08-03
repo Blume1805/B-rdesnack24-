@@ -367,6 +367,108 @@ Reihenfolge: **I0 zuerst** (legt das Projekt an), dann I1.
 
 ---
 
+## I5b · E-Mail-Vorlagen bearbeiten (bereit zum Senden, nach I0)
+
+> Baue die Ansicht „E-Mail-Vorlagen": eine Liste aller Mails, die das
+> System verschickt, und einen Editor für Betreff und Inhalt.
+>
+> **Berechtigung:** Nur interne Rollen, geprüft von der Datenbank. Wie bei
+> I5a keine eigene Rollenabfrage — Menüpunkt nur zeigen, wenn
+> `supabase.rpc("is_internal")` `true` liefert.
+>
+> ### Die Liste
+>
+> ```ts
+> const { data } = await supabase
+>   .from("email_templates")
+>   .select("key,label,description,subject,body_html,variables,legal_note,is_active,updated_at")
+>   .order("label");
+> ```
+>
+> Pro Zeile: Bezeichnung, Beschreibung und ein Zustand. Der Zustand ist
+> **die wichtigste Information der ganzen Ansicht**:
+>
+> * `subject` und `body_html` beide leer → **„Standardtext"**. Es wird die
+>   im Programm hinterlegte Fassung verschickt.
+> * beide gefüllt und `is_active` → **„Eigener Text"**.
+> * gefüllt, aber `is_active = false` → **„Eigener Text (abgeschaltet)"**,
+>   es gilt wieder der Standardtext.
+>
+> ### Der Editor
+>
+> Felder: Betreff, Vorschauzeile, Inhalt (HTML), Textfassung. Speichern
+> über:
+>
+> ```ts
+> await supabase.rpc("email_template_save", {
+>   p_key: key,
+>   p_subject: betreff,
+>   p_body_html: inhalt,
+>   p_body_text: textfassung,
+>   p_preheader: vorschau,
+>   p_is_active: true,
+> });
+> ```
+>
+> Ein **leeres** Feld setzt zurück: Wer Betreff und Inhalt leert und
+> speichert, bekommt wieder den Standardtext. Bau dafür bitte einen
+> eigenen Knopf „Auf Standardtext zurücksetzen" — das ist der Rückweg,
+> wenn eine Änderung sich als schlecht erweist, und er muss auffindbar
+> sein, ohne dass jemand Felder leert und hofft.
+>
+> ### Platzhalter
+>
+> `variables` listet die Platzhalter, die diese Mail kennt, z. B.
+> `firstName`, `cancelAt`. Im Text stehen sie als `{{firstName}}`. Zeig sie
+> als anklickbare Chips über dem Editor an, die den Platzhalter an der
+> Cursorposition einfügen — Abtippen ist eine Fehlerquelle, und ein
+> falsch geschriebener Platzhalter erscheint in der Mail als **leere
+> Stelle**, nicht als Fehler.
+>
+> Werte werden beim Einsetzen maskiert. Ein Kundenname kann also kein
+> Markup einschleusen — du musst dagegen nichts tun.
+>
+> ### `legal_note` — bitte nicht wegdesignen
+>
+> Ist `legal_note` gefüllt, **muss** der Text über dem Editor stehen,
+> sichtbar, nicht hinter einem Info-Symbol. Beispiel bei der
+> Kündigungsbestätigung: Der Zugang einer Kündigung muss nach
+> § 312k Abs. 2 S. 3 BGB bestätigt werden, samt Vertragsende. Wer diese
+> Angaben beim Umformulieren streicht, verletzt eine Formvorschrift — und
+> merkt es nicht, weil die Mail ja trotzdem rausgeht.
+>
+> Setz die Warnung optisch als Warnung (gelb/orange), nicht als
+> beiläufigen Hinweis.
+>
+> ### Was hier nicht hingehört
+>
+> * **Kein Editor für Kopf- und Fusszeile.** Die sind absichtlich nicht in
+>   der Datenbank: Dort stehen Impressum, Datenschutz und Widerruf. Lägen
+>   sie als Kopie in jeder Vorlage, müsste bei einem Umzug jede einzeln
+>   nachgezogen werden — und eine würde vergessen.
+> * **Kein Anlegen und kein Löschen von Vorlagen.** Welche Mails es gibt,
+>   bestimmt das Programm; die Liste ist ein Katalog, keine freie Sammlung.
+>   Eine Vorlage ohne sendende Stelle würde nie verschickt.
+> * **Keine Testversand-Funktion in diesem Schritt.** Kommt später, wenn
+>   der Weg steht.
+
+**Prüfliste nach dem Senden** (`get_diff`):
+
+- [ ] Zustand je Zeile: Standardtext / Eigener Text / abgeschaltet
+- [ ] Eigener Knopf „Auf Standardtext zurücksetzen"
+- [ ] Platzhalter als einfügbare Chips, nicht zum Abtippen
+- [ ] `legal_note` sichtbar als Warnung, nicht hinter einem Info-Symbol
+- [ ] Kein Editor für Kopf-/Fusszeile
+- [ ] Kein Anlegen, kein Löschen von Vorlagen
+
+> **Wichtig für die Erwartung der Nutzer:** Eine geänderte Vorlage wirkt
+> erst, wenn die Function, die diese Mail verschickt, neu ausgerollt
+> wurde. Der Stand steht in `docs/EMAIL_VORLAGEN.md` — bitte diesen Satz
+> auch in der Oberfläche unterbringen, solange nicht alle Functions
+> umgestellt sind.
+
+---
+
 ## Zum Testen
 
 | Konto | Rolle | Berechtigungen |

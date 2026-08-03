@@ -18,6 +18,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 import { sendMail } from "../_shared/email/send.ts";
 import { subscriptionCancelConfirmation } from "../_shared/email/templates/subscription_cancel.ts";
+import { mailInhalt } from "../_shared/email/db_templates.ts";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -98,12 +99,21 @@ Deno.serve(async (req) => {
     });
 
     // Zugangsbestätigung in Textform (§ 312k Abs. 2 S. 3 BGB).
-    const mail = subscriptionCancelConfirmation({
-      email,
-      kind,
-      cancelAt,
-      receivedAt,
-    });
+    //
+    // Vorlage aus der Datenbank, sonst die Fassung aus dem Code. Solange
+    // niemand in `email_templates` einen Betreff und einen Inhalt
+    // hinterlegt, ändert sich hier nichts (0092).
+    //
+    // `kindLabel` wird hier berechnet und nicht erst in der Vorlage: Eine
+    // Vorlage aus der Datenbank kennt nur Platzhalter, keine Logik.
+    const kindLabel = kind === "ausserordentlich"
+      ? "Außerordentliche Kündigung"
+      : "Ordentliche Kündigung";
+    const mail = await mailInhalt(
+      "subscription_cancel",
+      { email, kind, kindLabel, cancelAt, receivedAt },
+      () => subscriptionCancelConfirmation({ email, kind, cancelAt, receivedAt }),
+    );
     const emailStatus = await sendMail({
       to: email,
       subject: mail.subject,

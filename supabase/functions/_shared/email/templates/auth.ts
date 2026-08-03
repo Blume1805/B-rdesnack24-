@@ -155,7 +155,10 @@ export function buildVerifyUrl(opts: {
   return url.toString();
 }
 
-function codeBlock(code: string): string {
+/// Setzt bewusst den Platzhalter `{{code}}` statt des Wertes: Gefüllt wird
+/// er erst beim Rendern, damit der Code dabei maskiert wird. Deshalb nimmt
+/// die Funktion auch kein Argument entgegen — sie brauchte nie eins.
+function codeBlock(): string {
   return infoBox(
     `<p class="bs-text" style="margin:0 0 4px;font-size:12px;">` +
       `Oder gib diesen Code in der App ein:</p>` +
@@ -178,7 +181,7 @@ export function authActionEmail(opts: {
   if (copy.cta) {
     parts.push(button({ href: opts.verifyUrl, label: copy.cta }));
   }
-  if (opts.code) parts.push(codeBlock(opts.code));
+  if (opts.code) parts.push(codeBlock());
   parts.push(paragraph(copy.note, { muted: true }));
   if (copy.cta) {
     parts.push(

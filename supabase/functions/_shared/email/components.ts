@@ -108,6 +108,14 @@ function footerLinks(): string {
 /// [preheader] ist der Vorschautext, den Postfächer neben der Betreffzeile
 /// zeigen. Ohne ihn ziehen sie sich die erste sichtbare Textzeile — meist
 /// die Wortmarke, was in der Liste nach nichts aussieht.
+///
+/// [title] und [preheader] werden maskiert. Solange hier nur feste
+/// Zeichenketten ankamen, war das gleichgültig; sobald ein Betreff aus
+/// einer Vorlage in der Datenbank stammt und Nutzerdaten enthält (etwa
+/// einen Namen aus dem Anmeldeformular), ist es das nicht mehr. Ein
+/// Kundenname wie `</title><b>` würde sonst das Gerüst der Mail
+/// zerlegen. [content] wird NICHT maskiert — das ist bereits fertiges
+/// HTML aus den Bausteinen dieser Datei.
 export function page(opts: {
   title: string;
   preheader: string;
@@ -121,7 +129,7 @@ export function page(opts: {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
-<title>${opts.title}</title>
+<title>${escapeHtml(opts.title)}</title>
 <style>
   @media (prefers-color-scheme: dark) {
     .bs-page { background:#0F0D0B !important; }
@@ -137,7 +145,7 @@ export function page(opts: {
 </style>
 </head>
 <body class="bs-page" style="margin:0;padding:0;background:${theme.cream};font-family:${theme.font};">
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:${theme.cream};">${opts.preheader}</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:${theme.cream};">${escapeHtml(opts.preheader)}</div>
 <table ${TABLE} width="100%" class="bs-page" style="background:${theme.cream};">
   <tr>
     <td align="center" style="padding:24px 16px;">
