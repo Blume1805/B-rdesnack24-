@@ -26,15 +26,36 @@
 # gelaufen ist, gilt als offengelegt — er steht dort dauerhaft im Verlauf.
 #
 # -----------------------------------------------------------------------------
-# Absichtlich nur von Hand auslösbar
+# Absichtlich nie von allein
 #
 # Kein Ausrollen bei jedem Push. Eine Edge Function greift sofort und für
 # alle; ein Tippfehler in `auth-email-hook` legt die Anmeldung lahm, ohne
 # dass ein Test dazwischen wäre. Wann etwas produktiv geht, entscheidet ein
-# Mensch.
+# Mensch — per Knopf oder per Tag, siehe unten.
 # =============================================================================
 name: Edge Functions ausrollen
 
+# -----------------------------------------------------------------------------
+# Zwei Auslöser, und der zweite ist nicht Bequemlichkeit
+#
+# GitHub erkennt `workflow_dispatch` nur, wenn die Datei auf dem
+# **Standard-Branch** liegt. Solange diese Arbeit auf einem eigenen Branch
+# läuft, gibt es den Knopf für GitHub schlicht nicht — der Aufruf endet mit
+# 404, egal welchen `ref` man mitgibt.
+#
+# Ein Tag-Push dagegen führt den Ablauf von genau dem Stand aus, der getaggt
+# wurde. Und ein Tag zu setzen ist dieselbe bewusste Handlung wie ein
+# Knopfdruck, nur dass sie zusätzlich festhält, WAS ausgerollt wurde. Sobald
+# die Datei auf dem Standard-Branch liegt, funktioniert auch der Knopf; der
+# Tag-Weg bleibt daneben nützlich.
+#
+# Trockenlauf oder echt entscheidet der Tag-Name — bei einem Tag-Push gibt
+# es keine Eingabefelder, und ein fehlendes Feld würde sonst stillschweigend
+# „echt ausrollen" bedeuten. Das ist die falsche Richtung zum Irren.
+#
+#   functions-dryrun-<was-auch-immer>   → zeigt nur an
+#   functions-deploy-<was-auch-immer>   → rollt aus
+# -----------------------------------------------------------------------------
 on:
   workflow_dispatch:
     inputs:
@@ -49,6 +70,10 @@ on:
         type: boolean
         required: false
         default: false
+  push:
+    tags:
+      - 'functions-dryrun-*'
+      - 'functions-deploy-*'
 
 concurrency:
   group: deploy-functions
@@ -76,10 +101,33 @@ jobs:
         with:
           version: latest
 
+      - name: Modus bestimmen
+        id: modus
+        # Tag-Name und Eingaben laufen über die Umgebung, nicht direkt in den
+        # Skripttext. Ein Tag darf jeder setzen, der pushen darf, und ein
+        # Name mit Anführungszeichen und Semikolon würde sonst als Befehl
+        # gelesen.
+        env:
+          EREIGNIS:  ${{ github.event_name }}
+          TAG:       ${{ github.ref_name }}
+          EIN_DRY:   ${{ github.event.inputs.dry_run }}
+        run: |
+          if [ "$EREIGNIS" = "workflow_dispatch" ]; then
+            TROCKEN="$EIN_DRY"
+          else
+            case "$TAG" in
+              functions-dryrun-*) TROCKEN=true ;;
+              *)                  TROCKEN=false ;;
+            esac
+          fi
+          echo "trocken=$TROCKEN" >> "$GITHUB_OUTPUT"
+          echo "Modus: ${TROCKEN:-false} (Auslöser: $EREIGNIS${TAG:+, Tag $TAG})"
+
       - name: Auswahl bestimmen
         id: auswahl
+        env:
+          EINGABE: ${{ github.event.inputs.functions }}
         run: |
-          EINGABE="${{ github.event.inputs.functions }}"
           if [ "$EINGABE" = "alle" ]; then
             # Alles ausser _shared — das ist kein Deployziel, sondern werden
             # als relative Importe mitgezogen.
@@ -97,10 +145,12 @@ jobs:
           echo "Ausgewählt: $LISTE"
 
       - name: Deno-Prüfung vor dem Ausrollen
+        env:
+          LISTE: ${{ steps.auswahl.outputs.liste }}
         run: |
           # Ein Syntaxfehler soll hier auffallen und nicht erst, wenn die
           # Function beim ersten echten Aufruf 500 wirft.
-          for F in ${{ steps.auswahl.outputs.liste }}; do
+          for F in $LISTE; do
             echo "── prüfe $F"
             deno check "supabase/functions/$F/index.ts" || exit 1
           done
@@ -109,9 +159,11 @@ jobs:
         run: deno test --allow-env --allow-net supabase/functions/_shared/ || exit 1
 
       - name: Ausrollen
+        env:
+          TROCKEN: ${{ steps.modus.outputs.trocken }}
+          LISTE:   ${{ steps.auswahl.outputs.liste }}
         run: |
-          TROCKEN="${{ github.event.inputs.dry_run }}"
-          for F in ${{ steps.auswahl.outputs.liste }}; do
+          for F in $LISTE; do
             if [ ! -d "supabase/functions/$F" ]; then
               echo "::error::supabase/functions/$F gibt es nicht"
               exit 1
@@ -131,8 +183,15 @@ jobs:
 
       - name: Ergebnis
         if: always()
+        env:
+          TROCKEN: ${{ steps.modus.outputs.trocken }}
+          LISTE:   ${{ steps.auswahl.outputs.liste }}
         run: |
-          echo "### Ausgerollt" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$TROCKEN" = "true" ]; then
+            echo "### Trockenlauf — nichts ausgerollt" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Ausgerollt" >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ steps.auswahl.outputs.liste }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "$LISTE" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
