@@ -60,8 +60,22 @@ Token noch eine Deploy-Pipeline (die CI lintet nur). Für eine Function
 müssen dabei auch alle geteilten Module mitgeschickt werden — bei den
 Mail-Functions rund 28 KB pro Stück.
 
-Der saubere Weg ist ein `SUPABASE_ACCESS_TOKEN`: Damit lassen sich alle
-vier Functions byte-genau von der Platte ausrollen, in einem Durchgang.
+**Gelöst am 04.08.2026 — aber anders als gedacht.** Ein
+`SUPABASE_ACCESS_TOKEN` allein reicht in dieser Arbeitsumgebung nicht: Der
+Egress-Proxy lehnt `api.supabase.com` per Richtlinie ab (403), das
+Supabase-CLI ist hier also unabhängig vom Token tot. Umgangen wird das
+nicht — die Sperre ist eine Entscheidung, keine Panne.
+
+Stattdessen rollt jetzt ein GitHub-Runner aus:
+`.github/workflows/deploy-functions.yaml`. Der hat die Beschränkung nicht,
+checkt denselben Stand aus, den ihr lest, und rollt ihn unverändert aus.
+Damit ist wieder gesichert, dass in Supabase dasselbe läuft wie im
+Repository steht.
+
+Einmalig einzurichten: das Secret `SUPABASE_ACCESS_TOKEN` unter
+*Settings → Secrets and variables → Actions*. Ausgelöst wird von Hand
+(*Actions → Edge Functions ausrollen → Run workflow*) — bewusst nicht bei
+jedem Push, weil eine Edge Function sofort und für alle greift.
 
 ## Beim Ausrollen mitzunehmen
 
