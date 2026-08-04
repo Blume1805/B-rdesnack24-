@@ -85,3 +85,102 @@ Die Änderung greift ab dem nächsten Versand — kein Neustart nötig, kein
 Zwischenspeicher. Geht der Griff in die Datenbank schief, wird die Fassung
 aus dem Code verschickt: Eine Kündigungsbestätigung darf nicht daran
 scheitern, dass eine Vorlagentabelle gerade nicht erreichbar ist.
+
+---
+
+# Automatischer Versand (Migrationen 0099, 0100)
+
+Bis hierher beschreibt diese Seite acht Mails, die je eine Edge Function
+selbst verschickt. Für die gewünschten dreiunddreissig trägt das nicht:
+Jede neue Mail wäre eine neue Function oder eine Änderung an einer
+bestehenden — und jede davon muss ausgerollt werden. Das ist derzeit der
+Engpass.
+
+Seit 0100 läuft es andersherum:
+
+```
+Ereignis  →  email_enqueue(...)  →  email_outbox  →  ein Versender
+```
+
+Wer eine Mail auslösen will, **legt eine Zeile ab statt selbst zu senden**.
+Eine neue Mailart ist danach eine Katalogzeile plus eine Vorlage — kein
+neuer Dienst. Genau deshalb kann Loveable das Design liefern, ohne dass
+jemand Code anfasst: Das HTML landet in `email_templates.body_html`.
+
+## Die Einordnung entscheidet, ob eine Mail rausgeht
+
+`email_templates.category` kennt drei Werte:
+
+| Wert | Was das heisst | Einwilligung? | Abmeldelink? |
+|---|---|---|---|
+| `transactional` | Vertragspost (Registrierung, Passwort, Kündigung, Rechnung) | nein | **nein** |
+| `legal` | Pflichtinformation (AGB-, Datenschutzänderung, Sicherheitshinweis) | nein | **nein** |
+| `marketing` | Werbung (Neuigkeiten, Aktionen, Geburtstagsgutschein) | **ja** | **ja** |
+
+Zwei Regeln setzt `email_enqueue` durch — nicht als Bitte an den Aufrufer,
+sondern als Sperre dahinter:
+
+1. **Werbung ohne Einwilligung verlässt das Haus nicht.** Die Zeile wird
+   angelegt, aber mit `status = 'suppressed'` und
+   `suppressed_reason = 'keine_einwilligung'`. Sie wird nicht verschickt —
+   und man sieht hinterher, dass und warum jemand übersprungen wurde.
+2. **Vertragspost wird von einer Abmeldung nie aufgehalten.** Wer den
+   Abmeldelink klickt, bestellt Werbung ab, nicht seine
+   Kündigungsbestätigung. Wird das verwechselt, entsteht der Fall, in dem
+   jemand widerruft und nie eine Bestätigung bekommt.
+
+Beides ist gegen die Produktivdatenbank nachgestellt: Werbung ohne
+Einwilligung → `suppressed`; nach Erteilung → `queued`; nach Klick auf den
+Abmeldelink wieder `suppressed`; Vertragspost und Pflichtinformation
+im selben Moment weiterhin `queued`.
+
+## Die Einwilligung ist ein Protokoll, kein Häkchen
+
+Art. 7 Abs. 1 DSGVO legt die Beweislast auf euch. Ein `bool` auf `profiles`
+kann das nicht: Es sagt, wie es jetzt steht, nicht wie es dazu kam — und
+ein Widerruf löscht den Beweis, dass es je anders war.
+
+`email_consent_event` wird deshalb nur angehängt, nie geändert (ein Trigger
+verhindert `update`). Festgehalten wird **der Wortlaut, dem zugestimmt
+wurde**, denn nachzuweisen ist nicht „ein Haken war gesetzt", sondern wozu.
+Eine Einwilligung ohne Nachweistext lässt die Datenbank gar nicht erst zu.
+
+Drei Themen, getrennt wählbar: `produkt_neuigkeiten`, `aktionen`,
+`geburtstag`. Der Geburtstagsgruss hat ein eigenes Thema, weil er das
+Geburtsdatum zu einem Zweck verarbeitet, für den es nicht erhoben wurde.
+
+Der Abmeldelink funktioniert **ohne Anmeldung** (§ 7 Abs. 3 Nr. 4 UWG) und
+lässt sich mehrfach klicken, ohne in einen Fehler zu laufen.
+
+## Was noch nicht versendet wird — und warum
+
+Zwölf der Vorlagen stehen im Katalog, sind aber `is_active = false` und
+nennen in `precondition`, was fehlt. `email_enqueue` wirft bei ihnen eine
+Ausnahme, statt still zu schlucken — eine Vorlage, die aktiv aussieht, aber
+nie ausgelöst wird, ist schlimmer als eine, die ehrlich gesperrt dasteht.
+
+| Gesperrt | Was fehlt |
+|---|---|
+| `abo_rechnung`, `abo_zahlung_erfolgreich`, `abo_zahlung_fehlgeschlagen`, `abo_zahlungsmittel_laeuft_ab`, `abo_zahlungsmittel_geaendert`, `abo_verlaengert` | **Kein Zahlungsanbieter angebunden.** `0073_referral_program.sql` hält das bereits fest. Ohne Zahlungs-Webhook weiss die Datenbank nicht, ob eine Zahlung geklappt hat. |
+| `abo_test_beginnt`, `abo_test_endet_bald`, `abo_test_beendet` | Es gibt kein Testphasen-Modell in den Abodaten. |
+| `konto_neue_anmeldung` | Kein Geräte-/Sitzungsverzeichnis — „unbekanntes Gerät" ist nicht feststellbar. |
+| `konto_zwei_faktor` | Zwei-Faktor-Anmeldung ist nicht eingeführt. |
+| `support_feedback_erhalten` | Kein Feedback-Eingang ausserhalb der Reklamationen. |
+
+Das ist keine Bequemlichkeit: Diese Mails brauchen ein Ereignis, das es
+noch nicht gibt. Man kann sie nicht „schon mal vorbereiten" — man kann nur
+die Vorlage hinterlegen, und das ist geschehen.
+
+## Was als Nächstes fehlt
+
+1. **Der Versender.** Eine kleine Edge Function, die `email_outbox_claim()`
+   ruft, rendert, verschickt und `email_outbox_mark()` zurückmeldet.
+   Getaktet über `pg_cron` + `pg_net` (beide vorhanden). Sie kommt mit dem
+   nächsten Ausrollen — genau wie die fünf, die schon warten.
+2. **Die Auslöser.** Trigger und Zeitpläne, die `email_enqueue` rufen
+   (bestätigte Registrierung, Passwortänderung, Ablauferinnerung,
+   Geburtstag).
+3. **Das Design von Loveable**, das in `body_html` wandert.
+4. **Der Einwilligungs-Schalter im Profil** — `email_consent_state()`,
+   `email_consent_grant()` und `email_consent_revoke()` stehen bereit,
+   die Oberfläche dazu noch nicht.
