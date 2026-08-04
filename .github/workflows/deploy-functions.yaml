@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Token vorhanden?
+      - name: Ist das Secret gesetzt?
         run: |
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
             echo "::error::Das Secret SUPABASE_ACCESS_TOKEN fehlt. Siehe Kopf dieser Datei."
@@ -100,6 +100,25 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      # Und gilt er auch noch?
+      #
+      # „Nicht leer" ist keine Prüfung. Ein widerrufener Token ist genauso
+      # lang wie ein gültiger, und beim Trockenlauf wird nie ausgerollt —
+      # der Lauf wäre also grün, obwohl nichts mehr ginge. Genau darauf
+      # kommt es aber an, wenn jemand einen Token austauscht: Er will
+      # VORHER wissen, ob der neue sitzt, und nicht beim nächsten
+      # Ausrollen.
+      #
+      # Deshalb hier ein Aufruf, der wirklich am Konto anklopft, aber
+      # nichts verändert.
+      - name: Gilt der Token noch?
+        run: |
+          if ! supabase functions list --project-ref "$PROJECT_REF" >/dev/null 2>&1; then
+            echo "::error::Der Token wird von Supabase nicht angenommen — widerrufen, abgelaufen oder für ein anderes Konto. Neuen unter https://supabase.com/dashboard/account/tokens anlegen und das Secret SUPABASE_ACCESS_TOKEN aktualisieren."
+            exit 1
+          fi
+          echo "Token gilt, Zugriff auf $PROJECT_REF steht."
 
       # Deno ist auf dem Runner NICHT vorinstalliert. Beim ersten Lauf
       # (04.08.2026) scheiterte der Ablauf genau daran — `deno: command not
