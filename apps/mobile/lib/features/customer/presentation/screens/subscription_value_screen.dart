@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/config/app_config.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -22,10 +23,13 @@ class SubscriptionValueScreen extends ConsumerWidget {
   const SubscriptionValueScreen({super.key});
 
   /// Der One-Pager als PDF — wird mit dem Web-Build ausgeliefert
-  /// (apps/mobile/web/marketing/) und liegt damit auf GitHub Pages;
-  /// die absolute URL funktioniert auch aus den nativen Apps.
+  /// (apps/mobile/web/marketing/) und liegt damit dort, wo die Web-App
+  /// liegt; die absolute URL funktioniert auch aus den nativen Apps.
+  ///
+  /// Die Basis kommt aus `APP_PUBLIC_URL` (siehe [AppConfig]), damit sie
+  /// beim Domainwechsel nicht einzeln nachgezogen werden muss.
   static final Uri onePagerPdf = Uri.parse(
-    'https://blume1805.github.io/B-rdesnack24-/marketing/abo-rechnet-sich.pdf',
+    '${AppConfig.fromEnvironment().appBase}marketing/abo-rechnet-sich.pdf',
   );
 
   @override

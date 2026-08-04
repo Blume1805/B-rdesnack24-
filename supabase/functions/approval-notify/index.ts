@@ -7,6 +7,10 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+// Die Adresse der App steht an genau einer Stelle: `APP_PUBLIC_URL`.
+// Vorher stand sie hier fest verdrahtet — beim Domainwechsel wäre diese
+// Mail die eine gewesen, die man übersieht.
+import { mailConfig } from "../_shared/email/config.ts";
 
 const OFFICIAL_EMAIL = "boerdesnack24@gmail.com";
 
@@ -67,7 +71,7 @@ Deno.serve(async (req) => {
           ? `<p>Beide Gesellschafter haben signiert. Das finale, signierte PDF liegt im Archiv.</p>`
           : `<p>Ein Gesellschafter hat abgelehnt. Kommentar in der App einsehen.</p>`}
         <p style="margin-top:16px">
-          <a href="https://blume1805.github.io/B-rdesnack24-/"
+          <a href="${mailConfig.links.app}"
              style="background:#FDC102;color:#14110E;text-decoration:none;
                     padding:10px 16px;border-radius:999px;font-weight:800;">
             In App öffnen

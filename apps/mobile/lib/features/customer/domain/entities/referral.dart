@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/config/app_config.dart';
+
 /// Stand einer einzelnen Empfehlung aus Sicht des Werbers.
 enum ReferralStatus {
   /// Geworbene Person hat sich registriert, aber noch kein Abo.
@@ -192,7 +194,18 @@ class ReferralStatusSummary extends Equatable {
   final List<ReferralReward> rewards;
 
   /// Basis-URL für den Teilen-Link. Muss zur Deeplink-Konfiguration passen.
-  static const shareBase = 'https://blume1805.github.io/B-rdesnack24-/#/r/';
+  ///
+  /// Kommt aus `APP_PUBLIC_URL` (siehe [AppConfig]), damit der Link beim
+  /// Domainwechsel nicht einzeln nachgezogen werden muss. Ein Wert ohne
+  /// Schrägstrich am Ende ergäbe `…de#/r/CODE` statt `…de/#/r/CODE` —
+  /// deshalb verlangt [AppConfig.appPublicUrl] den abschliessenden
+  /// Schrägstrich. Hier lässt sich das nicht abfangen, weil der Wert
+  /// konstant sein muss.
+  static const _base = String.fromEnvironment(
+    'APP_PUBLIC_URL',
+    defaultValue: AppConfig.defaultAppPublicUrl,
+  );
+  static const shareBase = '$_base#/r/';
 
   String? get shareLink => code == null ? null : '$shareBase$code';
 
