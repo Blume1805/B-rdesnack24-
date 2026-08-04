@@ -248,29 +248,55 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 
 ## A5 · Spendenprojekte auf echte Daten (bereit zum Senden — zuerst)
 
+> **Stand 03.08.2026 — dieser Text wurde überarbeitet.** Eine frühere
+> Fassung nannte „Tafel Magdeburg", „Kinderhospiz Magdeburger Elbland"
+> und „Feuerwehr Sülzetal" als die echten Organisationen. Das war falsch:
+> Auch diese drei waren Anschauungsmaterial und sind mit Migration 0085
+> zurückgezogen worden. **In der Datenbank steht derzeit keine einzige
+> Organisation zur Abstimmung.**
+>
 > Der Charity-Bereich zeigt drei erfundene Projekte mit erfundenen
-> Spendenständen und Stimmenzahlen. Das muss weg, bevor irgendjemand die
-> Seite zu sehen bekommt.
->
-> **Was dort steht und was stimmt**
->
-> | In der App (erfunden) | In Wirklichkeit |
-> |---|---|
-> | Jugendtreff Irxleben · 3.120 € · 412 Stimmen | Tafel Magdeburg |
-> | Tierheim Magdeburg · 2.480 € · 388 Stimmen | Kinderhospiz Magdeburger Elbland |
-> | SV Hermsdorf Nachwuchs · 1.890 € · 275 Stimmen | Feuerwehr Sülzetal |
+> Spendenständen und Stimmenzahlen — `Jugendtreff Irxleben`,
+> `Tierheim Magdeburg`, `SV Hermsdorf Nachwuchs`. Das muss weg, bevor
+> irgendjemand die Seite zu sehen bekommt.
 >
 > Erfundene Zahlen sind das eine. Erfundene **gemeinnützige
 > Organisationen** mit erfundenen Spendenständen sind eine Falschangabe
 > über Dritte, die es wirklich gibt (§ 5 UWG). `charityProjects` in
 > `src/lib/data.ts` bitte ersatzlos löschen.
 >
+> **Der Leerzustand ist hier die Hauptsache, nicht ein Randfall.**
+> Die Liste wird nach dieser Änderung leer sein, und das ist richtig so —
+> die echte Liste bescheinigungsberechtigter Organisationen wird gerade
+> zusammengestellt. Bitte einen erklärenden Leerzustand bauen, keine
+> leere Fläche und erst recht keine Platzhalter:
+>
+> > „Die Organisationen für die nächste Abstimmung werden gerade
+> > zusammengestellt. Sobald sie feststehen, könnt ihr hier mitbestimmen,
+> > wohin gespendet wird."
+>
 > **Echte Quelle**
 >
 > ```ts
 > const { data } = await supabase.rpc("donation_causes_list");
-> // id, title, description, status, vote_count, voted_by_me, created_at
+> // id, title, description, status, vote_count, voted_by_me, created_at,
+> // legal_name, purpose, city, website, receipt_eligible
 > ```
+>
+> Die letzten fünf Felder sind mit Migration 0088 dazugekommen. Bitte
+> mitanzeigen, sobald Organisationen vorhanden sind:
+>
+> * `legal_name` — der vollständige Name laut Register, z. B. „… e. V.".
+>   `title` ist nur der kurze Anzeigename.
+> * `purpose` — der Satzungszweck, ein bis zwei Sätze.
+> * `city` — der Ort. **Keine vollständige Anschrift anzeigen**; die
+>   liegt zwar in der Datenbank, gehört aber nicht in die
+>   Abstimmungsliste.
+> * `website` — verlinken, wenn vorhanden, sonst weglassen.
+> * `receipt_eligible` — ist immer `true` bei allem, was hier ankommt
+>   (die Datenbank lässt nichts anderes zur Abstimmung zu). Ein kleiner
+>   Hinweis „darf Spendenbescheinigungen ausstellen" ist sinnvoll, aber
+>   **kein Gütesiegel-Design** — es ist eine Tatsache, keine Auszeichnung.
 >
 > Abstimmen ist ein Umschalter — die RPC gibt `true` zurück, wenn die
 > Stimme gesetzt wurde, `false`, wenn sie zurückgezogen wurde:
@@ -322,8 +348,8 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 > er stammt aus den eigenen Demo-Käufen und ist für den Nutzer als
 > solcher erkennbar.
 >
-> Was ohne Vorbehalt gezeigt werden kann: die drei echten Projekte, ihre
-> Stimmen und die eigene Stimme.
+> Was ohne Vorbehalt gezeigt werden kann: die Organisationen selbst, ihre
+> Stimmen und die eigene Stimme — sobald welche vorhanden sind.
 >
 > Gestaltung wie bisher, kein Redesign.
 
@@ -331,12 +357,17 @@ RLS-Policies greifen könnten; A3 ohne A2b hätte keine echten Preise.
 
 - [ ] `charityProjects` ist aus `src/lib/data.ts` verschwunden
 - [ ] Projekte kommen aus `donation_causes_list()`
+- [ ] **Erklärender Leerzustand statt leerer Fläche** — die Liste ist
+      derzeit leer, das ist der Normalfall und nicht der Sonderfall
+- [ ] `legal_name`, `purpose`, `city`, `website` werden mitangezeigt
+- [ ] Keine vollständige Anschrift in der Abstimmungsliste
 - [ ] Abstimmen ruft `vote_donation_cause()` und behandelt den Rückgabewert als Umschalter
 - [ ] Keine Fortschrittsbalken, keine Ziel-Beträge
 - [ ] Kein großer Spendentopf ohne Hinweis auf Testdaten
 - [ ] Keine Zahl auf der Seite, die nicht aus einer RPC stammt
+- [ ] Nirgends ein Platzhalter-Projekt „damit es nicht so leer aussieht"
 
-## A4 · Kontraste (bereit zum Senden — Credits fehlten)
+## A4 · Kontraste (✅ erledigt, 5/5 Prüfpunkte)
 
 > Die Preisdarstellung sitzt inhaltlich. Es gibt aber ein
 > Lesbarkeitsproblem, das ausgerechnet die neu hervorgehobenen Stellen
