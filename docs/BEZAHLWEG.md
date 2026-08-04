@@ -1,5 +1,12 @@
 # Wie das Abo bezahlt wird — und warum das die E-Mails bestimmt
 
+> **Entschieden am 04.08.2026: Bezahlt wird ausschliesslich über App Store
+> und Play Store. Kein eigener Zahlungsanbieter.**
+>
+> Der Hinweis auf Apples Richtlinie 3.1.3(e) weiter unten wurde vor dieser
+> Entscheidung eingebracht und bleibt als Begründung stehen — er ist damit
+> abgewogen und erledigt. Was daraus folgt, steht unter „Was gebaut wurde".
+
 Stand 04.08.2026. Ausgangspunkt war die Annahme, das Abo laufe über App
 Store und Play Store, und damit entfielen alle Zahlungs-E-Mails, weil
 Apple und Google die Belege selbst verschicken.
@@ -67,7 +74,66 @@ am Automaten" als Hauptargument steht, wird ein Prüfer bei Apple das als
 körperliche Leistung lesen — und die Seite ist genau so aufgebaut, weil
 das das stärkste Argument ist.
 
-## Empfehlung
+## Was gebaut wurde (Migration 0102)
+
+Die E-Mails entfallen — die **Anbindung nicht**. Das ist der Teil, den man
+beim Planen von In-App-Käufen am ehesten übersieht:
+
+* Jemand kündigt im App Store → ohne Benachrichtigung erfährt die
+  Datenbank nichts und die App gewährt weiter Premium.
+* Apple erstattet → ohne Benachrichtigung steht der Umsatz weiter in der
+  Auswertung, obwohl das Geld zurück ist.
+* Eine Verlängerung scheitert → der Rabatt am Automaten läuft weiter,
+  ohne dass jemand zahlt.
+
+Der Laden ist ab jetzt die Wahrheit darüber, **ob und bis wann bezahlt
+ist**. Dafür gibt es `store_subscription`. Bewusst getrennt von
+`customer_subscriptions`: Das beantwortet die andere Frage — was der Kunde
+gewählt und wozu er zugestimmt hat (`withdrawal_consent`, `age_consent`,
+Lifetime-Sperre). Zusammengelegt würde eine Erstattung durch Apple eine
+Zeile im Einwilligungsprotokoll ändern.
+
+### Die zwei Fallen, gegen die abgesichert ist
+
+**Wiederholte Zustellung.** Beide Läden wiederholen, bis sie eine 200
+sehen. Ein eindeutiger Schlüssel je Nachricht (Apple `notificationUUID`,
+Google `messageId`) macht das zweite Mal wirkungslos — ohne Fehler, sonst
+wiederholt der Laden weiter.
+
+**Vertauschte Reihenfolge.** Die unangenehmere. Eine wiederholte `EXPIRED`
+kann *nach* der `DID_RENEW` ankommen, die sie längst abgelöst hat. Wer
+stumpf den letzten Stand schreibt, setzt ein laufendes Abo auf abgelaufen
+— der Kunde verliert seinen Rabatt, obwohl er bezahlt hat. Dagegen wird
+der Zeitstempel des Ladens mitgeführt und Älteres verworfen.
+
+Nachgestellt und bestätigt: verspätete `EXPIRED` mit älterem Zeitstempel →
+`stale`, Abo bleibt `active` bis +60 Tage. Dazu: Wiederholung → `duplicate`;
+Erstattung → Zugang sofort weg; Sandkasten-Kauf → nie Zugang; fremden Kauf
+übernehmen → abgewiesen.
+
+### Was noch fehlt
+
+Die beiden Webhooks, die die Benachrichtigungen entgegennehmen und
+`store_notification_apply` rufen:
+
+* **Apple** — App Store Server Notifications V2. Der Rumpf ist ein JWS;
+  die Signatur wird über die Zertifikatskette im `x5c`-Kopf bis zur Apple
+  Root CA geprüft.
+* **Google** — Real-time Developer Notifications über Pub/Sub. Push mit
+  OIDC-Token, das gegen Googles Schlüssel und die erwartete Zielgruppe
+  geprüft wird.
+
+Beide laufen ohne JWT (ein Webhook kann sich nicht anmelden) und tragen
+ihre Prüfung deshalb selbst — dieselbe Bauart wie `email-inbound`, und
+dieselben drei Regeln: kein Rückfallwert für das Geheimnis, echte
+Signaturprüfung statt Kennwortvergleich, Zeitfenster gegen
+Wiedereinspielen.
+
+Dazu in der App: nach dem Kauf `store_subscription_claim` rufen, damit der
+Kauf am Konto hängt. Bis dahin steht die Zeile mit `profile_id is null`
+und die Benachrichtigung endet als `unmatched` — sichtbar, nicht still.
+
+## Frühere Empfehlung (vor der Entscheidung)
 
 **Nicht auf In-App-Kauf planen.** Zwei Gründe, unabhängig voneinander:
 
@@ -85,16 +151,19 @@ Beziehung statt in Apples.
 
 ## Was das für den E-Mail-Katalog bedeutet
 
-Vorerst **nichts**. Die neun betroffenen Vorlagen (`abo_rechnung`,
-`abo_zahlung_erfolgreich`, `abo_zahlung_fehlgeschlagen`,
-`abo_zahlungsmittel_laeuft_ab`, `abo_zahlungsmittel_geaendert`,
-`abo_verlaengert`, `abo_test_beginnt`, `abo_test_endet_bald`,
-`abo_test_beendet`) bleiben mit `is_active = false` im Katalog stehen.
+Die neun betroffenen Vorlagen (`abo_rechnung`, `abo_zahlung_erfolgreich`,
+`abo_zahlung_fehlgeschlagen`, `abo_zahlungsmittel_laeuft_ab`,
+`abo_zahlungsmittel_geaendert`, `abo_verlaengert`, `abo_test_beginnt`,
+`abo_test_endet_bald`, `abo_test_beendet`) bleiben mit
+`is_active = false` stehen und tragen seit 0102 den endgültigen Grund:
+Apple und Google verschicken diese Post selbst, eine zweite Mail von uns
+zur selben Sache wäre doppelt und im Zweifel widersprüchlich.
 
-Sie zu löschen wäre voreilig: Nach dieser Prüfung ist wahrscheinlicher,
-dass sie gebraucht werden, als dass sie entfallen. Ihre `precondition`
-nennt jetzt beide Zweige, damit niemand später aus dem Text den falschen
-Schluss zieht.
+Gelöscht werden sie trotzdem nicht. Wenn die Web-App auf
+`boerdesnack24.de` später Abos verkaufen soll, kann dort weder Apple noch
+Google kassieren — dann kehren sie samt Rechnungspflichten zurück. Eine
+gesperrte Vorlage mit begründetem Sperrvermerk kostet nichts; sie neu zu
+schreiben schon.
 
 Unberührt bleiben `premium_willkommen` (Begrüssung zur Leistung, kein
 Beleg), `abo_kuendigung_laufzeitende` und `abo_laeuft_bald_ab` — die
