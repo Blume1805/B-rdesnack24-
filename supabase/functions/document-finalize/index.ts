@@ -193,7 +193,9 @@ function renderInventoryFifo(ctx: Ctx): void {
     (l.invoice_number as string) ?? "",
     fmtEur(l.unit_cost as number),
     (l.lot_expiry as string) ?? "",
-    l.remaining_qty ?? "",
+    // `lots` ist Array<Record<string, unknown>> — ohne Zusicherung wird der
+    // Zellentyp zu `{}` und passt nicht in TableColumn.
+    (l.remaining_qty as number | null) ?? "",
     l.mhd_pct !== null && l.mhd_pct !== undefined ? `${l.mhd_pct}%` : "0%",
     fmtEur(l.lot_net as number),
   ]);
@@ -220,7 +222,7 @@ function renderInventoryFifo(ctx: Ctx): void {
       (m.product_name as string) ?? "",
       (m.machine_code as string) ?? "",
       (m.type as string) ?? "",
-      m.quantity_delta ?? "",
+      (m.quantity_delta as number | null) ?? "",
       fmtEur(m.unit_cost as number),
       (m.invoice_number as string) ?? "",
     ]);
@@ -591,12 +593,21 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Nur freigegebene Dokumente werden finalisiert" }, 400);
   }
 
-  const { data: decisions } = await caller
+  // Der Fehler wurde hier bisher verworfen. Das ist die eine Abfrage, bei
+  // der man das nicht darf: Schlägt sie fehl, ist `decisions` null, und es
+  // entsteht ein finalisiertes Freigabedokument OHNE die Liste derer, die
+  // freigegeben haben — also genau ohne den Teil, dessentwegen es das
+  // Dokument gibt. Lieber kein Dokument als ein leeres Unterschriftenfeld.
+  const { data: decisions, error: dErr } = await caller
     .from("document_approval_decisions")
     .select("approver_id, decision, decided_at, signature_url, "
           + "approver:profiles(full_name)")
     .eq("approval_id", body.approval_id)
     .order("created_at");
+  if (dErr) {
+    console.error("document-finalize: Freigaben nicht lesbar", dErr);
+    return jsonResponse({ error: "Freigaben nicht lesbar" }, 502);
+  }
 
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -605,7 +616,11 @@ Deno.serve(async (req) => {
   const ctx: Ctx = {
     pdf, font, bold, italic,
     approval: approval as Approval,
-    decisions: (decisions ?? []) as Decision[],
+    // Über `unknown`, weil supabase-js für die eingebettete Beziehung
+    // (`approver:profiles(full_name)`) ohne erzeugte Datenbanktypen einen
+    // Vereinigungstyp mit GenericStringError liefert, der sich nicht direkt
+    // zu Decision[] zusichern lässt. Der Fehlerfall ist oben abgefangen.
+    decisions: (decisions ?? []) as unknown as Decision[],
     caller,
     headerDrawn: false,
   };
