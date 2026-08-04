@@ -101,6 +101,13 @@ jobs:
         with:
           version: latest
 
+      # Deno ist auf dem Runner NICHT vorinstalliert. Beim ersten Lauf
+      # (04.08.2026) scheiterte der Ablauf genau daran — `deno: command not
+      # found` in der Prüfung, nachdem die Auswahl bereits korrekt stand.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: Modus bestimmen
         id: modus
         # Tag-Name und Eingaben laufen über die Umgebung, nicht direkt in den
@@ -143,6 +150,32 @@ jobs:
           fi
           echo "liste=$LISTE" >> "$GITHUB_OUTPUT"
           echo "Ausgewählt: $LISTE"
+
+      # Zuerst prüfen, ob es die Functions auf DIESEM Stand überhaupt gibt.
+      #
+      # Beim ersten echten Lauf (04.08.2026) wurde versehentlich gegen `main`
+      # gestartet. Dort fehlt `auth-email-hook` ganz, weil er auf dem
+      # Arbeitsbranch entstanden ist. Der Abbruch kam damals erst aus
+      # `deno check` — als Modulfehler, der nach einem Codeproblem aussah
+      # statt nach „falscher Branch gewählt".
+      #
+      # Der Ablauf rollt immer den Stand aus, gegen den er gestartet wurde.
+      # Solange die Arbeit auf einem Branch liegt, muss beim Starten unter
+      # „Use workflow from" dieser Branch gewählt werden — nicht `main`.
+      - name: Sind die Functions auf diesem Stand vorhanden?
+        env:
+          LISTE: ${{ steps.auswahl.outputs.liste }}
+          REF:   ${{ github.ref_name }}
+        run: |
+          FEHLT=""
+          for F in $LISTE; do
+            [ -d "supabase/functions/$F" ] || FEHLT="$FEHLT $F"
+          done
+          if [ -n "$FEHLT" ]; then
+            echo "::error::Auf '$REF' fehlen diese Functions:$FEHLT — vermutlich wurde der falsche Branch gewählt. Der Ablauf rollt immer den Stand aus, gegen den er gestartet wurde."
+            exit 1
+          fi
+          echo "Alle ausgewählten Functions sind auf '$REF' vorhanden."
 
       - name: Deno-Prüfung vor dem Ausrollen
         env:
