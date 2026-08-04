@@ -56,6 +56,29 @@ steht, was zur Wahlentscheidung gehört:
 * **Nur intern:** vollständige Anschrift, Registereintrag, Steuernummer,
   Finanzamt, Kontakt-E-Mail, wer die Berechtigung wann geprüft hat.
 
+Diese Trennung war bis zum 04.08.2026 nur eine Absicht, keine Sperre: Die
+Tabelle selbst stand für jede angemeldete Person offen, die Steuernummer
+liess sich mitlesen, und es liess sich sogar eine frei erfundene
+Organisation direkt als „aktiv" eintragen. Seit Migration 0098 sind die
+Tabellenrechte entzogen — es kommt nur noch heraus, was die Liste in der
+App bewusst herausgibt. Beim Eintragen deiner Liste ändert das nichts: Das
+geschieht über die Supabase-Oberfläche bzw. als Migration, und beide Wege
+sind davon nicht betroffen.
+
+### Kundenvorschläge
+
+Kund*innen können über die App eine Organisation vorschlagen. Ein solcher
+Vorschlag ist **kein** Eintrag in der Abstimmung: Er ist nur für die Person
+sichtbar, die ihn gemacht hat, und für euch intern. Vorher stand jeder
+Vorschlag sofort bei allen Kund*innen in der Liste — auch das ist seit dem
+04.08.2026 abgestellt (Migration 0097). Pro Person sind höchstens drei
+offene Vorschläge möglich.
+
+Ein Vorschlag wird zur Abstimmung zugelassen, indem ihr ihn wie jede andere
+Organisation vollständig erfasst — mit Rechtsname, Zweck und dem Nachweis
+der Bescheinigungsberechtigung. Ohne diese Angaben lässt die Datenbank das
+Umschalten auf `aktiv` gar nicht zu.
+
 ---
 
 ## Format
@@ -70,8 +93,11 @@ solange die Pflichtfelder dabei sind.
 1. Ich trage die Organisationen als Migration ein (nachvollziehbar, mit
    Datum und Quelle) und setze `verified_at`, sobald du bestätigst, dass die
    Berechtigung geprüft ist.
-2. **A5** wird abgeschickt — die Spendenseite zeigt dann echte
-   Organisationen statt Platzhalter.
+2. ~~**A5** wird abgeschickt~~ — erledigt am 04.08.2026. Die Spendenseite im
+   Web liest bereits die echte Tabelle. Sie zeigt derzeit den Leertext
+   „Noch keine Organisationen zur Abstimmung", weil die Tabelle leer ist —
+   sie füllt sich in dem Moment, in dem deine Liste eingetragen ist. Es ist
+   nichts mehr zu programmieren, nur noch einzutragen.
 3. Die drei zurückgezogenen Beispieleinträge (Tafel Magdeburg, Kinderhospiz
    Magdeburger Elbland, Feuerwehr Sülzetal) bleiben gelöscht. Falls eine
    davon tatsächlich mit euch zusammenarbeitet, nimm sie einfach in die
