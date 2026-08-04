@@ -31,14 +31,38 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final l10n = AppLocalizations.of(context);
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
+
+    // `try` OHNE `catch` stand hier bis zum 04.08.2026. Schlug der Aufruf
+    // fehl, lief zwar `finally` (Spinner aus), aber die Ausnahme flog
+    // weiter — Bestätigung und Weiterleitung darunter wurden übersprungen.
+    // Für die Nutzerin sah das aus, als täte der Knopf nichts.
+    //
+    // Aufgefallen ist es, als der Send-Email-Hook auf einen Platzhalter
+    // zeigte: Supabase antwortete mit 422, später mit 429, und am
+    // Bildschirm passierte sichtbar gar nichts. Ein stiller Fehler kostet
+    // mehr Zeit als eine hässliche Meldung.
+    var geklappt = true;
     try {
       await ref
           .read(authRepositoryProvider)
           .sendPasswordReset(_emailCtrl.text.trim());
+    } catch (_) {
+      geklappt = false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
     if (!mounted) return;
+
+    if (!geklappt) {
+      // Bewusst ohne Einzelheiten: Ob die Adresse existiert, geht niemanden
+      // etwas an. Dass etwas schiefging, dagegen schon. Kein `context.go`,
+      // damit die Eingabe stehen bleibt und ein zweiter Versuch möglich ist.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGeneric)),
+      );
+      return;
+    }
+
     // Aus Datenschutzgründen immer dieselbe neutrale Bestätigung anzeigen.
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.resetSent)),
