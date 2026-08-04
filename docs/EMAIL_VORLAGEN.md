@@ -24,19 +24,19 @@ sofort für alle Mails.
 
 | Vorlage | Versendet von | Umgestellt im Code | Ausgerollt |
 |---|---|---|---|
-| `subscription_cancel` | `subscription-cancel` | ✅ | ❌ |
-| `subscription_choose` | `subscription-choose` | ✅ | ❌ |
-| `account_deletion_customer` | `account-deletion-request` | ✅ | ❌ |
-| `account_deletion_internal` | `account-deletion-request` | ✅ | ❌ |
-| `auth_signup` … `auth_reauthentication` (6) | `auth-email-hook` | ✅ | ❌ |
+| `subscription_cancel` | `subscription-cancel` | ✅ | ✅ |
+| `subscription_choose` | `subscription-choose` | ✅ | ✅ |
+| `account_deletion_customer` | `account-deletion-request` | ✅ | ✅ |
+| `account_deletion_internal` | `account-deletion-request` | ✅ | ✅ |
+| `auth_signup` … `auth_reauthentication` (6) | `auth-email-hook` | ✅ | ✅ |
 
-**Bis eine Zeile in beiden Spalten ✅ trägt, ändert eine Bearbeitung in der
-Oberfläche nichts am tatsächlichen Versand.** Der Katalog ist trotzdem
-schon nützlich: Er zeigt, welche Mails es überhaupt gibt, welche
-Platzhalter sie kennen und wo der Wortlaut rechtlich vorgegeben ist.
+**Ausgerollt am 04.08.2026** über `.github/workflows/deploy-functions.yaml`
+(Lauf 5). Alle zehn Vorlagen wirken jetzt: Wer Betreff und Inhalt in der
+Datenbank füllt, ändert damit den tatsächlichen Versand.
 
-Im Code ist damit alles umgestellt; es fehlt nur noch das Ausrollen der
-vier Functions. Danach wirken alle zehn Vorlagen.
+Mit ausgerollt wurden die beiden wartenden Änderungen an den geteilten
+Modulen — die Maskierung von `title` und `preheader` in `components.ts`
+(siehe unten) und `document-finalize` mit den echten Finanzzahlen.
 
 ### Was bewusst NICHT über die Datenbank läuft
 
@@ -77,18 +77,18 @@ Einmalig einzurichten: das Secret `SUPABASE_ACCESS_TOKEN` unter
 (*Actions → Edge Functions ausrollen → Run workflow*) — bewusst nicht bei
 jedem Push, weil eine Edge Function sofort und für alle greift.
 
-## Beim Ausrollen mitzunehmen
+## Mit ausgerollt (04.08.2026)
 
-Zwei Änderungen an den geteilten Modulen warten ebenfalls auf den nächsten
-Deploy:
+Zwei Änderungen an den geteilten Modulen sind damit ebenfalls draussen:
 
 1. **`components.ts`: `title` und `preheader` werden jetzt maskiert.**
    Gefunden hat das ein Test der neuen Vorlagen-Funktion. Solange dort nur
    feste Zeichenketten ankamen, war es gleichgültig; sobald ein Betreff aus
    einer Vorlage stammt und einen Namen aus dem Anmeldeformular enthält,
    ist es das nicht mehr. Ein Name wie `</title><b>` hätte das Gerüst der
-   Mail zerlegt. Heute nicht ausnutzbar, weil noch keine Vorlage gefüllt
-   ist — aber es muss vor der ersten gefüllten Vorlage draussen sein.
+   Mail zerlegt. War nicht ausnutzbar, weil noch keine Vorlage gefüllt ist
+   — und ist jetzt draussen, bevor die erste gefüllt wird. Genau diese
+   Reihenfolge war der Punkt.
 2. **`auth.ts`: `codeBlock()` nimmt kein Argument mehr.** Es hat nie eins
    gebraucht; die Funktion setzt den Platzhalter `{{code}}`, den das
    Rendern füllt. Reine Aufräumarbeit.
@@ -107,8 +107,10 @@ scheitern, dass eine Vorlagentabelle gerade nicht erreichbar ist.
 Bis hierher beschreibt diese Seite acht Mails, die je eine Edge Function
 selbst verschickt. Für die gewünschten dreiunddreissig trägt das nicht:
 Jede neue Mail wäre eine neue Function oder eine Änderung an einer
-bestehenden — und jede davon muss ausgerollt werden. Das ist derzeit der
-Engpass.
+bestehenden — und jede davon muss ausgerollt werden. Seit dem 04.08.2026
+geht das zwar (siehe oben), bleibt aber ein Schritt, den ein Mensch
+auslösen muss. Eine Mailart, die ohne Ausrollen auskommt, ist die
+bessere.
 
 Seit 0100 läuft es andersherum:
 
