@@ -204,7 +204,6 @@ class _OffersTabState extends ConsumerState<OffersTab> {
             ),
           ),
 
-
           // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
           const _NewsTeaser(),
           const SizedBox(height: AppSpacing.s6),
@@ -2573,7 +2572,6 @@ class _HeroDonationCard extends StatelessWidget {
   }
 }
 
-
 /// Die Kernaussage der App plus drei harte Zahlen.
 ///
 /// Ersetzt den früheren Einstieg über Suchleiste + gesperrte Kachel: ein
@@ -2699,7 +2697,6 @@ class _FactChip extends StatelessWidget {
     );
   }
 }
-
 
 /// Der Break-even als Karte statt als Textlink.
 ///
@@ -2836,7 +2833,6 @@ class _CategoryChip extends StatelessWidget {
     );
   }
 }
-
 
 /// „Bisher zusammen X € gespendet" — der USP als überprüfbare Zahl.
 class _DonationCounter extends ConsumerWidget {

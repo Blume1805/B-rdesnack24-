@@ -843,7 +843,6 @@ class _PlanCard extends StatelessWidget {
   }
 }
 
-
 /// Anreißer fürs Empfehlungsprogramm im Abo-Bereich.
 class _ReferralTeaser extends StatelessWidget {
   const _ReferralTeaser({required this.onTap});
@@ -891,7 +890,6 @@ class _ReferralTeaser extends StatelessWidget {
   }
 }
 
-
 /// Drei Vertrauensbeweise als Zeile — kurz genug, um erkannt statt
 /// gelesen zu werden.
 class _TrustRow extends StatelessWidget {
@@ -901,7 +899,8 @@ class _TrustRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        _TrustItem(icon: Icons.event_available_outlined, label: 'Jederzeit\nkündbar'),
+        _TrustItem(
+            icon: Icons.event_available_outlined, label: 'Jederzeit\nkündbar'),
         SizedBox(width: AppSpacing.s2),
         _TrustItem(icon: Icons.block_outlined, label: 'Keine\nWerbung'),
         SizedBox(width: AppSpacing.s2),

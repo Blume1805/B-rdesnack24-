@@ -71,7 +71,8 @@ class ReferralEntry extends Equatable {
 
   /// Was in der Historie in der Spalte „Belohnung" steht.
   String get rewardLabel => switch (status) {
-        ReferralStatus.rewarded => '+$months ${months == 1 ? 'Monat' : 'Monate'}',
+        ReferralStatus.rewarded =>
+          '+$months ${months == 1 ? 'Monat' : 'Monate'}',
         ReferralStatus.qualified => 'Wartet auf Fristablauf',
         ReferralStatus.registered => 'Wartet auf Abo',
         ReferralStatus.rejected => '—',

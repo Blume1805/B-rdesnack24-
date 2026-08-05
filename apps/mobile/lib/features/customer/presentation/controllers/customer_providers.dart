@@ -262,8 +262,7 @@ class ReferralActions {
   final Ref _ref;
 
   Future<String> ensureCode() async {
-    final res =
-        await _ref.read(supabaseClientProvider).rpc('my_referral_code');
+    final res = await _ref.read(supabaseClientProvider).rpc('my_referral_code');
     _ref.invalidate(myReferralStatusProvider);
     return res as String;
   }

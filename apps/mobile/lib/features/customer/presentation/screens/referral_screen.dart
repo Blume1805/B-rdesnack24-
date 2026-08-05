@@ -412,9 +412,7 @@ class _ProgressCard extends StatelessWidget {
               Expanded(
                 child: _CountTile(
                   value: status.monthsTotal,
-                  label: status.monthsTotal == 1
-                      ? 'Freimonat'
-                      : 'Freimonate',
+                  label: status.monthsTotal == 1 ? 'Freimonat' : 'Freimonate',
                 ),
               ),
             ],
@@ -512,8 +510,7 @@ class _HistoryCard extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < status.history.length; i++) ...[
-            if (i > 0)
-              const Divider(height: 1, color: AppColors.borderSubtle),
+            if (i > 0) const Divider(height: 1, color: AppColors.borderSubtle),
             _HistoryRow(entry: status.history[i]),
           ],
         ],
@@ -572,8 +569,8 @@ class _HistoryRow extends StatelessWidget {
                 Text(
                   '${entry.status.label} · '
                   '${Formatters.date(entry.registeredAt)}',
-                  style:
-                      AppTypography.body(size: 11.5, color: AppColors.textMuted),
+                  style: AppTypography.body(
+                      size: 11.5, color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -605,8 +602,7 @@ class _RewardsCard extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < status.rewards.length; i++) ...[
-            if (i > 0)
-              const Divider(height: 1, color: AppColors.borderSubtle),
+            if (i > 0) const Divider(height: 1, color: AppColors.borderSubtle),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s4,
