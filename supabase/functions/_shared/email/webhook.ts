@@ -46,18 +46,45 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /// Nimmt das Secret in der Form, in der Supabase es ausgibt
-/// (`v1,whsec_<base64>`), und liefert die rohen Schlüsselbytes.
-export function parseHookSecret(secret: string): Uint8Array {
-  const trimmed = secret.trim();
+/// (`v1,whsec_<base64>`), und liefert die rohen Schlüsselbytes — je
+/// hinterlegtem Schlüssel einen.
+///
+/// **Mehrere Schlüssel sind zulässig.** Standard Webhooks sieht für den
+/// Schlüsselwechsel mehrere durch Leerzeichen getrennte Secrets vor, und
+/// Supabase gibt sie genauso aus. Die frühere Fassung nahm stumpf alles
+/// nach dem ERSTEN `whsec_` — bei zwei Schlüsseln landete damit
+/// `AAA v1,whsec_BBB` im base64-Decoder, der daran scheitert. Das Ergebnis
+/// war ein 401 mit der Begründung „kein gültiges Base64", während in der
+/// Oberfläche ein völlig korrektes Secret stand.
+export function parseHookSecrets(secret: string): Uint8Array[] {
+  const teile = secret.trim().split(/\s+/).filter((t) => t.length > 0);
+  if (teile.length === 0) throw new WebhookError("Hook-Secret ist leer");
+
   const marker = "whsec_";
-  const at = trimmed.indexOf(marker);
-  const b64 = at >= 0 ? trimmed.slice(at + marker.length) : trimmed;
-  if (!b64) throw new WebhookError("Hook-Secret ist leer");
-  try {
-    return base64ToBytes(b64);
-  } catch {
+  const keys: Uint8Array[] = [];
+  for (const teil of teile) {
+    const at = teil.indexOf(marker);
+    const b64 = at >= 0 ? teil.slice(at + marker.length) : teil;
+    if (!b64) continue;
+    try {
+      keys.push(base64ToBytes(b64));
+    } catch {
+      // Einen unbrauchbaren Teil überspringen statt alles zu verwerfen —
+      // sonst macht ein alter, kaputter Zweitschlüssel den gültigen ersten
+      // wirkungslos.
+      continue;
+    }
+  }
+  if (keys.length === 0) {
     throw new WebhookError("Hook-Secret ist kein gültiges Base64");
   }
+  return keys;
+}
+
+/// Wie viele Schlüssel im konfigurierten Wert stecken. Nur für die
+/// Diagnose — verrät nichts über den Inhalt.
+export function hookSecretCount(secret: string): number {
+  return (secret.match(/whsec_/g) ?? []).length;
 }
 
 /// Prüft die Signatur der Anfrage. Wirft [WebhookError], wenn etwas nicht
@@ -85,26 +112,31 @@ export async function verifyWebhookSignature(opts: {
     throw new WebhookError("Zeitstempel außerhalb des zulässigen Fensters");
   }
 
-  const key = await crypto.subtle.importKey(
-    "raw",
-    parseHookSecret(opts.secret) as unknown as ArrayBuffer,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
   const signed = `${id}.${timestamp}.${opts.payload}`;
-  const mac = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(signed) as unknown as ArrayBuffer,
-  );
-  const expected = bytesToBase64(mac);
+  const daten = new TextEncoder().encode(signed) as unknown as ArrayBuffer;
 
-  // Der Header kann mehrere Signaturen enthalten (Schlüsselwechsel).
-  // Eine passende genügt.
-  const ok = signatureHeader
+  // Sowohl die Schlüssel als auch die Signaturen können mehrfach vorliegen —
+  // beides sind Vorkehrungen für den Schlüsselwechsel. Eine einzige
+  // Übereinstimmung genügt.
+  const kandidaten = signatureHeader
     .split(" ")
     .filter((part) => part.startsWith("v1,"))
-    .some((part) => timingSafeEqual(part.slice(3), expected));
+    .map((part) => part.slice(3));
+
+  let ok = false;
+  for (const rohschluessel of parseHookSecrets(opts.secret)) {
+    const key = await crypto.subtle.importKey(
+      "raw",
+      rohschluessel as unknown as ArrayBuffer,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const expected = bytesToBase64(await crypto.subtle.sign("HMAC", key, daten));
+    if (kandidaten.some((k) => timingSafeEqual(k, expected))) {
+      ok = true;
+      break;
+    }
+  }
   if (!ok) throw new WebhookError("Signatur stimmt nicht");
 }

@@ -30,9 +30,56 @@ import {
   buildVerifyUrl,
 } from "../_shared/email/templates/auth.ts";
 import { mailInhalt } from "../_shared/email/db_templates.ts";
-import { verifyWebhookSignature, WebhookError } from "../_shared/email/webhook.ts";
+import {
+  hookSecretCount,
+  verifyWebhookSignature,
+  WebhookError,
+} from "../_shared/email/webhook.ts";
 
 const TAG = "auth-email-hook";
+
+/// Schreibt den Ausgang der Signaturprüfung nach `public.auth_hook_diagnose`.
+///
+/// Warum eine Tabelle und nicht `console.error`: Am 05.08.2026 war die
+/// Registrierung tot, und die Suche dauerte Stunden, weil beide naheliegenden
+/// Quellen nichts hergaben. GoTrue schreibt JEDEN Hook-Fehler in die Meldung
+/// „Hook requires authorization token" um — unabhängig davon, was der Hook
+/// wirklich gesagt hat. Und das Aufruf-Protokoll der Edge Functions hat
+/// Lücken: Ein nachweislich erfolgter Aufruf tauchte dort nicht auf.
+///
+/// Die Datenbank war am Ende die einzige Stelle, in die man verlässlich
+/// hineinsehen konnte. Also schreibt die Function dorthin.
+///
+/// Bewusst ohne Geheimnisse: nur Längen, Anzahlen und der Grund im Klartext.
+/// Schlägt das Schreiben fehl, wird das ignoriert — eine Diagnose darf den
+/// kritischen Pfad niemals zusätzlich blockieren.
+async function diagnose(row: {
+  ok: boolean;
+  grund?: string;
+  secret_laenge?: number;
+  secret_anzahl?: number;
+  sig_anzahl?: number;
+  ts_versatz?: number;
+  aktion?: string;
+}): Promise<void> {
+  try {
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !key) return;
+    await fetch(`${url}/rest/v1/auth_hook_diagnose`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(row),
+    });
+  } catch {
+    // absichtlich still
+  }
+}
 
 interface HookPayload {
   user: { email?: string; new_email?: string };
@@ -75,13 +122,29 @@ Deno.serve(async (req) => {
   }
 
   const payload = await req.text();
+
+  // Kennzahlen für die Diagnose, bevor geprüft wird — sie sollen auch dann
+  // vorliegen, wenn die Prüfung wirft.
+  const sigHeader = req.headers.get("webhook-signature") ?? "";
+  const tsHeader = Number(req.headers.get("webhook-timestamp"));
+  const kennzahlen = {
+    secret_laenge: secret.length,
+    secret_anzahl: hookSecretCount(secret),
+    sig_anzahl: sigHeader.split(" ").filter((p) => p.startsWith("v1,")).length,
+    ts_versatz: Number.isFinite(tsHeader)
+      ? Math.round(Date.now() / 1000 - tsHeader)
+      : undefined,
+  };
+
   try {
     await verifyWebhookSignature({ payload, headers: req.headers, secret });
   } catch (e) {
     const msg = e instanceof WebhookError ? e.message : "Signaturprüfung fehlgeschlagen";
     console.error(`[${TAG}] ${msg}`);
+    await diagnose({ ok: false, grund: msg, ...kennzahlen });
     return jsonError(msg, 401);
   }
+  await diagnose({ ok: true, ...kennzahlen });
 
   let body: HookPayload;
   try {

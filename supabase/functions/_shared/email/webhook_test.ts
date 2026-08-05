@@ -4,7 +4,8 @@ import {
   assertRejects,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  parseHookSecret,
+  hookSecretCount,
+  parseHookSecrets,
   verifyWebhookSignature,
   WebhookError,
 } from "./webhook.ts";
@@ -20,7 +21,7 @@ const SECRET = `v1,whsec_${SECRET_B64}`;
 const NOW = 1_785_650_000;
 
 async function sign(payload: string, id: string, ts: number): Promise<string> {
-  const raw = parseHookSecret(SECRET);
+  const raw = parseHookSecrets(SECRET)[0];
   const key = await crypto.subtle.importKey(
     "raw",
     raw as unknown as ArrayBuffer,
@@ -47,18 +48,48 @@ function headers(id: string, ts: number, sig: string): Headers {
   });
 }
 
-Deno.test("parseHookSecret akzeptiert das Supabase-Format und nacktes Base64", () => {
-  assertEquals(parseHookSecret(SECRET), parseHookSecret(SECRET_B64));
+Deno.test("parseHookSecrets akzeptiert das Supabase-Format und nacktes Base64", () => {
+  assertEquals(parseHookSecrets(SECRET), parseHookSecrets(SECRET_B64));
 });
 
-Deno.test("parseHookSecret lehnt leeres Secret ab", () => {
+Deno.test("parseHookSecrets lehnt leeres Secret ab", () => {
   let threw = false;
   try {
-    parseHookSecret("v1,whsec_");
+    parseHookSecrets("v1,whsec_");
   } catch (e) {
     threw = e instanceof WebhookError;
   }
   assert(threw, "leeres Secret wurde akzeptiert");
+});
+
+// Der Fehler, der am 05.08.2026 Registrierung und Passwort-Reset lahmlegte:
+// Supabase erlaubt beim Schlüsselwechsel mehrere Secrets nebeneinander. Die
+// alte Fassung nahm alles nach dem ERSTEN `whsec_` und schob damit
+// "AAA v1,whsec_BBB" in den base64-Decoder — der scheiterte, und der Hook
+// antwortete 401, obwohl in der Oberfläche ein korrektes Secret stand.
+Deno.test("parseHookSecrets liest mehrere Schlüssel nebeneinander", () => {
+  const zweiter = "endZZWl0ZXItc2NobHVlc3NlbC1mdWVyLWRlbi1UZXN0";
+  const keys = parseHookSecrets(`${SECRET} v1,whsec_${zweiter}`);
+  assertEquals(keys.length, 2);
+  assertEquals(keys[0], parseHookSecrets(SECRET)[0]);
+});
+
+Deno.test("Signatur des ZWEITEN Schlüssels wird ebenfalls akzeptiert", async () => {
+  const payload = '{"user":{"email":"a@b.de"}}';
+  const sig = await sign(payload, "msg_rot", NOW);
+  // Der gültige Schlüssel steht an zweiter Stelle, davor ein anderer.
+  await verifyWebhookSignature({
+    payload,
+    headers: headers("msg_rot", NOW, sig),
+    secret: `v1,whsec_YWx0ZXItdW5kLXVuZ3VlbHRpZ2VyLXNjaGx1ZXNzZWw= ${SECRET}`,
+    nowSeconds: NOW,
+  });
+});
+
+Deno.test("hookSecretCount zählt die hinterlegten Schlüssel", () => {
+  assertEquals(hookSecretCount(SECRET), 1);
+  assertEquals(hookSecretCount(`${SECRET} ${SECRET}`), 2);
+  assertEquals(hookSecretCount(""), 0);
 });
 
 Deno.test("gültige Signatur wird angenommen", async () => {
