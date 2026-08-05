@@ -225,11 +225,16 @@ jobs:
               continue
             fi
             echo "── rolle aus: $F"
-            # --no-verify-jwt NICHT pauschal setzen. Die Einstellung je
-            # Function bleibt die, die in Supabase hinterlegt ist; nur
-            # email-inbound und iot-webhook laufen bewusst ohne JWT, weil
-            # ein Webhook sich nicht anmelden kann, und die tragen ihre
-            # Prüfung selbst (HMAC).
+            # --no-verify-jwt NICHT pauschal setzen — ein solcher Schalter
+            # würde die Unterscheidung einebnen. Massgeblich ist
+            # `supabase/config.toml`, wo verify_jwt je Function steht.
+            #
+            # Das war bis zum 05.08.2026 anders und hat Schaden angerichtet:
+            # Ohne Eintrag in config.toml nimmt das CLI seinen Standard
+            # (verify_jwt = true). auth-email-hook lief dadurch zeitweise
+            # mit JWT-Pflicht, Supabase Auth kam nicht durch den Torwächter
+            # ("Hook requires authorization token"), und Registrierung wie
+            # Passwort-Reset waren tot.
             supabase functions deploy "$F" --project-ref "$PROJECT_REF"
           done
 

@@ -54,3 +54,95 @@ file_size_limit = "25MiB"
 
 [edge_runtime]
 enabled = true
+
+# =============================================================================
+# verify_jwt je Function — ausdrücklich, nicht dem Zufall überlassen
+# -----------------------------------------------------------------------------
+# Anlass (05.08.2026): `auth-email-hook` lief zeitweise mit
+# `verify_jwt = true`. Supabase Auth kam damit nicht durch den Torwächter und
+# meldete „500: Hook requires authorization token" — ein Webhook kann keinen
+# JWT mitschicken. Registrierung und Passwort-Reset waren dadurch tot, und die
+# Fehlersuche lief lange in die falsche Richtung, weil die Meldung nach einem
+# Signaturproblem aussah.
+#
+# Ursache: Ohne `[functions.<name>]`-Eintrag nimmt das CLI beim Ausrollen
+# seinen Standard — und der ist `verify_jwt = true`. Der Ablauf in
+# `.github/workflows/deploy-functions.yaml` setzt bewusst kein
+# `--no-verify-jwt`, weil ein pauschaler Schalter die Unterscheidung
+# einebnen würde. Diese Datei ist der richtige Ort dafür: eine Zeile je
+# Function, im Repository nachlesbar und beim nächsten Ausrollen verbindlich.
+#
+# `verify_jwt = false` bedeutet NICHT „ungeschützt". Diese fünf tragen ihre
+# Zugangsprüfung selbst, weil ihre Aufrufer sich nicht anmelden können.
+# =============================================================================
+
+# Supabase Auth ruft den Hook ohne JWT auf. Geschützt per HMAC-Signatur nach
+# Standard Webhooks (`SEND_EMAIL_HOOK_SECRET`), Zeitfenster 300 s.
+[functions.auth-email-hook]
+verify_jwt = false
+
+# Resend liefert Posteingang per Webhook, ebenfalls ohne Anmeldung.
+# Geschützt per HMAC (`INBOUND_WEBHOOK_SECRET`).
+[functions.email-inbound]
+verify_jwt = false
+
+# Automaten-Telemetrie meldet sich mit einem Geräteschlüssel, nicht mit
+# einem Benutzer-JWT.
+[functions.iot-webhook]
+verify_jwt = false
+
+# Kündigungsweg nach § 312k BGB: Er muss OHNE Anmeldung funktionieren.
+# Ist doch ein Authorization-Header dabei, wird die Kündigung dem Konto
+# zugeordnet — die Function wertet das selbst aus.
+[functions.subscription-cancel]
+verify_jwt = false
+
+# Wetterabgleich, per Zeitplan aufgerufen.
+[functions.weather-sync]
+verify_jwt = false
+
+# ── Alle übrigen verlangen einen gültigen JWT ────────────────────────────────
+[functions.account-deletion-request]
+verify_jwt = true
+[functions.approval-notify]
+verify_jwt = true
+[functions.document-finalize]
+verify_jwt = true
+[functions.documents-init-templates]
+verify_jwt = true
+[functions.documents-install-branded-set]
+verify_jwt = true
+[functions.documents-install-haccp-set]
+verify_jwt = true
+[functions.documents-zip-export]
+verify_jwt = true
+[functions.docusign-fetch-signature]
+verify_jwt = true
+[functions.email-export]
+verify_jwt = true
+[functions.email-send]
+verify_jwt = true
+[functions.finance-balance-sync]
+verify_jwt = true
+[functions.finance-export-pdf]
+verify_jwt = true
+[functions.install-signature]
+verify_jwt = true
+[functions.invite-user]
+verify_jwt = true
+[functions.merge-employee-signature]
+verify_jwt = true
+[functions.nayax-webhook]
+verify_jwt = true
+[functions.protocol-export-pdf]
+verify_jwt = true
+[functions.receipt-pdf]
+verify_jwt = true
+[functions.send-push]
+verify_jwt = true
+[functions.sevdesk-sync]
+verify_jwt = true
+[functions.signature-retouch]
+verify_jwt = true
+[functions.subscription-choose]
+verify_jwt = true
