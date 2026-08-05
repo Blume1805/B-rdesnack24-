@@ -27,20 +27,49 @@ jobs:
         run: flutter pub get
       - name: Lokalisierung generieren
         run: flutter gen-l10n
+      # `id: setup` ist der letzte Einrichtungsschritt. Die drei Prüfungen
+      # darunter hängen daran — siehe Begründung dort.
       - name: Codegen (build_runner, sofern konfiguriert)
+        id: setup
         run: |
           if grep -q build_runner pubspec.yaml; then
             dart run build_runner build --delete-conflicting-outputs
           else
             echo "Keine Codegen-Abhängigkeit – übersprungen."
           fi
+
+      # ------------------------------------------------------------------
+      # Die drei Prüfungen laufen unabhängig voneinander.
+      #
+      # Vorher brach der Ablauf beim ersten Fehler ab. Am 03.08.2026 hat ein
+      # Formatierungsbefund an sechs Dateien deshalb zwei Tage lang verdeckt,
+      # dass `analyze` drei weitere Stellen zu melden hatte — und die Tests
+      # liefen in dieser Zeit überhaupt nicht. Man repariert eine Sache,
+      # pusht, wartet, und bekommt die nächste serviert: eine Runde je
+      # Befund.
+      #
+      # `!cancelled()` statt `always()`: Ein abgebrochener Lauf soll auch
+      # wirklich abbrechen. Und `steps.setup.outcome == 'success'` davor,
+      # weil Prüfungen ohne aufgelöste Abhängigkeiten nur Folgefehler
+      # ausspucken — dann ist Schweigen nützlicher.
+      #
+      # Der Lauf wird trotzdem rot, sobald eine der drei fehlschlägt. Es
+      # geht ums Sehen, nicht ums Durchwinken.
+      # ------------------------------------------------------------------
       - name: Format-Check
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: flutter analyze
       - name: Tests (mit Coverage)
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: flutter test --coverage
+
       - name: Coverage-Artefakt
+        # Auch wenn Tests fehlschlagen: Die Abdeckung der bestandenen Tests
+        # ist dann besonders interessant.
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage
