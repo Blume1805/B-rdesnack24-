@@ -88,7 +88,11 @@ export async function sendMail(opts: {
   /// Präfix für die Logzeile, üblicherweise der Function-Name.
   tag: string;
 }): Promise<SendResult> {
-  const key = Deno.env.get("RESEND_API_KEY");
+  // `trim()` ist Hygiene, kein Schutz: Umschliessende Leerzeichen entfernt
+  // die Header-Verarbeitung ohnehin selbst (nachgemessen). Ein Umbruch
+  // MITTEN im Wert lässt `fetch` dagegen sofort werfen, noch vor jedem
+  // Netzverkehr — dagegen hilft nur der gefangene Aufruf weiter unten.
+  const key = Deno.env.get("RESEND_API_KEY")?.trim();
   const to = Array.isArray(opts.to) ? opts.to : [opts.to];
 
   if (!key) {
@@ -100,22 +104,44 @@ export async function sendMail(opts: {
     return "dev";
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: mailConfig.from,
+  // Der Aufruf ist abgesichert, weil die Zusage oben — „wirft bewusst
+  // nicht" — sonst nicht gilt. `fetch` wirft bei unbrauchbarem Header,
+  // DNS-/TLS-Problem oder Abbruch der Verbindung; ungefangen reisst das
+  // den Aufrufer mit, obwohl dessen fachlicher Vorgang längst gespeichert
+  // ist. Genau das ist am 05.08.2026 passiert: Der Passwort-Reset lief in
+  // einen 500, `email_log` blieb leer und bei Resend kam nie etwas an —
+  // also gab es keine einzige Stelle, an der man den Grund hätte ablesen
+  // können. Ein gefangener Wurf landet dagegen als `failed` mit Wortlaut
+  // im Protokoll.
+  let res: Response;
+  let raw: string;
+  try {
+    res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: mailConfig.from,
+        to,
+        subject: opts.subject,
+        html: opts.html,
+        text: opts.text,
+      }),
+    });
+    raw = await res.text();
+  } catch (e) {
+    const grund = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error(`[${opts.tag}] resend_unerreichbar`, grund);
+    await logMail({
+      ...opts,
       to,
-      subject: opts.subject,
-      html: opts.html,
-      text: opts.text,
-    }),
-  });
-
-  const raw = await res.text();
+      status: "failed",
+      error: `Aufruf an Resend fehlgeschlagen — ${grund}`.slice(0, 2000),
+    });
+    return "failed";
+  }
 
   if (!res.ok) {
     console.error(`[${opts.tag}] resend_error`, raw);

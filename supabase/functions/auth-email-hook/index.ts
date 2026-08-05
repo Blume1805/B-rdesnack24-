@@ -170,7 +170,12 @@ Deno.serve(async (req) => {
         text: notification.text,
         tag: `${TAG}/${action}`,
       });
-      return status === "failed" ? jsonError("Versand fehlgeschlagen", 500) : ok();
+      if (status === "failed") {
+        await diagnose({ ok: false, grund: "Versand fehlgeschlagen (Resend)", aktion: action });
+        return jsonError("Versand fehlgeschlagen", 500);
+      }
+      await diagnose({ ok: true, grund: `versendet (${status})`, aktion: action });
+      return ok();
     }
 
     // --- Adresswechsel: bis zu zwei Mails ---------------------------------
@@ -265,10 +270,21 @@ Deno.serve(async (req) => {
       text: mail.text,
       tag: `${TAG}/${action}`,
     });
-    return status === "failed" ? jsonError("Versand fehlgeschlagen", 500) : ok();
+    if (status === "failed") {
+      await diagnose({ ok: false, grund: "Versand fehlgeschlagen (Resend)", aktion: action });
+      return jsonError("Versand fehlgeschlagen", 500);
+    }
+    await diagnose({ ok: true, grund: `versendet (${status})`, aktion: action });
+    return ok();
   } catch (e) {
+    // Der Wortlaut der Ausnahme gehört in die Diagnose, nicht nur in eine
+    // Konsole, die von aussen niemand lesen kann. Am 05.08.2026 stand die
+    // Registrierung stundenlang still, weil an dieser Stelle nur
+    // `console.error` stand und GoTrue davon nichts weitergibt — der
+    // Aufrufer sieht ausschliesslich "Unexpected status code 500".
     const msg = e instanceof Error ? e.message : String(e);
     console.error(`[${TAG}] ${msg}`);
+    await diagnose({ ok: false, grund: `Ausnahme: ${msg}`.slice(0, 500), aktion: action });
     return jsonError("Unerwarteter Fehler beim Mailversand", 500);
   }
 });
