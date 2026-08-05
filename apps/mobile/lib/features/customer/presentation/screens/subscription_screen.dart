@@ -900,7 +900,9 @@ class _TrustRow extends StatelessWidget {
     return const Row(
       children: [
         _TrustItem(
-            icon: Icons.event_available_outlined, label: 'Jederzeit\nkündbar'),
+          icon: Icons.event_available_outlined,
+          label: 'Jederzeit\nkündbar',
+        ),
         SizedBox(width: AppSpacing.s2),
         _TrustItem(icon: Icons.block_outlined, label: 'Keine\nWerbung'),
         SizedBox(width: AppSpacing.s2),

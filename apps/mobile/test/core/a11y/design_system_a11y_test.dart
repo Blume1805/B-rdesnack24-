@@ -27,7 +27,8 @@ Future<void> pumpOnLight(WidgetTester tester, Widget child) async {
       home: Scaffold(
         backgroundColor: AppColors.surfaceCard,
         body: Center(
-            child: Padding(padding: const EdgeInsets.all(16), child: child)),
+          child: Padding(padding: const EdgeInsets.all(16), child: child),
+        ),
       ),
     ),
   );

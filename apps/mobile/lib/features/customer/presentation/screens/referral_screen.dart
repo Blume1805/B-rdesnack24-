@@ -570,7 +570,9 @@ class _HistoryRow extends StatelessWidget {
                   '${entry.status.label} · '
                   '${Formatters.date(entry.registeredAt)}',
                   style: AppTypography.body(
-                      size: 11.5, color: AppColors.textMuted),
+                    size: 11.5,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
