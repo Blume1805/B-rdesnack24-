@@ -10,7 +10,7 @@
 //
 // Ein Kommentar ist keine Zusicherung. Ein Test ist eine.
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { sendMail } from "./send.ts";
+import { headerProblem, sendMail } from "./send.ts";
 
 /// Tauscht `fetch` und stellt es danach wieder her.
 async function mitFetch(
@@ -98,6 +98,46 @@ Deno.test("sendMail ohne Schlüssel: dev statt Versand", async () => {
     },
   );
   assert(!gerufen, "ohne Schlüssel darf Resend nicht gerufen werden");
+});
+
+Deno.test("headerProblem findet genau die Zeichen, an denen fetch wirft", () => {
+  assertEquals(headerProblem("re_abc123"), null);
+  // Latin-1 ist als Header-Wert zulässig — hier darf nichts gemeldet werden.
+  assertEquals(headerProblem("re_abcä"), null);
+
+  /// Verlangt einen Befund und gibt ihn zurück.
+  const befund = (wert: string): string => {
+    const p = headerProblem(wert);
+    if (p === null) throw new Error(`erwarteter Befund blieb aus`);
+    return p;
+  };
+
+  // Das unsichtbare Zeichen, das ein verunglücktes Einfügen hinterlässt.
+  const zwsp = befund("re_ab​c");
+  assertStringIncludes(zwsp, "Stelle 6 von 7");
+  assertStringIncludes(zwsp, "U+200B");
+
+  assertStringIncludes(befund("re_a\nb"), "Steuerzeichen");
+
+  // Das Geheimnis selbst darf in keiner Meldung auftauchen.
+  assert(!zwsp.includes("re_ab"));
+});
+
+Deno.test("sendMail schickt einen unbrauchbaren Schlüssel gar nicht erst los", async () => {
+  Deno.env.set("RESEND_API_KEY", "re_ab​c");
+  Deno.env.delete("SUPABASE_URL");
+
+  let gerufen = false;
+  await mitFetch(
+    () => {
+      gerufen = true;
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    },
+    async () => {
+      assertEquals(await sendMail(mail), "failed");
+    },
+  );
+  assert(!gerufen, "unbrauchbarer Schlüssel darf keinen Aufruf ausloesen");
 });
 
 Deno.test("sendMail reicht die Resend-Id weiter", async () => {

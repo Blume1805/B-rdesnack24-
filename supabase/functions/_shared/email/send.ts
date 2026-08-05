@@ -17,6 +17,32 @@ export interface MailContent {
 /// "failed" — Resend hat abgelehnt (wird geloggt, wirft nicht)
 export type SendResult = "sent" | "dev" | "failed";
 
+/// Taugt der Wert als HTTP-Header-Wert?
+///
+/// Liefert `null`, wenn alles in Ordnung ist, sonst eine Beschreibung des
+/// Problems — ausdrücklich OHNE den Wert selbst, weil hier ein Geheimnis
+/// durchläuft. Stelle und Codepunkt genügen; ein Zeichen, das hier
+/// auffällt, gehört ohnehin nicht zu einem gültigen Schlüssel.
+///
+/// Anlass (05.08.2026): Im hinterlegten RESEND_API_KEY steckte ein Zeichen
+/// jenseits von Latin-1. `fetch` wirft dann beim Bauen der Anfrage mit
+/// „not a valid ByteString" — einer Meldung, die weder den Header noch die
+/// Ursache nennt. Registrierung und Passwort-Reset standen still, und der
+/// Weg von der Meldung zum eigentlichen Fehler (ein verunglücktes Einfügen
+/// im Dashboard) war unnötig weit.
+export function headerProblem(wert: string): string | null {
+  for (let i = 0; i < wert.length; i++) {
+    const c = wert.charCodeAt(i);
+    const stelle = `Stelle ${i + 1} von ${wert.length}`;
+    const punkt = `U+${c.toString(16).toUpperCase().padStart(4, "0")}`;
+    if (c > 0xFF) return `Zeichen ausserhalb Latin-1 an ${stelle} (${punkt})`;
+    if (c === 0x00 || c === 0x0A || c === 0x0D) {
+      return `Steuerzeichen an ${stelle} (${punkt})`;
+    }
+  }
+  return null;
+}
+
 /// Schreibt eine Zeile nach `public.email_log`.
 ///
 /// Warum hier und nicht in den einzelnen Functions: Weil jede ausgehende
@@ -102,6 +128,20 @@ export async function sendMail(opts: {
     );
     await logMail({ ...opts, to, status: "dev" });
     return "dev";
+  }
+
+  // Den Schlüssel prüfen, bevor er in einen Header geht. Sonst wirft
+  // `fetch` mit „not a valid ByteString" — ohne zu sagen, welcher Header
+  // gemeint ist oder woran es liegt. Der gefangene Aufruf unten würde das
+  // zwar protokollieren, aber niemand könnte etwas damit anfangen.
+  const schluesselProblem = headerProblem(key);
+  if (schluesselProblem) {
+    const grund = `RESEND_API_KEY ist als Header unbrauchbar: ${schluesselProblem}. ` +
+      "Der Schlüssel wurde vermutlich verunglückt eingefügt — im " +
+      "Supabase-Dashboard unter Edge Functions → Secrets neu eintragen.";
+    console.error(`[${opts.tag}] ${grund}`);
+    await logMail({ ...opts, to, status: "failed", error: grund });
+    return "failed";
   }
 
   // Der Aufruf ist abgesichert, weil die Zusage oben — „wirft bewusst
