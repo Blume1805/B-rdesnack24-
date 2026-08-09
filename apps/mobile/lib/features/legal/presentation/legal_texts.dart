@@ -4,8 +4,29 @@
 /// Vor Go-Live müssen sie durch einen Fachanwalt für IT-/Datenschutzrecht
 /// geprüft und final ergänzt werden (insbesondere gesetzlicher Vertreter,
 /// Steuernummer, ggf. USt-ID, Berufshaftpflicht usw. gemäß § 5 DDG).
+///
+/// ## Datenschutzerklärung: Stand v2 (09.08.2026)
+///
+/// Die Fassung v1 beschrieb vier Verarbeitungen, die es nachweislich nicht
+/// gibt — Push-Gerätetokens, Nutzungsanalyse, Standortabfrage und
+/// Empfehlungen — und nannte mit Firebase Cloud Messaging und Google Maps
+/// zwei Empfänger, die nirgends eingebunden sind. Umgekehrt fehlten die
+/// Empfänger, die tatsächlich Daten sehen (Resend, GitHub Pages, sevDesk,
+/// DocuSign), die Drittlandübermittlung in die USA und vor allem die
+/// Offenlegung des Profilings für individuelle Angebote.
+///
+/// Eine Datenschutzerklärung, die nicht vorhandene Verarbeitungen aufzählt,
+/// ist genauso falsch wie eine, die vorhandene verschweigt: Sie verlangt
+/// Einwilligungen ins Leere und verdeckt gleichzeitig, was wirklich
+/// geschieht. v2 beschreibt ausschliesslich das, was im Code, in der
+/// Datenbank und in den ausgerollten Functions nachgewiesen wurde.
+///
+/// Grundlage ist der technische Ist-Zustandsbericht vom 09.08.2026. Wird
+/// eine der dort genannten Funktionen aktiviert — insbesondere Push,
+/// Analytics oder ein Zahlungsdienstleister —, muss dieser Text VOR der
+/// Aktivierung nachgezogen werden.
 abstract final class LegalTexts {
-  static const version = 'v1 · 2026-06';
+  static const version = 'v2 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -44,75 +65,245 @@ verantwortlich.
 
   // ── Datenschutzerklärung (Art. 12/13 DSGVO, § 25 TDDDG) ────────────────────
   static const privacy = '''
-Datenschutzerklärung (Vorlage · $version)
+Datenschutzerklärung ($version)
 
-Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist die Bördesnack24 GbR (Kontakt siehe
-Impressum).
+Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist die Bördesnack24 GbR,
+Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen (Kontakt siehe Impressum).
 
-1) Verarbeitete Datenkategorien und Zwecke
+Wir haben diese Erklärung entlang des tatsächlichen Systems geschrieben, nicht entlang
+einer Vorlage. Sie beschreibt deshalb auch ausdrücklich, was wir NICHT tun — siehe
+Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf Vorrat.
 
-  a) Konto- und Kontaktdaten (Name, E-Mail, Telefon, Rolle)
-     Zweck: Registrierung, Authentifizierung, Zugriffssteuerung.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertrag/vorvertragliche Maßnahmen).
 
-  b) Kundenprofil, individuelle Preise, Kaufhistorie, Empfehlungen
-     Zweck: Vertragsdurchführung, individuelle Angebote.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
+1) WELCHE DATEN WIR VERARBEITEN
 
-  c) HACCP-/GoBD-Protokolle (Temperatur, Reinigung, Vernichtung, Wartung,
-     Geldentnahme, Belehrungen), Audit-Log
-     Zweck: Erfüllung gesetzlicher Pflichten (LMHV, HACCP, AO, HGB).
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit den o. g. Gesetzen.
+  a) Kontodaten
+     E-Mail-Adresse, Name, optional Telefonnummer, Geburtsdatum, optional Anrede.
+     Zweck: Konto anlegen, anmelden, Zugriff steuern.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertrag).
 
-  d) Push-Gerätetokens (nur nach Einwilligung)
-     Zweck: App-Benachrichtigungen.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
+     Zum Geburtsdatum: Wir erheben es als Altersnachweis, weil kostenpflichtige Abos
+     Volljährigkeit voraussetzen, und für den Geburtstagsgutschein. Es lässt sich nach
+     der Registrierung technisch nicht mehr ändern — die Datenbank weist jede Änderung
+     zurück. Ist es falsch erfasst, korrigieren wir es auf Anfrage von Hand
+     (Art. 16 DSGVO).
 
-  e) Nutzungsanalyse (nur nach Einwilligung, aktuell deaktiviert)
-     Zweck: Produktverbesserung.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
+  b) Kundenstammdaten
+     Kundennummer sowie bei Geschäftskunden Firmenname, Rechnungsanschrift,
+     Steuernummer und Umsatzsteuer-Identifikationsnummer.
+     Zweck: Abrechnung und Rechnungsstellung.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b und lit. c DSGVO (§ 14 UStG).
 
-  f) Kartendarstellung / Standortabfrage (nur nach Einwilligung)
-     Zweck: Automatenfinder / Navigation.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
+  c) Kaufdaten
+     Gekaufte Produkte, Menge, Einzel- und Gesamtpreis, Zeitpunkt, Automat und die
+     Zahlungsart als Kategorie.
+     Zweck: Kaufabwicklung, digitaler Kassenbon, Buchhaltung.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b und lit. c DSGVO.
 
-  g) Diagnose-/Fehlerdaten (ohne personenbezogene Rohdaten)
-     Zweck: Stabilität und IT-Sicherheit.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
+     Bitte beachten: Weil zu jedem Kauf Automat und Uhrzeit gespeichert werden, lässt
+     sich daraus nachvollziehen, wann Sie an welchem Automaten waren. Das ist kein
+     Standortdatum Ihres Geräts — wir fragen Ihren Standort nie ab —, kann in der
+     Zusammenschau aber einen ähnlichen Aussagewert haben. Wir nennen das hier
+     ausdrücklich, weil es nicht auf der Hand liegt.
 
-2) Empfänger / Auftragsverarbeiter
+  d) Individuelle Angebote (Profiling)
+     Wir werten Ihre Kaufhistorie der letzten 90 Tage aus, um das von Ihnen am
+     häufigsten gekaufte Produkt zu ermitteln, und bieten Ihnen genau darauf einen
+     Rabatt an. Verwendet werden ausschliesslich Produkt und Menge Ihrer eigenen
+     Käufe aus diesem Zeitraum.
 
-  * Supabase (EU-Region, Hosting/Datenbank/Auth/Storage) — Auftragsverarbeitung gem. Art. 28 DSGVO.
-  * Firebase Cloud Messaging (Push) — nur nativ, nach Einwilligung.
-  * Google Maps (Kartenanzeige) — nur nach Einwilligung.
-  Weitergaben an Behörden erfolgen nur bei gesetzlicher Verpflichtung.
+     Der Rabatt beträgt fest 10 Prozent und ist für alle Kundinnen und Kunden gleich
+     hoch. Es entscheidet sich also nur, WELCHES Produkt vergünstigt wird — nicht, ob
+     oder wie stark. Haben Sie in den 90 Tagen nichts gekauft, wählen wir ein
+     zufälliges Produkt; dann findet keine Auswertung statt.
 
-3) Speicherdauer
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+     Kundenbindung und an einem Angebot, das zu Ihnen passt).
 
-  Vertrags-/Kontodaten: bis zur Vertragsbeendigung + gesetzliche Aufbewahrungsfristen.
-  Buchhaltung und Nachweise: 10 Jahre (§ 147 AO).
-  HACCP-Protokolle: gemäß VLÜA-Vorgaben.
-  Einwilligungen: bis Widerruf; Nachweisdokumentation im Audit-Log.
+     Sie können dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO) — formlos
+     an die im Impressum genannte Adresse. Danach erhalten Sie nur noch allgemeine
+     Angebote. Ein Nachteil entsteht Ihnen dadurch nicht.
 
-4) Ihre Rechte (DSGVO)
+  e) Geburtstags- und Jubiläumsgutscheine
+     Auf Grundlage Ihres Geburtsdatums beziehungsweise des Anmeldedatums.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO; Widerspruch wie unter d).
 
-  * Auskunft (Art. 15) — in der App: „Meine Daten exportieren"
-  * Berichtigung (Art. 16)
-  * Löschung (Art. 17) — in der App: „Kontolöschung beantragen".
-    Hinweis: Aufgrund handels- und steuerrechtlicher Aufbewahrungspflichten
-    (§§ 147 AO, 257 HGB) erfolgt die Löschung ggf. erst nach Ablauf dieser Fristen;
-    zwischenzeitlich erfolgt Sperrung/Anonymisierung.
-  * Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21)
-  * Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft.
-  * Beschwerde bei einer Aufsichtsbehörde (Art. 77), z. B. LfD Sachsen-Anhalt.
+  f) Produktbewertungen
+     Ausschliesslich eine Bewertungszahl zu einem Produkt. Wir speichern dazu keinen
+     Freitext, keinen Namen und keine IP-Adresse. Bewertungen werden nicht mit Ihrem
+     Namen veröffentlicht.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Sortimentsgestaltung).
 
-5) Sicherheit
-  Verschlüsselte Übertragung (TLS), Server-Standort EU, rollenbasierter Zugriff mit
-  Row-Level-Security, Audit-Trail, MFA vorbereitet.
+  g) Kontaktanfragen
+     Kategorie, Betreff und Nachrichtentext.
+     Zweck: Bearbeitung Ihres Anliegens.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b beziehungsweise lit. f DSGVO.
 
-6) Änderungen
-  Diese Erklärung ist eine Vorlage und wird vor Live-Betrieb durch einen Fachanwalt
-  finalisiert. Änderungen werden versioniert.
+  h) E-Mail-Versand
+     Wir versenden Systemnachrichten (Bestätigung der Registrierung, Passwort
+     zurücksetzen, Abo- und Kündigungsbestätigungen). Diese sind zur Vertragserfüllung
+     erforderlich, Art. 6 Abs. 1 lit. b DSGVO, teils gesetzlich vorgeschrieben
+     (§ 312k Abs. 2 BGB).
+
+     Werbliche E-Mails erhalten Sie nur mit Ihrer vorherigen Einwilligung, getrennt
+     nach Themen (Produktneuheiten, Aktionen, Geburtstagsgruss). Die Einwilligung ist
+     freiwillig, jederzeit über den Abmeldelink in jeder Werbemail oder in den
+     Kontoeinstellungen widerrufbar — und der Widerruf ist genauso einfach wie die
+     Erteilung. Wir dokumentieren Zeitpunkt und Wortlaut jeder Einwilligung als
+     Nachweis (Art. 7 Abs. 1 DSGVO). Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO,
+     § 7 Abs. 2 Nr. 2 UWG.
+
+  i) Protokolle
+     Ein Änderungsprotokoll hält fest, wer welchen Datensatz wann geändert hat,
+     einschliesslich des Standes vor und nach der Änderung. Ein Versandprotokoll hält
+     fest, welche E-Mail wann an wen mit welchem Inhalt verschickt wurde.
+     Zweck: Nachvollziehbarkeit, Missbrauchserkennung, Nachweis des Versands.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. f und lit. c DSGVO.
+
+  j) Betriebliche Nachweise (betrifft nur Beschäftigte und Gesellschafter)
+     HACCP- und Hygieneprotokolle, Belehrungen nach IfSG, Wartungs- und
+     Reinigungsnachweise, Buchhaltungsdaten, elektronische Unterschriften.
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit LMHV, IfSG, AO, HGB.
+
+
+2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)
+
+  Die App speichert Ihre Anmeldesitzung und Ihre Anzeigeeinstellungen lokal auf Ihrem
+  Gerät. Beides ist für den von Ihnen ausdrücklich gewünschten Dienst unbedingt
+  erforderlich; es gilt die Ausnahme des § 25 Abs. 2 Nr. 2 TDDDG.
+
+  Darüber hinaus greifen wir nicht auf Ihr Endgerät zu. Es gibt keine Analyse- oder
+  Werbecookies, keine Zählpixel, keine Geräte- oder Werbe-Kennungen. Deshalb fragt die
+  App auch nicht nach einer Cookie-Einwilligung — es gibt nichts, wozu wir sie
+  bräuchten.
+
+
+3) WAS WIR AUSDRÜCKLICH NICHT TUN
+
+  Wir haben unser System daraufhin geprüft und halten hier fest:
+
+  * Keine Analyse- oder Tracking-Dienste. Weder Google Analytics noch Firebase,
+    Sentry, PostHog, Matomo, Meta, TikTok oder vergleichbare Werkzeuge sind
+    eingebunden — auch nicht deaktiviert im Hintergrund.
+  * Keine Push-Benachrichtigungen. Die App verschickt keine, und es ist kein
+    Push-Dienst eingebunden.
+  * Keine Standortabfrage. Die App fordert keine Standortberechtigung an und
+    erhebt weder GPS-, WLAN- noch Bluetooth-Position.
+  * Keine IP-Adressen in unseren Anwendungsdaten. Wir speichern sie weder zu
+    Bewertungen noch zu Kontaktanfragen oder Protokolleinträgen.
+  * Keine künstliche Intelligenz. Es werden keine Daten an Sprachmodelle oder
+    KI-Dienste übermittelt. Die individuellen Angebote entstehen durch eine feste
+    Rechenregel in unserer Datenbank, nicht durch KI.
+  * Keine Zahlungsdaten. Wir speichern weder Kartennummer noch IBAN noch
+    Zahlungstoken und binden keinen Zahlungsdienstleister ein. Gespeichert wird
+    ausschliesslich die Zahlungsart als Kategorie (bar, EC-Karte, Kreditkarte,
+    kontaktlos, andere). Die eigentliche Zahlung wickelt der Automat
+    beziehungsweise Ihr Kartenanbieter ab; wir erfahren davon nur, dass und womit
+    bezahlt wurde.
+  * Keine Schriftarten von externen Servern. Alle Schriften liegen in der App;
+    Anfragen an Google-Schriftserver werden technisch unterbunden.
+  * Kein Verkauf und keine Weitergabe Ihrer Daten zu Werbezwecken Dritter.
+
+
+4) WER IHRE DATEN ZU SEHEN BEKOMMT
+
+  * Supabase (Datenbank, Anmeldung, Serverfunktionen). Verarbeitung in der Region
+    Frankfurt am Main. Auftragsverarbeitung nach Art. 28 DSGVO.
+  * Resend (E-Mail-Versand). Verarbeitung in der EU-Region Irland. Übermittelt
+    werden Empfängeradresse, Betreff und Inhalt der jeweiligen E-Mail.
+  * GitHub Pages (Auslieferung der Web-Version). Beim Aufruf der Web-App wird Ihre
+    IP-Adresse technisch bedingt an GitHub Inc., USA übertragen.
+  * sevDesk (Buchhaltung, Deutschland) — Rechnungsdaten.
+  * DocuSign (elektronische Unterschriften, USA) — betrifft ausschliesslich
+    Beschäftigte und Gesellschafter, keine Kundendaten.
+
+  Für Wetterdaten zur Absatzplanung nutzen wir den Dienst Bright Sky auf Basis von
+  Daten des Deutschen Wetterdienstes. Dabei werden keine personenbezogenen Daten
+  übermittelt.
+
+  An Behörden geben wir Daten nur weiter, wenn wir gesetzlich dazu verpflichtet sind.
+
+  Hinweis zu Kartenlinks: Im Automatenfinder können Sie eine Route öffnen. Dabei
+  verlassen Sie unsere App und rufen Google Maps auf; Google erhält dann Ihre
+  IP-Adresse und das Ziel. Wir betten keine Karte ein und übermitteln von uns aus
+  nichts — der Aufruf erfolgt erst, wenn Sie den Link antippen.
+
+
+5) ÜBERMITTLUNG IN DIE USA
+
+  Zwei der oben genannten Empfänger sitzen in den USA: GitHub (Auslieferung der
+  Web-App) und DocuSign (interne Unterschriften). Für diese Übermittlungen stützen wir
+  uns auf die Standardvertragsklauseln der EU-Kommission beziehungsweise auf die
+  Zertifizierung nach dem EU-US Data Privacy Framework.
+
+  Die native App für iOS und Android lädt ihre Oberfläche nicht über GitHub; wer die
+  App aus dem Store nutzt, ist von dieser Übermittlung nicht betroffen.
+
+
+6) WIE LANGE WIR SPEICHERN
+
+  * Konto- und Kundenstammdaten: bis zur Löschung des Kontos, danach nur noch, soweit
+    gesetzliche Aufbewahrungspflichten bestehen.
+  * Kauf- und Rechnungsdaten: 10 Jahre (§ 147 AO, § 257 HGB).
+  * Einwilligungen und deren Widerruf: bis zum Ablauf möglicher Nachweispflichten.
+  * Individuelle Angebote: drei Tage Gültigkeit; der Datensatz bleibt zur
+    Missbrauchsvermeidung darüber hinaus bestehen.
+  * HACCP- und IfSG-Nachweise: nach den jeweiligen gesetzlichen Vorgaben.
+  * Änderungs- und Versandprotokoll: Für diese beiden Protokolle ist derzeit keine
+    automatische Löschfrist eingerichtet. Wir sagen das offen, statt eine Frist zu
+    behaupten, die technisch nicht durchgesetzt wird. Eine Frist wird eingeführt; bis
+    dahin löschen wir Protokolleinträge auf begründetes Verlangen, soweit keine
+    Nachweispflicht entgegensteht.
+
+
+7) IHRE RECHTE
+
+  * Auskunft (Art. 15): In der App unter „Meine Daten exportieren" erhalten Sie
+    sofort eine vollständige Kopie Ihrer gespeicherten Daten.
+  * Berichtigung (Art. 16), auch für das gesperrte Geburtsdatum — bitte an den
+    Kundenservice wenden.
+  * Löschung (Art. 17): In der App unter „Kontolöschung beantragen". Sie erhalten
+    umgehend eine Eingangsbestätigung per E-Mail; wir bearbeiten den Antrag
+    unverzüglich, spätestens binnen eines Monats (Art. 12 Abs. 3 DSGVO). Daten, die
+    wir handels- oder steuerrechtlich aufbewahren müssen, werden für die weitere
+    Verwendung gesperrt und erst nach Fristablauf gelöscht.
+  * Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20).
+  * Widerspruch (Art. 21) gegen die individuellen Angebote und die
+    Geburtstagsgutscheine — siehe Abschnitt 1 d).
+  * Widerruf jeder Einwilligung mit Wirkung für die Zukunft; die Rechtmässigkeit der
+    bis dahin erfolgten Verarbeitung bleibt unberührt.
+  * Beschwerde bei einer Aufsichtsbehörde (Art. 77), für uns zuständig:
+    Landesbeauftragte für den Datenschutz Sachsen-Anhalt, Leiterstr. 9, 39104 Magdeburg.
+
+
+8) AUTOMATISIERTE ENTSCHEIDUNGEN
+
+  Eine automatisierte Entscheidung im Sinne von Art. 22 DSGVO, die Ihnen gegenüber
+  rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt,
+  findet nicht statt.
+
+  Die unter 1 d) beschriebene Auswertung Ihrer Kaufhistorie ist Profiling im Sinne von
+  Art. 4 Nr. 4 DSGVO — das benennen wir ausdrücklich. Sie führt aber zu keiner
+  Entscheidung über Sie: Der Rabattsatz ist für alle gleich, niemand wird
+  ausgeschlossen, bevorzugt oder anders bepreist, und es findet keine Bewertung Ihrer
+  Zahlungsfähigkeit oder Ihres Verhaltens statt.
+
+
+9) SICHERHEIT
+
+  Alle Verbindungen sind mit TLS verschlüsselt. Passwörter speichern wir ausschliesslich
+  als bcrypt-Hash, nie im Klartext. Der Zugriff auf Daten ist in der Datenbank selbst
+  zeilenweise abgesichert (Row Level Security): Jede Abfrage kann technisch nur die
+  Daten des jeweils angemeldeten Kontos zurückgeben — auch dann, wenn jemand die
+  Kennung eines fremden Kontos kennt. Wir haben das mit echten Testkonten überprüft.
+
+
+10) ÄNDERUNGEN
+
+  Diese Erklärung hat den oben genannten Stand. Ändert sich die Verarbeitung —
+  insbesondere bei Aktivierung von Push-Nachrichten, einer Nutzungsanalyse oder eines
+  Zahlungsdienstleisters —, aktualisieren wir sie vorher und weisen in der App darauf
+  hin. Frühere Fassungen halten wir vor.
 ''';
 
   // ── AGB (Vorlage) ──────────────────────────────────────────────────────────

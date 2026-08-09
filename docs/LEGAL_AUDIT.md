@@ -39,9 +39,10 @@ Legende: ✅ konform · 🟨 fix hinzugefügt (siehe unten) · 🟥 Anwalt erfor
 | Einwilligung (Art. 7) | 🟨 | Registrierung: Pflicht-Checkboxen Datenschutz + AGB; Kunden-Consent-Screen |
 | Widerruf | ✅ | `consents` append-only mit `granted=false` |
 | Verzeichnis der Verarbeitungen | 🟥 | Vorlage `docs/VVT.md`, Pflege durch Verantwortliche |
-| DSFA (Art. 35) | 🟥 | Bewertung erforderlich (HACCP-Daten, Standortdaten, Zahlungs-/Kaufdaten) |
-| AV-Verträge (Art. 28) | 🟥 | Supabase / Firebase / (später) Sentry / PostHog / Google Maps |
-| Datenschutzerklärung in-App | 🟨 | `PrivacyScreen` mit Vorlage-Text |
+| DSFA (Art. 35) | 🟥 | Bewertung erforderlich (HACCP-Daten, Kaufdaten mit Automat + Uhrzeit, Profiling für individuelle Angebote). **Keine** Standortdaten — die App fragt den Gerätestandort nicht ab (Audit 09.08.2026) |
+| AV-Verträge (Art. 28) | 🟥 | Tatsächlich nötig: **Supabase** (Frankfurt), **Resend** (Irland), **GitHub Pages** (USA), **sevDesk**, **DocuSign** (USA). *Nicht* nötig: Firebase, Sentry, PostHog, Google Maps — nichts davon ist eingebunden |
+| Profiling offenlegen (Art. 13 II f, 21) | ✅ | DSE v2 Abschnitt 1 d) + 8: `generate_personal_offer()` benannt, Widerspruchsrecht eingeräumt |
+| Datenschutzerklärung in-App | 🟨 | `PrivacyScreen`, **DSE v2 vom 09.08.2026** — entlang des geprüften Ist-Zustands geschrieben (Bericht: Systemanalyse 09.08.2026). Anwaltliche Freigabe steht weiterhin aus |
 | Impressum in-App (§ 5 DDG) | 🟨 | `ImprintScreen` mit Vorlage-Text |
 
 ### GoBD / Buchführung
