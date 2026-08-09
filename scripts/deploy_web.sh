@@ -47,6 +47,40 @@ SUBPATH="${SUBPATH-}"
 CUSTOM_DOMAIN="${CUSTOM_DOMAIN-}"
 
 if [ -n "$CUSTOM_DOMAIN" ]; then
+  # Vorbedingung, die sich selbst prüft.
+  #
+  # Ein Deploy mit base-href="/" auf eine Domain, die noch nicht auf
+  # GitHub zeigt, hinterlässt eine App, die NIRGENDS mehr lädt: Unter der
+  # neuen Domain steht die alte Parkseite, unter der github.io-Adresse
+  # sucht der Build seine Dateien am falschen Pfad. Beides ohne
+  # Fehlermeldung — nur eine weisse Seite.
+  #
+  # Das ist genau die Sorte Fehler, die man erst bemerkt, wenn ein Kunde
+  # sich meldet. Also prüft das Skript vorher nach, statt zu vertrauen.
+  GITHUB_PAGES_IPS="185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153"
+  echo "▶︎ Vorbedingung: zeigt $CUSTOM_DOMAIN auf GitHub Pages?"
+  AUFGELOEST="$(getent ahostsv4 "$CUSTOM_DOMAIN" 2>/dev/null | awk '{print $1}' | sort -u)"
+  if [ -z "$AUFGELOEST" ]; then
+    echo "  ! $CUSTOM_DOMAIN löst nicht auf. DNS-Einträge gesetzt?" >&2
+    exit 1
+  fi
+  TREFFER=0
+  for ip in $AUFGELOEST; do
+    case " $GITHUB_PAGES_IPS " in *" $ip "*) TREFFER=1 ;; esac
+  done
+  if [ "$TREFFER" -eq 0 ]; then
+    {
+      echo "  ! $CUSTOM_DOMAIN zeigt auf: $(echo $AUFGELOEST | tr '\n' ' ')"
+      echo "    Erwartet wird mindestens eine dieser Adressen:"
+      echo "    $GITHUB_PAGES_IPS"
+      echo
+      echo "    Abgebrochen, BEVOR etwas kaputtgeht. Erst die A-Einträge beim"
+      echo "    DNS-Anbieter umstellen, dann diesen Lauf wiederholen."
+    } >&2
+    exit 1
+  fi
+  echo "  ✓ zeigt auf GitHub Pages ($(echo $AUFGELOEST | tr '\n' ' '))"
+
   BASE_HREF="/"
   OEFFENTLICHE_URL="https://$CUSTOM_DOMAIN/"
 elif [ -z "$SUBPATH" ]; then
