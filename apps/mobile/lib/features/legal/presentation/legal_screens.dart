@@ -55,3 +55,44 @@ class TermsScreen extends StatelessWidget {
         body: LegalTexts.terms,
       );
 }
+
+/// Widerrufsbelehrung — bewusst eine eigene Seite.
+///
+/// Der Text stand bisher als § 6 in den Nutzungsbedingungen. Dort findet
+/// ihn niemand, der ihn braucht: Wer widerrufen will, sucht „Widerruf",
+/// nicht Abschnitt sechs eines elfteiligen Vertragswerks.
+class WithdrawalScreen extends StatelessWidget {
+  const WithdrawalScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const _LegalTextScreen(
+        title: 'Widerrufsbelehrung',
+        body: LegalTexts.withdrawal,
+      );
+}
+
+class PaymentInfoScreen extends StatelessWidget {
+  const PaymentInfoScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const _LegalTextScreen(
+        title: 'Zahlungsinformationen',
+        body: LegalTexts.payment,
+      );
+}
+
+class CookiesScreen extends StatelessWidget {
+  const CookiesScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const _LegalTextScreen(
+        title: 'Cookies und Tracking',
+        body: LegalTexts.cookies,
+      );
+}
+
+class AccessibilityScreen extends StatelessWidget {
+  const AccessibilityScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const _LegalTextScreen(
+        title: 'Barrierefreiheit',
+        body: LegalTexts.accessibility,
+      );
+}

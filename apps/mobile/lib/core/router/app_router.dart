@@ -28,6 +28,10 @@ abstract final class AppRoutes {
   static const privacy = '/legal/privacy';
   static const terms = '/legal/terms';
   static const cancellation = '/legal/kuendigung';
+  static const withdrawal = '/legal/widerruf';
+  static const paymentInfo = '/legal/zahlung';
+  static const cookies = '/legal/cookies';
+  static const accessibility = '/legal/barrierefreiheit';
 
   /// Empfehlungslink: /r/<CODE>. Merkt den Code lokal vor und schickt
   /// zur Registrierung — eingelöst wird er nach dem ersten Login.
@@ -125,6 +129,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.cancellation,
         builder: (context, state) => const CancellationScreen(),
+      ),
+      // Die vier folgenden Seiten sind wie Impressum und Datenschutz
+      // ausserhalb des Anmeldezwangs erreichbar: Widerruf, Zahlungsangaben,
+      // Tracking-Hinweise und Barrierefreiheit muss man lesen können, BEVOR
+      // man ein Konto anlegt.
+      GoRoute(
+        path: AppRoutes.withdrawal,
+        builder: (context, state) => const WithdrawalScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentInfo,
+        builder: (context, state) => const PaymentInfoScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.cookies,
+        builder: (context, state) => const CookiesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accessibility,
+        builder: (context, state) => const AccessibilityScreen(),
       ),
     ],
   );

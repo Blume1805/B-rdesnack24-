@@ -33,34 +33,85 @@ abstract final class LegalTexts {
 Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
 
 Bördesnack24 GbR
-Pia Blume, Philipp Blume (vertretungsberechtigte Gesellschafter)
 Sülldorfer Str. 3A
 39171 Sülzetal OT Osterweddingen
+Deutschland
 
-Kontakt
-E-Mail: kontakt@boerdesnack24.de
-Website: https://www.boerdesnack24.de
+Vertretungsberechtigte Gesellschafter
+Philipp Blume
+Pia Blume
 
-Umsatzsteuer / Steuernummer
+
+KONTAKT
+
+E-Mail: boerdesnack24@gmail.com
+Telefon: 0157 30065762
+Telefon: 0151 21076771
+
+Wir antworten auf E-Mails in der Regel innerhalb eines Werktages.
+
+
+UNTERNEHMENSANGABEN
+
+Rechtsform: Gesellschaft bürgerlichen Rechts (GbR)
+Die Bördesnack24 GbR ist nicht im Handelsregister eingetragen.
+
 Steuernummer: 102/178/01635
 Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE 458804058
 
-Zuständige Aufsichtsbehörde für Lebensmittelrecht
-Veterinär- und Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis
 
-Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
-Pia Blume, Philipp Blume, Anschrift wie oben.
+VERANTWORTLICH FÜR DEN INHALT (§ 18 Abs. 2 MStV)
 
-Streitbeilegung
-Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+Philipp Blume
+Sülldorfer Str. 3A
+39171 Sülzetal OT Osterweddingen
+E-Mail: boerdesnack24@gmail.com
+
+
+ZUSTÄNDIGE AUFSICHTSBEHÖRDE FÜR LEBENSMITTELRECHT
+
+Landkreis Börde
+Amt für Gesundheit und Verbraucherschutz
+Bornsche Straße 2
+39340 Haldensleben
+
+
+VERBRAUCHERSTREITBEILEGUNG
+
+Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit:
 https://ec.europa.eu/consumers/odr
-Wir sind nicht bereit oder verpflichtet, an einem Streitbeilegungsverfahren vor einer
+
+Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
 Verbraucherschlichtungsstelle teilzunehmen.
 
-Haftungshinweis
-Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte
-externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber
-verantwortlich.
+
+VERANTWORTLICHKEIT FÜR INHALTE
+
+Wir halten die Informationen in dieser App nach bestem Wissen aktuell, richtig und
+vollständig. Eine Gewähr dafür können wir jedoch nicht übernehmen, soweit das
+gesetzlich zulässig ist. Gesetzliche Haftungsansprüche bleiben unberührt.
+
+Für die Inhalte externer Links sind ausschließlich deren Betreiber verantwortlich.
+
+
+URHEBERRECHT
+
+Die von der Bördesnack24 GbR erstellten Inhalte und Werke in dieser App unterliegen
+dem deutschen Urheberrecht. Vervielfältigung, Bearbeitung, Verbreitung und jede
+Verwertung außerhalb der Grenzen des Urheberrechts bedürfen unserer vorherigen
+Zustimmung, soweit das Gesetz nichts anderes bestimmt.
+
+Soweit Inhalte nicht von uns erstellt wurden, beachten wir die Rechte Dritter und
+kennzeichnen sie, wo es erforderlich ist.
+
+
+WEITERE RECHTSTEXTE
+
+Datenschutzerklärung, Nutzungsbedingungen, Widerrufsbelehrung,
+Zahlungsinformationen, Cookie- und Tracking-Hinweise, Barrierefreiheitserklärung
+sowie die Hinweise zur automatisierten Auswahl stehen als eigene Seiten im
+Bereich „Rechtliches" — bewusst getrennt, damit jede Angabe dort steht, wo man
+sie sucht.
 ''';
 
   // ── Datenschutzerklärung (Art. 12/13 DSGVO, § 25 TDDDG) ────────────────────
@@ -304,6 +355,304 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   insbesondere bei Aktivierung von Push-Nachrichten, einer Nutzungsanalyse oder eines
   Zahlungsdienstleisters —, aktualisieren wir sie vorher und weisen in der App darauf
   hin. Frühere Fassungen halten wir vor.
+''';
+
+  // ── Widerrufsbelehrung (§§ 355 ff. BGB) ────────────────────────────────────
+  //
+  // Eigene Seite statt eines Abschnitts in den AGB: Die Belehrung muss
+  // auffindbar sein, und in einem 11-Punkte-Vertragswerk findet sie
+  // niemand. Der Inhalt ist mit § 6 der Nutzungsbedingungen abgestimmt.
+  static const withdrawal = '''
+Widerrufsbelehrung ($version)
+
+
+WAREN AUS DEM AUTOMATEN
+
+Für Waren, die du unmittelbar am Automaten entnimmst, besteht kein Widerrufsrecht.
+Die Ware wird dir sofort übergeben; ein Fernabsatzvertrag im Sinne der §§ 355 ff. BGB
+kommt dabei nicht zustande.
+
+Ist eine Ware verdorben, beschädigt oder wurde sie nicht ausgegeben, gelten deine
+gesetzlichen Gewährleistungsrechte. Melde das bitte über das Kontaktformular in der
+App oder per E-Mail — wir erstatten oder ersetzen.
+
+
+ABONNEMENTS (DIGITALE DIENSTLEISTUNG)
+
+Widerrufsrecht
+
+Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu
+widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.
+
+Um dein Widerrufsrecht auszuüben, musst du uns
+
+  Bördesnack24 GbR
+  Sülldorfer Str. 3A
+  39171 Sülzetal OT Osterweddingen
+  E-Mail: boerdesnack24@gmail.com
+  Telefon: 0157 30065762
+
+mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder eine
+E-Mail) über deinen Entschluss, diesen Vertrag zu widerrufen, informieren. Du kannst
+dafür das unten stehende Muster-Widerrufsformular verwenden, das aber nicht
+vorgeschrieben ist.
+
+Zur Wahrung der Widerrufsfrist reicht es aus, dass du die Mitteilung über die Ausübung
+des Widerrufsrechts vor Ablauf der Widerrufsfrist absendest.
+
+Folgen des Widerrufs
+
+Wenn du diesen Vertrag widerrufst, haben wir dir alle Zahlungen, die wir von dir
+erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag
+zurückzuzahlen, an dem die Mitteilung über deinen Widerruf bei uns eingegangen ist.
+Für diese Rückzahlung verwenden wir dasselbe Zahlungsmittel, das du bei der
+ursprünglichen Transaktion eingesetzt hast, es sei denn, mit dir wurde ausdrücklich
+etwas anderes vereinbart; in keinem Fall werden dir wegen dieser Rückzahlung Entgelte
+berechnet.
+
+Vorzeitiger Beginn der Leistung
+
+Hast du verlangt, dass die Leistung während der Widerrufsfrist beginnen soll, so hast
+du uns einen angemessenen Betrag zu zahlen, der dem Anteil der bis zum Widerruf bereits
+erbrachten Leistung im Vergleich zum Gesamtumfang der vertraglich vereinbarten Leistung
+entspricht.
+
+Erlöschen beim Lifetime-Abo
+
+Beim Lifetime-Abo erlischt dein Widerrufsrecht, wenn wir die Leistung vollständig
+bereitgestellt haben und du zuvor ausdrücklich zugestimmt hast, dass wir vor Ablauf der
+Widerrufsfrist beginnen, und du bestätigt hast, dass du dein Widerrufsrecht damit
+verlierst (§ 356 Abs. 5 BGB). Wir holen beide Bestätigungen vor dem Abschluss
+ausdrücklich ein.
+
+
+MUSTER-WIDERRUFSFORMULAR
+
+Wenn du den Vertrag widerrufen willst, fülle dieses Formular aus und sende es zurück.
+
+  An:
+  Bördesnack24 GbR, Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen
+  E-Mail: boerdesnack24@gmail.com
+
+  Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über
+  den Kauf der folgenden Waren (*) / die Erbringung der folgenden Dienstleistung (*):
+
+  ______________________________________________________________
+
+  Bestellt am (*) / erhalten am (*):  ______________________
+  Name des/der Verbraucher(s):        ______________________
+  Anschrift des/der Verbraucher(s):   ______________________
+
+  Unterschrift (nur bei Mitteilung auf Papier): ______________________
+  Datum:                                        ______________________
+
+  (*) Unzutreffendes streichen.
+
+
+KÜNDIGUNG IST ETWAS ANDERES
+
+Der Widerruf beendet den Vertrag rückwirkend innerhalb der ersten 14 Tage. Willst du
+ein laufendes Abo zum Ende des Abrechnungszeitraums beenden, ist das eine Kündigung —
+dafür gibt es in der App die Schaltfläche „Verträge hier kündigen", die auch ohne
+Anmeldung erreichbar ist (§ 312k BGB).
+''';
+
+  // ── Zahlungsinformationen ──────────────────────────────────────────────────
+  static const payment = '''
+Zahlungsinformationen ($version)
+
+
+AM AUTOMATEN
+
+Du kannst an unseren Automaten wie folgt bezahlen:
+
+  • bar
+  • EC-/Girocard
+  • Kreditkarte
+  • kontaktlos
+
+Alle Preise verstehen sich als Endpreise einschließlich der gesetzlichen
+Umsatzsteuer. Der am Automaten angezeigte Preis gilt.
+
+Welche Daten wir dabei bekommen
+
+Wir speichern zu deinem Kauf ausschließlich die Zahlungsart als Kategorie — also
+etwa „EC-Karte" — zusammen mit Betrag, Zeitpunkt und Automat.
+
+Wir speichern KEINE Kartennummer, KEINE IBAN und KEINE Zahlungstoken. Wir haben
+auch keinen Zahlungsdienstleister eingebunden. Die Zahlung selbst wickeln das
+Kartenterminal am Automaten und dein Kartenanbieter ab; wir erfahren davon nur,
+dass und womit bezahlt wurde.
+
+
+ABONNEMENTS
+
+Für erweiterte App-Funktionen bieten wir drei Modelle an, alle Preise inklusive
+gesetzlicher Umsatzsteuer:
+
+  • Monats-Abo    0,99 € pro Monat
+  • Jahres-Abo    9,99 € pro Jahr
+  • Lifetime-Abo  79,99 € einmalig
+
+Das Jahres-Abo entspricht rechnerisch zehn Monatsbeiträgen; zwei Monate sind
+darin geschenkt.
+
+Abrechnung
+
+Nach Veröffentlichung der App im Apple App Store und bei Google Play läuft die
+Abrechnung ausschließlich über den jeweiligen Store. Es gelten ergänzend dessen
+Zahlungs- und Abo-Bedingungen; die Verwaltung und Kündigung deines Abos ist dann
+auch in den Store-Einstellungen möglich.
+
+Bis dahin ist die Auswahl eines Abo-Modells in der App eine unverbindliche
+Vormerkung. Es wird nichts abgebucht, und es entsteht keine Zahlungspflicht.
+
+Mindestalter
+
+Kostenpflichtige Abos können nur volljährige Personen abschließen. Minderjährige
+brauchen die Zustimmung ihrer gesetzlichen Vertreter. Die kostenlose Nutzung der
+App sowie das Bonus- und Rabattprogramm stehen allen Altersgruppen offen.
+
+
+RECHNUNGEN UND BELEGE
+
+Den digitalen Kassenbon zu einem Kauf kannst du in der App jederzeit erzeugen. Er
+wird bei jedem Abruf neu erstellt und nicht dauerhaft als Datei gespeichert.
+
+Der digitale Kassenbon ist ein Nachweis für dich, aber kein steuerlicher Beleg im
+Sinne der Kassensicherungsverordnung. Brauchst du eine Rechnung nach § 14 UStG,
+melde dich bitte über das Kontaktformular.
+''';
+
+  // ── Cookies und Tracking (§ 25 TDDDG) ──────────────────────────────────────
+  //
+  // Der Text ist kurz, weil der Befund kurz ist. Er wurde am 09.08.2026 am
+  // Code geprüft: kein Analytics-Paket in pubspec.yaml, keine Tracking-SDKs,
+  // Google Fonts durch einen Shim in web/index.html unterbunden.
+  static const cookies = '''
+Cookies und Tracking ($version)
+
+
+DIE KURZE ANTWORT
+
+Wir setzen keine Cookies zu Analyse- oder Werbezwecken. Wir binden keine
+Tracking-Dienste ein. Deshalb fragt dich diese App auch nicht nach einer
+Cookie-Einwilligung — es gibt nichts, wofür wir sie bräuchten.
+
+
+WAS AUF DEINEM GERÄT GESPEICHERT WIRD
+
+Zwei Dinge, beide technisch notwendig:
+
+  • Deine Anmeldesitzung, damit du nicht bei jedem Start neu eingeben musst,
+    wer du bist.
+  • Deine Anzeigeeinstellungen in der App.
+
+Beides ist für den von dir gewünschten Dienst unbedingt erforderlich. Es gilt
+die Ausnahme des § 25 Abs. 2 Nr. 2 TDDDG; eine Einwilligung ist dafür nicht
+nötig. Meldest du dich ab, wird die Sitzung gelöscht.
+
+
+WAS WIR NICHT EINSETZEN
+
+Wir haben unseren Code darauf geprüft. Keines der folgenden Werkzeuge ist
+eingebunden — auch nicht abgeschaltet im Hintergrund:
+
+  • Google Analytics, Google Tag Manager
+  • Firebase, Crashlytics
+  • Sentry, PostHog, Matomo, Mixpanel, Amplitude
+  • Meta-, TikTok- oder andere Werbe-SDKs
+  • Hotjar, FullStory, Microsoft Clarity, Smartlook
+  • Werbe-IDs oder Geräte-Kennungen
+
+Auch Schriftarten laden wir nicht von fremden Servern nach: Alle Schriften
+liegen in der App, und Anfragen an Google-Schriftserver werden technisch
+unterbunden. Deine IP-Adresse geht damit auch nicht auf diesem Weg an Dritte.
+
+
+WENN SICH DAS ÄNDERT
+
+Sollten wir künftig eine Reichweitenmessung einsetzen wollen, holen wir vorher
+deine Einwilligung ein — getrennt, freiwillig und genauso einfach widerrufbar
+wie erteilt. Bis dahin gilt diese Seite.
+''';
+
+  // ── Barrierefreiheitserklärung (BFSG) ──────────────────────────────────────
+  static const accessibility = '''
+Erklärung zur Barrierefreiheit ($version)
+
+Diese Erklärung gilt für die Bördesnack24-App und ihre Web-Fassung. Grundlage ist
+das Barrierefreiheitsstärkungsgesetz (BFSG), das seit dem 28. Juni 2025 für
+Dienstleistungen im elektronischen Geschäftsverkehr gilt.
+
+
+UNSER ANSPRUCH
+
+Wir wollen, dass die App für alle bedienbar ist — auch mit Screenreader, mit
+vergrößerter Schrift, mit eingeschränktem Sehvermögen oder ohne Maus. Wir
+orientieren uns an EN 301 549 und den WCAG 2.1 auf Stufe AA.
+
+
+WAS WIR UMGESETZT HABEN
+
+  • Alle Bedienelemente sind mindestens 44 x 44 Punkt groß und damit auch mit
+    motorischen Einschränkungen sicher treffbar.
+  • Farbkontraste sind gegen die Anforderungen der WCAG 2.1 AA geprüft. Die
+    Prüfung läuft automatisch bei jeder Codeänderung mit — ein Verstoß lässt
+    den Build scheitern, statt unbemerkt zu bleiben.
+  • Bedienelemente tragen Beschriftungen für Screenreader.
+  • Die Schriftgröße folgt deiner Systemeinstellung. Vergrößerst du sie im
+    Betriebssystem, wächst der Text in der App mit.
+  • Rechtstexte sind als Fließtext markierbar und vorlesbar, nicht als Bild.
+  • Farbe ist nie das einzige Unterscheidungsmerkmal.
+
+
+WAS NOCH NICHT VOLLSTÄNDIG BARRIEREFREI IST
+
+Wir nennen das offen, statt Vollständigkeit zu behaupten:
+
+  • Die Screenreader-Beschriftungen sind noch nicht in jedem Bereich der App
+    gleich sorgfältig gepflegt. Der Kundenbereich ist weiter als die internen
+    Verwaltungsansichten.
+  • PDF-Dokumente, die die App erzeugt (etwa der digitale Kassenbon), sind
+    noch nicht als barrierefreie PDF/UA ausgezeichnet.
+  • Einzelne Diagramme in den Auswertungen haben noch keine gleichwertige
+    Textalternative.
+
+An allen drei Punkten arbeiten wir. Brauchst du eine der genannten
+Informationen in anderer Form, melde dich — wir liefern sie dir.
+
+
+BARRIERE MELDEN
+
+Ist dir etwas aufgefallen, das du nicht bedienen konntest, sag uns bitte
+Bescheid. Das ist für uns der schnellste Weg, es zu beheben.
+
+  E-Mail: boerdesnack24@gmail.com
+  Telefon: 0157 30065762
+
+Wir melden uns innerhalb von zwei Wochen zurück.
+
+
+DURCHSETZUNGSVERFAHREN
+
+Hilft dir unsere Antwort nicht weiter, kannst du dich an die
+Marktüberwachungsstelle der Länder für die Barrierefreiheit von Produkten und
+Dienstleistungen wenden:
+
+  MLBF
+  Carl-Miller-Straße 6
+  39112 Magdeburg
+  E-Mail: kontakt@mlbf-barrierefrei.de
+  Telefon: 0391 289 230 23
+
+
+STAND
+
+Diese Erklärung wurde am 9. August 2026 erstellt. Grundlage ist eine Prüfung
+unseres eigenen Codes und der automatisierten Barrierefreiheitstests, nicht ein
+externes Audit. Ein unabhängiges Audit steht noch aus; sobald es vorliegt,
+aktualisieren wir diese Seite.
 ''';
 
   // ── AGB (Vorlage) ──────────────────────────────────────────────────────────
