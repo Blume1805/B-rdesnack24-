@@ -49,10 +49,15 @@ class AiInfoScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s4),
           Text(
-            'Wir informieren dich hier transparent nach Artikel 50 EU AI Act '
-            '(Verordnung (EU) 2024/1689), an welchen Stellen unsere App '
-            'automatisierte, algorithmische oder KI-basierte Entscheidungen '
-            'trifft, welchen Zweck sie verfolgen und welche Rechte du hast.',
+            'Hier steht, an welchen Stellen unsere App automatisiert '
+            'auswählt, welchen Zweck das hat und welche Rechte du hast.\n\n'
+            'Zur Einordnung, ehrlich gesagt: Unsere Angebotslogik sind feste '
+            'Rechenregeln — kein lernendes System und kein Sprachmodell. '
+            'Nach den Leitlinien der EU-Kommission vom 06.02.2025 sind '
+            'solche regelbasierten Systeme keine KI-Systeme im Sinne des EU '
+            'AI Act, und Artikel 50 verpflichtet uns hier zu nichts. Wir '
+            'kennzeichnen trotzdem — weil du sonst nicht erkennen könntest, '
+            'warum dir ausgerechnet dieses Angebot gezeigt wird.',
             style: AppTypography.body(size: 14, color: AppColors.textMuted)
                 .copyWith(height: 1.4),
           ),
@@ -84,15 +89,23 @@ class AiInfoScreen extends StatelessWidget {
           ),
           const _InfoBlock(
             title: 'Welche Daten fließen ein?',
-            body: '• Deine Kaufhistorie an unseren Automaten\n'
-                '• Deine Kategorie-Präferenzen (Getränke, Snacks, Eis)\n'
-                '• Loyalty-Punktestand und -Meilensteine\n'
-                '• Aktive Coupons\n'
+            body: 'Für das individuelle Angebot:\n'
+                '• Welche Produkte du in den letzten 90 Tagen gekauft hast, '
+                'und wie oft\n\n'
+                'Für den Geburtstagsgutschein:\n'
+                '• Dein Geburtsdatum\n\n'
+                'Ohne Bezug zu deiner Person:\n'
                 '• Wettervorhersage für den Automaten-Standort '
-                '(nicht für deinen)\n\n'
+                '(nicht für deinen)\n'
+                '• Mindesthaltbarkeitsdatum unseres Bestands\n\n'
+                'Mehr nicht. Loyalty-Punkte, Kategorie-Präferenzen und aktive '
+                'Coupons fließen ausdrücklich NICHT in die Auswahl ein — '
+                'frühere Fassungen dieser Seite haben das falsch behauptet.\n\n'
                 'Keine Weitergabe an Dritte für Werbezwecke. Keine automatisierten '
                 'Einzelentscheidungen mit rechtlicher Wirkung im Sinne von '
-                'Art. 22 DSGVO.',
+                'Art. 22 DSGVO: Der Rabatt beträgt immer 10 % und ist für alle '
+                'gleich — es entscheidet sich nur, welches Produkt vergünstigt '
+                'wird.',
           ),
           const _InfoBlock(
             title: 'Widerspruch und Opt-out',
@@ -112,11 +125,10 @@ class AiInfoScreen extends StatelessWidget {
           ),
           const _InfoBlock(
             title: 'Beschwerde',
-            body: 'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
-                'verletzt, kannst du dich an die zuständige Datenschutz-'
-                'Aufsichtsbehörde wenden: den Bundesbeauftragten für den '
-                'Datenschutz und die Informationsfreiheit (BfDI) oder — für '
-                'Sachsen-Anhalt — die Landesbeauftragte für den Datenschutz.',
+            body: 'Wenn du glaubst, dass unsere automatisierte Auswahl deine '
+                'Rechte verletzt, kannst du dich an die für uns zuständige '
+                'Aufsichtsbehörde wenden: die Landesbeauftragte für den '
+                'Datenschutz Sachsen-Anhalt, Leiterstr. 9, 39104 Magdeburg.',
           ),
           const SizedBox(height: AppSpacing.s5),
           OutlinedButton.icon(

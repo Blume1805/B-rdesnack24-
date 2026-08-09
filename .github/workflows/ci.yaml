@@ -107,6 +107,13 @@ jobs:
       # dadurch blieb die NULL-Falle in acht Funktionen unentdeckt.
       - name: Aufgerufene Datenbankfunktionen müssen im Repository stehen
         run: python3 scripts/check_rpc_vollstaendig.py
+      # Ebenfalls blockierend. Die Compliance-Vorgabe verlangt, dass keine
+      # neue algorithmische oder KI-gestützte Funktion ohne Einstufung
+      # produktiv geht. Eine Regel, die nur in einem Dokument steht, hält
+      # das nicht durch — wer eine Funktion ergänzt, liest kein Dokument,
+      # er schreibt SQL. Also fällt es hier auf.
+      - name: Angebotslogik muss im KI-Register eingestuft sein
+        run: python3 scripts/check_ki_register.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:
