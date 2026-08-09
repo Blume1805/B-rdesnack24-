@@ -114,6 +114,12 @@ jobs:
       # er schreibt SQL. Also fällt es hier auf.
       - name: Angebotslogik muss im KI-Register eingestuft sein
         run: python3 scripts/check_ki_register.py
+      # Ebenfalls blockierend. Fängt den häufigsten Auslöser dafür ab, dass
+      # die Rechtstexte hinter dem Code zurückbleiben: eine neue
+      # Abhängigkeit, die still neue Datenflüsse mitbringt. Deckt nur diesen
+      # einen Fall ab — die vollständige Prüfliste steht in CLAUDE.md.
+      - name: Abhängigkeiten datenschutzrechtlich eingeordnet
+        run: python3 scripts/check_rechtstexte.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:
