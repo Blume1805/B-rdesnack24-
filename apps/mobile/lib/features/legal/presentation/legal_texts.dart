@@ -30,11 +30,18 @@ abstract final class LegalTexts {
   // Übersicht (`/legal`) statt als sieben Einzelzeilen im Profil. Dabei fiel
   // auf, dass die Zahl in Abschnitt 4 der Barrierefreiheitserklärung nicht
   // mehr stimmte — sie ist nachgemessen und korrigiert.
-  static const version = 'v4 · 2026-08';
+  //
+  // v5 (09.08.2026): Überschriften und die Stellen, auf die es ankommt,
+  // sind mit `**…**` ausgezeichnet und werden fett dargestellt. Am Wortlaut
+  // ändert sich nichts — `legal_rich_text_test.dart` prüft für jeden Text,
+  // dass beim Zerlegen kein Zeichen verlorengeht. Wer hier weiterschreibt:
+  // Die Auszeichnung endet an der Zeilengrenze, ein Paar über zwei Zeilen
+  // bleibt sichtbar stehen.
+  static const version = 'v5 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
-Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
+**Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)**
 
 Bördesnack24 GbR
 Sülldorfer Str. 3A
@@ -46,7 +53,7 @@ Philipp Blume
 Pia Blume
 
 
-KONTAKT
+**KONTAKT**
 
 E-Mail: boerdesnack24@gmail.com
 Telefon: 0157 30065762
@@ -55,7 +62,7 @@ Telefon: 0151 21076771
 Wir antworten auf E-Mails in der Regel innerhalb eines Werktages.
 
 
-UNTERNEHMENSANGABEN
+**UNTERNEHMENSANGABEN**
 
 Rechtsform: Gesellschaft bürgerlichen Rechts (GbR)
 Die Bördesnack24 GbR ist nicht im Handelsregister eingetragen.
@@ -64,7 +71,7 @@ Steuernummer: 102/178/01635
 Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE 458804058
 
 
-VERANTWORTLICH FÜR DEN INHALT (§ 18 Abs. 2 MStV)
+**VERANTWORTLICH FÜR DEN INHALT (§ 18 Abs. 2 MStV)**
 
 Philipp Blume
 Sülldorfer Str. 3A
@@ -72,7 +79,7 @@ Sülldorfer Str. 3A
 E-Mail: boerdesnack24@gmail.com
 
 
-ZUSTÄNDIGE AUFSICHTSBEHÖRDE FÜR LEBENSMITTELRECHT
+**ZUSTÄNDIGE AUFSICHTSBEHÖRDE FÜR LEBENSMITTELRECHT**
 
 Landkreis Börde
 Amt für Gesundheit und Verbraucherschutz
@@ -80,7 +87,7 @@ Bornsche Straße 2
 39340 Haldensleben
 
 
-VERBRAUCHERSTREITBEILEGUNG
+**VERBRAUCHERSTREITBEILEGUNG**
 
 Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit:
 https://ec.europa.eu/consumers/odr
@@ -89,7 +96,7 @@ Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor e
 Verbraucherschlichtungsstelle teilzunehmen.
 
 
-VERANTWORTLICHKEIT FÜR INHALTE
+**VERANTWORTLICHKEIT FÜR INHALTE**
 
 Wir halten die Informationen in dieser App nach bestem Wissen aktuell, richtig und
 vollständig. Eine Gewähr dafür können wir jedoch nicht übernehmen, soweit das
@@ -98,7 +105,7 @@ gesetzlich zulässig ist. Gesetzliche Haftungsansprüche bleiben unberührt.
 Für die Inhalte externer Links sind ausschließlich deren Betreiber verantwortlich.
 
 
-URHEBERRECHT
+**URHEBERRECHT**
 
 Die von der Bördesnack24 GbR erstellten Inhalte und Werke in dieser App unterliegen
 dem deutschen Urheberrecht. Vervielfältigung, Bearbeitung, Verbreitung und jede
@@ -109,7 +116,7 @@ Soweit Inhalte nicht von uns erstellt wurden, beachten wir die Rechte Dritter un
 kennzeichnen sie, wo es erforderlich ist.
 
 
-WEITERE RECHTSTEXTE
+**WEITERE RECHTSTEXTE**
 
 Datenschutzerklärung, Nutzungsbedingungen, Widerrufsbelehrung,
 Zahlungsinformationen, Cookie- und Tracking-Hinweise, Barrierefreiheitserklärung
@@ -120,7 +127,7 @@ sie sucht.
 
   // ── Datenschutzerklärung (Art. 12/13 DSGVO, § 25 TDDDG) ────────────────────
   static const privacy = '''
-Datenschutzerklärung ($version)
+**Datenschutzerklärung ($version)**
 
 Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist die Bördesnack24 GbR,
 Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen (Kontakt siehe Impressum).
@@ -130,9 +137,9 @@ einer Vorlage. Sie beschreibt deshalb auch ausdrücklich, was wir NICHT tun — 
 Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf Vorrat.
 
 
-1) WELCHE DATEN WIR VERARBEITEN
+**1) WELCHE DATEN WIR VERARBEITEN**
 
-  a) Kontodaten
+  **a) Kontodaten**
      E-Mail-Adresse, Name, optional Telefonnummer, Geburtsdatum, optional Anrede.
      Zweck: Konto anlegen, anmelden, Zugriff steuern.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertrag).
@@ -143,13 +150,13 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      zurück. Ist es falsch erfasst, korrigieren wir es auf Anfrage von Hand
      (Art. 16 DSGVO).
 
-  b) Kundenstammdaten
+  **b) Kundenstammdaten**
      Kundennummer sowie bei Geschäftskunden Firmenname, Rechnungsanschrift,
      Steuernummer und Umsatzsteuer-Identifikationsnummer.
      Zweck: Abrechnung und Rechnungsstellung.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. b und lit. c DSGVO (§ 14 UStG).
 
-  c) Kaufdaten
+  **c) Kaufdaten**
      Gekaufte Produkte, Menge, Einzel- und Gesamtpreis, Zeitpunkt, Automat und die
      Zahlungsart als Kategorie.
      Zweck: Kaufabwicklung, digitaler Kassenbon, Buchhaltung.
@@ -161,7 +168,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      Zusammenschau aber einen ähnlichen Aussagewert haben. Wir nennen das hier
      ausdrücklich, weil es nicht auf der Hand liegt.
 
-  d) Individuelle Angebote (Profiling)
+  **d) Individuelle Angebote (Profiling)**
      Wir werten Ihre Kaufhistorie der letzten 90 Tage aus, um das von Ihnen am
      häufigsten gekaufte Produkt zu ermitteln, und bieten Ihnen genau darauf einen
      Rabatt an. Verwendet werden ausschliesslich Produkt und Menge Ihrer eigenen
@@ -175,26 +182,26 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
      Kundenbindung und an einem Angebot, das zu Ihnen passt).
 
-     Sie können dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO) — formlos
+     **Sie können dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO)** — formlos
      an die im Impressum genannte Adresse. Danach erhalten Sie nur noch allgemeine
      Angebote. Ein Nachteil entsteht Ihnen dadurch nicht.
 
-  e) Geburtstags- und Jubiläumsgutscheine
+  **e) Geburtstags- und Jubiläumsgutscheine**
      Auf Grundlage Ihres Geburtsdatums beziehungsweise des Anmeldedatums.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO; Widerspruch wie unter d).
 
-  f) Produktbewertungen
+  **f) Produktbewertungen**
      Ausschliesslich eine Bewertungszahl zu einem Produkt. Wir speichern dazu keinen
      Freitext, keinen Namen und keine IP-Adresse. Bewertungen werden nicht mit Ihrem
      Namen veröffentlicht.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Sortimentsgestaltung).
 
-  g) Kontaktanfragen
+  **g) Kontaktanfragen**
      Kategorie, Betreff und Nachrichtentext.
      Zweck: Bearbeitung Ihres Anliegens.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. b beziehungsweise lit. f DSGVO.
 
-  h) E-Mail-Versand
+  **h) E-Mail-Versand**
      Wir versenden Systemnachrichten (Bestätigung der Registrierung, Passwort
      zurücksetzen, Abo- und Kündigungsbestätigungen). Diese sind zur Vertragserfüllung
      erforderlich, Art. 6 Abs. 1 lit. b DSGVO, teils gesetzlich vorgeschrieben
@@ -208,20 +215,20 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      Nachweis (Art. 7 Abs. 1 DSGVO). Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO,
      § 7 Abs. 2 Nr. 2 UWG.
 
-  i) Protokolle
+  **i) Protokolle**
      Ein Änderungsprotokoll hält fest, wer welchen Datensatz wann geändert hat,
      einschliesslich des Standes vor und nach der Änderung. Ein Versandprotokoll hält
      fest, welche E-Mail wann an wen mit welchem Inhalt verschickt wurde.
      Zweck: Nachvollziehbarkeit, Missbrauchserkennung, Nachweis des Versands.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. f und lit. c DSGVO.
 
-  j) Betriebliche Nachweise (betrifft nur Beschäftigte und Gesellschafter)
+  **j) Betriebliche Nachweise (betrifft nur Beschäftigte und Gesellschafter)**
      HACCP- und Hygieneprotokolle, Belehrungen nach IfSG, Wartungs- und
      Reinigungsnachweise, Buchhaltungsdaten, elektronische Unterschriften.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit LMHV, IfSG, AO, HGB.
 
 
-2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)
+**2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)**
 
   Die App speichert Ihre Anmeldesitzung und Ihre Anzeigeeinstellungen lokal auf Ihrem
   Gerät. Beides ist für den von Ihnen ausdrücklich gewünschten Dienst unbedingt
@@ -233,7 +240,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   bräuchten.
 
 
-3) WAS WIR AUSDRÜCKLICH NICHT TUN
+**3) WAS WIR AUSDRÜCKLICH NICHT TUN**
 
   Wir haben unser System daraufhin geprüft und halten hier fest:
 
@@ -246,7 +253,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     erhebt weder GPS-, WLAN- noch Bluetooth-Position.
   * Keine IP-Adressen in unseren Anwendungsdaten. Wir speichern sie weder zu
     Bewertungen noch zu Kontaktanfragen oder Protokolleinträgen.
-  * Keine künstliche Intelligenz. Es werden keine Daten an Sprachmodelle oder
+  * **Keine künstliche Intelligenz.** Es werden keine Daten an Sprachmodelle oder
     KI-Dienste übermittelt. Die individuellen Angebote entstehen durch eine feste
     Rechenregel in unserer Datenbank, nicht durch KI.
   * Keine Zahlungsdaten. Wir speichern weder Kartennummer noch IBAN noch
@@ -260,7 +267,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   * Kein Verkauf und keine Weitergabe Ihrer Daten zu Werbezwecken Dritter.
 
 
-4) WER IHRE DATEN ZU SEHEN BEKOMMT
+**4) WER IHRE DATEN ZU SEHEN BEKOMMT**
 
   * Supabase (Datenbank, Anmeldung, Serverfunktionen). Verarbeitung in der Region
     Frankfurt am Main. Auftragsverarbeitung nach Art. 28 DSGVO.
@@ -284,7 +291,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   nichts — der Aufruf erfolgt erst, wenn Sie den Link antippen.
 
 
-5) ÜBERMITTLUNG IN DIE USA
+**5) ÜBERMITTLUNG IN DIE USA**
 
   Zwei der oben genannten Empfänger sitzen in den USA: GitHub (Auslieferung der
   Web-App) und DocuSign (interne Unterschriften). Für diese Übermittlungen stützen wir
@@ -295,11 +302,11 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   App aus dem Store nutzt, ist von dieser Übermittlung nicht betroffen.
 
 
-6) WIE LANGE WIR SPEICHERN
+**6) WIE LANGE WIR SPEICHERN**
 
   * Konto- und Kundenstammdaten: bis zur Löschung des Kontos, danach nur noch, soweit
     gesetzliche Aufbewahrungspflichten bestehen.
-  * Kauf- und Rechnungsdaten: 10 Jahre (§ 147 AO, § 257 HGB).
+  * **Kauf- und Rechnungsdaten: 10 Jahre (§ 147 AO, § 257 HGB).**
   * Einwilligungen und deren Widerruf: bis zum Ablauf möglicher Nachweispflichten.
   * Individuelle Angebote: drei Tage Gültigkeit; der Datensatz bleibt zur
     Missbrauchsvermeidung darüber hinaus bestehen.
@@ -311,7 +318,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     Nachweispflicht entgegensteht.
 
 
-7) IHRE RECHTE
+**7) IHRE RECHTE**
 
   * Auskunft (Art. 15): In der App unter „Meine Daten exportieren" erhalten Sie
     sofort eine vollständige Kopie Ihrer gespeicherten Daten.
@@ -319,7 +326,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     Kundenservice wenden.
   * Löschung (Art. 17): In der App unter „Kontolöschung beantragen". Sie erhalten
     umgehend eine Eingangsbestätigung per E-Mail; wir bearbeiten den Antrag
-    unverzüglich, spätestens binnen eines Monats (Art. 12 Abs. 3 DSGVO). Daten, die
+    unverzüglich, **spätestens binnen eines Monats (Art. 12 Abs. 3 DSGVO)**. Daten, die
     wir handels- oder steuerrechtlich aufbewahren müssen, werden für die weitere
     Verwendung gesperrt und erst nach Fristablauf gelöscht.
   * Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20).
@@ -331,7 +338,7 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     Landesbeauftragte für den Datenschutz Sachsen-Anhalt, Leiterstr. 9, 39104 Magdeburg.
 
 
-8) AUTOMATISIERTE ENTSCHEIDUNGEN
+**8) AUTOMATISIERTE ENTSCHEIDUNGEN**
 
   Eine automatisierte Entscheidung im Sinne von Art. 22 DSGVO, die Ihnen gegenüber
   rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt,
@@ -344,16 +351,16 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   Zahlungsfähigkeit oder Ihres Verhaltens statt.
 
 
-9) SICHERHEIT
+**9) SICHERHEIT**
 
-  Alle Verbindungen sind mit TLS verschlüsselt. Passwörter speichern wir ausschliesslich
+  **Alle Verbindungen sind mit TLS verschlüsselt.** Passwörter speichern wir ausschliesslich
   als bcrypt-Hash, nie im Klartext. Der Zugriff auf Daten ist in der Datenbank selbst
   zeilenweise abgesichert (Row Level Security): Jede Abfrage kann technisch nur die
   Daten des jeweils angemeldeten Kontos zurückgeben — auch dann, wenn jemand die
   Kennung eines fremden Kontos kennt. Wir haben das mit echten Testkonten überprüft.
 
 
-10) ÄNDERUNGEN
+**10) ÄNDERUNGEN**
 
   Diese Erklärung hat den oben genannten Stand. Ändert sich die Verarbeitung —
   insbesondere bei Aktivierung von Push-Nachrichten, einer Nutzungsanalyse oder eines
@@ -367,12 +374,12 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   // auffindbar sein, und in einem 11-Punkte-Vertragswerk findet sie
   // niemand. Der Inhalt ist mit § 6 der Nutzungsbedingungen abgestimmt.
   static const withdrawal = '''
-Widerrufsbelehrung ($version)
+**Widerrufsbelehrung ($version)**
 
 
-WAREN AUS DEM AUTOMATEN
+**WAREN AUS DEM AUTOMATEN**
 
-Für Waren, die du unmittelbar am Automaten entnimmst, besteht kein Widerrufsrecht.
+Für Waren, die du unmittelbar am Automaten entnimmst, **besteht kein Widerrufsrecht**.
 Die Ware wird dir sofort übergeben; ein Fernabsatzvertrag im Sinne der §§ 355 ff. BGB
 kommt dabei nicht zustande.
 
@@ -381,12 +388,12 @@ gesetzlichen Gewährleistungsrechte. Melde das bitte über das Kontaktformular i
 App oder per E-Mail — wir erstatten oder ersetzen.
 
 
-ABONNEMENTS (DIGITALE DIENSTLEISTUNG)
+**ABONNEMENTS (DIGITALE DIENSTLEISTUNG)**
 
-Widerrufsrecht
+**Widerrufsrecht**
 
-Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu
-widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.
+Du hast das Recht, **binnen vierzehn Tagen ohne Angabe von Gründen** diesen Vertrag zu
+widerrufen. **Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.**
 
 Um dein Widerrufsrecht auszuüben, musst du uns
 
@@ -404,7 +411,7 @@ vorgeschrieben ist.
 Zur Wahrung der Widerrufsfrist reicht es aus, dass du die Mitteilung über die Ausübung
 des Widerrufsrechts vor Ablauf der Widerrufsfrist absendest.
 
-Folgen des Widerrufs
+**Folgen des Widerrufs**
 
 Wenn du diesen Vertrag widerrufst, haben wir dir alle Zahlungen, die wir von dir
 erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag
@@ -414,23 +421,23 @@ ursprünglichen Transaktion eingesetzt hast, es sei denn, mit dir wurde ausdrüc
 etwas anderes vereinbart; in keinem Fall werden dir wegen dieser Rückzahlung Entgelte
 berechnet.
 
-Vorzeitiger Beginn der Leistung
+**Vorzeitiger Beginn der Leistung**
 
 Hast du verlangt, dass die Leistung während der Widerrufsfrist beginnen soll, so hast
 du uns einen angemessenen Betrag zu zahlen, der dem Anteil der bis zum Widerruf bereits
 erbrachten Leistung im Vergleich zum Gesamtumfang der vertraglich vereinbarten Leistung
 entspricht.
 
-Erlöschen beim Lifetime-Abo
+**Erlöschen beim Lifetime-Abo**
 
-Beim Lifetime-Abo erlischt dein Widerrufsrecht, wenn wir die Leistung vollständig
+Beim Lifetime-Abo **erlischt dein Widerrufsrecht**, wenn wir die Leistung vollständig
 bereitgestellt haben und du zuvor ausdrücklich zugestimmt hast, dass wir vor Ablauf der
 Widerrufsfrist beginnen, und du bestätigt hast, dass du dein Widerrufsrecht damit
 verlierst (§ 356 Abs. 5 BGB). Wir holen beide Bestätigungen vor dem Abschluss
 ausdrücklich ein.
 
 
-MUSTER-WIDERRUFSFORMULAR
+**MUSTER-WIDERRUFSFORMULAR**
 
 Wenn du den Vertrag widerrufen willst, fülle dieses Formular aus und sende es zurück.
 
@@ -453,7 +460,7 @@ Wenn du den Vertrag widerrufen willst, fülle dieses Formular aus und sende es z
   (*) Unzutreffendes streichen.
 
 
-KÜNDIGUNG IST ETWAS ANDERES
+**KÜNDIGUNG IST ETWAS ANDERES**
 
 Der Widerruf beendet den Vertrag rückwirkend innerhalb der ersten 14 Tage. Willst du
 ein laufendes Abo zum Ende des Abrechnungszeitraums beenden, ist das eine Kündigung —
@@ -463,10 +470,10 @@ Anmeldung erreichbar ist (§ 312k BGB).
 
   // ── Zahlungsinformationen ──────────────────────────────────────────────────
   static const payment = '''
-Zahlungsinformationen ($version)
+**Zahlungsinformationen ($version)**
 
 
-AM AUTOMATEN
+**AM AUTOMATEN**
 
 Du kannst an unseren Automaten wie folgt bezahlen:
 
@@ -476,32 +483,32 @@ Du kannst an unseren Automaten wie folgt bezahlen:
   • kontaktlos
 
 Alle Preise verstehen sich als Endpreise einschließlich der gesetzlichen
-Umsatzsteuer. Der am Automaten angezeigte Preis gilt.
+Umsatzsteuer. **Der am Automaten angezeigte Preis gilt.**
 
-Welche Daten wir dabei bekommen
+**Welche Daten wir dabei bekommen**
 
 Wir speichern zu deinem Kauf ausschließlich die Zahlungsart als Kategorie — also
 etwa „EC-Karte" — zusammen mit Betrag, Zeitpunkt und Automat.
 
-Wir speichern KEINE Kartennummer, KEINE IBAN und KEINE Zahlungstoken. Wir haben
+**Wir speichern KEINE Kartennummer, KEINE IBAN und KEINE Zahlungstoken.** Wir haben
 auch keinen Zahlungsdienstleister eingebunden. Die Zahlung selbst wickeln das
 Kartenterminal am Automaten und dein Kartenanbieter ab; wir erfahren davon nur,
 dass und womit bezahlt wurde.
 
 
-ABONNEMENTS
+**ABONNEMENTS**
 
 Für erweiterte App-Funktionen bieten wir drei Modelle an, alle Preise inklusive
 gesetzlicher Umsatzsteuer:
 
-  • Monats-Abo    0,99 € pro Monat
-  • Jahres-Abo    9,99 € pro Jahr
-  • Lifetime-Abo  79,99 € einmalig
+  • Monats-Abo    **0,99 € pro Monat**
+  • Jahres-Abo    **9,99 € pro Jahr**
+  • Lifetime-Abo  **79,99 € einmalig**
 
 Das Jahres-Abo entspricht rechnerisch zehn Monatsbeiträgen; zwei Monate sind
 darin geschenkt.
 
-Abrechnung
+**Abrechnung**
 
 Nach Veröffentlichung der App im Apple App Store und bei Google Play läuft die
 Abrechnung ausschließlich über den jeweiligen Store. Es gelten ergänzend dessen
@@ -509,16 +516,16 @@ Zahlungs- und Abo-Bedingungen; die Verwaltung und Kündigung deines Abos ist dan
 auch in den Store-Einstellungen möglich.
 
 Bis dahin ist die Auswahl eines Abo-Modells in der App eine unverbindliche
-Vormerkung. Es wird nichts abgebucht, und es entsteht keine Zahlungspflicht.
+Vormerkung. **Es wird nichts abgebucht, und es entsteht keine Zahlungspflicht.**
 
-Mindestalter
+**Mindestalter**
 
-Kostenpflichtige Abos können nur volljährige Personen abschließen. Minderjährige
+**Kostenpflichtige Abos können nur volljährige Personen abschließen.** Minderjährige
 brauchen die Zustimmung ihrer gesetzlichen Vertreter. Die kostenlose Nutzung der
 App sowie das Bonus- und Rabattprogramm stehen allen Altersgruppen offen.
 
 
-RECHNUNGEN UND BELEGE
+**RECHNUNGEN UND BELEGE**
 
 Den digitalen Kassenbon zu einem Kauf kannst du in der App jederzeit erzeugen. Er
 wird bei jedem Abruf neu erstellt und nicht dauerhaft als Datei gespeichert.
@@ -534,17 +541,17 @@ melde dich bitte über das Kontaktformular.
   // Code geprüft: kein Analytics-Paket in pubspec.yaml, keine Tracking-SDKs,
   // Google Fonts durch einen Shim in web/index.html unterbunden.
   static const cookies = '''
-Cookies und Tracking ($version)
+**Cookies und Tracking ($version)**
 
 
-DIE KURZE ANTWORT
+**DIE KURZE ANTWORT**
 
-Wir setzen keine Cookies zu Analyse- oder Werbezwecken. Wir binden keine
+**Wir setzen keine Cookies zu Analyse- oder Werbezwecken.** Wir binden keine
 Tracking-Dienste ein. Deshalb fragt dich diese App auch nicht nach einer
 Cookie-Einwilligung — es gibt nichts, wofür wir sie bräuchten.
 
 
-WAS AUF DEINEM GERÄT GESPEICHERT WIRD
+**WAS AUF DEINEM GERÄT GESPEICHERT WIRD**
 
 Zwei Dinge, beide technisch notwendig:
 
@@ -557,7 +564,7 @@ die Ausnahme des § 25 Abs. 2 Nr. 2 TDDDG; eine Einwilligung ist dafür nicht
 nötig. Meldest du dich ab, wird die Sitzung gelöscht.
 
 
-WAS WIR NICHT EINSETZEN
+**WAS WIR NICHT EINSETZEN**
 
 Wir haben unseren Code darauf geprüft. Keines der folgenden Werkzeuge ist
 eingebunden — auch nicht abgeschaltet im Hintergrund:
@@ -574,7 +581,7 @@ liegen in der App, und Anfragen an Google-Schriftserver werden technisch
 unterbunden. Deine IP-Adresse geht damit auch nicht auf diesem Weg an Dritte.
 
 
-WENN SICH DAS ÄNDERT
+**WENN SICH DAS ÄNDERT**
 
 Sollten wir künftig eine Reichweitenmessung einsetzen wollen, holen wir vorher
 deine Einwilligung ein — getrennt, freiwillig und genauso einfach widerrufbar
@@ -593,12 +600,12 @@ wie erteilt. Bis dahin gilt diese Seite.
   // der die App nicht bedienen kann. Deshalb bleibt die Erklärung
   // konkret: was messbar umgesetzt ist, und was messbar fehlt.
   static const accessibility = '''
-Erklärung zur Barrierefreiheit ($version)
+**Erklärung zur Barrierefreiheit ($version)**
 
 Gilt für die Bördesnack24-App und ihre Web-Fassung.
 
 
-1) DIE RECHTSLAGE, EHRLICH VORWEG
+**1) DIE RECHTSLAGE, EHRLICH VORWEG**
 
 Die Bördesnack24 GbR ist ein Kleinstunternehmen im Sinne von § 2 Nr. 17
 Barrierefreiheitsstärkungsgesetz (BFSG): Sie beschäftigt keine Arbeitnehmerinnen
@@ -617,12 +624,12 @@ Produkte. Für Produkte, die unter § 1 Abs. 2 BFSG fallen, treffen die Pflichte
 Hersteller, Einführer und Händler. Wir betreiben unsere Verkaufsautomaten, wir
 bringen sie nicht in Verkehr.
 
-Und das Wichtigste: Dass wir nicht müssen, heisst nicht, dass wir nicht wollen.
+Und das Wichtigste: **Dass wir nicht müssen, heisst nicht, dass wir nicht wollen.**
 Der Rest dieser Seite sagt konkret, wie weit wir sind — mit Zahlen, nicht mit
 Absichtserklärungen.
 
 
-2) WAS DIE APP KANN
+**2) WAS DIE APP KANN**
 
 Damit klar ist, worauf sich diese Erklärung bezieht:
 
@@ -639,7 +646,7 @@ gibt es in dieser App nicht — wir führen es hier auf, weil ältere
 Beschreibungen etwas anderes nahegelegt haben.
 
 
-3) WAS MESSBAR UMGESETZT IST
+**3) WAS MESSBAR UMGESETZT IST**
 
   • Bedienelemente sind mindestens 44 x 44 Punkt gross. Das wird automatisch
     geprüft: Die Testfälle laufen bei jeder Codeänderung gegen Apples und
@@ -655,7 +662,7 @@ Beschreibungen etwas anderes nahegelegt haben.
   • Fehlermeldungen sagen, was zu tun ist, statt nur dass etwas schieflief.
 
 
-4) WO WIR NOCH NICHT SIND
+**4) WO WIR NOCH NICHT SIND**
 
 Wir nennen das mit Zahlen, weil eine vage Formulierung niemandem hilft:
 
@@ -678,7 +685,7 @@ funktioniert. Das ist kein Zugeständnis, sondern der schnellere Weg, solange di
 Lücke besteht.
 
 
-5) BARRIERE MELDEN
+**5) BARRIERE MELDEN**
 
 Sag uns bitte Bescheid, wenn du etwas nicht bedienen konntest. Hilfreich sind:
 
@@ -691,10 +698,10 @@ Sag uns bitte Bescheid, wenn du etwas nicht bedienen konntest. Hilfreich sind:
   Telefon: 0157 30065762
   Bördesnack24 GbR, Sülldorfer Str. 3A, 39171 Sülzetal OT Osterweddingen
 
-Wir antworten innerhalb von zwei Wochen.
+**Wir antworten innerhalb von zwei Wochen.**
 
 
-6) WENN UNSERE ANTWORT NICHT REICHT
+**6) WENN UNSERE ANTWORT NICHT REICHT**
 
 Für Barrierefreiheit von Produkten und Dienstleistungen ist bundesweit die
 Marktüberwachungsstelle der Länder zuständig:
@@ -709,7 +716,7 @@ voraussichtlich nicht als Verstoss verfolgen können. Deine Rückmeldung an uns
 ist deshalb der wirksamere Weg — und uns ist sie willkommen.
 
 
-7) STAND
+**7) STAND**
 
 Erstellt und zuletzt geprüft am 9. August 2026. Wir überprüfen diese Erklärung,
 wenn sich die App wesentlich ändert, wenn wir Beschäftigte einstellen — dann
@@ -735,10 +742,10 @@ entfällt die Ausnahme — oder wenn sich die Rechtslage ändert.
   // Zwecke. Die Registrierung kennt aber ausdrücklich Geschäftskunden mit
   // Firmenname, Rechnungsanschrift, Steuernummer und USt-IdNr.
   static const terms = '''
-Nutzungsbedingungen ($version)
+**Nutzungsbedingungen ($version)**
 
 
-1) WER WIR SIND UND WOFÜR DIESE BEDINGUNGEN GELTEN
+**1) WER WIR SIND UND WOFÜR DIESE BEDINGUNGEN GELTEN**
 
 Betreiberin der Bördesnack24-App ist die Bördesnack24 GbR, Sülldorfer Str. 3A,
 39171 Sülzetal OT Osterweddingen, boerdesnack24@gmail.com (nachfolgend „wir").
@@ -753,7 +760,7 @@ Tracking-Hinweise sowie die Barrierefreiheitserklärung. Wo diese Bedingungen
 darauf verweisen, ist der dortige Text massgeblich.
 
 
-2) WAS DIE APP KANN
+**2) WAS DIE APP KANN**
 
   • Produkte, Preise und Verfügbarkeit an unseren Automaten ansehen
   • Automatenstandorte finden
@@ -773,7 +780,7 @@ Der Funktionsumfang kann sich durch Weiterentwicklung ändern; Abschnitt 10
 regelt, was dabei gilt.
 
 
-3) WER DIE APP NUTZEN DARF
+**3) WER DIE APP NUTZEN DARF**
 
 Die App steht Privatpersonen und Geschäftskunden offen. Bei der Registrierung
 wählst du aus, als was du dich anmeldest; als Geschäftskunde erheben wir
@@ -792,7 +799,7 @@ Kostenlose Nutzung, Bonusprogramm und Rabatte stehen allen Altersgruppen offen.
 Für kostenpflichtige Abos gilt Abschnitt 6.
 
 
-4) KONTO UND ZUGANG
+**4) KONTO UND ZUGANG**
 
 Manche Funktionen setzen ein Konto voraus. Bei der Registrierung erheben wir
 Name, E-Mail-Adresse, Passwort und Geburtsdatum; welche Daten wir wozu
@@ -810,7 +817,7 @@ einen erheblichen Verstoss gegen diese Bedingungen oder gegen geltendes Recht
 bestehen. Wir nennen dir dabei den Grund, soweit uns das rechtlich möglich ist.
 
 
-5) KUNDENKARTE, COUPONS UND INDIVIDUELLE ANGEBOTE
+**5) KUNDENKARTE, COUPONS UND INDIVIDUELLE ANGEBOTE**
 
 Die digitale Kundenkarte ist ein QR-Code in deinem Konto. Damit verbundene
 Rabatte und Coupons zeigen wir dir in der App mit ihren Bedingungen an —
@@ -834,17 +841,17 @@ nur noch allgemeine Angebote. Einzelheiten stehen in der Datenschutzerklärung
 und auf der Info-Seite zur automatisierten Auswahl.
 
 
-6) ABONNEMENTS
+**6) ABONNEMENTS**
 
 Wir bieten drei Modelle an, alle Preise inklusive gesetzlicher Umsatzsteuer:
 
-  • Monats-Abo    0,99 € pro Monat
-  • Jahres-Abo    9,99 € pro Jahr
-  • Lifetime-Abo  79,99 € einmalig
+  • Monats-Abo    **0,99 € pro Monat**
+  • Jahres-Abo    **9,99 € pro Jahr**
+  • Lifetime-Abo  **79,99 € einmalig**
 
 Laufzeit: Das Monats-Abo verlängert sich um je einen Monat, das Jahres-Abo um je
 ein Jahr, wenn du nicht zum Ende des laufenden Abrechnungszeitraums kündigst.
-Das Lifetime-Abo ist eine Einmalzahlung ohne Verlängerung.
+**Das Lifetime-Abo ist eine Einmalzahlung ohne Verlängerung.**
 
 Kontingent Lifetime („Founders Edition"): Dieses Modell ist auf insgesamt
 20 Konten begrenzt. Ist das Kontingent ausgeschöpft, steht es nicht mehr zur
@@ -855,9 +862,9 @@ Wechsel: Zwischen Monats- und Jahres-Abo kannst du jederzeit wechseln, wirksam
 zum nächsten Abrechnungszeitraum. Nach Abschluss des Lifetime-Abos ist ein
 Wechsel ausgeschlossen; darauf weisen wir vorher gesondert hin.
 
-Jede Auswahl und jeder Wechsel wird per E-Mail bestätigt.
+**Jede Auswahl und jeder Wechsel wird per E-Mail bestätigt.**
 
-Mindestalter: Kostenpflichtige Abos können nur volljährige Personen abschliessen.
+**Mindestalter: Kostenpflichtige Abos können nur volljährige Personen abschliessen.**
 Minderjährige brauchen die Zustimmung ihrer gesetzlichen Vertreter (§§ 106 ff.
 BGB); der Taschengeldparagraph (§ 110 BGB) greift bei laufenden Abos in der
 Regel nicht. Vor jedem Abschluss ist die Volljährigkeit beziehungsweise das
@@ -869,9 +876,9 @@ Google; bis dahin ist die Auswahl eine unverbindliche Vormerkung ohne
 Abbuchung.
 
 
-7) KÜNDIGUNG UND WIDERRUF
+**7) KÜNDIGUNG UND WIDERRUF**
 
-Kündigen kannst du jederzeit zum Ende des laufenden Abrechnungszeitraums — über
+**Kündigen kannst du jederzeit zum Ende des laufenden Abrechnungszeitraums** — über
 die Schaltfläche „Verträge hier kündigen", die auch ohne Anmeldung erreichbar
 ist (§ 312k BGB), im Kundenbereich unter „Mein Abo", und nach der
 Store-Veröffentlichung zusätzlich über die Abo-Verwaltung des Stores. Den Zugang
@@ -883,7 +890,7 @@ rückwirkend innerhalb der ersten 14 Tage. Die vollständige Belehrung samt
 Musterformular steht auf der Seite „Widerrufsbelehrung".
 
 
-8) PRODUKTINFORMATIONEN UND PREISE
+**8) PRODUKTINFORMATIONEN UND PREISE**
 
 Verfügbarkeiten können sich kurzfristig ändern; eine Anzeige in der App ist
 deshalb keine Zusicherung, dass das Produkt beim Kauf noch vorrätig ist.
@@ -896,7 +903,7 @@ Wir halten Produktangaben aktuell und richtig. Für offensichtliche Schreib- ode
 unberührt.
 
 
-9) BEWERTUNGEN
+**9) BEWERTUNGEN**
 
 Du kannst ein Produkt mit 1 bis 5 Sternen bewerten, ein Mal je Produkt, und die
 Bewertung später ändern. Ein Freitextfeld gibt es nicht: Wir speichern
@@ -911,7 +918,7 @@ Bewertungen sollen auf eigener Erfahrung beruhen. Bewertungen mehrfach
 abzugeben, indem man mehrere Konten anlegt, ist unzulässig.
 
 
-10) VERFÜGBARKEIT, UPDATES UND ÄNDERUNGEN
+**10) VERFÜGBARKEIT, UPDATES UND ÄNDERUNGEN**
 
 Wir bemühen uns um hohe Verfügbarkeit, können sie aber nicht ununterbrochen
 zusichern. Einschränkungen können durch Wartung, Störungen, Sicherheitsmassnahmen
@@ -928,7 +935,7 @@ Wir zeigen dir die Änderung vorher an. Wesentliche vertragliche Rechte schränk
 wir ohne deine ausdrückliche Zustimmung nicht nachträglich ein.
 
 
-11) WAS NICHT ERLAUBT IST
+**11) WAS NICHT ERLAUBT IST**
 
   • Daten automatisiert oder massenhaft auslesen, etwa per Bot oder Scraper
   • Sicherheits- oder Zugangsmechanismen umgehen
@@ -942,7 +949,7 @@ Findest du eine Sicherheitslücke, schreib uns bitte, bevor du sie
 veröffentlichst. Wir gehen solchen Hinweisen nach und bedanken uns dafür.
 
 
-12) RECHTE AN DER APP
+**12) RECHTE AN DER APP**
 
 App, Software, Texte, Grafiken, Logos und Datenbanken sind urheber- oder
 sonst schutzrechtlich geschützt. Die Rechte liegen bei uns oder bei den
@@ -953,7 +960,7 @@ nutzen. Weitergehende Verwertung ist nur zulässig, soweit das Gesetz sie
 erlaubt oder wir ausdrücklich zustimmen.
 
 
-13) DATENSCHUTZ
+**13) DATENSCHUTZ**
 
 Was wir wozu verarbeiten, steht in der Datenschutzerklärung. Sie gehört zu den
 rechtlichen Informationen der App, ist aber kein Bestandteil dieser
@@ -966,7 +973,7 @@ nicht, und deshalb fragt die App auch nicht nach einer Einwilligung. Einzelheite
 auf der Seite „Cookies und Tracking".
 
 
-14) KONTO LÖSCHEN
+**14) KONTO LÖSCHEN**
 
 Du kannst die Löschung deines Kontos jederzeit in der App beantragen. Du
 erhältst umgehend eine Eingangsbestätigung; wir bearbeiten den Antrag
@@ -978,7 +985,7 @@ bleiben für die Dauer der Fristen gespeichert und werden für die weitere
 Verwendung gesperrt.
 
 
-15) HAFTUNG
+**15) HAFTUNG**
 
 Für Schäden aus der Verletzung von Leben, Körper oder Gesundheit haften wir
 unbeschränkt, ebenso bei Vorsatz und grober Fahrlässigkeit.
@@ -996,7 +1003,7 @@ Hostingdiensten, Cyberangriffe oder behördliche Massnahmen — haften wir nicht
 Deine gesetzlichen Ansprüche bleiben unberührt.
 
 
-16) VERBRAUCHERRECHTE UND SCHLUSSBESTIMMUNGEN
+**16) VERBRAUCHERRECHTE UND SCHLUSSBESTIMMUNGEN**
 
 Zwingende Verbraucherrechte — Gewährleistung, Widerruf, Kündigung, Datenschutz —
 werden durch diese Bedingungen nicht eingeschränkt.

@@ -90,6 +90,27 @@ void main() {
     }
   });
 
+  testWidgets('Der Screen stellt Auszeichnungen fett dar', (tester) async {
+    // Prüft die Verdrahtung, nicht den Parser: Wäre `legalSpans` im Screen
+    // vergessen worden, blieben alle Tests in legal_rich_text_test.dart
+    // trotzdem grün — der Text stünde dann nur mit Sternchen auf dem
+    // Bildschirm.
+    await pumpLegal(tester, const WithdrawalScreen());
+    final feld = tester.widget<SelectableText>(find.byType(SelectableText));
+    final teile = <String>[];
+    var fett = 0;
+    feld.textSpan!.visitChildren((s) {
+      if (s is TextSpan) {
+        if (s.text != null) teile.add(s.text!);
+        if (s.style?.fontWeight == FontWeight.w700) fett++;
+      }
+      return true;
+    });
+    expect(fett, greaterThan(0), reason: 'nichts wurde fett gesetzt');
+    expect(teile.join(), isNot(contains('**')));
+    expect(teile.join(), contains('Widerrufsbelehrung'));
+  });
+
   testWidgets('Die Übersicht verlinkt jeden Rechtstext', (tester) async {
     // Seit die sieben Texte hinter einer Kachel liegen, ist diese Seite der
     // einzige Weg dorthin. Fällt hier ein Eintrag heraus, ist der Text für
