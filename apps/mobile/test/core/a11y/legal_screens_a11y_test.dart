@@ -1,3 +1,5 @@
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/features/legal/presentation/legal_overview_screen.dart';
 import 'package:boerdesnack24/features/legal/presentation/legal_screens.dart';
 import 'package:boerdesnack24/features/legal/presentation/legal_texts.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +36,7 @@ Future<void> expectAccessible(WidgetTester tester) async {
 
 void main() {
   const seiten = <String, Widget>{
+    'Übersicht': LegalOverviewScreen(),
     'Impressum': ImprintScreen(),
     'Datenschutzerklärung': PrivacyScreen(),
     'Nutzungsbedingungen': TermsScreen(),
@@ -85,6 +88,55 @@ void main() {
     ]) {
       expect(LegalTexts.imprint, contains(pflicht));
     }
+  });
+
+  testWidgets('Die Übersicht verlinkt jeden Rechtstext', (tester) async {
+    // Seit die sieben Texte hinter einer Kachel liegen, ist diese Seite der
+    // einzige Weg dorthin. Fällt hier ein Eintrag heraus, ist der Text für
+    // den Nutzer verschwunden — auffallen würde das sonst niemandem, denn
+    // die Seite selbst funktioniert ja weiter.
+    await pumpLegal(tester, const LegalOverviewScreen());
+    for (final titel in [
+      'Impressum',
+      'Datenschutzerklärung',
+      'Nutzungsbedingungen',
+      'Widerrufsbelehrung',
+      'Zahlungsinformationen',
+      'Cookies und Tracking',
+      'Barrierefreiheit',
+    ]) {
+      expect(find.text(titel), findsOneWidget, reason: '$titel fehlt');
+    }
+  });
+
+  test('Die Übersicht zeigt auf registrierte Routen, ohne Dubletten', () {
+    // Ein Eintrag mit Tippfehler im Pfad sieht in der Liste völlig normal
+    // aus und läuft erst beim Antippen ins Leere.
+    const registriert = {
+      AppRoutes.imprint,
+      AppRoutes.privacy,
+      AppRoutes.terms,
+      AppRoutes.cancellation,
+      AppRoutes.withdrawal,
+      AppRoutes.paymentInfo,
+      AppRoutes.cookies,
+      AppRoutes.accessibility,
+    };
+    final ziele = legalOverviewEntries.map((e) => e.route).toList();
+    expect(ziele.toSet().length, ziele.length, reason: 'doppelter Eintrag');
+    for (final ziel in ziele) {
+      expect(registriert, contains(ziel));
+    }
+  });
+
+  test('Der Kündigungsweg steht in der Übersicht', () {
+    // § 312k Abs. 2 BGB: ständig verfügbar und unmittelbar erreichbar.
+    // Vorher war das Formular nur von der Anmeldeseite und aus dem
+    // Chat-Assistenten heraus verlinkt — für Angemeldete also nirgends.
+    expect(
+      legalOverviewEntries.map((e) => e.route),
+      contains(AppRoutes.cancellation),
+    );
   });
 
   test('Widerrufsbelehrung enthält Frist, Adressat und Musterformular', () {

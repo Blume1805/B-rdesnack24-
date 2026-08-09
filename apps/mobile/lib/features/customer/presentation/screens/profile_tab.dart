@@ -172,55 +172,36 @@ class ProfileTab extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.s4),
+        // Einwilligungen sind eine Einstellung, kein Rechtstext — deshalb
+        // eine eigene Gruppe und nicht in der Übersicht darunter. Wer sein
+        // Marketing-Häkchen zurücknehmen will, sucht es nicht zwischen
+        // Impressum und Widerrufsbelehrung.
         _ProfileGroup(
-          eyebrow: 'Rechtliches',
+          eyebrow: 'Einwilligungen',
           children: [
             _ProfileRow(
               icon: Icons.shield_outlined,
-              title: 'Einwilligungen',
+              title: 'Einwilligungen verwalten',
               subtitle: 'Analyse, Marketing, Karten',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ConsentScreen()),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        // Eine Kachel statt sieben. Die sieben Rechtstexte standen bis
+        // 09.08.2026 einzeln hier und machten das Profil zu einer langen
+        // Linkliste, in der Belege, Abo und Empfehlungen untergingen.
+        // Die Texte selbst sind unverändert — nur einen Schritt weiter.
+        _ProfileGroup(
+          eyebrow: 'Rechtliches',
+          children: [
             _ProfileRow(
               icon: Icons.gavel_outlined,
-              title: 'Impressum',
-              onTap: () => context.push(AppRoutes.imprint),
-            ),
-            _ProfileRow(
-              icon: Icons.privacy_tip_outlined,
-              title: 'Datenschutzerklärung',
-              onTap: () => context.push(AppRoutes.privacy),
-            ),
-            _ProfileRow(
-              icon: Icons.article_outlined,
-              title: 'Nutzungsbedingungen',
-              onTap: () => context.push(AppRoutes.terms),
-            ),
-            _ProfileRow(
-              icon: Icons.undo_outlined,
-              title: 'Widerrufsbelehrung',
-              subtitle: '14 Tage bei Abos',
-              onTap: () => context.push(AppRoutes.withdrawal),
-            ),
-            _ProfileRow(
-              icon: Icons.payments_outlined,
-              title: 'Zahlungsinformationen',
-              subtitle: 'Zahlarten, Preise, Belege',
-              onTap: () => context.push(AppRoutes.paymentInfo),
-            ),
-            _ProfileRow(
-              icon: Icons.cookie_outlined,
-              title: 'Cookies und Tracking',
-              subtitle: 'Kurz: wir setzen keine',
-              onTap: () => context.push(AppRoutes.cookies),
-            ),
-            _ProfileRow(
-              icon: Icons.accessibility_new_outlined,
-              title: 'Barrierefreiheit',
-              subtitle: 'Erklärung nach BFSG',
-              onTap: () => context.push(AppRoutes.accessibility),
+              title: 'Rechtliches',
+              subtitle: 'Impressum, Datenschutz, Widerruf, Kündigung …',
+              onTap: () => context.push(AppRoutes.legalOverview),
             ),
           ],
         ),

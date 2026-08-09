@@ -11,6 +11,7 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
 import '../../features/legal/presentation/cancellation_screen.dart';
+import '../../features/legal/presentation/legal_overview_screen.dart';
 import '../../features/legal/presentation/legal_screens.dart';
 import '../../features/customer/data/referral_code_inbox.dart';
 import '../di/providers.dart';
@@ -24,6 +25,7 @@ abstract final class AppRoutes {
   static const mfaEnroll = '/security/mfa';
   static const approvals = '/finance/approvals';
   static const mySignatureTasks = '/management/my-signatures';
+  static const legalOverview = '/legal';
   static const imprint = '/legal/imprint';
   static const privacy = '/legal/privacy';
   static const terms = '/legal/terms';
@@ -49,11 +51,24 @@ const _authRoutes = {
 /// Rechtsseiten: in BEIDEN Zuständen erreichbar. Impressum/Datenschutz/AGB
 /// sind Pflichtangaben, die Kündigungsseite muss nach § 312k BGB sogar
 /// ausdrücklich ohne Anmeldung nutzbar sein.
+///
+/// Korrektur (09.08.2026): Vier dieser Seiten standen hier NICHT drin —
+/// Widerruf, Zahlungsangaben, Cookies und Barrierefreiheit. Der Kommentar
+/// weiter unten bei ihren `GoRoute`-Einträgen behauptete das Gegenteil
+/// („ausserhalb des Anmeldezwangs erreichbar"), tatsächlich schickte der
+/// Guard nicht angemeldete Besucher auf `/signin`. Genau der Fall, vor
+/// dem die Regel „Behauptungen vorher prüfen" steht: Die Absicht stand im
+/// Kommentar, umgesetzt war sie nie.
 const _openRoutes = {
+  AppRoutes.legalOverview,
   AppRoutes.imprint,
   AppRoutes.privacy,
   AppRoutes.terms,
   AppRoutes.cancellation,
+  AppRoutes.withdrawal,
+  AppRoutes.paymentInfo,
+  AppRoutes.cookies,
+  AppRoutes.accessibility,
 };
 
 /// go_router mit Auth-Guard: nicht angemeldete Nutzer landen auf /signin.
@@ -115,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const MySignatureTasksScreen(),
       ),
       GoRoute(
+        path: AppRoutes.legalOverview,
+        builder: (context, state) => const LegalOverviewScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.imprint,
         builder: (context, state) => const ImprintScreen(),
       ),
@@ -133,7 +152,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Die vier folgenden Seiten sind wie Impressum und Datenschutz
       // ausserhalb des Anmeldezwangs erreichbar: Widerruf, Zahlungsangaben,
       // Tracking-Hinweise und Barrierefreiheit muss man lesen können, BEVOR
-      // man ein Konto anlegt.
+      // man ein Konto anlegt. Das Registrieren allein macht sie noch nicht
+      // öffentlich — dafür müssen sie in `_openRoutes` stehen, siehe dort.
       GoRoute(
         path: AppRoutes.withdrawal,
         builder: (context, state) => const WithdrawalScreen(),

@@ -26,7 +26,11 @@
 /// Analytics oder ein Zahlungsdienstleister —, muss dieser Text VOR der
 /// Aktivierung nachgezogen werden.
 abstract final class LegalTexts {
-  static const version = 'v3 · 2026-08';
+  // v4 (09.08.2026): Die Rechtsseiten liegen jetzt hinter einer gemeinsamen
+  // Übersicht (`/legal`) statt als sieben Einzelzeilen im Profil. Dabei fiel
+  // auf, dass die Zahl in Abschnitt 4 der Barrierefreiheitserklärung nicht
+  // mehr stimmte — sie ist nachgemessen und korrigiert.
+  static const version = 'v4 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -655,7 +659,7 @@ Beschreibungen etwas anderes nahegelegt haben.
 
 Wir nennen das mit Zahlen, weil eine vage Formulierung niemandem hilft:
 
-  • Screenreader-Beschriftungen sind bislang in 11 von rund 160 Quelldateien
+  • Screenreader-Beschriftungen sind bislang in 12 von 167 Quelldateien
     gepflegt. Die Bausteine des Design-Systems und der Kundenbereich sind am
     weitesten; die internen Verwaltungsansichten sind es nicht. Für Kundinnen
     und Kunden ist der wichtigere Teil abgedeckt, vollständig ist es nicht.
