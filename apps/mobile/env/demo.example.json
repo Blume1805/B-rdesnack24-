@@ -1,0 +1,10 @@
+{
+  "_hinweis": "Konfiguration der oeffentlichen Web-Demo. Wird vom Ablauf .github/workflows/deploy-web.yaml nach demo.json kopiert. Alle Werte sind oeffentlich: SUPABASE_URL und SUPABASE_ANON_KEY landen ohnehin in jedem gebauten Bundle, der Schutz der Daten liegt vollstaendig in den RLS-Policies. Hier gehoert NIEMALS ein service_role- oder secret-Key hinein.",
+  "SUPABASE_URL": "https://nnfsyuglkqycwenwxmuw.supabase.co",
+  "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uZnN5dWdsa3F5Y3dlbnd4bXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTAxNzYsImV4cCI6MjA5ODI2NjE3Nn0.m6j3FzwlgoCh0Etemo_jADVBJNh6HrPzFuzGmVPBbQo",
+  "APP_ENV": "demo",
+  "SENTRY_DSN": "",
+  "POSTHOG_API_KEY": "",
+  "POSTHOG_HOST": "https://eu.posthog.com",
+  "GOOGLE_REVIEW_URL": ""
+}

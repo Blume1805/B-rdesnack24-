@@ -39,5 +39,35 @@ jobs:
       - name: Dependencies
         run: flutter pub get
         working-directory: apps/mobile
+
+      # Ohne diesen Schritt lief der Ablauf noch NIE durch.
+      #
+      # `scripts/deploy_web.sh` baut mit `--dart-define-from-file=env/demo.json`.
+      # Die `.gitignore` schliesst `apps/mobile/env/*.json` aus — die Datei
+      # existiert also nur auf den Rechnern, auf denen sie jemand von Hand
+      # angelegt hat. Auf dem Runner fehlt sie, und der Build bricht ab mit
+      # „Did not find the file passed to --dart-define-from-file". Alle drei
+      # bisherigen Läufe (26.07., 04.08., 09.08.2026) sind genau daran
+      # gescheitert; die Live-Demo wurde bislang von Hand ausgerollt.
+      #
+      # `demo.example.json` liegt im Repository, weil die Ausnahme
+      # `!apps/mobile/env/*.example.json` in der .gitignore genau dafür
+      # gedacht ist. Der Inhalt ist ohne Ausnahme öffentlich: URL und
+      # Anon-Key stehen ohnehin in jedem gebauten Bundle, der Schutz der
+      # Daten liegt vollständig in den RLS-Policies. Ein service_role-Key
+      # gehört dort nie hinein — er würde RLS umgehen und wäre im Browser
+      # für jeden lesbar.
+      #
+      # Kopiert statt verschoben: Wer lokal eine eigene `demo.json` pflegt,
+      # behält sie; auf dem Runner gibt es keine, also entsteht sie hier.
+      - name: Demo-Konfiguration bereitstellen
+        run: |
+          if [ -f apps/mobile/env/demo.json ]; then
+            echo "demo.json ist bereits vorhanden — unverändert übernommen."
+          else
+            cp apps/mobile/env/demo.example.json apps/mobile/env/demo.json
+            echo "demo.json aus demo.example.json erzeugt."
+          fi
+
       - name: Build + Deploy
         run: bash scripts/deploy_web.sh
