@@ -29,15 +29,41 @@ REPO="${REPO:-B-rdesnack24-}"
 # https://<user>.github.io/<REPO>/ zeigt direkt die App, kein Redirect nötig.
 # Ein Sub-Path wird nur noch benutzt, wenn explizit gesetzt (SUBPATH=demo o. ä.).
 SUBPATH="${SUBPATH-}"
-if [ -z "$SUBPATH" ]; then
+
+# Eigene Domain (GitHub Pages Custom Domain).
+#
+# Leer  → App liegt unter https://<user>.github.io/<REPO>/, base-href
+#         braucht deshalb das Repo-Präfix.
+# Gesetzt → App liegt an der Wurzel der eigenen Domain, base-href ist "/",
+#         und gh-pages braucht eine CNAME-Datei mit dem Domainnamen.
+#
+# WICHTIG, Reihenfolge: Erst müssen die DNS-Einträge stehen und auf GitHub
+# zeigen. Wird hier vorher umgestellt, sucht der alte github.io-Aufruf seine
+# Dateien unter "/" statt unter "/<REPO>/" und die App lädt nicht mehr —
+# weiss geladene Seite, keine Fehlermeldung. Deshalb ist der Schalter
+# standardmässig AUS und wird bewusst gesetzt:
+#
+#   CUSTOM_DOMAIN=boerdesnack24.de bash scripts/deploy_web.sh
+CUSTOM_DOMAIN="${CUSTOM_DOMAIN-}"
+
+if [ -n "$CUSTOM_DOMAIN" ]; then
+  BASE_HREF="/"
+  OEFFENTLICHE_URL="https://$CUSTOM_DOMAIN/"
+elif [ -z "$SUBPATH" ]; then
   BASE_HREF="/$REPO/"
+  OEFFENTLICHE_URL="https://blume1805.github.io/$REPO/"
 else
   BASE_HREF="/$REPO/$SUBPATH/"
+  OEFFENTLICHE_URL="https://blume1805.github.io/$REPO/$SUBPATH/"
 fi
 
 echo "▶︎ Flutter Web-Build ($ENV_FILE, base=$BASE_HREF)"
+# APP_PUBLIC_URL muss zur ausgelieferten Adresse passen: Der Wert landet in
+# Empfehlungslinks und in verlinkten PDFs. Steht dort die alte Adresse,
+# verschickt ein Kunde Links, die auf die Vorgängerdomain zeigen.
 ( cd "$MOBILE" && flutter build web --release \
     --base-href="$BASE_HREF" \
+    --dart-define=APP_PUBLIC_URL="$OEFFENTLICHE_URL" \
     --dart-define-from-file="$ENV_FILE" )
 
 BUILD_DIR="$MOBILE/build/web"
@@ -161,6 +187,14 @@ if [ -z "$SUBPATH" ]; then
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
+  # CNAME teilt GitHub Pages die eigene Domain mit. Ohne die Datei fällt
+  # Pages nach dem nächsten Deploy auf die github.io-Adresse zurück und die
+  # eigene Domain liefert 404 — die Datei gehört deshalb in JEDEN Deploy,
+  # nicht einmalig von Hand angelegt.
+  if [ -n "$CUSTOM_DOMAIN" ]; then
+    echo "$CUSTOM_DOMAIN" > "$ROOT/CNAME"
+    echo "  ✓ CNAME: $CUSTOM_DOMAIN"
+  fi
   # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
   # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
   # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.
@@ -176,7 +210,7 @@ if [ -z "$SUBPATH" ]; then
       flutter_bootstrap.js flutter_service_worker.js main.dart.js \
       main.dart.js_*.part.js \
       version.json version.txt assets canvaskit icons marketing .last_build_id \
-      roboto-regular.ttf; do
+      roboto-regular.ttf CNAME; do
       [ -e "$f" ] && git add -f -- "$f" || echo "  (skip: $f fehlt)"
     done; \
     git add -u )
@@ -224,4 +258,4 @@ if [ -z "$SUBPATH" ]; then
            version.txt .last_build_id roboto-regular.ttf )
 fi
 
-echo "✓ Deploy fertig — https://blume1805.github.io/B-rdesnack24-/ (v=${TS})"
+echo "✓ Deploy fertig — ${OEFFENTLICHE_URL} (v=${TS})"
