@@ -652,3 +652,125 @@ Programmieraufgabe.
 
 **Bewertungen.** 0 Zeilen. Sie entstehen erst, wenn Kunden bewerten —
 also nach den ersten Verkäufen über die App.
+
+---
+
+## A10 · Eine Kachel „Rechtliches" + Fettdarstellung (bereit zum Senden)
+
+Nachtrag vom 09.08.2026. Zwei Punkte, bewusst in **einer** Nachricht:
+Zwei Nachrichten kosten doppelt Credits, und beide betreffen dieselben
+zwei Dateien.
+
+**Warum das hier steht und nicht längst gesendet ist:** Der erste
+Sendeversuch am 09.08.2026 wurde vom Server abgelehnt — das Guthaben des
+Workspaces war aufgebraucht („Your workspace is out of credits"). Danach
+brach zusätzlich die MCP-Verbindung zu Loveable ab. Der Text ist
+unversendet. Er kann per `send_message` geschickt oder von Hand in den
+Loveable-Chat kopiert werden.
+
+**Stand der Datenbank dazu:** `public.legal_text` enthält seit dem
+09.08.2026 die Fassung v5 — **ohne** die Auszeichnungszeichen. Migration
+0107 entfernt sie beim Abgleich, damit im Web-Frontend keine Sternchen
+stehen, solange es sie nicht darstellen kann. Wird Punkt 2 unten
+umgesetzt, muss der `regexp_replace`-Aufruf in
+`legal_text_uebernehmen()` wieder entfernt und der Abgleich erneut
+ausgeführt werden — sonst kommt die Auszeichnung nie im Web an.
+
+> **Punkt 1 — Eine Kachel statt sieben**
+>
+> Im Profil (`src/routes/app.profil.tsx`) sollen die sieben einzelnen
+> Rechtskacheln zu EINER Kachel „Rechtliches" zusammengefasst werden. Ein
+> Klick darauf führt auf eine Übersichtsseite, die die sieben Rechtstexte
+> als anklickbare Einträge auflistet.
+>
+> **Neue Route `src/routes/rechtliches.index.tsx` (Pfad `/rechtliches`)**
+>
+> * Baugleich zur bestehenden `src/routes/rechtliches.$slug.tsx`:
+>   dieselbe `Shell`-Struktur, dieselbe Navy/Gold-Optik, `card-lift`,
+>   `rounded-3xl bg-card`. Bitte die `Shell`-Komponente aus
+>   `rechtliches.$slug.tsx` in eine gemeinsame Datei ziehen (z. B.
+>   `src/components/legal-shell.tsx`) und in beiden Routen verwenden,
+>   statt sie zu kopieren — sonst laufen die beiden Seiten optisch
+>   auseinander.
+> * Daten über `fetchLegalLinks()` aus `@/lib/legal` (sortiert bereits
+>   nach `sortierung`) im **Route-Loader**, genau wie `$slug` es macht —
+>   nicht per `useQuery`. Dann ist die Liste auch serverseitig gerendert
+>   und ohne JavaScript erreichbar; ein Impressum darf nicht von
+>   laufendem JavaScript abhängen.
+> * Überschrift `<h1>` „Rechtliches", darunter ein kurzer Satz wie
+>   „Pflichtangaben, Datenschutz und Vertragsbedingungen von Börde Snack
+>   24."
+> * Jeder Eintrag ist ein `<Link to="/rechtliches/$slug" params={{ slug:
+>   l.slug }}>` mit `Gavel`-Icon links, `l.titel`, `ChevronRight` rechts,
+>   `min-h-14` (Tippziel ≥ 44 px). `Reveal` mit gestaffeltem
+>   `delay={i * 0.04}`.
+> * `head`-Meta setzen: Titel „Rechtliches — BÖRDE SNACK 24", passende
+>   `description`, `og:*`, `twitter:card` — im Muster von `$slug`.
+> * `errorComponent` und den Leer-Fall genau wie in `$slug`: verständlicher
+>   Text plus `mailto:`-Link auf `LEGAL_CONTACT` aus `@/lib/legal`. Diese
+>   Rückfallebene ist Pflicht — wenn die Texte nicht laden, muss trotzdem
+>   ein Kontaktweg sichtbar bleiben.
+>
+> **`src/routes/app.profil.tsx` anpassen**
+>
+> * `LegalSection()` ersetzen durch eine einzelne Kachel. Kein `useQuery`
+>   mehr in dieser Datei, keine Liste, kein Lade-/Fehlerzustand — die
+>   Kachel führt auf `/rechtliches`: `card-lift flex min-h-14 w-full
+>   items-center justify-between rounded-3xl bg-card px-5 text-sm
+>   font-bold`, links `Gavel`-Icon + „Rechtliches", rechts
+>   `ChevronRight`.
+> * Die Kachel als erste Zeile in die bestehende Kachelgruppe mit
+>   Support/Spendenwirkung/Abmelden setzen und die separate `<section>`
+>   mit `SectionHeader` entfernen — sonst hiessen Überschrift und
+>   Kachelbeschriftung beide „Rechtliches".
+> * Danach nicht mehr benötigte Importe entfernen (`fetchLegalLinks`;
+>   `LEGAL_CONTACT` wird für den Support-`mailto:` weiter gebraucht,
+>   `Loader2`/`Reveal`/`useQuery` nur, falls sie sonst nirgends mehr in
+>   der Datei vorkommen — bitte nachsehen, nicht raten).
+>
+> **Punkt 2 — Fettdarstellung in den Rechtstexten**
+>
+> Die Rechtstexte tragen eine Auszeichnung für Überschriften und die
+> Stellen, auf die es ankommt: `**so**`. Die App stellt das fett dar.
+> `/rechtliches/<slug>` gibt den Text aktuell als Fliesstext mit
+> `whitespace-pre-wrap` aus und müsste dasselbe tun.
+>
+> * Eine kleine Funktion in `src/lib/legal.ts`, die `**…**` in
+>   `<strong>` umsetzt — **ohne** Markdown-Bibliothek und **ohne**
+>   `dangerouslySetInnerHTML`. Der Text wird an dem Muster zerlegt und
+>   als React-Knoten zusammengesetzt; ein Rechtstext darf niemals als HTML
+>   interpretiert werden.
+> * Muster: zwei Sternchen, dazwischen mindestens ein Zeichen, **kein**
+>   Sternchen und **kein** Zeilenumbruch — `/\*\*([^*\n]+)\*\*/g`. Genau
+>   dieselbe Regel wie in der App.
+> * Einzelne Sternchen bleiben unverändert stehen. Das
+>   Muster-Widerrufsformular enthält „(*) Unzutreffendes streichen" —
+>   das ist Text, keine Auszeichnung.
+> * Ein `**` ohne schliessendes Paar bleibt sichtbarer Text, statt den
+>   Rest des Dokuments fett zu setzen.
+> * `<strong>` erbt Grösse und Farbe, ändert nur die Strichstärke
+>   (`font-semibold`/`font-bold` genügt) — die Textfarbe nicht anfassen,
+>   sonst stimmt der geprüfte Kontrast nicht mehr.
+>
+> **Bitte nichts anderes anfassen.** Die Inhalte der Rechtstexte werden
+> nicht formatiert, gekürzt oder umgeschrieben. Die bestehenden
+> Detailseiten müssen weiter genau so funktionieren wie jetzt.
+>
+> **Prüfen statt annehmen:** Nach der Änderung in der Vorschau tatsächlich
+> nachsehen, dass (a) im Profil nur noch eine Kachel „Rechtliches" steht,
+> (b) der Klick auf `/rechtliches` führt und dort alle sieben Einträge
+> erscheinen, (c) jeder Eintrag den richtigen Text öffnet — auch im
+> Demozugang, denn dort waren die Kacheln zuletzt tot —, und (d) in keinem
+> Text ein `**` sichtbar stehen bleibt. Was nicht überprüft werden konnte,
+> bitte ausdrücklich so sagen, statt es als erledigt zu melden.
+
+### Prüfliste nach `get_diff` (A10)
+
+- [ ] Genau eine Kachel „Rechtliches" im Profil
+- [ ] `/rechtliches` listet alle sieben Einträge, im Loader geladen
+- [ ] `Shell` geteilt, nicht kopiert
+- [ ] Fehler- und Leer-Fall zeigen `LEGAL_CONTACT`
+- [ ] `**` wird zu `<strong>`, kein `dangerouslySetInnerHTML`
+- [ ] Einzelne Sternchen im Muster-Widerrufsformular bleiben stehen
+- [ ] Danach: `regexp_replace` in `legal_text_uebernehmen()` entfernen und
+      Abgleich neu ausführen
