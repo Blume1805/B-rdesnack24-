@@ -672,13 +672,16 @@ MCP-Aufrufs, der Agent arbeitet aber weiter. Ein Timeout ist **kein**
 Grund zum erneuten Senden — das kostet ein zweites Mal Credits. Erst
 `list_messages` lesen und den Status prüfen.
 
-**Stand der Datenbank dazu:** `public.legal_text` enthält seit dem
-09.08.2026 die Fassung v5 — **ohne** die Auszeichnungszeichen. Migration
-0107 entfernt sie beim Abgleich, damit im Web-Frontend keine Sternchen
-stehen, solange es sie nicht darstellen kann. Wird Punkt 2 unten
-umgesetzt, muss der `regexp_replace`-Aufruf in
-`legal_text_uebernehmen()` wieder entfernt und der Abgleich erneut
-ausgeführt werden — sonst kommt die Auszeichnung nie im Web an.
+**ERLEDIGT am 10.08.2026.** Beide Punkte sind umgesetzt und
+gegengeprüft (siehe Prüfliste unten). Der Text bleibt hier stehen, weil
+er dokumentiert, was beauftragt wurde.
+
+**Stand der Datenbank:** `public.legal_text` führt seit dem 10.08.2026
+die Fassung v5 **mit** Auszeichnungszeichen. Migration 0107 hatte sie
+zunächst entfernt, solange das Web-Frontend sie nicht darstellen konnte;
+Migration 0108 nimmt sie wieder mit, nachdem `renderLegalText()` steht.
+Der Reihenfolge wegen: erst der Renderer, dann die Marker — nie
+umgekehrt, sonst stehen Sternchen im Rechtstext.
 
 > **Punkt 1 — Eine Kachel statt sieben**
 >
@@ -781,13 +784,29 @@ ausgeführt werden — sonst kommt die Auszeichnung nie im Web an.
 > Text ein `**` sichtbar stehen bleibt. Was nicht überprüft werden konnte,
 > bitte ausdrücklich so sagen, statt es als erledigt zu melden.
 
-### Prüfliste nach `get_diff` (A10)
+### Prüfliste nach `get_diff` (A10) — abgehakt am 10.08.2026
 
-- [ ] Genau eine Kachel „Rechtliches" im Profil
-- [ ] `/rechtliches` listet alle sieben Einträge, im Loader geladen
-- [ ] `Shell` geteilt, nicht kopiert
-- [ ] Fehler- und Leer-Fall zeigen `LEGAL_CONTACT`
-- [ ] `**` wird zu `<strong>`, kein `dangerouslySetInnerHTML`
-- [ ] Einzelne Sternchen im Muster-Widerrufsformular bleiben stehen
-- [ ] Danach: `regexp_replace` in `legal_text_uebernehmen()` entfernen und
-      Abgleich neu ausführen
+Jeder Haken steht für einen Blick in die Datei, nicht für die
+Erfolgsmeldung des Agenten.
+
+- [x] Genau eine Kachel „Rechtliches" im Profil; `LegalSection` entfernt,
+      `fetchLegalLinks`-Import weg, `LEGAL_CONTACT` für Support geblieben
+- [x] `/rechtliches` (`rechtliches.index.tsx`) listet alle Einträge, im
+      Loader geladen — also auch ohne JavaScript da
+- [x] `LegalShell` in `src/components/legal-shell.tsx`, von beiden Routen
+      benutzt statt kopiert
+- [x] Fehler- und Leer-Fall zeigen beide `LEGAL_CONTACT`
+- [x] `renderLegalText()` baut `<strong>` über `createElement`, kein
+      `dangerouslySetInnerHTML`; Muster `/\*\*([^*\n]+)\*\*/g` — Zeichen
+      für Zeichen dieselbe Regel wie in der App
+- [x] Einzelne Sternchen bleiben: `(*)` im Muster-Widerrufsformular und
+      die Aufzählungszeichen der Datenschutzerklärung
+- [x] Migration 0108 nimmt die Marker wieder mit; Abgleich ausgeführt,
+      alle sieben MD5-Prüfsummen stimmen mit der Quelldatei überein
+      (102 Paare, +4 Zeichen je Paar)
+
+Offen und bewusst nicht beauftragt: Aus dem Profil führt die Kachel aus
+der App-Hülle heraus, und der „zurück"-Link der Rechtsseiten zeigt auf
+`/`, nicht zurück ins Profil. Der Zurück-Knopf des Browsers tut das
+Richtige. Eine weitere Runde beim Agenten wäre dafür teurer als der
+Gewinn.
