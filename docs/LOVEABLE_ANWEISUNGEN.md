@@ -810,3 +810,71 @@ der App-Hülle heraus, und der „zurück"-Link der Rechtsseiten zeigt auf
 `/`, nicht zurück ins Profil. Der Zurück-Knopf des Browsers tut das
 Richtige. Eine weitere Runde beim Agenten wäre dafür teurer als der
 Gewinn.
+
+---
+
+## A11 · Wortmarke „BÖRDESNACK24" (NICHT gesendet — Guthaben leer)
+
+Stand 10.08.2026. Dieser Text konnte nicht abgeschickt werden: Der
+Workspace war zum Sendezeitpunkt ohne Guthaben („Your workspace is out
+of credits"). Er korrigiert Punkt 5 des Sechs-Punkte-Auftrags, der um
+04:47 UTC angenommen wurde, aber offenbar nicht mehr abgearbeitet wurde
+— `latest_commit_sha` blieb unverändert, es gibt keine Antwort des
+Agenten, und die Vorschau zeigt weiterhin „BÖRDE SNACK 24".
+
+**Reihenfolge, wenn wieder Guthaben da ist:** Der Sechs-Punkte-Auftrag
+steht bereits im Loveable-Chat. Erst diesen Nachtrag schicken, dann den
+Agenten den Sechs-Punkte-Auftrag abarbeiten lassen — sonst setzt er
+Punkt 5 in der überholten Fassung („BÖRDESNACK 24" mit Leerzeichen) um
+und muss nachbessern.
+
+> NACHTRAG ZU PUNKT 5 — bitte diese Fassung umsetzen, nicht die alte.
+>
+> Die Wortmarke wird **komplett zusammengeschrieben**, ganz ohne
+> Leerzeichen, und die „24" steht im Markengold:
+>
+> **BÖRDESNACK24** — „BÖRDESNACK" in der jeweiligen Textfarbe, „24"
+> golden.
+>
+> **Farbe: die Token aus dem Design-System nehmen, keinen Hexwert
+> erfinden.** In `src/styles.css` sind zwei Goldtöne definiert, und
+> welcher richtig ist, hängt vom Untergrund ab:
+>
+> * `text-gold` — `--gold: oklch(0.82 0.145 85)`. Für **dunklen** Grund:
+>   Kopfzeile über dem Hero, Navy-Flächen, Fusszeile auf Navy.
+> * `text-gold-ink` — `--gold-ink: oklch(0.545 0.145 85)`. Für **hellen**
+>   Grund. Die Datei kommentiert diesen Token ausdrücklich mit
+>   „Textvarianten für hellen Grund (WCAG 1.4.3, ≥ 4,5:1)".
+>
+> Das ist kein Schönheitsdetail: Die Barrierefreiheitserklärung sagt zu,
+> dass die Farbkontraste WCAG 2.1 Stufe AA für Fliesstext erfüllen.
+> `text-gold` auf weissem Grund reisst diese Zusage.
+>
+> **Drei Dinge, die dabei leicht kaputtgehen:**
+>
+> 1. **Kein Leerzeichen im Markup.**
+>    `BÖRDESNACK<span class="text-gold">24</span>` in EINEM Element, ohne
+>    Leerraum oder Umbruch dazwischen — sonst liest ein Screenreader
+>    „Bördesnack" und „vierundzwanzig" als zwei Wörter, und im Layout
+>    entsteht eine sichtbare Lücke.
+> 2. **Nur dort einfärben, wo die Wortmarke Gestaltungselement ist** —
+>    Kopfzeile, Fusszeile, Marken-Schriftzüge. In `<title>`, `og:title`,
+>    `description`, `alt`-Texten und im Fliesstext gibt es keine Farbe:
+>    dort „BÖRDESNACK24" als reiner Text bzw. „Bördesnack24" in normaler
+>    Schreibung.
+> 3. **Umbruch prüfen.** Die Kopfzeile nutzt weite Laufweite. Zusammen
+>    geschrieben ist das Wort länger als vorher und kann auf schmalen
+>    Geräten umbrechen. Ab 320 px ansehen; notfalls Laufweite oder
+>    Schriftgrösse anpassen, aber nicht abschneiden.
+>
+> Das Logo-Bild bleibt unverändert — Grafik, keine Textstelle. Den
+> Kommentarkopf in `src/styles.css` darf man mitziehen.
+
+### Warum die Goldwahl hier begründet steht
+
+Die naheliegende Umsetzung wäre überall `text-gold`. Auf den weissen
+Karten der App ergibt `oklch(0.82 0.145 85)` gegen Weiss rund 1,9:1 —
+weit unter den 4,5:1, die Abschnitt 3 der Barrierefreiheitserklärung
+zusagt. Das Design-System hat für genau diesen Fall `--gold-ink`. Wer
+das nicht weiss, macht aus einer Farbänderung eine falsche Aussage in
+einem Rechtstext.
