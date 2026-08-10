@@ -661,12 +661,16 @@ Nachtrag vom 09.08.2026. Zwei Punkte, bewusst in **einer** Nachricht:
 Zwei Nachrichten kosten doppelt Credits, und beide betreffen dieselben
 zwei Dateien.
 
-**Warum das hier steht und nicht längst gesendet ist:** Der erste
-Sendeversuch am 09.08.2026 wurde vom Server abgelehnt — das Guthaben des
-Workspaces war aufgebraucht („Your workspace is out of credits"). Danach
-brach zusätzlich die MCP-Verbindung zu Loveable ab. Der Text ist
-unversendet. Er kann per `send_message` geschickt oder von Hand in den
-Loveable-Chat kopiert werden.
+**Sendehistorie.** Der erste Versuch am 09.08.2026 wurde vom Server
+abgelehnt — das Guthaben des Workspaces war aufgebraucht („Your
+workspace is out of credits"); danach brach zusätzlich die
+MCP-Verbindung ab. **Am 10.08.2026, 04:17 UTC gesendet und vom Projekt
+angenommen** (`list_messages` → Status `accepted`).
+
+Zum Ablauf: `send_message` läuft nach 60 Sekunden in einen Timeout des
+MCP-Aufrufs, der Agent arbeitet aber weiter. Ein Timeout ist **kein**
+Grund zum erneuten Senden — das kostet ein zweites Mal Credits. Erst
+`list_messages` lesen und den Status prüfen.
 
 **Stand der Datenbank dazu:** `public.legal_text` enthält seit dem
 09.08.2026 die Fassung v5 — **ohne** die Auszeichnungszeichen. Migration
@@ -734,6 +738,19 @@ ausgeführt werden — sonst kommt die Auszeichnung nie im Web an.
 > Stellen, auf die es ankommt: `**so**`. Die App stellt das fett dar.
 > `/rechtliches/<slug>` gibt den Text aktuell als Fliesstext mit
 > `whitespace-pre-wrap` aus und müsste dasselbe tun.
+>
+> **WICHTIG — sonst sucht der Agent vergeblich:** In `public.legal_text`
+> stehen die Marker **derzeit nicht drin**. Migration 0107 entfernt sie
+> beim Abgleich, damit auf der öffentlichen Seite keine Sternchen stehen,
+> solange sie niemand darstellt. In den echten Daten ist also kein
+> einziges `**` zu finden — das ist kein Fehler und kein Grund, den
+> Abgleich zu „reparieren". Die Umsetzung wird an einem **literalen
+> Beispieltext** geprüft; die Marker werden datenbankseitig erst
+> freigeschaltet, wenn die Darstellung steht.
+>
+> (Diese Reihenfolge fehlte im ersten Entwurf dieses Auftrags. Ohne sie
+> hätte der Agent an leeren Daten geprüft und „sieht gut aus" gemeldet —
+> oder angefangen, an der Datenbank herumzubauen.)
 >
 > * Eine kleine Funktion in `src/lib/legal.ts`, die `**…**` in
 >   `<strong>` umsetzt — **ohne** Markdown-Bibliothek und **ohne**
