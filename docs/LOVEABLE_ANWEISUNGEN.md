@@ -813,20 +813,21 @@ Gewinn.
 
 ---
 
-## A11 · Wortmarke „BÖRDESNACK24" (NICHT gesendet — Guthaben leer)
+## A11 · Wortmarke „BÖRDESNACK24" (gesendet 11.08.2026)
 
-Stand 10.08.2026. Dieser Text konnte nicht abgeschickt werden: Der
-Workspace war zum Sendezeitpunkt ohne Guthaben („Your workspace is out
-of credits"). Er korrigiert Punkt 5 des Sechs-Punkte-Auftrags, der um
-04:47 UTC angenommen wurde, aber offenbar nicht mehr abgearbeitet wurde
-— `latest_commit_sha` blieb unverändert, es gibt keine Antwort des
-Agenten, und die Vorschau zeigt weiterhin „BÖRDE SNACK 24".
+Am 11.08.2026 um 04:03 UTC gesendet und angenommen.
 
-**Reihenfolge, wenn wieder Guthaben da ist:** Der Sechs-Punkte-Auftrag
-steht bereits im Loveable-Chat. Erst diesen Nachtrag schicken, dann den
-Agenten den Sechs-Punkte-Auftrag abarbeiten lassen — sonst setzt er
-Punkt 5 in der überholten Fassung („BÖRDESNACK 24" mit Leerzeichen) um
-und muss nachbessern.
+**Richtigstellung zum 10.08.2026.** Hier stand zwischenzeitlich, der
+Sechs-Punkte-Auftrag sei angenommen, aber nicht abgearbeitet worden.
+Das war falsch. Belegt hatte ich es mit einem unveränderten
+`latest_commit_sha` und dem Projekt-Screenshot — beides war veraltet.
+Der Blick in die Dateien zeigte später: Alle sechs Punkte waren
+umgesetzt, einschliesslich Keyvisual, Kategoriezeile und der
+entfernten Spendenzahl.
+
+Die Lehre für das nächste Mal: `latest_commit_sha` und der Screenshot
+aus `get_project` sind kein Nachweis dafür, dass nichts passiert ist.
+Nachweis ist die Datei. `read_file` kostet keine Credits.
 
 > NACHTRAG ZU PUNKT 5 — bitte diese Fassung umsetzen, nicht die alte.
 >
