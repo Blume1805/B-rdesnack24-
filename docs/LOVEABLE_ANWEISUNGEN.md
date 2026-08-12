@@ -952,3 +952,57 @@ der Wurzel — dann liegt das Motiv auf jeder Fläche richtig, ohne
 Blendmodus. Beide Wege oben sind Reparaturen am fertigen Bild. Wenn die
 Originaldatei noch existiert oder neu erzeugt werden kann, ist das die
 dauerhafte Lösung.
+
+---
+
+## A13 · 5 % Dauerrabatt richtigstellen (NICHT gesendet — Guthaben leer)
+
+Stand 12.08.2026. Korrigiert meinen eigenen Fehler aus der
+Punktesystem-Nachricht: Dort stand, „5 % Dauerrabatt" solle entfernt
+werden, solange keine Quelle in der Datenbank benannt werden kann. Der
+Agent hat das umgesetzt — der Satz ist aus dem Bonusbereich verschwunden.
+
+Der Auftraggeber hat inzwischen klargestellt: **Der Dauerrabatt ist eine
+echte Zusage** an alle mit kostenpflichtigem Abo. Er muss also zurück,
+nur richtig dargestellt.
+
+> **KORREKTUR: „5 % Dauerrabatt" nicht löschen, sondern richtig anzeigen.**
+>
+> **Was gilt:**
+>
+> * 5 % Dauerrabatt auf alle Produkte — aber **nur mit laufendem
+>   kostenpflichtigem Abo**.
+> * Nicht an eine Stufe gekoppelt. Es gibt kein „Level Gold". Der Rabatt
+>   hängt am Abo, sonst an nichts.
+> * Wer kündigt, verliert ihn. In der Datenbank durchgesetzt:
+>   `app.has_subscription()` liefert `false`, sobald eine Kündigung nach
+>   der Abo-Wahl eingegangen ist (Migration 0109). Dieselbe Funktion
+>   bewacht Coupons, persönliche Angebote und Loyalty-Gutscheine.
+>
+> **Für die Oberfläche:**
+>
+> * Den Hinweis **abhängig vom Abo** anzeigen, nicht pauschal. Ohne Abo
+>   darf nirgends „5 % Dauerrabatt aktiv" stehen.
+> * `my_subscription()` liefert das gewählte Modell (`plan` ist `null`
+>   ohne Wahl). Sie prüft **nicht** auf Kündigung — also nur zur Anzeige
+>   des Modells verwenden, nicht als Beweis für „Rabatt aktiv".
+> * Für „hat der Kunde die Abo-Vorteile?" gibt es derzeit **keine**
+>   aufrufbare Funktion im Frontend. Bitte **keine eigene Regel
+>   erfinden** und nicht selbst aus Tabellen zusammenrechnen, ob jemand
+>   gekündigt hat. Wenn der Zustand gebraucht wird: melden, dann wird
+>   `my_subscription_benefits()` angelegt. Eine zweite, abweichende Regel
+>   im Frontend ist genau der Weg, auf dem App und Datenbank auseinander
+>   laufen.
+> * Bis dahin neutral formulieren: „5 % Dauerrabatt auf alle Produkte im
+>   kostenpflichtigen Abo" beschreibt das Angebot. „5 % Dauerrabatt
+>   aktiv" behauptet einen Zustand — das ist der Unterschied.
+
+### Was dabei offen bleibt
+
+Für den Dauerrabatt gibt es in der Datenbank **keine Umsetzung** — keine
+Funktion, keine Spalte, keine Preislogik. Gekauft wird am Automaten, nicht
+in der App; der Rabatt müsste also am Kartenterminal beziehungsweise über
+die Automatenanbindung gewährt werden. Solange das nicht geklärt ist,
+beschreibt die App eine Zusage, die technisch nirgends durchgesetzt wird.
+Das ist eine Entscheidung für den Auftraggeber, keine Aufgabe für den
+Frontend-Agenten.
