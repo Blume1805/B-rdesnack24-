@@ -879,3 +879,76 @@ weit unter den 4,5:1, die Abschnitt 3 der Barrierefreiheitserklärung
 zusagt. Das Design-System hat für genau diesen Fall `--gold-ink`. Wer
 das nicht weiss, macht aus einer Farbänderung eine falsche Aussage in
 einem Rechtstext.
+
+---
+
+## A12 · Übergang Keyvisual ↔ Kachel (NICHT gesendet — MCP getrennt)
+
+Stand 11.08.2026. Guthaben war vorhanden, aber die MCP-Verbindung zu
+Loveable war getrennt (`ToolSearch` findet die Werkzeuge nicht). Der Text
+ist unversendet und kann von Hand in den Loveable-Chat kopiert werden.
+
+**Warum reine Transparenz nicht reicht.** Der naheliegende Wunsch ist
+„Bild transparenter machen". Das löst es nicht: Bei `opacity` wird das
+Bild gegen den Hintergrund gerechnet, Schwarz über Navy ergibt immer
+etwas *Dunkleres* als Navy. Man kommt näher, trifft es aber nie — und je
+transparenter, desto blasser wird auch die Wortmarke. Deshalb nennt der
+Auftrag zwei Wege, die tatsächlich funktionieren, statt den Wunsch
+wörtlich weiterzureichen.
+
+> **Nachbesserung zum Übergang auf der App-Startseite
+> (`src/routes/app.index.tsx`).**
+>
+> Die weiche Kante ist besser, aber der schwarze Bildgrund des
+> Keyvisuals hebt sich weiterhin sichtbar von der Navy-Fläche darunter
+> ab. Es sind erkennbar zwei verschiedene Farben.
+>
+> **Bitte nicht mit `opacity` allein lösen.** Beim Überblenden wird das
+> Bild gegen den Hintergrund gerechnet: Schwarz über Navy ergibt immer
+> etwas Dunkleres als Navy. Man kommt näher, trifft es aber nie — und je
+> transparenter, desto blasser wird auch die Wortmarke. Deshalb zwei
+> Wege, die tatsächlich zum Ziel führen:
+>
+> **Weg A (bevorzugt): Blendmodus.** Das Bild auf eine Navy-Fläche legen
+> und mit `mix-blend-mode: lighten` (oder `screen`) verrechnen. Bei
+> `lighten` gewinnt pro Kanal der hellere Wert — die schwarzen
+> Bildbereiche nehmen damit **exakt** den Navy-Ton an, während
+> Wortmarke, Umrisskarte und der goldene Schein unverändert hell
+> bleiben. Die Kante verschwindet dadurch vollständig, nicht nur fast.
+>
+> Bitte dabei genau hinsehen, ob der Automatenkörper zu blass wird — er
+> ist dunkelgrau und kann unter `screen` ausbleichen. Wenn ja, `lighten`
+> statt `screen` nehmen, das ist schonender. Wenn beides den Automaten
+> zerstört, Weg B.
+>
+> **Weg B (Rückfallebene): die Kachel ans Bild angleichen, nicht das
+> Bild an die Kachel.** Statt `bg-navy` für den Textbereich die
+> tatsächliche Farbe des unteren Bildrands verwenden. Dann ist der ganze
+> Hero-Block einheitlich dunkel und der Übergang fällt weg. Der Rest der
+> App bleibt unverändert Navy.
+>
+> **Nur dieser eine Bereich.** Die Landingpage, die Kacheln darunter und
+> die restliche Farbwelt bleiben unangetastet.
+>
+> **Zwei Bedingungen, die erhalten bleiben müssen:**
+>
+> * Die Überschrift „Genießen. Geben. Gutes tun." steht weiß bzw. gold
+>   auf dieser Fläche. Der Kontrast muss weiter WCAG 2.1 AA erfüllen —
+>   die Barrierefreiheitserklärung sagt das ausdrücklich zu. Wird der
+>   Grund heller, bitte gegenprüfen.
+> * Die Umrisskarte des Bördekreises muss vollständig sichtbar bleiben,
+>   nicht angeschnitten.
+>
+> **Ansehen, nicht nur ändern.** Bitte einen Screenshot des Ergebnisses
+> vergleichen und sagen, welchen Weg du genommen hast und warum. Falls
+> der Automat unter dem Blendmodus leidet, sag das ausdrücklich, statt
+> es durchzuwinken.
+
+### Die Wurzel, nicht die Reparatur
+
+Das eigentliche Übel ist der eingebrannte schwarze Hintergrund des
+Keyvisuals. Ein PNG mit **echtem transparentem Hintergrund** löst das an
+der Wurzel — dann liegt das Motiv auf jeder Fläche richtig, ohne
+Blendmodus. Beide Wege oben sind Reparaturen am fertigen Bild. Wenn die
+Originaldatei noch existiert oder neu erzeugt werden kann, ist das die
+dauerhafte Lösung.
