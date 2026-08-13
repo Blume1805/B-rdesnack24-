@@ -1006,3 +1006,87 @@ die Automatenanbindung gewährt werden. Solange das nicht geklärt ist,
 beschreibt die App eine Zusage, die technisch nirgends durchgesetzt wird.
 Das ist eine Entscheidung für den Auftraggeber, keine Aufgabe für den
 Frontend-Agenten.
+
+---
+
+## A14 · Landingpage-Redesign (NICHT gesendet — Guthaben leer)
+
+Stand 13.08.2026. Auftraggeber will Landingpage und App „dynamisch,
+modern, funktional, übersichtlich, intuitiv, rechtssicher, strukturiert" —
+aber ausdrücklich **nicht so, als wäre alles mit KI erstellt**. Farben
+bleiben, Schrift und Grössen dürfen neu, Motion erwünscht.
+
+Entscheidungen des Auftraggebers dazu:
+
+* **Landingpage zuerst, App danach.** Getrennte Aufträge, damit der Agent
+  nicht in einem Zug Dateien anfasst, in denen frisch gebaute Logik
+  steckt — Punkte, Abo, Gutscheine, Rechtsseiten.
+* **Neue Schriftpaarung**, vom Agenten vorgeschlagen, selbst ausgeliefert.
+
+### Der Befund, der die Aufgabe verändert hat
+
+`src/routes/__root.tsx` lädt Sora und Manrope von `fonts.googleapis.com`
+und `fonts.gstatic.com`, mit `preconnect`. Die IP jedes Besuchers geht
+also an Google, bevor die Seite erscheint, ohne Einwilligung.
+
+Die Datenschutzerklärung sagt wörtlich das Gegenteil: „Auch Schriftarten
+laden wir nicht von fremden Servern nach … Deine IP-Adresse geht damit
+auch nicht auf diesem Weg an Dritte." Für die native App stimmt das (dort
+doppelt abgesichert), für dieses Frontend nicht.
+
+Weil die Schrift ohnehin getauscht wird, ist die Korrektur hier
+kostenlos zu haben — deshalb steht sie im Auftrag an erster Stelle und
+nicht als Nebensatz.
+
+### Modus und Dials (frontend-taste)
+
+Brand-Modus. Landingpage: `DESIGN_VARIANCE` 7, `MOTION_INTENSITY` 5,
+`VISUAL_DENSITY` 4. Für die App später: 5 / 4 / 5 — sie muss bedienbar
+bleiben und trägt mehr Inhalt.
+
+### Was an der Seite heute nach KI aussieht
+
+Am Bestand geprüft, nicht vermutet:
+
+1. **Drei gleich grosse Kacheln** (`tiles`: Clock / HeartHandshake /
+   Sparkles), je Icon + Überschrift + ein Satz. Lehrbuchmuster. Dazu
+   inhaltlich schief: „5 % für den guten Zweck" ist das
+   Alleinstellungsmerkmal, „Rund um die Uhr" eine Selbstverständlichkeit
+   bei Automaten — gleich gross dargestellt wird beides gleich wichtig.
+2. **Kategorie-Reihe** aus fünf identischen Kreisen mit Versalien-Label.
+   Dekoration ohne Funktion, nichts davon ist anklickbar.
+3. **Hero**: Vollflächenfoto, dunkler Verlauf, Eyebrow in Versalien mit
+   weiter Laufweite, dreizeilige Überschrift, Knopf. Solide, aber
+   austauschbar.
+
+### Der Auftragstext
+
+> (Der vollständige Text steht im Loveable-Chat-Entwurf dieser Sitzung.
+> Kernpunkte, falls er neu getippt werden muss:)
+>
+> * Google-Font-Links **ersatzlos** raus, Schriften als `woff2` selbst
+>   ausliefern, `@font-face` in `styles.css`, `font-display: swap`,
+>   Lizenz mit ins Repository. Danach im Netzwerk-Tab bestätigen, dass
+>   **kein** Aufruf an eine fremde Domain mehr geht.
+> * Schriftwahl mit Begründung. Zwei harte Bedingungen: Umlaute und ß in
+>   allen Schnitten sauber („Genießen" steht in der grössten Überschrift),
+>   und bei 14 px auf dem Handy mühelos lesbar.
+> * Farben unverändert, Tokens statt Hexwerten. `text-gold` auf dunklem,
+>   `text-gold-ink` auf hellem Grund — `--gold` gegen Weiss ergibt rund
+>   1,9:1 und reisst die WCAG-Zusage.
+> * **Ein** Signature-Element, Rest ruhig. Die Bördekreis-Kontur ist das,
+>   was die Marke unterscheidet.
+> * Bewegung mit `motion/react` (installiert), keine neue Abhängigkeit,
+>   kein GSAP. `prefers-reduced-motion: reduce` muss greifen und den
+>   Inhalt trotzdem vollständig zeigen.
+> * Rechtssicher heisst hier konkret: Fusszeile mit allen Rechtslinks
+>   bleibt vollständig und nicht hinter einem Aufklapper (§ 5 DDG,
+>   § 312k BGB); keine Zahl ohne Grundlage; der Dauerrabatt bleibt eine
+>   Beschreibung, kein Zustand — die Landingpage kennt keinen
+>   angemeldeten Nutzer; Wortmarke BÖRDESNACK24 mit goldener 24;
+>   Kontrast 4,5:1 / 3:1, Tippziele 44 px, sichtbarer Tastaturfokus.
+> * Nicht anfassen: alles unter `/app`, die Rechtsseiten,
+>   `src/lib/loyalty.ts`, die Abo-Logik.
+> * Berichten: Schriftwahl mit Begründung, Netzwerk-Tab-Bestätigung,
+>   Ansicht bei 320 px, Ansicht mit reduzierter Bewegung, gewähltes
+>   Signature-Element. Screenshots vorher/nachher.
