@@ -1090,3 +1090,43 @@ Am Bestand geprüft, nicht vermutet:
 > * Berichten: Schriftwahl mit Begründung, Netzwerk-Tab-Bestätigung,
 >   Ansicht bei 320 px, Ansicht mit reduzierter Bewegung, gewähltes
 >   Signature-Element. Screenshots vorher/nachher.
+
+---
+
+## A16 · Automaten und Karte zusammenführen (NICHT gesendet — Guthaben leer)
+
+Stand 15.08.2026. Nachtrag zu A15 (Kundenkarte zentral in die untere
+Leiste). Der Auftraggeber hat den Platzkonflikt entschieden: „Automaten"
+und „Karte" gehören zusammen, es wird nur eines gebraucht.
+
+Damit wird die Mitte frei: **Home · Automaten · [Kundenkarte] · Bonus ·
+Profil** — vier Reiter, die Kundenkarte als erhabene Aktion dazwischen.
+
+> **Nachtrag zur unteren Leiste.**
+>
+> „Automaten" und „Karte" gehören zusammen und werden zu einem Ziel.
+> Beides zeigt dieselbe Sache: unsere Automaten. Einmal als Liste, einmal
+> auf der Landkarte — zwei Ansichten desselben Inhalts, keine zwei
+> Bereiche.
+>
+> **Zusammenführen, nicht wegwerfen:**
+>
+> * Beide Ansichten bleiben erhalten, innerhalb des Ziels umschaltbar. Es
+>   darf keine Funktion verloren gehen, nur ein Menüpunkt.
+> * Die Doppelbenennung erledigt sich damit: In der Leiste steht
+>   „Automaten", „Karte" bezeichnet künftig eindeutig die Kundenkarte. Im
+>   Fliesstext für die Landkarte „Landkarte" oder „Kartenansicht"
+>   schreiben.
+> * **Bestehende Verweise dürfen nicht ins Leere laufen.** `/app/karte`
+>   wird u. a. von der App-Startseite verlinkt („Jetzt Automaten
+>   finden"). Alle Verweise durchsehen, die alte Adresse nicht löschen,
+>   sondern auf die Kartenansicht des zusammengeführten Ziels
+>   weiterleiten — damit geteilte und gemerkte Links weiter das
+>   Erwartete zeigen.
+> * „Jetzt Automaten finden" muss weiterhin auf der **Kartenansicht**
+>   landen, nicht in der Liste. Der Knopf verspricht Finden, nicht
+>   Blättern.
+>
+> Alles andere aus A15 bleibt gültig: Gold mit passendem Vordergrund,
+> Tippziel ≥ 44 px, `aria-haspopup="dialog"`, kein aktiver Zustand für
+> die Kundenkarte, Chat-Assistent regelbasiert ohne Sprachmodell.
