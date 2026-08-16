@@ -1130,3 +1130,83 @@ Profil** — vier Reiter, die Kundenkarte als erhabene Aktion dazwischen.
 > Alles andere aus A15 bleibt gültig: Gold mit passendem Vordergrund,
 > Tippziel ≥ 44 px, `aria-haspopup="dialog"`, kein aktiver Zustand für
 > die Kundenkarte, Chat-Assistent regelbasiert ohne Sprachmodell.
+
+---
+
+## A17 · Rechtschreibung und Kundenkarten-Symbol (bereit zum Senden)
+
+Stand 16.08.2026. Zwei Rückmeldungen des Auftraggebers: Groß- und
+Kleinschreibung soll überall stimmen, und das gewählte Symbol für die
+Kundenkarte gefällt ihm nicht.
+
+### Warum die Kleinschreibung mehr ist als Geschmack
+
+Das Frontend nutzt durchgängig kleingeschriebene Eyebrows als
+Gestaltungsmittel — „dein bonuskonto.", „punkte im laufenden monat.",
+„pflichtangaben.", „gemeinsam gutes tun.", „rund um die uhr in der
+börde.". Im Deutschen sind das Rechtschreibfehler, keine Typografie.
+
+Der schwerwiegendste Fall steht in `app.index.tsx`:
+`eyebrow={group.category.toLowerCase() + "."}`. Hier werden **echte
+Kategorienamen aus der Datenbank** kleingeschrieben — aus „Süßwaren"
+wird „süßwaren". Das ist kein Stil mehr, das ist Verfälschung von Daten
+im Namen der Optik.
+
+Der Unterschied, auf den es ankommt: Ein Versalien- oder
+Kapitälchen-Look gehört ins CSS (`text-transform`), nicht in den
+Text. Was im DOM steht, lesen Screenreader vor, Suchmaschinen ein und
+Nutzer beim Kopieren heraus. Der Text muss richtig geschrieben sein,
+egal wie er dargestellt wird.
+
+> **Zwei Rückmeldungen des Auftraggebers.**
+>
+> **1 — Groß- und Kleinschreibung überall beachten.**
+>
+> Das Frontend schreibt Eyebrows und Labels durchgängig klein — „dein
+> bonuskonto.", „punkte im laufenden monat.", „belohnungen.",
+> „meilensteine.", „pflichtangaben.", „digitale bons.",
+> „feinjustierung.", „dein modell.", „gemeinsam gutes tun.", „rund um
+> die uhr in der börde.", „faire preise — jederzeit für dich da.",
+> „kunden werben kunden.", „service". Im Deutschen sind das
+> Rechtschreibfehler.
+>
+> Bitte durchgängig korrigieren — Substantive gross, Sätze beginnen
+> gross. Nicht nur an den genannten Stellen: Landingpage, App,
+> Komponenten, `aria-label`, Fehlermeldungen, Meta-Beschreibungen. Bitte
+> alle durchsehen, meine Liste ist nicht vollständig.
+>
+> **Der wichtigste Fall** steht in `src/routes/app.index.tsx`:
+> `eyebrow={group.category.toLowerCase() + "."}`. Das schreibt echte
+> Kategorienamen aus der Datenbank klein — aus „Süßwaren" wird
+> „süßwaren". Bitte `toLowerCase()` entfernen. Daten werden nicht für
+> die Optik verändert.
+>
+> **Wenn der Versalien-Look bleiben soll:** über CSS
+> (`text-transform: uppercase` bzw. `class="uppercase"`), niemals über
+> falsch geschriebenen Text. Was im DOM steht, lesen Screenreader vor,
+> Suchmaschinen ein und Nutzer beim Kopieren heraus — dort muss es
+> richtig stehen. Die Darstellung ist davon unabhängig.
+>
+> **2 — Das Symbol der Kundenkarte überzeugt noch nicht.**
+>
+> Bitte nicht raten, sondern zeigen: Stell **drei bis vier Kandidaten
+> nebeneinander** — gerendert in der echten goldenen Kreisfläche, in der
+> echten Grösse, in der echten Leiste, damit man sie vergleichen kann.
+> Ein Screenshot davon genügt, dann entscheidet der Auftraggeber.
+>
+> Sinnvolle Kandidaten aus `lucide-react` (Vorhandensein in 0.575.0
+> bitte prüfen, nicht annehmen): `WalletCards`, `IdCard`, `Ticket`,
+> `ScanLine`, `Nfc`.
+>
+> **`CreditCard` bleibt ausgeschlossen** — es liest sich als
+> Zahlungsmittel und weckt in einer App mit kostenpflichtigen Abos die
+> falsche Erwartung, dort sei eine Zahlungskarte hinterlegt.
+>
+> **Nimm einen eigenen Entwurf mit in die Auswahl.** Ein selbst
+> gezeichnetes Symbol — eine Karte mit einer Andeutung der Wortmarke
+> oder der Bördekreis-Kontur — wäre an dieser Stelle das
+> eigenständigste Element der ganzen Leiste, und es ist genau eine SVG.
+> Bei einem Symbol dieser Grösse zählt Klarheit vor Detail: Bei 32 px
+> überlebt keine feine Linie.
+>
+> Im Sheet bleibt der QR-Code unverändert — dort ist er richtig.
