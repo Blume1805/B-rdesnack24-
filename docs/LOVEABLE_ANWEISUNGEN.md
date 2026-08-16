@@ -1210,3 +1210,169 @@ egal wie er dargestellt wird.
 > überlebt keine feine Linie.
 >
 > Im Sheet bleibt der QR-Code unverändert — dort ist er richtig.
+
+## A18 · Kundenkarten-Symbol und Unterseiten (NICHT gesendet — Guthaben leer)
+
+Auslöser: vier Screenshots der Globus-Baumarkt-App vom Auftraggeber,
+16.08.2026. Übernommen wird die Informationsarchitektur und die
+Icon-Form, **nicht** die Mechanik. Beim Sendeversuch war das
+Loveable-Guthaben aufgebraucht; der Text steht hier unverändert bereit.
+
+Diese Anweisung ersetzt A17 nicht, sondern nimmt dessen Punkt 1
+(Groß-/Kleinschreibung) mit auf. Punkt 2 aus A17 — die Icon-Auswahl zum
+Vergleich — ist damit **erledigt**: Der Auftraggeber hat sich für die
+Kartenform aus den Screenshots entschieden. Auch der dort notierte
+Ausschluss von `CreditCard` ist gegenstandslos geworden; die Entscheidung
+lautet ausdrücklich „so wie auf den Bildern". Statt eines Stock-Icons
+wird trotzdem ein eigenes SVG gezeichnet — das war der Kern des
+Einwands und bleibt richtig.
+
+> Aufgabe: Kundenkarte — eigenes Karten-Icon und Unterseiten-Struktur
+> (Vorbild: Globus-Bonuskarte, Umsetzung strikt im Bördesnack24-Design)
+>
+> Der Auftraggeber hat vier Screenshots der Globus-Baumarkt-App als
+> Vorbild gezeigt. Übernommen wird die INFORMATIONSARCHITEKTUR und die
+> Icon-Form. NICHT übernommen werden Optik, Farben, Begriffe und vor
+> allem nicht die Mechanik — die ist bei uns eine andere und steht
+> weiter unten verbindlich.
+>
+> **A) Das Icon in der Bottom-Nav**
+>
+> Der zentrale Gold-Button trägt derzeit `QrCode` aus lucide. Der
+> Auftraggeber mag weder den QR-Code noch die bisher probierten
+> Stock-Icons. Gewünscht ist die Kartenform aus den Screenshots.
+>
+> Bitte KEIN Stock-Icon verwenden, sondern ein eigenes Inline-SVG als
+> Komponente `src/components/icons/customer-card.tsx` anlegen:
+>
+> * Viewbox 24×24, `stroke="currentColor"`, `fill="none"`,
+>   `strokeWidth={1.75}`, `strokeLinecap="round"`,
+>   `strokeLinejoin="round"` — damit es sich in Strichstärke und
+>   Rundung an die übrigen lucide-Icons der Navigation anpasst und
+>   nicht wie ein Fremdkörper wirkt.
+> * Form: liegendes Rechteck mit deutlich gerundeten Ecken (rx ≈ 3),
+>   etwa im Seitenverhältnis einer echten Karte, also breiter als hoch
+>   (z. B. x=2 y=5 w=20 h=14).
+> * Ein durchgehender waagerechter Balken im oberen Drittel (der
+>   Magnetstreifen) — als gefüllter oder dick gestrichener Strich über
+>   die volle Breite.
+> * Unten links zwei kurze, ungleich lange Striche (die Prägezeile).
+>   Kein Chip, keine Kontaktflächen, keine Kartennummer, kein
+>   Sternchen, keine Person, keine Hand.
+>
+> Das ist bewusst schlicht: Die Bedeutung trägt das Label
+> „Kundenkarte" darunter, das Icon muss nur in 24 px sicher als Karte
+> lesbar sein. Ein Icon mit Chip, Wellen oder Gesicht wird in dieser
+> Größe zu Matsch.
+>
+> Alles andere am Button bleibt wie gebaut: erhabener goldener Kreis,
+> größer als die Nachbarn, zentriert, `aria-haspopup="dialog"`,
+> Fokusring.
+>
+> **B) Die Unterseiten-Struktur**
+>
+> Vorbild ist der Aufbau der vier Screenshots, in dieser Reihenfolge:
+>
+> 1. Karten-Sheet (öffnet über den Gold-Button, bleibt ein Sheet —
+>    keine eigene Route nötig)
+>    * Logo/Wortmarke oben
+>    * QR-Code groß und mittig, auf weißer Fläche mit ruhigem Rand
+>      (QR-Codes brauchen hellen Untergrund, sonst scheitert das
+>      Scannen — hier also ausdrücklich kein Navy hinter dem Code)
+>    * Name des Kunden, darunter die Kundennummer
+>    * danach eine Liste mit Verweisen auf die Unterseiten:
+>      Meine Gutscheine · Bonusübersicht anzeigen · Kundenkarte
+>      verwalten · Informationen zur Kundenkarte
+> 2. Bonusübersicht — `/app/bonus`. Prüfe zuerst, ob die bestehende
+>    Route `src/routes/app.bonus.tsx` das schon abdeckt. Wenn ja:
+>    diese Seite ausbauen, KEINE zweite Bonusseite anlegen. Zwei
+>    Seiten mit denselben Zahlen laufen garantiert auseinander.
+> 3. Bonushistorie — `/app/bonus/historie`
+> 4. Kundenkarte verwalten — `/app/karte/verwalten`
+> 5. Informationen zur Kundenkarte — `/app/karte/info`
+>
+> Optik durchgängig Bördesnack24: Navy-Flächen, Gold als Akzent, die
+> vorhandenen Reveal-/Motion-Komponenten und das Card-Lift-Muster aus
+> `src/routes/index.tsx`. Zurück-Pfeil auf jeder Unterseite, der zur
+> vorherigen Seite führt (nicht zur Startseite) — das war schon einmal
+> Thema.
+>
+> **C) Verbindlich: die Mechanik ist bei uns eine ANDERE als bei
+> Globus**
+>
+> Das ist der wichtigste Teil dieser Aufgabe. Globus rechnet einen
+> Jahresumsatz und zahlt nach 12 Monaten aus. Wir nicht. Wer die
+> Globus-Zahlen abschreibt, baut ein Versprechen, das wir nicht halten
+> — das ist irreführende Werbung nach § 5 UWG, nicht nur ein
+> Designfehler.
+>
+> So funktioniert es bei uns tatsächlich (Quelle: Datenbankfunktion
+> `my_loyalty_status()`):
+>
+> * 1 Punkt = 1 Cent Bruttoumsatz.
+> * Vier Meilensteine: 500 / 1200 / 2000 / 3000 Punkte, also
+>   5 € / 12 € / 20 € / 30 € Umsatz.
+> * Belohnung je Meilenstein: ein persönlicher Gutschein über
+>   5 % / 10 % / 15 % / 25 % auf ein Produkt, 14 Tage gültig.
+> * Die Punkte werden MONATLICH zurückgesetzt, am 1. jedes Monats.
+>   Kein Sammeljahr.
+>
+> Deshalb ausdrücklich NICHT übernehmen: „Sammeljahr", ein Zeitraum
+> über 12 Monate, „Bonusfähiger Umsatz", „Kartenanzahl", die
+> Prozentstufen 0/3/5/10 %, die Umsatzschwellen 1500/2500/5000 € und
+> der Zähler „Aktivierte Coupons (5/5)". Nichts davon existiert bei
+> uns.
+>
+> Alle Zahlen kommen aus den vorhandenen Funktionen, keine erfunden
+> und keine hartkodiert:
+>
+> * `my_loyalty_status()` → `points`, `next_tier`, `points_to_next`,
+>   `reached_tiers`, `month_start`, `next_reset`
+> * `my_subscription_benefits()` → `active`, `discount_percent`,
+>   `period_end`, `plan` — das ist die einzige Quelle für den
+>   5-%-Dauerrabatt. Nicht selbst nachrechnen, nicht aus dem Abo-Feld
+>   ableiten.
+>
+> Auf der Bonusübersicht statt Globus' Jahresbalken also: der aktuelle
+> Punktestand, der nächste Meilenstein mit der Differenz dorthin, die
+> vier Stufen mit ihren echten Prozentsätzen, und der Hinweis, wann
+> zurückgesetzt wird (aus `next_reset`, nicht „in X Tagen" geschätzt).
+>
+> **D) Leere Zustände — nicht wegdesignen**
+>
+> In der Datenbank stehen heute in `loyalty_bonus_grants` und in
+> `personal_offers` jeweils 0 Zeilen. Die Bonushistorie und die
+> Gutscheinliste werden also zunächst leer sein. Bitte einen
+> ordentlichen leeren Zustand bauen (kurzer Satz, was hier später
+> steht, dezent gesetzt) — keine Beispieldaten, keine
+> Platzhalter-Einträge, keine Demo-Coupons. Erfundene Einträge in
+> einer Bonushistorie sind besonders heikel, weil sie wie ein
+> Kontoauszug gelesen werden.
+>
+> Für „Kundenkarte verwalten" gibt es noch kein Backend. Diese Seite
+> deshalb ehrlich klein halten: Kundennummer anzeigen, Hinweis, dass
+> die Karte an das Konto gebunden ist, und ein Verweis auf den
+> Support. Keine Schaltflächen, die nichts tun.
+>
+> **E) Groß-/Kleinschreibung**
+>
+> Der Auftraggeber hat außerdem angemerkt, dass durchgängig die
+> deutsche Groß- und Kleinschreibung zu beachten ist. Bitte beim
+> Durchgehen der Oberfläche mitnehmen: Substantive groß, Navigations-
+> und Schaltflächenbeschriftungen nicht in Versalien oder
+> durchgehender Kleinschreibung setzen, `uppercase`/`lowercase`-
+> Utilities dort entfernen, wo sie deutschen Text betreffen.
+>
+> Wenn etwas davon mit dem bestehenden Aufbau kollidiert (etwa weil
+> `app.bonus.tsx` schon anders strukturiert ist): nicht raten, sondern
+> kurz zurückmelden, was du vorgefunden hast und was du vorschlägst.
+
+**Woher die Zahlen in Abschnitt C stammen** — nachgesehen, nicht
+erinnert: `app.loyalty_milestones()` in
+`supabase/migrations/0023_loyalty_capacity_donationpool.sql` liefert
+`{500, 1200, 2000, 3000}`; die Rabattsätze 5/10/15/25 % und die
+14-Tage-Frist stehen in
+`supabase/migrations/0037_loyalty_correction.sql`, das genau diesen
+Abgleich schon einmal nachziehen musste. `my_loyalty_status()` steht in
+`0016_loyalty_mhd.sql`, `my_subscription_benefits()` in
+`0112_abo_vorteile_abfragbar.sql`.
