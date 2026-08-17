@@ -1211,12 +1211,15 @@ egal wie er dargestellt wird.
 >
 > Im Sheet bleibt der QR-Code unverändert — dort ist er richtig.
 
-## A18 · Kundenkarten-Symbol und Unterseiten (NICHT gesendet — Guthaben leer)
+## A18 · Kundenkarten-Symbol und Unterseiten (gesendet 17.08.2026)
 
 Auslöser: vier Screenshots der Globus-Baumarkt-App vom Auftraggeber,
 16.08.2026. Übernommen wird die Informationsarchitektur und die
-Icon-Form, **nicht** die Mechanik. Beim Sendeversuch war das
-Loveable-Guthaben aufgebraucht; der Text steht hier unverändert bereit.
+Icon-Form, **nicht** die Mechanik.
+
+Der erste Sendeversuch scheiterte am leeren Guthaben; am 17.08.2026
+unverändert abgesetzt (`umsg_01m06zm2dwebvsq5dt7vjmgg9k`, Status
+`accepted`).
 
 Diese Anweisung ersetzt A17 nicht, sondern nimmt dessen Punkt 1
 (Groß-/Kleinschreibung) mit auf. Punkt 2 aus A17 — die Icon-Auswahl zum
