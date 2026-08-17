@@ -1379,3 +1379,127 @@ erinnert: `app.loyalty_milestones()` in
 Abgleich schon einmal nachziehen musste. `my_loyalty_status()` steht in
 `0016_loyalty_mhd.sql`, `my_subscription_benefits()` in
 `0112_abo_vorteile_abfragbar.sql`.
+
+## A19 · Tägliches Einloggen: Wochenübersicht und Animation (bereit zum Senden)
+
+Auslöser: Vorgabe des Auftraggebers vom 17.08.2026. Die Datenbankseite ist
+gebaut und geprüft (Migration `0113_taegliches_einloggen_punkte.sql`,
+angewandt am 17.08.2026); diese Anweisung betrifft nur die Oberfläche.
+Beim Verfassen war die Lovable-Verbindung getrennt — der Text steht hier
+unverändert bereit.
+
+> Aufgabe: Wochenübersicht „Täglich einloggen" mit Animation
+>
+> Wer die App öffnet, sammelt ab sofort Punkte auf dieselben Meilensteine
+> wie beim Einkauf. Die Datenbank ist fertig; du baust die Oberfläche.
+>
+> **Die Regel, wörtlich**
+>
+> * 10 Punkte für jeden Tag, an dem die App geöffnet wird — für die
+>   ersten sechs Tage einer Woche (Montag bis Sonntag).
+> * 100 Punkte zusätzlich, wenn alle sieben Tage einer Woche dabei sind.
+> * Macht 160 Punkte je Woche.
+> * Zurückgesetzt wird am Monatsersten, zusammen mit den Umsatzpunkten.
+>
+> **Nenne als Obergrenze nur „160 pro Woche".** Nicht „640 im Monat":
+> Ein Kalendermonat hat 4,4 Wochen, nicht 4. Nachgerechnet ergibt ein
+> lückenlos besuchter Monat je nach Wochenlage zwischen 640 und 760
+> Punkten. 160 je Woche ist die einzige Zahl, die immer stimmt.
+>
+> **Die beiden Datenbankfunktionen**
+>
+> `record_daily_login()` — beim ersten Öffnen des Tages aufrufen. Bucht
+> den Tag, prüft die Meilensteine und liefert alles für die Anzeige:
+>
+> ```json
+> {
+>   "participates": true,
+>   "counted_today": true,
+>   "awarded": 10,
+>   "week_start": "2026-08-17",
+>   "week_end": "2026-08-23",
+>   "today": "2026-08-17",
+>   "days": [{"day":"2026-08-17","logged_in":true,"future":false}, … 7 Stück],
+>   "days_logged_in": 1,
+>   "week_complete": false,
+>   "points_per_day": 10,
+>   "streak_bonus": 100,
+>   "points_max_week": 160,
+>   "login_points_month": 10,
+>   "benefits_active": true
+> }
+> ```
+>
+> `my_login_week()` — dieselbe Übersicht ohne zu buchen. Für jeden
+> späteren Aufruf am selben Tag.
+>
+> **Die wichtigste Falle: nicht an `SIGNED_IN` hängen.** Supabase feuert
+> dieses Ereignis auch beim stündlichen Token-Refresh. Wer die Animation
+> daran koppelt, zeigt sie jede Stunde erneut. Richtig ist: einmal beim
+> Öffnen der App `record_daily_login()` rufen und die Animation **nur**
+> abspielen, wenn `counted_today` true ist. Ist es false, war der Nutzer
+> heute schon da — dann höchstens die Übersicht zeigen, ohne Feier.
+>
+> Verlass dich auch nicht auf das Datum des Geräts. Der Tag kommt vom
+> Server in deutscher Zeit; die Funktion regelt das.
+>
+> `participates: false` bedeutet: Konto ohne Kundenzeile (Admin,
+> Mitarbeiter). Dann nichts anzeigen, kein Fehler.
+>
+> **Die Übersicht**
+>
+> Sieben Kästen, Montag bis Sonntag, mit den Wochentagskürzeln. Drei
+> Zustände, klar unterscheidbar:
+>
+> * **eingeloggt** — gefüllt, Gold, Haken
+> * **verpasst** (`logged_in: false`, `future: false`) — leer, gedämpft
+> * **noch offen** (`future: true`) — leer, aber sichtbar anders als
+>   „verpasst". Ein Tag, der noch kommt, darf nicht wie ein Versäumnis
+>   aussehen. Das ist der Unterschied zwischen Ermutigung und Vorwurf.
+>
+> Dazu der Punktestand des Monats und die Angabe, wie weit es zum
+> nächsten Meilenstein ist (aus `my_loyalty_status()`, nicht selbst
+> gerechnet).
+>
+> **Die Animation**
+>
+> Sofort beim Öffnen, als Overlay über der Startseite. Ablauf:
+>
+> 1. Die Übersicht fährt auf, die Kästen erscheinen kurz nacheinander
+>    von Montag nach Sonntag.
+> 2. Der heutige Kasten wird zuletzt gefüllt — ein Stempel, kein
+>    Aufblitzen.
+> 3. Der Punktestand zählt um `awarded` hoch.
+> 4. Ist `week_complete` true, folgt eine deutlichere Auflösung für die
+>    100 Extrapunkte: die ganze Reihe leuchtet einmal in Gold durch.
+>    Kein Konfetti-Regen über den halben Bildschirm — eine Bewegung, die
+>    man beim zwanzigsten Mal noch erträgt.
+> 5. Das Overlay lässt sich jederzeit wegtippen und schliesst sich sonst
+>    von selbst.
+>
+> **`prefers-reduced-motion` respektieren.** Ist es gesetzt, erscheint
+> die Übersicht ohne Bewegung, der Punktestand steht sofort auf dem
+> Endwert. Nicht die Information weglassen, nur die Bewegung.
+>
+> **Ehrlichkeit an zwei Stellen — nicht wegdesignen**
+>
+> 1. Der Gutschein am Meilenstein ist ein Abo-Vorteil. Wer kein Abo hat,
+>    sammelt sichtbar mit, bekommt am Meilenstein aber nichts. Steht in
+>    `benefits_active`. Ist es false, muss das **in der Übersicht
+>    stehen** — ein Satz, ruhig gesetzt, kein Verkaufsbanner. Ein voller
+>    Balken ohne Gutschein und ohne Vorwarnung ist genau die
+>    Enttäuschung, die Vertrauen kostet.
+> 2. Hinweis-Chip an die Section, wie bei den übrigen automatisch
+>    erzeugten Inhalten, verlinkt auf die Seite zur automatisierten
+>    Auswahl. Hausregel; die Punkteregel entscheidet mit, wann ein
+>    Gutschein entsteht, und das muss nachlesbar sein.
+>
+> **Optik** wie überall: Navy-Flächen, Gold als Akzent, die vorhandenen
+> Motion-Komponenten. Deutsche Groß- und Kleinschreibung beachten.
+
+**Warum die Zahlen so und nicht wie ursprünglich vorgegeben** — die
+Vorgabe lautete 1 Punkt je Tag und 10 für die volle Woche. In diesem
+System ist ein Punkt ein Cent Umsatz; 16 Punkte pro Woche wären 16 Cent
+gewesen, der erste Meilenstein (500) allein durch Logins erst nach 31
+Wochen erreicht. Der Auftraggeber hat den Massstab daraufhin
+verzehnfacht; die Verhältnisse 6×1 + 10 bleiben erhalten.

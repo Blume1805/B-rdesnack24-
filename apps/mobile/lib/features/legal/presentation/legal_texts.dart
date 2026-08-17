@@ -37,7 +37,17 @@ abstract final class LegalTexts {
   // dass beim Zerlegen kein Zeichen verlorengeht. Wer hier weiterschreibt:
   // Die Auszeichnung endet an der Zeilengrenze, ein Paar über zwei Zeilen
   // bleibt sichtbar stehen.
-  static const version = 'v5 · 2026-08';
+  //
+  // v6 (17.08.2026): Punkte fürs tägliche Einloggen (Migration 0113). Neu
+  // gespeichert wird der Kalendertag, an dem die App geöffnet wurde —
+  // Verhaltensdaten, aus denen ein geldwerter Vorteil abgeleitet wird.
+  // Deshalb: eigener Buchstabe k) in Abschnitt 1, Speicherdauer von 90
+  // Tagen in Abschnitt 6, Widerspruchsrecht in Abschnitt 7 und die
+  // Ergänzung des Profiling-Abschnitts 8. Ausdrücklich mit aufgenommen ist
+  // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
+  // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
+  // Erwartung, die die Datenbank nicht einlöst.
+  static const version = 'v6 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -227,6 +237,28 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      Reinigungsnachweise, Buchhaltungsdaten, elektronische Unterschriften.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit LMHV, IfSG, AO, HGB.
 
+  **k) Punkte für tägliches Einloggen**
+     Öffnen Sie die App an einem Tag, speichern wir **diesen Kalendertag** — mehr
+     nicht. Keine Uhrzeit, kein Gerät, keine IP-Adresse, kein Standort. Daraus
+     berechnen wir Punkte auf dieselben Meilensteine wie beim Einkauf: 10 Punkte je
+     Tag für die ersten sechs Tage einer Woche und 100 Punkte zusätzlich, wenn Sie
+     an allen sieben Tagen einer Woche da waren.
+
+     Zweck: Kundenbindung. Wird ein Meilenstein erreicht, entsteht ein persönlicher
+     Gutschein — **allerdings nur bei aktivem Abo.** Ohne Abo sammeln Sie sichtbar
+     mit, erhalten am Meilenstein aber keinen Gutschein. Wir sagen das hier
+     ausdrücklich, damit der volle Fortschrittsbalken keine falsche Erwartung weckt.
+
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), soweit das
+     Punktesystem Teil Ihres Abos ist; sammeln Sie ohne Abo, stützen wir uns auf
+     Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Kundenbindung).
+
+     Die Auswertung Ihrer Öffnungstage ist **Profiling nach Art. 4 Nr. 4 DSGVO**,
+     weil aus Ihrem Nutzungsverhalten ein geldwerter Vorteil abgeleitet
+     wird. **Sie können ihr jederzeit widersprechen (Art. 21 DSGVO)** — formlos an die
+     im Impressum genannte Adresse. Danach zeichnen wir Ihre Öffnungstage nicht mehr
+     auf; Punkte sammeln Sie dann nur noch über Ihre Einkäufe.
+
 
 **2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)**
 
@@ -310,6 +342,9 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   * Einwilligungen und deren Widerruf: bis zum Ablauf möglicher Nachweispflichten.
   * Individuelle Angebote: drei Tage Gültigkeit; der Datensatz bleibt zur
     Missbrauchsvermeidung darüber hinaus bestehen.
+  * **Öffnungstage der App: 90 Tage.** Für die Punkte zählt der laufende Monat, für
+    die Wochenübersicht die laufende Woche. Die 90 Tage geben Luft für Rückfragen zu
+    einem Gutschein aus dem Vormonat; danach wird täglich automatisch gelöscht.
   * HACCP- und IfSG-Nachweise: nach den jeweiligen gesetzlichen Vorgaben.
   * Änderungs- und Versandprotokoll: Für diese beiden Protokolle ist derzeit keine
     automatische Löschfrist eingerichtet. Wir sagen das offen, statt eine Frist zu
@@ -330,8 +365,9 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     wir handels- oder steuerrechtlich aufbewahren müssen, werden für die weitere
     Verwendung gesperrt und erst nach Fristablauf gelöscht.
   * Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20).
-  * Widerspruch (Art. 21) gegen die individuellen Angebote und die
-    Geburtstagsgutscheine — siehe Abschnitt 1 d).
+  * Widerspruch (Art. 21) gegen die individuellen Angebote, die
+    Geburtstagsgutscheine und die Punkte für tägliches Einloggen — siehe
+    Abschnitt 1 d) und 1 k).
   * Widerruf jeder Einwilligung mit Wirkung für die Zukunft; die Rechtmässigkeit der
     bis dahin erfolgten Verarbeitung bleibt unberührt.
   * Beschwerde bei einer Aufsichtsbehörde (Art. 77), für uns zuständig:
@@ -344,11 +380,12 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
   rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt,
   findet nicht statt.
 
-  Die unter 1 d) beschriebene Auswertung Ihrer Kaufhistorie ist Profiling im Sinne von
-  Art. 4 Nr. 4 DSGVO — das benennen wir ausdrücklich. Sie führt aber zu keiner
-  Entscheidung über Sie: Der Rabattsatz ist für alle gleich, niemand wird
-  ausgeschlossen, bevorzugt oder anders bepreist, und es findet keine Bewertung Ihrer
-  Zahlungsfähigkeit oder Ihres Verhaltens statt.
+  Die unter 1 d) beschriebene Auswertung Ihrer Kaufhistorie und die unter 1 k)
+  beschriebene Auswertung Ihrer Öffnungstage sind Profiling im Sinne von
+  Art. 4 Nr. 4 DSGVO — das benennen wir ausdrücklich. Beide führen aber zu keiner
+  Entscheidung über Sie: Der Rabattsatz ist für alle gleich, die Punkteregel gilt für
+  alle gleich, niemand wird ausgeschlossen, bevorzugt oder anders bepreist, und es
+  findet keine Bewertung Ihrer Zahlungsfähigkeit oder Ihres Verhaltens statt.
 
 
 **9) SICHERHEIT**
@@ -635,6 +672,7 @@ Damit klar ist, worauf sich diese Erklärung bezieht:
 
   • Produkte, Preise und Verfügbarkeit an unseren Automaten ansehen
   • Angebote, Rabatte und Coupons abrufen, darunter individuelle Angebote
+  • Punkte fürs tägliche Einloggen sammeln und die Wochenübersicht einsehen
   • die digitale Kundenkarte als QR-Code nutzen
   • den digitalen Kassenbon zu einem Kauf abrufen
   • Produkte bewerten
@@ -765,6 +803,7 @@ darauf verweisen, ist der dortige Text massgeblich.
   • Produkte, Preise und Verfügbarkeit an unseren Automaten ansehen
   • Automatenstandorte finden
   • Angebote, Rabatte und Coupons abrufen, darunter individuelle Angebote
+  • Punkte fürs tägliche Einloggen sammeln und die Wochenübersicht einsehen
   • die digitale Kundenkarte als QR-Code nutzen
   • den digitalen Kassenbon zu einem Kauf abrufen
   • Produkte mit 1 bis 5 Sternen bewerten

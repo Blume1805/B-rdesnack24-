@@ -78,6 +78,13 @@ class AiInfoScreen extends StatelessWidget {
                 'Grundlage ist die Vorhersage des Deutschen Wetterdienstes '
                 'für den Automaten-Standort — dein eigener Standort wird '
                 'dafür nicht verwendet. '
+                'Dazu kommt seit August 2026 eine Punkteregel fürs tägliche '
+                'Einloggen: Öffnest du die App an einem Tag, zählt dieser Tag '
+                '10 Punkte; warst du an allen sieben Tagen einer Woche da, '
+                'kommen 100 Punkte dazu. Das ist reine Rechnerei nach festen '
+                'Zahlen — nichts wird gelernt, geschätzt oder vorhergesagt. '
+                'Sie steht hier trotzdem, weil sie mitentscheidet, wann ein '
+                'Meilenstein-Gutschein entsteht. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
@@ -94,6 +101,10 @@ class AiInfoScreen extends StatelessWidget {
                 'und wie oft\n\n'
                 'Für den Geburtstagsgutschein:\n'
                 '• Dein Geburtsdatum\n\n'
+                'Für die Punkte fürs tägliche Einloggen:\n'
+                '• Der Kalendertag, an dem du die App geöffnet hast — keine '
+                'Uhrzeit, kein Gerät, keine IP-Adresse. Nach 90 Tagen wird '
+                'er gelöscht.\n\n'
                 'Ohne Bezug zu deiner Person:\n'
                 '• Wettervorhersage für den Automaten-Standort '
                 '(nicht für deinen)\n'
@@ -113,7 +124,10 @@ class AiInfoScreen extends StatelessWidget {
                 'widersprechen — schreib uns über das Kontaktformular in '
                 'der App oder per E-Mail an datenschutz@boerdesnack24.de. Du '
                 'siehst dann nur noch die allgemeinen Wochenangebote, den '
-                'Frühstücks- und den Feierabend-Deal.',
+                'Frühstücks- und den Feierabend-Deal.\n\n'
+                'Das gilt auch für die Punkte fürs tägliche Einloggen: Auf '
+                'Widerspruch zeichnen wir deine Öffnungstage nicht mehr auf. '
+                'Punkte sammelst du dann nur noch über deine Einkäufe.',
           ),
           const _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',

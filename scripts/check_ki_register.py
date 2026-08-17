@@ -62,13 +62,40 @@ FUNKTIONSKOPF = re.compile(
 
 
 def registrierte_schluessel() -> set[str]:
-    """Liest die Schlüssel aus den INSERT-Werten der Registermigration."""
+    """Liest die Schlüssel aus allen Migrationen, die ins Register schreiben.
+
+    Bis 17.08.2026 wurde ausschliesslich `0105_ki_register.sql` gelesen.
+    Das ging so lange gut, wie das Register nur bei seiner Anlage gefüllt
+    wurde — genau bis zum ersten Nachtrag. Migration 0113 trägt
+    `loyalty_login_points` nach; für dieses Skript hätte der Eintrag nicht
+    existiert, und die nächste Funktion mit passendem Namen wäre fälschlich
+    als „nicht eingestuft" gemeldet worden.
+
+    Eine bereits angewandte Migration nachträglich zu ändern, ist keine
+    Lösung — sie ist Geschichte, keine Datei zum Fortschreiben. Also liest
+    das Skript jetzt jede Migration, die in `ki_register` einfügt.
+    """
     if not REGISTER.exists():
         print(f"FEHLER: {REGISTER.relative_to(WURZEL)} fehlt.", file=sys.stderr)
         sys.exit(1)
-    text = REGISTER.read_text(encoding="utf-8")
-    # Die Schlüssel stehen als erstes Feld jeder Wertezeile: ('name',
-    return set(re.findall(r"^\('(\w+)'", text, re.MULTILINE))
+
+    schluessel: set[str] = set()
+    for datei in sorted(MIGRATIONEN.glob("*.sql")):
+        text = datei.read_text(encoding="utf-8")
+        if "ki_register" not in text:
+            continue
+        # 0105 listet die Werte als Zeilenanfang: ('name', …
+        schluessel.update(re.findall(r"^\('(\w+)'", text, re.MULTILINE))
+        # Nachträge stehen als eigener INSERT; der Schlüssel ist der erste
+        # Wert nach `values (` — meist erst auf der nächsten Zeile.
+        schluessel.update(
+            re.findall(
+                r"insert\s+into\s+public\.ki_register\b.*?\bvalues\s*\(\s*'(\w+)'",
+                text,
+                re.IGNORECASE | re.DOTALL,
+            )
+        )
+    return schluessel
 
 
 def gefundene_funktionen() -> dict[str, str]:
