@@ -1380,13 +1380,15 @@ Abgleich schon einmal nachziehen musste. `my_loyalty_status()` steht in
 `0016_loyalty_mhd.sql`, `my_subscription_benefits()` in
 `0112_abo_vorteile_abfragbar.sql`.
 
-## A19 · Tägliches Einloggen: Wochenübersicht und Animation (bereit zum Senden)
+## A19 · Tägliches Einloggen: Wochenübersicht und Animation (gesendet 17.08.2026)
 
 Auslöser: Vorgabe des Auftraggebers vom 17.08.2026. Die Datenbankseite ist
 gebaut und geprüft (Migration `0113_taegliches_einloggen_punkte.sql`,
 angewandt am 17.08.2026); diese Anweisung betrifft nur die Oberfläche.
-Beim Verfassen war die Lovable-Verbindung getrennt — der Text steht hier
-unverändert bereit.
+
+Beim Verfassen war die Lovable-Verbindung getrennt; nach der Wiederkehr
+unverändert abgesetzt (`umsg_01m09gx2r4e9xrxpctp6qhmt8b`, Status
+`accepted`).
 
 > Aufgabe: Wochenübersicht „Täglich einloggen" mit Animation
 >
