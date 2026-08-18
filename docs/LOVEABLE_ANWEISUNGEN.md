@@ -1505,3 +1505,42 @@ System ist ein Punkt ein Cent Umsatz; 16 Punkte pro Woche wären 16 Cent
 gewesen, der erste Meilenstein (500) allein durch Logins erst nach 31
 Wochen erreicht. Der Auftraggeber hat den Massstab daraufhin
 verzehnfacht; die Verhältnisse 6×1 + 10 bleiben erhalten.
+
+## A20 · Demozugang, Kontrast, Bewegung, Coupon-Slider (NICHT gesendet — Guthaben leer)
+
+Auslöser: fünf Punkte des Auftraggebers vom 18.08.2026. Vor dem Verfassen
+gegen den Code und die Datenbank geprüft; die Befunde stehen in der
+Anweisung, damit der Agent sie nicht noch einmal erheben muss.
+
+**Was die Prüfung ergeben hat** (Zahlen, nicht Eindrücke):
+
+* `--background: #fbf8f4` gegen `--card: #ffffff` = **1,06:1**. Die Karten
+  hängen allein an Rand und Schatten.
+* `--border: #dcd8d3` gegen den Hintergrund = **1,34:1**. WCAG 1.4.11
+  verlangt 3:1 für die Begrenzung eines Bedienelements.
+* `--shadow-soft` arbeitet mit Alpha 0,06/0,07 — auf Creme fast nichts.
+* Ein dunklerer Hintergrund bricht ein Text-Token: `--gold-ink: #8a6a00`
+  liegt auf `#fbf8f4` bei 4,79:1, auf `#f2ece2` nur noch bei **4,32:1**
+  und damit unter den 4,5:1 aus WCAG 1.4.3.
+* `motion` ^12.43, `embla-carousel-react` ^8.6 sind installiert. Die App
+  ist aus Entscheidung statisch, nicht aus Mangel. `Reveal`,
+  `PageTransition`, `AnimatedNumber`, `card-lift` existieren und werden
+  kaum benutzt.
+* **Keine** Lottie-Bibliothek im Projekt. Die Dateien liegen beim
+  Auftraggeber und müssen hochgeladen werden — der Agent kommt nicht
+  daran.
+* `public.products`: 62 aktive Produkte, **0** mit `image_url`. Der
+  Platzhalter ist auf absehbare Zeit das, was jeder sieht.
+* `daily-login-gate.tsx` enthält `if (!user || (demo && !user)) return;` —
+  der zweite Teil ist wirkungslos, weil der erste bei fehlendem `user`
+  schon abbricht.
+
+Der Anweisungstext liegt im Verlauf dieser Sitzung und wird beim nächsten
+Guthaben unverändert abgesetzt. Reihenfolge laut Anweisung: Kontrast und
+Rechtschreibung zuerst (betreffen alles), dann Demozugang, dann
+Coupon-Slider, dann Bewegung, zuletzt die Vorbereitung für Lottie.
+
+**Offen beim Auftraggeber:** Die Lottie-Dateien müssen in das
+Lovable-Projekt hochgeladen werden. Ohne sie kann nur die Aufnahme
+(`<BrandLottie slot="…" />` plus Registrierung) gebaut werden, nicht der
+Inhalt.
