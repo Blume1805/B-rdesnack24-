@@ -78,3 +78,6 @@ apps/mobile/lib/l10n/generated/
 # Python-Bytecode der Wächterskripte
 __pycache__/
 *.pyc
+
+# Erzeugte Design-Leinwand — wird aus design/*.dc.html neu gebaut
+design/boerdesnack24-designrichtungen.html
