@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@300..800&display=swap">
+  <style>
+    body { margin: 0; font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif; }
+    a { color: #8a6a00; } a:hover { color: #6d5400; }
+    .disp { font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; }
+    .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #6b6862; margin: 0 0 12px; }
+    .note { font-size: 12px; line-height: 1.5; color: #6b6862; margin: 7px 0 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+  </style>
+</helmet>
+
+<div style="width: 900px; min-height: 1020px; box-sizing: border-box; background: #fbf8f4; color: #202321; padding: 40px 44px 48px;">
+
+  <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #8a6a00;">Conversion</p>
+  <h1 class="disp" style="margin: 6px 0 0; font-size: 38px; font-weight: 800; line-height: 0.98; letter-spacing: -0.03em;">Überzeugen heisst hier: nachprüfbar bleiben.</h1>
+  <p style="margin: 12px 0 0; font-size: 14px; line-height: 1.55; color: #4a4844; max-width: 640px;">Jeder Baustein auf dieser Seite hat eine Bedingung, unter der er <span style="font-weight: 700; color: #202321;">nicht</span> erscheint. Das ist der eigentliche Entwurf — ein Hook ohne Deckung ist eine Behauptung, und eine Behauptung über Geld ist nach § 5 UWG angreifbar.</p>
+  <div style="height: 1px; background: #dcd8d3; margin: 26px 0 30px;"></div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+
+    <div>
+      <p class="lbl">Hooks — mit Deckungsbedingung</p>
+      <div style="border-top: 1px solid #dcd8d3;">
+        <div style="padding: 13px 0; border-bottom: 1px solid #dcd8d3;">
+          <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">„Noch 340 Punkte bis zum Gutschein."</p>
+          <p class="note">Zeigt sich, wenn <code>points_to_next</code> vorliegt. Bei 0 Punkten im Monat: nicht zeigen — sonst ist es eine Aufforderung, keine Information.</p>
+        </div>
+        <div style="padding: 13px 0; border-bottom: 1px solid #dcd8d3;">
+          <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">„Noch 3 Stück im Fach."</p>
+          <p class="note">Nur aus <code>inventory.quantity</code>, nur unter 5. Kein Zähler, der jeden Tag neu bei drei anfängt.</p>
+        </div>
+        <div style="padding: 13px 0; border-bottom: 1px solid #dcd8d3;">
+          <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">„Dein Gutschein läuft am 31. August ab."</p>
+          <p class="note">Aus <code>personal_offers.valid_to</code>. Echte Frist, echtes Datum — kein Countdown, der sich beim Neuladen zurücksetzt.</p>
+        </div>
+        <div style="padding: 13px 0; border-bottom: 1px solid #dcd8d3;">
+          <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">„Noch 20 von 20 Founders-Plätzen frei."</p>
+          <p class="note">Das Lifetime-Abo ist auf <span style="font-weight: 700; color: #202321;">20 Konten</span> begrenzt — die Zahlungsinformationen sagen zu, die freien Plätze anzuzeigen. Echte Knappheit, sogar eine versprochene.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; padding: 14px 16px; background: #ffffff; border: 1px solid #cfc7bb; border-left: 3px solid #b31c1c; border-radius: 10px;">
+        <p style="margin: 0; font-size: 13px; line-height: 1.55;"><span style="font-weight: 800;">Nicht gebaut wird:</span> ein Zähler ohne Enddatum, „nur heute" ohne Frist im Datensatz, „X Personen sehen das gerade", Sternebewertungen ohne Bewertungen. In <code>product_ratings</code> stehen heute null Zeilen.</p>
+      </div>
+    </div>
+
+    <div>
+      <p class="lbl">Ersparnis — nur gerechnet, nie geschätzt</p>
+      <div style="background: #202321; border-top: 2px solid #fdc102; border-radius: 10px; padding: 18px 20px 20px;">
+        <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #fdc102;">Deine Vorteile im August</p>
+        <p class="disp" style="margin: 10px 0 0; font-size: 34px; font-weight: 800; line-height: 1; color: #fbf8f4; font-variant-numeric: tabular-nums;">3,80 €</p>
+        <p style="margin: 6px 0 0; font-size: 13px; color: rgba(251,248,244,0.75);">aus 14 Einkäufen mit 5 % Abo-Rabatt</p>
+      </div>
+      <p class="note"><span style="font-weight: 700; color: #202321;">Erscheint erst, wenn der Rabatt tatsächlich gewährt und erfasst wurde.</span> Bis dahin: kein Näherungswert, kein „du könntest sparen", kein 0,00 € — die Karte fehlt einfach.</p>
+
+      <p class="lbl" style="margin-top: 26px;">Sozialer Beleg</p>
+      <div style="background: #ffffff; border: 1px dashed #cfc7bb; border-radius: 10px; padding: 22px 20px; text-align: center;">
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6b6862;">Diese Fläche bleibt leer, solange es nichts Echtes zu zeigen gibt.<br>Heute: 0 Bewertungen, 0 eingelöste Gutscheine.</p>
+      </div>
+      <p class="note">Die Komponente wird gebaut und rendert bei null Zeilen <span style="font-weight: 700; color: #202321;">nichts</span> — kein Platzhalter, kein „Sei der Erste". Sobald Zahlen da sind, steht sie an dieser Stelle.</p>
+
+      <p class="lbl" style="margin-top: 26px;">Kontextueller Hinweis statt Pop-up</p>
+      <div style="background: #ffffff; border: 1px solid #cfc7bb; border-radius: 10px; padding: 4px 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid #cfc7bb;">
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 15px; font-weight: 700;">Magnum Klassik</p></div>
+          <p class="disp" style="margin: 0; font-size: 16px; font-weight: 800;">2,78 €</p>
+        </div>
+        <div style="padding: 12px 0; display: flex; align-items: center; gap: 10px;">
+          <span style="width: 22px; height: 22px; border-radius: 999px; background: #202321; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"><span style="font-size: 9px; font-weight: 800; color: #fdc102;">%</span></span>
+          <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #4a4844;">Mit Abo <span style="font-weight: 700; color: #202321;">2,64 €</span> — 0,14 € weniger. <span style="color: #8a6a00; font-weight: 700; border-bottom: 1px solid #8a6a00;">Vorteile ansehen</span></p>
+        </div>
+      </div>
+      <p class="note">Der Hinweis sitzt am Preis, wo die Frage entsteht — nicht als Einblendung über dem Inhalt. Erscheint nur ohne laufendes Abo.</p>
+    </div>
+  </div>
+
+  <div style="height: 1px; background: #dcd8d3; margin: 32px 0 28px;"></div>
+
+  <div>
+    <p class="lbl">Kostenlos und mit Abo — der Vergleich ohne Preistabelle</p>
+    <div style="background: #ffffff; border: 1px solid #cfc7bb; border-radius: 12px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr;">
+        <div style="padding: 14px 18px; border-bottom: 1px solid #cfc7bb;"></div>
+        <div style="padding: 14px 12px; border-bottom: 1px solid #cfc7bb; border-left: 1px solid #cfc7bb; text-align: center;"><p style="margin: 0; font-size: 12px; font-weight: 700; color: #6b6862;">Ohne Abo</p></div>
+        <div style="padding: 14px 12px; border-bottom: 1px solid #cfc7bb; background: #202321; text-align: center;"><p style="margin: 0; font-size: 12px; font-weight: 800; color: #fdc102;">Mit Abo</p></div>
+
+        <div style="padding: 13px 18px; border-bottom: 1px solid #cfc7bb;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Preise und Verfügbarkeit sehen</p></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; border-left: 1px solid #cfc7bb; text-align: center;"><span style="color: #467430; font-weight: 800;">Ja</span></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; background: #202321; text-align: center;"><span style="color: #fdc102; font-weight: 800;">Ja</span></div>
+
+        <div style="padding: 13px 18px; border-bottom: 1px solid #cfc7bb;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Punkte sammeln</p></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; border-left: 1px solid #cfc7bb; text-align: center;"><span style="color: #467430; font-weight: 800;">Ja</span></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; background: #202321; text-align: center;"><span style="color: #fdc102; font-weight: 800;">Ja</span></div>
+
+        <div style="padding: 13px 18px; border-bottom: 1px solid #cfc7bb;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Gutschein am Meilenstein</p><p style="margin: 2px 0 0; font-size: 12px; color: #6b6862;">5 bis 25 % auf ein Produkt, 14 Tage gültig</p></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; border-left: 1px solid #cfc7bb; text-align: center;"><span style="color: #6b6862; font-weight: 700;">Nein</span></div>
+        <div style="padding: 13px 12px; border-bottom: 1px solid #cfc7bb; background: #202321; text-align: center;"><span style="color: #fdc102; font-weight: 800;">Ja</span></div>
+
+        <div style="padding: 13px 18px;"><p style="margin: 0; font-size: 14px; font-weight: 700;">5 % auf jeden Einkauf</p></div>
+        <div style="padding: 13px 12px; border-left: 1px solid #cfc7bb; text-align: center;"><span style="color: #6b6862; font-weight: 700;">Nein</span></div>
+        <div style="padding: 13px 12px; background: #202321; text-align: center;"><span style="color: #fdc102; font-weight: 800;">Ja</span></div>
+      </div>
+    </div>
+    <p class="note">Vier Zeilen, keine zwanzig. Die ersten beiden sind bewusst zweimal „Ja" — wer ohne Abo bleibt, soll sehen, dass er eine vollständige App hat und nicht eine beschnittene.</p>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

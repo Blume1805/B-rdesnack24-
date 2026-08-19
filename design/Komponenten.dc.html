@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@300..800&display=swap">
+  <style>
+    body { margin: 0; font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif; }
+    a { color: #8a6a00; } a:hover { color: #6d5400; }
+    .disp { font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; }
+    .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #6b6862; margin: 0 0 12px; }
+    .note { font-size: 12px; line-height: 1.5; color: #6b6862; margin: 7px 0 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+    .pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; }
+  </style>
+</helmet>
+
+<div style="width: 900px; min-height: 1020px; box-sizing: border-box; background: #fbf8f4; color: #202321; padding: 40px 44px 48px;">
+
+  <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #8a6a00;">Komponenten</p>
+  <h1 class="disp" style="margin: 6px 0 0; font-size: 38px; font-weight: 800; line-height: 0.98; letter-spacing: -0.03em;">Wenige Bausteine, streng benutzt.</h1>
+  <div style="height: 1px; background: #dcd8d3; margin: 26px 0 30px;"></div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+
+    <div>
+      <p class="lbl">Das CTA-System — fünf Stufen, mehr nicht</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <span class="pill" style="min-height: 52px; padding: 0 24px; background: #fdc102; color: #202321; font-size: 15px;">Vorteile ansehen</span>
+          <p class="note"><span style="font-weight: 700; color: #202321;">Primär</span> — genau einer pro Bildschirm.</p>
+        </div>
+        <div>
+          <span class="pill" style="min-height: 48px; padding: 0 20px; background: #ffffff; border: 1px solid #8f887e; color: #202321; font-size: 14px; font-weight: 700;">Mehr erfahren</span>
+          <p class="note"><span style="font-weight: 700; color: #202321;">Sekundär</span> — gleichwertige Alternative, nie versteckt.</p>
+        </div>
+        <div>
+          <span class="pill" style="min-height: 48px; padding: 0 20px; background: #202321; color: #fdc102; font-size: 14px;">Vorteil aktivieren</span>
+          <p class="note"><span style="font-weight: 700; color: #202321;">Aktivierung</span> — löst etwas Konkretes aus, nicht Navigation.</p>
+        </div>
+        <div>
+          <span class="pill" style="min-height: 44px; padding: 0 18px; background: transparent; color: #4a4844; font-family: 'Hanken Grotesk', sans-serif; font-weight: 700; font-size: 14px; border: 1px solid #cfc7bb;">Später</span>
+          <p class="note"><span style="font-weight: 700; color: #202321;">Ablehnen</span> — gleich gross, gleich erreichbar, gleich lesbar. Kein Graustich, keine Winzschrift.</p>
+        </div>
+        <div>
+          <span style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 14px; font-weight: 700; color: #8a6a00; border-bottom: 1px solid #8a6a00;">Abo kündigen</span>
+          <p class="note"><span style="font-weight: 700; color: #202321;">Textlink</span> — für die Kündigung. Sichtbar, nicht in einem Aufklapper (§ 312k BGB).</p>
+        </div>
+      </div>
+
+      <p class="lbl" style="margin-top: 30px;">Beschriftung: was drin ist, nicht was passiert</p>
+      <div style="border-top: 1px solid #dcd8d3;">
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #dcd8d3; align-items: center;">
+          <span style="width: 58px; flex-shrink: 0; font-size: 11px; font-weight: 800; color: #b31c1c;">schwach</span>
+          <span style="font-size: 14px; color: #6b6862;">Weiter</span>
+        </div>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #dcd8d3; align-items: center;">
+          <span style="width: 58px; flex-shrink: 0; font-size: 11px; font-weight: 800; color: #8c6104;">besser</span>
+          <span style="font-size: 14px;">Angebot ansehen</span>
+        </div>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #dcd8d3; align-items: center;">
+          <span style="width: 58px; flex-shrink: 0; font-size: 11px; font-weight: 800; color: #467430;">richtig</span>
+          <span style="font-size: 14px; font-weight: 700;">5 % Vorteil ansehen</span>
+        </div>
+      </div>
+      <p class="note">Die dritte Form nur, wenn die Zahl an dieser Stelle tatsächlich vorliegt. Sonst die zweite.</p>
+    </div>
+
+    <div>
+      <p class="lbl">Die Listenzeile — ersetzt die Kachel</p>
+      <div style="background: #ffffff; border: 1px solid #cfc7bb; border-radius: 10px; padding: 4px 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid #cfc7bb;">
+          <span style="width: 7px; height: 7px; border-radius: 999px; background: #5c9a3f; flex-shrink: 0;"></span>
+          <div style="flex-grow: 1; min-width: 0;">
+            <p style="margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; color: #6b6862;">Eis</p>
+            <p style="margin: 2px 0 0; font-size: 15px; font-weight: 700;">Magnum Klassik</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <p class="disp" style="margin: 0; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums;">2,78 €</p>
+            <p style="margin: 1px 0 0; font-size: 11px; font-weight: 700; color: #8a6a00;">2,64 € mit Abo</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; background: #f2eee8; margin: 0 -16px; padding-left: 16px; padding-right: 16px;">
+          <span style="width: 7px; height: 7px; border-radius: 999px; background: #5c9a3f; flex-shrink: 0;"></span>
+          <div style="flex-grow: 1; min-width: 0;">
+            <p style="margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; color: #6b6862;">Eis</p>
+            <p style="margin: 2px 0 0; font-size: 15px; font-weight: 700;">Capri Eis</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <p class="disp" style="margin: 0; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums;">1,33 €</p>
+          </div>
+        </div>
+      </div>
+      <p class="note">Zweite Zeile im Druckzustand. Die Zeile ist die tragende Komponente von Richtung A — keine Bildfläche, also auch kein leerer Rahmen.</p>
+
+      <p class="lbl" style="margin-top: 26px;">Statuszeichen</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #ffffff; border: 1px solid #cfc7bb; font-size: 12px; font-weight: 700;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #5c9a3f;"></span>Verfügbar</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #fdf3d6; border: 1px solid #e8a206; font-size: 12px; font-weight: 700; color: #8c6104;">Noch 3 Stück</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #ffffff; border: 1px solid #cfc7bb; font-size: 12px; font-weight: 700; color: #6b6862;">Nicht im Fach</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #202321; color: #fdc102; font-size: 12px; font-weight: 800;">Abo-Vorteil</span>
+      </div>
+      <p class="note">Jeder Zustand trägt Text. Der farbige Punkt ist Zugabe, nie die einzige Information.</p>
+
+      <p class="lbl" style="margin-top: 26px;">Eingabe</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; background: #ffffff; border: 1px solid #8f887e; border-radius: 10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6862" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+          <span style="font-size: 15px; color: #6b6862;">Produkt oder Automat suchen</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; background: #ffffff; border: 2px solid #202321; border-radius: 10px;">
+          <span style="font-size: 15px;">Magnum</span>
+        </div>
+      </div>
+      <p class="note">Fokus als 2-px-Ink-Kante — nicht als Schein, der auf Papier nicht existiert.</p>
+    </div>
+  </div>
+
+  <div style="height: 1px; background: #dcd8d3; margin: 32px 0 28px;"></div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+    <div>
+      <p class="lbl">Leerer Zustand</p>
+      <div style="background: #ffffff; border: 1px solid #cfc7bb; border-radius: 10px; padding: 26px 20px; text-align: center;">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#cfc7bb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display: block; margin: 0 auto 12px;"><rect x="3" y="8" width="18" height="12" rx="2"></rect><path d="M3 12h18"></path><path d="M12 8v12"></path></svg>
+        <p class="disp" style="margin: 0; font-size: 16px; font-weight: 700;">Noch keine Gutscheine</p>
+        <p style="margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: #6b6862;">Ab 500 Punkten erscheint hier dein erster.</p>
+      </div>
+      <p class="note">Sagt, was hier stehen wird — nie Beispieldaten, nie ein Skelett mit erfundener Zahl.</p>
+    </div>
+
+    <div>
+      <p class="lbl">Bildplatzhalter</p>
+      <div style="display: flex; gap: 10px;">
+        <div style="width: 96px; height: 120px; border-radius: 10px; background: #202321; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+          <span class="disp" style="font-size: 34px; font-weight: 800; color: #fdc102;">M</span>
+          <span style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; color: rgba(251,248,244,0.6);">Eis</span>
+        </div>
+        <div style="width: 96px; height: 120px; border-radius: 10px; background: #353834; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+          <span class="disp" style="font-size: 34px; font-weight: 800; color: rgba(251,248,244,0.55);">C</span>
+          <span style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; color: rgba(251,248,244,0.5);">Getränke</span>
+        </div>
+      </div>
+      <p class="note">62 von 62 Produkten haben kein Foto. Also gestaltet statt entschuldigt — festes Format 4:5, damit das echte Bild später an dieselbe Stelle tritt, ohne dass das Layout springt.</p>
+    </div>
+
+    <div>
+      <p class="lbl">Bottom Sheet</p>
+      <div style="background: #ffffff; border: 1px solid #cfc7bb; border-radius: 16px 16px 10px 10px; padding: 12px 16px 18px;">
+        <div style="width: 38px; height: 4px; border-radius: 999px; background: #cfc7bb; margin: 0 auto 14px;"></div>
+        <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">Gutschein einlösen</p>
+        <p style="margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: #4a4844;">Zeig den Code am Automaten. Gültig bis 31. August.</p>
+        <div style="margin-top: 12px; padding: 12px; background: #f2eee8; border-radius: 8px; text-align: center;">
+          <span class="disp" style="font-size: 22px; font-weight: 800; letter-spacing: 0.12em;">BS24-7QK2</span>
+        </div>
+      </div>
+      <p class="note">Sheets statt Vollbild-Dialogen — der Kontext dahinter bleibt sichtbar.</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

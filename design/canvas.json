@@ -1,14 +1,32 @@
 {
+  "pages": [
+    { "id": "richtungen", "name": "Richtungen" },
+    { "id": "system", "name": "Designsystem" },
+    { "id": "screens", "name": "Screens" }
+  ],
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 900, "h": 680, "title": "Fundament" },
-    { "file": "RichtungA.dc.html", "x": 0, "y": 800, "w": 390, "h": 844, "title": "A — Premium Editorial" },
-    { "file": "RichtungB.dc.html", "x": 460, "y": 800, "w": 390, "h": 844, "title": "B — Dynamic Commerce" },
-    { "file": "RichtungC.dc.html", "x": 920, "y": 800, "w": 390, "h": 844, "title": "C — Local Discovery" },
-    { "file": "Empfehlung.dc.html", "x": 980, "y": 0, "w": 900, "h": 680, "title": "Empfehlung" }
+    { "file": "Main.dc.html", "page": "richtungen", "x": 0, "y": 0, "w": 900, "h": 680, "title": "Fundament" },
+    { "file": "RichtungA.dc.html", "page": "richtungen", "x": 0, "y": 800, "w": 390, "h": 844, "title": "A — Premium Editorial (gewählt)" },
+    { "file": "RichtungB.dc.html", "page": "richtungen", "x": 460, "y": 800, "w": 390, "h": 844, "title": "B — Dynamic Commerce" },
+    { "file": "RichtungC.dc.html", "page": "richtungen", "x": 920, "y": 800, "w": 390, "h": 844, "title": "C — Local Discovery" },
+    { "file": "Empfehlung.dc.html", "page": "richtungen", "x": 980, "y": 0, "w": 900, "h": 680, "title": "Empfehlung" },
+
+    { "file": "Foundations.dc.html", "page": "system", "x": 0, "y": 0, "w": 900, "h": 1000, "title": "Foundations" },
+    { "file": "Komponenten.dc.html", "page": "system", "x": 960, "y": 0, "w": 900, "h": 1020, "title": "Komponenten" },
+    { "file": "Conversion.dc.html", "page": "system", "x": 1920, "y": 0, "w": 900, "h": 1020, "title": "Conversion" },
+    { "file": "AboEbene.dc.html", "page": "system", "x": 2880, "y": 0, "w": 900, "h": 1000, "title": "Abo-Ebene" },
+
+    { "file": "Onboarding.dc.html", "page": "screens", "x": 0, "y": 0, "w": 390, "h": 844, "title": "Onboarding" },
+    { "file": "ProduktDetail.dc.html", "page": "screens", "x": 450, "y": 0, "w": 390, "h": 844, "title": "Produktdetail" },
+    { "file": "Bonus.dc.html", "page": "screens", "x": 900, "y": 0, "w": 390, "h": 844, "title": "Bonus" },
+    { "file": "Landing.dc.html", "page": "screens", "x": 1350, "y": 0, "w": 390, "h": 1560, "title": "Landingpage" }
   ],
   "annotations": [
-    { "id": "gleiche-inhalte", "x": 1380, "y": 810, "w": 300, "text": "Alle drei Entwürfe zeigen denselben Startbildschirm mit denselben echten Daten: Punktestand 160 von 500, Magnum Klassik 2,78 €, Capri Eis 1,33 €, Calippo Cola 1,67 €.\n\nSo vergleichst du Komposition, nicht Inhalt." },
-    { "id": "farbwelt", "x": 1380, "y": 1090, "w": 300, "text": "Identische Palette in allen dreien — Gold #FDC102, Ink #202321, Cream #FBF8F4, Börde-Grau #DCD8D3, Grün #5C9A3F.\n\nWas sich unterscheidet, ist ausschliesslich die Anwendung." }
+    { "id": "gleiche-inhalte", "page": "richtungen", "x": 1380, "y": 810, "w": 300, "text": "Alle drei Entwürfe zeigen denselben Startbildschirm mit denselben echten Daten: Punktestand 160 von 500, Magnum Klassik 2,78 €, Capri Eis 1,33 €, Calippo Cola 1,67 €.\n\nSo vergleichst du Komposition, nicht Inhalt." },
+    { "id": "farbwelt", "page": "richtungen", "x": 1380, "y": 1090, "w": 300, "text": "Identische Palette in allen dreien — Gold #FDC102, Ink #202321, Cream #FBF8F4, Börde-Grau #DCD8D3, Grün #5C9A3F.\n\nWas sich unterscheidet, ist ausschliesslich die Anwendung." },
+    { "id": "kante-neu", "page": "system", "x": 0, "y": 1060, "w": 320, "text": "Die einzige Änderung an der Palette ist eine Ergänzung, keine Ersetzung: --border-strong #8F887E für alles Antippbare.\n\nNachgemessen 3,31:1 gegen Cream. Die bisherige Kante lag bei 1,34:1 — WCAG 1.4.11 verlangt 3:1." },
+    { "id": "leer-ist-richtig", "page": "system", "x": 1920, "y": 1080, "w": 320, "text": "Jeder Conversion-Baustein hat eine Bedingung, unter der er NICHT erscheint.\n\nHeute leer: Ersparnis (kein Rabatt erfasst), sozialer Beleg (0 Bewertungen), Gutscheine (0 Zeilen). Das ist kein fehlendes Design, das ist das Design." },
+    { "id": "screens-hinweis", "page": "screens", "x": 1800, "y": 0, "w": 300, "text": "Die Landingpage ist als Handy-Ansicht entworfen — dort entscheidet sie sich.\n\nAlle Zahlen darin sind echt: 62 Produkte, 4 Automaten, 0,99 / 9,99 / 79,99 €, 20 freie Founders-Plätze." }
   ],
-  "launch": { "view": "canvas" }
+  "launch": { "view": "canvas", "page": "system" }
 }
