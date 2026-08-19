@@ -1506,7 +1506,7 @@ gewesen, der erste Meilenstein (500) allein durch Logins erst nach 31
 Wochen erreicht. Der Auftraggeber hat den Massstab daraufhin
 verzehnfacht; die Verhältnisse 6×1 + 10 bleiben erhalten.
 
-## A20 · Demozugang, Kontrast, Bewegung, Coupon-Slider (NICHT gesendet — Guthaben leer)
+## A20 · Demozugang, Kontrast, Bewegung, Coupon-Slider (gesendet 18.08.2026)
 
 Auslöser: fünf Punkte des Auftraggebers vom 18.08.2026. Vor dem Verfassen
 gegen den Code und die Datenbank geprüft; die Befunde stehen in der
@@ -1535,12 +1535,29 @@ Anweisung, damit der Agent sie nicht noch einmal erheben muss.
   der zweite Teil ist wirkungslos, weil der erste bei fehlendem `user`
   schon abbricht.
 
-Der Anweisungstext liegt im Verlauf dieser Sitzung und wird beim nächsten
-Guthaben unverändert abgesetzt. Reihenfolge laut Anweisung: Kontrast und
-Rechtschreibung zuerst (betreffen alles), dann Demozugang, dann
-Coupon-Slider, dann Bewegung, zuletzt die Vorbereitung für Lottie.
+Abgesetzt am 18.08.2026 (`umsg_01m0dqcmctfhfrpaa2d5bwkhva`, Status
+`accepted`). Reihenfolge laut Anweisung: Kontrast und Rechtschreibung
+zuerst (betreffen alles), dann Demozugang, dann Coupon-Slider, dann
+Bewegung, zuletzt die Vorbereitung für Lottie.
 
-**Offen beim Auftraggeber:** Die Lottie-Dateien müssen in das
-Lovable-Projekt hochgeladen werden. Ohne sie kann nur die Aufnahme
-(`<BrandLottie slot="…" />` plus Registrierung) gebaut werden, nicht der
-Inhalt.
+**Zu Lottie, nachgesehen statt vermutet.** Der Auftraggeber hat
+angegeben, die Dateien bereits in diesem Verlauf hochgeladen zu haben.
+Die Suche über den gesamten Sitzungsmitschnitt (83 MB, 760 Anhänge)
+ergibt: hochgeladen wurden ausschliesslich Bilder — die Screenshots. Die
+33 Datei-Anhänge sind allesamt Dateien aus diesem Repository. Keine
+`.json`, keine `.lottie`.
+
+Der einzige Lottie-Treffer ist ein erledigter Aufgabenpunkt aus einer
+früheren Phase, „Toast-Set aus neuer Lottie-Datei
+(Success/Info/Error/Warning)". Was daraus wurde, steht in
+`apps/mobile/lib/core/motion/feedback.dart:12`: „Bewusst code-basiert
+statt Lottie: keine zusätzliche Abhängigkeit, kein Asset, exakt in
+Markenfarben." Die Vorlage wurde also nachgebaut, nicht eingebunden. Im
+Repository liegt keine Lottie-Datei, im Lovable-Projekt ebenfalls nicht.
+
+Für ein Set aus vier Zustandssymbolen war diese Entscheidung richtig. Für
+die Momente, um die es jetzt geht — leerer Zustand, volle Woche,
+geschaffter Meilenstein — verdient Lottie seinen Platz. **Offen beim
+Auftraggeber:** die Dateien ins Lovable-Projekt hochladen. Bis dahin
+entsteht nur die Aufnahme (`<BrandLottie slot="…" />` plus
+Registrierung), ohne Bibliothek.
