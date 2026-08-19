@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@300..800&display=swap">
+  <style>
+    body { margin: 0; font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif; }
+    a { color: #8a6a00; } a:hover { color: #6d5400; }
+    .disp { font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; }
+  </style>
+</helmet>
+
+<div style="width: 900px; min-height: 680px; box-sizing: border-box; background: #fbf8f4; color: #202321; padding: 40px 44px 44px;">
+
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px;">
+    <div>
+      <p style="margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #8a6a00;">Fundament</p>
+      <h1 class="disp" style="margin: 6px 0 0; font-size: 40px; font-weight: 800; line-height: 0.98; letter-spacing: -0.03em;">Was gesperrt ist, und was gemessen wurde.</h1>
+    </div>
+    <p style="margin: 0; width: 210px; font-size: 12px; line-height: 1.5; color: #6b6862; flex-shrink: 0;">Alle Werte aus <span style="font-weight: 700; color: #202321;">src/styles.css</span> und der Produktivdatenbank gelesen, nicht geschätzt.</p>
+  </div>
+
+  <div style="height: 1px; background: #dcd8d3; margin: 28px 0 26px;"></div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px;">
+
+    <div>
+      <p style="margin: 0 0 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #6b6862;">Die Farbwelt bleibt unverändert</p>
+
+      <div style="display: flex; flex-direction: column; gap: 0; border-top: 1px solid #dcd8d3;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #dcd8d3;">
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #fdc102; flex-shrink: 0;"></div>
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Gold</p><p style="margin: 1px 0 0; font-size: 12px; color: #6b6862;">Nur Handlung und Status</p></div>
+          <code style="font-size: 12px; color: #6b6862;">#FDC102</code>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #dcd8d3;">
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #202321; flex-shrink: 0;"></div>
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Ink</p><p style="margin: 1px 0 0; font-size: 12px; color: #6b6862;">Text und Kapitelflächen</p></div>
+          <code style="font-size: 12px; color: #6b6862;">#202321</code>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #dcd8d3;">
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #fbf8f4; border: 1px solid #dcd8d3; flex-shrink: 0;"></div>
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Cream</p><p style="margin: 1px 0 0; font-size: 12px; color: #6b6862;">Grundfläche</p></div>
+          <code style="font-size: 12px; color: #6b6862;">#FBF8F4</code>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #dcd8d3;">
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #dcd8d3; flex-shrink: 0;"></div>
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Börde-Grau</p><p style="margin: 1px 0 0; font-size: 12px; color: #6b6862;">Kanten und Trenner</p></div>
+          <code style="font-size: 12px; color: #6b6862;">#DCD8D3</code>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #dcd8d3;">
+          <div style="width: 34px; height: 34px; border-radius: 7px; background: #5c9a3f; flex-shrink: 0;"></div>
+          <div style="flex-grow: 1;"><p style="margin: 0; font-size: 14px; font-weight: 700;">Frisch-Grün</p><p style="margin: 1px 0 0; font-size: 12px; color: #6b6862;">Verfügbarkeit</p></div>
+          <code style="font-size: 12px; color: #6b6862;">#5C9A3F</code>
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; padding: 14px 16px; background: #ffffff; border: 1px solid #dcd8d3; border-radius: 10px;">
+        <p style="margin: 0; font-size: 12px; line-height: 1.55; color: #4a4844;"><span style="font-weight: 700; color: #202321;">Die Regel hinter der Palette:</span> Gold trägt nur auf Ink. Auf Cream gilt <code style="font-size: 11px;">#8A6A00</code> für Text und <code style="font-size: 11px;">#406C2B</code> für Grün — sonst fällt der Kontrast auf 1,9:1.</p>
+      </div>
+    </div>
+
+    <div>
+      <p style="margin: 0 0 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #6b6862;">Vier Befunde, die das Design bestimmen</p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #dcd8d3; border-left: 3px solid #b31c1c; border-radius: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+            <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">Kacheln sind unsichtbar</p>
+            <span class="disp" style="font-size: 20px; font-weight: 800; color: #b31c1c;">1,06:1</span>
+          </div>
+          <p style="margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: #4a4844;">Cream gegen weisse Karte. Die Trennung hängt allein an Kante und Schatten — die Kante liegt bei 1,34:1, gefordert sind 3:1.</p>
+        </div>
+
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #dcd8d3; border-left: 3px solid #b31c1c; border-radius: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+            <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">Kein einziges Produktbild</p>
+            <span class="disp" style="font-size: 20px; font-weight: 800; color: #b31c1c;">0 / 62</span>
+          </div>
+          <p style="margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: #4a4844;">62 aktive Produkte, alle ohne <code style="font-size: 11px;">image_url</code>. Ein bildgetriebenes Raster hätte 62 gleiche Platzhalter.</p>
+        </div>
+
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #dcd8d3; border-left: 3px solid #e8a206; border-radius: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+            <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">Standorte sind Platzhalter</p>
+            <span class="disp" style="font-size: 20px; font-weight: 800; color: #8c6104;">4</span>
+          </div>
+          <p style="margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: #4a4844;">Alle vier Automaten heissen in der Datenbank noch „Standort 1 (ANPASSEN)". Ein ortsgeführter Startbildschirm hätte heute nichts zu zeigen.</p>
+        </div>
+
+        <div style="padding: 14px 16px; background: #ffffff; border: 1px solid #dcd8d3; border-left: 3px solid #5c9a3f; border-radius: 10px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+            <p class="disp" style="margin: 0; font-size: 17px; font-weight: 700;">Marken-Schrift liegt bereit</p>
+            <span class="disp" style="font-size: 20px; font-weight: 800; color: #467430;">2</span>
+          </div>
+          <p style="margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: #4a4844;">Bricolage Grotesque und Hanken Grotesk sind selbst ausgeliefert, OFL-lizenziert. Kein Schriftwechsel nötig.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 26px; padding: 16px 18px; background: #202321; border-radius: 10px; border-top: 2px solid #fdc102;">
+    <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #fbf8f4;"><span class="disp" style="font-weight: 800; color: #fdc102;">Kein „Premium".</span> Die Bezahlebene heisst im gesamten Entwurf <span style="font-weight: 700;">Abo-Vorteile</span> — Monats-, Jahres- und Lifetime-Abo. So stehen die Namen in AGB, Widerrufsbelehrung und Zahlungsinformationen. Ein neuer Produktname im Interface würde drei Rechtstexte nach sich ziehen.</p>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

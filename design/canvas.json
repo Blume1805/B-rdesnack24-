@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 900, "h": 680, "title": "Fundament" },
+    { "file": "RichtungA.dc.html", "x": 0, "y": 800, "w": 390, "h": 844, "title": "A — Premium Editorial" },
+    { "file": "RichtungB.dc.html", "x": 460, "y": 800, "w": 390, "h": 844, "title": "B — Dynamic Commerce" },
+    { "file": "RichtungC.dc.html", "x": 920, "y": 800, "w": 390, "h": 844, "title": "C — Local Discovery" },
+    { "file": "Empfehlung.dc.html", "x": 980, "y": 0, "w": 900, "h": 680, "title": "Empfehlung" }
+  ],
+  "annotations": [
+    { "id": "gleiche-inhalte", "x": 1380, "y": 810, "w": 300, "text": "Alle drei Entwürfe zeigen denselben Startbildschirm mit denselben echten Daten: Punktestand 160 von 500, Magnum Klassik 2,78 €, Capri Eis 1,33 €, Calippo Cola 1,67 €.\n\nSo vergleichst du Komposition, nicht Inhalt." },
+    { "id": "farbwelt", "x": 1380, "y": 1090, "w": 300, "text": "Identische Palette in allen dreien — Gold #FDC102, Ink #202321, Cream #FBF8F4, Börde-Grau #DCD8D3, Grün #5C9A3F.\n\nWas sich unterscheidet, ist ausschliesslich die Anwendung." }
+  ],
+  "launch": { "view": "canvas" }
+}
