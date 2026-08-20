@@ -1561,3 +1561,145 @@ geschaffter Meilenstein — verdient Lottie seinen Platz. **Offen beim
 Auftraggeber:** die Dateien ins Lovable-Projekt hochladen. Bis dahin
 entsteht nur die Aufnahme (`<BrandLottie slot="…" />` plus
 Registrierung), ohne Bibliothek.
+
+---
+
+# Warteschlange ab 20.08.2026
+
+A20 war zu gross für einen Durchgang: Der Agent hat nur geprüft, keinen
+Code geschrieben und nach der Reihenfolge gefragt. Konsequenz — ein
+Auftrag je Nachricht, jeder für sich abschliessbar. Die Reihenfolge unten
+ist bindend, weil jeder Schritt auf dem vorherigen aufbaut.
+
+| Nr. | Inhalt | Stand |
+|---|---|---|
+| A20a | Kontrast-Token + Schreibweisen | gesendet 20.08.2026 (`umsg_01m0g915shehks0assmv688n9a`) |
+| A21 | Demo-Fixtures | wartet |
+| A22 | Coupon-Slider mit Zoom | wartet |
+| A23 | Bewegung durchziehen | wartet |
+| A24 | Lottie-Aufnahme | wartet, braucht Dateien vom Auftraggeber |
+| A25 | Designsystem Richtung A | wartet, nach A20a |
+
+## A21 · Demozugang mit vollständigen Beispieldaten (wartet)
+
+> **Nur dieser Punkt. Kein Slider, keine Bewegung.**
+>
+> Im Demozugang bleibt heute die halbe App leer — der Hinweis in
+> `src/routes/app.tsx` sagt das selbst: „Persönliche Bereiche wie Abo und
+> Bons bleiben leer." Der Auftraggeber kann sie deshalb nicht beurteilen.
+>
+> Bau `src/lib/demo/fixtures.ts` als vollständigen, festen
+> Beispieldatensatz und lass jede Datenquelle im Demomodus daraus lesen.
+> Abgedeckt: Kundenkarte mit QR-Code, Bonusübersicht mit einem
+> Punktestand zwischen zwei Meilensteinen, Wochenübersicht mit vier von
+> sieben Tagen (darunter ein verpasster und zwei noch offene, damit alle
+> drei Zustände zu sehen sind), Gutscheine, Bonushistorie, Belege, Abo
+> aktiv, Spenden, Freunde werben.
+>
+> Drei Regeln ohne Spielraum:
+>
+> a) **Im Demomodus wird nichts geschrieben.** `record_daily_login()` und
+> jeder andere schreibende RPC bleibt aus. Die Bedingung in
+> `daily-login-gate.tsx` — `if (!user || (demo && !user)) return;` — ist
+> im zweiten Teil wirkungslos; ein angemeldeter Nutzer mit Demo-Flag
+> würde tatsächlich buchen.
+>
+> b) **Beispieldaten sehen nie wie echte aus.** Hinweisstreifen bleibt,
+> erkennbare Namen, keine echt wirkende Kundennummer.
+>
+> c) **Kein Demo-Zustand für Angemeldete.** Wer eine Session hat, sieht
+> seine echten Daten.
+>
+> Dazu ein Umschalter, der nur im Demomodus existiert (dezent, unten im
+> Profil): „mit Abo / ohne Abo", „Woche vollständig / lückenhaft", „mit
+> Gutscheinen / leer". Damit lassen sich die Varianten beurteilen, ohne
+> dass jemand Daten anlegt.
+
+## A22 · Coupon-Slider mit Zoom und Bildplatzhaltern (wartet)
+
+> **Nur dieser Punkt.** `embla-carousel-react` ^8.6 ist installiert,
+> keine neue Abhängigkeit nötig.
+>
+> Waagerechter Slider, Karten etwa 78 % der Breite, sodass die
+> Nachbarkarte angeschnitten bleibt — das macht einen Slider auf dem
+> Handy als Slider lesbar. Einrasten an, kein Endlosumlauf.
+>
+> Zoom: mittige Karte 1,0, Nachbarn etwa 0,92 mit leicht reduzierter
+> Deckkraft, stufenlos am Scroll-Fortschritt (`emblaApi.scrollProgress()`
+> im `scroll`-Ereignis), nicht als Sprung beim Einrasten. Das Bild in der
+> Karte minimal gegenläufig mitziehen. Bei `prefers-reduced-motion`
+> entfällt die Skalierung, das Einrasten bleibt.
+>
+> **Die Platzhalter sind Pflicht, nicht Notlösung:** 62 aktive Produkte,
+> null mit `image_url`. Also aus der Marke gebaut — Ink-Fläche,
+> Monogramm in Gold, Produktname in der Display-Schrift, festes
+> Seitenverhältnis 4:5 über `AspectRatio`, leichte Unterscheidung nach
+> Kategorie. Kein graues Feld, kein durchgestrichenes Bildsymbol, kein
+> „Bild folgt". Sobald `image_url` gefüllt ist, tritt das Foto an
+> dieselbe Stelle, ohne dass das Layout springt.
+>
+> Karteninhalt: Rabatt gross, Produktname, Gültigkeit, Einlösecode.
+> Quelle `personal_offers`; im Demozugang die Fixtures aus A21.
+
+## A23 · Bewegung konsequent durchziehen (wartet)
+
+> **Nur dieser Punkt.** Es fehlen keine Werkzeuge: `motion` ^12.43 ist
+> installiert, `Reveal`, `PageTransition`, `AnimatedNumber` und
+> `card-lift` existieren und werden kaum benutzt.
+>
+> - Jeder Abschnitt mit `Reveal`, gestaffelt, **einmalig** — kein
+>   erneutes Einblenden beim Zurückscrollen.
+> - Jede antippbare Zeile und Kachel bekommt einen Druckzustand
+>   (`row-press` bzw. `active:scale-[0.98]`). Das wirkt stärker als jede
+>   Zierbewegung.
+> - Zahlen laufen hoch: Punktestand, Ersparnis, Spendensumme.
+> - `PageTransition` überall, nicht nur an einzelnen Stellen.
+> - Karte → Detailseite als gemeinsame Bewegung (`layoutId`), damit die
+>   Karte sich öffnet statt ersetzt zu werden.
+>
+> Timing 0,2–0,45 s, `cubic-bezier(0.22, 1, 0.36, 1)`, nichts über 0,6 s.
+> `animate-float-slow` bleibt stillgestellt. Neue JS-Animationen fragen
+> `useReducedMotion` selbst ab.
+
+## A24 · Lottie-Aufnahme (wartet — Dateien fehlen)
+
+> **Nur die Aufnahme, nicht der Inhalt.** Es ist keine Lottie-Bibliothek
+> im Projekt und es liegt keine Lottie-Datei vor.
+>
+> - Komponente `<BrandLottie slot="…" />` plus Registrierung
+>   `src/lib/lottie/registry.ts`, die benannte Plätze auf Dateien
+>   abbildet.
+> - Ohne hinterlegte Datei zeigt die Komponente den heutigen statischen
+>   Zustand. Nichts bricht, nichts wird leer.
+> - **Bibliothek noch nicht hinzufügen.** Später
+>   `@lottiefiles/dotlottie-react`, pro Route nachgeladen.
+> - `prefers-reduced-motion`: erstes Bild als Standbild.
+>
+> Lottie gehört an erzählende Momente — leerer Zustand, geschaffter
+> Meilenstein, volle Woche. Nicht an Zustandswechsel der Oberfläche, und
+> nichts davon in Dauerschleife in einer Liste. Drei bis fünf Plätze
+> vorschlagen, mehr nicht.
+
+## A25 · Designsystem Richtung A umsetzen (wartet — nach A20a)
+
+Grundlage ist die Design-Leinwand vom 20.08.2026 (Seite „Designsystem"
+und „Screens"). Wird in Teilaufträgen gesendet, nicht als Block:
+
+1. **Typo- und Abstandsskala** aus dem Foundations-Blatt in `styles.css`
+   festschreiben. Farben unverändert; die einzige Ergänzung
+   (`--border-strong`) kommt schon mit A20a.
+2. **Listenzeile statt Kachel** — die tragende Komponente von Richtung A.
+   Danach `app.index.tsx` und die Produktlisten darauf umstellen.
+3. **Conversion-Bausteine mit ihren Abschaltbedingungen**: Ersparnis erst
+   bei erfasstem Rabatt, sozialer Beleg bei null Zeilen gar nicht,
+   Knappheit nur für die 20 Founders-Plätze.
+4. **Abo-Ebene**: Vergleich „ohne Abo / mit Abo" (vier Zeilen, die
+   ersten beiden zweimal „Ja"), Paywall in sieben Schritten, zwei
+   Beschriftungszustände der Bestellschaltfläche nach § 312j Abs. 3 BGB,
+   Kündigung sichtbar im Statusband nach § 312k.
+5. **Screens** in dieser Reihenfolge: Startseite, Produktdetail, Bonus,
+   Profil, Onboarding, Landingpage.
+
+Durchgehend gilt: Die Bezahlebene heisst **Abo-Vorteile**, nicht
+„Premium" — die Rechtstexte kennen Monats-, Jahres- und Lifetime-Abo zu
+0,99 / 9,99 / 79,99 €.
