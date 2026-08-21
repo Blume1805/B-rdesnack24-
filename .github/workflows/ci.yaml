@@ -128,6 +128,13 @@ jobs:
       # noch stehen.
       - name: Zahlungstabelle erst nach Nachziehen der Rechtstexte benutzen
         run: python3 scripts/check_zahlungstexte.py
+      # Ebenfalls blockierend. Seit Migration 0117 hängt die Trennung zwischen
+      # Firmenkunden an `app.is_business_member`. Eine neue Tabelle mit
+      # `business_id`, deren Regeln die Funktion nicht aufrufen, fällt im
+      # Betrieb nicht auf — es geht nichts kaputt, es sieht nur jeder alles.
+      # Also fällt es hier auf.
+      - name: Tabellen mit Firmenbezug müssen die Mitgliedschaft prüfen
+        run: python3 scripts/check_mandantentrennung.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:
