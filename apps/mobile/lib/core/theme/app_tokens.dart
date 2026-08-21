@@ -29,6 +29,21 @@ abstract final class AppColors {
   static const Color borderSubtle =
       Color(0xFFE3DFDA); // Börde-Grau (etwas heller wegen Weiß-BG)
 
+  /// Kante für alles, was man antippen kann.
+  ///
+  /// [borderSubtle] erreicht auf Weiß nur 1,33:1. Für Text ist das
+  /// unerheblich — WCAG 1.4.3 gilt dort nicht. Für die *Begrenzung eines
+  /// Bedienelements* verlangt aber WCAG 1.4.11 mindestens 3:1, und genau das
+  /// ist eine antippbare Karte: Sie hat weder Beschriftung noch Symbol, die
+  /// ihre Grenze zeigen würden. Erschwerend liegt in dieser App die
+  /// Kartenfläche auf demselben Weiß wie der Hintergrund — die Karte ist also
+  /// ausschließlich an ihrer Kante zu erkennen.
+  ///
+  /// Dieser Ton erreicht 3,51:1 auf Weiß und 3,31:1 auf Creme. Er ist bewusst
+  /// deutlich dunkler als die Haarlinie; wer ihn für Trennstriche verwendet,
+  /// macht die Oberfläche unruhig. Trennstriche bleiben [borderSubtle].
+  static const Color borderStrong = Color(0xFF8F887E);
+
   static const Color statusPositive = Color(0xFF5C9A3F);
   static const Color statusWarning = Color(0xFFE8A206);
   static const Color statusCritical = Color(0xFFB31C1C);

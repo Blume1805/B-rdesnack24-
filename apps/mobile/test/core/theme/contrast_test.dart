@@ -108,4 +108,38 @@ void main() {
       expect(contrast(AppColors.statusInfo, chipInfoBg), lessThan(4.5));
     });
   });
+
+  // ── WCAG 1.4.11: Begrenzung von Bedienelementen (>= 3:1) ────────────────
+  //
+  // Ein eigener Block, weil hier eine ANDERE Schwelle gilt als oben. 1.4.3
+  // regelt Text und verlangt 4,5:1; 1.4.11 regelt die visuelle Information,
+  // die ein Bedienelement erkennbar macht, und verlangt 3:1.
+  //
+  // Für diese App ist das der schärfere Fall: Kartenfläche und Hintergrund
+  // tragen beide Weiß (surfaceCard ist auch die Scaffold-Farbe). Eine
+  // antippbare Karte ist damit ausschließlich an ihrer Kante zu erkennen —
+  // fällt die Kante durch, ist das Bedienelement unsichtbar, nicht nur blass.
+  group('WCAG 1.4.11 (>= 3:1 für Bedienkanten)', () {
+    test('Bedienkante auf Weiß und auf Creme', () {
+      expect(
+        contrast(AppColors.borderStrong, AppColors.surfaceCard),
+        greaterThanOrEqualTo(3.0),
+      );
+      expect(
+        contrast(AppColors.borderStrong, AppColors.surfaceAlt),
+        greaterThanOrEqualTo(3.0),
+      );
+    });
+
+    // Gegenprobe, damit die Begründung in app_tokens.dart überprüfbar
+    // bleibt: Die Haarlinie taugt NICHT als Begrenzung eines
+    // Bedienelements. Wird sie irgendwann dunkler, fällt dieser Test auf
+    // und die Trennung der beiden Token kann neu bewertet werden.
+    test('die Haarlinie taugt als Bedienkante NICHT', () {
+      expect(
+        contrast(AppColors.borderSubtle, AppColors.surfaceCard),
+        lessThan(3.0),
+      );
+    });
+  });
 }

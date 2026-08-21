@@ -39,11 +39,19 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = Padding(padding: padding, child: child);
+
+    // Antippbare Karten bekommen die kräftige Kante. Grund: Karte und
+    // Hintergrund tragen beide Weiß, die Karte ist also allein an ihrer Kante
+    // zu erkennen — und für die Begrenzung eines Bedienelements verlangt
+    // WCAG 1.4.11 mindestens 3:1. Die Haarlinie liegt bei 1,33:1.
+    // Ein ausdrücklich gesetztes [borderColor] hat weiterhin Vorrang.
+    final effectiveBorder = borderColor ??
+        (onTap == null ? AppColors.borderSubtle : AppColors.borderStrong);
+
     final decoration = BoxDecoration(
       color: color ?? AppColors.surfaceCard,
       borderRadius: BorderRadius.circular(radius),
-      border:
-          Border.all(color: borderColor ?? AppColors.borderSubtle, width: 1),
+      border: Border.all(color: effectiveBorder, width: 1),
     );
 
     Widget stripedContent = content;
