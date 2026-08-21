@@ -1573,8 +1573,8 @@ ist bindend, weil jeder Schritt auf dem vorherigen aufbaut.
 
 | Nr. | Inhalt | Stand |
 |---|---|---|
-| A20a | Kontrast-Token + Schreibweisen | gesendet 20.08.2026 (`umsg_01m0g915shehks0assmv688n9a`) |
-| A21 | Demo-Fixtures | wartet |
+| A20a | Kontrast-Token + Schreibweisen | **erledigt**, in `styles.css` gegengelesen |
+| A21 | Demo-Fixtures | Sendung wartet auf Freigabe |
 | A22 | Coupon-Slider mit Zoom | wartet |
 | A23 | Bewegung durchziehen | wartet |
 | A24 | Lottie-Aufnahme | wartet, braucht Dateien vom Auftraggeber |
@@ -1703,3 +1703,21 @@ und „Screens"). Wird in Teilaufträgen gesendet, nicht als Block:
 Durchgehend gilt: Die Bezahlebene heisst **Abo-Vorteile**, nicht
 „Premium" — die Rechtstexte kennen Monats-, Jahres- und Lifetime-Abo zu
 0,99 / 9,99 / 79,99 €.
+
+### A20a — Ergebnis, an der Datei geprüft (20.08.2026)
+
+Nicht der Zusammenfassung geglaubt, sondern `src/styles.css` gelesen:
+
+* `--border-strong: #8f887e` ist neu angelegt, `--color-border-strong` in
+  `@theme inline` verfügbar.
+* `--border` von `#dcd8d3` auf `#cfc7bb` gehoben.
+* `--input` trägt jetzt ebenfalls die Bedienkante `#8f887e`.
+* `--shadow-soft` auf Alpha 0,10, `--shadow-lift` auf 0,14 — Geometrie
+  unverändert.
+* `--background` und `--card` sind unangetastet geblieben, damit
+  `--gold-ink` seine 4,79:1 behält.
+* Der Dunkelmodus wurde mitgezogen (`--border` 16 %, `--border-strong`
+  42 %), und `cta-quiet` nutzt die starke Kante.
+
+Damit ist die gemessene Untergrenze aus WCAG 1.4.11 erfüllt: 3,31:1 gegen
+Cream statt bisher 1,34:1.
