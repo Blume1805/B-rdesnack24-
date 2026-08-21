@@ -120,6 +120,14 @@ jobs:
       # einen Fall ab — die vollständige Prüfliste steht in CLAUDE.md.
       - name: Abhängigkeiten datenschutzrechtlich eingeordnet
         run: python3 scripts/check_rechtstexte.py
+      # Ebenfalls blockierend. Migration 0115 legt `public.payments` an,
+      # ohne dass etwas hineinschreibt — nur solange bleiben die Sätze
+      # „kein Zahlungsdienstleister eingebunden" und „keine Zahlungstoken"
+      # in Datenschutzerklärung und Zahlungsinformationen wahr. Dieser
+      # Schritt schlägt an, sobald Code die Tabelle benutzt und die Texte
+      # noch stehen.
+      - name: Zahlungstabelle erst nach Nachziehen der Rechtstexte benutzen
+        run: python3 scripts/check_zahlungstexte.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:
