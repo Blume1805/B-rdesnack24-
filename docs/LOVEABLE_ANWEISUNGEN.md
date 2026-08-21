@@ -1721,3 +1721,75 @@ Nicht der Zusammenfassung geglaubt, sondern `src/styles.css` gelesen:
 
 Damit ist die gemessene Untergrenze aus WCAG 1.4.11 erfüllt: 3,31:1 gegen
 Cream statt bisher 1,34:1.
+
+## A25a · Designsystem Teil 1: Foundations (bereit — Sendung blockiert)
+
+Der Auftraggeber hat am 21.08.2026 den vollständigen 36-Punkte-Auftrag
+erneut geschickt, mit der Bitte, ihn an den Agenten weiterzuleiten.
+
+**Unverändert weitergeleitet wird er nicht.** Die Punkte 1 bis 10 des
+Arbeitsauftrags — Analyse, Markenanker, Schwächen, Richtungen, Auswahl —
+sind bereits erledigt: Die drei Richtungen liegen als Entwürfe vor,
+Richtung A ist bestätigt, und das vollständige System steht auf der
+Design-Leinwand. Den Rohtext erneut zu senden hiesse, den Agenten alles
+neu herleiten zu lassen, mit dem Risiko, dass er bei einer anderen
+Richtung landet. Weitergeleitet wird deshalb die **Umsetzung** mit den
+getroffenen Entscheidungen darin.
+
+Weil A20 an fünf Blöcken in einer Nachricht gescheitert ist, zerfällt A25
+in fünf Sendungen. Dies ist die erste.
+
+> Neuer Auftrag: das Designsystem in Code überführen. **Teil 1 von 5 —
+> nur die Foundations. Keine Screens, keine Komponenten.**
+>
+> Vorweg, damit du nichts doppelt machst: Die Analyse ist gelaufen, drei
+> Designrichtungen wurden entwickelt, und der Auftraggeber hat **Richtung
+> A — Premium Editorial** bestätigt. Du sollst sie nicht neu herleiten,
+> sondern ausbauen. Teile davon stehen schon in `styles.css`.
+>
+> Der tragende Grund für A: 62 aktive Produkte, **null** mit `image_url`.
+> A ist die einzige Richtung, die ohne Bildflächen auskommt — die Karte
+> wird zur Textzeile, statt einen leeren Rahmen zu zeigen.
+>
+> **Die Farbwelt bleibt unverändert.** Gold `#FDC102`, Ink `#202321`,
+> Cream `#FBF8F4`, Börde-Grau, Frisch-Grün `#5C9A3F`. Die einzige
+> Ergänzung (`--border-strong`) ist bereits drin. Zwei verbindliche
+> Regeln: Gold trägt nur auf Ink, auf Cream gilt `--gold-ink`; und eine
+> goldene Fläche pro Bildschirm, mehr entwertet sie.
+>
+> **1) Typo-Skala vervollständigen.** Fließtext 15 px / 1,55 und
+> Hilfstext 13 px ergänzen. Darunter wird nichts kleiner. Prüfen, wo
+> heute 11 oder 12 px für Fließtext stehen, und anheben.
+>
+> **2) Abstandsskala festschreiben.** 4 · 8 · 12 · 16 · 20 · 24 · 32 ·
+> 40. Seitenrand mobil 20 px, Abschnittsabstand 24 px.
+>
+> **3) Bewegungs-Token.** Hauskurve `cubic-bezier(0.22, 1, 0.36, 1)` als
+> benannte Grösse herausziehen, dazu vier Dauern: Druck 0,2 s ·
+> Einblenden 0,35 s · geteiltes Element 0,45 s · Zahlenlauf 0,9 s.
+> Nichts über 0,6 s ausser dem Zahlenlauf.
+>
+> **4) Die Listenzeile als Komponente.** Tragender Baustein von Richtung
+> A, ersetzt die Kachel: Verfügbarkeitspunkt, Kategorie-Eyebrow,
+> Produktname, rechts Bruttopreis und darunter Abo-Preis. Trennlinie
+> statt Kartenrahmen, Druckzustand über `row-press`.
+>
+> **5) Barrierefreiheit als Regel.** Tippfläche mindestens 44 × 44 px.
+> Zustand nie allein über Farbe. Sichtbarer Fokusring auf jedem
+> Bedienelement.
+>
+> **Ausdrücklich nicht:** Screens umbauen, Conversion-Bausteine, Paywall,
+> Bilder. Und kein „Premium" als Wort — die Bezahlebene heisst
+> durchgehend **Abo-Vorteile**.
+>
+> Zum Schluss: welche Token neu angelegt wurden, und wo Fließtext unter
+> 13 px gefunden wurde.
+
+**Warum nicht gesendet:** Das Werkzeug `mcp__Lovable__send_message` ist
+in `.claude/settings.json` freigegeben, aber der Einstellungs-Wächter
+beobachtet nur Verzeichnisse, die beim Sitzungsstart bereits eine
+Einstellungsdatei hatten — `.claude/` gab es vorher nicht. Die Freigabe
+greift ab dem nächsten Sitzungsstart.
+
+Reihenfolge danach: Teil 2 Listen und Screens, Teil 3
+Conversion-Bausteine, Teil 4 Abo-Ebene, Teil 5 Landingpage.
