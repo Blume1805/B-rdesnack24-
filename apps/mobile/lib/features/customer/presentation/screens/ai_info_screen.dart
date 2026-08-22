@@ -106,7 +106,9 @@ class AiInfoScreen extends StatelessWidget {
             title: 'Welche Daten fließen ein?',
             body: 'Für das individuelle Angebot:\n'
                 '• Welche Produkte du in den letzten 90 Tagen gekauft hast, '
-                'und wie oft\n\n'
+                'und wie oft — dabei zählen nur deine PRIVATEN Käufe. Was du '
+                'an einem Automaten auf dem Gelände deines Arbeitgebers '
+                'kaufst, fließt hier nicht ein und prägt dein Angebot nicht.\n\n'
                 'Für den Geburtstagsgutschein:\n'
                 '• Dein Geburtsdatum\n\n'
                 'Für die Punkte fürs tägliche Einloggen:\n'

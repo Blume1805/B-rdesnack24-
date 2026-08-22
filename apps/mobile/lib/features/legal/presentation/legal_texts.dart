@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v7 · 2026-08';
+  static const version = 'v8 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -286,6 +286,43 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      im Impressum genannte Adresse.
      Danach prüfen wir Ihre Käufe nicht mehr auf die Aufgaben; bereits
      gutgeschriebene Punkte bleiben Ihnen erhalten.
+
+  **m) Einkauf an einem Automaten auf dem Gelände Ihres Arbeitgebers**
+     Steht ein Automat auf dem Gelände eines Unternehmens, das mit uns einen
+     Vertrag hat, und sind Sie dort als Beschäftigte oder Beschäftigter
+     hinterlegt, dann gilt für einen Einkauf an **diesem** Automaten etwas
+     anderes als sonst:
+
+     * Der Kauf geht **auf Rechnung Ihres Arbeitgebers**, nicht auf Ihre.
+     * **Ihr Arbeitgeber erfährt von diesem Kauf.** Übermittelt werden
+       Zeitpunkt, Betrag, Automat und die gekauften Artikel. Einsehen können
+       das die Personen, die Ihr Arbeitgeber bei uns als Firmen-Administrator
+       benannt hat.
+     * Sie sammeln dafür **keine** Treuepunkte, keinen Statusumsatz, keinen
+       Aufgabenfortschritt und keine Spendenzuschreibung. Dieser Kauf zählt
+       für Ihr privates Konto nicht mit — wir schreiben Ihnen keinen Vorteil
+       gut, den ein anderer bezahlt hat.
+     * In Ihrer Beleg-Übersicht erscheint der Kauf weiterhin. Sie haben ihn
+       getätigt und sollen nachsehen können, was Sie entnommen haben.
+
+     Maßgeblich ist allein der **Standort des Automaten**, nicht Ihre Person
+     und nicht Ihre Kundenkarte. Kaufen Sie mit derselben Karte an einem
+     öffentlichen Automaten, ist das ein ganz normaler Privatkauf: Ihr
+     Arbeitgeber erfährt davon nichts, und Sie sammeln wie immer.
+
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO — die Abwicklung des Kaufs
+     ist Erfüllung des Vertrages zwischen uns und Ihrem Arbeitgeber, den Sie
+     an diesem Automaten in Anspruch nehmen. Für die Abrechnung selbst
+     kommt Art. 6 Abs. 1 lit. f DSGVO hinzu (berechtigtes Interesse an einer
+     nachvollziehbaren Rechnung).
+
+     Wir weisen ausdrücklich darauf hin, weil der Unterschied am Automaten
+     nicht sichtbar ist:
+     **Wollen Sie nicht, dass Ihr Arbeitgeber von einem Einkauf erfährt, nutzen Sie einen öffentlichen Automaten.**
+     Welche
+     Regelungen zwischen Ihnen und Ihrem Arbeitgeber gelten — etwa ein
+     Verpflegungszuschuss und dessen Grenzen —, ist Sache Ihres
+     Arbeitsverhältnisses und nicht unsere.
 
 
 **2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)**
