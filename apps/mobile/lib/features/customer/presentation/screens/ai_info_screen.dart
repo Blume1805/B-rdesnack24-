@@ -85,6 +85,14 @@ class AiInfoScreen extends StatelessWidget {
                 'Zahlen — nichts wird gelernt, geschätzt oder vorhergesagt. '
                 'Sie steht hier trotzdem, weil sie mitentscheidet, wann ein '
                 'Meilenstein-Gutschein entsteht. '
+                'Nach demselben Muster arbeiten seit August 2026 die '
+                'Aufgaben-Prämien: Erfüllst du „Wochen-Snacker" (drei Käufe '
+                'in sieben Tagen) oder „Morgenmuffel-Kur" (drei Käufe '
+                'zwischen 7 und 9 Uhr) zum ersten Mal, werden dir einmalig '
+                '300 beziehungsweise 200 Punkte gutgeschrieben. Gezählt '
+                'werden deine Käufe im jeweiligen Zeitfenster — eine feste '
+                'Rechenregel, keine Schätzung. Jede Aufgabe zahlt genau '
+                'einmal aus. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
@@ -105,6 +113,10 @@ class AiInfoScreen extends StatelessWidget {
                 '• Der Kalendertag, an dem du die App geöffnet hast — keine '
                 'Uhrzeit, kein Gerät, keine IP-Adresse. Nach 90 Tagen wird '
                 'er gelöscht.\n\n'
+                'Für die Aufgaben-Prämien:\n'
+                '• Zeitpunkt und Anzahl deiner Käufe, der Automat und das '
+                'Produkt je Kauf — also Daten, die ohnehin zu deinem Kauf '
+                'gespeichert sind. Es kommt nichts Neues dazu.\n\n'
                 'Ohne Bezug zu deiner Person:\n'
                 '• Wettervorhersage für den Automaten-Standort '
                 '(nicht für deinen)\n'
@@ -127,7 +139,11 @@ class AiInfoScreen extends StatelessWidget {
                 'Frühstücks- und den Feierabend-Deal.\n\n'
                 'Das gilt auch für die Punkte fürs tägliche Einloggen: Auf '
                 'Widerspruch zeichnen wir deine Öffnungstage nicht mehr auf. '
-                'Punkte sammelst du dann nur noch über deine Einkäufe.',
+                'Punkte sammelst du dann nur noch über deine Einkäufe.\n\n'
+                'Bei den Aufgaben-Prämien können wir dich auf Widerspruch von '
+                'der Auswertung ausnehmen — dann wird dein Kaufverhalten '
+                'nicht mehr auf die Aufgaben geprüft, und es entstehen keine '
+                'Prämien mehr. Bereits gutgeschriebene Punkte bleiben dir.',
           ),
           const _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',

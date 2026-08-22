@@ -135,6 +135,14 @@ jobs:
       # Also fällt es hier auf.
       - name: Tabellen mit Firmenbezug müssen die Mitgliedschaft prüfen
         run: python3 scripts/check_mandantentrennung.py
+      # Ebenfalls blockierend. Der Parser in legal_rich_text.dart erkennt
+      # `**fett**` nur innerhalb einer Zeile. Eine Markierung über einen
+      # Zeilenumbruch erscheint dem Kunden als literale Sternchen — zweimal
+      # passiert (21.08. und 22.08.2026), beide Male in einer Pflichtangabe.
+      # Beim Schreiben sieht die Quelle richtig aus; es fällt erst in der App
+      # auf. Also hier.
+      - name: Fettmarkierungen der Rechtstexte müssen einzeilig sein
+        run: python3 scripts/check_rechtstext_markup.py
       - name: Supabase CLI
         uses: supabase/setup-cli@v1
         with:

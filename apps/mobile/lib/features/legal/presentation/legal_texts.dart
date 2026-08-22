@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v6 · 2026-08';
+  static const version = 'v7 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -258,6 +258,34 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      wird. **Sie können ihr jederzeit widersprechen (Art. 21 DSGVO)** — formlos an die
      im Impressum genannte Adresse. Danach zeichnen wir Ihre Öffnungstage nicht mehr
      auf; Punkte sammeln Sie dann nur noch über Ihre Einkäufe.
+
+  **l) Punkte für erfüllte Aufgaben**
+     Der Belohnungs-Bereich zeigt Aufgaben wie „Wochen-Snacker" (drei Käufe in sieben
+     Tagen) oder „Morgenmuffel-Kur" (drei Käufe zwischen 7 und 9 Uhr). Erfüllen Sie
+     eine solche Aufgabe zum ersten Mal, schreiben wir Ihnen einmalig die dort
+     genannten Punkte gut — 300 beziehungsweise 200.
+     **Jede Aufgabe zahlt genau einmal aus**, eine Wiederholung gibt es nicht.
+
+     Dafür werten wir aus, wie viele Käufe Sie im jeweiligen Zeitfenster getätigt
+     haben, wann diese Käufe stattfanden und an welchem Automaten. Es entstehen
+     **keine neuen Daten**: Wir rechnen ausschliesslich mit Angaben, die ohnehin zu
+     Ihrem Kauf gespeichert sind. Gespeichert wird zusätzlich nur, welche Aufgabe
+     Ihnen wann wie viele Punkte gebracht hat — solange Ihr Konto besteht, weil
+     daran die Einmaligkeit hängt.
+
+     Zweck: Kundenbindung. Wie bei den übrigen Punkten gilt: Sammeln können alle,
+     der Meilenstein-Gutschein entsteht aber nur bei aktivem Abo.
+
+     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), soweit das
+     Punktesystem Teil Ihres Abos ist; sonst Art. 6 Abs. 1 lit. f DSGVO
+     (berechtigtes Interesse an Kundenbindung).
+
+     Auch diese Auswertung ist **Profiling nach Art. 4 Nr. 4 DSGVO**, weil aus Ihrem
+     Kaufverhalten ein geldwerter Vorteil abgeleitet wird.
+     **Sie können ihr jederzeit widersprechen (Art. 21 DSGVO)** — formlos an die
+     im Impressum genannte Adresse.
+     Danach prüfen wir Ihre Käufe nicht mehr auf die Aufgaben; bereits
+     gutgeschriebene Punkte bleiben Ihnen erhalten.
 
 
 **2) WAS AUF IHREM GERÄT GESPEICHERT WIRD (§ 25 TDDDG)**

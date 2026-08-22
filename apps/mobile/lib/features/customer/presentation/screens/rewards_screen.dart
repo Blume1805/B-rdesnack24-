@@ -417,16 +417,30 @@ class _ChallengeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.s2),
+          // `awarded` kommt aus `my_gamification_status()` und sagt, ob die
+          // Prämie bereits gutgeschrieben wurde. Ohne diese Unterscheidung
+          // stünde „Belohnung: +300 Bonuspunkte" auch dann noch als offenes
+          // Versprechen da, wenn die Punkte längst auf dem Konto sind.
           Row(
             children: [
-              const Icon(Icons.redeem, size: 14, color: AppColors.brandDark),
+              Icon(
+                (c['awarded'] as bool? ?? false)
+                    ? Icons.check_circle
+                    : Icons.redeem,
+                size: 14,
+                color: AppColors.brandDark,
+              ),
               const SizedBox(width: 4),
-              Text(
-                'Belohnung: ${c['reward_text'] ?? ''}',
-                style: AppTypography.body(
-                  size: 11,
-                  weight: FontWeight.w700,
-                  color: AppColors.brandDark,
+              Expanded(
+                child: Text(
+                  (c['awarded'] as bool? ?? false)
+                      ? '${c['reward_text'] ?? ''} — gutgeschrieben'
+                      : 'Belohnung: ${c['reward_text'] ?? ''}',
+                  style: AppTypography.body(
+                    size: 11,
+                    weight: FontWeight.w700,
+                    color: AppColors.brandDark,
+                  ),
                 ),
               ),
             ],
