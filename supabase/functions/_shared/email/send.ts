@@ -63,6 +63,9 @@ async function logMail(row: {
   status: SendResult;
   providerId?: string | null;
   error?: string | null;
+  /// `false` = Betreff, Empfänger und Status protokollieren, den KÖRPER
+  /// aber nicht. Siehe die Begründung an `sendMail`.
+  logBody?: boolean;
 }): Promise<void> {
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -85,8 +88,8 @@ async function logMail(row: {
         from_address: mailConfig.from,
         to_addresses: row.to,
         subject: row.subject,
-        html: row.html,
-        text_body: row.text ?? null,
+        html: row.logBody === false ? null : row.html,
+        text_body: row.logBody === false ? null : (row.text ?? null),
         status: row.status,
         provider_id: row.providerId ?? null,
         error: row.error ?? null,
@@ -113,6 +116,26 @@ export async function sendMail(opts: {
   text?: string;
   /// Präfix für die Logzeile, üblicherweise der Function-Name.
   tag: string;
+  /// Soll der Mailkörper mitprotokolliert werden? Standard: ja.
+  ///
+  /// `false` setzt, wer eine Mail verschickt, die ein Geheimnis TRÄGT —
+  /// derzeit ausschliesslich die Aktionsmails aus `auth-email-hook`
+  /// (Passwort zurücksetzen, Anmeldelink, Einladung, Registrierung,
+  /// Adresswechsel, erneute Anmeldung). Deren Körper enthält den
+  /// `token_hash` in der Bestätigungs-URL und den Einmalcode im Klartext.
+  ///
+  /// Warum das nötig ist: `email_log` ist für interne Rollen lesbar. Ein
+  /// mitprotokollierter Körper macht aus jeder Passwort-Zurücksetzung
+  /// einen ablesbaren Zugang zu genau dem Konto, für das sie ausgelöst
+  /// wurde — und auslösen kann sie jeder, unangemeldet, für jede
+  /// registrierte Adresse. Das ist kein Protokoll mehr, das ist ein
+  /// Schlüsselbrett.
+  ///
+  /// Was erhalten bleibt: Empfänger, Betreff, Zeitpunkt, Status,
+  /// `provider_id` und Fehlertext. Die Frage „ist die Mail rausgegangen
+  /// und was sagt Resend dazu?" — der Zweck des Protokolls — bleibt
+  /// beantwortbar.
+  logBody?: boolean;
 }): Promise<SendResult> {
   // `trim()` ist Hygiene, kein Schutz: Umschliessende Leerzeichen entfernt
   // die Header-Verarbeitung ohnehin selbst (nachgemessen). Ein Umbruch

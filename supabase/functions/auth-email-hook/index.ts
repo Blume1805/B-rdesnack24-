@@ -169,6 +169,11 @@ Deno.serve(async (req) => {
         html: notification.html,
         text: notification.text,
         tag: `${TAG}/${action}`,
+        // Hier bewusst MIT Körper: eine reine Benachrichtigung („Ihr
+        // Passwort wurde geändert") enthält weder Link noch Code. Der
+        // Wortlaut ist genau das, was man bei einer Beschwerde belegen
+        // können muss. `authNotificationEmail` liefert nur für solche
+        // Typen etwas zurück — alles mit Token läuft weiter unten.
       });
       if (status === "failed") {
         await diagnose({ ok: false, grund: "Versand fehlgeschlagen (Resend)", aktion: action });
@@ -227,6 +232,9 @@ Deno.serve(async (req) => {
           html: mail.html,
           text: mail.text,
           tag: `${TAG}/${action}`,
+          // Kein Körper ins Protokoll: er trägt den `token_hash` in der
+          // Bestätigungs-URL und den Einmalcode. Siehe `sendMail`.
+          logBody: false,
         });
         if (status === "failed") return jsonError("Versand fehlgeschlagen", 500);
       }
@@ -269,6 +277,15 @@ Deno.serve(async (req) => {
       html: mail.html,
       text: mail.text,
       tag: `${TAG}/${action}`,
+      // Kein Körper ins Protokoll: er trägt den `token_hash` in der
+      // Bestätigungs-URL und den Einmalcode. Siehe `sendMail`.
+      //
+      // Dieser Zweig ist der Sammelpunkt für JEDE Aktionsmail ausser dem
+      // Adresswechsel — auch für Typen, die es noch nicht gibt. Deshalb
+      // steht das Unterdrücken hier und nicht je Aktionstyp: Ein neuer
+      // Typ ist damit von sich aus abgedeckt, statt darauf angewiesen zu
+      // sein, dass jemand daran denkt.
+      logBody: false,
     });
     if (status === "failed") {
       await diagnose({ ok: false, grund: "Versand fehlgeschlagen (Resend)", aktion: action });

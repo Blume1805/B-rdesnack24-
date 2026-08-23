@@ -156,3 +156,88 @@ Deno.test("sendMail reicht die Resend-Id weiter", async () => {
   );
   assertStringIncludes(körper, `"subject":"Test"`);
 });
+
+// ---------------------------------------------------------------------------
+// Auth-Mails: Betreff ja, Körper nein.
+//
+// Anlass (23.08.2026, Sicherheitsdurchsicht): `logMail` schrieb den
+// vollständigen Körper jeder Mail nach `email_log`. Seit die Auth-Mails
+// durch denselben Sammelpunkt laufen, stand damit der Bestätigungslink
+// samt `token_hash` und der Einmalcode in einer Tabelle, die interne
+// Rollen lesen dürfen — ein gültiger Zugang zu jedem Konto, für das
+// jemand eine Zurücksetzung auslöst.
+//
+// Der Schutz ist ein einzelnes Feld am Aufruf. Genau deshalb gehört er
+// getestet: Ein vergessenes `logBody: false` sieht aus wie nichts.
+// ---------------------------------------------------------------------------
+
+/// Fängt die Zeile ab, die `logMail` nach `email_log` schreiben will.
+async function protokollzeile(
+  opts: Parameters<typeof sendMail>[0],
+): Promise<Record<string, unknown>> {
+  Deno.env.set("SUPABASE_URL", "https://projekt.example");
+  Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "service_test");
+  // Ohne Resend-Schlüssel nimmt sendMail den Dev-Zweig — protokolliert
+  // wird trotzdem, und genau darum geht es hier.
+  Deno.env.delete("RESEND_API_KEY");
+
+  let zeile: Record<string, unknown> = {};
+  await mitFetch(
+    (_url, init) => {
+      zeile = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return Promise.resolve(new Response("", { status: 201 }));
+    },
+    async () => {
+      await sendMail(opts);
+    },
+  );
+  return zeile;
+}
+
+const authMail = {
+  to: "kundin@example.org",
+  subject: "Passwort zurücksetzen",
+  html: '<a href="https://projekt.example/auth/v1/verify?token=GEHEIM&type=recovery">Neu setzen</a>',
+  text: "Code: 123456",
+  tag: "auth-email-hook/recovery",
+};
+
+Deno.test("logBody: false lässt den Körper weg, behält aber die Nachweiskette", async () => {
+  const zeile = await protokollzeile({ ...authMail, logBody: false });
+
+  assertEquals(zeile.html, null);
+  assertEquals(zeile.text_body, null);
+
+  // Gegenprobe im selben Test: Der Wert darf auch nicht anderswo in der
+  // Zeile auftauchen. Ein Protokoll, das den Token im Betreff führt, wäre
+  // genauso offen wie vorher.
+  assert(
+    !JSON.stringify(zeile).includes("GEHEIM"),
+    "token_hash steht weiterhin in der Protokollzeile",
+  );
+  assert(
+    !JSON.stringify(zeile).includes("123456"),
+    "Einmalcode steht weiterhin in der Protokollzeile",
+  );
+
+  // Was das Protokoll leisten soll, leistet es weiterhin.
+  assertEquals(zeile.subject, "Passwort zurücksetzen");
+  assertEquals(zeile.to_addresses, ["kundin@example.org"]);
+  assertEquals(zeile.tag, "auth-email-hook/recovery");
+  assertEquals(zeile.status, "dev");
+});
+
+Deno.test("ohne logBody bleibt der Körper im Protokoll", async () => {
+  // Die Voreinstellung ändert sich nicht: Eine Kündigungsbestätigung soll
+  // im Wortlaut belegbar bleiben.
+  const zeile = await protokollzeile({
+    to: "kundin@example.org",
+    subject: "Kündigung bestätigt",
+    html: "<p>Ihre Kündigung ist eingegangen.</p>",
+    text: "Ihre Kündigung ist eingegangen.",
+    tag: "subscription-cancel",
+  });
+
+  assertStringIncludes(String(zeile.html), "Kündigung ist eingegangen");
+  assertEquals(zeile.text_body, "Ihre Kündigung ist eingegangen.");
+});

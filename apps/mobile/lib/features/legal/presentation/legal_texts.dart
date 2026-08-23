@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v8 · 2026-08';
+  static const version = 'v9 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -229,6 +229,12 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      Ein Änderungsprotokoll hält fest, wer welchen Datensatz wann geändert hat,
      einschliesslich des Standes vor und nach der Änderung. Ein Versandprotokoll hält
      fest, welche E-Mail wann an wen mit welchem Inhalt verschickt wurde.
+     **Eine Ausnahme:** Bei Mails, die einen Anmeldelink oder einen Einmalcode
+     enthalten — Passwort zurücksetzen, Anmeldelink, Einladung, Bestätigung der
+     Registrierung, Adresswechsel —, protokollieren wir Empfänger, Betreff,
+     Zeitpunkt und Zustellstatus, **nicht aber den Inhalt.** Sonst stünde der
+     Zugang zu Ihrem Konto in einem Protokoll, das unsere Beschäftigten lesen
+     können.
      Zweck: Nachvollziehbarkeit, Missbrauchserkennung, Nachweis des Versands.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. f und lit. c DSGVO.
 
