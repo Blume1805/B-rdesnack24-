@@ -241,3 +241,45 @@ Deno.test("ohne logBody bleibt der Körper im Protokoll", async () => {
   assertStringIncludes(String(zeile.html), "Kündigung ist eingegangen");
   assertEquals(zeile.text_body, "Ihre Kündigung ist eingegangen.");
 });
+
+// ---------------------------------------------------------------------------
+// Antwortadresse: `noreply@` darf keine Sackgasse sein.
+// ---------------------------------------------------------------------------
+
+/// Fängt die Anfrage ab, die an Resend gehen soll.
+async function resendAnfrage(
+  opts: Parameters<typeof sendMail>[0],
+): Promise<Record<string, unknown>> {
+  Deno.env.set("RESEND_API_KEY", "re_test");
+  Deno.env.delete("SUPABASE_URL");
+
+  let körper: Record<string, unknown> = {};
+  await mitFetch(
+    (_url, init) => {
+      körper = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return Promise.resolve(
+        new Response(JSON.stringify({ id: "test" }), { status: 200 }),
+      );
+    },
+    async () => {
+      await sendMail(opts);
+    },
+  );
+  return körper;
+}
+
+Deno.test("jede Mail trägt eine Antwortadresse", async () => {
+  const anfrage = await resendAnfrage(mail);
+  // Schlangenschrift, weil die REST-Schnittstelle sie so erwartet — die
+  // Kamelschrift gehört dem MCP-Werkzeug. Der Test hält den Unterschied
+  // fest, damit ihn niemand „korrigiert".
+  assertEquals(anfrage.reply_to, "boerdesnack24@gmail.com");
+});
+
+Deno.test("eine eigene Antwortadresse sticht die Voreinstellung", async () => {
+  const anfrage = await resendAnfrage({
+    ...mail,
+    replyTo: "kontakt@boerdesnack24.de",
+  });
+  assertEquals(anfrage.reply_to, "kontakt@boerdesnack24.de");
+});

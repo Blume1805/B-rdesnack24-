@@ -116,6 +116,20 @@ export async function sendMail(opts: {
   text?: string;
   /// Präfix für die Logzeile, üblicherweise der Function-Name.
   tag: string;
+  /// Antwortadresse. Standard: die Support-Adresse aus `mailConfig`.
+  ///
+  /// Warum überhaupt: Der Absender ist `noreply@` — eine Adresse, die
+  /// niemand liest. Kunden antworten trotzdem, weil „Antworten" der
+  /// naheliegende Knopf ist. Ohne `Reply-To` läuft diese Antwort ins
+  /// Leere: Der Kunde hält seine Frage für gestellt, bei uns kommt nie
+  /// etwas an. Mit `Reply-To` landet sie im Support-Postfach, das im
+  /// Fuß jeder Mail ohnehin schon genannt wird.
+  ///
+  /// Nebeneffekt, wegen dem es hier eingebaut wurde: Eine Mail ohne
+  /// jeden Rückweg ist für Spamfilter ein (schwaches) negatives Signal.
+  /// Der grosse Hebel gegen den Spam-Ordner ist es nicht — das sind die
+  /// Ziel-Domains der Links und DMARC.
+  replyTo?: string | string[];
   /// Soll der Mailkörper mitprotokolliert werden? Standard: ja.
   ///
   /// `false` setzt, wer eine Mail verschickt, die ein Geheimnis TRÄGT —
@@ -188,6 +202,15 @@ export async function sendMail(opts: {
       body: JSON.stringify({
         from: mailConfig.from,
         to,
+        // Feldname bewusst in Schlangenschrift: Die REST-Schnittstelle
+        // von Resend erwartet `reply_to`. Die Kamelschrift `replyTo`
+        // gehört dem MCP-Werkzeug, nicht der HTTP-Schnittstelle — dort
+        // heissen auch `idempotency_key`, `scheduled_at` und `topic_id`
+        // so. Nachgeprüft werden konnte das hier nicht: resend.com ist
+        // aus der Arbeitsumgebung gesperrt. Falls es doch falsch ist,
+        // antwortet Resend mit 422, und der Wortlaut steht als `failed`
+        // samt Fehlertext in `email_log` — sichtbar beim ersten Versand.
+        reply_to: opts.replyTo ?? mailConfig.supportEmail,
         subject: opts.subject,
         html: opts.html,
         text: opts.text,
