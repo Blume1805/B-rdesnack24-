@@ -52,6 +52,49 @@ Deno.test("zelle: ein Semikolon im Betreff verschiebt keine Spalten", () => {
   assertStringIncludes(datenzeile, '"Rabatt; jetzt sichern"');
 });
 
+Deno.test("zelle: ein führendes = wird zu Text entschärft", () => {
+  // Ohne den Apostroph wertet Excel das als Formel aus. Die
+  // Anführungszeichen helfen nicht — die gehören zum CSV-Format und sind
+  // beim Einlesen längst weg.
+  assertEquals(
+    zelle('=HYPERLINK("https://boese.invalid","Rechnung")'),
+    `"'=HYPERLINK(""https://boese.invalid"",""Rechnung"")"`,
+  );
+});
+
+Deno.test("zelle: auch + - @ Tabulator und Wagenrücklauf starten Formeln", () => {
+  assertEquals(zelle("+1+1"), `"'+1+1"`);
+  assertEquals(zelle("-2+3"), `"'-2+3"`);
+  assertEquals(zelle("@SUM(A1:A9)"), `"'@SUM(A1:A9)"`);
+  assertEquals(zelle("\t=1+1"), `"'\t=1+1"`);
+  // Der Wagenrücklauf wird zusätzlich zum Leerzeichen — beide Regeln
+  // greifen, in dieser Reihenfolge.
+  assertEquals(zelle("\r=1+1"), `"' =1+1"`);
+});
+
+Deno.test("zelle: harmlose Werte bekommen keinen Apostroph", () => {
+  assertEquals(zelle("Kündigung bestätigt"), '"Kündigung bestätigt"');
+  assertEquals(zelle("kunde@example.invalid"), '"kunde@example.invalid"');
+  assertEquals(zelle("2+2 im Betreff"), '"2+2 im Betreff"');
+  assertEquals(zelle(""), '""');
+});
+
+Deno.test("csvBauen: eine untergeschobene Adresse wird nicht zur Formel", () => {
+  // Der reale Weg dorthin: `subscription-cancel` läuft nach § 312k BGB
+  // ohne Anmeldung und prüft die Adresse nur gegen ein weites Muster.
+  // Eine „Adresse", die mit = beginnt, kommt durch und landet in
+  // email_log.to_addresses.
+  const csv = csvBauen([{
+    ...zeile,
+    to_addresses: ['=HYPERLINK("https://boese.invalid","Klicken")@x.invalid'],
+  }]);
+  assertStringIncludes(csv, `"'=HYPERLINK(`);
+  assert(
+    !csv.includes(';"=HYPERLINK('),
+    "unentschärfte Formel steht weiterhin am Zellenanfang",
+  );
+});
+
 Deno.test("zelle: null wird zur leeren Zelle, nicht zu 'null'", () => {
   assertEquals(zelle(null), '""');
   assertEquals(zelle(undefined), '""');

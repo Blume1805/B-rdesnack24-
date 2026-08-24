@@ -25,13 +25,44 @@ export interface MailDetail extends LogZeile {
 // CSV
 // ---------------------------------------------------------------------------
 
+/// Zeichen, mit denen eine Tabellenkalkulation eine Formel beginnen lässt.
+/// Tabulator und Wagenrücklauf gehören dazu, weil Excel führenden
+/// Leerraum überspringt und erst danach entscheidet.
+const FORMELSTART = /^[=+\-@\t\r]/;
+
 /// Eine Zelle so einpacken, dass kein Inhalt die Tabelle sprengen kann.
-/// Anführungszeichen werden verdoppelt, Zeilenumbrüche zu Leerzeichen —
-/// ein Fehlertext von Resend enthält gern beides, und ein einzelnes
-/// Semikolon im Betreff würde die Spalten sonst verschieben.
+///
+/// Zwei getrennte Dinge passieren hier:
+///
+/// 1. **Aufbau schützen.** Anführungszeichen werden verdoppelt,
+///    Zeilenumbrüche zu Leerzeichen — ein Fehlertext von Resend enthält
+///    gern beides, und ein einzelnes Semikolon im Betreff würde die
+///    Spalten sonst verschieben.
+///
+/// 2. **Formeln entschärfen.** Beginnt der Wert mit `=`, `+`, `-`, `@`,
+///    Tabulator oder Wagenrücklauf, wird ein Apostroph vorangestellt.
+///    Excel liest das als „das ist Text" und zeigt den Apostroph nicht an.
+///
+/// Warum Punkt 2 nötig ist, obwohl doch alles in Anführungszeichen steht:
+/// Die Anführungszeichen gehören zum CSV-Format, nicht zum Zellinhalt.
+/// Excel entfernt sie beim Einlesen und wertet aus, was übrig bleibt — aus
+/// `"=HYPERLINK(...)"` wird also sehr wohl eine Formel. Der Export ist
+/// ausdrücklich fürs Öffnen in Excel gebaut (BOM und CRLF weiter unten),
+/// damit ist das kein theoretischer Fall.
+///
+/// Wie ein solcher Wert überhaupt hierher kommt: `subscription-cancel`
+/// läuft ohne Anmeldung — § 312k BGB verlangt das — und prüft die
+/// Adresse nur gegen ein weites Muster. Eine „Adresse", die mit `=`
+/// beginnt, kommt durch und steht danach in `email_log.to_addresses`.
+/// Wer später exportiert und die Datei in Excel öffnet, führt sie aus.
+///
+/// Bewusst hier und nicht beim Schreiben in die Datenbank: `email_log` ist
+/// ein Nachweis. Dort muss stehen, was tatsächlich zugestellt wurde — bis
+/// aufs Zeichen. Entschärft wird erst bei der Ausgabe.
 export function zelle(wert: unknown): string {
   const s = wert === null || wert === undefined ? "" : String(wert);
-  return `"${s.replace(/"/g, '""').replace(/[\r\n]+/g, " ")}"`;
+  const sicher = FORMELSTART.test(s) ? `'${s}` : s;
+  return `"${sicher.replace(/"/g, '""').replace(/[\r\n]+/g, " ")}"`;
 }
 
 export function richtungKlartext(d: string): string {
