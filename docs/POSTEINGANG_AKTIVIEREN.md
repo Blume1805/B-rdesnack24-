@@ -103,3 +103,76 @@ Dazu ein eindeutiger Index auf `provider_id` für eingehende Post: Stellt
 Resend denselben Eingang nach einer Zeitüberschreitung erneut zu, entsteht
 keine zweite Zeile. Die Function antwortet dann mit 200, damit die
 Wiederholungen aufhören.
+
+---
+
+# Die Support-Adresse — Entscheidung vom 24.08.2026
+
+Der Auftraggeber hat entschieden: **Die Support-Adresse zieht auf die
+eigene Domain.** Anlass war die Rechtsprüfung — `boerdesnack24@gmail.com`
+macht Google zum Empfänger jeder Kundenanfrage, und für privates Gmail
+gibt es keinen Auftragsverarbeitungsvertrag nach Art. 28 DSGVO. Seit die
+Antwortadresse gesetzt ist, ist dieses Postfach zudem der eingebaute
+Rückkanal jeder Systemnachricht, nicht mehr nur eine veröffentlichte
+Adresse.
+
+## Die Umstellung darf erst NACH dem Postfach passieren
+
+`mailConfig.supportEmail` ist eine Zeile. Sie zu ändern ist trotzdem der
+**letzte** Schritt, nicht der erste. Die Adresse steckt an neun Stellen,
+acht davon Text in Mails — und an einer echt: `account-deletion-request`
+schickt die interne Benachrichtigung über einen Löschantrag dorthin.
+
+Wird umgestellt, bevor das Postfach Post annimmt, steht die neue Adresse
+sofort im Fuß jeder Mail und in jedem `Reply-To` — und Kundenanfragen wie
+Löschanträge nach Art. 17 DSGVO laufen ins Nichts. Das ist schlechter als
+der Ausgangszustand, weil vorher wenigstens jemand mitlas.
+
+## Der MX-Konflikt
+
+Eine Domain hat **einen** MX-Eintrag. Er kann auf ein Postfach zeigen
+oder auf Resend — nicht auf beides:
+
+| | MX → Postfach (z. B. Hostinger) | MX → Resend |
+|---|---|---|
+| Wer liest die Post? | ein Mensch, im Mailprogramm | niemand — sie liegt in `email_log` |
+| Google als Empfänger | raus | raus |
+| Aufwand | Postfach buchen, MX setzen | MX, Webhook, Secret, **plus Oberfläche bauen** |
+| `email-inbound` | bleibt stumm | wird scharf |
+
+Der zweite Weg klingt vollständiger, ist aber heute unbrauchbar:
+`email-inbound` schreibt ausschliesslich nach `email_log`, und **es gibt
+keine Oberfläche, die das anzeigt** — `email_log_list`,
+`email_log_detail` und `email-export` kommen in `apps/mobile/lib` an
+keiner Stelle vor. Support wäre blind.
+
+Wer beides will, gibt Resend eine **Unterdomain** (`inbound.boerdesnack24.de`);
+dann hat jede Seite ihren eigenen MX. Übliches Muster, hier aber nicht
+gegen die Resend-Dokumentation geprüft — `resend.com` ist aus der
+Arbeitsumgebung gesperrt.
+
+## Reihenfolge
+
+1. **Postfach anlegen** für `kontakt@boerdesnack24.de` bei einem
+   EU-Anbieter mit AV-Vertrag (Hostinger bietet Mailhosting an).
+2. **MX-Eintrag** dorthin setzen. ⚠️ Läuft an dieser Domain schon Post,
+   vorher klären — ein MX leitet den gesamten Posteingang um.
+3. **Probe:** von aussen an `kontakt@boerdesnack24.de` schreiben und
+   nachsehen, ob es ankommt. Erst wenn das steht, weiter.
+4. **Dann erst** `mailConfig.supportEmail` umstellen. `Reply-To`, alle
+   Mailfüsse und die Löschantrag-Benachrichtigung ziehen automatisch mit.
+5. **Rechtstexte nachziehen** — und zwar in beide Richtungen:
+   * Impressum und die sechs weiteren Stellen mit der Kontaktadresse.
+   * Datenschutzerklärung Abschnitt 4: den neuen Anbieter als Empfänger
+     benennen (Google entfällt, war ohnehin nie eingetragen).
+   * Abschnitt 5 („zwei US-Empfänger") bleibt bei zwei — der neue
+     Anbieter sitzt in der EU.
+   * `LegalTexts.version` hochziehen.
+6. **Offenen Punkt in `CLAUDE.md` streichen** („Google als Empfänger").
+
+## Was bis dahin gilt
+
+`boerdesnack24@gmail.com` bleibt in Betrieb. Die Lücke ist benannt und
+liegt beim Auftraggeber — sie wird **nicht** durch einen Textbaustein
+kaschiert, der Google als Empfänger benennt, während der AV-Vertrag
+fehlt.

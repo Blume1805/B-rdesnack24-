@@ -183,6 +183,11 @@ diese Rollen überhaupt. Diese Zahlen werden abgefragt, nicht geschätzt.
 * **Google als Empfänger** (Support-Postfach `boerdesnack24@gmail.com`)
   fehlt in Abschnitt 4 der Datenschutzerklärung; Abschnitt 5 nennt „zwei"
   US-Empfänger, mit Google wären es drei; Abschnitt g) sagt nicht, wo
-  Kontaktanfragen landen. Wartet auf die Entscheidung zum AV-Vertrag.
+  Kontaktanfragen landen. **Entscheidung vom 24.08.2026: Die Adresse zieht
+  auf die eigene Domain**, damit entfällt Google statt benannt zu werden.
+  Reihenfolge und der MX-Konflikt stehen in
+  `docs/POSTEINGANG_AKTIVIEREN.md`. Bis das Postfach Post annimmt, bleibt
+  `boerdesnack24@gmail.com` in Betrieb und die Lücke offen —
+  `mailConfig.supportEmail` wird **zuletzt** umgestellt, nicht zuerst.
 * **Kein Verarbeitungsverzeichnis nach Art. 30** im Repository. Die
   Datenschutzerklärung ersetzt es nicht.
