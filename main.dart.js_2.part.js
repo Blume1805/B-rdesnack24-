@@ -23,7 +23,7 @@ return new C.lW(A.bU(A.b0(x),A.bl(x),1,0,0,0,0),A.bU(A.b0(x),A.bl(x)+1,0,0,0,0,0
 rl(d){return B.c.d1(B.e.j(A.b0(d)),4,"0")+"-"+B.c.d1(B.e.j(A.bl(d)),2,"0")+"-"+B.c.d1(B.e.j(A.c0(d)),2,"0")},
 lW:function lW(d,e){this.a=d
 this.b=e},
-yc:function yc(d){this.a=d},
+yd:function yd(d){this.a=d},
 Va:function Va(d,e){var _=this
 _.w=$
 _.x=d
@@ -41,8 +41,8 @@ axE:function axE(d){this.a=d},
 axF:function axF(){},
 axG:function axG(d){this.a=d},
 axH:function axH(){},
-awr(d,e,f,g,h,i){return C.c8E(d,e,f,g,h,i)},
-c8E(d,e,f,g,h,i){var x=0,w=A.q(y.X),v,u,t,s,r,q
+awr(d,e,f,g,h,i){return C.c8F(d,e,f,g,h,i)},
+c8F(d,e,f,g,h,i){var x=0,w=A.q(y.X),v,u,t,s,r,q
 var $async$awr=A.m(function(j,k){if(j===1)return A.n(k,w)
 for(;;)switch(x){case 0:r={}
 q=g.a
@@ -291,7 +291,7 @@ _.c=f
 _.d=g
 _.e=h},
 aII(d,e,f,g,h,i,j){var x=null,w=A.adu(e,!0,!0,!0),v=e.length
-return new A.vh(new C.b_U(f,h,g,d,x),w,x,B.F,!1,x,x,i,x,!0,x,0,x,x,v,B.hv,B.ab,x,x,B.r,B.bn,x)},
+return new A.vi(new C.b_U(f,h,g,d,x),w,x,B.F,!1,x,x,i,x,!0,x,0,x,x,v,B.hv,B.ab,x,x,B.r,B.bn,x)},
 a4R:function a4R(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w){var _=this
 _.dx=d
 _.c=e
@@ -338,7 +338,7 @@ D=c[7]
 C.DR.prototype={}
 C.lW.prototype={
 gbw(){return[C.rl(this.a),C.rl(this.b)]}}
-C.yc.prototype={
+C.yd.prototype={
 U(){var x=$.al()
 return new C.Va(new A.bK(B.ae,x),new A.bK(B.ae,x))}}
 C.Va.prototype={
@@ -377,13 +377,13 @@ p=k
 l=r.c
 if(l==null){s=[1]
 x=5
-break}if(J.cd(p)===0){l.P(y.q).f.be(D.aB9)
+break}if(J.cd(p)===0){l.P(y.q).f.be(D.aBa)
 s=[1]
 x=5
 break}l=r.goq()
 j=r.goq()
-i=B.c.aS(r.x.a.a)
-o=C.c5x(B.c.aS(r.y.a.a),i,l.a,p,j.b)
+i=B.c.aN(r.x.a.a)
+o=C.c5x(B.c.aN(r.y.a.a),i,l.a,p,j.b)
 n="EXTF_Buchungsstapel_"+B.c.a1(r.goq().a.ek(),0,10)+"_"+B.c.a1(r.goq().b.ek(),0,10)+".csv"
 x=8
 return A.k(C.bBG(o,n),$async$Ba)
@@ -413,17 +413,17 @@ case 6:case 1:return A.o(v,w)
 case 2:return A.n(t.at(-1),w)}})
 return A.p($async$Ba,w)},
 p(d){var x,w,v,u,t=this,s=null,r=B.ac.el(0.14),q=A.ax(4),p=A.cl(B.ac.el(0.5),1),o=y.p
-q=A.ai(A.b([D.a8w,A.aQ(s,A.ai(A.b([D.acb,B.cz,A.i("DATEV",s,s,s,s,A.y(B.ac,11,B.o).fv(0.4),s,s,s)],o),B.j,s,B.f,B.G,0,s,s),B.q,s,s,new A.aD(r,s,p,q,s,s,B.B),s,s,s,s,B.l5,s,s,s)],o),B.j,s,B.f,B.i,0,s,s)
+q=A.ai(A.b([D.a8x,A.aQ(s,A.ai(A.b([D.acc,B.cz,A.i("DATEV",s,s,s,s,A.y(B.ac,11,B.o).fv(0.4),s,s,s)],o),B.j,s,B.f,B.G,0,s,s),B.q,s,s,new A.aD(r,s,p,q,s,s,B.B),s,s,s,s,B.l5,s,s,s)],o),B.j,s,B.f,B.i,0,s,s)
 p=A.i("Erzeugt eine CSV-Datei im DATEV-Format (EXTF-Buchungsstapel, SKR 03). Enthalten sind die Tageslosungen der App-Verk\xe4ufe je Steuersatz: Kasse (1000) an Erl\xf6se 7 % (8300) bzw. 19 % (8400) \u2014 entsprechend der GoBD-Verfahrensdokumentation. Buchhaltung und Steuererkl\xe4rungen erstellt Gesellschafter Philipp Blume; die Datei l\xe4sst sich direkt in eine DATEV-f\xe4hige Buchhaltungssoftware importieren.",s,s,s,s,A.y(B.p,13,B.l).cB(1.4),s,s,s)
 r=t.z?s:t.gaIt()
 x=t.goq()
 w=$.dO()
-r=A.fQ(D.adx,A.i("Zeitraum: "+w.ap(x.a)+" \u2013 "+w.ap(t.goq().b),s,s,s,s,s,s,s,s),r,s)
-w=A.f6(s,B.aW,!1,s,!0,B.r,s,A.fj(),t.x,s,s,s,s,s,2,D.aeM,B.ab,!0,s,!0,s,!1,s,B.b2,s,s,s,s,B.dL,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.D,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.av,s,B.a5,s,s,s,s)
-x=A.f6(s,B.aW,!1,s,!0,B.r,s,A.fj(),t.y,s,s,s,s,s,2,D.aeV,B.ab,!0,s,!0,s,!1,s,B.b2,s,s,s,s,B.dL,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.D,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.av,s,B.a5,s,s,s,s)
+r=A.fQ(D.ady,A.i("Zeitraum: "+w.ap(x.a)+" \u2013 "+w.ap(t.goq().b),s,s,s,s,s,s,s,s),r,s)
+w=A.f6(s,B.aW,!1,s,!0,B.r,s,A.fj(),t.x,s,s,s,s,s,2,D.aeN,B.ab,!0,s,!0,s,!1,s,B.b2,s,s,s,s,B.dL,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.D,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.av,s,B.a5,s,s,s,s)
+x=A.f6(s,B.aW,!1,s,!0,B.r,s,A.fj(),t.y,s,s,s,s,s,2,D.aeW,B.ab,!0,s,!0,s,!1,s,B.b2,s,s,s,s,B.dL,s,s,s,1,s,s,!1,"\u2022",s,s,s,s,s,!1,s,s,!1,s,!0,s,B.D,s,s,s,s,s,s,s,s,s,s,s,s,!0,B.av,s,B.a5,s,s,s,s)
 v=t.z?s:t.gavK()
 u=A.dC(B.m,B.h,s,B.el,s,s,s)
-return A.dg(D.a9L,s,A.dn(A.b([q,B.I,p,B.Q,A.bm(s,A.a7(A.b([r,B.t,w,B.I,x,B.Q,A.fz(t.z?D.YO:D.F_,D.aJ9,v,u)],o),B.a9,B.f,B.i),s,s,B.D,s,s,3),B.t,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.p,11,B.l).cB(1.35),s,s,s)],o),s,B.D,s,B.F,!1),s,s,s)}}
+return A.dg(D.a9M,s,A.dn(A.b([q,B.I,p,B.Q,A.bm(s,A.a7(A.b([r,B.t,w,B.I,x,B.Q,A.fz(t.z?D.YO:D.F_,D.aJa,v,u)],o),B.a9,B.f,B.i),s,s,B.D,s,s,3),B.t,A.i("Hinweis: Bargeld-Entnahmen und Bankbewegungen bucht Philipp Blume weiterhin \xfcber sevDesk/Kontoauszug \u2014 diese Datei deckt bewusst nur die Erl\xf6sseite ab, damit keine Buchungen doppelt entstehen.",s,s,s,s,A.y(B.p,11,B.l).cB(1.35),s,s,s)],o),s,B.D,s,B.F,!1),s,s,s)}}
 C.nW.prototype={
 zB(d,e,f,g,h){return this.b_A(d,e,f,g,h)},
 b_A(d,e,f,g,h){var x=0,w=A.q(y.N),v,u=this,t,s,r,q
@@ -678,7 +678,7 @@ j=b1.a.z
 v=v.gaT()
 b3.a=new C.amT(r,o,n,l,b1.gI2(),b1.gHW(),q,k,v,s,x,b2)
 if(m)g=B.Aj
-else g=D.aA9
+else g=D.aAa
 x=u.b
 if(x==null){x=t.b
 x.toString
@@ -745,7 +745,7 @@ a0=a1.at
 x=A.b([A.bN(a2,a2,A.by(a3,B.vF,w).w.a.a<360?42:72),A.as(A.bA(a2,a2,a2,A.a7(A.b([A.i(a0,a2,1,B.ak,a2,m,a2,a2,a2),B.I,A.ai(A.b([A.i(j,a2,1,B.ak,a2,h,a2,a2,a2),A.i(" \u2013 ",a2,a2,a2,a2,h,a2,a2,a2),new A.h7(1,B.cp,A.i(i,a2,1,B.ak,a2,g,a2,a2,a2),a2)],x),B.j,a2,B.f,B.i,0,a2,a2),B.Q],x),B.A,B.f,B.i),!1,a2,a2,!0,a2,!1,a2,a2,a2,a2,a2,a2,a2,a2,a2,a0+" "+j+" to "+i,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,a2,B.N,a2),1)],x)
 if(v===B.dx&&a1.ay!=null){w=a1.ay
 w.toString
-x.push(new A.ad(B.fr,A.z2(w,e,a2),a2))}x=A.bEx(d,e,r,new A.FX(A.ai(x,B.j,a2,B.f,B.i,0,a2,a2),D.azX,a2),0,e,new A.LU(B.YW,a2,a2,a2,B.Ck,a2,a1.Q,a2,a2,a2,a2),0,a2)
+x.push(new A.ad(B.fr,A.z2(w,e,a2),a2))}x=A.bEx(d,e,r,new A.FX(A.ai(x,B.j,a2,B.f,B.i,0,a2,a2),D.azY,a2),0,e,new A.LU(B.YW,a2,a2,a2,B.Ck,a2,a1.Q,a2,a2,a2,a2),0,a2)
 w=a1.e
 d=a1.f
 a0=a1.w
@@ -759,7 +759,7 @@ U(){return new C.Uk(new A.bk(null,y.A),new A.nu())}}
 C.Uk.prototype={
 aq(){var x,w,v,u=this
 u.aJ()
-x=A.wk(0,null,null)
+x=A.wl(0,null,null)
 u.x=x
 x.a9(0,u.gaKp())
 x=u.a
@@ -796,7 +796,7 @@ x=A.bU(A.b0(u),A.bl(u)+t,1,0,0,0,0)
 u=v.a
 w=u.z
 return new C.WL(v.f,v.r,u.w,v.gaNr(),u.e,u.f,x,u.r,w,null)},
-p(d){var x,w,v,u,t,s,r=this,q=null,p=y.p,o=A.b([D.aNu],p),n=r.y
+p(d){var x,w,v,u,t,s,r=this,q=null,p=y.p,o=A.b([D.aNv],p),n=r.y
 n===$&&A.a()
 if(n)o.push(D.a6y)
 n=r.a
@@ -1029,7 +1029,7 @@ m=m.gvV()}m=new A.Dz(m,!0,B.lq,b2)}else m=B.lq
 a5.push(m)}B.b.K(a1,a5)}b0=A.by(b5,B.dN,y.w).w.giZ(0)===B.f4?384:480
 return A.a7(A.b([new A.dT(new A.ar(0,b0,0,1/0).Oe(58),new A.ad(B.hV,new A.e8(B.bh,b2,b2,new A.k3(!0,A.i(b4.E8(b1.a.x),b2,b2,b2,b2,b3.ok.z.kC(b3.ax.k3),b2,b2,b2),b2),b2),b2),b2),new A.dT(new A.ar(0,b0,0,s*42+(s-1)*8),A.byJ(A.adu(a1,!0,!1,!0),D.Cc,B.il,!1),b2),B.t],x),B.j,B.f,B.i)}}
 C.Vc.prototype={
-U(){return new C.ak6(A.wO())},
+U(){return new C.ak6(A.wP())},
 vQ(d){return this.e.$1(d)}}
 C.ak6.prototype={
 l(){var x=this.d
@@ -1088,7 +1088,7 @@ C.Ix.prototype={
 L(){return"_HighlightPainterStyle."+this.b}}
 C.Wa.prototype={
 aL(d,e){var x,w,v,u,t,s,r=this.c
-if(r===D.aOJ)return
+if(r===D.aOK)return
 $.am()
 x=A.aX()
 w=this.b
@@ -1115,7 +1115,7 @@ u.toString
 x=this.as
 w=C.bLl(u,x,e,f)
 v=C.bLk(u,x,e,f,g)
-if(e==null||f==null)return u.gaP()
+if(e==null||f==null)return u.gaQ()
 switch(d.P(y.I).w.a){case 0:u=v+" \u2013 "+w
 break
 case 1:u=w+" \u2013 "+v
@@ -1238,7 +1238,7 @@ p(d){var x,w,v,u,t,s,r,q=this,p=null
 A.V(d)
 x=A.cy(d,B.aD,y.y)
 x.toString
-w=A.vv(d)
+w=A.vw(d)
 v=w.p1
 if(v==null)v=B.uz
 u=q.w
@@ -1496,14 +1496,14 @@ w(v,"gaAu","aAv",4)})();(function inheritance(){var x=a.mixinHard,w=a.inheritMan
 w(A.B,[C.DR,C.nW])
 w(A.o6,[C.bu1,C.b9o,C.axE,C.axF,C.axG,C.axH,C.bwA,C.b9m,C.b9x,C.b9y,C.b9z,C.b9s,C.b9t,C.b9w,C.b9r,C.b9u])
 v(C.lW,A.v5)
-v(C.yc,A.bf)
-v(C.Va,A.y6)
-w(A.y_,[C.b9q,C.b9n,C.b9p,C.b9k,C.b9j,C.b9l,C.b9i,C.b6c,C.b6d,C.b6e,C.b6i,C.b6h,C.b9v,C.bf9,C.bf8,C.bf7])
+v(C.yd,A.bf)
+v(C.Va,A.y7)
+w(A.y0,[C.b9q,C.b9n,C.b9p,C.b9k,C.b9j,C.b9l,C.b9i,C.b6c,C.b6d,C.b6e,C.b6i,C.b6h,C.b9v,C.bf9,C.bf8,C.bf7])
 w(A.N,[C.MA,C.Uj,C.Ul,C.WL,C.Vc,C.Wn])
 w(A.a_,[C.a_v,C.Uk,C.Um,C.WM,C.ak6,C.IC])
 v(C.V9,C.a_v)
 w(A.G,[C.aiL,C.ak5,C.amT])
-w(A.y0,[C.b6f,C.b6g,C.bf6,C.bse])
+w(A.y1,[C.b6f,C.b6g,C.bf6,C.bse])
 v(C.VS,A.bD)
 w(A.ady,[C.bhM,C.b_U])
 v(C.bhQ,A.adA)
@@ -1511,36 +1511,36 @@ v(C.Ix,A.Ih)
 v(C.Wa,A.Mw)
 v(C.a4R,A.RB)
 x(C.a_v,A.le)})()
-A.brg(b.typeUniverse,JSON.parse('{"yc":{"bf":[],"N":[],"c":[]},"Va":{"a_":["yc"]},"MA":{"N":[],"c":[]},"Uj":{"N":[],"c":[]},"Ul":{"N":[],"c":[]},"VS":{"bD":[],"bt":[],"c":[]},"WL":{"N":[],"c":[]},"Vc":{"N":[],"c":[]},"Wn":{"N":[],"c":[]},"IC":{"a_":["Wn"]},"V9":{"a_":["MA"]},"aiL":{"G":[],"c":[]},"Uk":{"a_":["Uj"]},"Um":{"a_":["Ul"]},"ak5":{"G":[],"c":[]},"WM":{"a_":["WL"]},"ak6":{"a_":["Vc"]},"Wa":{"aB":[]},"amT":{"G":[],"c":[]},"a4R":{"G":[],"c":[]}}'))
+A.brg(b.typeUniverse,JSON.parse('{"yd":{"bf":[],"N":[],"c":[]},"Va":{"a_":["yd"]},"MA":{"N":[],"c":[]},"Uj":{"N":[],"c":[]},"Ul":{"N":[],"c":[]},"VS":{"bD":[],"bt":[],"c":[]},"WL":{"N":[],"c":[]},"Vc":{"N":[],"c":[]},"Wn":{"N":[],"c":[]},"IC":{"a_":["Wn"]},"V9":{"a_":["MA"]},"aiL":{"G":[],"c":[]},"Uk":{"a_":["Uj"]},"Um":{"a_":["Ul"]},"ak5":{"G":[],"c":[]},"WM":{"a_":["WL"]},"ak6":{"a_":["Vc"]},"Wa":{"aB":[]},"amT":{"G":[],"c":[]},"a4R":{"G":[],"c":[]}}'))
 var y=(function rtii(){var x=A.aw
-return{V:x("cf<cc>"),Y:x("dx<jm>"),M:x("dx<me>"),O:x("dx<mi>"),G:x("E"),v:x("bFC"),T:x("lQ<b9>"),i:x("DR"),I:x("jn"),E:x("eC"),S:x("NL"),R:x("D<R<~>>"),s:x("D<f>"),p:x("D<c>"),k:x("D<~(cf<cc>)>"),A:x("bk<a_<N>>"),t:x("bk<IC>"),D:x("u<a3<f,@>>"),j:x("u<@>"),P:x("a3<f,@>"),f:x("a3<@,@>"),y:x("aL"),w:x("kd"),a:x("bs"),c:x("c4<~(cf<cc>)>"),U:x("eU<B?>"),N:x("f"),F:x("nr"),n:x("j6"),C:x("d9"),Q:x("VS"),q:x("xe"),b:x("bp<E?>"),z:x("@"),_:x("E?"),X:x("lQ<b9>?"),W:x("eS?"),u:x("f?"),H:x("~"),Z:x("~()")}})();(function constants(){D.Cc=new C.bhM()
+return{V:x("cf<cc>"),Y:x("dx<jm>"),M:x("dx<me>"),O:x("dx<mi>"),G:x("E"),v:x("bFC"),T:x("lQ<b9>"),i:x("DR"),I:x("jn"),E:x("eC"),S:x("NL"),R:x("D<R<~>>"),s:x("D<f>"),p:x("D<c>"),k:x("D<~(cf<cc>)>"),A:x("bk<a_<N>>"),t:x("bk<IC>"),D:x("u<a3<f,@>>"),j:x("u<@>"),P:x("a3<f,@>"),f:x("a3<@,@>"),y:x("aL"),w:x("kd"),a:x("bs"),c:x("c4<~(cf<cc>)>"),U:x("eU<B?>"),N:x("f"),F:x("nr"),n:x("j6"),C:x("d9"),Q:x("VS"),q:x("xf"),b:x("bp<E?>"),z:x("@"),_:x("E?"),X:x("lQ<b9>?"),W:x("eS?"),u:x("f?"),H:x("~"),Z:x("~()")}})();(function constants(){D.Cc=new C.bhM()
 D.i0=new A.a5(62250,"MaterialIcons",null,!1)
-D.Db=new C.yc(null)
+D.Db=new C.yd(null)
 D.a6y=new A.lS(0,null,null)
-D.axY=new A.fT("Schnittstelle","Buchungsstapel f\xfcr die Buchhaltung",null,null)
-D.a8w=new A.jq(1,B.dj,D.axY,null)
-D.aGE=new A.aj("DATEV-Export",null,null,null,null,null,null,null,null,null)
-D.a9L=new A.em(D.aGE,null,null)
-D.aa_=new A.a5(57504,"MaterialIcons",null,!1)
-D.acb=new A.aA(B.fR,14,B.ac,null,null)
+D.axZ=new A.fT("Schnittstelle","Buchungsstapel f\xfcr die Buchhaltung",null,null)
+D.a8x=new A.jq(1,B.dj,D.axZ,null)
+D.aGF=new A.aj("DATEV-Export",null,null,null,null,null,null,null,null,null)
+D.a9M=new A.em(D.aGF,null,null)
+D.aa0=new A.a5(57504,"MaterialIcons",null,!1)
+D.acc=new A.aA(B.fR,14,B.ac,null,null)
 D.F_=new A.aA(B.y5,null,null,null,null)
 D.Eo=new A.a5(57782,"MaterialIcons",null,!1)
-D.adx=new A.aA(D.Eo,18,null,null,null)
-D.aeM=new A.ch(null,null,null,"Beraternummer (optional)",null,null,null,"Nur falls in der Buchhaltungssoftware hinterlegt",null,null,null,null,null,null,null,null,!0,!0,!1,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.aeV=new A.ch(null,null,null,"Mandantennummer (optional)",null,null,null,"Bleibt sie leer, beim Import in der Software erg\xe4nzen",null,null,null,null,null,null,null,null,!0,!0,!1,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
-D.azX=new A.H(1/0,64)
-D.aA9=new A.H(496,164)
+D.ady=new A.aA(D.Eo,18,null,null,null)
+D.aeN=new A.ch(null,null,null,"Beraternummer (optional)",null,null,null,"Nur falls in der Buchhaltungssoftware hinterlegt",null,null,null,null,null,null,null,null,!0,!0,!1,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
+D.aeW=new A.ch(null,null,null,"Mandantennummer (optional)",null,null,null,"Bleibt sie leer, beim Import in der Software erg\xe4nzen",null,null,null,null,null,null,null,null,!0,!0,!1,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null)
+D.azY=new A.H(1/0,64)
+D.aAa=new A.H(496,164)
 D.YO=new A.cq(18,18,B.mV,null)
-D.aHd=new A.aj("Freigabe angefordert.",null,null,null,null,null,null,null,null,null)
-D.v9=new A.e2(D.aHd,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.r,null)
-D.aHY=new A.aj("Keine Ums\xe4tze im gew\xe4hlten Zeitraum.",null,null,null,null,null,null,null,null,null)
-D.aB9=new A.e2(D.aHY,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.r,null)
+D.aHe=new A.aj("Freigabe angefordert.",null,null,null,null,null,null,null,null,null)
+D.v9=new A.e2(D.aHe,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.r,null)
+D.aHZ=new A.aj("Keine Ums\xe4tze im gew\xe4hlten Zeitraum.",null,null,null,null,null,null,null,null,null)
+D.aBa=new A.e2(D.aHZ,null,null,null,null,null,null,null,null,null,null,null,null,B.L,!1,null,null,null,B.r,null)
 D.vi=new A.aj("Anfordern",null,null,null,null,null,null,null,null,null)
 D.vj=new A.aj("Freigabe anfordern",null,null,null,null,null,null,null,null,null)
-D.aJ9=new A.aj("DATEV-Datei herunterladen",null,null,null,null,null,null,null,null,null)
-D.aNu=new C.ak5(null)
-D.aOJ=new C.Ix(0,"none")
+D.aJa=new A.aj("DATEV-Datei herunterladen",null,null,null,null,null,null,null,null,null)
+D.aNv=new C.ak5(null)
+D.aOK=new C.Ix(0,"none")
 D.ZW=new C.Ix(1,"highlightLeading")
 D.AY=new C.Ix(2,"highlightTrailing")
 D.ZX=new C.Ix(3,"highlightAll")})()};
-(a=>{a["jQHVYYhfHXNbnNcdw2TPt+S1dOg="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["utb3g0ZiwGNZyJlelyC8gsthwKE="]=a.current})($__dart_deferred_initializers__);
