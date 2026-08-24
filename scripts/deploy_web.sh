@@ -207,6 +207,34 @@ CURRENT_BRANCH=$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)
 STAGE="$(mktemp -d)"
 cp -r "$BUILD_DIR"/. "$STAGE/"
 
+# Vor dem Branchwechsel: Änderungen an VERFOLGTEN Dateien beiseitelegen.
+#
+# Anlass (24.08.2026, Lauf #8): Der Build war fertig, das Ausrollen brach ab
+# mit „Your local changes to the following files would be overwritten by
+# checkout: apps/mobile/analysis_options.yaml". Der gh-pages-Branch kennt
+# diese Datei nicht, der Wechsel würde sie also entfernen — und Git
+# verweigert das, solange sie verändert ist.
+#
+# WER sie verändert, steht nirgends im Repository: kein Skript und kein
+# Ablauf fasst sie an, es muss die Werkzeugkette auf dem Runner sein
+# (`flutter pub get`). Nachstellen liess sich das nicht — Flutter ist in
+# der Arbeitsumgebung nicht installiert. Deshalb schreibt der Schritt
+# unten auf, WAS unsauber war: Beim nächsten Lauf steht die Antwort im
+# Protokoll, statt wieder geraten zu werden.
+#
+# `stash` statt `checkout -- .`: Dieses Skript läuft auch von Hand auf
+# Entwicklerrechnern. Dort dürfen unfertige Änderungen nicht stillschweigend
+# verworfen werden — sie werden beiseitegelegt und am Ende zurückgeholt.
+# Unverfolgte Dateien bleiben unangetastet; das gebaute Bundle liegt
+# ohnehin schon in "$STAGE".
+STASHED=0
+if ! git -C "$ROOT" diff --quiet; then
+  echo "  ! Arbeitsverzeichnis nicht sauber, folgende Dateien werden beiseitegelegt:"
+  git -C "$ROOT" status --porcelain --untracked-files=no | sed 's/^/      /'
+  git -C "$ROOT" stash push --quiet --message "deploy_web.sh ${TS}"
+  STASHED=1
+fi
+
 git -C "$ROOT" checkout gh-pages
 
 if [ -z "$SUBPATH" ]; then
@@ -276,6 +304,13 @@ fi
 git -C "$ROOT" commit -m "deploy: web build v=${TS}" || echo "  (nichts zu committen)"
 git -C "$ROOT" push origin gh-pages
 git -C "$ROOT" checkout "$CURRENT_BRANCH"
+
+# Beiseitegelegtes zurückholen, sobald der Ausgangsbranch wieder steht.
+if [ "$STASHED" = "1" ]; then
+  git -C "$ROOT" stash pop --quiet
+  echo "  ✓ beiseitegelegte Änderungen zurückgeholt"
+fi
+
 rm -rf "$STAGE"
 
 # Aufräumen: git checkout löscht keine untracked Files. Die Deploy-Artefakte
