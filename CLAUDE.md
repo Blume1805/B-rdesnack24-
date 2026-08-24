@@ -125,3 +125,64 @@ Versionskennung `LegalTexts.version` hochziehen.
 `scripts/check_rechtstexte.py` fängt den häufigsten Fall automatisch ab:
 eine neue Abhängigkeit ohne datenschutzrechtliche Einordnung. Das Skript
 ersetzt die Prüfung nicht — es kennt nur Abhängigkeiten, nicht Bedeutung.
+
+## Rechtsprüfung sichtbar machen (Pflicht, ohne Nachfrage)
+
+Die Regel darüber sagt, **dass** nach jeder Änderung geprüft wird. Diese
+hier sagt, **wie das Ergebnis aussieht** — denn eine Prüfung, die nur als
+Halbsatz in einer Commit-Nachricht auftaucht („Rechtstexte geprüft, keine
+Änderung nötig"), ist für den Auftraggeber nicht nachvollziehbar. Er kann
+nicht sehen, was geprüft wurde, und ein übersehener Bereich fällt
+niemandem auf.
+
+Anlass (24.08.2026): Vier Commits an einem Tag — Auth-Mail-Protokoll,
+Antwortadresse, CSV-Absicherung. Jeder trug die Zeile „Rechtstexte
+geprüft". Erst auf Nachfrage, welche Bereiche das umfasst, kam heraus:
+Die Antwortadresse macht ein **Gmail-Postfach zum eingebauten Rückkanal
+jeder Systemnachricht**, und Google steht in der Empfängerliste der
+Datenschutzerklärung nicht. Die Lücke bestand schon vorher, weil die
+Adresse im Impressum steht — aber die Änderung hat sie von „jemand
+könnte" zu „die Software gibt es vor" gemacht. Die pauschale Zeile hatte
+sie verdeckt.
+
+**Nach jeder Änderung sind diese sieben Bereiche einzeln durchzugehen**,
+und das Ergebnis gehört in die Antwort an den User — je Bereich ein
+Befund, nicht eine Sammelaussage:
+
+1. **Datenschutzerklärung** — neue Datenkategorie, neuer Zweck, neue
+   Rechtsgrundlage, neuer **Empfänger**, neue Speicherdauer, Profiling.
+2. **AGB / Nutzungsbedingungen** — Leistung, Preis, Laufzeit, Kündigung,
+   Kommunikationswege.
+3. **Lizenzen** — neue Abhängigkeit, neues SDK, neuer Dienst.
+4. **EU AI Act / Kennzeichnung** — algorithmisch oder KI-erzeugte Inhalte
+   hinzugefügt **oder entfernt**; `public.ki_register` und `AiInfoScreen`.
+5. **DSGVO über die Texte hinaus** — Art. 5 (Datenminimierung), Art. 32
+   (TOM), Art. 30 (Verarbeitungsverzeichnis), Art. 33/34 (Meldepflicht).
+6. **Barrierefreiheitserklärung** — Funktionsliste, Beschäftigtenzahl.
+7. **Impressum** — Anschrift, Rechtsform, Vertretung, Kontakt.
+
+Zwei Regeln zum Ergebnis:
+
+* **„Keine Änderung nötig" braucht eine Begründung.** Nicht „geprüft",
+  sondern „keine neue Abhängigkeit in allen vier Commits, Wächter grün".
+  Ein Satz, der sich nachprüfen lässt.
+* **Eine Lücke, die man nicht durch Text schliessen kann, wird gemeldet
+  statt bebildert.** Google als Empfänger zu benennen, solange kein
+  AV-Vertrag nach Art. 28 existiert, dokumentiert die Lücke — es behebt
+  sie nicht. Solche Fälle gehören dem Auftraggeber vorgelegt, mit den
+  Wegen, die es gibt (hier: Support-Adresse auf die eigene Domain, oder
+  Google Workspace).
+
+Beim Prüfen von Bereich 5 gilt die Nachweisregel aus „Behauptungen vorher
+prüfen": Ob ein Vorfall meldepflichtig ist, entscheidet sich an Zahlen —
+wie viele Zeilen, welche Empfänger, welche Rollen konnten lesen, gab es
+diese Rollen überhaupt. Diese Zahlen werden abgefragt, nicht geschätzt.
+
+### Offen, Stand 24.08.2026
+
+* **Google als Empfänger** (Support-Postfach `boerdesnack24@gmail.com`)
+  fehlt in Abschnitt 4 der Datenschutzerklärung; Abschnitt 5 nennt „zwei"
+  US-Empfänger, mit Google wären es drei; Abschnitt g) sagt nicht, wo
+  Kontaktanfragen landen. Wartet auf die Entscheidung zum AV-Vertrag.
+* **Kein Verarbeitungsverzeichnis nach Art. 30** im Repository. Die
+  Datenschutzerklärung ersetzt es nicht.
