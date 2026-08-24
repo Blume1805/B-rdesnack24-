@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -75,14 +76,30 @@ class FinanceScreen extends ConsumerWidget {
   Future<void> _sync(BuildContext context, WidgetRef ref) async {
     final count = await ref.read(financeActionsProvider.notifier).sync();
     if (!context.mounted) return;
-    final ok = !ref.read(financeActionsProvider).hasError;
+    final zustand = ref.read(financeActionsProvider);
+    final ok = !zustand.hasError;
+    // Den Grund mitzeigen, statt ihn zu verschlucken. Am 24.08.2026 hat
+    // „Synchronisierung fehlgeschlagen." drei Versuche und eine Runde
+    // gekostet — die Function hatte „sevDesk nicht konfiguriert"
+    // geantwortet, sichtbar war das nur im Serverprotokoll.
+    final fehler = zustand.error;
+    final grund = fehler is Failure ? fehler.message : fehler?.toString();
+    // Bewusst als if-Kette statt als verschachtelte Bedingung: Die
+    // Formatierung eines geschachtelten Fragezeichen-Ausdrucks hängt von
+    // der Dart-Version ab, und `dart format --set-exit-if-changed` ist im
+    // Bauablauf blockierend.
+    final String meldung;
+    if (ok) {
+      meldung = 'sevDesk synchronisiert: $count Buchungen.';
+    } else if (grund == null) {
+      meldung = 'Synchronisierung fehlgeschlagen.';
+    } else {
+      meldung = 'Synchronisierung fehlgeschlagen: $grund';
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          ok
-              ? 'sevDesk synchronisiert: $count Buchungen.'
-              : 'Synchronisierung fehlgeschlagen.',
-        ),
+        duration: ok ? const Duration(seconds: 4) : const Duration(seconds: 8),
+        content: Text(meldung),
       ),
     );
   }

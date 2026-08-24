@@ -61,11 +61,41 @@ class FinanceRepositoryImpl implements FinanceRepository {
       return ServerFailure(e.message, cause: e);
     }
     if (e is FunctionException) {
+      final grund = funktionsFehlerText(e.details);
       return ServerFailure(
-        'Edge Function fehlgeschlagen (${e.status})',
+        grund == null
+            ? 'Edge Function fehlgeschlagen (${e.status})'
+            : '$grund (${e.status})',
         cause: e,
       );
     }
     return UnknownFailure('Unerwarteter Fehler: $e', cause: e);
   }
+}
+
+/// Zieht den Klartext aus der Fehlerantwort einer Edge Function.
+///
+/// Alle Functions dieses Projekts antworten im Fehlerfall mit
+/// `{"error": "..."}`. Ohne diese Auswertung landet der Wortlaut nirgends:
+/// Der Aufrufer sah nur „Edge Function fehlgeschlagen (500)", und die
+/// Oberfläche machte daraus „Synchronisierung fehlgeschlagen."
+///
+/// Anlass (24.08.2026): Der sevDesk-Sync scheiterte dreimal hintereinander.
+/// Die Function hatte sauber geantwortet — „sevDesk nicht konfiguriert",
+/// weil `SEVDESK_API_TOKEN` fehlte. Zu sehen war davon nichts; der Grund
+/// liess sich nur im Serverprotokoll finden. Das hat eine ganze Runde
+/// gekostet, und genau solche Runden meint die Regel „Behauptungen vorher
+/// prüfen": Wer den Grund nicht sieht, rät.
+///
+/// `details` kommt je nach Antwort als Map (JSON wurde geparst) oder als
+/// Zeichenkette (Rohtext). Beides wird behandelt; ist nichts Brauchbares
+/// dabei, liefert die Funktion `null` und der Aufrufer bleibt bei seiner
+/// allgemeinen Meldung.
+String? funktionsFehlerText(Object? details) {
+  if (details is Map) {
+    final wert = details['error'];
+    if (wert is String && wert.trim().isNotEmpty) return wert.trim();
+  }
+  if (details is String && details.trim().isNotEmpty) return details.trim();
+  return null;
 }
