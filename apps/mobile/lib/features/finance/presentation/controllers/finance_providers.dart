@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../data/datasources/finance_remote_data_source.dart';
 import '../../data/repositories/finance_repository_impl.dart';
+import '../../domain/entities/finance_booking.dart';
 import '../../domain/entities/finance_kpis.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
@@ -28,6 +29,13 @@ final financeSummaryProvider =
     FutureProvider.autoDispose<FinanceSummary>((ref) {
   final period = ref.watch(selectedPeriodProvider);
   return ref.watch(financeRepositoryProvider).getSummary(period);
+});
+
+/// Einzelbuchungen für den gewählten Zeitraum (serverseitig begrenzt).
+final financeBookingsProvider =
+    FutureProvider.autoDispose<FinanceBookingPage>((ref) {
+  final period = ref.watch(selectedPeriodProvider);
+  return ref.watch(financeRepositoryProvider).getBookings(period);
 });
 
 /// Volles KPI-Paket (Trend, Vorjahr/Vormonat, Automaten, Produkte).
@@ -63,6 +71,8 @@ class FinanceActionsController extends StateNotifier<AsyncValue<void>> {
     });
     if (!state.hasError) {
       _ref.invalidate(financeSummaryProvider);
+      _ref.invalidate(financeKpisProvider);
+      _ref.invalidate(financeBookingsProvider);
     }
     return count;
   }

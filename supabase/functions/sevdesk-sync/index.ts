@@ -1,8 +1,8 @@
 // ============================================================================
 // Edge Function: sevdesk-sync
 // ----------------------------------------------------------------------------
-// Holt Belege/Buchungen aus sevDesk für einen Zeitraum, mappt sie auf
-// SKR-03-Konten und schreibt normalisierte Zeilen nach public.finance_bookings.
+// Holt Belege/Buchungen aus sevDesk, mappt sie auf SKR-03-Konten und schreibt
+// normalisierte Zeilen nach public.finance_bookings.
 //
 // Sicherheit:
 //  - Aufrufer muss 'finance.view' besitzen (nur Gesellschafter/Admin).
@@ -10,39 +10,65 @@
 //  - Schreiben via Service-Role (RLS lässt keine Client-Schreibzugriffe zu).
 //
 // ⚠️ Verifikationspflicht (UWG/GoBD, vgl. Projekt-README): Die Feld- und
-//    Kontozuordnung unten MUSS einmalig gegen das echte sevDesk-Konto geprüft
-//    werden, bevor die Zahlen produktiv/öffentlich genutzt werden.
+//    Kontozuordnung MUSS einmalig gegen das echte sevDesk-Konto geprüft
+//    werden, bevor die Zahlen produktiv/öffentlich genutzt werden. Die
+//    Strukturprobe in `sevdesk_sync_runs.diagnostics` ist die Grundlage
+//    dafür — sie ersetzt die Prüfung nicht.
+//
+// ----------------------------------------------------------------------------
+// ZEITRAUM: warum clientseitig gefiltert wird (24.08.2026)
+//
+// Vorher hing der Filter an `?startDate=&endDate=` mit ISO-Datum. Fünf Läufe
+// über vier verschiedene Zeiträume meldeten „success / 0 Belege", ohne Fehler
+// und ohne HTTP-Auffälligkeit — sevDesk antwortete mit 200 und einer leeren
+// Liste. Ob das Format der beiden Parameter stimmt, lässt sich von hier aus
+// nicht nachprüfen: api.sevdesk.de ist aus der Arbeitsumgebung nicht
+// erreichbar, die Dokumentation ebenso wenig.
+//
+// Statt zu raten wird der Filter weggelassen und `voucherDate` hier verglichen.
+// Das ist unter jeder Annahme über die Parameter korrekt, und `fetched_count`
+// im Protokoll trennt endlich die beiden Fälle: „sevDesk hat nichts" von
+// „sevDesk hat etwas, der Zeitraum passte nur nicht".
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
-import { mapToAccount, parseVoucher } from "./mapping.ts";
+import { fallbackKonto, findeKontoCode, parseVoucher, belegProbe } from "./mapping.ts";
 
+const SEITE = 100;
+const MAX_SEITEN = 50; // 5.000 Belege — für einen Betrieb dieser Größe reichlich.
+
+/** Holt alle Belege. `embed` wird versucht und bei Ablehnung fallengelassen. */
 async function fetchVouchers(
   baseUrl: string,
   token: string,
-  from: string,
-  to: string,
-): Promise<Record<string, unknown>[]> {
-  const out: Record<string, unknown>[] = [];
-  const limit = 100;
+): Promise<{ belege: Record<string, unknown>[]; embedGenutzt: boolean }> {
+  const embed = "embed=voucherPos,voucherPos.accountingType,accountingType";
+  let embedGenutzt = true;
+  const belege: Record<string, unknown>[] = [];
   let offset = 0;
-  // sevDesk-Filter: startDate/endDate als ISO-Datum. Paginierung via limit/offset.
-  for (let page = 0; page < 100; page++) {
-    const url = `${baseUrl}/Voucher?startDate=${from}&endDate=${to}` +
-      `&limit=${limit}&offset=${offset}`;
-    const res = await fetch(url, {
+
+  for (let seite = 0; seite < MAX_SEITEN; seite++) {
+    const basis = `${baseUrl}/Voucher?limit=${SEITE}&offset=${offset}`;
+    let res = await fetch(embedGenutzt ? `${basis}&${embed}` : basis, {
       headers: { Authorization: token, Accept: "application/json" },
     });
+    // Ein abgelehntes `embed` darf den Sync nicht kosten — dann eben ohne.
+    if (!res.ok && embedGenutzt) {
+      embedGenutzt = false;
+      res = await fetch(basis, {
+        headers: { Authorization: token, Accept: "application/json" },
+      });
+    }
     if (!res.ok) {
       throw new Error(`sevDesk HTTP ${res.status}: ${await res.text()}`);
     }
     const body = await res.json();
     const objects: Record<string, unknown>[] = body.objects ?? [];
-    out.push(...objects);
-    if (objects.length < limit) break;
-    offset += limit;
+    belege.push(...objects);
+    if (objects.length < SEITE) break;
+    offset += SEITE;
   }
-  return out;
+  return { belege, embedGenutzt };
 }
 
 Deno.serve(async (req) => {
@@ -98,13 +124,35 @@ Deno.serve(async (req) => {
   const runId = run?.id as string | undefined;
 
   try {
-    const vouchers = await fetchVouchers(sevBase, sevToken, from, to);
-    const rows = vouchers
-      .map(parseVoucher)
-      .filter((r): r is NonNullable<typeof r> => r !== null)
-      .map((r) => ({
+    // 4) Kontenstamm laden — er ist zugleich der Prüfer für Kontonummern
+    //    aus sevDesk (siehe findeKontoCode).
+    const { data: konten, error: kontenErr } = await admin
+      .from("finance_accounts")
+      .select("code");
+    if (kontenErr) throw kontenErr;
+    const bekannt = new Set<string>((konten ?? []).map((k) => String(k.code)));
+
+    const { belege, embedGenutzt } = await fetchVouchers(sevBase, sevToken);
+
+    let ohneDatum = 0;
+    let ausserhalb = 0;
+    let ausSevdesk = 0;
+    const rows: Record<string, unknown>[] = [];
+    for (const beleg of belege) {
+      const r = parseVoucher(beleg);
+      if (r === null) {
+        ohneDatum++;
+        continue;
+      }
+      if (r.booking_date < from || r.booking_date > to) {
+        ausserhalb++;
+        continue;
+      }
+      const sevKonto = findeKontoCode(beleg, bekannt);
+      if (sevKonto) ausSevdesk++;
+      rows.push({
         booking_date: r.booking_date,
-        account_code: mapToAccount(r.direction, r.tax_rate),
+        account_code: sevKonto ?? fallbackKonto(r.direction, r.tax_rate),
         description: r.description,
         amount_net: r.amount_net,
         amount_tax: r.amount_tax,
@@ -112,9 +160,11 @@ Deno.serve(async (req) => {
         direction: r.direction,
         source: "sevdesk",
         source_ref: r.source_ref,
+        source_account_code: sevKonto,
         sync_run_id: runId,
         created_by: userData.user.id,
-      }));
+      });
+    }
 
     let upserted = 0;
     if (rows.length > 0) {
@@ -125,13 +175,34 @@ Deno.serve(async (req) => {
       upserted = count ?? rows.length;
     }
 
+    const diagnostics = {
+      embed_genutzt: embedGenutzt,
+      belege_gesamt: belege.length,
+      ohne_verwertbares_datum: ohneDatum,
+      ausserhalb_zeitraum: ausserhalb,
+      im_zeitraum: rows.length,
+      konto_aus_sevdesk: ausSevdesk,
+      konto_aus_sammelkonto: rows.length - ausSevdesk,
+      kontenstamm_groesse: bekannt.size,
+      // Nur der erste Beleg, und davon nur Feldnamen + Buchungswerte.
+      strukturprobe: belege.length > 0 ? belegProbe(belege[0]) : null,
+    };
+
     await admin.from("sevdesk_sync_runs").update({
       status: "success",
       inserted_count: upserted,
+      fetched_count: belege.length,
+      diagnostics,
       finished_at: new Date().toISOString(),
     }).eq("id", runId);
 
-    return jsonResponse({ ok: true, processed: rows.length, upserted });
+    return jsonResponse({
+      ok: true,
+      fetched: belege.length,
+      processed: rows.length,
+      upserted,
+      diagnostics,
+    });
   } catch (e) {
     await admin.from("sevdesk_sync_runs").update({
       status: "error",

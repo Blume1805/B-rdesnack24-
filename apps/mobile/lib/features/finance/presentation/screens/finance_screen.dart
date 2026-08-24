@@ -16,6 +16,7 @@ import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
 import '../widgets/kpi_dashboard.dart';
 import 'datev_export_screen.dart';
+import 'finance_bookings_screen.dart';
 
 /// Kategorie 1 — Finanzdashboard (nur Gesellschafter/Admin).
 class FinanceScreen extends ConsumerWidget {
@@ -50,6 +51,11 @@ class FinanceScreen extends ConsumerWidget {
                 MaterialPageRoute(builder: (_) => const DatevExportScreen()),
               ),
               onApprovals: () => context.push(AppRoutes.approvals),
+              onBookings: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const FinanceBookingsScreen(),
+                ),
+              ),
               onRequestApproval: () => _requestApproval(context, ref, period),
             ),
           ),
@@ -179,6 +185,7 @@ class _ActionCluster extends StatelessWidget {
     required this.onExport,
     required this.onDatev,
     required this.onApprovals,
+    required this.onBookings,
     required this.onRequestApproval,
   });
 
@@ -187,6 +194,7 @@ class _ActionCluster extends StatelessWidget {
   final VoidCallback onExport;
   final VoidCallback onDatev;
   final VoidCallback onApprovals;
+  final VoidCallback onBookings;
   final VoidCallback onRequestApproval;
 
   @override
@@ -206,6 +214,12 @@ class _ActionCluster extends StatelessWidget {
           icon: Icons.verified_user_outlined,
           tooltip: 'Gesellschafter-Freigaben',
           onTap: onApprovals,
+        ),
+        const SizedBox(width: 6),
+        _IconAction(
+          icon: Icons.format_list_bulleted,
+          tooltip: 'Einzelbuchungen ansehen',
+          onTap: onBookings,
         ),
         const SizedBox(width: 6),
         _IconAction(
@@ -501,6 +515,12 @@ class _SummaryContent extends StatelessWidget {
                   name: a.name,
                   isRevenue: a.isRevenue,
                   amount: a.net,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          FinanceBookingsScreen(accountCode: a.code),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.s2),
               ],
@@ -517,16 +537,18 @@ class _AccountRow extends StatelessWidget {
     required this.name,
     required this.isRevenue,
     required this.amount,
+    this.onTap,
   });
 
   final String code;
   final String name;
   final bool isRevenue;
   final double amount;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
+    final karte = AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s4,
         vertical: AppSpacing.s3,
@@ -584,7 +606,26 @@ class _AccountRow extends StatelessWidget {
               color: isRevenue ? AppColors.statusPositive : AppColors.ink,
             ),
           ),
+          if (onTap != null) ...[
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.textMuted,
+            ),
+          ],
         ],
+      ),
+    );
+    if (onTap == null) return karte;
+    // Die Summe je Konto ist der Einstieg in die Belege dahinter.
+    return Semantics(
+      button: true,
+      label: 'Einzelbuchungen zu Konto $code anzeigen',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        child: karte,
       ),
     );
   }

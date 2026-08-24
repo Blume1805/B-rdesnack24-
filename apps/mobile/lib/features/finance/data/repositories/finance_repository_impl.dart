@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/finance_booking.dart';
 import '../../domain/entities/finance_kpis.dart';
 import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
@@ -30,6 +31,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
     try {
       final json = await _remote.fetchKpis(period);
       return FinanceKpis.fromJson(json);
+    } catch (e) {
+      throw _map(e);
+    }
+  }
+
+  @override
+  Future<FinanceBookingPage> getBookings(FinancePeriod period) async {
+    try {
+      final json = await _remote.fetchBookings(period);
+      return FinanceBookingPage.fromJson(json);
     } catch (e) {
       throw _map(e);
     }

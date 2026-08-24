@@ -101,6 +101,26 @@ class FinanceRemoteDataSource {
     };
   }
 
+  /// Einzelbuchungen des Zeitraums (serverseitig RBAC-geprüft, seitenweise).
+  Future<Map<String, dynamic>> fetchBookings(
+    FinancePeriod period, {
+    int limit = 500,
+    int offset = 0,
+  }) async {
+    final result = await _client.rpc(
+      'finance_bookings_list',
+      params: {
+        'p_from': period.fromIso,
+        'p_to': period.toIso,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
+    if (result is Map) return Map<String, dynamic>.from(result);
+    // Gleiche Vorsicht wie bei fetchSummary: lieber leer als abgestürzt.
+    return const {'total': 0, 'rows': <Map<String, dynamic>>[]};
+  }
+
   Future<int> syncSevdesk(FinancePeriod period) async {
     final res = await _client.functions.invoke(
       'sevdesk-sync',
