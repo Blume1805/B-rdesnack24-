@@ -206,10 +206,12 @@ export async function sendMail(opts: {
         // von Resend erwartet `reply_to`. Die Kamelschrift `replyTo`
         // gehört dem MCP-Werkzeug, nicht der HTTP-Schnittstelle — dort
         // heissen auch `idempotency_key`, `scheduled_at` und `topic_id`
-        // so. Nachgeprüft werden konnte das hier nicht: resend.com ist
-        // aus der Arbeitsumgebung gesperrt. Falls es doch falsch ist,
-        // antwortet Resend mit 422, und der Wortlaut steht als `failed`
-        // samt Fehlertext in `email_log` — sichtbar beim ersten Versand.
+        // so. Die Dokumentation liess sich nicht abrufen (resend.com ist
+        // aus der Arbeitsumgebung gesperrt), dafür steht der Beleg am
+        // Ergebnis: Die Zurücksetzung vom 24.08.2026, 13:16 Uhr, trägt
+        // bei Resend `Reply-To: boerdesnack24@gmail.com` in der
+        // zugestellten Mail. Der Name stimmt also, nachgemessen statt
+        // geschlossen.
         reply_to: opts.replyTo ?? mailConfig.supportEmail,
         subject: opts.subject,
         html: opts.html,
