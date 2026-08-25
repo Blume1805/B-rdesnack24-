@@ -160,6 +160,10 @@ Befund, nicht eine Sammelaussage:
    (TOM), Art. 30 (Verarbeitungsverzeichnis), Art. 33/34 (Meldepflicht).
 6. **Barrierefreiheitserklärung** — Funktionsliste, Beschäftigtenzahl.
 7. **Impressum** — Anschrift, Rechtsform, Vertretung, Kontakt.
+8. **Verarbeitungsverzeichnis** (`docs/VERARBEITUNGSVERZEICHNIS.md`) — neue
+   Tabelle oder Spalte mit Personenbezug, neuer Empfänger, neue automatische
+   E-Mail, neue Auswahllogik, geänderte Löschfrist, **entfernte Funktion**.
+   Wird es geändert, die Fassungsnummer im Kopf hochziehen.
 
 Zwei Regeln zum Ergebnis:
 
@@ -189,5 +193,15 @@ diese Rollen überhaupt. Diese Zahlen werden abgefragt, nicht geschätzt.
   `docs/POSTEINGANG_AKTIVIEREN.md`. Bis das Postfach Post annimmt, bleibt
   `boerdesnack24@gmail.com` in Betrieb und die Lücke offen —
   `mailConfig.supportEmail` wird **zuletzt** umgestellt, nicht zuerst.
-* **Kein Verarbeitungsverzeichnis nach Art. 30** im Repository. Die
-  Datenschutzerklärung ersetzt es nicht.
+* ~~Kein Verarbeitungsverzeichnis nach Art. 30 im Repository.~~
+  **Erledigt am 25.08.2026:** `docs/VERARBEITUNGSVERZEICHNIS.md`, Fassung 1.
+  Jede Angabe am laufenden System abgefragt, nicht aus einer Vorlage. Es ist
+  jetzt Bereich 8 der Prüfliste oben.
+
+  Aus dem Verzeichnis sind dabei **fünf weitere offene Punkte** entstanden,
+  die es vorher nicht sichtbar gab. Sie stehen dort in Abschnitt 5, hier nur
+  als Verweis: keine Löschfrist für `audit_log` und `email_log` (Art. 5
+  Abs. 1 lit. e); `nayax_sales.raw` speichert die vollständige Webhook-Nutzlast
+  und ist **vor dem ersten echten Verkauf** darauf zu prüfen, ob Nayax
+  Personenbezogenes mitsendet; kein Wiederherstellungstest der Sicherungen;
+  die sevDesk-Verifikationspflicht; keine anwaltliche Freigabe.
