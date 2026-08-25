@@ -432,6 +432,13 @@ Deno.serve(async (req) => {
     //     zwei Belege — die Anmeldung und die Zahlung. In der Auswertung
     //     stand derselbe Eingang dadurch zweimal. Die Regel und ihre engen
     //     Grenzen stehen in mapping.ts.
+    //
+    //     Grenze des Verfahrens: Geprüft wird nur, was in DIESEM Lauf
+    //     zusammenkommt, also innerhalb des gewählten Zeitraums. Fällt die
+    //     Anmeldung vor und die Zahlung hinter die Zeitraumgrenze, bleiben
+    //     beide stehen. Bei den bisherigen Paaren liegen 4 bis 6 Tage
+    //     dazwischen; wer eng schneidet, sollte den Zeitraum um zwei Wochen
+    //     überlappen lassen.
     const doppel = doppelteZahlungenFinden(
       rows.map((r) => ({
         booking_date: String(r.booking_date),
