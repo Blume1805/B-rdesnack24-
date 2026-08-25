@@ -247,7 +247,9 @@ Deno.serve(async (req) => {
       .from("finance_accounts")
       .select("code");
     if (kontenErr) throw kontenErr;
-    const bekannt = new Set<string>((konten ?? []).map((k) => String(k.code)));
+    const bekannt = new Set<string>(
+      (konten ?? []).map((k: { code: string }) => String(k.code)),
+    );
 
     const belege = await holeAlle(`${sevBase}/Voucher`, sevToken, "Voucher");
     const { nachBeleg, fehler: positionsFehler } = await holePositionen(
@@ -401,7 +403,11 @@ Deno.serve(async (req) => {
 
         rows.push({
           booking_date: r.booking_date,
-          account_code: sevKonto ?? fallbackKonto(direction, satz),
+          // `direction` kann „liability" sein (Privatkonto). Das Sammelkonto
+          // kennt aber nur Aufwand und Erlös — und es greift ohnehin nur,
+          // wenn gar kein Konto aufgelöst wurde; dann ist `direction`
+          // identisch mit `r.direction`.
+          account_code: sevKonto ?? fallbackKonto(r.direction, satz),
           description: r.description,
           amount_net: netto,
           amount_tax: steuer,
