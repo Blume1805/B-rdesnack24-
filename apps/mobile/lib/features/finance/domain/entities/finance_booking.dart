@@ -44,6 +44,30 @@ class FinanceBooking extends Equatable {
   bool get isRevenue => direction == 'revenue';
   bool get isExpense => direction == 'expense';
 
+  /// Weder Erlös noch Aufwand — Bestands- und Kapitalkonten.
+  ///
+  /// Wichtigster Fall: die Privatkonten 1800–1999 des SKR 03
+  /// (Privatentnahmen, Privateinlagen). Sie berühren das Kapitalkonto, nicht
+  /// das Ergebnis. Bis zum 25.08.2026 zeigte die App alles, was kein Erlös
+  /// war, als „Aufwand" — zwei Privateinlagen über 347,00 € standen deshalb
+  /// als Kosten in der Auswertung.
+  bool get isNeutral => !isRevenue && !isExpense;
+
+  String get directionLabel {
+    switch (direction) {
+      case 'revenue':
+        return 'Erlös';
+      case 'expense':
+        return 'Aufwand';
+      case 'liability':
+        return 'Privat/Kapital';
+      case 'asset':
+        return 'Bestand';
+      default:
+        return direction;
+    }
+  }
+
   /// True, wenn das Konto geraten (Sammelkonto) statt übernommen wurde.
   bool get kontoGeschaetzt => source == 'sevdesk' && sourceAccountCode == null;
 

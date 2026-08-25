@@ -514,6 +514,7 @@ class _SummaryContent extends StatelessWidget {
                   code: a.code,
                   name: a.name,
                   isRevenue: a.isRevenue,
+                  label: a.directionLabel,
                   amount: a.net,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -536,6 +537,7 @@ class _AccountRow extends StatelessWidget {
     required this.code,
     required this.name,
     required this.isRevenue,
+    required this.label,
     required this.amount,
     this.onTap,
   });
@@ -543,6 +545,11 @@ class _AccountRow extends StatelessWidget {
   final String code;
   final String name;
   final bool isRevenue;
+
+  /// „Erlös", „Aufwand", „Privat/Kapital" oder „Bestand". Vorher stand hier
+  /// fest „Aufwand", sobald es kein Erlös war — Privateinlagen sahen damit
+  /// aus wie Kosten.
+  final String label;
   final double amount;
   final VoidCallback? onTap;
 
@@ -591,7 +598,7 @@ class _AccountRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  isRevenue ? 'Erlös' : 'Aufwand',
+                  label,
                   style:
                       AppTypography.body(size: 12, color: AppColors.textMuted),
                 ),

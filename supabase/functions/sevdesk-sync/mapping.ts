@@ -1,6 +1,9 @@
 // Reine, testbare Hilfsfunktionen des sevDesk-Connectors (ohne Seiteneffekte).
 export type Direction = "revenue" | "expense";
 
+/** Was in `finance_bookings.direction` stehen darf. */
+export type Buchungsrichtung = Direction | "asset" | "liability";
+
 const VIERSTELLIG = /^[1-9]\d{3}$/;
 
 // ============================================================================
@@ -132,15 +135,41 @@ export function datevIdAusPosition(
 }
 
 /**
- * Richtung aus der Kontonummer, wo sie eindeutig ist.
+ * Privat- und Kapitalkonten des SKR 03: 1800–1999.
  *
- * Im SKR 03 ist die erste Ziffer aussagekräftig: 3 = Wareneingang,
- * 4 = betriebliche Aufwendungen, 8 = Erlöse. Steht ein solches Konto am
- * Beleg, ist es die bessere Quelle als ein Kennbuchstabe — es kommt aus der
- * Buchhaltung selbst. Alles andere (0–2, 5–7, 9) bleibt offen; dort
- * entscheidet weiter `creditDebit`.
+ * 1800 „Privatentnahmen allgemein" und 1890 „Privateinlagen" sind der
+ * Kapitalanteil der Entnahmen und Einlagen — Geld, das der Gesellschafter
+ * dem Betrieb entnimmt oder zuführt. Das ist WEDER Aufwand NOCH Erlös:
+ * Es berührt das Kapitalkonto, nicht das Ergebnis.
+ *
+ * Anlass (25.08.2026): Zwei Belege des Auftraggebers auf 1890 landeten über
+ * das Sammelkonto auf „3300 Wareneingang" und damit im Aufwand — 347,00 €,
+ * die das Ergebnis verfälscht haben. Der Auftraggeber hat es gemeldet.
+ *
+ * Der ganze Bereich zählt dazu, nicht nur die beiden genannten Konten:
+ * 1800–1899 für Vollhafter, 1900–1999 für Teilhafter (SKR 03, Kontenklasse
+ * „Privat"). Wer nur 1800 und 1890 prüft, lässt Privatsteuern (1810),
+ * Sonderausgaben (1820 ff.), Spenden (1840) und unentgeltliche Wertabgaben
+ * (1880) durchrutschen.
  */
-export function richtungAusKonto(code: string | null): Direction | null {
+export function istPrivatkonto(code: string | null): boolean {
+  if (!code || !VIERSTELLIG.test(code)) return false;
+  const n = Number(code);
+  return n >= 1800 && n <= 1999;
+}
+
+/**
+ * Die endgültige Richtung einer Buchung.
+ *
+ * Vorrang hat das Konto, denn es kommt aus der Buchhaltung selbst; der
+ * Kennbuchstabe `creditDebit` ist nur der Rückfall. Im SKR 03 ist die erste
+ * Ziffer aussagekräftig: 3 = Wareneingang, 4 = betriebliche Aufwendungen,
+ * 8 = Erlöse. 1800–1999 ist Privat und damit weder noch. Alles andere
+ * (0, 2, 5–7, 9 und der Rest von 1) bleibt offen — dort entscheidet
+ * `creditDebit`.
+ */
+export function richtungAusKonto(code: string | null): Buchungsrichtung | null {
+  if (istPrivatkonto(code)) return "liability";
   if (!code || !VIERSTELLIG.test(code)) return null;
   if (code.startsWith("3") || code.startsWith("4")) return "expense";
   if (code.startsWith("8")) return "revenue";

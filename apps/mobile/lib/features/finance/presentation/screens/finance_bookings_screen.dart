@@ -26,7 +26,7 @@ class FinanceBookingsScreen extends ConsumerStatefulWidget {
       _FinanceBookingsScreenState();
 }
 
-enum _Filter { alle, aufwand, erloes }
+enum _Filter { alle, aufwand, erloes, privat }
 
 class _FinanceBookingsScreenState extends ConsumerState<FinanceBookingsScreen> {
   _Filter _filter = _Filter.alle;
@@ -96,6 +96,8 @@ class _FinanceBookingsScreenState extends ConsumerState<FinanceBookingsScreen> {
           return b.isExpense;
         case _Filter.erloes:
           return b.isRevenue;
+        case _Filter.privat:
+          return b.isNeutral;
       }
     }).toList();
   }
@@ -134,6 +136,11 @@ class _FilterLeiste extends StatelessWidget {
           label: 'Erlöse',
           aktiv: filter == _Filter.erloes,
           onTap: () => onFilter(_Filter.erloes),
+        ),
+        _Chip(
+          label: 'Privat',
+          aktiv: filter == _Filter.privat,
+          onTap: () => onFilter(_Filter.privat),
         ),
         if (konto != null)
           _Chip(
@@ -228,6 +235,9 @@ class _Liste extends StatelessWidget {
     final summeErloes = gefiltert
         .where((b) => b.isRevenue)
         .fold<double>(0, (s, b) => s + b.net);
+    final summePrivat = gefiltert
+        .where((b) => b.isNeutral)
+        .fold<double>(0, (s, b) => s + b.net);
     final geschaetzt = gefiltert.where((b) => b.kontoGeschaetzt).length;
 
     return Column(
@@ -241,7 +251,11 @@ class _Liste extends StatelessWidget {
               Text(
                 '${gefiltert.length} Buchungen · Erlöse '
                 '${Formatters.euro(summeErloes)} · Aufwand '
-                '${Formatters.euro(summeAufwand)}',
+                '${Formatters.euro(summeAufwand)}'
+                // Privatentnahmen und -einlagen gehören in keine der beiden
+                // Summen. Sie zu verschweigen wäre aber genauso falsch wie
+                // sie mitzurechnen.
+                '${summePrivat == 0 ? '' : ' · Privat ${Formatters.euro(summePrivat)}'}',
                 style: AppTypography.body(
                   size: 14,
                   weight: FontWeight.w700,
@@ -332,7 +346,8 @@ class _BuchungsZeile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${Formatters.date(b.date)} · ${b.accountCode} ${b.accountName}',
+            '${Formatters.date(b.date)} · ${b.accountCode} ${b.accountName} '
+            '· ${b.directionLabel}',
             style: AppTypography.body(size: 12, color: AppColors.textMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

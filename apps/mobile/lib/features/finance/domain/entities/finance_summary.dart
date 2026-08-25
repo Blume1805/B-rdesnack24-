@@ -21,6 +21,25 @@ class AccountAmount extends Equatable {
   bool get isRevenue => direction == 'revenue';
   bool get isExpense => direction == 'expense';
 
+  /// Weder Erlös noch Aufwand — Bestands- und Kapitalkonten, allen voran die
+  /// Privatkonten 1800–1999 des SKR 03.
+  bool get isNeutral => !isRevenue && !isExpense;
+
+  String get directionLabel {
+    switch (direction) {
+      case 'revenue':
+        return 'Erlös';
+      case 'expense':
+        return 'Aufwand';
+      case 'liability':
+        return 'Privat/Kapital';
+      case 'asset':
+        return 'Bestand';
+      default:
+        return direction;
+    }
+  }
+
   factory AccountAmount.fromJson(Map<String, dynamic> j) => AccountAmount(
         // Defensiv: die RPC kann in seltenen Fällen null oder unerwartete
         // Typen liefern. Aussteigen mit „minified:qY" hätte in Release

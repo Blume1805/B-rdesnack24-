@@ -5,6 +5,7 @@ import {
   bezeichnung,
   datevIdAusPosition,
   fallbackKonto,
+  istPrivatkonto,
   kontonameAusDatev,
   kontonummerAusDatev,
   parseVoucher,
@@ -36,6 +37,30 @@ Deno.test("richtungAusKonto: nur 3, 4 und 8 sind eindeutig", () => {
   assertEquals(richtungAusKonto("9000"), null);
   assertEquals(richtungAusKonto(null), null);
   assertEquals(richtungAusKonto("33"), null);
+});
+
+Deno.test("Privatkonten sind weder Aufwand noch Erloes", () => {
+  // 1800 Privatentnahmen, 1890 Privateinlagen: Kapitalkonten. Am 25.08.2026
+  // standen zwei solche Belege ueber das Sammelkonto auf 3300 Wareneingang
+  // und damit im Aufwand — 347,00 EUR zu viel.
+  assertEquals(richtungAusKonto("1800"), "liability");
+  assertEquals(richtungAusKonto("1890"), "liability");
+  // Der ganze Bereich, nicht nur die beiden bekannten Konten.
+  assertEquals(richtungAusKonto("1810"), "liability"); // Privatsteuern
+  assertEquals(richtungAusKonto("1840"), "liability"); // Zuwendungen, Spenden
+  assertEquals(richtungAusKonto("1880"), "liability"); // Unentgeltl. Wertabgaben
+  assertEquals(richtungAusKonto("1990"), "liability"); // Teilhafter
+});
+
+Deno.test("istPrivatkonto: 1800 bis 1999, und keins daneben", () => {
+  assertEquals(istPrivatkonto("1800"), true);
+  assertEquals(istPrivatkonto("1999"), true);
+  // Die Nachbarn duerfen NICHT mitgefangen werden: 1776 ist Umsatzsteuer,
+  // 2000 ist neutraler Aufwand.
+  assertEquals(istPrivatkonto("1799"), false);
+  assertEquals(istPrivatkonto("2000"), false);
+  assertEquals(istPrivatkonto("1200"), false);
+  assertEquals(istPrivatkonto(null), false);
 });
 
 // ---------------------------------------------------------------------------

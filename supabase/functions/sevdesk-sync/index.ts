@@ -71,11 +71,12 @@ async function holeAlle(
   url: string,
   token: string,
   was: string,
+  seitengroesse = SEITE,
 ): Promise<Record<string, unknown>[]> {
   const raus: Record<string, unknown>[] = [];
   let offset = 0;
   for (let seite = 0; seite < MAX_SEITEN; seite++) {
-    const res = await fetch(`${url}?limit=${SEITE}&offset=${offset}`, {
+    const res = await fetch(`${url}?limit=${seitengroesse}&offset=${offset}`, {
       headers: { Authorization: token, Accept: "application/json" },
     });
     if (!res.ok) {
@@ -84,10 +85,28 @@ async function holeAlle(
     const body = await res.json();
     const objects: Record<string, unknown>[] = body.objects ?? [];
     raus.push(...objects);
-    if (objects.length < SEITE) break;
-    offset += SEITE;
+    if (objects.length < seitengroesse) break;
+    offset += seitengroesse;
   }
   return raus;
+}
+
+/** Holt ein einzelnes Objekt. Gibt `null` zurück, statt zu werfen. */
+async function holeEinzeln(
+  url: string,
+  token: string,
+): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: token, Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    const objects: Record<string, unknown>[] = body.objects ?? [];
+    return objects[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -138,7 +157,16 @@ async function holeKontenplan(
     { nummer: string; name: string | null; skr03: boolean }
   >();
   try {
-    const objekte = await holeAlle(`${baseUrl}/AccountDatev`, token, "AccountDatev");
+    // Seitengröße 1000 statt 100: Der Lauf vom 25.08.2026 bekam exakt 100
+    // Einträge zurück, und fünf Kontokennungen aus den Belegpositionen waren
+    // nicht darunter — der Kontenplan kam abgeschnitten an. Zehn Buchungen
+    // landeten dadurch auf dem Sammelkonto.
+    const objekte = await holeAlle(
+      `${baseUrl}/AccountDatev`,
+      token,
+      "AccountDatev",
+      1000,
+    );
     for (const o of objekte) {
       const id = o.id;
       const treffer = kontonummerAusDatev(o);
@@ -229,6 +257,36 @@ Deno.serve(async (req) => {
     const { konten: datev, fehler: kontenplanFehler, probe: kontenProbe } =
       await holeKontenplan(sevBase, sevToken);
 
+    // Welche Konten brauchen wir überhaupt? Erst fragen, dann nachladen —
+    // sonst bleibt es beim Sammelkonto, ohne dass jemand erfährt warum.
+    const gebraucht = new Set<string>();
+    for (const liste of nachBeleg.values()) {
+      for (const pos of liste) {
+        const a = datevIdAusPosition(pos, false);
+        const b = datevIdAusPosition(pos, true);
+        if (a) gebraucht.add(a);
+        if (b) gebraucht.add(b);
+      }
+    }
+    const nachgeladen: string[] = [];
+    const nichtGefunden: string[] = [];
+    for (const id of gebraucht) {
+      if (datev.has(id)) continue;
+      if (nachgeladen.length + nichtGefunden.length >= 100) break;
+      const o = await holeEinzeln(`${sevBase}/AccountDatev/${id}`, sevToken);
+      const treffer = o ? kontonummerAusDatev(o) : null;
+      if (o && treffer) {
+        datev.set(id, {
+          nummer: treffer.nummer,
+          name: kontonameAusDatev(o, treffer.skr03),
+          skr03: treffer.skr03,
+        });
+        nachgeladen.push(id);
+      } else {
+        nichtGefunden.push(id);
+      }
+    }
+
     let ohneDatum = 0;
     let ausserhalb = 0;
     let ausSevdesk = 0;
@@ -237,6 +295,8 @@ Deno.serve(async (req) => {
     let richtungAusKontoZahl = 0;
     let ohnePositionen = 0;
     let ausSkr04 = 0;
+    let privatBuchungen = 0;
+    let vorlagen = 0;
     const unaufloesbar = new Set<string>();
     const belegarten = new Map<string, number>();
     // Konten, die angelegt oder deren Name an sevDesk angeglichen wird.
@@ -261,6 +321,14 @@ Deno.serve(async (req) => {
       // steht es im Protokoll statt still in der Auswertung.
       const art = String(beleg.voucherType ?? "?");
       belegarten.set(art, (belegarten.get(art) ?? 0) + 1);
+
+      // „RV" ist ein wiederkehrender Beleg — eine VORLAGE, aus der sevDesk
+      // die echten Belege erzeugt. Sie mitzubuchen zählt denselben Vorgang
+      // ein zweites Mal. Der Lauf vom 25.08.2026 hatte genau einen davon.
+      if (art === "RV") {
+        vorlagen++;
+        continue;
+      }
 
       const positionen = nachBeleg.get(r.source_ref) ?? [];
       if (positionsProbe === null && positionen.length > 0) {
@@ -328,6 +396,7 @@ Deno.serve(async (req) => {
 
         const ausKonto = richtungAusKonto(sevKonto);
         if (ausKonto !== null && ausKonto !== r.direction) richtungAusKontoZahl++;
+        if (ausKonto === "liability") privatBuchungen++;
         const direction = ausKonto ?? r.direction;
 
         rows.push({
@@ -391,7 +460,12 @@ Deno.serve(async (req) => {
       konto_aus_sammelkonto: ausSammelkonto,
       konto_aus_vorschlag: ausVorschlag,
       konto_aus_skr04: ausSkr04,
+      privatbuchungen: privatBuchungen,
+      uebersprungene_vorlagen: vorlagen,
+      konten_nachgeladen: nachgeladen.length,
+      konten_nicht_gefunden: nichtGefunden,
       kontenplan_unaufloesbare_ids: [...unaufloesbar],
+      kontenplan_gebrauchte_ids: gebraucht.size,
       belegarten: Object.fromEntries(belegarten),
       belege_ohne_positionen: ohnePositionen,
       richtung_vom_konto_korrigiert: richtungAusKontoZahl,

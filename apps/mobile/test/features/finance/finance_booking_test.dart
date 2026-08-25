@@ -66,6 +66,46 @@ void main() {
     expect(b.sourceLabel, 'manuell');
   });
 
+  test('Privatkonto ist weder Erloes noch Aufwand', () {
+    // 1890 Privateinlagen: Kapitalkonto. Am 25.08.2026 zeigte die App alles,
+    // was kein Erlös war, als „Aufwand" — zwei solche Buchungen ueber
+    // 347,00 EUR standen dadurch als Kosten in der Auswertung.
+    final b = FinanceBooking.fromJson({
+      'id': 'priv',
+      'booking_date': '2026-06-15',
+      'account_code': '1890',
+      'account_name': 'Privateinlagen',
+      'direction': 'liability',
+      'amount_net': 215,
+      'tax_rate': 0,
+      'source': 'sevdesk',
+      'source_ref': '147932939-203065862',
+      'source_account_code': '1890',
+    });
+
+    expect(b.isRevenue, isFalse);
+    expect(b.isExpense, isFalse);
+    expect(b.isNeutral, isTrue);
+    expect(b.directionLabel, 'Privat/Kapital');
+  });
+
+  test('directionLabel benennt alle vier Richtungen', () {
+    FinanceBooking mit(String richtung) => FinanceBooking.fromJson({
+          'id': 'x',
+          'booking_date': '2026-06-15',
+          'account_code': '4930',
+          'account_name': 'Bürobedarf',
+          'direction': richtung,
+          'amount_net': 1,
+          'tax_rate': 19,
+          'source': 'sevdesk',
+        });
+    expect(mit('revenue').directionLabel, 'Erlös');
+    expect(mit('expense').directionLabel, 'Aufwand');
+    expect(mit('liability').directionLabel, 'Privat/Kapital');
+    expect(mit('asset').directionLabel, 'Bestand');
+  });
+
   test('FinanceBookingPage zaehlt nicht gezeigte Buchungen', () {
     final p = FinanceBookingPage.fromJson({
       'total': 512,
