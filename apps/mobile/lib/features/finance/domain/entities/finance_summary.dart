@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'finance_direction.dart';
+
 /// Aggregierter Betrag je SKR-03-Konto.
 class AccountAmount extends Equatable {
   const AccountAmount({
@@ -25,20 +27,10 @@ class AccountAmount extends Equatable {
   /// Privatkonten 1800–1999 des SKR 03.
   bool get isNeutral => !isRevenue && !isExpense;
 
-  String get directionLabel {
-    switch (direction) {
-      case 'revenue':
-        return 'Erlös';
-      case 'expense':
-        return 'Aufwand';
-      case 'liability':
-        return 'Privat/Kapital';
-      case 'asset':
-        return 'Bestand';
-      default:
-        return direction;
-    }
-  }
+  String get directionLabel => richtungsBezeichnung(direction);
+
+  /// Fliesst auf diesem Konto Geld ab? Steuert Vorzeichen und Farbe.
+  bool get istAuszahlung => geldFliesstAb(direction, code);
 
   factory AccountAmount.fromJson(Map<String, dynamic> j) => AccountAmount(
         // Defensiv: die RPC kann in seltenen Fällen null oder unerwartete

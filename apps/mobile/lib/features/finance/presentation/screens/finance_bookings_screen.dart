@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/finance_booking.dart';
+import '../widgets/betrag_text.dart';
 import '../controllers/finance_providers.dart';
 
 /// Einzelbuchungen des gewählten Zeitraums — jeder sevDesk-Beleg und jede
@@ -251,7 +252,9 @@ class _Liste extends StatelessWidget {
               Text(
                 '${gefiltert.length} Buchungen · Erlöse '
                 '${Formatters.euro(summeErloes)} · Aufwand '
-                '${Formatters.euro(summeAufwand)}'
+                // Aufwand ist Geld, das abfliesst — mit Vorzeichen, wie in
+                // jeder Zeile darunter auch.
+                '${betragMitVorzeichen(summeAufwand, auszahlung: true)}'
                 // Privatentnahmen und -einlagen gehören in keine der beiden
                 // Summen. Sie zu verschweigen wäre aber genauso falsch wie
                 // sie mitzurechnen.
@@ -334,13 +337,10 @@ class _BuchungsZeile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s3),
-              Text(
-                Formatters.euro(b.net),
-                style: AppTypography.body(
-                  size: 15,
-                  weight: FontWeight.w700,
-                  color: b.isRevenue ? AppColors.statusPositive : AppColors.ink,
-                ),
+              BetragText(
+                betrag: b.net,
+                direction: b.direction,
+                accountCode: b.accountCode,
               ),
             ],
           ),

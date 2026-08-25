@@ -308,3 +308,266 @@ export function belegProbe(v: Record<string, unknown>): Record<string, unknown> 
       })),
   };
 }
+
+// ============================================================================
+// DOPPELTE ZAHLUNGEN: „immer nur eine Ein- oder Auszahlung"
+// ----------------------------------------------------------------------------
+// Hausregel des Auftraggebers vom 25.08.2026, wörtlich: „Merke dir das, dass
+// immer nur eine Ein- oder Auszahlung da stehen darf. Das Konto 1780 ist
+// richtig."
+//
+// Anlass waren die Umsatzsteuer-Voranmeldungen. sevDesk führt zu jeder
+// Voranmeldung ZWEI Belege — die Anmeldung und die Zahlung/Erstattung:
+//
+//   09.01.2026  1780  Finanzamt · UStVA-Q4.2025       35,43 €
+//   13.01.2026  1790  Finanzamt Magdeburg · USt IV/25 35,43 €
+//   02.04.2026  1780  Finanzamt · UStVA-Q1.2026       74,27 €
+//   08.04.2026  1780  Finanzamt Magdeburg · I/2026    74,27 €
+//   02.07.2026  1780  Finanzamt · UStVA-Q2.2026       36,96 €
+//   06.07.2026  1780  Finanzamt Magdeburg · USt II/26 36,96 €
+//
+// Buchhalterisch ist das richtig; in einer Einnahmen-Übersicht steht derselbe
+// Geldeingang dadurch zweimal, und die Summe ist um 146,66 € zu hoch.
+//
+// WARUM DIE REGEL SO ENG GEFASST IST
+// Eine allgemeine Regel „gleicher Partner + gleicher Betrag + nahes Datum"
+// hätte echte Vorgänge geschluckt. Im selben Bestand stehen:
+//
+//   * zwei Bescheide der Gemeinde Sülzetal, beide 25,00 €, beide am
+//     25.11.2025 — aber mit verschiedenen Belegnummern (50012634/50012635).
+//     Zwei Gebühren, kein Doppel.
+//   * eine Privateinlage (1890) und eine Privatentnahme (1800) über je
+//     215,00 € am selben Tag. Gleicher Betrag, gleicher Name, aber
+//     ENTGEGENGESETZTE Zahlungsrichtung. Eine davon zu unterdrücken hiesse,
+//     Geld verschwinden zu lassen.
+//
+// Automatisch unterdrückt wird deshalb nur der nachgewiesene Fall: beide
+// Buchungen auf einem Umsatzsteuer-Zahlkonto (17xx), gleicher Betrag,
+// gleiche Zahlungsrichtung, gleicher Partner, höchstens 14 Tage auseinander.
+// Alles andere wird nur GEMELDET — Löschen ohne Beleg wäre dasselbe
+// Ratespiel, nur mit schlimmeren Folgen.
+// ============================================================================
+
+/** Fliesst Geld ab (`aus`) oder herein (`ein`)? */
+export type Zahlungsrichtung = "ein" | "aus";
+
+/**
+ * Zahlungsrichtung einer Buchung.
+ *
+ * Bei den Privat-/Kapitalkonten des SKR 03 entscheidet das Konto, nicht die
+ * Buchungsrichtung: 1890/1990 ff. sind Einlagen (Geld herein), 1800–1889 und
+ * 1900–1989 Entnahmen (Geld hinaus). Beide tragen `liability`.
+ */
+export function zahlungsrichtung(
+  direction: Buchungsrichtung,
+  code: string | null,
+): Zahlungsrichtung {
+  if (istPrivatkonto(code)) {
+    return Number(code) % 100 >= 90 ? "ein" : "aus";
+  }
+  return direction === "revenue" ? "ein" : "aus";
+}
+
+/** Umsatzsteuer-Zahlkonten des SKR 03: 1700–1799 (u. a. 1780, 1790). */
+export function istUmsatzsteuerZahlkonto(code: string | null): boolean {
+  if (!code || !VIERSTELLIG.test(code)) return false;
+  const n = Number(code);
+  return n >= 1700 && n <= 1799;
+}
+
+// Rechtsformen und Füllwörter, die denselben Partner verschieden schreiben
+// lassen: „Freenet" und „Freenet Dls Gmbh", „Finanzamt" und „Finanzamt
+// Magdeburg".
+const RECHTSFORMEN = new Set([
+  "gmbh", "mbh", "ag", "kg", "kgaa", "ohg", "gbr", "ug", "se", "ev", "eg",
+  "ltd", "limited", "llc", "inc", "corp", "pbc", "plc", "sa", "sarl", "srl",
+  "sro", "bv", "nv", "as", "oy", "ab", "spa", "co", "cie", "sca", "und",
+]);
+
+/**
+ * Vergleichbarer Schlüssel für den Geschäftspartner.
+ *
+ * `bezeichnung()` setzt „Lieferant · Belegnummer" zusammen; hier zählt nur
+ * der Teil davor.
+ */
+export function partnerSchluessel(bez: string | null): string {
+  const roh = (bez ?? "").split("·")[0];
+  return roh
+    .toLowerCase()
+    .replace(/[^a-z0-9äöüß]+/g, " ")
+    .split(" ")
+    .filter((w) => w.length > 0 && !RECHTSFORMEN.has(w))
+    .join(" ")
+    .trim();
+}
+
+/** Belegnummer aus „Lieferant · Belegnummer", normalisiert. */
+export function belegnummerSchluessel(bez: string | null): string {
+  const teile = (bez ?? "").split("·");
+  if (teile.length < 2) return "";
+  return teile.slice(1).join("·").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+/**
+ * Zwei Partnernamen meinen denselben, wenn einer den anderen als
+ * vollständigen Wortanfang enthält („finanzamt" ⊂ „finanzamt magdeburg").
+ * Ein reiner `includes`-Vergleich wäre zu grob — „post" steckt auch in
+ * „postbank".
+ */
+export function selberPartner(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  return a === b || a.startsWith(`${b} `) || b.startsWith(`${a} `);
+}
+
+/** Abstand zweier ISO-Daten in Tagen (absolut). */
+export function tageAbstand(a: string, b: string): number {
+  const ta = Date.parse(`${a}T00:00:00Z`);
+  const tb = Date.parse(`${b}T00:00:00Z`);
+  if (!Number.isFinite(ta) || !Number.isFinite(tb)) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+  return Math.abs(ta - tb) / 86_400_000;
+}
+
+/** Die Felder, die für die Doppelerkennung gebraucht werden. */
+export interface Zahlungszeile {
+  booking_date: string;
+  account_code: string;
+  description: string | null;
+  amount_net: number;
+  amount_tax: number;
+  direction: Buchungsrichtung;
+  source_ref: string;
+}
+
+export interface Doppelbefund {
+  /** Indizes, die NICHT gebucht werden sollen. */
+  unterdruecken: number[];
+  /** Was unterdrückt wurde — für das Sync-Protokoll. */
+  unterdrueckt: Array<{
+    source_ref: string;
+    zugunsten_von: string;
+    grund: string;
+  }>;
+  /** Verdachtsfälle, die nur gemeldet und nicht angefasst werden. */
+  verdacht: Array<{ source_refs: string[]; grund: string }>;
+}
+
+const FENSTER_TAGE = 14;
+
+/** Cent-genauer Bruttobetrag — Fliesskomma-Vergleiche taugen hier nicht. */
+function cent(z: Zahlungszeile): number {
+  return Math.round((z.amount_net + z.amount_tax) * 100);
+}
+
+/**
+ * Findet Buchungen, die denselben Geldfluss ein zweites Mal zeigen.
+ *
+ * Unterdrückt wird ausschliesslich das Umsatzsteuer-Paar (siehe Kopf).
+ * Welche der beiden bleibt: Vorrang hat 1780 („Das Konto 1780 ist richtig"),
+ * danach das frühere Datum, danach die kleinere Belegkennung — damit das
+ * Ergebnis bei jedem Lauf dasselbe ist.
+ */
+export function doppelteZahlungenFinden(zeilen: Zahlungszeile[]): Doppelbefund {
+  const befund: Doppelbefund = {
+    unterdruecken: [],
+    unterdrueckt: [],
+    verdacht: [],
+  };
+
+  // --- 1) Umsatzsteuer-Paare: unterdrücken ---------------------------------
+  const ustGruppen = new Map<string, number[]>();
+  zeilen.forEach((z, i) => {
+    if (!istUmsatzsteuerZahlkonto(z.account_code)) return;
+    const schl = `${zahlungsrichtung(z.direction, z.account_code)}|${cent(z)}`;
+    const liste = ustGruppen.get(schl) ?? [];
+    liste.push(i);
+    ustGruppen.set(schl, liste);
+  });
+
+  const erledigt = new Set<number>();
+  for (const liste of ustGruppen.values()) {
+    if (liste.length < 2) continue;
+    for (const i of liste) {
+      if (erledigt.has(i)) continue;
+      const gruppe = [i];
+      for (const j of liste) {
+        if (j === i || erledigt.has(j)) continue;
+        const gleicherPartner = selberPartner(
+          partnerSchluessel(zeilen[i].description),
+          partnerSchluessel(zeilen[j].description),
+        );
+        if (!gleicherPartner) continue;
+        const abstand = tageAbstand(
+          zeilen[i].booking_date,
+          zeilen[j].booking_date,
+        );
+        if (abstand > FENSTER_TAGE) continue;
+        gruppe.push(j);
+      }
+      if (gruppe.length < 2) continue;
+      for (const k of gruppe) erledigt.add(k);
+
+      const sieger = gruppe.slice().sort((a, b) => {
+        const av = zeilen[a].account_code === "1780" ? 0 : 1;
+        const bv = zeilen[b].account_code === "1780" ? 0 : 1;
+        if (av !== bv) return av - bv;
+        if (zeilen[a].booking_date !== zeilen[b].booking_date) {
+          return zeilen[a].booking_date < zeilen[b].booking_date ? -1 : 1;
+        }
+        return zeilen[a].source_ref < zeilen[b].source_ref ? -1 : 1;
+      })[0];
+
+      for (const k of gruppe) {
+        if (k === sieger) continue;
+        const abstand = tageAbstand(
+          zeilen[k].booking_date,
+          zeilen[sieger].booking_date,
+        );
+        befund.unterdruecken.push(k);
+        befund.unterdrueckt.push({
+          source_ref: zeilen[k].source_ref,
+          zugunsten_von: zeilen[sieger].source_ref,
+          grund: "Umsatzsteuer-Voranmeldung und ihre Zahlung sind derselbe " +
+            `Geldfluss (gleicher Betrag, gleicher Partner, ${abstand} Tage ` +
+            "Abstand).",
+        });
+      }
+    }
+  }
+
+  // --- 2) Gleiche Belegnummer: nur melden ----------------------------------
+  // Zwei Belege mit DERSELBEN Rechnungsnummer beim selben Partner sind fast
+  // immer dieselbe Rechnung, zweimal erfasst. „Fast immer" reicht aber nicht,
+  // um sie zu löschen — die Beträge können abweichen, und welcher davon der
+  // richtige ist, weiss nur die Buchhaltung.
+  const nachNummer = new Map<string, number[]>();
+  zeilen.forEach((z, i) => {
+    const nr = belegnummerSchluessel(z.description);
+    const partner = partnerSchluessel(z.description);
+    if (nr.length < 4 || !partner) return;
+    const schl = `${partner.split(" ")[0]}|${nr}`;
+    const liste = nachNummer.get(schl) ?? [];
+    liste.push(i);
+    nachNummer.set(schl, liste);
+  });
+  for (const liste of nachNummer.values()) {
+    if (liste.length < 2) continue;
+    const nah = liste.filter((j) =>
+      liste.some((k) =>
+        k !== j &&
+        tageAbstand(zeilen[j].booking_date, zeilen[k].booking_date) <=
+          FENSTER_TAGE
+      )
+    );
+    if (nah.length < 2) continue;
+    befund.verdacht.push({
+      source_refs: nah.map((j) => zeilen[j].source_ref),
+      grund: "Dieselbe Belegnummer beim selben Partner, innerhalb von " +
+        `${FENSTER_TAGE} Tagen. In sevDesk prüfen — hier wird nichts ` +
+        "unterdrückt, weil die Beträge abweichen können.",
+    });
+  }
+
+  return befund;
+}

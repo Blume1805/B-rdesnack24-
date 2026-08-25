@@ -1,17 +1,23 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import type { Zahlungszeile } from "./mapping.ts";
 import {
   belegIdAusPosition,
   belegProbe,
   bezeichnung,
   datevIdAusPosition,
+  doppelteZahlungenFinden,
   fallbackKonto,
   istPrivatkonto,
+  istUmsatzsteuerZahlkonto,
   kontonameAusDatev,
   kontonummerAusDatev,
   parseVoucher,
+  partnerSchluessel,
   richtungAusCreditDebit,
   richtungAusKonto,
+  selberPartner,
   steuersatz,
+  zahlungsrichtung,
 } from "./mapping.ts";
 
 // ---------------------------------------------------------------------------
@@ -228,4 +234,163 @@ Deno.test("belegProbe: nennt Feldnamen, aber keine Freitexte", () => {
   assertEquals(JSON.stringify(probe).includes("Musterweg"), false);
   assertEquals(JSON.stringify(probe).includes("Meier"), false);
   assertEquals((probe.werte as Record<string, unknown>).sumNet, 12);
+});
+
+// ============================================================================
+// Doppelte Zahlungen — die Hausregel „immer nur eine Ein- oder Auszahlung"
+// ============================================================================
+
+const ust = (
+  datum: string,
+  konto: string,
+  partner: string,
+  betrag: number,
+  ref: string,
+): Zahlungszeile => ({
+  booking_date: datum,
+  account_code: konto,
+  description: `${partner} · Beleg`,
+  amount_net: betrag,
+  amount_tax: 0,
+  direction: "revenue",
+  source_ref: ref,
+});
+
+Deno.test("Zahlungsrichtung: Privateinlage herein, Privatentnahme hinaus", () => {
+  assertEquals(zahlungsrichtung("liability", "1890"), "ein");
+  assertEquals(zahlungsrichtung("liability", "1800"), "aus");
+  assertEquals(zahlungsrichtung("liability", "1990"), "ein");
+  assertEquals(zahlungsrichtung("liability", "1810"), "aus");
+  assertEquals(zahlungsrichtung("revenue", "8400"), "ein");
+  assertEquals(zahlungsrichtung("expense", "4920"), "aus");
+});
+
+Deno.test("Umsatzsteuer-Zahlkonten sind 1700–1799", () => {
+  assertEquals(istUmsatzsteuerZahlkonto("1780"), true);
+  assertEquals(istUmsatzsteuerZahlkonto("1790"), true);
+  assertEquals(istUmsatzsteuerZahlkonto("1800"), false);
+  assertEquals(istUmsatzsteuerZahlkonto("4920"), false);
+  assertEquals(istUmsatzsteuerZahlkonto(null), false);
+});
+
+Deno.test("Partnerschlüssel lässt Rechtsformen weg", () => {
+  assertEquals(partnerSchluessel("Freenet Dls Gmbh · M2601"), "freenet dls");
+  assertEquals(partnerSchluessel("Finanzamt Magdeburg · I/2026"), "finanzamt magdeburg");
+  assertEquals(selberPartner("finanzamt", "finanzamt magdeburg"), true);
+  // Ein reiner Textvergleich würde hier danebengreifen.
+  assertEquals(selberPartner("post", "postbank"), false);
+});
+
+Deno.test("UStVA und ihre Zahlung werden zu einer Buchung", () => {
+  const zeilen = [
+    ust("2026-04-02", "1780", "Finanzamt", 74.27, "A"),
+    ust("2026-04-08", "1780", "Finanzamt Magdeburg", 74.27, "B"),
+  ];
+  const b = doppelteZahlungenFinden(zeilen);
+  assertEquals(b.unterdruecken.length, 1);
+  // Bei gleichem Konto gewinnt das frühere Datum.
+  assertEquals(b.unterdrueckt[0].source_ref, "B");
+  assertEquals(b.unterdrueckt[0].zugunsten_von, "A");
+});
+
+Deno.test("Bei 1780 gegen 1790 bleibt 1780 stehen", () => {
+  // Auch wenn 1790 das frühere Datum trägt: der Auftraggeber hat 1780 als
+  // das richtige Konto benannt.
+  const zeilen = [
+    ust("2026-01-09", "1790", "Finanzamt Magdeburg", 35.43, "frueh"),
+    ust("2026-01-13", "1780", "Finanzamt", 35.43, "spaet"),
+  ];
+  const b = doppelteZahlungenFinden(zeilen);
+  assertEquals(b.unterdrueckt.length, 1);
+  assertEquals(b.unterdrueckt[0].source_ref, "frueh");
+  assertEquals(b.unterdrueckt[0].zugunsten_von, "spaet");
+});
+
+Deno.test("Zwei Quartale mit gleichem Betrag bleiben zwei Buchungen", () => {
+  const zeilen = [
+    ust("2026-04-02", "1780", "Finanzamt", 50.0, "Q1"),
+    ust("2026-07-02", "1780", "Finanzamt", 50.0, "Q2"),
+  ];
+  assertEquals(doppelteZahlungenFinden(zeilen).unterdrueckt.length, 0);
+});
+
+Deno.test("Einlage und Entnahme über denselben Betrag bleiben beide", () => {
+  // 215,00 € am 15.06.2026 auf 1890 und auf 1800. Gleicher Betrag, gleicher
+  // Name, gleicher Tag — aber entgegengesetzte Zahlungsrichtung.
+  const zeilen: Zahlungszeile[] = [
+    {
+      booking_date: "2026-06-15",
+      account_code: "1890",
+      description: "Philipp Blume · 15.06.26",
+      amount_net: 215,
+      amount_tax: 0,
+      direction: "liability",
+      source_ref: "einlage",
+    },
+    {
+      booking_date: "2026-06-15",
+      account_code: "1800",
+      description: "Philipp Blume · 15.06.26",
+      amount_net: 215,
+      amount_tax: 0,
+      direction: "liability",
+      source_ref: "entnahme",
+    },
+  ];
+  assertEquals(doppelteZahlungenFinden(zeilen).unterdrueckt.length, 0);
+});
+
+Deno.test("Zwei Gebühren am selben Tag bleiben zwei Buchungen", () => {
+  // Gemeinde Sülzetal, zweimal 25,00 € am 25.11.2025 — verschiedene
+  // Belegnummern, also zwei Vorgänge. Weder unterdrückt noch gemeldet.
+  const zeilen: Zahlungszeile[] = [
+    {
+      booking_date: "2025-11-25",
+      account_code: "4900",
+      description: "Gemeinde Sülzetal · 50012634",
+      amount_net: 25,
+      amount_tax: 0,
+      direction: "expense",
+      source_ref: "a",
+    },
+    {
+      booking_date: "2025-11-25",
+      account_code: "4900",
+      description: "Gemeinde Sülzetal · 50012635",
+      amount_net: 25,
+      amount_tax: 0,
+      direction: "expense",
+      source_ref: "b",
+    },
+  ];
+  const b = doppelteZahlungenFinden(zeilen);
+  assertEquals(b.unterdrueckt.length, 0);
+  assertEquals(b.verdacht.length, 0);
+});
+
+Deno.test("Gleiche Rechnungsnummer wird gemeldet, nicht gelöscht", () => {
+  const zeilen: Zahlungszeile[] = [
+    {
+      booking_date: "2026-05-06",
+      account_code: "4930",
+      description: "Amazon Business Eu S.À R.L. · DE62YC8JABEI",
+      amount_net: 22.71,
+      amount_tax: 4.31,
+      direction: "expense",
+      source_ref: "a",
+    },
+    {
+      booking_date: "2026-05-15",
+      account_code: "4930",
+      description: "Amazon Business Eu S.À R.L. · DE62YC8JABEI",
+      amount_net: 22.71,
+      amount_tax: 4.31,
+      direction: "expense",
+      source_ref: "b",
+    },
+  ];
+  const b = doppelteZahlungenFinden(zeilen);
+  assertEquals(b.unterdrueckt.length, 0);
+  assertEquals(b.verdacht.length, 1);
+  assertEquals(b.verdacht[0].source_refs.sort(), ["a", "b"]);
 });

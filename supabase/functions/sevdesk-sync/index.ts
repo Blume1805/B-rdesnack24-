@@ -51,10 +51,12 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import type { Buchungsrichtung } from "./mapping.ts";
 import {
   belegIdAusPosition,
   belegProbe,
   datevIdAusPosition,
+  doppelteZahlungenFinden,
   fallbackKonto,
   kontonameAusDatev,
   kontonummerAusDatev,
@@ -424,6 +426,40 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 4b) Denselben Geldfluss nur einmal buchen.
+    //     Hausregel des Auftraggebers vom 25.08.2026: „immer nur eine Ein-
+    //     oder Auszahlung". sevDesk führt zu jeder Umsatzsteuer-Voranmeldung
+    //     zwei Belege — die Anmeldung und die Zahlung. In der Auswertung
+    //     stand derselbe Eingang dadurch zweimal. Die Regel und ihre engen
+    //     Grenzen stehen in mapping.ts.
+    const doppel = doppelteZahlungenFinden(
+      rows.map((r) => ({
+        booking_date: String(r.booking_date),
+        account_code: String(r.account_code),
+        description: (r.description as string | null) ?? null,
+        amount_net: Number(r.amount_net),
+        amount_tax: Number(r.amount_tax),
+        direction: r.direction as Buchungsrichtung,
+        source_ref: String(r.source_ref),
+      })),
+    );
+    const raus = new Set(doppel.unterdruecken);
+    const gebucht = rows.filter((_, i) => !raus.has(i));
+
+    // Was einmal gebucht wurde, bleibt sonst stehen: Der Sync schreibt nur
+    // (upsert) und löscht nie. Die unterdrückten Zeilen werden deshalb
+    // ausdrücklich als gelöscht markiert — weich, damit der Vorgang
+    // nachvollziehbar bleibt statt spurlos zu verschwinden.
+    if (doppel.unterdrueckt.length > 0) {
+      const { error: delErr } = await admin
+        .from("finance_bookings")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("source", "sevdesk")
+        .is("deleted_at", null)
+        .in("source_ref", doppel.unterdrueckt.map((d) => d.source_ref));
+      if (delErr) throw delErr;
+    }
+
     // 5) Fehlende Konten anlegen, BEVOR gebucht wird — der Fremdschlüssel
     //    von finance_bookings.account_code verlangt sie.
     // Nennt sevDesk einen Namen, gilt DIESER — auch für ein Konto, das der
@@ -445,12 +481,12 @@ Deno.serve(async (req) => {
     }
 
     let upserted = 0;
-    if (rows.length > 0) {
+    if (gebucht.length > 0) {
       const { error: upErr, count } = await admin
         .from("finance_bookings")
-        .upsert(rows, { onConflict: "source,source_ref", count: "exact" });
+        .upsert(gebucht, { onConflict: "source,source_ref", count: "exact" });
       if (upErr) throw upErr;
-      upserted = count ?? rows.length;
+      upserted = count ?? gebucht.length;
     }
 
     const diagnostics = {
@@ -461,7 +497,10 @@ Deno.serve(async (req) => {
       kontenplan_fehler: kontenplanFehler,
       ohne_verwertbares_datum: ohneDatum,
       ausserhalb_zeitraum: ausserhalb,
-      buchungen: rows.length,
+      buchungen: gebucht.length,
+      buchungen_vor_entdoppelung: rows.length,
+      doppelte_zahlungen_unterdrueckt: doppel.unterdrueckt,
+      doppelte_zahlungen_verdacht: doppel.verdacht,
       konto_aus_sevdesk: ausSevdesk,
       konto_aus_sammelkonto: ausSammelkonto,
       konto_aus_vorschlag: ausVorschlag,
@@ -495,7 +534,7 @@ Deno.serve(async (req) => {
     return jsonResponse({
       ok: true,
       fetched: belege.length,
-      processed: rows.length,
+      processed: gebucht.length,
       upserted,
       diagnostics,
     });

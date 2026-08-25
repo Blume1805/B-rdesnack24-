@@ -73,6 +73,56 @@ Gilt auch für das Melden von Fehlern: Bevor ein Befund gemeldet wird,
 erst prüfen, ob er wirklich besteht. Ein Fehlalarm kostet den User
 dieselbe Zeit wie ein echter Fehler.
 
+## Geld: ein Geldfluss, eine Buchung — Ausgaben rot mit Vorzeichen (Pflicht, ohne Nachfrage)
+
+Zwei Vorgaben des Auftraggebers vom 25.08.2026, wörtlich:
+
+> „Ausgaben möchte ich immer in rot angezeigt bekommen mit einem `-` davor."
+
+> „Merke dir das, dass immer nur eine Ein- oder Auszahlung da stehen darf.
+> Das Konto 1780 ist richtig."
+
+**Darstellung.** Alles, wobei Geld abfliesst, steht rot
+(`AppColors.statusCritical`) und mit einem `-` davor — in den
+Einzelbuchungen, in der Kontoübersicht und in den Kennzahlen gleich.
+Erlöse grün, Bestands- und Kapitalkonten gedämpft. Die Regel steht an
+genau einer Stelle: `geldFliesstAb` in
+`features/finance/domain/entities/finance_direction.dart`, angewandt über
+das Widget `BetragText`. Neue Geldansichten benutzen dieses Widget, statt
+sich eine eigene Bedingung zu bauen — „immer" hält sonst bis zur nächsten
+Änderung an einer der Stellen.
+
+Bei den Privat-/Kapitalkonten des SKR 03 entscheidet das Konto, nicht die
+Buchungsrichtung: 1890/1990 ff. sind Einlagen (Geld herein, kein
+Vorzeichen), 1800–1889 und 1900–1989 Entnahmen (Geld hinaus, mit `-`).
+Beide tragen `direction = 'liability'`.
+
+**Doppelte Geldflüsse.** Derselbe Geldfluss darf nur einmal in der
+Auswertung stehen. sevDesk führt zu jeder Umsatzsteuer-Voranmeldung zwei
+Belege — die Anmeldung und die Zahlung; die Einnahmen waren dadurch um
+146,66 € zu hoch. Unterdrückt wird in
+`doppelteZahlungenFinden` (`supabase/functions/sevdesk-sync/mapping.ts`),
+weich (`deleted_at`), und nur im nachgewiesenen Fall: beide Buchungen auf
+einem Umsatzsteuer-Zahlkonto (1700–1799), gleicher Bruttobetrag, gleiche
+Zahlungsrichtung, gleicher Partner, höchstens 14 Tage auseinander. Es
+bleibt die Buchung auf 1780, sonst die frühere.
+
+**Und was dabei nicht passieren darf:** Eine breitere Regel — „gleicher
+Partner, gleicher Betrag, nahes Datum" — hätte im selben Bestand echte
+Vorgänge geschluckt: zwei Gebührenbescheide der Gemeinde Sülzetal über je
+25,00 € am selben Tag (verschiedene Belegnummern), und eine Privateinlage
+plus eine Privatentnahme über je 215,00 € am selben Tag (entgegengesetzte
+Richtung). Alles ausserhalb des engen Falls wird deshalb nur **gemeldet**
+(`doppelte_zahlungen_verdacht` im Sync-Protokoll), nicht angefasst. Wer
+eine Doppelerkennung erweitert, muss vorher am echten Bestand nachsehen,
+was sie mitnimmt — siehe „Behauptungen vorher prüfen".
+
+**Eine Quelle für die Richtung.** `finance_summary` und
+`finance_bookings_list` nehmen beide `finance_bookings.direction`, nicht
+`finance_accounts.direction`. Vorher war 0480 im Kontenstamm „asset" und
+in der Buchung „expense" — dieselbe Anschaffung stand in einer Ansicht
+rot, in der anderen grau (Migration 0131).
+
 ## Rechtstexte mitziehen (Pflicht, ohne Nachfrage)
 
 **Nach jeder inhaltlichen, funktionalen oder strukturellen Änderung ist

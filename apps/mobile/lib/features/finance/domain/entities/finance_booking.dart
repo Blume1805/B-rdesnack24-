@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'finance_direction.dart';
+
 /// Eine einzelne Buchung (ein sevDesk-Beleg oder eine manuelle Erfassung).
 ///
 /// Bis zum 24.08.2026 zeigte das Finanzdashboard ausschließlich Summen je
@@ -53,20 +55,10 @@ class FinanceBooking extends Equatable {
   /// als Kosten in der Auswertung.
   bool get isNeutral => !isRevenue && !isExpense;
 
-  String get directionLabel {
-    switch (direction) {
-      case 'revenue':
-        return 'Erlös';
-      case 'expense':
-        return 'Aufwand';
-      case 'liability':
-        return 'Privat/Kapital';
-      case 'asset':
-        return 'Bestand';
-      default:
-        return direction;
-    }
-  }
+  String get directionLabel => richtungsBezeichnung(direction);
+
+  /// Fliesst bei dieser Buchung Geld ab? Steuert Vorzeichen und Farbe.
+  bool get istAuszahlung => geldFliesstAb(direction, accountCode);
 
   /// True, wenn das Konto geraten (Sammelkonto) statt übernommen wurde.
   bool get kontoGeschaetzt => source == 'sevdesk' && sourceAccountCode == null;

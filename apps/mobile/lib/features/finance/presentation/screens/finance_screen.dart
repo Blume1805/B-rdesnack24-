@@ -15,6 +15,7 @@ import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
 import '../widgets/kpi_dashboard.dart';
+import '../widgets/betrag_text.dart';
 import 'datev_export_screen.dart';
 import 'finance_bookings_screen.dart';
 
@@ -462,7 +463,13 @@ class _SummaryContent extends StatelessWidget {
                 ),
                 KpiCard(
                   label: 'Aufwand',
-                  value: Formatters.euro(summary.expenseNet),
+                  // Ausgaben stehen überall mit Vorzeichen — auch in der
+                  // Kennzahl, sonst widerspricht die Kachel der Liste.
+                  value: betragMitVorzeichen(
+                    summary.expenseNet,
+                    auszahlung: true,
+                  ),
+                  valueColor: AppColors.statusCritical,
                   icon: Icons.trending_down,
                 ),
                 KpiCard(
@@ -513,7 +520,7 @@ class _SummaryContent extends StatelessWidget {
                 _AccountRow(
                   code: a.code,
                   name: a.name,
-                  isRevenue: a.isRevenue,
+                  direction: a.direction,
                   label: a.directionLabel,
                   amount: a.net,
                   onTap: () => Navigator.of(context).push(
@@ -536,7 +543,7 @@ class _AccountRow extends StatelessWidget {
   const _AccountRow({
     required this.code,
     required this.name,
-    required this.isRevenue,
+    required this.direction,
     required this.label,
     required this.amount,
     this.onTap,
@@ -544,7 +551,10 @@ class _AccountRow extends StatelessWidget {
 
   final String code;
   final String name;
-  final bool isRevenue;
+
+  /// „revenue" | „expense" | „asset" | „liability" — bestimmt Beschriftung,
+  /// Vorzeichen und Farbe des Betrags.
+  final String direction;
 
   /// „Erlös", „Aufwand", „Privat/Kapital" oder „Bestand". Vorher stand hier
   /// fest „Aufwand", sobald es kein Erlös war — Privateinlagen sahen damit
@@ -555,6 +565,7 @@ class _AccountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final istErloes = direction == 'revenue';
     final karte = AppCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s4,
@@ -566,9 +577,9 @@ class _AccountRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: isRevenue ? AppColors.brandLight : AppColors.surfaceAlt,
+              color: istErloes ? AppColors.brandLight : AppColors.surfaceAlt,
               border: Border.all(
-                color: isRevenue ? AppColors.brand : AppColors.borderSubtle,
+                color: istErloes ? AppColors.brand : AppColors.borderSubtle,
               ),
               borderRadius: BorderRadius.circular(AppRadii.sm),
             ),
@@ -605,13 +616,10 @@ class _AccountRow extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            Formatters.euro(amount),
-            style: AppTypography.body(
-              size: 15,
-              weight: FontWeight.w700,
-              color: isRevenue ? AppColors.statusPositive : AppColors.ink,
-            ),
+          BetragText(
+            betrag: amount,
+            direction: direction,
+            accountCode: code,
           ),
           if (onTap != null) ...[
             const SizedBox(width: 4),
