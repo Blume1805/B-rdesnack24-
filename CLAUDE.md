@@ -194,14 +194,15 @@ diese Rollen überhaupt. Diese Zahlen werden abgefragt, nicht geschätzt.
   `boerdesnack24@gmail.com` in Betrieb und die Lücke offen —
   `mailConfig.supportEmail` wird **zuletzt** umgestellt, nicht zuerst.
 * ~~Kein Verarbeitungsverzeichnis nach Art. 30 im Repository.~~
-  **Erledigt am 25.08.2026:** `docs/VERARBEITUNGSVERZEICHNIS.md`, Fassung 1.
+  **Erledigt am 25.08.2026:** `docs/VERARBEITUNGSVERZEICHNIS.md` (Fassung 2 seit 0126).
   Jede Angabe am laufenden System abgefragt, nicht aus einer Vorlage. Es ist
   jetzt Bereich 8 der Prüfliste oben.
 
   Aus dem Verzeichnis sind dabei **fünf weitere offene Punkte** entstanden,
   die es vorher nicht sichtbar gab. Sie stehen dort in Abschnitt 5, hier nur
-  als Verweis: keine Löschfrist für `audit_log` und `email_log` (Art. 5
-  Abs. 1 lit. e); `nayax_sales.raw` speichert die vollständige Webhook-Nutzlast
+  als Verweis: ~~keine Löschfrist für `audit_log` und `email_log`~~
+  (**erledigt am 25.08.2026**, Migration 0126: 10 Jahre bzw. 12 Monate mit
+  Ausnahmeliste); `nayax_sales.raw` speichert die vollständige Webhook-Nutzlast
   und ist **vor dem ersten echten Verkauf** darauf zu prüfen, ob Nayax
   Personenbezogenes mitsendet; kein Wiederherstellungstest der Sicherungen;
   die sevDesk-Verifikationspflicht; keine anwaltliche Freigabe.

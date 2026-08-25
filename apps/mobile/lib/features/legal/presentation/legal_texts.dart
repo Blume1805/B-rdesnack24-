@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v10 · 2026-08';
+  static const version = 'v11 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -417,11 +417,16 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
     die Wochenübersicht die laufende Woche. Die 90 Tage geben Luft für Rückfragen zu
     einem Gutschein aus dem Vormonat; danach wird täglich automatisch gelöscht.
   * HACCP- und IfSG-Nachweise: nach den jeweiligen gesetzlichen Vorgaben.
-  * Änderungs- und Versandprotokoll: Für diese beiden Protokolle ist derzeit keine
-    automatische Löschfrist eingerichtet. Wir sagen das offen, statt eine Frist zu
-    behaupten, die technisch nicht durchgesetzt wird. Eine Frist wird eingeführt; bis
-    dahin löschen wir Protokolleinträge auf begründetes Verlangen, soweit keine
-    Nachweispflicht entgegensteht.
+  * **Änderungsprotokoll: 10 Jahre.** Es hält fest, wer wann welchen Datensatz
+    geändert hat. Weil darin auch Änderungen an steuerlich relevanten Daten stehen,
+    richtet sich die Frist nach § 147 Abs. 3 AO. Danach wird täglich automatisch
+    gelöscht.
+  * **Versandprotokoll: 12 Monate.** Ausgenommen sind Nachrichten, an denen eine
+    Nachweispflicht hängt — Vertragsschluss, Kündigungsbestätigung nach § 312k BGB,
+    Bestätigung eines Löschantrags sowie Rechnungs- und Belegmails. Diese bleiben
+    10 Jahre. Auch hier wird täglich automatisch gelöscht.
+    Bis zum 25.08.2026 gab es für diese beiden Protokolle keine Frist; an dieser
+    Stelle stand das offen und ist jetzt erledigt.
 
 
 **7) IHRE RECHTE**

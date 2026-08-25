@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 1**
+**Stand: 25.08.2026 · Fassung 2**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -124,9 +124,9 @@ Verfahren sind in `public.ki_register` einzeln eingestuft und im
 | Drittland | nein |
 | Löschfrist | **Öffnungstage: 90 Tage, täglich automatisch gelöscht** (`cron.job` „purge_login_days", 03:15 Uhr, ruft `app.purge_login_days()`; die Funktion löscht `where day < heute() - 90`). Übrige: bis zur Kontolöschung |
 
-Dies ist die einzige Verarbeitung mit einer technisch durchgesetzten
-Löschfrist. Das ist keine Auszeichnung, sondern der Maßstab, an dem die
-übrigen zu messen sind — siehe Abschnitt 5.
+Bis zum 25.08.2026 war dies die **einzige** Verarbeitung mit einer technisch
+durchgesetzten Löschfrist. Seither gilt sie auch für V6 und V12; damit sind
+alle drei Protokolle begrenzt.
 
 ### V6 — E-Mail-Versand und Versandprotokoll
 
@@ -138,7 +138,7 @@ Löschfrist. Das ist keine Auszeichnung, sondern der Maßstab, an dem die
 | Datenkategorien | `email_log`: Absender, Empfänger, Betreff, Status, Zeitpunkt, Provider-ID, Fehlertext — **Inhalt nur bei Nicht-Auth-Mails**; `email_outbox`; `email_consent_event` (inkl. User-Agent); `email_unsubscribe_token` |
 | Empfänger | S, R, **G** |
 | Drittland | nein für R (EU-Region Irland); **USA für G** |
-| Löschfrist | **keine automatische Frist** — offen, siehe Abschnitt 5 |
+| Löschfrist | **12 Monate**, täglich automatisch (`cron.job` „purge_email_log", 03:30 Uhr, ruft `app.purge_email_log()`). Ausgenommen und damit **10 Jahre**: Vertrags-, Kündigungs-, Löschantrags- sowie Rechnungs- und Belegmails |
 
 **Auth-Mails werden ohne Inhalt protokolliert** (Migration 0124): Vorher standen
 Bestätigungs-URL samt `token_hash` und Einmalcode im Klartext in `email_log`.
@@ -239,7 +239,7 @@ wird `mailConfig.supportEmail` beim Domainwechsel **zuletzt** umgestellt.
 | Datenkategorien | `audit_log`: handelnde Person, Zeitpunkt, Tabelle, Datensatz, Alt- und Neuwert; `auth_hook_diagnose`: Ausgang und Grund eines Hook-Aufrufs, **ohne Geheimnisse und ohne Signaturen** |
 | Empfänger | S |
 | Drittland | nein |
-| Löschfrist | **keine automatische Frist** — offen, siehe Abschnitt 5 |
+| Löschfrist | **10 Jahre**, täglich automatisch (`cron.job` „purge_audit_log", 03:25 Uhr, ruft `app.purge_audit_log()`); Frist nach § 147 Abs. 3 AO, weil das Protokoll auch Änderungen an steuerlich relevanten Daten enthält |
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 
@@ -323,11 +323,18 @@ offen und gehören dem Verantwortlichen vorgelegt:
    nicht, Abschnitt 5 spricht von *zwei* US-Empfängern statt drei. Beschlossen
    ist der Umzug auf die eigene Domain; die Reihenfolge steht in
    `docs/POSTEINGANG_AKTIVIEREN.md`. Bis dahin besteht die Lücke.
-2. **Keine Löschfrist für `audit_log` und `email_log` (V6, V12).** Kein
-   `cron.job` löscht dort. Art. 5 Abs. 1 lit. e verlangt eine Begrenzung; die
-   Datenschutzerklärung sagt das offen, eingerichtet ist sie nicht. Für
-   `customer_login_days` existiert die Frist und läuft — der Weg ist also
-   bekannt.
+2. ~~Keine Löschfrist für `audit_log` und `email_log`.~~ **Erledigt am
+   25.08.2026** (Migration 0126, Entscheidung des Auftraggebers): `audit_log`
+   einheitlich 10 Jahre, `email_log` 12 Monate mit Ausnahme der
+   aufbewahrungspflichtigen Nachrichten. Die E-Mail-Regel ist bewusst als
+   **Erlaubnisliste** gebaut: Gelöscht wird nur, was ausdrücklich als
+   kurzlebig eingetragen ist — ein unbekannter oder neuer Tag bleibt liegen.
+   Wer später einen Rechnungsversand ergänzt und den Tag vergisst, verliert
+   damit keinen Nachweis. Nachgeprüft: beide `cron.job`-Einträge aktiv,
+   beide Funktionen einmal ausgeführt (0 gelöscht, nichts ist alt genug),
+   und die Tag-Regel gegen zehn Beispiel-Tags durchgespielt — `invoice`,
+   `subscription-cancel`, `account-deletion-request` und ein leerer Tag
+   bleiben, die vier kurzlebigen werden erfasst.
 3. **`nayax_sales.raw` speichert die vollständige Nutzlast des
    Telemetrie-Webhooks.** Die Tabelle ist derzeit leer, es ist also nichts
    passiert. **Bevor der erste echte Verkauf einläuft, ist zu prüfen, was
