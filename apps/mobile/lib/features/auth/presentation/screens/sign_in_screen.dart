@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app_config.dart';
+import '../../../../core/di/providers.dart';
 import '../../../../core/motion/motion.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -31,9 +33,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     super.dispose();
   }
 
-  void _fillDemo(String email, String password) {
-    _emailCtrl.text = email;
-    _passwordCtrl.text = password;
+  void _demoAnmelden(AppConfig config) {
+    _emailCtrl.text = config.demoLoginEmail;
+    _passwordCtrl.text = config.demoLoginPassword;
     _submit();
   }
 
@@ -55,6 +57,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(authControllerProvider);
     final isLoading = state.isLoading;
+    final config = ref.watch(appConfigProvider);
 
     return Scaffold(
       backgroundColor: AppColors.ink,
@@ -91,7 +94,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             setState(() => _obscure = !_obscure),
                         isLoading: isLoading,
                         onSubmit: _submit,
-                        onFillDemo: _fillDemo,
+                        onDemoLogin: config.hasDemoLogin
+                            ? () => _demoAnmelden(config)
+                            : null,
                         l10n: l10n,
                       ),
                     ),
@@ -115,7 +120,7 @@ class _FormPanel extends StatelessWidget {
     required this.onToggleObscure,
     required this.isLoading,
     required this.onSubmit,
-    required this.onFillDemo,
+    required this.onDemoLogin,
     required this.l10n,
   });
 
@@ -126,7 +131,10 @@ class _FormPanel extends StatelessWidget {
   final VoidCallback onToggleObscure;
   final bool isLoading;
   final VoidCallback onSubmit;
-  final void Function(String email, String password) onFillDemo;
+
+  /// `null` = dieser Build bringt kein Demokonto mit; dann erscheint die
+  /// Schaltfläche gar nicht.
+  final VoidCallback? onDemoLogin;
   final AppLocalizations l10n;
 
   @override
@@ -182,8 +190,10 @@ class _FormPanel extends StatelessWidget {
                   offset: 24,
                   step: const Duration(milliseconds: 90),
                   child: Text(
-                    'Melde dich mit deinem Konto an oder wähle einen '
-                    'Demo-Zugang.',
+                    onDemoLogin == null
+                        ? 'Melde dich mit deinem Konto an.'
+                        : 'Melde dich mit deinem Konto an oder sieh dich mit '
+                            'dem Demo-Zugang um.',
                     style: AppTypography.body(
                       size: 14,
                       color: AppColors.textMuted,
@@ -283,72 +293,42 @@ class _FormPanel extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.s5),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(color: AppColors.borderSubtle),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-                      child: Text(
-                        'Demo-Zugänge',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
+                // Genau EIN Demozugang, und nur wenn der Build einen
+                // mitbringt. Vorher standen hier drei fest verdrahtete Paare,
+                // darunter `system_admin` und `shareholder` — in einem
+                // öffentlichen Repository und auf einer öffentlichen Seite.
+                if (onDemoLogin != null) ...[
+                  const SizedBox(height: AppSpacing.s5),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: AppColors.borderSubtle),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s3,
+                        ),
+                        child: Text(
+                          'Demo-Zugang',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ),
-                    ),
-                    const Expanded(
-                      child: Divider(color: AppColors.borderSubtle),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.admin_panel_settings_outlined,
-                        label: 'Admin',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-admin@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
+                      const Expanded(
+                        child: Divider(color: AppColors.borderSubtle),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.s2),
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.badge_outlined,
-                        label: 'Mitarbeiter',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-gs@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s2),
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.storefront_outlined,
-                        label: 'Kunde',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-kunde@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.s3),
+                  _DemoChip(
+                    icon: Icons.storefront_outlined,
+                    label: 'Als Demo-Kunde ansehen',
+                    onTap: isLoading ? null : onDemoLogin,
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.s6),
                 Wrap(
                   alignment: WrapAlignment.center,

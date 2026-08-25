@@ -13,6 +13,8 @@ class AppConfig {
     this.googleReviewUrl = '',
     this.appPublicUrl = defaultAppPublicUrl,
     this.environment = 'dev',
+    this.demoLoginEmail = '',
+    this.demoLoginPassword = '',
   });
 
   /// Adresse, unter der die Web-App erreichbar ist.
@@ -36,6 +38,21 @@ class AppConfig {
   final String googleReviewUrl;
   final String appPublicUrl;
   final String environment;
+
+  /// Zugangsdaten des öffentlichen Demokontos für den Anmeldebildschirm.
+  ///
+  /// Bewusst leer voreingestellt und NICHT im Quelltext hinterlegt. Bis zum
+  /// 24.08.2026 standen drei Paare fest im Anmeldebildschirm — darunter eines
+  /// für `system_admin` und eines für `shareholder`. Dieses Repository ist
+  /// öffentlich, und die Web-Demo ist es auch: Damit stand die Kombination
+  /// aus Rolle, Adresse und Kennwort an zwei öffentlichen Stellen.
+  ///
+  /// Ein Demokonto darf nur ein Kundenkonto sein, und sein Kennwort gehört
+  /// in die Build-Konfiguration, wo es sich ohne Codeänderung wechseln lässt.
+  /// Ist eines der beiden Felder leer, zeigt der Anmeldebildschirm gar keine
+  /// Demo-Schaltfläche — das ist der sichere Ausgangszustand.
+  final String demoLoginEmail;
+  final String demoLoginPassword;
 
   bool get hasSentry => sentryDsn.isNotEmpty;
   bool get hasAnalytics => posthogApiKey.isNotEmpty;
@@ -62,8 +79,17 @@ class AppConfig {
         defaultValue: defaultAppPublicUrl,
       ),
       environment: String.fromEnvironment('APP_ENV', defaultValue: 'dev'),
+      demoLoginEmail: String.fromEnvironment('DEMO_LOGIN_EMAIL'),
+      demoLoginPassword: String.fromEnvironment('DEMO_LOGIN_PASSWORD'),
     );
   }
 
   bool get isValid => supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+
+  /// Nur wahr, wenn BEIDE Felder gefüllt sind. Ein halb gesetztes Paar
+  /// ergäbe eine Schaltfläche, die verlässlich scheitert — genau das ist am
+  /// 24.08.2026 passiert, als die fest verdrahteten Kennwörter längst
+  /// gewechselt waren und der Anmeldebildschirm sie trotzdem noch anbot.
+  bool get hasDemoLogin =>
+      demoLoginEmail.isNotEmpty && demoLoginPassword.isNotEmpty;
 }

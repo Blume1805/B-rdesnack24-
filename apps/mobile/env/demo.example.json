@@ -6,5 +6,8 @@
   "SENTRY_DSN": "",
   "POSTHOG_API_KEY": "",
   "POSTHOG_HOST": "https://eu.posthog.com",
-  "GOOGLE_REVIEW_URL": ""
+  "GOOGLE_REVIEW_URL": "",
+  "_hinweis_demo_login": "Leer = der Anmeldebildschirm zeigt KEINE Demo-Schaltflaeche. Das ist der sichere Ausgangszustand. Wer einen oeffentlichen Demo-Zugang anbieten will, traegt hier ausschliesslich ein KUNDENKONTO ein — niemals eines mit der Rolle system_admin oder shareholder. Beide Werte landen im gebauten Bundle und sind damit oeffentlich; das Kennwort gehoert deshalb nur einem Konto, das nichts sehen kann, was nicht ohnehin jeder Kunde sieht.",
+  "DEMO_LOGIN_EMAIL": "",
+  "DEMO_LOGIN_PASSWORD": ""
 }
