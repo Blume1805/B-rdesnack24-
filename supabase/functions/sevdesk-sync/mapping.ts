@@ -1,6 +1,8 @@
 // Reine, testbare Hilfsfunktionen des sevDesk-Connectors (ohne Seiteneffekte).
 export type Direction = "revenue" | "expense";
 
+const VIERSTELLIG = /^[1-9]\d{3}$/;
+
 // ============================================================================
 // RICHTUNG: creditDebit, und warum die Zuordnung am 25.08.2026 gedreht wurde
 // ----------------------------------------------------------------------------
@@ -35,60 +37,76 @@ export function fallbackKonto(direction: Direction, taxRate: number): string {
 /** Alte Bezeichnung, bis alle Aufrufer umgestellt sind. */
 export const mapToAccount = fallbackKonto;
 
-// Schlüsselnamen, hinter denen eine Kontonummer stehen kann. Bewusst eng:
-// Ein zu weiter Filter würde interne sevDesk-Objekt-IDs (ebenfalls vier
-// Ziffern) als Konto durchgehen lassen.
-const KONTO_SCHLUESSEL = /(account|konto|datev|skr)/i;
-const VIERSTELLIG = /^[1-9]\d{3}$/;
+// ============================================================================
+// KONTO: die Position verweist, sie nennt nicht
+// ----------------------------------------------------------------------------
+// Die Strukturprobe vom 25.08.2026 zeigt es: Die Belegposition trägt
+// `accountDatev` — aber als OBJEKT {id, objectName}, nicht als Nummer. Die
+// Kontonummer steht am AccountDatev-Objekt selbst und muss über /AccountDatev
+// aufgelöst werden.
+//
+// Die frühere Suche nach vierstelligen Werten unter kontoartigen Schlüsseln
+// ist damit ersatzlos entfallen. Sie war eine Notlösung, solange die echten
+// Feldnamen unbekannt waren, und sie hätte mit dem vollständigen
+// SKR-03-Stamm sogar Schaden angerichtet: Wenn fast jede vierstellige Zahl
+// ein gültiges Konto ist, taugt „steht im Kontenstamm" nicht mehr als Prüfer.
+// ============================================================================
 
 /**
- * Sammelt ALLE vierstelligen Werte, die unter einem kontoartigen Schlüssel
- * stehen — auch die, die im Kontenstamm fehlen.
+ * Zieht die Kontonummer aus einem AccountDatev-Objekt von sevDesk.
  *
- * Getrennt von der Auswahl, damit das Sync-Protokoll melden kann, welche
- * Konten sevDesk benutzt, die wir noch nicht führen. Ohne diese Liste müsste
- * man raten, welche Konten der Stamm noch braucht.
+ * Wie das Feld heisst, ist von hier aus nicht nachprüfbar (api.sevdesk.de ist
+ * gesperrt). Deshalb erst die naheliegenden Namen, dann als Rückfall jedes
+ * Feld, das wie eine Kontonummer aussieht — auf einem Kontoobjekt ist eine
+ * drei- bis vierstellige Zahl nichts anderes. `id` und `objectName` sind
+ * ausgenommen: Die `id` ist die sevDesk-Objektkennung, nicht das Konto.
  */
-export function sammleKontoKandidaten(
-  wert: unknown,
-  tiefe = 0,
-  raus: string[] = [],
-): string[] {
-  if (tiefe > 5 || wert === null || typeof wert !== "object") return raus;
-
-  if (Array.isArray(wert)) {
-    for (const element of wert) sammleKontoKandidaten(element, tiefe + 1, raus);
-    return raus;
-  }
-
-  for (const [schluessel, v] of Object.entries(wert as Record<string, unknown>)) {
-    if (
-      KONTO_SCHLUESSEL.test(schluessel) &&
-      (typeof v === "string" || typeof v === "number")
-    ) {
-      const code = String(v).trim();
-      if (VIERSTELLIG.test(code) && !raus.includes(code)) raus.push(code);
+export function kontonummerAusDatev(obj: unknown): string | null {
+  if (!obj || typeof obj !== "object") return null;
+  const o = obj as Record<string, unknown>;
+  for (const k of ["number", "accountNumber", "datevNumber", "account", "nr"]) {
+    const v = o[k];
+    if (typeof v === "string" || typeof v === "number") {
+      const s = String(v).trim();
+      if (/^\d{3,4}$/.test(s)) return s.padStart(4, "0");
     }
-    sammleKontoKandidaten(v, tiefe + 1, raus);
   }
-  return raus;
+  for (const [k, v] of Object.entries(o)) {
+    if (k === "id" || k === "objectName") continue;
+    if (typeof v !== "string" && typeof v !== "number") continue;
+    const s = String(v).trim();
+    if (/^\d{3,4}$/.test(s)) return s.padStart(4, "0");
+  }
+  return null;
+}
+
+/** Lesbarer Name eines AccountDatev-Objekts, sofern vorhanden. */
+export function kontonameAusDatev(obj: unknown): string | null {
+  if (!obj || typeof obj !== "object") return null;
+  const o = obj as Record<string, unknown>;
+  for (const k of ["name", "description", "caption"]) {
+    const v = o[k];
+    if (typeof v === "string" && v.trim()) return v.trim().slice(0, 120);
+  }
+  return null;
 }
 
 /**
- * Wählt aus den Kandidaten das erste Konto, das im Kontenstamm steht.
- *
- * Der Kontenstamm ist hier der Prüfer: Nur was in `public.finance_accounts`
- * steht, wird übernommen. Damit kann diese Suche nicht „danebengreifen" —
- * im schlimmsten Fall findet sie nichts und der Aufrufer nimmt das
- * Sammelkonto.
+ * Die referenzierte AccountDatev-Kennung einer Belegposition.
+ * `geschaetzt` liest stattdessen `estimatedAccountDatev` — den Vorschlag,
+ * den sevDesk macht, wenn noch nicht endgültig kontiert wurde.
  */
-export function findeKontoCode(
-  wert: unknown,
-  bekannt: ReadonlySet<string>,
+export function datevIdAusPosition(
+  p: Record<string, unknown>,
+  geschaetzt = false,
 ): string | null {
-  for (const code of sammleKontoKandidaten(wert)) {
-    if (bekannt.has(code)) return code;
+  const feld = geschaetzt ? p.estimatedAccountDatev : p.accountDatev;
+  if (feld && typeof feld === "object") {
+    const id = (feld as Record<string, unknown>).id;
+    if (typeof id === "string" || typeof id === "number") return String(id);
   }
+  // Manche Antworten liefern die Nummer direkt statt eines Verweises.
+  if (typeof feld === "string" || typeof feld === "number") return String(feld);
   return null;
 }
 

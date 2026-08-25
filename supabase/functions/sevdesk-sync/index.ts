@@ -26,6 +26,10 @@
 //    mit 200 und ohne Positionen; im Beleg steht kein einziges Kontofeld.
 //    Ergebnis: 44 von 44 Buchungen auf einem Sammelkonto. Die Positionen
 //    werden jetzt ueber /VoucherPos einzeln geholt.
+//    NACHTRAG, zweiter Lauf: Die Position traegt `accountDatev` — aber als
+//    OBJEKT {id, objectName}. Die Kontonummer steht am AccountDatev-Objekt
+//    und wird ueber /AccountDatev aufgeloest. Erst damit kommen die echten
+//    SKR-03-Konten an; vorher lag alles auf 3300/3400 (Wareneingang).
 // 2. `creditDebit` war genau falsch herum zugeordnet (siehe mapping.ts).
 // 3. `description` ist nicht die Beschreibung, sondern die Belegnummer. Der
 //    Geschaeftspartner steht in `supplierName`.
@@ -50,11 +54,13 @@ import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 import {
   belegIdAusPosition,
   belegProbe,
+  datevIdAusPosition,
   fallbackKonto,
-  findeKontoCode,
+  kontonameAusDatev,
+  kontonummerAusDatev,
   parseVoucher,
   richtungAusKonto,
-  sammleKontoKandidaten,
+  steuersatz,
 } from "./mapping.ts";
 
 const SEITE = 100;
@@ -112,6 +118,40 @@ async function holePositionen(
   }
 }
 
+/**
+ * Holt den DATEV-Kontenplan von sevDesk: Objektkennung -> {Nummer, Name}.
+ *
+ * Die Belegposition verweist nur auf ein AccountDatev-Objekt. Ohne diese
+ * Auflösung ist die Kontonummer nicht zu bekommen — genau daran lag es, dass
+ * im zweiten Lauf alle 44 Buchungen auf dem Sammelkonto landeten.
+ */
+async function holeKontenplan(
+  baseUrl: string,
+  token: string,
+): Promise<{
+  konten: Map<string, { nummer: string; name: string | null }>;
+  fehler: string | null;
+  probe: Record<string, unknown> | null;
+}> {
+  const konten = new Map<string, { nummer: string; name: string | null }>();
+  try {
+    const objekte = await holeAlle(`${baseUrl}/AccountDatev`, token, "AccountDatev");
+    for (const o of objekte) {
+      const id = o.id;
+      const nummer = kontonummerAusDatev(o);
+      if ((typeof id !== "string" && typeof id !== "number") || !nummer) continue;
+      konten.set(String(id), { nummer, name: kontonameAusDatev(o) });
+    }
+    return {
+      konten,
+      fehler: null,
+      probe: objekte.length > 0 ? belegProbe(objekte[0]) : null,
+    };
+  } catch (e) {
+    return { konten, fehler: String(e), probe: null };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
@@ -165,8 +205,9 @@ Deno.serve(async (req) => {
   const runId = run?.id as string | undefined;
 
   try {
-    // 4) Kontenstamm laden — er ist zugleich der Prüfer für Kontonummern
-    //    aus sevDesk (siehe findeKontoCode).
+    // 4) Kontenstamm laden. Er ist kein Prüfer mehr, sondern eine Nachschlage-
+    //    liste: Der vollständige SKR 03 steht seit Migration 0127 darin, und
+    //    was sevDesk trotzdem meldet und dort fehlt, wird unten angelegt.
     const { data: konten, error: kontenErr } = await admin
       .from("finance_accounts")
       .select("code");
@@ -178,13 +219,19 @@ Deno.serve(async (req) => {
       sevBase,
       sevToken,
     );
+    const { konten: datev, fehler: kontenplanFehler, probe: kontenProbe } =
+      await holeKontenplan(sevBase, sevToken);
 
     let ohneDatum = 0;
     let ausserhalb = 0;
     let ausSevdesk = 0;
+    let ausSammelkonto = 0;
+    let ausVorschlag = 0;
     let richtungAusKontoZahl = 0;
     let ohnePositionen = 0;
-    const unbekannteKonten = new Map<string, number>();
+    // Konten, die angelegt oder deren Name an sevDesk angeglichen wird.
+    const kontenPflege = new Map<string, string | null>();
+    const neueKonten: string[] = [];
     let positionsProbe: Record<string, unknown> | null = null;
 
     const rows: Record<string, unknown>[] = [];
@@ -200,47 +247,108 @@ Deno.serve(async (req) => {
       }
 
       const positionen = nachBeleg.get(r.source_ref) ?? [];
-      if (positionen.length === 0) ohnePositionen++;
       if (positionsProbe === null && positionen.length > 0) {
         positionsProbe = belegProbe(positionen[0]);
       }
 
-      // Konto zuerst an der Position suchen, dann am Beleg. Die Position ist
-      // die Stelle, an der sevDesk kontiert — der Beleg trägt kein Konto.
-      const sevKonto = findeKontoCode(positionen, bekannt) ??
-        findeKontoCode(beleg, bekannt);
-      if (sevKonto) ausSevdesk++;
-
-      // Was sevDesk an Konten nennt, das wir NICHT führen: zählen statt
-      // verschweigen. Sonst bliebe unklar, um welche Konten der Stamm zu
-      // ergänzen ist, und das Sammelkonto wäre der Dauerzustand.
-      if (!sevKonto) {
-        for (const code of sammleKontoKandidaten(positionen)) {
-          unbekannteKonten.set(code, (unbekannteKonten.get(code) ?? 0) + 1);
-        }
+      // Eine Buchung JE POSITION, nicht je Beleg. sevDesk kontiert auf der
+      // Position; ein Beleg mit Wareneinkauf und Verpackung gehört auf zwei
+      // Konten. Wer je Beleg bucht, muss sich für eines entscheiden — und
+      // liegt bei jedem gemischten Beleg daneben.
+      if (positionen.length === 0) {
+        ohnePositionen++;
+        ausSammelkonto++;
+        rows.push({
+          booking_date: r.booking_date,
+          account_code: fallbackKonto(r.direction, r.tax_rate),
+          description: r.description,
+          amount_net: r.amount_net,
+          amount_tax: r.amount_tax,
+          tax_rate: r.tax_rate,
+          direction: r.direction,
+          source: "sevdesk",
+          source_ref: r.source_ref,
+          source_account_code: null,
+          sync_run_id: runId,
+          created_by: userData.user.id,
+        });
+        continue;
       }
 
-      // Steht ein eindeutiges SKR-03-Konto am Beleg, ist es die bessere
-      // Quelle für die Richtung als ein Kennbuchstabe: Es kommt aus der
-      // Buchhaltung selbst.
-      const ausKonto = richtungAusKonto(sevKonto);
-      if (ausKonto !== null && ausKonto !== r.direction) richtungAusKontoZahl++;
-      const direction = ausKonto ?? r.direction;
+      for (const pos of positionen) {
+        const posId = String(pos.id ?? "");
+        // Erst das gebuchte Konto, dann der Vorschlag von sevDesk.
+        const idGebucht = datevIdAusPosition(pos, false);
+        const idVorschlag = datevIdAusPosition(pos, true);
+        let treffer = idGebucht ? datev.get(idGebucht) : undefined;
+        if (!treffer && idVorschlag) {
+          treffer = datev.get(idVorschlag);
+          if (treffer) ausVorschlag++;
+        }
+        const sevKonto = treffer?.nummer ?? null;
 
-      rows.push({
-        booking_date: r.booking_date,
-        account_code: sevKonto ?? fallbackKonto(direction, r.tax_rate),
-        description: r.description,
-        amount_net: r.amount_net,
-        amount_tax: r.amount_tax,
-        tax_rate: r.tax_rate,
-        direction,
-        source: "sevdesk",
-        source_ref: r.source_ref,
-        source_account_code: sevKonto,
-        sync_run_id: runId,
-        created_by: userData.user.id,
-      });
+        if (sevKonto) {
+          ausSevdesk++;
+          // Konten, die sevDesk benutzt und der Stamm nicht kennt, werden
+          // angelegt statt verworfen. Sonst wandert die Buchung auf ein
+          // Sammelkonto, und die App zeigt etwas anderes als die Buchhaltung.
+          if (!bekannt.has(sevKonto) && !neueKonten.includes(sevKonto)) {
+            neueKonten.push(sevKonto);
+          }
+          if (!kontenPflege.has(sevKonto)) {
+            kontenPflege.set(sevKonto, treffer?.name ?? null);
+          }
+        } else {
+          ausSammelkonto++;
+        }
+
+        const netto = Math.abs(Number(pos.sumNet ?? r.amount_net));
+        const steuer = Math.abs(Number(pos.sumTax ?? r.amount_tax));
+        // Der Steuersatz steht an der Position im Klartext („19") — das ist
+        // besser als jede Herleitung aus gerundeten Cent-Beträgen.
+        const satz = steuersatz(pos.taxRate, netto, steuer);
+
+        const ausKonto = richtungAusKonto(sevKonto);
+        if (ausKonto !== null && ausKonto !== r.direction) richtungAusKontoZahl++;
+        const direction = ausKonto ?? r.direction;
+
+        rows.push({
+          booking_date: r.booking_date,
+          account_code: sevKonto ?? fallbackKonto(direction, satz),
+          description: r.description,
+          amount_net: netto,
+          amount_tax: steuer,
+          tax_rate: satz,
+          direction,
+          source: "sevdesk",
+          // Beleg UND Position: Ein Beleg kann mehrere Positionen haben, und
+          // ohne die Position wäre der Schlüssel nicht eindeutig.
+          source_ref: posId ? `${r.source_ref}-${posId}` : r.source_ref,
+          source_account_code: sevKonto,
+          sync_run_id: runId,
+          created_by: userData.user.id,
+        });
+      }
+    }
+
+    // 5) Fehlende Konten anlegen, BEVOR gebucht wird — der Fremdschlüssel
+    //    von finance_bookings.account_code verlangt sie.
+    // Nennt sevDesk einen Namen, gilt DIESER — auch für ein Konto, das der
+    // Stamm schon führt. Der Auftraggeber soll in der App dieselbe
+    // Bezeichnung sehen wie in sevDesk; eine abweichende Beschriftung für
+    // dasselbe Konto ist genau die Verwirrung, die niemand braucht.
+    if (kontenPflege.size > 0) {
+      const anlegen = [...kontenPflege].map(([code, name]) => ({
+        code,
+        name: name ?? `Konto ${code} (sevDesk)`,
+        direction: richtungAusKonto(code) ??
+          (Number(code) >= 1700 && Number(code) <= 1999 ? "liability" : "asset"),
+        sort_order: Number(code),
+      }));
+      const { error: kErr } = await admin
+        .from("finance_accounts")
+        .upsert(anlegen, { onConflict: "code" });
+      if (kErr) throw kErr;
     }
 
     let upserted = 0;
@@ -256,20 +364,23 @@ Deno.serve(async (req) => {
       belege_gesamt: belege.length,
       positionen_belege: nachBeleg.size,
       positionen_fehler: positionsFehler,
+      kontenplan_eintraege: datev.size,
+      kontenplan_fehler: kontenplanFehler,
       ohne_verwertbares_datum: ohneDatum,
       ausserhalb_zeitraum: ausserhalb,
-      im_zeitraum: rows.length,
+      buchungen: rows.length,
       konto_aus_sevdesk: ausSevdesk,
-      konto_aus_sammelkonto: rows.length - ausSevdesk,
+      konto_aus_sammelkonto: ausSammelkonto,
+      konto_aus_vorschlag: ausVorschlag,
       belege_ohne_positionen: ohnePositionen,
       richtung_vom_konto_korrigiert: richtungAusKontoZahl,
       kontenstamm_groesse: bekannt.size,
-      // Konten, die sevDesk nennt und der Stamm nicht kennt — genau die
-      // Liste, um die der Stamm zu ergänzen ist.
-      unbekannte_konten: Object.fromEntries(unbekannteKonten),
+      neu_angelegte_konten: neueKonten,
+      konten_gepflegt: kontenPflege.size,
       // Nur je ein Objekt, und davon nur Feldnamen + Buchungswerte.
       strukturprobe: belege.length > 0 ? belegProbe(belege[0]) : null,
       strukturprobe_position: positionsProbe,
+      strukturprobe_konto: kontenProbe,
     };
 
     await admin.from("sevdesk_sync_runs").update({

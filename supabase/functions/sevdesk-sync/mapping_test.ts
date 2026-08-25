@@ -3,12 +3,13 @@ import {
   belegIdAusPosition,
   belegProbe,
   bezeichnung,
+  datevIdAusPosition,
   fallbackKonto,
-  findeKontoCode,
+  kontonameAusDatev,
+  kontonummerAusDatev,
   parseVoucher,
   richtungAusCreditDebit,
   richtungAusKonto,
-  sammleKontoKandidaten,
   steuersatz,
 } from "./mapping.ts";
 
@@ -121,34 +122,42 @@ Deno.test("parseVoucher: ohne id oder ohne brauchbares Datum => null", () => {
 // ---------------------------------------------------------------------------
 // Konto
 // ---------------------------------------------------------------------------
-const STAMM = new Set(["3300", "3400", "4240", "8300", "8400"]);
-
-Deno.test("findeKontoCode: Konto an der Belegposition", () => {
-  const positionen = [{ accountingType: { accountNumber: "4240" } }];
-  assertEquals(findeKontoCode(positionen, STAMM), "4240");
+Deno.test("kontonummerAusDatev: bevorzugt `number`", () => {
+  assertEquals(kontonummerAusDatev({ id: "27", number: "4930" }), "4930");
+  assertEquals(kontonummerAusDatev({ id: "27", accountNumber: 3300 }), "3300");
+  // Dreistellige Konten des SKR 03 werden auf vier Stellen aufgefuellt.
+  assertEquals(kontonummerAusDatev({ id: "27", number: "800" }), "0800");
 });
 
-Deno.test("findeKontoCode: unbekanntes Konto wird NICHT uebernommen", () => {
-  assertEquals(findeKontoCode({ accountDatev: "9999" }, STAMM), null);
+Deno.test("kontonummerAusDatev: `id` gilt nie als Konto", () => {
+  // Die id ist die sevDesk-Objektkennung. Waere sie zugelassen, bekaeme jede
+  // Position ein plausibel aussehendes, falsches Konto.
+  assertEquals(kontonummerAusDatev({ id: "4930", objectName: "AccountDatev" }), null);
+  assertEquals(kontonummerAusDatev(null), null);
+  assertEquals(kontonummerAusDatev("4930"), null);
 });
 
-Deno.test("findeKontoCode: interne IDs gelten nicht als Konto", () => {
-  // `id` und `objectName` tragen keinen Kontoschluessel im Namen; die 3400
-  // hier ist eine sevDesk-Objekt-ID und darf nicht als Konto durchgehen.
-  assertEquals(
-    findeKontoCode({ supplier: { id: "3400", objectName: "Contact" } }, STAMM),
-    null,
-  );
+Deno.test("kontonummerAusDatev: Rueckfall auf ein unbekanntes Feld", () => {
+  // Wie das Feld wirklich heisst, ist von hier aus nicht pruefbar. Auf einem
+  // Kontoobjekt ist eine vierstellige Zahl aber nichts anderes als das Konto.
+  assertEquals(kontonummerAusDatev({ id: "27", datev: "4240" }), "4240");
 });
 
-Deno.test("sammleKontoKandidaten: meldet auch unbekannte Konten", () => {
-  const positionen = [
-    { accountingType: { accountNumber: "6815" } },
-    { accountDatev: "4930" },
-  ];
-  assertEquals(sammleKontoKandidaten(positionen), ["6815", "4930"]);
-  // …und genau die tauchen dann als "unbekannt" im Protokoll auf.
-  assertEquals(findeKontoCode(positionen, STAMM), null);
+Deno.test("kontonameAusDatev: Name, wenn vorhanden", () => {
+  assertEquals(kontonameAusDatev({ name: " Buerobedarf " }), "Buerobedarf");
+  assertEquals(kontonameAusDatev({ id: "27" }), null);
+});
+
+Deno.test("datevIdAusPosition: gebucht vor geschaetzt", () => {
+  const pos = {
+    accountDatev: { id: "27", objectName: "AccountDatev" },
+    estimatedAccountDatev: { id: "99", objectName: "AccountDatev" },
+  };
+  assertEquals(datevIdAusPosition(pos, false), "27");
+  assertEquals(datevIdAusPosition(pos, true), "99");
+  assertEquals(datevIdAusPosition({}, false), null);
+  // Liefert sevDesk ausnahmsweise die Nummer direkt statt eines Verweises:
+  assertEquals(datevIdAusPosition({ accountDatev: "4930" }, false), "4930");
 });
 
 Deno.test("belegIdAusPosition: verschachtelt und flach", () => {
