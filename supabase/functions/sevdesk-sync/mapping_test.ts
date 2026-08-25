@@ -122,11 +122,27 @@ Deno.test("parseVoucher: ohne id oder ohne brauchbares Datum => null", () => {
 // ---------------------------------------------------------------------------
 // Konto
 // ---------------------------------------------------------------------------
-Deno.test("kontonummerAusDatev: bevorzugt `number`", () => {
-  assertEquals(kontonummerAusDatev({ id: "27", number: "4930" }), "4930");
-  assertEquals(kontonummerAusDatev({ id: "27", accountNumber: 3300 }), "3300");
-  // Dreistellige Konten des SKR 03 werden auf vier Stellen aufgefuellt.
-  assertEquals(kontonummerAusDatev({ id: "27", number: "800" }), "0800");
+Deno.test("kontonummerAusDatev: SKR 03 schlaegt SKR 04", () => {
+  // Das AccountDatev-Objekt fuehrt BEIDE Kontenrahmen. Der Betrieb bucht
+  // nach SKR 03 — `number03` gilt, `number` ist der SKR 04.
+  assertEquals(
+    kontonummerAusDatev({ id: "27", number: "6815", number03: "4930" }),
+    { nummer: "4930", skr03: true },
+  );
+});
+
+Deno.test("kontonummerAusDatev: ohne SKR 03 der Rueckfall, aber markiert", () => {
+  // Eine Nummer aus dem falschen Rahmen ist immer noch brauchbarer als ein
+  // Sammelkonto — sie muss nur als solche erkennbar bleiben.
+  assertEquals(
+    kontonummerAusDatev({ id: "27", number: "6815" }),
+    { nummer: "6815", skr03: false },
+  );
+  // Dreistellige Konten werden auf vier Stellen aufgefuellt.
+  assertEquals(
+    kontonummerAusDatev({ id: "27", number03: "480" }),
+    { nummer: "0480", skr03: true },
+  );
 });
 
 Deno.test("kontonummerAusDatev: `id` gilt nie als Konto", () => {
@@ -137,14 +153,10 @@ Deno.test("kontonummerAusDatev: `id` gilt nie als Konto", () => {
   assertEquals(kontonummerAusDatev("4930"), null);
 });
 
-Deno.test("kontonummerAusDatev: Rueckfall auf ein unbekanntes Feld", () => {
-  // Wie das Feld wirklich heisst, ist von hier aus nicht pruefbar. Auf einem
-  // Kontoobjekt ist eine vierstellige Zahl aber nichts anderes als das Konto.
-  assertEquals(kontonummerAusDatev({ id: "27", datev: "4240" }), "4240");
-});
-
-Deno.test("kontonameAusDatev: Name, wenn vorhanden", () => {
-  assertEquals(kontonameAusDatev({ name: " Buerobedarf " }), "Buerobedarf");
+Deno.test("kontonameAusDatev: `name03` zum SKR-03-Konto", () => {
+  const konto = { name: "Telefon (SKR04)", name03: "Telefon" };
+  assertEquals(kontonameAusDatev(konto, true), "Telefon");
+  assertEquals(kontonameAusDatev(konto, false), "Telefon (SKR04)");
   assertEquals(kontonameAusDatev({ id: "27" }), null);
 });
 

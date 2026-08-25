@@ -53,38 +53,59 @@ export const mapToAccount = fallbackKonto;
 // ============================================================================
 
 /**
- * Zieht die Kontonummer aus einem AccountDatev-Objekt von sevDesk.
+ * Zieht die SKR-03-Kontonummer aus einem AccountDatev-Objekt von sevDesk.
  *
- * Wie das Feld heisst, ist von hier aus nicht nachprüfbar (api.sevdesk.de ist
- * gesperrt). Deshalb erst die naheliegenden Namen, dann als Rückfall jedes
- * Feld, das wie eine Kontonummer aussieht — auf einem Kontoobjekt ist eine
- * drei- bis vierstellige Zahl nichts anderes. `id` und `objectName` sind
- * ausgenommen: Die `id` ist die sevDesk-Objektkennung, nicht das Konto.
+ * DAS OBJEKT FÜHRT BEIDE KONTENRAHMEN — nachgewiesen an der Strukturprobe
+ * vom 25.08.2026:
+ *
+ *   number,   name     → SKR 04
+ *   number03, name03   → SKR 03
+ *
+ * Der erste Anlauf nahm `number` und damit den SKR 04. In der App standen
+ * dadurch 6805 „Telefon" statt 4920, 6815 „Bürobedarf" statt 4930 und 0670
+ * statt 0480 — Konten, die es im SKR 03 so nicht gibt. Der Betrieb bucht
+ * nach SKR 03, also gilt `number03`.
+ *
+ * `number` bleibt der Rückfall: Führt sevDesk zu einem Konto nur den
+ * SKR 04, ist eine Nummer aus dem falschen Rahmen immer noch brauchbarer
+ * als ein Sammelkonto — und `konto_aus_skr04` im Protokoll sagt, wie oft
+ * das vorkam.
  */
-export function kontonummerAusDatev(obj: unknown): string | null {
+export function kontonummerAusDatev(
+  obj: unknown,
+): { nummer: string; skr03: boolean } | null {
   if (!obj || typeof obj !== "object") return null;
   const o = obj as Record<string, unknown>;
-  for (const k of ["number", "accountNumber", "datevNumber", "account", "nr"]) {
+
+  const lies = (k: string): string | null => {
     const v = o[k];
-    if (typeof v === "string" || typeof v === "number") {
-      const s = String(v).trim();
-      if (/^\d{3,4}$/.test(s)) return s.padStart(4, "0");
-    }
-  }
-  for (const [k, v] of Object.entries(o)) {
-    if (k === "id" || k === "objectName") continue;
-    if (typeof v !== "string" && typeof v !== "number") continue;
+    if (typeof v !== "string" && typeof v !== "number") return null;
     const s = String(v).trim();
-    if (/^\d{3,4}$/.test(s)) return s.padStart(4, "0");
-  }
+    return /^\d{3,5}$/.test(s) ? s.padStart(4, "0") : null;
+  };
+
+  const skr03 = lies("number03") ?? lies("accountNumber03");
+  if (skr03) return { nummer: skr03, skr03: true };
+
+  const skr04 = lies("number") ?? lies("accountNumber") ?? lies("datevNumber");
+  if (skr04) return { nummer: skr04, skr03: false };
+
   return null;
 }
 
-/** Lesbarer Name eines AccountDatev-Objekts, sofern vorhanden. */
-export function kontonameAusDatev(obj: unknown): string | null {
+/**
+ * Lesbarer Name eines AccountDatev-Objekts — bevorzugt die SKR-03-Fassung.
+ * `name` und `name03` unterscheiden sich: Zu 6805 heisst es „Telefon", zu
+ * 4920 ebenfalls „Telefon", zu 0670/0480 aber „Geringwertige
+ * Wirtschaftsgüter" gegenüber einer abweichenden SKR-03-Bezeichnung.
+ */
+export function kontonameAusDatev(obj: unknown, skr03 = true): string | null {
   if (!obj || typeof obj !== "object") return null;
   const o = obj as Record<string, unknown>;
-  for (const k of ["name", "description", "caption"]) {
+  const reihe = skr03
+    ? ["name03", "name", "simpleName", "description"]
+    : ["name", "simpleName", "description"];
+  for (const k of reihe) {
     const v = o[k];
     if (typeof v === "string" && v.trim()) return v.trim().slice(0, 120);
   }

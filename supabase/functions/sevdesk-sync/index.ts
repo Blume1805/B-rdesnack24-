@@ -129,18 +129,25 @@ async function holeKontenplan(
   baseUrl: string,
   token: string,
 ): Promise<{
-  konten: Map<string, { nummer: string; name: string | null }>;
+  konten: Map<string, { nummer: string; name: string | null; skr03: boolean }>;
   fehler: string | null;
   probe: Record<string, unknown> | null;
 }> {
-  const konten = new Map<string, { nummer: string; name: string | null }>();
+  const konten = new Map<
+    string,
+    { nummer: string; name: string | null; skr03: boolean }
+  >();
   try {
     const objekte = await holeAlle(`${baseUrl}/AccountDatev`, token, "AccountDatev");
     for (const o of objekte) {
       const id = o.id;
-      const nummer = kontonummerAusDatev(o);
-      if ((typeof id !== "string" && typeof id !== "number") || !nummer) continue;
-      konten.set(String(id), { nummer, name: kontonameAusDatev(o) });
+      const treffer = kontonummerAusDatev(o);
+      if ((typeof id !== "string" && typeof id !== "number") || !treffer) continue;
+      konten.set(String(id), {
+        nummer: treffer.nummer,
+        name: kontonameAusDatev(o, treffer.skr03),
+        skr03: treffer.skr03,
+      });
     }
     return {
       konten,
@@ -229,6 +236,9 @@ Deno.serve(async (req) => {
     let ausVorschlag = 0;
     let richtungAusKontoZahl = 0;
     let ohnePositionen = 0;
+    let ausSkr04 = 0;
+    const unaufloesbar = new Set<string>();
+    const belegarten = new Map<string, number>();
     // Konten, die angelegt oder deren Name an sevDesk angeglichen wird.
     const kontenPflege = new Map<string, string | null>();
     const neueKonten: string[] = [];
@@ -245,6 +255,12 @@ Deno.serve(async (req) => {
         ausserhalb++;
         continue;
       }
+
+      // Belegart mitzählen. Wiederkehrende Belege („RV") sind Vorlagen und
+      // keine Buchungen — bislang ist keiner aufgetaucht, aber wenn doch,
+      // steht es im Protokoll statt still in der Auswertung.
+      const art = String(beleg.voucherType ?? "?");
+      belegarten.set(art, (belegarten.get(art) ?? 0) + 1);
 
       const positionen = nachBeleg.get(r.source_ref) ?? [];
       if (positionsProbe === null && positionen.length > 0) {
@@ -286,6 +302,8 @@ Deno.serve(async (req) => {
           if (treffer) ausVorschlag++;
         }
         const sevKonto = treffer?.nummer ?? null;
+        if (treffer && !treffer.skr03) ausSkr04++;
+        if (!treffer && idGebucht) unaufloesbar.add(idGebucht);
 
         if (sevKonto) {
           ausSevdesk++;
@@ -372,6 +390,9 @@ Deno.serve(async (req) => {
       konto_aus_sevdesk: ausSevdesk,
       konto_aus_sammelkonto: ausSammelkonto,
       konto_aus_vorschlag: ausVorschlag,
+      konto_aus_skr04: ausSkr04,
+      kontenplan_unaufloesbare_ids: [...unaufloesbar],
+      belegarten: Object.fromEntries(belegarten),
       belege_ohne_positionen: ohnePositionen,
       richtung_vom_konto_korrigiert: richtungAusKontoZahl,
       kontenstamm_groesse: bekannt.size,
