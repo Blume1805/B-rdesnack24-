@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 3**
+**Stand: 25.08.2026 · Fassung 4**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -187,6 +187,14 @@ halten fest, welche Buchung als zweite Erfassung desselben Geldflusses nicht
 jeweils nur über **Belegkennungen** (`voucherId-posId`) und einen festen
 Begründungstext. Lieferantennamen und Belegnummern stehen dort nicht;
 dieselbe Zurückhaltung wie bei der Strukturprobe.
+
+Seit derselben Änderung stehen dort ausserdem `richtung_abweichungen`
+(Belegkennung, Kontonummer und die beiden widersprüchlichen Richtungen — für
+Gutschriften und Erstattungen) und `partner_ist_privatkonto` (Belegkennung
+und die beiden Kontonummern). Auch sie führen **keine Freitexte**: keine
+Lieferantennamen, keine Belegnummern, keine Beträge. Am Code nachgesehen;
+anders als bei der Strukturprobe sichert das kein Test ab, weil die beiden
+Listen im Ablauf selbst entstehen und nicht in einer prüfbaren Funktion.
 
 Eine so unterdrückte Buchung wird **weich** gelöscht (`deleted_at`), nicht
 entfernt. Sie zählt nicht mehr in die Auswertung, bleibt aber unter der
