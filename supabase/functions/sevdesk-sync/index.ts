@@ -51,18 +51,17 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
-import type { Buchungsrichtung } from "./mapping.ts";
+import type { Buchungsrichtung, Direction } from "./mapping.ts";
 import {
   belegIdAusPosition,
   belegProbe,
   datevIdAusPosition,
   doppelteZahlungenFinden,
   fallbackKonto,
-  istGutschrift,
+  gutschriftenFinden,
   kontonameAusDatev,
   kontonummerAusDatev,
   parseVoucher,
-  privatkontoAusPartner,
   richtungAusKonto,
   steuersatz,
 } from "./mapping.ts";
@@ -303,17 +302,17 @@ Deno.serve(async (req) => {
     let ausSkr04 = 0;
     let privatBuchungen = 0;
     let vorlagen = 0;
-    let gutschriften = 0;
     const abweichungen: Array<{
       source_ref: string;
       konto: string | null;
       konto_richtung: string;
       beleg_richtung: string;
     }> = [];
-    const partnerPrivatkonto: Array<{
-      source_ref: string;
-      statt: string | null;
-      konto: string;
+    // Je Zeile in `rows`: woraus die Richtung stammt. Wird für die
+    // Gutschrift-Erkennung gebraucht, steht aber nicht in der Datenbank.
+    const richtungen: Array<{
+      beleg_richtung: Direction;
+      konto_richtung: Buchungsrichtung | null;
     }> = [];
     const unaufloesbar = new Set<string>();
     const belegarten = new Map<string, number>();
@@ -360,6 +359,12 @@ Deno.serve(async (req) => {
       if (positionen.length === 0) {
         ohnePositionen++;
         ausSammelkonto++;
+        // Beide Listen müssen Zeile für Zeile zusammenpassen — sonst zeigt
+        // die Gutschrift-Erkennung auf die falsche Buchung.
+        richtungen.push({
+          beleg_richtung: r.direction,
+          konto_richtung: null,
+        });
         rows.push({
           booking_date: r.booking_date,
           account_code: fallbackKonto(r.direction, r.tax_rate),
@@ -387,20 +392,12 @@ Deno.serve(async (req) => {
           treffer = datev.get(idVorschlag);
           if (treffer) ausVorschlag++;
         }
-        // Nennt der Beleg als Partner eine Privatkontonummer, gilt DIESE.
-        // Der Beleg vom 31.12.2025 trägt `supplierName = "1890"` und war in
-        // sevDesk auf 4651 kontiert — eine Privateinlage, die als
-        // Betriebsausgabe erschien. Begründung in mapping.ts.
-        const ausPartner = privatkontoAusPartner(r.description);
-        const sevKonto = ausPartner ?? treffer?.nummer ?? null;
-        if (ausPartner) {
-          partnerPrivatkonto.push({
-            source_ref: `${r.source_ref}-${posId}`,
-            statt: treffer?.nummer ?? null,
-            konto: ausPartner,
-          });
-        }
-        if (!ausPartner && treffer && !treffer.skr03) ausSkr04++;
+        // Was sevDesk kontiert hat, gilt. Eine vierstellige Privatkonto-
+        // nummer im Partnerfeld ist das GEGENKONTO der Buchung, nicht das
+        // Buchungskonto — nachgewiesen an der Homeoffice-Pauschale vom
+        // 31.12.2025 (Partner „1890", Konto 4651, echte Betriebsausgabe).
+        const sevKonto = treffer?.nummer ?? null;
+        if (treffer && !treffer.skr03) ausSkr04++;
         if (!treffer && idGebucht) unaufloesbar.add(idGebucht);
 
         if (sevKonto) {
@@ -440,13 +437,13 @@ Deno.serve(async (req) => {
         if (ausKonto === "liability") privatBuchungen++;
         const direction = ausKonto ?? r.direction;
 
-        // Gutschrift/Erstattung: Konto und Beleg widersprechen sich auf einem
-        // ERFOLGSKONTO. Die Buchung bleibt, wo sie hingehört, und bekommt ein
-        // negatives Vorzeichen — eine Erstattung mindert den Aufwand, sie ist
-        // kein Erlös. Bei Privat- und Bestandskonten ist der Widerspruch der
-        // Normalfall und kein Storno; dort passiert nichts.
-        const vorzeichen = istGutschrift(ausKonto, r.direction) ? -1 : 1;
-        if (vorzeichen === -1) gutschriften++;
+        // Ob das eine Gutschrift ist, entscheidet sich erst, wenn alle
+        // Positionen beisammen sind — es braucht die Gegenbuchung. Hier wird
+        // nur mitgeschrieben, woraus sich die Richtung ergeben hat.
+        richtungen.push({
+          beleg_richtung: r.direction,
+          konto_richtung: ausKonto,
+        });
 
         rows.push({
           booking_date: r.booking_date,
@@ -456,8 +453,8 @@ Deno.serve(async (req) => {
           // identisch mit `r.direction`.
           account_code: sevKonto ?? fallbackKonto(r.direction, satz),
           description: r.description,
-          amount_net: vorzeichen * netto,
-          amount_tax: vorzeichen * steuer,
+          amount_net: netto,
+          amount_tax: steuer,
           tax_rate: satz,
           direction,
           source: "sevdesk",
@@ -469,6 +466,31 @@ Deno.serve(async (req) => {
           created_by: userData.user.id,
         });
       }
+    }
+
+    // 4a) Erstattungen und Gutschriften: negativ buchen statt doppelt.
+    //     Nachgewiesen ist eine Erstattung nur MIT Gegenbuchung — gleiche
+    //     Rechnungsnummer, gleicher Partner, gleicher Betrag, gleiches Konto.
+    //     Ein blosser Widerspruch zwischen Konto und `creditDebit` reicht
+    //     nicht: Die Homeoffice-Pauschale vom 31.12.2025 wird gegen ein
+    //     Kapitalkonto gebucht und sieht genauso aus, ist aber ein echter
+    //     Aufwand. Begründung in mapping.ts.
+    const gutschrift = gutschriftenFinden(
+      rows.map((r, i) => ({
+        booking_date: String(r.booking_date),
+        account_code: String(r.account_code),
+        description: (r.description as string | null) ?? null,
+        amount_net: Number(r.amount_net),
+        amount_tax: Number(r.amount_tax),
+        direction: r.direction as Buchungsrichtung,
+        source_ref: String(r.source_ref),
+        beleg_richtung: richtungen[i].beleg_richtung,
+        konto_richtung: richtungen[i].konto_richtung,
+      })),
+    );
+    for (const i of gutschrift.negieren) {
+      rows[i].amount_net = -Math.abs(Number(rows[i].amount_net));
+      rows[i].amount_tax = -Math.abs(Number(rows[i].amount_tax));
     }
 
     // 4b) Denselben Geldfluss nur einmal buchen.
@@ -567,8 +589,8 @@ Deno.serve(async (req) => {
       belege_ohne_positionen: ohnePositionen,
       richtung_vom_konto_korrigiert: richtungAusKontoZahl,
       richtung_abweichungen: abweichungen,
-      gutschriften,
-      partner_ist_privatkonto: partnerPrivatkonto,
+      gutschriften: gutschrift.negieren.length,
+      gutschrift_ohne_gegenbuchung: gutschrift.ohneGegenbuchung,
       kontenstamm_groesse: bekannt.size,
       neu_angelegte_konten: neueKonten,
       konten_gepflegt: kontenPflege.size,

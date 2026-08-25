@@ -125,24 +125,30 @@ von einem Kauf zu unterscheiden: Zwei Amazon-Belege mit derselben
 Rechnungsnummer standen beide als Aufwand, Bürobedarf war um 45,42 € zu
 hoch.
 
-Widersprechen sich beide auf einem **Erfolgskonto** (3xxx/4xxx/8xxx), ist
-es eine Gutschrift: Die Buchung bleibt auf ihrem Konto und in ihrer
-Richtung und bekommt einen **negativen Betrag** (`istGutschrift`). Eine
-Erstattung ist kein Erlös — sie mindert den Aufwand. Auf Privat-,
-Bestands- und Umsatzsteuerkonten ist der Widerspruch dagegen der
-Normalfall und kein Storno: Eine Einlage ist Geld herein und trotzdem
-kein Erlös.
+**Ein Widerspruch allein ist aber noch keine Gutschrift.** Der erste
+Anlauf negierte jeden Beleg, der auf einem Erfolgskonto gegen seine
+Kontorichtung läuft. Das hätte die **Homeoffice-Pauschale** getroffen:
+Sie wird als Aufwand gegen ein Kapitalkonto gebucht, meldet deshalb „Geld
+herein" und ist trotzdem eine echte Betriebsausgabe. Nachgewiesen ist
+eine Erstattung erst mit **Gegenbuchung** — gleiches Konto, gleicher
+Partner, gleiche Rechnungsnummer, gleicher Betrag
+(`gutschriftenFinden`). Dann bekommt die Buchung, die gegen die
+Kontorichtung läuft, einen negativen Betrag und bleibt auf ihrem Konto;
+eine Erstattung ist kein Erlös, sie mindert den Aufwand. Ohne
+Gegenbuchung wird nur gemeldet (`gutschrift_ohne_gegenbuchung`).
 
 In der Darstellung dreht ein negativer Betrag den Geldfluss um
 (`geldfluss`): Eine Erstattung steht grün und **ohne** Minus, nicht rot.
 
-**Ein Privatkonto im Partnerfeld schlägt das sevDesk-Konto.** Trägt ein
-Beleg als `supplierName` genau vier Ziffern im Bereich 1800–1999, ist das
-Konto gemeint, nicht ein Lieferant (`privatkontoAusPartner`). Anlass: ein
-Beleg mit Partner „1890" war in sevDesk auf 4651 kontiert und stand als
-Betriebsausgabe. Das ist die **einzige** Stelle, an der die App bewusst
-von sevDesk abweicht; sie steht im Protokoll (`partner_ist_privatkonto`)
-und ist dem Auftraggeber zu melden, damit der Beleg dort umkontiert wird.
+**Was im Partnerfeld steht, ist nicht das Buchungskonto.** Ein Beleg
+trug als `supplierName` die Zeichenfolge `1890`, und daraus wurde
+geschlossen, er gehöre auf das Konto „Privateinlagen". Falsch: `1890`
+war das **Gegenkonto**; das Buchungskonto 4651 stimmte. Die daraus
+gebaute Regel `privatkontoAusPartner` ist wieder entfallen (Migration
+0133). Sie war aus einem einzigen Beleg hergeleitet, ohne die Bedeutung
+des Feldes zu prüfen — und sie hätte die App an genau der Stelle von
+sevDesk abweichen lassen, an der sevDesk recht hatte. Aus einem Feld,
+das man nicht versteht, wird keine Buchungsregel.
 
 **Eine Quelle für die Richtung.** `finance_summary` und
 `finance_bookings_list` nehmen beide `finance_bookings.direction`, nicht

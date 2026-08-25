@@ -600,11 +600,12 @@ export function doppelteZahlungenFinden(zeilen: Zahlungszeile[]): Doppelbefund {
 // ============================================================================
 
 /**
- * Ist die Position eine Gutschrift/Storno auf einem Erfolgskonto?
+ * Widersprechen sich Konto und Belegkennzeichen auf einem Erfolgskonto?
  *
- * Nur für Aufwands- und Erlöskonten. Bei Privat-, Bestands- und
- * Umsatzsteuerkonten sagt `richtungAusKonto` etwas anderes als eine
- * Zahlungsrichtung, dort wäre der Vergleich sinnlos.
+ * Für sich genommen ist das nur ein VERDACHT, keine Gutschrift — siehe
+ * `gutschriftenFinden`. Bei Privat-, Bestands- und Umsatzsteuerkonten sagt
+ * `richtungAusKonto` etwas anderes als eine Zahlungsrichtung; dort wäre der
+ * Vergleich von vornherein sinnlos.
  */
 export function istGutschrift(
   kontoRichtung: Buchungsrichtung | null,
@@ -614,27 +615,107 @@ export function istGutschrift(
   return kontoRichtung !== belegRichtung;
 }
 
+// ============================================================================
+// WARUM EIN WIDERSPRUCH ALLEIN NICHT REICHT
+// ----------------------------------------------------------------------------
+// Erster Anlauf am 25.08.2026: Jeder Widerspruch zwischen Konto und
+// `creditDebit` galt als Gutschrift und wurde negativ gebucht. Der
+// Auftraggeber hat den Fehler daran aufgedeckt, bevor er wirken konnte:
+//
+//   Der Beleg vom 31.12.2025 über 132,00 € ist die HOMEOFFICE-PAUSCHALE.
+//   Er trägt als Geschäftspartner die Zeichenfolge `1890` — das ist das
+//   GEGENKONTO der Buchung (Privateinlage), nicht das Buchungskonto. Es
+//   fliesst kein Geld; der Aufwand wird gegen das Kapitalkonto gebucht.
+//   4651 ist richtig, und es ist eine echte Betriebsausgabe.
+//
+// Damit ist auch die erste Deutung widerlegt, eine vierstellige Privatkonto-
+// nummer im Partnerfeld benenne das Buchungskonto. Sie benennt die
+// Gegenseite. Die Regel `privatkontoAusPartner` ist deshalb ersatzlos
+// entfallen — und die Lehre daraus steht hier, damit sie niemand aus
+// demselben Feldnamen noch einmal herleitet.
+//
+// Ein Beleg, der auf einem Aufwandskonto sitzt und trotzdem „Geld herein"
+// meldet, kann also beides sein: eine Erstattung ODER eine Buchung gegen ein
+// Kapitalkonto. Unterscheiden lässt sich das nur an der GEGENBUCHUNG: Eine
+// Erstattung hat ein Original — denselben Partner, dieselbe Rechnungsnummer,
+// denselben Betrag, dasselbe Konto, die andere Richtung. Die
+// Homeoffice-Pauschale hat keines.
+//
+// Ohne Gegenbuchung wird deshalb nichts negiert, sondern gemeldet
+// (`gutschrift_ohne_gegenbuchung`). Lieber ein Hinweis zu viel als ein
+// Aufwand, den die App eigenmächtig ins Minus dreht.
+// ============================================================================
+
+/** Eine Zahlungszeile samt der beiden Richtungsangaben, die sie erzeugt haben. */
+export interface Gutschriftzeile extends Zahlungszeile {
+  /** Aus `creditDebit` des Belegs: wohin das Geld läuft. */
+  beleg_richtung: Direction;
+  /** Aus der Kontonummer: Aufwand, Erlös, Privat — oder unbekannt. */
+  konto_richtung: Buchungsrichtung | null;
+}
+
+export interface Gutschriftbefund {
+  /** Indizes, deren Beträge negativ zu buchen sind. */
+  negieren: number[];
+  /** Verdacht ohne Gegenbuchung — nur gemeldet, nicht angefasst. */
+  ohneGegenbuchung: Array<{
+    source_ref: string;
+    konto: string;
+    grund: string;
+  }>;
+}
+
 /**
- * Nennt der Beleg als Geschäftspartner eine Privatkontonummer, ist dieses
- * Konto gemeint.
+ * Findet Erstattungen und Gutschriften — aber nur mit Gegenbuchung.
  *
- * Gemeldet am 25.08.2026: „Die 132 € sind auch eine Privateinlage von
- * Philipp." Der Beleg vom 31.12.2025 trägt als `supplierName` die Zeichen
- * `1890` — nicht den Namen einer Firma, sondern die Nummer des Kontos
- * „Privateinlagen". sevDesk selbst hat ihn auf 4651 kontiert; die App hat das
- * getreu übernommen und damit eine Einlage als Betriebsausgabe gezeigt.
+ * Nachgewiesen ist eine Erstattung, wenn zwei Buchungen auf DEMSELBEN Konto
+ * denselben Partner, dieselbe Rechnungsnummer und denselben Bruttobetrag
+ * tragen und eine der beiden gegen die Kontorichtung läuft. Genau so liegen
+ * die beiden Amazon-Belege über je 22,71 € auf 4930 mit der Rechnungsnummer
+ * DE62YC8JABEI.
  *
- * Die Regel ist bewusst eng: Der Partnername muss GENAU vier Ziffern sein und
- * im Privatbereich 1800–1999 liegen. Ein Lieferant, der so heisst, ist nicht
- * vorstellbar; eine Rechnungsnummer steht im anderen Feld.
- *
- * Sie weicht damit von sevDesk ab — sonst gilt hier „was sevDesk kontiert,
- * gilt". Das ist ein bewusster Sonderfall und steht im Protokoll
- * (`partner_ist_privatkonto`). Sauberer wäre, den Beleg in sevDesk auf 1890
- * umzukontieren; dann läuft diese Regel leer.
+ * Welche der beiden die Erstattung ist, entscheidet `creditDebit` aus dem
+ * Beleg — nicht das Datum und nicht die Reihenfolge.
  */
-export function privatkontoAusPartner(bez: string | null): string | null {
-  const partner = (bez ?? "").split("·")[0].trim();
-  if (!/^\d{4}$/.test(partner)) return null;
-  return istPrivatkonto(partner) ? partner : null;
+export function gutschriftenFinden(
+  zeilen: Gutschriftzeile[],
+): Gutschriftbefund {
+  const befund: Gutschriftbefund = { negieren: [], ohneGegenbuchung: [] };
+
+  const gruppen = new Map<string, number[]>();
+  zeilen.forEach((z, i) => {
+    const nr = belegnummerSchluessel(z.description);
+    const partner = partnerSchluessel(z.description);
+    if (nr.length < 4 || !partner) return;
+    const brutto = Math.abs(Math.round((z.amount_net + z.amount_tax) * 100));
+    gruppen.set(
+      `${z.account_code}|${partner}|${nr}|${brutto}`,
+      [...(gruppen.get(`${z.account_code}|${partner}|${nr}|${brutto}`) ?? []), i],
+    );
+  });
+
+  zeilen.forEach((z, i) => {
+    if (!istGutschrift(z.konto_richtung, z.beleg_richtung)) return;
+
+    const nr = belegnummerSchluessel(z.description);
+    const partner = partnerSchluessel(z.description);
+    const brutto = Math.abs(Math.round((z.amount_net + z.amount_tax) * 100));
+    const gruppe = gruppen.get(`${z.account_code}|${partner}|${nr}|${brutto}`);
+
+    if (gruppe && gruppe.length >= 2) {
+      befund.negieren.push(i);
+      return;
+    }
+    befund.ohneGegenbuchung.push({
+      source_ref: z.source_ref,
+      konto: z.account_code,
+      grund: "Beleg läuft gegen die Richtung seines Kontos, hat aber keine " +
+        "Gegenbuchung mit gleicher Rechnungsnummer und gleichem Betrag. " +
+        "Kann eine Buchung gegen ein Kapitalkonto sein (etwa die " +
+        "Homeoffice-Pauschale) — deshalb unverändert gebucht und nur " +
+        "gemeldet.",
+    });
+  });
+
+  return befund;
 }

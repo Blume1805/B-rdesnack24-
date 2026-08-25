@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 4**
+**Stand: 25.08.2026 · Fassung 5**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -189,9 +189,9 @@ Begründungstext. Lieferantennamen und Belegnummern stehen dort nicht;
 dieselbe Zurückhaltung wie bei der Strukturprobe.
 
 Seit derselben Änderung stehen dort ausserdem `richtung_abweichungen`
-(Belegkennung, Kontonummer und die beiden widersprüchlichen Richtungen — für
-Gutschriften und Erstattungen) und `partner_ist_privatkonto` (Belegkennung
-und die beiden Kontonummern). Auch sie führen **keine Freitexte**: keine
+(Belegkennung, Kontonummer und die beiden widersprüchlichen Richtungen) und
+`gutschrift_ohne_gegenbuchung` (Belegkennung, Kontonummer und ein fester
+Begründungstext). Auch sie führen **keine Freitexte**: keine
 Lieferantennamen, keine Belegnummern, keine Beträge. Am Code nachgesehen;
 anders als bei der Strukturprobe sichert das kein Test ab, weil die beiden
 Listen im Ablauf selbst entstehen und nicht in einer prüfbaren Funktion.

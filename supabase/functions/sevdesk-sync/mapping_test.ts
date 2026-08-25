@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import type { Zahlungszeile } from "./mapping.ts";
+import type { Gutschriftzeile, Zahlungszeile } from "./mapping.ts";
 import {
   belegIdAusPosition,
   belegProbe,
@@ -7,6 +7,7 @@ import {
   datevIdAusPosition,
   doppelteZahlungenFinden,
   fallbackKonto,
+  gutschriftenFinden,
   istGutschrift,
   istPrivatkonto,
   istUmsatzsteuerZahlkonto,
@@ -14,7 +15,6 @@ import {
   kontonummerAusDatev,
   parseVoucher,
   partnerSchluessel,
-  privatkontoAusPartner,
   richtungAusCreditDebit,
   richtungAusKonto,
   selberPartner,
@@ -418,16 +418,66 @@ Deno.test("Gutschrift nur auf Erfolgskonten, nicht auf Privatkonten", () => {
   assertEquals(istGutschrift("asset", "revenue"), false);
 });
 
-Deno.test("Privatkontonummer im Partnerfeld schlägt das sevDesk-Konto", () => {
-  assertEquals(privatkontoAusPartner("1890 · 31-12-2025"), "1890");
-  assertEquals(privatkontoAusPartner("1800 · 15.06.26"), "1800");
-  // Ausserhalb des Privatbereichs: nein.
-  assertEquals(privatkontoAusPartner("4930 · Beleg"), null);
-  assertEquals(privatkontoAusPartner("1780 · UStVA"), null);
-  // Ein echter Lieferantenname bleibt unberührt.
-  assertEquals(privatkontoAusPartner("Amazon Business · DE62"), null);
-  // Keine reine vierstellige Zahl.
-  assertEquals(privatkontoAusPartner("18900 · x"), null);
-  assertEquals(privatkontoAusPartner("Konto 1890 · x"), null);
-  assertEquals(privatkontoAusPartner(null), null);
+const kauf = (
+  ref: string,
+  konto: string,
+  bez: string,
+  netto: number,
+  belegRichtung: "revenue" | "expense",
+): Gutschriftzeile => ({
+  booking_date: "2026-05-06",
+  account_code: konto,
+  description: bez,
+  amount_net: netto,
+  amount_tax: 0,
+  direction: "expense",
+  source_ref: ref,
+  beleg_richtung: belegRichtung,
+  konto_richtung: "expense",
+});
+
+Deno.test("Erstattung mit Gegenbuchung wird negativ gebucht", () => {
+  // Zwei Amazon-Belege, dieselbe Rechnungsnummer, dasselbe Konto, derselbe
+  // Betrag — einer davon läuft gegen die Kontorichtung.
+  const zeilen = [
+    kauf("kauf", "4930", "Amazon Business · DE62YC8JABEI", 22.71, "expense"),
+    kauf("zurueck", "4930", "Amazon Business · DE62YC8JABEI", 22.71, "revenue"),
+  ];
+  const b = gutschriftenFinden(zeilen);
+  assertEquals(b.negieren, [1]);
+  assertEquals(b.ohneGegenbuchung.length, 0);
+});
+
+Deno.test("Aufwand gegen Kapitalkonto wird nur gemeldet", () => {
+  // Die Homeoffice-Pauschale: Partner „1890" ist das GEGENKONTO, der Beleg
+  // meldet „Geld herein", und trotzdem ist es eine echte Betriebsausgabe.
+  // Ohne Gegenbuchung darf nichts negiert werden.
+  const zeilen = [
+    kauf("pauschale", "4651", "1890 · 31-12-2025", 132, "revenue"),
+  ];
+  const b = gutschriftenFinden(zeilen);
+  assertEquals(b.negieren.length, 0);
+  assertEquals(b.ohneGegenbuchung.length, 1);
+  assertEquals(b.ohneGegenbuchung[0].source_ref, "pauschale");
+  assertEquals(b.ohneGegenbuchung[0].konto, "4651");
+});
+
+Deno.test("Zwei gleiche Käufe ohne Widerspruch bleiben unangetastet", () => {
+  const zeilen = [
+    kauf("a", "4930", "Amazon Business · DE62YC8JABEI", 22.71, "expense"),
+    kauf("b", "4930", "Amazon Business · DE62YC8JABEI", 22.71, "expense"),
+  ];
+  const b = gutschriftenFinden(zeilen);
+  assertEquals(b.negieren.length, 0);
+  assertEquals(b.ohneGegenbuchung.length, 0);
+});
+
+Deno.test("Ein anderes Konto ist keine Gegenbuchung", () => {
+  const zeilen = [
+    kauf("a", "4930", "Amazon Business · DE62YC8JABEI", 22.71, "expense"),
+    kauf("b", "4985", "Amazon Business · DE62YC8JABEI", 22.71, "revenue"),
+  ];
+  const b = gutschriftenFinden(zeilen);
+  assertEquals(b.negieren.length, 0);
+  assertEquals(b.ohneGegenbuchung.length, 1);
 });
