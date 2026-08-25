@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 2**
+**Stand: 25.08.2026 · Fassung 3**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -179,6 +179,19 @@ Die Belege werden **aus** sevDesk gelesen, nicht dorthin übertragen.
 fest — bewusst nur Feldnamen und Buchungswerte, **keine Freitexte**; ein Test
 sichert das ab (`belegProbe: nennt Feldnamen, aber keine Freitexte`).
 Zugriff nur mit der Berechtigung `finance.view`, serverseitig geprüft.
+
+Seit dem 25.08.2026 stehen dort zwei weitere Schlüssel:
+`doppelte_zahlungen_unterdrueckt` und `doppelte_zahlungen_verdacht`. Sie
+halten fest, welche Buchung als zweite Erfassung desselben Geldflusses nicht
+übernommen wurde und welche Belegpaare zur Prüfung in sevDesk anstehen —
+jeweils nur über **Belegkennungen** (`voucherId-posId`) und einen festen
+Begründungstext. Lieferantennamen und Belegnummern stehen dort nicht;
+dieselbe Zurückhaltung wie bei der Strukturprobe.
+
+Eine so unterdrückte Buchung wird **weich** gelöscht (`deleted_at`), nicht
+entfernt. Sie zählt nicht mehr in die Auswertung, bleibt aber unter der
+Aufbewahrungsfrist des § 147 AO lesbar — eine Buchung, die spurlos
+verschwindet, wäre nach GoBD gerade das Falsche.
 
 ### V9 — Beschäftigten-, Gesellschafter- und Betriebsunterlagen
 
