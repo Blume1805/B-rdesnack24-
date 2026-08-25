@@ -7,26 +7,55 @@
 /// höchstens bis zur nächsten Änderung an einer der drei Stellen.
 library;
 
-/// Fliesst bei dieser Buchung Geld AB?
+/// In welche Richtung läuft das Geld bei dieser Buchung?
+enum Geldfluss {
+  /// Geld verlässt den Betrieb: Aufwand, Privatentnahme, Erlösminderung.
+  hinaus,
+
+  /// Geld kommt herein: Erlös, Privateinlage — und die Erstattung eines
+  /// Aufwands.
+  herein,
+
+  /// Bestandskonten ohne erkennbare Zahlungsrichtung.
+  weder,
+}
+
+/// Die Zahlungsrichtung einer Buchung.
 ///
-/// Aufwand ja, Erlös nein — und bei den Privat-/Kapitalkonten des SKR 03
-/// (1800–1999) entscheidet das Konto selbst:
+/// Drei Dinge entscheiden gemeinsam, und keines allein reicht:
 ///
-///   * 1800–1889 / 1900–1989  Privatentnahmen → Geld verlässt den Betrieb
-///   * 1890–1899 / 1990–1999  Privateinlagen  → Geld kommt herein
-///
-/// Beide tragen `direction = 'liability'`. Sie über einen Kamm zu scheren
-/// wäre genau der Fehler, der am 25.08.2026 gemeldet wurde, nur andersherum:
-/// Eine Einlage mit `-` davor sähe aus wie eine Entnahme.
-bool geldFliesstAb(String direction, String accountCode) {
-  if (direction == 'expense') return true;
-  if (direction == 'revenue') return false;
+/// * **Die Kontoklasse** sagt, ob es Aufwand, Erlös oder Kapital ist.
+/// * **Das Konto selbst** entscheidet im Privatbereich des SKR 03
+///   (1800–1999): Auf den Zehnerstellen 90–99 liegen die Einlagen (1890
+///   Privateinlagen, 1990 für Teilhafter), darunter die Entnahmen. Beide
+///   tragen `direction = 'liability'`; sie über einen Kamm zu scheren wäre
+///   derselbe Fehler wie „Privateinlage als Aufwand", nur andersherum.
+/// * **Das Vorzeichen des Betrags** dreht die Richtung um. Ein negativer
+///   Aufwand ist keine doppelte Ausgabe, sondern eine Erstattung — gemeldet
+///   am 25.08.2026 an zwei Amazon-Belegen über je 22,71 € mit derselben
+///   Rechnungsnummer, von denen der zweite eine Rückerstattung war.
+Geldfluss geldfluss(String direction, String accountCode, double betrag) {
+  final zurueck = betrag < 0;
+  Geldfluss dreh(Geldfluss f) {
+    if (!zurueck) return f;
+    return f == Geldfluss.hinaus ? Geldfluss.herein : Geldfluss.hinaus;
+  }
+
+  if (direction == 'expense') return dreh(Geldfluss.hinaus);
+  if (direction == 'revenue') return dreh(Geldfluss.herein);
+
   final n = int.tryParse(accountCode.trim());
-  if (n != null && n >= 1800 && n <= 1999) return n % 100 < 90;
+  if (n != null && n >= 1800 && n <= 1999) {
+    return dreh(n % 100 >= 90 ? Geldfluss.herein : Geldfluss.hinaus);
+  }
   // Bestandskonten ohne klare Zahlungsrichtung bekommen kein Vorzeichen —
   // ein geratenes Vorzeichen ist schlimmer als keines.
-  return false;
+  return Geldfluss.weder;
 }
+
+/// Fliesst bei dieser Buchung Geld ab? Kurzform für Vorzeichen und Farbe.
+bool geldFliesstAb(String direction, String accountCode, double betrag) =>
+    geldfluss(direction, accountCode, betrag) == Geldfluss.hinaus;
 
 /// Klartext für `finance_bookings.direction`.
 String richtungsBezeichnung(String direction) {

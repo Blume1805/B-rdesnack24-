@@ -7,12 +7,14 @@ import {
   datevIdAusPosition,
   doppelteZahlungenFinden,
   fallbackKonto,
+  istGutschrift,
   istPrivatkonto,
   istUmsatzsteuerZahlkonto,
   kontonameAusDatev,
   kontonummerAusDatev,
   parseVoucher,
   partnerSchluessel,
+  privatkontoAusPartner,
   richtungAusCreditDebit,
   richtungAusKonto,
   selberPartner,
@@ -393,4 +395,39 @@ Deno.test("Gleiche Rechnungsnummer wird gemeldet, nicht gelöscht", () => {
   assertEquals(b.unterdrueckt.length, 0);
   assertEquals(b.verdacht.length, 1);
   assertEquals(b.verdacht[0].source_refs.sort(), ["a", "b"]);
+});
+
+// ============================================================================
+// Gutschriften und Privatkonto im Partnerfeld
+// ============================================================================
+
+Deno.test("Gutschrift nur auf Erfolgskonten, nicht auf Privatkonten", () => {
+  // Erstattung: Konto sagt Aufwand, der Beleg sagt Einnahme.
+  assertEquals(istGutschrift("expense", "revenue"), true);
+  // Erlösminderung/Storno: Konto sagt Erlös, der Beleg sagt Ausgabe.
+  assertEquals(istGutschrift("revenue", "expense"), true);
+  // Der Normalfall.
+  assertEquals(istGutschrift("expense", "expense"), false);
+  assertEquals(istGutschrift("revenue", "revenue"), false);
+  // Privateinlage: „liability" gegen „revenue" ist kein Storno, sondern
+  // genau das, was eine Einlage ist — Geld herein, kein Erlös.
+  assertEquals(istGutschrift("liability", "revenue"), false);
+  assertEquals(istGutschrift("liability", "expense"), false);
+  // Kein Konto aufgelöst: nichts zu vergleichen.
+  assertEquals(istGutschrift(null, "expense"), false);
+  assertEquals(istGutschrift("asset", "revenue"), false);
+});
+
+Deno.test("Privatkontonummer im Partnerfeld schlägt das sevDesk-Konto", () => {
+  assertEquals(privatkontoAusPartner("1890 · 31-12-2025"), "1890");
+  assertEquals(privatkontoAusPartner("1800 · 15.06.26"), "1800");
+  // Ausserhalb des Privatbereichs: nein.
+  assertEquals(privatkontoAusPartner("4930 · Beleg"), null);
+  assertEquals(privatkontoAusPartner("1780 · UStVA"), null);
+  // Ein echter Lieferantenname bleibt unberührt.
+  assertEquals(privatkontoAusPartner("Amazon Business · DE62"), null);
+  // Keine reine vierstellige Zahl.
+  assertEquals(privatkontoAusPartner("18900 · x"), null);
+  assertEquals(privatkontoAusPartner("Konto 1890 · x"), null);
+  assertEquals(privatkontoAusPartner(null), null);
 });

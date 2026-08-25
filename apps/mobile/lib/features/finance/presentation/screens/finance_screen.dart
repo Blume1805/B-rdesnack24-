@@ -15,6 +15,7 @@ import '../../domain/entities/finance_period.dart';
 import '../../domain/entities/finance_summary.dart';
 import '../controllers/finance_providers.dart';
 import '../widgets/kpi_dashboard.dart';
+import '../../domain/entities/finance_direction.dart';
 import '../widgets/betrag_text.dart';
 import 'datev_export_screen.dart';
 import 'finance_bookings_screen.dart';
@@ -465,11 +466,14 @@ class _SummaryContent extends StatelessWidget {
                   label: 'Aufwand',
                   // Ausgaben stehen überall mit Vorzeichen — auch in der
                   // Kennzahl, sonst widerspricht die Kachel der Liste.
-                  value: betragMitVorzeichen(
+                  value: betragMitFluss(
                     summary.expenseNet,
-                    auszahlung: true,
+                    geldfluss('expense', '', summary.expenseNet),
                   ),
-                  valueColor: AppColors.statusCritical,
+                  valueColor: betragsFarbe(
+                    'expense',
+                    geldfluss('expense', '', summary.expenseNet),
+                  ),
                   icon: Icons.trending_down,
                 ),
                 KpiCard(

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/finance_booking.dart';
+import '../../domain/entities/finance_direction.dart';
 import '../widgets/betrag_text.dart';
 import '../controllers/finance_providers.dart';
 
@@ -253,8 +254,9 @@ class _Liste extends StatelessWidget {
                 '${gefiltert.length} Buchungen · Erlöse '
                 '${Formatters.euro(summeErloes)} · Aufwand '
                 // Aufwand ist Geld, das abfliesst — mit Vorzeichen, wie in
-                // jeder Zeile darunter auch.
-                '${betragMitVorzeichen(summeAufwand, auszahlung: true)}'
+                // jeder Zeile darunter auch. Überwiegen die Erstattungen,
+                // dreht sich das Vorzeichen mit.
+                '${betragMitFluss(summeAufwand, geldfluss('expense', '', summeAufwand))}'
                 // Privatentnahmen und -einlagen gehören in keine der beiden
                 // Summen. Sie zu verschweigen wäre aber genauso falsch wie
                 // sie mitzurechnen.

@@ -7,9 +7,10 @@ import '../../domain/entities/finance_direction.dart';
 
 /// Ein Geldbetrag, überall gleich dargestellt.
 ///
-/// Rot mit `-` bei allem, was Geld kostet; grün bei Erlösen; gedämpft bei
-/// Bestands- und Kapitalkonten, die weder das eine noch das andere sind.
-/// Die Regel steht in `istAuszahlung`, nicht in den Bildschirmen.
+/// Rot mit `-` bei allem, was Geld kostet; grün bei Erlösen und bei
+/// Erstattungen; gedämpft bei Bestands- und Kapitalkonten, die weder das eine
+/// noch das andere sind. Die Regel steht in `geldfluss`, nicht in den
+/// Bildschirmen.
 class BetragText extends StatelessWidget {
   const BetragText({
     super.key,
@@ -26,42 +27,60 @@ class BetragText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ab = geldFliesstAb(direction, accountCode);
+    final fluss = geldfluss(direction, accountCode, betrag);
     return Text(
-      betragMitVorzeichen(betrag, auszahlung: ab),
+      betragMitFluss(betrag, fluss),
       style: AppTypography.body(
         size: size,
         weight: FontWeight.w700,
-        color: betragsFarbe(direction),
+        color: betragsFarbe(direction, fluss),
       ),
       // Für den Screenreader ist ein „-" vor einer Zahl nicht eindeutig; es
       // kann als Bindestrich vorgelesen werden. Deshalb hier im Klartext.
-      semanticsLabel: ab
-          ? 'Ausgabe ${Formatters.euro(betrag.abs())}'
-          : '${richtungsBezeichnung(direction)} ${Formatters.euro(betrag.abs())}',
+      semanticsLabel: '${flussBezeichnung(direction, fluss)} '
+          '${Formatters.euro(betrag.abs())}',
     );
   }
 }
 
-/// `-1.234,56 €` bei Auszahlungen, sonst ohne Vorzeichen.
+/// `-1.234,56 €`, wenn Geld abfliesst, sonst ohne Vorzeichen.
 ///
-/// Der Betrag wird vorher auf seinen Absolutwert gebracht: In
-/// `finance_bookings` stehen alle Beträge positiv, die Richtung steckt in
-/// `direction`. Käme doch einmal ein negativer Wert an, stünden sonst zwei
-/// Minuszeichen davor.
-String betragMitVorzeichen(double betrag, {required bool auszahlung}) {
+/// Der Betrag wird auf seinen Absolutwert gebracht: Das Vorzeichen steckt
+/// schon in `Geldfluss` — ein negativer Aufwand ist eine Erstattung und
+/// bekommt gerade KEIN Minus, sondern steht wie ein Zufluss da.
+String betragMitFluss(double betrag, Geldfluss fluss) {
   final text = Formatters.euro(betrag.abs());
-  return auszahlung ? '-$text' : text;
+  return fluss == Geldfluss.hinaus ? '-$text' : text;
 }
 
-/// Grün für Erlöse, rot für Aufwand, gedämpft für alles dazwischen.
-Color betragsFarbe(String direction) {
-  switch (direction) {
-    case 'revenue':
-      return AppColors.statusPositive;
-    case 'expense':
-      return AppColors.statusCritical;
-    default:
-      return AppColors.textMuted;
+/// Rot, wenn Geld abfliesst; grün, wenn es bei einem Erfolgskonto hereinkommt;
+/// gedämpft bei Bestands- und Kapitalkonten.
+///
+/// Warum die Farbe am Fluss hängt und nicht allein an der Richtung: Eine
+/// Erstattung steht auf einem Aufwandskonto, ist aber Geld, das zurückkommt.
+/// Rot wäre dort schlicht falsch.
+Color betragsFarbe(String direction, Geldfluss fluss) {
+  if (fluss == Geldfluss.hinaus) {
+    return direction == 'revenue' || direction == 'expense'
+        ? AppColors.statusCritical
+        : AppColors.textMuted;
   }
+  if (fluss == Geldfluss.herein &&
+      (direction == 'revenue' || direction == 'expense')) {
+    return AppColors.statusPositive;
+  }
+  return AppColors.textMuted;
+}
+
+/// Was der Screenreader statt eines Minuszeichens vorliest.
+String flussBezeichnung(String direction, Geldfluss fluss) {
+  if (direction == 'expense') {
+    return fluss == Geldfluss.hinaus ? 'Ausgabe' : 'Erstattung';
+  }
+  if (direction == 'revenue') {
+    return fluss == Geldfluss.hinaus ? 'Erlösminderung' : 'Erlös';
+  }
+  if (fluss == Geldfluss.hinaus) return 'Privatentnahme';
+  if (fluss == Geldfluss.herein) return 'Privateinlage';
+  return richtungsBezeichnung(direction);
 }

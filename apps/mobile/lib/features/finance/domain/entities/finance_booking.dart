@@ -58,7 +58,12 @@ class FinanceBooking extends Equatable {
   String get directionLabel => richtungsBezeichnung(direction);
 
   /// Fliesst bei dieser Buchung Geld ab? Steuert Vorzeichen und Farbe.
-  bool get istAuszahlung => geldFliesstAb(direction, accountCode);
+  /// Ein negativer Betrag dreht die Richtung um — eine Erstattung auf einem
+  /// Aufwandskonto ist Geld, das zurückkommt.
+  bool get istAuszahlung => geldFliesstAb(direction, accountCode, net);
+
+  /// Erstattung eines Aufwands (oder Minderung eines Erlöses).
+  bool get istErstattung => net < 0;
 
   /// True, wenn das Konto geraten (Sammelkonto) statt übernommen wurde.
   bool get kontoGeschaetzt => source == 'sevdesk' && sourceAccountCode == null;

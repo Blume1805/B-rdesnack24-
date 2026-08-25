@@ -117,6 +117,33 @@ Richtung). Alles ausserhalb des engen Falls wird deshalb nur **gemeldet**
 eine Doppelerkennung erweitert, muss vorher am echten Bestand nachsehen,
 was sie mitnimmt — siehe „Behauptungen vorher prüfen".
 
+**Konto und Kennzeichen sagen verschiedene Dinge.** Das Konto sagt, WOHIN
+gebucht wird; `creditDebit` sagt, in WELCHE RICHTUNG das Geld läuft.
+Beides wird gebraucht. Am 25.08.2026 hatte das Konto Vorrang und das
+Kennzeichen wurde verworfen — damit war eine Rückerstattung nicht mehr
+von einem Kauf zu unterscheiden: Zwei Amazon-Belege mit derselben
+Rechnungsnummer standen beide als Aufwand, Bürobedarf war um 45,42 € zu
+hoch.
+
+Widersprechen sich beide auf einem **Erfolgskonto** (3xxx/4xxx/8xxx), ist
+es eine Gutschrift: Die Buchung bleibt auf ihrem Konto und in ihrer
+Richtung und bekommt einen **negativen Betrag** (`istGutschrift`). Eine
+Erstattung ist kein Erlös — sie mindert den Aufwand. Auf Privat-,
+Bestands- und Umsatzsteuerkonten ist der Widerspruch dagegen der
+Normalfall und kein Storno: Eine Einlage ist Geld herein und trotzdem
+kein Erlös.
+
+In der Darstellung dreht ein negativer Betrag den Geldfluss um
+(`geldfluss`): Eine Erstattung steht grün und **ohne** Minus, nicht rot.
+
+**Ein Privatkonto im Partnerfeld schlägt das sevDesk-Konto.** Trägt ein
+Beleg als `supplierName` genau vier Ziffern im Bereich 1800–1999, ist das
+Konto gemeint, nicht ein Lieferant (`privatkontoAusPartner`). Anlass: ein
+Beleg mit Partner „1890" war in sevDesk auf 4651 kontiert und stand als
+Betriebsausgabe. Das ist die **einzige** Stelle, an der die App bewusst
+von sevDesk abweicht; sie steht im Protokoll (`partner_ist_privatkonto`)
+und ist dem Auftraggeber zu melden, damit der Beleg dort umkontiert wird.
+
 **Eine Quelle für die Richtung.** `finance_summary` und
 `finance_bookings_list` nehmen beide `finance_bookings.direction`, nicht
 `finance_accounts.direction`. Vorher war 0480 im Kontenstamm „asset" und

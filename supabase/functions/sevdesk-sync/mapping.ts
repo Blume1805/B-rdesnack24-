@@ -571,3 +571,70 @@ export function doppelteZahlungenFinden(zeilen: Zahlungszeile[]): Doppelbefund {
 
   return befund;
 }
+
+// ============================================================================
+// GUTSCHRIFTEN UND RÜCKERSTATTUNGEN
+// ----------------------------------------------------------------------------
+// Gemeldet am 25.08.2026: „Amazon ist eine Rückerstattung." Zwei Belege mit
+// derselben Rechnungsnummer DE62YC8JABEI, beide 22,71 € netto auf 4930
+// Bürobedarf — der Kauf am 06.05. und die Erstattung am 15.05. In der App
+// standen beide als Aufwand; Bürobedarf war dadurch um 45,42 € zu hoch, denn
+// die Erstattung hätte den Aufwand mindern müssen, statt ihn zu verdoppeln.
+//
+// Der Fehler sass in der Rangfolge: `richtungAusKonto` hatte Vorrang vor
+// `creditDebit`, und damit ging die einzige Information verloren, die einen
+// Kauf von seiner Erstattung unterscheidet. Das Konto sagt, WOHIN gebucht
+// wird (4930 Bürobedarf, bei Kauf wie bei Erstattung dasselbe); `creditDebit`
+// sagt, in WELCHE RICHTUNG das Geld läuft. Beides wird gebraucht.
+//
+// Der Lauf vom 25.08.2026 zählte drei solche Widersprüche
+// (`richtung_vom_konto_korrigiert`): zwei davon sind die Privatkonten
+// 1800/1890 — dort ist der Widerspruch der Normalfall und kein Storno, weil
+// eine Einlage nun einmal Geld herein und trotzdem kein Erlös ist. Der dritte
+// ist ein echtes Erfolgskonto: die Erstattung.
+//
+// Behandelt wird sie NICHT durch Umdrehen der Richtung — eine Erstattung ist
+// kein Erlös, sie mindert den Aufwand. Sie bleibt auf 4930 und im Aufwand,
+// nur mit negativem Betrag. Damit stimmt die Kontosumme (92,43 € statt
+// 137,85 €), und die Buchung bleibt dort, wo die Buchhaltung sie führt.
+// ============================================================================
+
+/**
+ * Ist die Position eine Gutschrift/Storno auf einem Erfolgskonto?
+ *
+ * Nur für Aufwands- und Erlöskonten. Bei Privat-, Bestands- und
+ * Umsatzsteuerkonten sagt `richtungAusKonto` etwas anderes als eine
+ * Zahlungsrichtung, dort wäre der Vergleich sinnlos.
+ */
+export function istGutschrift(
+  kontoRichtung: Buchungsrichtung | null,
+  belegRichtung: Direction,
+): boolean {
+  if (kontoRichtung !== "expense" && kontoRichtung !== "revenue") return false;
+  return kontoRichtung !== belegRichtung;
+}
+
+/**
+ * Nennt der Beleg als Geschäftspartner eine Privatkontonummer, ist dieses
+ * Konto gemeint.
+ *
+ * Gemeldet am 25.08.2026: „Die 132 € sind auch eine Privateinlage von
+ * Philipp." Der Beleg vom 31.12.2025 trägt als `supplierName` die Zeichen
+ * `1890` — nicht den Namen einer Firma, sondern die Nummer des Kontos
+ * „Privateinlagen". sevDesk selbst hat ihn auf 4651 kontiert; die App hat das
+ * getreu übernommen und damit eine Einlage als Betriebsausgabe gezeigt.
+ *
+ * Die Regel ist bewusst eng: Der Partnername muss GENAU vier Ziffern sein und
+ * im Privatbereich 1800–1999 liegen. Ein Lieferant, der so heisst, ist nicht
+ * vorstellbar; eine Rechnungsnummer steht im anderen Feld.
+ *
+ * Sie weicht damit von sevDesk ab — sonst gilt hier „was sevDesk kontiert,
+ * gilt". Das ist ein bewusster Sonderfall und steht im Protokoll
+ * (`partner_ist_privatkonto`). Sauberer wäre, den Beleg in sevDesk auf 1890
+ * umzukontieren; dann läuft diese Regel leer.
+ */
+export function privatkontoAusPartner(bez: string | null): string | null {
+  const partner = (bez ?? "").split("·")[0].trim();
+  if (!/^\d{4}$/.test(partner)) return null;
+  return istPrivatkonto(partner) ? partner : null;
+}

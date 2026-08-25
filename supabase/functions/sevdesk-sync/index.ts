@@ -58,9 +58,11 @@ import {
   datevIdAusPosition,
   doppelteZahlungenFinden,
   fallbackKonto,
+  istGutschrift,
   kontonameAusDatev,
   kontonummerAusDatev,
   parseVoucher,
+  privatkontoAusPartner,
   richtungAusKonto,
   steuersatz,
 } from "./mapping.ts";
@@ -301,6 +303,18 @@ Deno.serve(async (req) => {
     let ausSkr04 = 0;
     let privatBuchungen = 0;
     let vorlagen = 0;
+    let gutschriften = 0;
+    const abweichungen: Array<{
+      source_ref: string;
+      konto: string | null;
+      konto_richtung: string;
+      beleg_richtung: string;
+    }> = [];
+    const partnerPrivatkonto: Array<{
+      source_ref: string;
+      statt: string | null;
+      konto: string;
+    }> = [];
     const unaufloesbar = new Set<string>();
     const belegarten = new Map<string, number>();
     // Konten, die angelegt oder deren Name an sevDesk angeglichen wird.
@@ -373,8 +387,20 @@ Deno.serve(async (req) => {
           treffer = datev.get(idVorschlag);
           if (treffer) ausVorschlag++;
         }
-        const sevKonto = treffer?.nummer ?? null;
-        if (treffer && !treffer.skr03) ausSkr04++;
+        // Nennt der Beleg als Partner eine Privatkontonummer, gilt DIESE.
+        // Der Beleg vom 31.12.2025 trägt `supplierName = "1890"` und war in
+        // sevDesk auf 4651 kontiert — eine Privateinlage, die als
+        // Betriebsausgabe erschien. Begründung in mapping.ts.
+        const ausPartner = privatkontoAusPartner(r.description);
+        const sevKonto = ausPartner ?? treffer?.nummer ?? null;
+        if (ausPartner) {
+          partnerPrivatkonto.push({
+            source_ref: `${r.source_ref}-${posId}`,
+            statt: treffer?.nummer ?? null,
+            konto: ausPartner,
+          });
+        }
+        if (!ausPartner && treffer && !treffer.skr03) ausSkr04++;
         if (!treffer && idGebucht) unaufloesbar.add(idGebucht);
 
         if (sevKonto) {
@@ -399,9 +425,28 @@ Deno.serve(async (req) => {
         const satz = steuersatz(pos.taxRate, netto, steuer);
 
         const ausKonto = richtungAusKonto(sevKonto);
-        if (ausKonto !== null && ausKonto !== r.direction) richtungAusKontoZahl++;
+        if (ausKonto !== null && ausKonto !== r.direction) {
+          richtungAusKontoZahl++;
+          // Nachweispflicht: Bisher stand hier nur eine Zahl, und welche
+          // Buchung gemeint war, liess sich nicht mehr feststellen. Genau
+          // daran hing die Erstattung, die niemand gesehen hat.
+          abweichungen.push({
+            source_ref: `${r.source_ref}-${posId}`,
+            konto: sevKonto,
+            konto_richtung: ausKonto,
+            beleg_richtung: r.direction,
+          });
+        }
         if (ausKonto === "liability") privatBuchungen++;
         const direction = ausKonto ?? r.direction;
+
+        // Gutschrift/Erstattung: Konto und Beleg widersprechen sich auf einem
+        // ERFOLGSKONTO. Die Buchung bleibt, wo sie hingehört, und bekommt ein
+        // negatives Vorzeichen — eine Erstattung mindert den Aufwand, sie ist
+        // kein Erlös. Bei Privat- und Bestandskonten ist der Widerspruch der
+        // Normalfall und kein Storno; dort passiert nichts.
+        const vorzeichen = istGutschrift(ausKonto, r.direction) ? -1 : 1;
+        if (vorzeichen === -1) gutschriften++;
 
         rows.push({
           booking_date: r.booking_date,
@@ -411,8 +456,8 @@ Deno.serve(async (req) => {
           // identisch mit `r.direction`.
           account_code: sevKonto ?? fallbackKonto(r.direction, satz),
           description: r.description,
-          amount_net: netto,
-          amount_tax: steuer,
+          amount_net: vorzeichen * netto,
+          amount_tax: vorzeichen * steuer,
           tax_rate: satz,
           direction,
           source: "sevdesk",
@@ -521,6 +566,9 @@ Deno.serve(async (req) => {
       belegarten: Object.fromEntries(belegarten),
       belege_ohne_positionen: ohnePositionen,
       richtung_vom_konto_korrigiert: richtungAusKontoZahl,
+      richtung_abweichungen: abweichungen,
+      gutschriften,
+      partner_ist_privatkonto: partnerPrivatkonto,
       kontenstamm_groesse: bekannt.size,
       neu_angelegte_konten: neueKonten,
       konten_gepflegt: kontenPflege.size,

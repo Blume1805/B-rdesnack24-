@@ -30,7 +30,7 @@ class AccountAmount extends Equatable {
   String get directionLabel => richtungsBezeichnung(direction);
 
   /// Fliesst auf diesem Konto Geld ab? Steuert Vorzeichen und Farbe.
-  bool get istAuszahlung => geldFliesstAb(direction, code);
+  bool get istAuszahlung => geldFliesstAb(direction, code, net);
 
   factory AccountAmount.fromJson(Map<String, dynamic> j) => AccountAmount(
         // Defensiv: die RPC kann in seltenen Fällen null oder unerwartete
