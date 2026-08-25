@@ -16,6 +16,21 @@
 //    dafür — sie ersetzt die Prüfung nicht.
 //
 // ----------------------------------------------------------------------------
+// WAS DER ERSTE ECHTE LAUF GEZEIGT HAT (25.08.2026, 44 Belege)
+//
+// Die Strukturprobe im Sync-Protokoll hat drei Fehler aufgedeckt, die sich
+// vorher nicht nachweisen liessen — api.sevdesk.de ist von hier aus gesperrt,
+// und ohne echte Belege war jede Annahme eine Annahme:
+//
+// 1. `embed=voucherPos,...` wird von sevDesk STILL IGNORIERT. Die Antwort kam
+//    mit 200 und ohne Positionen; im Beleg steht kein einziges Kontofeld.
+//    Ergebnis: 44 von 44 Buchungen auf einem Sammelkonto. Die Positionen
+//    werden jetzt ueber /VoucherPos einzeln geholt.
+// 2. `creditDebit` war genau falsch herum zugeordnet (siehe mapping.ts).
+// 3. `description` ist nicht die Beschreibung, sondern die Belegnummer. Der
+//    Geschaeftspartner steht in `supplierName`.
+//
+// ----------------------------------------------------------------------------
 // ZEITRAUM: warum clientseitig gefiltert wird (24.08.2026)
 //
 // Vorher hing der Filter an `?startDate=&endDate=` mit ISO-Datum. Fünf Läufe
@@ -32,43 +47,69 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
-import { fallbackKonto, findeKontoCode, parseVoucher, belegProbe } from "./mapping.ts";
+import {
+  belegIdAusPosition,
+  belegProbe,
+  fallbackKonto,
+  findeKontoCode,
+  parseVoucher,
+  richtungAusKonto,
+  sammleKontoKandidaten,
+} from "./mapping.ts";
 
 const SEITE = 100;
 const MAX_SEITEN = 50; // 5.000 Belege — für einen Betrieb dieser Größe reichlich.
 
-/** Holt alle Belege. `embed` wird versucht und bei Ablehnung fallengelassen. */
-async function fetchVouchers(
-  baseUrl: string,
+/** Holt eine Sammlung seitenweise ab. Wirft, wenn sevDesk nicht mitspielt. */
+async function holeAlle(
+  url: string,
   token: string,
-): Promise<{ belege: Record<string, unknown>[]; embedGenutzt: boolean }> {
-  const embed = "embed=voucherPos,voucherPos.accountingType,accountingType";
-  let embedGenutzt = true;
-  const belege: Record<string, unknown>[] = [];
+  was: string,
+): Promise<Record<string, unknown>[]> {
+  const raus: Record<string, unknown>[] = [];
   let offset = 0;
-
   for (let seite = 0; seite < MAX_SEITEN; seite++) {
-    const basis = `${baseUrl}/Voucher?limit=${SEITE}&offset=${offset}`;
-    let res = await fetch(embedGenutzt ? `${basis}&${embed}` : basis, {
+    const res = await fetch(`${url}?limit=${SEITE}&offset=${offset}`, {
       headers: { Authorization: token, Accept: "application/json" },
     });
-    // Ein abgelehntes `embed` darf den Sync nicht kosten — dann eben ohne.
-    if (!res.ok && embedGenutzt) {
-      embedGenutzt = false;
-      res = await fetch(basis, {
-        headers: { Authorization: token, Accept: "application/json" },
-      });
-    }
     if (!res.ok) {
-      throw new Error(`sevDesk HTTP ${res.status}: ${await res.text()}`);
+      throw new Error(`sevDesk ${was} HTTP ${res.status}: ${await res.text()}`);
     }
     const body = await res.json();
     const objects: Record<string, unknown>[] = body.objects ?? [];
-    belege.push(...objects);
+    raus.push(...objects);
     if (objects.length < SEITE) break;
     offset += SEITE;
   }
-  return { belege, embedGenutzt };
+  return raus;
+}
+
+/**
+ * Holt die Belegpositionen und ordnet sie den Belegen zu.
+ *
+ * Am Beleg selbst steht kein Konto — nachgewiesen am ersten echten Lauf.
+ * Es steht an der Position. Schlaegt der Abruf fehl, ist das kein Grund, den
+ * ganzen Sync fallenzulassen: Dann greift wie bisher das Sammelkonto, und im
+ * Protokoll steht, warum.
+ */
+async function holePositionen(
+  baseUrl: string,
+  token: string,
+): Promise<{ nachBeleg: Map<string, Record<string, unknown>[]>; fehler: string | null }> {
+  const nachBeleg = new Map<string, Record<string, unknown>[]>();
+  try {
+    const positionen = await holeAlle(`${baseUrl}/VoucherPos`, token, "VoucherPos");
+    for (const p of positionen) {
+      const belegId = belegIdAusPosition(p);
+      if (!belegId) continue;
+      const liste = nachBeleg.get(belegId);
+      if (liste) liste.push(p);
+      else nachBeleg.set(belegId, [p]);
+    }
+    return { nachBeleg, fehler: null };
+  } catch (e) {
+    return { nachBeleg, fehler: String(e) };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -132,11 +173,20 @@ Deno.serve(async (req) => {
     if (kontenErr) throw kontenErr;
     const bekannt = new Set<string>((konten ?? []).map((k) => String(k.code)));
 
-    const { belege, embedGenutzt } = await fetchVouchers(sevBase, sevToken);
+    const belege = await holeAlle(`${sevBase}/Voucher`, sevToken, "Voucher");
+    const { nachBeleg, fehler: positionsFehler } = await holePositionen(
+      sevBase,
+      sevToken,
+    );
 
     let ohneDatum = 0;
     let ausserhalb = 0;
     let ausSevdesk = 0;
+    let richtungAusKontoZahl = 0;
+    let ohnePositionen = 0;
+    const unbekannteKonten = new Map<string, number>();
+    let positionsProbe: Record<string, unknown> | null = null;
+
     const rows: Record<string, unknown>[] = [];
     for (const beleg of belege) {
       const r = parseVoucher(beleg);
@@ -148,16 +198,43 @@ Deno.serve(async (req) => {
         ausserhalb++;
         continue;
       }
-      const sevKonto = findeKontoCode(beleg, bekannt);
+
+      const positionen = nachBeleg.get(r.source_ref) ?? [];
+      if (positionen.length === 0) ohnePositionen++;
+      if (positionsProbe === null && positionen.length > 0) {
+        positionsProbe = belegProbe(positionen[0]);
+      }
+
+      // Konto zuerst an der Position suchen, dann am Beleg. Die Position ist
+      // die Stelle, an der sevDesk kontiert — der Beleg trägt kein Konto.
+      const sevKonto = findeKontoCode(positionen, bekannt) ??
+        findeKontoCode(beleg, bekannt);
       if (sevKonto) ausSevdesk++;
+
+      // Was sevDesk an Konten nennt, das wir NICHT führen: zählen statt
+      // verschweigen. Sonst bliebe unklar, um welche Konten der Stamm zu
+      // ergänzen ist, und das Sammelkonto wäre der Dauerzustand.
+      if (!sevKonto) {
+        for (const code of sammleKontoKandidaten(positionen)) {
+          unbekannteKonten.set(code, (unbekannteKonten.get(code) ?? 0) + 1);
+        }
+      }
+
+      // Steht ein eindeutiges SKR-03-Konto am Beleg, ist es die bessere
+      // Quelle für die Richtung als ein Kennbuchstabe: Es kommt aus der
+      // Buchhaltung selbst.
+      const ausKonto = richtungAusKonto(sevKonto);
+      if (ausKonto !== null && ausKonto !== r.direction) richtungAusKontoZahl++;
+      const direction = ausKonto ?? r.direction;
+
       rows.push({
         booking_date: r.booking_date,
-        account_code: sevKonto ?? fallbackKonto(r.direction, r.tax_rate),
+        account_code: sevKonto ?? fallbackKonto(direction, r.tax_rate),
         description: r.description,
         amount_net: r.amount_net,
         amount_tax: r.amount_tax,
         tax_rate: r.tax_rate,
-        direction: r.direction,
+        direction,
         source: "sevdesk",
         source_ref: r.source_ref,
         source_account_code: sevKonto,
@@ -176,16 +253,23 @@ Deno.serve(async (req) => {
     }
 
     const diagnostics = {
-      embed_genutzt: embedGenutzt,
       belege_gesamt: belege.length,
+      positionen_belege: nachBeleg.size,
+      positionen_fehler: positionsFehler,
       ohne_verwertbares_datum: ohneDatum,
       ausserhalb_zeitraum: ausserhalb,
       im_zeitraum: rows.length,
       konto_aus_sevdesk: ausSevdesk,
       konto_aus_sammelkonto: rows.length - ausSevdesk,
+      belege_ohne_positionen: ohnePositionen,
+      richtung_vom_konto_korrigiert: richtungAusKontoZahl,
       kontenstamm_groesse: bekannt.size,
-      // Nur der erste Beleg, und davon nur Feldnamen + Buchungswerte.
+      // Konten, die sevDesk nennt und der Stamm nicht kennt — genau die
+      // Liste, um die der Stamm zu ergänzen ist.
+      unbekannte_konten: Object.fromEntries(unbekannteKonten),
+      // Nur je ein Objekt, und davon nur Feldnamen + Buchungswerte.
       strukturprobe: belege.length > 0 ? belegProbe(belege[0]) : null,
+      strukturprobe_position: positionsProbe,
     };
 
     await admin.from("sevdesk_sync_runs").update({
