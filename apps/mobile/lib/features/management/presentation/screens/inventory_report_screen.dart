@@ -19,7 +19,15 @@ import 'inventory_report_print.dart'
 ///       – FIFO-Restlots am Stichtag mit Bewertung + MHD-Abschlag
 ///   • Am Ende: MHD-Bewertungsmatrix + Unterschriften-Block
 class InventoryReportScreen extends ConsumerStatefulWidget {
-  const InventoryReportScreen({super.key});
+  const InventoryReportScreen({super.key, this.eingebettet = false});
+
+  /// Ohne eigenes Gerüst rendern, weil der Bildschirm schon eines hat.
+  ///
+  /// Seit dem 25.08.2026 sitzt der Report als zweiter Reiter in
+  /// `InventoryHubScreen`. Zwei ineinandergeschachtelte Scaffolds hätten
+  /// zwei Kopfleisten und zwei Zurück-Pfeile ergeben.
+  final bool eingebettet;
+
   @override
   ConsumerState<InventoryReportScreen> createState() =>
       _InventoryReportScreenState();
@@ -167,135 +175,135 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const HeroAppBar(
-        title: Text('Inventur — FIFO-Bewegungsreport'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.s5),
-        children: [
-          if (_movements != null && _movements!.isNotEmpty)
-            HeroActionBar(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-              actions: [
-                HeroAction(
-                  icon: Icons.rule_folder_outlined,
-                  tooltip: 'Freigabe anfordern',
-                  iconColor: AppColors.brand,
-                  onTap: _requestApproval,
-                ),
-                HeroAction(
-                  icon: Icons.picture_as_pdf,
-                  tooltip: 'Als PDF drucken',
-                  iconColor: AppColors.statusCritical,
-                  borderColor: AppColors.statusCritical,
-                  onTap: () => printInventoryReport(
-                    movements: _movements!,
-                    lots: _lots ?? const [],
-                    signatures: _signatures ?? const [],
-                    from: _from,
-                    to: _to,
-                  ),
-                ),
-              ],
-            ),
-          Text(
-            'FIFO-Inventur — je Produkt alle Bewegungen chronologisch, '
-            'Bewertung nach dem Verbrauchsfolgeverfahren (§256 HGB): die '
-            'ältesten Zugänge sind zuerst verbraucht, der Endbestand wird '
-            'mit den EK-Preisen der jüngsten verbliebenen Lots bewertet. '
-            'MHD-Abschlag nach Restlaufzeit-Matrix vom AK-Wert.',
-            style: AppTypography.body(size: 12, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _pickFrom,
-                  icon: const Icon(Icons.date_range),
-                  label: Text('Von ${Formatters.date(_from)}'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
-                    side: const BorderSide(color: AppColors.brand),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
+    final inhalt = ListView(
+      padding: const EdgeInsets.all(AppSpacing.s5),
+      children: [
+        if (_movements != null && _movements!.isNotEmpty)
+          HeroActionBar(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s3),
+            actions: [
+              HeroAction(
+                icon: Icons.rule_folder_outlined,
+                tooltip: 'Freigabe anfordern',
+                iconColor: AppColors.brand,
+                onTap: _requestApproval,
               ),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _pickTo,
-                  icon: const Icon(Icons.date_range),
-                  label: Text('Bis ${Formatters.date(_to)}'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
-                    side: const BorderSide(color: AppColors.brand),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
+              HeroAction(
+                icon: Icons.picture_as_pdf,
+                tooltip: 'Als PDF drucken',
+                iconColor: AppColors.statusCritical,
+                borderColor: AppColors.statusCritical,
+                onTap: () => printInventoryReport(
+                  movements: _movements!,
+                  lots: _lots ?? const [],
+                  signatures: _signatures ?? const [],
+                  from: _from,
+                  to: _to,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s3),
-          FilledButton.icon(
-            onPressed: _busy ? null : _load,
-            icon: _busy
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.ink,
-                    ),
-                  )
-                : const Icon(Icons.refresh),
-            label: const Text('Inventur berechnen'),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+        Text(
+          'FIFO-Inventur — je Produkt alle Bewegungen chronologisch, '
+          'Bewertung nach dem Verbrauchsfolgeverfahren (§256 HGB): die '
+          'ältesten Zugänge sind zuerst verbraucht, der Endbestand wird '
+          'mit den EK-Preisen der jüngsten verbliebenen Lots bewertet. '
+          'MHD-Abschlag nach Restlaufzeit-Matrix vom AK-Wert.',
+          style: AppTypography.body(size: 12, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickFrom,
+                icon: const Icon(Icons.date_range),
+                label: Text('Von ${Formatters.date(_from)}'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  side: const BorderSide(color: AppColors.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          if (_error != null)
-            AppCard(
-              color: const Color(0xFFF7DBDB),
-              borderColor: AppColors.statusCritical,
-              child: Text(
-                _error!,
-                style: AppTypography.body(size: 13, color: AppColors.ink),
+            const SizedBox(width: AppSpacing.s2),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickTo,
+                icon: const Icon(Icons.date_range),
+                label: Text('Bis ${Formatters.date(_to)}'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  side: const BorderSide(color: AppColors.brand),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
               ),
-            )
-          else if (_movements == null)
-            const SizedBox.shrink()
-          else if (_movements!.isEmpty)
-            AppCard(
-              color: AppColors.surfaceAlt,
-              child: Text(
-                'Keine Bewegungen im gewählten Zeitraum.',
-                style: AppTypography.body(size: 13, color: AppColors.textMuted),
-              ),
-            )
-          else ...[
-            for (final entry in _byProduct(_movements!).entries)
-              _ProductSection(
-                productId: entry.key,
-                movements: entry.value,
-                lots: (_lots ?? [])
-                    .where((l) => l['product_id']?.toString() == entry.key)
-                    .toList(),
-              ),
-            const SizedBox(height: AppSpacing.s5),
-            _GrandTotal(lots: _lots ?? const []),
-            const SizedBox(height: AppSpacing.s6),
-            const _MhdWritedownMatrix(),
-            const SizedBox(height: AppSpacing.s6),
-            if (_signatures != null && _signatures!.isNotEmpty)
-              _SignatureBlock(signatures: _signatures!),
+            ),
           ],
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        FilledButton.icon(
+          onPressed: _busy ? null : _load,
+          icon: _busy
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.ink,
+                  ),
+                )
+              : const Icon(Icons.refresh),
+          label: const Text('Inventur berechnen'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brand,
+            foregroundColor: AppColors.ink,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s4),
+        if (_error != null)
+          AppCard(
+            color: const Color(0xFFF7DBDB),
+            borderColor: AppColors.statusCritical,
+            child: Text(
+              _error!,
+              style: AppTypography.body(size: 13, color: AppColors.ink),
+            ),
+          )
+        else if (_movements == null)
+          const SizedBox.shrink()
+        else if (_movements!.isEmpty)
+          AppCard(
+            color: AppColors.surfaceAlt,
+            child: Text(
+              'Keine Bewegungen im gewählten Zeitraum.',
+              style: AppTypography.body(size: 13, color: AppColors.textMuted),
+            ),
+          )
+        else ...[
+          for (final entry in _byProduct(_movements!).entries)
+            _ProductSection(
+              productId: entry.key,
+              movements: entry.value,
+              lots: (_lots ?? [])
+                  .where((l) => l['product_id']?.toString() == entry.key)
+                  .toList(),
+            ),
+          const SizedBox(height: AppSpacing.s5),
+          _GrandTotal(lots: _lots ?? const []),
+          const SizedBox(height: AppSpacing.s6),
+          const _MhdWritedownMatrix(),
+          const SizedBox(height: AppSpacing.s6),
+          if (_signatures != null && _signatures!.isNotEmpty)
+            _SignatureBlock(signatures: _signatures!),
         ],
-      ),
+      ],
+    );
+    if (widget.eingebettet) return inhalt;
+    return Scaffold(
+      appBar: const HeroAppBar(title: Text('Inventur')),
+      body: inhalt,
     );
   }
 }

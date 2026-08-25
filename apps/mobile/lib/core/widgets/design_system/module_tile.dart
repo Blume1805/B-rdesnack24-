@@ -17,6 +17,8 @@ class ModuleTile extends StatelessWidget {
     this.iconColor,
     this.iconBackgroundColor,
     this.iconBorderColor,
+    this.onAnhang,
+    this.anhangTooltip = 'Unterlage hinzufügen',
   });
 
   final IconData icon;
@@ -30,6 +32,14 @@ class ModuleTile extends StatelessWidget {
   final Color? iconColor;
   final Color? iconBackgroundColor;
   final Color? iconBorderColor;
+
+  /// Zweite Aktion in der Kachel: Unterlage hinzufügen, per Datei oder Foto.
+  ///
+  /// Vorgabe vom 25.08.2026: „in die jeweilige Kachel hinzugefügt werden".
+  /// Deshalb sitzt sie hier und nicht auf dem Bildschirm dahinter, den man
+  /// erst öffnen müsste.
+  final VoidCallback? onAnhang;
+  final String anhangTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +69,36 @@ class ModuleTile extends StatelessWidget {
               const Spacer(),
               if (badge != null)
                 badge!
+              else if (onAnhang != null)
+                // 40x40 statt eines nackten Icons: Unter 44 dp trifft man
+                // auf einer Kachel, die selbst antippbar ist, regelmässig
+                // daneben und landet im Modul statt im Anhang.
+                Semantics(
+                  button: true,
+                  label: anhangTooltip,
+                  child: Tooltip(
+                    message: anhangTooltip,
+                    child: Material(
+                      color: AppColors.surfaceAlt,
+                      shape: const CircleBorder(
+                        side: BorderSide(color: AppColors.borderStrong),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: onAnhang,
+                        child: const SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: Icon(
+                            Icons.add,
+                            size: 20,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               else
                 const Icon(Icons.chevron_right, color: AppColors.textMuted),
             ],

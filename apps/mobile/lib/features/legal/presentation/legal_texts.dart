@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v12 · 2026-08';
+  static const version = 'v13 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -780,7 +780,7 @@ Beschreibungen etwas anderes nahegelegt haben.
 
 Wir nennen das mit Zahlen, weil eine vage Formulierung niemandem hilft:
 
-  • Screenreader-Beschriftungen sind bislang in 17 von 172 Quelldateien
+  • Screenreader-Beschriftungen sind bislang in 19 von 175 Quelldateien
     gepflegt. Die Bausteine des Design-Systems und der Kundenbereich sind am
     weitesten; die internen Verwaltungsansichten sind es nicht. Für Kundinnen
     und Kunden ist der wichtigere Teil abgedeckt, vollständig ist es nicht.

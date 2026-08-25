@@ -1,36 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../finance/presentation/screens/datev_export_screen.dart';
+import '../domain/verwaltungs_struktur.dart';
+import 'screens/approvals_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
-import 'screens/complaints_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
+import 'screens/complaints_screen.dart';
 import 'screens/disposal_screen.dart';
 import 'screens/documents_screen.dart';
 import 'screens/employees_screen.dart';
 import 'screens/filling_screen.dart';
-import 'screens/inventory_report_screen.dart';
-import 'screens/inventory_screen.dart';
+import 'screens/inventory_hub_screen.dart';
 import 'screens/maintenance_screen.dart';
 import 'screens/my_signature_tasks_screen.dart';
-import 'screens/approvals_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
+import 'widgets/anhang_sheet.dart';
+import 'widgets/oberbegriff_gruppe.dart';
 
-/// Kategorie 2 — Unternehmensverwaltung. Modul-Kacheln werden nach den
-/// effektiven Berechtigungen (RBAC/ABAC) ein-/ausgeblendet. Autorisierung
-/// erfolgt zusätzlich serverseitig (RLS).
-class ManagementScreen extends ConsumerWidget {
+/// Kategorie 2 — Unternehmensverwaltung.
+///
+/// Bis zum 25.08.2026 lagen hier 17 gleichrangige Kacheln in einem Raster.
+/// Der Auftraggeber hat fünf Oberbegriffe vorgegeben; jeder klappt seine
+/// Funktionen auf. Die Zuordnung selbst steht in
+/// `domain/verwaltungs_struktur.dart`, nicht hier.
+///
+/// Zugeklappt ist der Ausgangszustand, weil genau das verlangt war: „Durch
+/// Anklicken der Oberbegriffe erscheinen dann die jeweiligen Unterbegriffe."
+/// Damit der Bildschirm dabei nicht leer wirkt, trägt jede Kopfzeile eine
+/// erklärende Zeile und die Anzahl.
+///
+/// Kacheln werden nach den effektiven Berechtigungen ein- und ausgeblendet.
+/// Autorisierung erfolgt zusätzlich serverseitig (RLS und RPC).
+class ManagementScreen extends ConsumerStatefulWidget {
   const ManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ManagementScreen> createState() => _ManagementScreenState();
+}
+
+class _ManagementScreenState extends ConsumerState<ManagementScreen> {
+  final Set<Oberbegriff> _offen = <Oberbegriff>{};
+
+  @override
+  Widget build(BuildContext context) {
     final perms = ref.watch(currentPermissionsProvider);
     return perms.when(
       loading: () => const Center(
@@ -39,213 +59,302 @@ class ManagementScreen extends ConsumerWidget {
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.s6),
-          child: Text('$e', style: AppTypography.body(size: 14)),
+          child: Text(
+            'Berechtigungen konnten nicht geladen werden: $e',
+            style: AppTypography.body(size: 14),
+          ),
         ),
       ),
       data: (p) {
-        final modules = _buildModules(p);
-        if (modules.isEmpty) {
-          return _EmptyState();
-        }
-        return _ModuleGrid(modules: modules);
+        final sichtbar =
+            _funktionen().where((f) => f.sichtbar(p)).toList(growable: false);
+        if (sichtbar.isEmpty) return const _KeineModule();
+
+        final gruppen = [
+          for (final g in oberbegriffe)
+            (
+              daten: g,
+              eintraege: sichtbar
+                  .where((f) => f.gruppe == g.id)
+                  .toList(growable: false)
+            ),
+        ].where((g) => g.eintraege.isNotEmpty).toList(growable: false);
+
+        // Bleibt nur eine Gruppe übrig, gibt es nichts zu wählen. Wer als
+        // Mitarbeiter zwei Funktionen sieht, soll sie sehen und nicht erst
+        // eine Überschrift aufklappen müssen.
+        final nurEine = gruppen.length == 1;
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.s5,
+            AppSpacing.s5,
+            AppSpacing.s5,
+            AppSpacing.s8,
+          ),
+          children: [
+            const SectionHeader(
+              eyebrow: 'Verwaltung',
+              title: 'Betrieb und Unterlagen',
+            ),
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              'Tippe einen Bereich an, um seine Funktionen zu sehen. Über das '
+              'Plus an einer Kachel legst Du Unterlagen dazu ab, als Datei '
+              'oder als Foto.',
+              style: AppTypography.body(size: 13, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: AppSpacing.s5),
+            for (final g in gruppen) ...[
+              OberbegriffGruppe(
+                daten: g.daten,
+                anzahl: g.eintraege.length,
+                offen: nurEine || _offen.contains(g.daten.id),
+                onUmschalten: () => setState(() {
+                  if (!_offen.remove(g.daten.id)) _offen.add(g.daten.id);
+                }),
+                inhalt: _Kachelraster(eintraege: g.eintraege),
+              ),
+              const SizedBox(height: AppSpacing.s3),
+            ],
+          ],
+        );
       },
     );
   }
 
-  List<_Module> _buildModules(Set<String> p) {
-    return <_Module>[
-      _Module(
-        'Inventur',
-        'Bestand je Automat',
-        Icons.inventory_2_outlined,
-        const InventoryScreen(),
-        visible: p.contains('inventory.view') || p.contains('inventory.edit'),
-      ),
-      _Module(
-        'Befüllung',
-        'Nachfüll-Protokoll',
-        Icons.add_box_outlined,
-        const FillingScreen(),
-        visible: p.contains('haccp.fill'),
-      ),
-      _Module(
-        'Temperatur',
-        'HACCP · ≤ 7 °C',
-        Icons.thermostat_outlined,
-        const TemperatureScreen(),
-        visible: p.contains('haccp.temperature'),
-      ),
-      _Module(
-        'Reinigung',
-        'Hygieneplan',
-        Icons.cleaning_services_outlined,
-        const CleaningScreen(),
-        visible: p.contains('haccp.cleaning'),
-      ),
-      _Module(
-        'Vernichtung',
-        'MHD / Verderb',
-        Icons.delete_outline,
-        const DisposalScreen(),
-        visible: p.contains('haccp.disposal'),
-      ),
-      _Module(
-        'Wartung',
-        'Technik-Protokolle',
-        Icons.build_outlined,
-        const MaintenanceScreen(),
-        visible: p.contains('haccp.maintenance'),
-      ),
-      _Module(
-        'Geldentnahme',
-        'Kassenprotokoll',
-        Icons.payments_outlined,
-        const CashScreen(),
-        visible: p.contains('cash.collect'),
-      ),
-      _Module(
-        'Dokumente',
-        'Archiv & Versionen',
-        Icons.folder_outlined,
-        const DocumentsScreen(),
-        visible: p.contains('documents.view') || p.contains('documents.edit'),
-      ),
-      _Module(
-        'Mitarbeiter',
-        'Einladen & Schulen',
-        Icons.group_outlined,
-        const EmployeesScreen(),
-        visible: p.contains('employees.manage'),
-      ),
-      _Module(
-        'B2B-Kunden',
-        'sevDesk-CSV-Export',
-        Icons.download_outlined,
-        const B2bCustomersScreen(),
-        // Sichtbar für alle Gesellschafter/Admins mit customers.manage.
-        visible: p.contains('customers.manage'),
-      ),
-      _Module(
-        'DATEV-Export',
-        'Buchungsstapel (CSV)',
-        Icons.receipt_long_outlined,
-        const DatevExportScreen(),
-        // Finanz-sensibel: Kachel nur für Gesellschafter/Admins; die RPC
-        // erzwingt die Rolle zusätzlich serverseitig.
-        visible: p.contains('finance.export'),
-        iconColor: AppColors.statusPositive,
-        iconBackgroundColor: AppColors.statusPositive.withValues(alpha: 0.12),
-        iconBorderColor: AppColors.statusPositive.withValues(alpha: 0.4),
-        badge: const _DatevBadge(),
-      ),
-      _Module(
-        'Inventur',
-        'PDF-Report Zeitraum',
-        Icons.inventory_2_outlined,
-        const InventoryReportScreen(),
-        // Nur Systemadministrator/Vollzugriff — Server-RPC prüft zusätzlich
-        visible: p.contains('customers.manage'),
-      ),
-      _Module(
-        'Telemetrie',
-        'IoT · Live · Slots',
-        Icons.sensors,
-        const TelemetryHubScreen(),
-        visible: p.contains('customers.manage'),
-      ),
-      _Module(
-        'Freigaben',
-        'Dokumente prüfen',
-        Icons.rule_folder_outlined,
-        const DocumentApprovalsScreen(),
-        visible: p.contains('customers.manage'),
-      ),
-      _Module(
-        'Kündigungen',
-        'Abo-Kündigungen prüfen',
-        Icons.unsubscribe_outlined,
-        const CancellationsScreen(),
-        visible: p.contains('customers.manage'),
-      ),
-      _Module(
-        'Reklamationen',
-        'Kundenmeldungen je Kauf',
-        Icons.flag_outlined,
-        const ComplaintsScreen(),
-        visible: p.contains('customers.manage'),
-      ),
-      const _Module(
-        'Zu signieren',
-        'Belehrungen & Nachweise',
-        Icons.draw_outlined,
-        MySignatureTasksScreen(),
-        // Für alle authentifizierten Rollen sichtbar — die RPC filtert
-        // ohnehin nur die dem User zugewiesenen Aufgaben. Nützlich vor
-        // allem für Rolle 'employee'.
-        visible: true,
-      ),
-    ].where((m) => m.visible).toList();
-  }
+  /// Alle Funktionen mit ihrer Gruppe, ihrem Recht und ihrem Ablageordner.
+  List<Verwaltungsfunktion> _funktionen() => <Verwaltungsfunktion>[
+        // ── Protokolle ──────────────────────────────────────────────────
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Befüllung',
+          beschreibung: 'Nachfüll-Protokoll',
+          icon: Icons.add_box_outlined,
+          ziel: () => const FillingScreen(),
+          sichtbar: (p) => p.contains('haccp.fill'),
+          ablageOrdner: 'protokolle',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Reinigung',
+          beschreibung: 'Hygieneplan',
+          icon: Icons.cleaning_services_outlined,
+          ziel: () => const CleaningScreen(),
+          sichtbar: (p) => p.contains('haccp.cleaning'),
+          ablageOrdner: 'protokolle',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Temperatur',
+          beschreibung: 'HACCP, höchstens 7 °C',
+          icon: Icons.thermostat_outlined,
+          ziel: () => const TemperatureScreen(),
+          sichtbar: (p) => p.contains('haccp.temperature'),
+          ablageOrdner: 'protokolle',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Wartung',
+          beschreibung: 'Technik-Protokolle',
+          icon: Icons.build_outlined,
+          ziel: () => const MaintenanceScreen(),
+          sichtbar: (p) => p.contains('haccp.maintenance'),
+          ablageOrdner: 'wartung',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Vernichtung',
+          beschreibung: 'MHD und Verderb',
+          icon: Icons.delete_outline,
+          ziel: () => const DisposalScreen(),
+          sichtbar: (p) => p.contains('haccp.disposal'),
+          ablageOrdner: 'protokolle',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.protokolle,
+          label: 'Geldentnahme',
+          beschreibung: 'Kassenprotokoll',
+          icon: Icons.payments_outlined,
+          ziel: () => const CashScreen(),
+          sichtbar: (p) => p.contains('cash.collect'),
+          ablageOrdner: 'protokolle',
+        ),
+
+        // ── Vorgänge & Prozesse ─────────────────────────────────────────
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Freigaben',
+          beschreibung: 'Dokumente prüfen',
+          icon: Icons.rule_folder_outlined,
+          ziel: () => const DocumentApprovalsScreen(),
+          sichtbar: (p) => p.contains('customers.manage'),
+          ablageOrdner: 'sonstiges',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Zu signieren',
+          beschreibung: 'Belehrungen und Nachweise',
+          icon: Icons.draw_outlined,
+          ziel: () => const MySignatureTasksScreen(),
+          // Für alle angemeldeten Rollen sichtbar, die RPC liefert ohnehin
+          // nur die eigenen Aufgaben. Wichtig für die Rolle 'employee'.
+          sichtbar: (_) => true,
+          ablageOrdner: 'ifsg',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Mitarbeiter',
+          beschreibung: 'Einladen und schulen',
+          icon: Icons.group_outlined,
+          ziel: () => const EmployeesScreen(),
+          sichtbar: (p) => p.contains('employees.manage'),
+          ablageOrdner: 'arbeitsvertrag',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Telemetrie',
+          beschreibung: 'IoT, Live, Slots',
+          icon: Icons.sensors,
+          ziel: () => const TelemetryHubScreen(),
+          sichtbar: (p) => p.contains('customers.manage'),
+          ablageOrdner: 'wartung',
+        ),
+
+        // ── Serviceanliegen ─────────────────────────────────────────────
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.serviceanliegen,
+          label: 'Reklamationen',
+          beschreibung: 'Kundenmeldungen je Kauf',
+          icon: Icons.flag_outlined,
+          ziel: () => const ComplaintsScreen(),
+          sichtbar: (p) => p.contains('customers.manage'),
+          ablageOrdner: 'sonstiges',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.serviceanliegen,
+          label: 'Kündigungen',
+          beschreibung: 'Abo-Kündigungen prüfen',
+          icon: Icons.unsubscribe_outlined,
+          ziel: () => const CancellationsScreen(),
+          sichtbar: (p) => p.contains('customers.manage'),
+          ablageOrdner: 'sonstiges',
+        ),
+
+        // ── Dokumente ───────────────────────────────────────────────────
+        // Eine Kachel, kein Ordner je Vertragsart: Die Ordner liegen in
+        // `document_folders` und werden dort gepflegt. Sie hier ein zweites
+        // Mal als Kacheln zu führen, hiesse dieselbe Liste an zwei Stellen
+        // zu haben, die auseinanderlaufen können.
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.dokumente,
+          label: 'Archiv',
+          beschreibung: 'Verträge, Bescheide, Policen',
+          icon: Icons.folder_outlined,
+          ziel: () => const DocumentsScreen(),
+          sichtbar: (p) =>
+              p.contains('documents.view') || p.contains('documents.edit'),
+          ablageOrdner: 'sonstiges',
+        ),
+
+        // ── Steuern ─────────────────────────────────────────────────────
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.steuern,
+          label: 'DATEV-Export',
+          beschreibung: 'Buchungsstapel als CSV',
+          icon: Icons.receipt_long_outlined,
+          ziel: () => const DatevExportScreen(),
+          // Finanz-sensibel: nur Gesellschafter und Admins; die RPC
+          // erzwingt die Rolle zusätzlich serverseitig.
+          sichtbar: (p) => p.contains('finance.export'),
+          ablageOrdner: 'steuern',
+          iconColor: AppColors.statusPositive,
+          iconBackgroundColor: const Color(0x1F5C9A3F),
+          iconBorderColor: const Color(0x665C9A3F),
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.steuern,
+          label: 'Inventur',
+          beschreibung: 'Bestand je Automat und FIFO-Report',
+          icon: Icons.inventory_2_outlined,
+          ziel: () => const InventoryHubScreen(),
+          sichtbar: (p) =>
+              p.contains('inventory.view') || p.contains('inventory.edit'),
+          ablageOrdner: 'steuern',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.steuern,
+          label: 'B2B-Kunden',
+          beschreibung: 'sevDesk-Export als CSV',
+          icon: Icons.download_outlined,
+          ziel: () => const B2bCustomersScreen(),
+          sichtbar: (p) => p.contains('customers.manage'),
+          ablageOrdner: 'steuern',
+        ),
+      ];
 }
 
-class _ModuleGrid extends StatelessWidget {
-  const _ModuleGrid({required this.modules});
-  final List<_Module> modules;
+class _Kachelraster extends StatelessWidget {
+  const _Kachelraster({required this.eintraege});
+
+  final List<Verwaltungsfunktion> eintraege;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.s5,
-        AppSpacing.s5,
-        AppSpacing.s5,
-        AppSpacing.s8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = constraints.maxWidth < 460 ? 2 : 3;
+        return GridView.count(
+          crossAxisCount: cols,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 1.05,
+          mainAxisSpacing: AppSpacing.s3,
+          crossAxisSpacing: AppSpacing.s3,
+          children: [
+            for (final f in eintraege)
+              ModuleTile(
+                icon: f.icon,
+                label: f.label,
+                description: f.beschreibung,
+                iconColor: f.iconColor,
+                iconBackgroundColor: f.iconBackgroundColor,
+                iconBorderColor: f.iconBorderColor,
+                badge: f.badge,
+                anhangTooltip: 'Unterlage zu ${f.label} hinzufügen',
+                onAnhang:
+                    f.ablageOrdner == null ? null : () => _anhang(context, f),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => f.ziel()),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _anhang(
+    BuildContext context,
+    Verwaltungsfunktion f,
+  ) async {
+    final abgelegt = await AnhangSheet.oeffnen(
+      context,
+      ordner: f.ablageOrdner!,
+      kachel: f.label,
+    );
+    if (!abgelegt || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Unterlage liegt im Dokumentenarchiv.'),
       ),
-      children: [
-        const SectionHeader(
-          eyebrow: 'Verwaltung',
-          title: 'Betriebsprotokolle',
-        ),
-        const SizedBox(height: AppSpacing.s2),
-        Text(
-          'Digitale HACCP-, Reinigungs- und Bestandsprotokolle — revisionssicher und GoBD-konform.',
-          style: AppTypography.body(size: 13, color: AppColors.textMuted),
-        ),
-        const SizedBox(height: AppSpacing.s5),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final cols = constraints.maxWidth < 500 ? 2 : 3;
-            return GridView.count(
-              crossAxisCount: cols,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.05,
-              mainAxisSpacing: AppSpacing.s3,
-              crossAxisSpacing: AppSpacing.s3,
-              children: [
-                for (final m in modules)
-                  ModuleTile(
-                    icon: m.icon,
-                    label: m.label,
-                    description: m.description,
-                    iconColor: m.iconColor,
-                    iconBackgroundColor: m.iconBackgroundColor,
-                    iconBorderColor: m.iconBorderColor,
-                    badge: m.badge,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => m.screen),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
     );
   }
 }
 
-class _EmptyState extends StatelessWidget {
+class _KeineModule extends StatelessWidget {
+  const _KeineModule();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -276,66 +385,13 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Für dein Konto sind noch keine Module aktiviert. Bitte wende dich an einen Gesellschafter.',
+              'Für Dein Konto ist noch kein Bereich aktiviert. Bitte wende '
+              'Dich an einen Gesellschafter.',
               textAlign: TextAlign.center,
               style: AppTypography.body(size: 14, color: AppColors.textMuted),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Module {
-  const _Module(
-    this.label,
-    this.description,
-    this.icon,
-    this.screen, {
-    required this.visible,
-    this.iconColor,
-    this.iconBackgroundColor,
-    this.iconBorderColor,
-    this.badge,
-  });
-  final String label;
-  final String description;
-  final IconData icon;
-  final Widget screen;
-  final bool visible;
-
-  /// Optionale Farbüberschreibung — z. B. Grün + Badge für DATEV.
-  final Color? iconColor;
-  final Color? iconBackgroundColor;
-  final Color? iconBorderColor;
-  final Widget? badge;
-}
-
-/// Kleines grünes "DATEV"-Label auf der Export-Kachel — kennzeichnet das
-/// Zielformat (EXTF-Buchungsstapel) rein textlich, ohne das geschützte
-/// DATEV-Markenlogo zu reproduzieren.
-class _DatevBadge extends StatelessWidget {
-  const _DatevBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.statusPositive.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(AppRadii.sm),
-        border: Border.all(
-          color: AppColors.statusPositive.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Text(
-        'DATEV',
-        style: AppTypography.body(
-          size: 9,
-          weight: FontWeight.w800,
-          color: AppColors.statusPositive,
-        ).copyWith(letterSpacing: 0.4),
       ),
     );
   }

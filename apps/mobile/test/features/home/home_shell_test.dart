@@ -58,7 +58,7 @@ void main() {
     );
 
     // Deferred-Verwaltung ist vollständig geladen (kein grauer Tab).
-    expect(find.text('Betriebsprotokolle'), findsOneWidget);
+    expect(find.text('Betrieb und Unterlagen'), findsOneWidget);
 
     // „Später" blendet die Erinnerung für die Sitzung aus.
     await tester.tap(find.byTooltip('Später'));
