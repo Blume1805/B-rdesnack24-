@@ -94,10 +94,7 @@ class _BildregisterScreenState extends ConsumerState<BildregisterScreen> {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Jedes Produktbild wird hier mit Herkunft, Bearbeitung und '
-              'Freigabe festgehalten. Das ist der Nachweis, dass die Aufnahme '
-              'von uns stammt — und dass am abgebildeten Produkt nichts '
-              'verändert wurde.',
+              'Herkunft, Bearbeitung und Freigabe je Produktbild.',
               style: AppTypography.body(size: 13, color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.s4),
@@ -116,17 +113,21 @@ class _BildregisterScreenState extends ConsumerState<BildregisterScreen> {
                 icon: Icons.error_outline,
               )
             else ...[
-              _Kennzahlen(werte: _kennzahlen),
-              const SizedBox(height: AppSpacing.s4),
-              const _Rechtshinweis(),
+              BildregisterKennzahlen(werte: _kennzahlen),
               const SizedBox(height: AppSpacing.s4),
               if (_bilder.isEmpty)
                 const _Leer()
               else
                 for (final bild in _bilder) ...[
-                  _BildKarte(bild: bild, onTap: () => _bearbeiten(bild)),
+                  BildregisterKarte(bild: bild, onTap: () => _bearbeiten(bild)),
                   const SizedBox(height: AppSpacing.s3),
                 ],
+              // Die Begründung steht UNTER dem Bestand, nicht darüber: Wer
+              // den Bildschirm öffnet, will die Bilder sehen. Vorher lagen
+              // drei Absätze Recht davor, und die erste Bildkarte war auf
+              // dem Telefon nur mit Scrollen erreichbar.
+              const SizedBox(height: AppSpacing.s3),
+              const _Rechtshinweis(),
             ],
           ],
         ),
@@ -245,8 +246,25 @@ String _fehlertext(Object e) {
 // Anzeige
 // ═══════════════════════════════════════════════════════════════════════════
 
-class _Kennzahlen extends StatelessWidget {
-  const _Kennzahlen({required this.werte});
+/// Die vier Zahlen über dem Register.
+///
+/// KEINE Kachelreihe, und das war eine Korrektur: Zuerst standen hier vier
+/// `KpiCard`s wie im Finanzbereich. Auf dem Telefon blieben je Kachel rund
+/// 18 dp für die Beschriftung, und „zu kennzeichnen" brach buchstabenweise
+/// senkrecht um — vom Auftraggeber am Gerät gemeldet. Ein zweispaltiges
+/// Raster half nur halb: bei 390 dp passte es, bei 320 dp lief die Kachel
+/// wieder über. Das Bauteil ist für kurze Beschriftungen gedacht
+/// („Aufwand"), nicht für vier lange.
+///
+/// Vier Zahlen brauchen keine vier Kacheln. Eine Karte mit vier Zeilen kann
+/// nicht überlaufen — die Beschriftung darf umbrechen, die Zahl steht rechts
+/// — und sie braucht ein Drittel der Höhe, sodass die erste Bildkarte ohne
+/// Scrollen sichtbar bleibt.
+///
+/// Öffentlich, damit ein Test sie in Telefonbreite rendern kann: Der
+/// Bildschirm selbst braucht eine Supabase-Verbindung.
+class BildregisterKennzahlen extends StatelessWidget {
+  const BildregisterKennzahlen({super.key, required this.werte});
 
   final Map<String, dynamic> werte;
 
@@ -254,48 +272,102 @@ class _Kennzahlen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final offen = _z('ohne_freigabe');
     final pflicht = _z('kennzeichnungspflicht');
-    return Row(
-      children: [
-        Expanded(
-          child: KpiCard(
-            label: 'Bilder',
-            value: '${_z('gesamt')}',
+    final offen = _z('ohne_freigabe');
+
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.s4,
+        vertical: AppSpacing.s2,
+      ),
+      child: Column(
+        children: [
+          _Kennzahl(
             icon: Icons.photo_library_outlined,
+            label: 'Dokumentierte Bilder',
+            wert: _z('gesamt'),
           ),
-        ),
-        const SizedBox(width: AppSpacing.s2),
-        Expanded(
-          child: KpiCard(
-            label: 'mit KI',
-            value: '${_z('mit_ki')}',
+          const _Trenner(),
+          _Kennzahl(
             icon: Icons.auto_awesome_outlined,
+            label: 'davon mit KI bearbeitet',
+            wert: _z('mit_ki'),
           ),
-        ),
-        const SizedBox(width: AppSpacing.s2),
-        Expanded(
-          child: KpiCard(
-            label: 'zu kennzeichnen',
-            value: '$pflicht',
+          const _Trenner(),
+          _Kennzahl(
             icon: Icons.campaign_outlined,
-            valueColor:
-                pflicht > 0 ? AppColors.statusWarning : AppColors.ink,
+            label: 'zu kennzeichnen',
+            wert: pflicht,
+            // Nur hervorheben, wenn es etwas hervorzuheben gibt. Eine
+            // dauerhaft gelbe Null gewöhnt einem die Farbe ab.
+            warnung: pflicht > 0,
           ),
-        ),
-        const SizedBox(width: AppSpacing.s2),
-        Expanded(
-          child: KpiCard(
-            label: 'ohne Freigabe',
-            value: '$offen',
+          const _Trenner(),
+          _Kennzahl(
             icon: Icons.pending_outlined,
-            valueColor:
-                offen > 0 ? AppColors.statusWarning : AppColors.ink,
+            label: 'ohne Freigabe',
+            wert: offen,
+            warnung: offen > 0,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
+
+class _Kennzahl extends StatelessWidget {
+  const _Kennzahl({
+    required this.icon,
+    required this.label,
+    required this.wert,
+    this.warnung = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final int wert;
+  final bool warnung;
+
+  @override
+  Widget build(BuildContext context) {
+    final farbe = warnung ? AppColors.statusWarning : AppColors.ink;
+    return Semantics(
+      label: '$label: $wert',
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.s3),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: warnung ? farbe : AppColors.brand),
+            const SizedBox(width: AppSpacing.s3),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.body(size: 13, color: AppColors.textDefault),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s3),
+            Text(
+              '$wert',
+              style: AppTypography.display(
+                size: 20,
+                weight: FontWeight.w700,
+                color: farbe,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Trenner extends StatelessWidget {
+  const _Trenner();
+
+  @override
+  Widget build(BuildContext context) =>
+      const Divider(height: 1, thickness: 1, color: AppColors.borderSubtle);
 }
 
 /// Warum es dieses Register gibt — einmal ausgeschrieben, im Bildschirm.
@@ -409,8 +481,17 @@ class _Leer extends StatelessWidget {
   }
 }
 
-class _BildKarte extends StatelessWidget {
-  const _BildKarte({required this.bild, required this.onTap});
+/// Ein Eintrag des Registers.
+///
+/// Öffentlich aus demselben Grund wie [BildregisterKennzahlen]: Der
+/// Bildschirm braucht eine Supabase-Verbindung, die Karte nicht — und genau
+/// hier entscheidet sich, ob das Format auf einem Telefon hält.
+class BildregisterKarte extends StatelessWidget {
+  const BildregisterKarte({
+    super.key,
+    required this.bild,
+    required this.onTap,
+  });
 
   final Map<String, dynamic> bild;
   final VoidCallback onTap;
@@ -499,25 +580,29 @@ class _Zeile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Keine feste Breite für die Beschriftung: 150 dp gegen eine Karte, die
+    // von 320 bis 1200 dp breit sein kann, ist derselbe Fehler wie bei den
+    // Kennzahlen. Beide Seiten teilen sich den Platz im Verhältnis.
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 150,
+          Expanded(
+            flex: 5,
             child: Text(
               links,
               style: AppTypography.body(size: 12, color: AppColors.textMuted),
             ),
           ),
+          const SizedBox(width: AppSpacing.s3),
           Expanded(
+            flex: 6,
             child: Text(
               rechts,
               style: AppTypography.body(
                 size: 12,
-                color:
-                    betont ? AppColors.statusWarning : AppColors.ink,
+                color: betont ? AppColors.statusWarning : AppColors.ink,
               ),
             ),
           ),
