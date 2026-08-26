@@ -37,7 +37,9 @@ const _ustIdNr = 'DE 458804058';
 class _FirmenkundeDetailScreenState
     extends ConsumerState<FirmenkundeDetailScreen> {
   Map<String, dynamic>? _daten;
+  List<Map<String, dynamic>> _rechnungen = const [];
   bool _laedt = false;
+  bool _uebertraegt = false;
   String? _fehler;
 
   late DateTime _monat = DateTime(DateTime.now().year, DateTime.now().month);
@@ -64,6 +66,11 @@ class _FirmenkundeDetailScreenState
         },
       );
       _daten = Map<String, dynamic>.from(ergebnis as Map);
+      final laeufe = await client.rpc(
+        'business_invoice_runs_list',
+        params: {'p_business': widget.firmaId},
+      );
+      _rechnungen = (laeufe as List).cast<Map<String, dynamic>>();
     } catch (e) {
       _fehler = e.toString();
       _daten = null;
@@ -164,6 +171,32 @@ class _FirmenkundeDetailScreenState
                 mitglieder: _mitglieder,
                 onSetzen: () => _budget(null),
               ),
+              const SizedBox(height: AppSpacing.s5),
+              _Abschnitt(
+                'Rechnungen',
+                aktion: TextButton.icon(
+                  onPressed: _uebertraegt ? null : _rechnungAnfordern,
+                  icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                  label: const Text('Anfordern'),
+                ),
+              ),
+              const _RechnungsHinweis(),
+              const SizedBox(height: AppSpacing.s2),
+              if (_rechnungen.isEmpty)
+                const _Leerzeile(
+                  'Noch keine Rechnung angefordert. Abgerechnet wird immer ein '
+                  'abgeschlossener Monat.',
+                )
+              else
+                for (final r in _rechnungen) ...[
+                  _RechnungsKarte(
+                    lauf: r,
+                    beschaeftigt: _uebertraegt,
+                    onUebertragen: () => _anSevdesk(r),
+                    onFreigeben: () => _freigeben(r),
+                  ),
+                  const SizedBox(height: AppSpacing.s2),
+                ],
             ],
           ],
         ),
@@ -277,6 +310,80 @@ class _FirmenkundeDetailScreenState
         ),
       );
     }
+  }
+
+  /// Fordert die Rechnung für den GEWÄHLTEN Monat an. Die Datenbank lehnt
+  /// einen laufenden Monat ab und nennt das Datum, ab dem es geht — die
+  /// Oberfläche muss das nicht noch einmal wissen.
+  Future<void> _rechnungAnfordern() async {
+    await _rufe(
+      'business_invoice_request',
+      {
+        'p_business': widget.firmaId,
+        'p_jahr': _monat.year,
+        'p_monat': _monat.month,
+      },
+      'Rechnung angefordert',
+    );
+  }
+
+  /// Ruft die Edge Function, die in sevDesk den Entwurf anlegt.
+  Future<void> _anSevdesk(Map<String, dynamic> lauf) async {
+    setState(() => _uebertraegt = true);
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.functions.invoke(
+        'sevdesk-invoice',
+        body: {'run': lauf['id']},
+      );
+      await _laden();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An sevDesk übertragen')),
+      );
+    } catch (e) {
+      await _laden();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.statusCritical,
+          content: Text(firmenFehlertext(e)),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _uebertraegt = false);
+    }
+  }
+
+  Future<void> _freigeben(Map<String, dynamic> lauf) async {
+    final ja = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: const Text('Rechnung freigeben'),
+        content: Text(
+          'Damit bestätigst Du, dass Du die Rechnung in sevDesk geprüft hast. '
+          'Freigeben darf nur ein Gesellschafter. Versendet wird sie danach '
+          'in sevDesk — dort entsteht auch das E-Rechnungsformat.\n\n'
+          'Betrag: ${Formatters.euro(zuDouble(lauf['brutto']))}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(d, true),
+            child: const Text('Freigeben'),
+          ),
+        ],
+      ),
+    );
+    if (ja != true) return;
+    await _rufe(
+      'business_invoice_release',
+      {'p_run': lauf['id']},
+      'Rechnung freigegeben',
+    );
   }
 
   Future<void> _zurueckziehen(Map<String, dynamic> e) async {
@@ -1043,6 +1150,158 @@ class _BudgetDialogState extends State<_BudgetDialog> {
           child: const Text('Speichern'),
         ),
       ],
+    );
+  }
+}
+
+/// Warum die Rechnung nicht hier entsteht — einmal ausgeschrieben.
+///
+/// Ohne diesen Satz wirkt der Ausdruck aus der App wie eine Rechnung, und
+/// genau das ist er nicht: Er ist der Nachweis, der ihr beiliegt.
+class _RechnungsHinweis extends StatelessWidget {
+  const _RechnungsHinweis();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s3),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, size: 18, color: AppColors.textMuted),
+          const SizedBox(width: AppSpacing.s2),
+          Expanded(
+            child: Text(
+              'Die Rechnung selbst schreibt sevDesk — dort entstehen die '
+              'fortlaufende Nummer, der Steuerausweis und das '
+              'E-Rechnungsformat. Von hier geht nur der Auftrag hin. Die '
+              'Aufstellung aus dieser App ist der Nachweis, der ihr beiliegt.',
+              style: AppTypography.body(size: 12, color: AppColors.textMuted),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RechnungsKarte extends StatelessWidget {
+  const _RechnungsKarte({
+    required this.lauf,
+    required this.beschaeftigt,
+    required this.onUebertragen,
+    required this.onFreigeben,
+  });
+
+  final Map<String, dynamic> lauf;
+  final bool beschaeftigt;
+  final VoidCallback onUebertragen;
+  final VoidCallback onFreigeben;
+
+  static const _monate = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final status = '${lauf['status']}';
+    final monat = (lauf['monat'] as num?)?.toInt() ?? 1;
+    final nummer = lauf['sevdesk_invoice_number'];
+
+    final (farbe, text) = switch (status) {
+      'angefordert' => (AppColors.statusWarning, 'wartet auf Übertragung'),
+      'in_sevdesk' => (AppColors.statusInfo, 'Entwurf in sevDesk'),
+      'freigegeben' => (AppColors.statusPositive, 'freigegeben'),
+      'fehler' => (AppColors.statusCritical, 'Fehler'),
+      _ => (AppColors.textMuted, status),
+    };
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${_monate[(monat - 1).clamp(0, 11)]} ${lauf['jahr']}',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              _Marke(text: text, farbe: farbe),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'netto ${Formatters.euro(zuDouble(lauf['netto']))} · '
+                  'USt ${Formatters.euro(zuDouble(lauf['steuer']))}',
+                  style:
+                      AppTypography.body(size: 12, color: AppColors.textMuted),
+                ),
+              ),
+              UmsatzBetrag(betrag: zuDouble(lauf['brutto']), size: 15),
+            ],
+          ),
+          if (nummer != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'sevDesk: $nummer',
+              style: AppTypography.body(size: 12, color: AppColors.textMuted),
+            ),
+          ],
+          if (lauf['fehlertext'] != null) ...[
+            const SizedBox(height: AppSpacing.s2),
+            Text(
+              '${lauf['fehlertext']}',
+              style: AppTypography.body(
+                size: 12,
+                color: AppColors.statusCritical,
+              ),
+            ),
+          ],
+          if (lauf['freigegeben_am'] != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Freigegeben von ${lauf['freigegeben_von'] ?? '—'} am '
+              '${datumKurz(lauf['freigegeben_am'])}',
+              style: AppTypography.body(size: 12, color: AppColors.textMuted),
+            ),
+          ],
+          if (status == 'angefordert' || status == 'fehler') ...[
+            const SizedBox(height: AppSpacing.s3),
+            OutlinedButton.icon(
+              onPressed: beschaeftigt ? null : onUebertragen,
+              icon: const Icon(Icons.cloud_upload_outlined, size: 16),
+              label: Text(
+                status == 'fehler'
+                    ? 'Erneut an sevDesk übertragen'
+                    : 'An sevDesk übertragen',
+              ),
+            ),
+          ],
+          if (status == 'in_sevdesk') ...[
+            const SizedBox(height: AppSpacing.s3),
+            FilledButton.icon(
+              onPressed: onFreigeben,
+              icon: const Icon(Icons.verified_outlined, size: 16),
+              label: const Text('Nach Prüfung freigeben'),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

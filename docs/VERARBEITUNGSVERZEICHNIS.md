@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 11**
+**Stand: 26.08.2026 · Fassung 12**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -422,6 +422,42 @@ physische Flächen. Es wird nichts in der App eingeblendet, nichts gemessen
 und nichts über Kundinnen und Kunden an Werbekunden übermittelt. Reichweiten
 werden zurzeit nicht ausgewiesen — dafür gibt es zu wenige Verkaufsdaten,
 und eine geschätzte Reichweite zu bewerben wäre nach § 5 UWG angreifbar.
+
+### V17 — Rechnungsstellung an Firmenkunden über sevDesk
+
+| | |
+|---|---|
+| Zweck | Ordnungsgemässe Rechnung nach § 14 UStG über den Warenbezug der Beschäftigten eines Firmenkunden; Freigabe durch einen Gesellschafter |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. c (§ 14 UStG, § 147 AO, § 257 HGB); Art. 6 Abs. 1 lit. b für die Vertragsabwicklung |
+| Betroffene | Beschäftigte des Firmenkunden (im beigefügten Einzelnachweis), Ansprechpersonen des Firmenkunden |
+| Datenkategorien | `business_invoice_runs`: Zeitraum, Beträge, Steueraufteilung, **eingefrorene Grundlage** samt Einzelnachweis (Name der kaufenden Person, Zeitpunkt, Automat, Artikel), Empfängerdaten, wer angefordert und wer freigegeben hat; `businesses.sevdesk_contact_id` |
+| Empfänger | S, **sevD**, **AG** |
+| Drittland | nein (sevDesk: Deutschland) |
+| Löschfrist | 10 Jahre (§ 147 AO) |
+
+**Die Rechnung entsteht nicht bei uns, sondern in sevDesk.** Von hier geht
+nur der Auftrag hin: Zeitraum, Beträge nach Steuersätzen und der
+Empfängerkontakt. Fortlaufende Nummer, Steuerausweis, Aufbewahrung und das
+E-Rechnungsformat leistet sevDesk — es hier ein zweites Mal zu führen wäre
+dieselbe Rechnung an zwei Orten.
+
+**Die Grundlage wird eingefroren** (`business_invoice_runs.grundlage`). Die
+Aufteilung zwischen Arbeitgeber- und Beschäftigtenanteil rechnet
+`app.business_split` sonst bei jedem Abruf neu; eine Rechnung darf sich nicht
+mehr bewegen. Damit steht dort auch der vollständige Einzelnachweis
+dauerhaft — das ist der Grund für die 10-Jahres-Frist und zugleich die
+Datenkategorie mit dem stärksten Personenbezug in diesem Bereich.
+
+**Freigabe als eigener Akt.** Anfordern darf, wer Firmenkunden verwaltet;
+freigeben nur ein Gesellschafter (`app_role() = 'shareholder'`) oder der
+Systemadministrator — und erst, wenn die Rechnung in sevDesk tatsächlich
+entstanden ist. Beides mit echten Identitäten nachgestellt und abgewiesen,
+wo es abzuweisen war.
+
+**Ein laufender Monat kann nicht abgerechnet werden**, und eine Rechnung, die
+nicht aufgeht, wird verweigert statt gestellt: fehlende Einzelposten,
+unbekannter Steuersatz oder eine Abweichung zwischen Postensumme und
+Kaufbetrag über zwei Cent brechen den Vorgang ab.
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 

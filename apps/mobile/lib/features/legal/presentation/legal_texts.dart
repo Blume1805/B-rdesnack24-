@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v16 · 2026-08';
+  static const version = 'v17 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -314,6 +314,10 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
      * Wir buchen dabei **kein Guthaben** für Sie und laden nichts auf. Ob und
        wie Ihr Arbeitgeber einen auf Sie entfallenden Anteil von Ihnen
        verlangt, ist Sache Ihres Arbeitsverhältnisses.
+     * **Für die Rechnung geben wir diese Angaben an sevDesk weiter**
+       — unser Buchhaltungsprogramm (sevDesk GmbH, Deutschland). Dort entsteht die eigentliche Rechnung; die Aufstellung
+       Ihrer Einkäufe liegt ihr als Nachweis bei. Wir sind verpflichtet, diese
+       Unterlagen zehn Jahre aufzubewahren (§ 147 AO).
      * Sie sammeln dafür **keine** Treuepunkte, keinen Statusumsatz, keinen
        Aufgabenfortschritt und keine Spendenzuschreibung. Dieser Kauf zählt
        für Ihr privates Konto nicht mit — wir schreiben Ihnen keinen Vorteil
