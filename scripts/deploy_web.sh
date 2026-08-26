@@ -129,38 +129,23 @@ PY
 
 TS=$(date +%s)
 
-echo "▶︎ Post-Build-Patch: nachgeladene Teile bekommen eine Version"
-# ANLASS (26.08.2026): Der Auftraggeber sah die neue Kachel "Anlagen" nicht,
-# obwohl der Deploy grün war und die Zeichenkette nachweislich im
-# ausgelieferten Bundle stand.
+# ZURÜCKGENOMMEN (26.08.2026): Hier stand ein Patch, der an die Verweise auf
+# die nachgeladenen Teile (main.dart.js_N.part.js) ein "?v=<TS>" gehängt hat,
+# damit sie nach einem Deploy nicht aus dem Cache kommen.
 #
-# Grund: flutter_bootstrap.js und main.dart.js tragen ein ?v=<TS> und kommen
-# deshalb nach jedem Deploy frisch. Die per `deferred as` nachgeladenen Teile
-# (main.dart.js_N.part.js) trugen keines. Genau dort liegt der
-# Verwaltungsbereich, denn er wird verzoegert geladen.
+# Er hat die App zerlegt: dart2js prüft jede nachgeladene Teildatei über
+# `deferredPartHashes`, und dieser Nachschlag hängt an der URL. Mit dem
+# angehängten "?v=" findet der Loader den Eintrag nicht mehr, wirft, und der
+# Verwaltungsbereich meldet "Bereich konnte nicht geladen werden."
 #
-# Erschwerend: Der Service Worker unten uebernimmt absichtlich erst bei der
-# NAECHSTEN Navigation (kein clients.claim, Lehre aus dem iOS-Boot-Haenger).
-# Beim ersten Aufruf nach einem Deploy ist also noch der alte Worker am Ruder
-# und liefert den alten Teil aus seinem Cache. Der Nutzer sieht eine frische
-# Huelle mit altem Inhalt und hat keinen Anhaltspunkt, woran es liegt.
+# Die Lehre: Ich hatte die Regex am echten Bundle geprüft und dabei nur
+# nachgesehen, DASS sie die richtigen Stellen trifft. Ob das Ergebnis noch
+# lädt, habe ich nicht geprüft, und lokal lässt sich das hier auch nicht
+# nachstellen. Ein Post-Build-Patch am erzeugten JavaScript gehört vor dem
+# Ausrollen einmal im Browser geöffnet.
 #
-# Die Dateien behalten ihre Namen, nur die VERWEISE in main.dart.js bekommen
-# die Version. Eine andere URL ist ein anderer Cache-Schluessel, damit greift
-# weder der Browser- noch der Worker-Cache daneben.
-python3 - "$BUILD_DIR/main.dart.js" "$TS" <<'PYPART'
-import re, sys
-pfad, ts = sys.argv[1], sys.argv[2]
-s = open(pfad, encoding="utf-8").read()
-muster = re.compile(r"(main\.dart\.js_\d+\.part\.js)(?!\?)")
-s2, n = muster.subn(r"\1?v=" + ts, s)
-if n == 0:
-    # Kein Fehler: Ein Build ohne verzoegert geladene Teile ist moeglich.
-    print("  (keine nachgeladenen Teile gefunden)")
-else:
-    open(pfad, "w", encoding="utf-8").write(s2)
-    print("  ✓ %d Verweise auf Teildateien versioniert (v=%s)" % (n, ts))
-PYPART
+# Das Cache-Problem bleibt damit offen und ist weiter unten am Service Worker
+# zu lösen, nicht über die URLs.
 
 echo "▶︎ flutter_service_worker.js: versionierter Offline-Cache (PWA)"
 # Ersetzt den Flutter-Standard-SW durch einen kleinen, deterministischen
