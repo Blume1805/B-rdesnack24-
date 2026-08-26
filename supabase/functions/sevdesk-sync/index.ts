@@ -88,10 +88,19 @@ async function holeAlle(
     const body = await res.json();
     const objects: Record<string, unknown>[] = body.objects ?? [];
     raus.push(...objects);
-    if (objects.length < seitengroesse) break;
+    if (objects.length < seitengroesse) return raus;
     offset += seitengroesse;
   }
-  return raus;
+  // Die Seitengrenze ist erreicht UND die letzte Seite war voll: sevDesk hat
+  // mehr, als hier ankommt. Das war bisher ein stiller Abbruch — die
+  // Auswertung zeigte dann einen Ausschnitt und sah vollständig aus. Seit die
+  // Aufräumstufe („in sevDesk gelöscht") an der Vollständigkeit dieser Liste
+  // hängt, ist ein stiller Abbruch nicht mehr nur ungenau, sondern
+  // gefährlich: Was nicht geliefert wurde, sähe aus wie gelöscht.
+  throw new Error(
+    `sevDesk ${was}: mehr als ${MAX_SEITEN * seitengroesse} Objekte — ` +
+      `Abruf abgebrochen statt unvollständig zu buchen.`,
+  );
 }
 
 /** Holt ein einzelnes Objekt. Gibt `null` zurück, statt zu werfen. */
@@ -563,6 +572,71 @@ Deno.serve(async (req) => {
       upserted = count ?? gebucht.length;
     }
 
+    // ------------------------------------------------------------------
+    // 6a) Was in sevDesk nicht mehr existiert, darf in der App nicht
+    //     stehenbleiben.
+    //
+    // Bis hierher schrieb der Sync nur (upsert) und löschte nie. Eine
+    // Buchung, die in sevDesk gelöscht oder ersetzt wurde, blieb dadurch
+    // für immer in der Auswertung — nachgewiesen am 26.08.2026: Fünf
+    // Freenet-Belege (Feb–Jun 2026, zusammen 118,38 € brutto) waren am
+    // 25.08. um 18:34 noch da und in den beiden Läufen danach nicht mehr.
+    // In der App stand Telefon deshalb monatlich zweimal — einmal mit
+    // 4,99 € und einmal mit 24,95 €. Genau das hat der Auftraggeber
+    // gemeldet.
+    //
+    // Gelöscht wird weich (`deleted_at`) wie bei den doppelten Zahlungen:
+    // Die Zeile bleibt nachvollziehbar, statt spurlos zu verschwinden.
+    //
+    // Drei Bedingungen, ohne die NICHT aufgeräumt wird — sonst löscht ein
+    // unvollständiger Abruf echte Buchungen:
+    //   * `holeAlle` wirft bei HTTP-Fehler und seit heute auch bei
+    //     erreichter Seitengrenze. Die Belegliste ist also vollständig
+    //     oder der Lauf ist gar nicht bis hierher gekommen.
+    //   * Die Positionen müssen fehlerfrei geladen sein. Sonst bucht der
+    //     Lauf je Beleg statt je Position, und die Schlüssel des
+    //     Vorlaufs (`beleg-position`) sähen alle wie gelöscht aus.
+    //   * Der Lauf muss überhaupt etwas gebucht haben. Ein Lauf mit null
+    //     Zeilen ist kein Beweis dafür, dass sevDesk leer ist.
+    let verschwunden: { source_ref: string; beschreibung: string | null }[] = [];
+    let aufraeumen_ausgesetzt: string | null = null;
+    if (positionsFehler) {
+      aufraeumen_ausgesetzt =
+        "Belegpositionen unvollständig geladen — Aufräumen ausgesetzt.";
+    } else if (gebucht.length === 0) {
+      aufraeumen_ausgesetzt =
+        "Kein Beleg gebucht — Aufräumen ausgesetzt.";
+    } else {
+      const geliefert = new Set(gebucht.map((r) => String(r.source_ref)));
+      const { data: bestand, error: bErr } = await admin
+        .from("finance_bookings")
+        .select("id, source_ref, description")
+        .eq("source", "sevdesk")
+        .is("deleted_at", null)
+        .gte("booking_date", from)
+        .lte("booking_date", to);
+      if (bErr) throw bErr;
+      type Bestandszeile = {
+        id: string;
+        source_ref: string | null;
+        description: string | null;
+      };
+      const weg = ((bestand ?? []) as Bestandszeile[]).filter(
+        (b) => !geliefert.has(String(b.source_ref)),
+      );
+      if (weg.length > 0) {
+        const { error: wErr } = await admin
+          .from("finance_bookings")
+          .update({ deleted_at: new Date().toISOString() })
+          .in("id", weg.map((b) => b.id));
+        if (wErr) throw wErr;
+        verschwunden = weg.map((b) => ({
+          source_ref: String(b.source_ref),
+          beschreibung: (b.description as string | null) ?? null,
+        }));
+      }
+    }
+
     const diagnostics = {
       belege_gesamt: belege.length,
       positionen_belege: nachBeleg.size,
@@ -598,6 +672,8 @@ Deno.serve(async (req) => {
       strukturprobe: belege.length > 0 ? belegProbe(belege[0]) : null,
       strukturprobe_position: positionsProbe,
       strukturprobe_konto: kontenProbe,
+      in_sevdesk_geloescht: verschwunden,
+      aufraeumen_ausgesetzt,
     };
 
     await admin.from("sevdesk_sync_runs").update({
