@@ -145004,7 +145004,7 @@ initializeLoadedHunk:function(a){var s=$__dart_deferred_initializers__[a]
 if(s==null){throw"DeferredLoading state error: code with hash '"+a+"' was not loaded"}initializeDeferredHunk(s)
 v.deferredInitialized[a]=true},
 deferredLibraryParts:{finance:[0,1],management:[0,2]},
-deferredPartUris:["main.dart.js_2.part.js","main.dart.js_1.part.js","main.dart.js_3.part.js"],
+deferredPartUris:["main.dart.js_2.part.js?v=1787731112","main.dart.js_1.part.js?v=1787731112","main.dart.js_3.part.js?v=1787731112"],
 deferredPartHashes:["ARP9HftKcbTvZnKWI1sJAjxSjBg=","J24nq3jLS2Gp3gDJSD4RCFTJjKg=","3GdOBHecsq24lZdxsice0wnQH/Y="],
 typeUniverse:{eC:new Map(),tR:{},eT:{},tPV:{},sEA:[]},
 mangledGlobalNames:{v:"int",G:"double",by:"num",h:"String",C:"bool",bt:"Null",u:"List",B:"Object",a3:"Map",ax:"JSObject"},
