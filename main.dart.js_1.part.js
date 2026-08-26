@@ -361,15 +361,15 @@ w=1
 break}if(J.d(J.Y(q,"ok"),!0)){o=$.bAd()
 if(e.e==null)B.S(B.Z(y.b))
 e.gce().c_(o)
-l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Bilanz aus sevDesk \xfcbernommen ("+B.j(J.Y(q,"as_of"))+").",null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))}else{o=J.Y(q,"error")
-l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Sync-Fehler: "+B.j(o==null?"unbekannt":o),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))}t=2
+l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Bilanz aus sevDesk \xfcbernommen ("+B.i(J.Y(q,"as_of"))+").",null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))}else{o=J.Y(q,"error")
+l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Sync-Fehler: "+B.i(o==null?"unbekannt":o),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))}t=2
 w=6
 break
 case 4:t=3
 k=s.pop()
 p=B.a1(k)
 l.MK()
-l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Sync fehlgeschlagen: "+B.j(p),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
+l.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Sync fehlgeschlagen: "+B.i(p),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
 w=6
 break
 case 3:w=2
@@ -1710,7 +1710,7 @@ if(d instanceof B.vj)return d
 if(d instanceof B.mi){if(d.b==="42501")return new B.wd(d.a)
 return new B.tw(d.a)}if(d instanceof B.O5){w=A.c9T(d.b)
 v=""+d.a
-return new B.tw(w==null?"Edge Function fehlgeschlagen ("+v+")":w+" ("+v+")")}return new B.Bu("Unerwarteter Fehler: "+B.j(d))},
+return new B.tw(w==null?"Edge Function fehlgeschlagen ("+v+")":w+" ("+v+")")}return new B.Bu("Unerwarteter Fehler: "+B.i(d))},
 $iaH8:1}
 A.pP.prototype={
 gamj(){var w=this.z
@@ -1870,7 +1870,7 @@ s=t.ghe(t)==null
 r=t.ghe(t)
 if(r instanceof B.vj)q=r.a
 else q=r==null?null:J.al(r)
-if(s)p="sevDesk synchronisiert: "+B.j(m)+" Buchungen."
+if(s)p="sevDesk synchronisiert: "+B.i(m)+" Buchungen."
 else p=q==null?"Synchronisierung fehlgeschlagen.":"Synchronisierung fehlgeschlagen: "+q
 n=d.O(x.q).f
 o=s?C.L:D.a8d
@@ -1913,7 +1913,7 @@ break
 case 5:t=4
 k=s.pop()
 q=B.a1(k)
-if(d.e!=null)d.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Fehler: "+B.j(q),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
+if(d.e!=null)d.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Fehler: "+B.i(q),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
 w=7
 break
 case 4:w=2
@@ -2186,7 +2186,7 @@ a3=s.pop()
 f=B.a1(a3)
 a1=r.c
 if(a1==null){w=1
-break}a1.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Import fehlgeschlagen: "+B.j(f),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
+break}a1.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Import fehlgeschlagen: "+B.i(f),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
 w=6
 break
 case 3:w=2
@@ -2220,7 +2220,7 @@ p=B.a1(l)
 o=q.c
 if(o==null){r=[1]
 w=5
-break}o.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Speichern fehlgeschlagen: "+B.j(p),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
+break}o.O(x.q).f.aR(B.c0(null,null,null,null,null,C.r,null,B.f("Speichern fehlgeschlagen: "+B.i(p),null,null,null,null,null,null,null,null),null,C.L,null,null,null,null,null,null,null,null,null,null))
 r.push(6)
 w=5
 break
@@ -2641,7 +2641,7 @@ A.vn.prototype={
 gbs(){var w=this
 return[w.a,w.b,w.c,w.d,w.e]}}
 A.eF.prototype={
-j(d){return"("+B.j(this.a)+", "+B.j(this.b)+")"},
+j(d){return"("+B.i(this.a)+", "+B.i(this.b)+")"},
 k(d,e){var w,v=this
 if(e==null)return!1
 if(v===e)return!0
@@ -4036,7 +4036,7 @@ A.bey.prototype={
 $0(){return F.zG},
 $S:98}
 A.bex.prototype={
-$2(d,e){return new A.xf("Buchungen konnten nicht geladen werden: "+B.j(d),C.a0,F.yd,null)},
+$2(d,e){return new A.xf("Buchungen konnten nicht geladen werden: "+B.i(d),C.a0,F.yd,null)},
 $S:z+12}
 A.bew.prototype={
 $1(d){return new A.Jb(d,this.a.at_(d.b),null)},
@@ -4128,7 +4128,7 @@ A.aHm.prototype={
 $0(){return F.zG},
 $S:98}
 A.aHl.prototype={
-$2(d,e){return new A.IM(B.j(d),null)},
+$2(d,e){return new A.IM(B.i(d),null)},
 $S:z+19}
 A.aHk.prototype={
 $1(d){return new A.K5(d,null)},
@@ -4182,7 +4182,7 @@ $0(){return D.awr},
 $S:98}
 A.aMb.prototype={
 $2(d,e){var w=null
-return B.bh(C.a0,B.f("KPIs konnten nicht geladen werden: "+B.j(d),w,w,w,w,B.w(C.h,13,C.k),w,w,w),C.fl,w,C.B,w,w,3)},
+return B.bh(C.a0,B.f("KPIs konnten nicht geladen werden: "+B.i(d),w,w,w,w,B.w(C.h,13,C.k),w,w,w),C.fl,w,C.B,w,w,3)},
 $S:177}
 A.aMa.prototype={
 $1(d){return new A.J6(d,null)},
@@ -4337,7 +4337,7 @@ A.b5Z.prototype={
 $0(){return D.awz},
 $S:98}
 A.b5Y.prototype={
-$2(d,e){return new A.xa("Bilanzdaten nicht verf\xfcgbar: "+B.j(d),null)},
+$2(d,e){return new A.xa("Bilanzdaten nicht verf\xfcgbar: "+B.i(d),null)},
 $S:z+30}
 A.b5X.prototype={
 $1(d){var w,v,u,t,s,r,q,p,o,n=this,m=null
@@ -4351,7 +4351,7 @@ if(s==null)s=0
 r=s>0?t/s*100:m
 w=B.jz(new A.b5U(new A.b60(w),r,w,s))
 v=J.T(d)
-u=B.j(v.h(d,"as_of"))
+u=B.i(v.h(d,"as_of"))
 v=J.d(v.h(d,"source"),"sevdesk")?"sevDesk-Sync":"manuell erfasst"
 q=n.b
 p=n.c
@@ -5025,4 +5025,4 @@ w($,"cjq","bAd",()=>C.aI.$1$1(new A.bxk(),x.h))
 w($,"cjp","bAc",()=>B.b0W(A.c9E(),x.F,x.c))
 w($,"ccv","bzK",()=>new A.azh())
 v($,"cfR","lI",()=>new A.b3C())})()};
-(a=>{a["vWiXofYCysEKnx5ARk4T3/nzX2M="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["zNXhRWGKKeTD22QSJBvW4DVppgI="]=a.current})($__dart_deferred_initializers__);
