@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 6**
+**Stand: 26.08.2026 · Fassung 7**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -291,6 +291,16 @@ Berechtigung für Finanzdaten".
 Die Kosten werden von Hand erfasst und stammen nicht aus sevDesk. Es sind
 private Fahrzeuge; ihre Kosten sind keine Betriebsausgaben und stehen
 deshalb in keiner Buchung.
+
+Korrekturen sind möglich, solange die Anlage des Jahres nicht freigegeben
+ist. Gestrichen wird **weich** (`deleted_at`): Eine Buchhaltungsunterlage,
+aus der Zeilen spurlos verschwinden, wäre nach GoBD gerade das Falsche.
+Sobald beide Gesellschafter signiert und freigegeben haben, ist das Jahr
+unveränderlich; durchgesetzt in der Datenbank über den Trigger
+`app.anlage_pkw_sperre` auf allen drei Tabellen, nicht in der Oberfläche.
+Nachgestellt am 26.08.2026: sechs Schreibversuche im freigegebenen Jahr,
+darunter ein Umdatieren einer Fahrt in ein offenes Jahr, alle mit 42501
+abgewiesen; das offene Jahr blieb schreibbar.
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 

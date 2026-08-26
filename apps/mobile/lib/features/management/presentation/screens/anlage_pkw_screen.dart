@@ -90,6 +90,31 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
   List<Map<String, dynamic>> get _fahrten =>
       ((_daten?['fahrten'] as List?) ?? const []).cast<Map<String, dynamic>>();
 
+  /// Ist die Anlage für dieses Jahr freigegeben und damit unveränderlich?
+  ///
+  /// Die Angabe kommt aus der Auswertung, nicht aus einer eigenen Abfrage:
+  /// Durchgesetzt wird die Sperre ohnehin in der Datenbank, hier geht es nur
+  /// darum, sie sichtbar zu machen, statt den Nutzer in einen Fehler laufen
+  /// zu lassen.
+  bool get _gesperrt => anlageIstGesperrt(_daten);
+
+  Map<String, dynamic>? get _freigabe => _daten?['freigabe'] == null
+      ? null
+      : Map<String, dynamic>.from(_daten!['freigabe'] as Map);
+
+  /// Wer unterschrieben hat, in der Form, die der Druck erwartet.
+  List<Map<String, dynamic>>? get _unterzeichner {
+    final liste = (_freigabe?['unterzeichner'] as List?) ?? const [];
+    if (liste.isEmpty) return null;
+    return [
+      for (final e in liste)
+        {
+          'full_name': (e as Map)['name'],
+          'signature_url': e['unterschrift'],
+        },
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,9 +147,14 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
                 icon: Icons.error_outline,
               )
             else ...[
+              if (_gesperrt) ...[
+                _Sperrhinweis(jahr: _jahr, freigabe: _freigabe),
+                const SizedBox(height: AppSpacing.s4),
+              ],
               _FahrzeugTabelle(
                 fahrzeuge: _fahrzeuge,
                 jahr: _jahr,
+                gesperrt: _gesperrt,
                 onAendern: _laden,
               ),
               const SizedBox(height: AppSpacing.s6),
@@ -132,6 +162,7 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
                 fahrten: _fahrten,
                 fahrzeuge: _fahrzeuge,
                 jahr: _jahr,
+                gesperrt: _gesperrt,
                 nutzungseinlage: _zahl(_daten?['nutzungseinlage']),
                 ohneSatz: _zahl(_daten?['fahrten_ohne_satz']).toInt(),
                 onAendern: _laden,
@@ -149,12 +180,14 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
     return HeroActionBar(
       padding: const EdgeInsets.only(bottom: AppSpacing.s3),
       actions: [
-        HeroAction(
-          icon: Icons.rule_folder_outlined,
-          tooltip: 'Freigabe anfordern',
-          iconColor: AppColors.brand,
-          onTap: _freigabeAnfordern,
-        ),
+        // Ist die Anlage schon freigegeben, gibt es nichts mehr anzufordern.
+        if (!_gesperrt)
+          HeroAction(
+            icon: Icons.rule_folder_outlined,
+            tooltip: 'Freigabe anfordern',
+            iconColor: AppColors.brand,
+            onTap: _freigabeAnfordern,
+          ),
         // Auf iOS und Android gibt es den Druck noch nicht. Einen Knopf zu
         // zeigen, der nichts tut, ist schlimmer als keiner.
         if (anlageDruckMoeglich)
@@ -169,6 +202,11 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
               firma: _firma,
               steuernummer: _steuernummer,
               ustIdNr: _ustIdNr,
+              // Ist die Anlage freigegeben, trägt das PDF den Stempel und
+              // die Unterschriften aus der Freigabe. Ohne das müsste man
+              // sich die endgültige Fassung über den Freigabe-Bildschirm
+              // zusammensuchen.
+              approvalDecisions: _unterzeichner,
             ),
           ),
       ],
@@ -228,6 +266,10 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
 }
 
 /// Immer derselbe Hinweis, wenn ein Betrag fehlt oder null ist.
+const _fahrtUnvollstaendig = SnackBar(
+  content: Text('Anlass und eine Strecke über null sind nötig.'),
+);
+
 const _betragFehlt = SnackBar(
   content: Text('Bitte einen Betrag über null angeben.'),
 );
@@ -296,11 +338,13 @@ class _FahrzeugTabelle extends ConsumerWidget {
   const _FahrzeugTabelle({
     required this.fahrzeuge,
     required this.jahr,
+    required this.gesperrt,
     required this.onAendern,
   });
 
   final List<Map<String, dynamic>> fahrzeuge;
   final int jahr;
+  final bool gesperrt;
   final Future<void> Function() onAendern;
 
   @override
@@ -320,6 +364,7 @@ class _FahrzeugTabelle extends ConsumerWidget {
           _FahrzeugKarte(
             fahrzeug: f,
             jahr: jahr,
+            gesperrt: gesperrt,
             onAendern: onAendern,
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -333,22 +378,19 @@ class _FahrzeugKarte extends ConsumerWidget {
   const _FahrzeugKarte({
     required this.fahrzeug,
     required this.jahr,
+    required this.gesperrt,
     required this.onAendern,
   });
 
   final Map<String, dynamic> fahrzeug;
   final int jahr;
+  final bool gesperrt;
   final Future<void> Function() onAendern;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kosten =
         (fahrzeug['kosten'] as List? ?? const []).cast<Map<String, dynamic>>();
-    final proArt = <String, double>{};
-    for (final k in kosten) {
-      final art = '${k['kostenart']}';
-      proArt[art] = (proArt[art] ?? 0) + _zahl(k['betrag_brutto']);
-    }
 
     return AppCard(
       child: Column(
@@ -373,13 +415,15 @@ class _FahrzeugKarte extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.s3),
-          for (final eintrag in _kostenarten.entries)
-            if (proArt.containsKey(eintrag.key))
-              _Zeile(
-                links: eintrag.value,
-                rechts: Formatters.euro(proArt[eintrag.key]!),
-              ),
-          if (proArt.isEmpty)
+          // Einzelne Zeilen statt nur Summen je Kostenart: Korrigieren kann
+          // man nur, was man einzeln anfassen kann.
+          for (final k in kosten)
+            _KostenZeile(
+              kosten: k,
+              gesperrt: gesperrt,
+              onBearbeiten: () => _kostenBearbeiten(context, ref, k),
+            ),
+          if (kosten.isEmpty)
             Text(
               'Für $jahr ist noch keine Kostenposition erfasst.',
               style: AppTypography.body(size: 13, color: AppColors.textMuted),
@@ -415,29 +459,137 @@ class _FahrzeugKarte extends ConsumerWidget {
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.s3),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _kilometerstaende(context, ref),
-                  icon: const Icon(Icons.speed_outlined, size: 18),
-                  label: const Text('Kilometerstände'),
+          // Nach der Freigabe gibt es hier nichts mehr zu tun. Eine
+          // ausgegraute Schaltfläche wäre eine Einladung, es zu versuchen;
+          // der Hinweis oben sagt bereits, warum.
+          if (!gesperrt) ...[
+            const SizedBox(height: AppSpacing.s3),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _kilometerstaende(context, ref),
+                    icon: const Icon(Icons.speed_outlined, size: 18),
+                    label: const Text('Kilometerstände'),
+                  ),
                 ),
+                const SizedBox(width: AppSpacing.s2),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _kostenErfassen(context, ref),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Kosten'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Eine Kostenzeile ändern oder streichen.
+  ///
+  /// Gestrichen wird weich (`deleted_at`), nicht gelöscht: Eine
+  /// Buchhaltungsunterlage, aus der Zeilen spurlos verschwinden, ist nach
+  /// GoBD gerade das Falsche.
+  Future<void> _kostenBearbeiten(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> zeile,
+  ) async {
+    var art = '${zeile['kostenart']}';
+    final betrag = TextEditingController(
+      text:
+          _zahl(zeile['betrag_brutto']).toStringAsFixed(2).replaceAll('.', ','),
+    );
+    final bezeichnung =
+        TextEditingController(text: '${zeile['bezeichnung'] ?? ''}');
+
+    final wahl = await showDialog<String>(
+      context: context,
+      builder: (d) => StatefulBuilder(
+        builder: (d2, setLocal) => AlertDialog(
+          title: const Text('Kostenposition korrigieren'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: art,
+                decoration: const InputDecoration(labelText: 'Kostenart'),
+                items: [
+                  for (final e in _kostenarten.entries)
+                    DropdownMenuItem(value: e.key, child: Text(e.value)),
+                ],
+                onChanged: (v) => setLocal(() => art = v ?? art),
               ),
-              const SizedBox(width: AppSpacing.s2),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _kostenErfassen(context, ref),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Kosten'),
+              TextField(
+                controller: betrag,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration:
+                    const InputDecoration(labelText: 'Betrag brutto in Euro'),
+              ),
+              TextField(
+                controller: bezeichnung,
+                decoration: const InputDecoration(
+                  labelText: 'Bezeichnung (freiwillig)',
                 ),
               ),
             ],
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(d2, 'streichen'),
+              child: const Text(
+                'Streichen',
+                style: TextStyle(color: AppColors.statusCritical),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(d2, 'abbrechen'),
+              child: const Text('Abbrechen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(d2, 'speichern'),
+              child: const Text('Speichern'),
+            ),
+          ],
+        ),
       ),
     );
+    if (wahl == null || wahl == 'abbrechen') return;
+
+    final client = ref.read(supabaseClientProvider);
+    try {
+      if (wahl == 'streichen') {
+        final id = '${zeile['id']}';
+        final gestrichen = {
+          'deleted_at': DateTime.now().toIso8601String(),
+        };
+        await client.from('pkw_kosten').update(gestrichen).eq('id', id);
+      } else {
+        final wert =
+            double.tryParse(betrag.text.trim().replaceAll(',', '.')) ?? 0;
+        if (wert <= 0) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(_betragFehlt);
+          }
+          return;
+        }
+        await client.from('pkw_kosten').update({
+          'kostenart': art,
+          'betrag_brutto': wert,
+          'bezeichnung':
+              bezeichnung.text.trim().isEmpty ? null : bezeichnung.text.trim(),
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', '${zeile['id']}');
+      }
+      await onAendern();
+    } catch (err) {
+      if (context.mounted) _meldeFehler(context, err);
+    }
   }
 
   Future<void> _kilometerstaende(BuildContext context, WidgetRef ref) async {
@@ -505,11 +657,7 @@ class _FahrzeugKarte extends ConsumerWidget {
       );
       await onAendern();
     } catch (err) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Speichern fehlgeschlagen: $err')),
-        );
-      }
+      if (context.mounted) _meldeFehler(context, err);
     }
   }
 
@@ -581,11 +729,7 @@ class _FahrzeugKarte extends ConsumerWidget {
       });
       await onAendern();
     } catch (err) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Speichern fehlgeschlagen: $err')),
-        );
-      }
+      if (context.mounted) _meldeFehler(context, err);
     }
   }
 }
@@ -597,6 +741,7 @@ class _FahrtenTabelle extends ConsumerWidget {
     required this.fahrten,
     required this.fahrzeuge,
     required this.jahr,
+    required this.gesperrt,
     required this.nutzungseinlage,
     required this.ohneSatz,
     required this.onAendern,
@@ -605,6 +750,7 @@ class _FahrtenTabelle extends ConsumerWidget {
   final List<Map<String, dynamic>> fahrten;
   final List<Map<String, dynamic>> fahrzeuge;
   final int jahr;
+  final bool gesperrt;
   final double nutzungseinlage;
   final int ohneSatz;
   final Future<void> Function() onAendern;
@@ -617,12 +763,14 @@ class _FahrtenTabelle extends ConsumerWidget {
         Row(
           children: [
             const Expanded(child: Eyebrow('Betriebliche Fahrten')),
-            TextButton.icon(
-              onPressed:
-                  fahrzeuge.isEmpty ? null : () => _fahrtErfassen(context, ref),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Fahrt'),
-            ),
+            if (!gesperrt)
+              TextButton.icon(
+                onPressed: fahrzeuge.isEmpty
+                    ? null
+                    : () => _fahrtErfassen(context, ref),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Fahrt'),
+              ),
           ],
         ),
         const SizedBox(height: AppSpacing.s2),
@@ -656,6 +804,11 @@ class _FahrtenTabelle extends ConsumerWidget {
               rows: [
                 for (final t in fahrten)
                   DataRow(
+                    // Antippen korrigiert die Fahrt, solange die Anlage
+                    // offen ist. Nach der Freigabe passiert nichts.
+                    onSelectChanged: gesperrt
+                        ? null
+                        : (_) => _fahrtBearbeiten(context, ref, t),
                     cells: [
                       DataCell(Text(_datumText(t['fahrt_datum']))),
                       DataCell(
@@ -728,6 +881,125 @@ class _FahrtenTabelle extends ConsumerWidget {
         ],
       ],
     );
+  }
+
+  /// Eine Fahrt korrigieren oder streichen. Weich gestrichen, wie bei den
+  /// Kosten: Was einmal in einer Anlage stand, verschwindet nicht spurlos.
+  Future<void> _fahrtBearbeiten(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> zeile,
+  ) async {
+    var datum =
+        DateTime.tryParse('${zeile['fahrt_datum']}') ?? DateTime(jahr, 1, 1);
+    var pkwId = '${zeile['pkw_id']}';
+    final anlass = TextEditingController(text: '${zeile['anlass'] ?? ''}');
+    final km = TextEditingController(
+      text: _zahl(zeile['kilometer']).toStringAsFixed(1).replaceAll('.', ','),
+    );
+
+    final wahl = await showDialog<String>(
+      context: context,
+      builder: (d) => StatefulBuilder(
+        builder: (d2, setLocal) => AlertDialog(
+          title: const Text('Fahrt korrigieren'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final gewaehlt = await showDatePicker(
+                      context: d2,
+                      initialDate: datum,
+                      firstDate: DateTime(jahr, 1, 1),
+                      lastDate: DateTime(jahr, 12, 31),
+                    );
+                    if (gewaehlt != null) setLocal(() => datum = gewaehlt);
+                  },
+                  icon: const Icon(Icons.event, size: 18),
+                  label: Text(Formatters.date(datum)),
+                ),
+                TextField(
+                  controller: anlass,
+                  decoration:
+                      const InputDecoration(labelText: 'Anlass der Fahrt'),
+                ),
+                TextField(
+                  controller: km,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Kilometer (Hin- und Rückweg)',
+                  ),
+                ),
+                DropdownButtonFormField<String>(
+                  initialValue: pkwId,
+                  decoration: const InputDecoration(labelText: 'Fahrzeug'),
+                  items: [
+                    for (final f in fahrzeuge)
+                      DropdownMenuItem(
+                        value: '${f['id']}',
+                        child: Text('${f['kennzeichen']}'),
+                      ),
+                  ],
+                  onChanged: (v) => setLocal(() => pkwId = v ?? pkwId),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(d2, 'streichen'),
+              child: const Text(
+                'Streichen',
+                style: TextStyle(color: AppColors.statusCritical),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(d2, 'abbrechen'),
+              child: const Text('Abbrechen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(d2, 'speichern'),
+              child: const Text('Speichern'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (wahl == null || wahl == 'abbrechen') return;
+
+    final client = ref.read(supabaseClientProvider);
+    final id = '${zeile['id']}';
+    try {
+      if (wahl == 'streichen') {
+        final gestrichen = {
+          'deleted_at': DateTime.now().toIso8601String(),
+        };
+        await client.from('pkw_fahrten').update(gestrichen).eq('id', id);
+      } else {
+        final strecke =
+            double.tryParse(km.text.trim().replaceAll(',', '.')) ?? 0;
+        if (strecke <= 0 || anlass.text.trim().isEmpty) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(_fahrtUnvollstaendig);
+          }
+          return;
+        }
+        await client.from('pkw_fahrten').update({
+          'pkw_id': pkwId,
+          'fahrt_datum': datum.toIso8601String().substring(0, 10),
+          'anlass': anlass.text.trim(),
+          'kilometer': strecke,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', id);
+      }
+      await onAendern();
+    } catch (err) {
+      if (context.mounted) _meldeFehler(context, err);
+    }
   }
 
   Future<void> _fahrtErfassen(BuildContext context, WidgetRef ref) async {
@@ -806,9 +1078,7 @@ class _FahrtenTabelle extends ConsumerWidget {
     if (strecke <= 0 || anlass.text.trim().isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Anlass und eine Strecke über null sind nötig.'),
-          ),
+          _fahrtUnvollstaendig,
         );
       }
       return;
@@ -822,11 +1092,7 @@ class _FahrtenTabelle extends ConsumerWidget {
       });
       await onAendern();
     } catch (err) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Speichern fehlgeschlagen: $err')),
-        );
-      }
+      if (context.mounted) _meldeFehler(context, err);
     }
   }
 }
@@ -904,6 +1170,185 @@ class _Unterschriften extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Ist diese Anlage freigegeben und damit unveränderlich?
+///
+/// Die Angabe kommt aus der Auswertung. Fehlt sie, wird NICHT gesperrt:
+/// Durchgesetzt wird die Sperre ohnehin in der Datenbank, und eine
+/// Oberfläche, die vorsorglich sperrt, nimmt dem Nutzer eine Korrektur weg,
+/// die er vornehmen darf.
+bool anlageIstGesperrt(Map<String, dynamic>? daten) =>
+    daten?['gesperrt'] == true;
+
+/// Kommt dieser Fehler von der Änderungssperre?
+///
+/// Die Datenbank wirft einen verständlichen Satz. Ihn durch ein allgemeines
+/// „Fehlgeschlagen" zu ersetzen, hiesse die einzige Erklärung wegzuwerfen,
+/// die der Nutzer bekommt.
+bool istSperrfehler(String meldung) =>
+    meldung.contains('freigegeben und unterschrieben');
+
+/// Zeigt den Grund, wenn ein Schreibversuch abgelehnt wurde.
+///
+/// Die Sperre wirft aus der Datenbank einen verständlichen Satz. Ihn durch
+/// ein allgemeines „Fehlgeschlagen" zu ersetzen, hiesse die einzige
+/// Erklärung wegzuwerfen, die der Nutzer bekommt.
+void _meldeFehler(BuildContext context, Object fehler) {
+  final text = fehler.toString();
+  final gesperrt = istSperrfehler(text);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        gesperrt
+            ? 'Diese Anlage ist freigegeben und unterschrieben. '
+                'Korrekturen sind nicht mehr möglich.'
+            : 'Speichern fehlgeschlagen: $text',
+      ),
+      duration: Duration(seconds: gesperrt ? 6 : 4),
+    ),
+  );
+}
+
+/// Eine einzelne Kostenposition, antippbar solange nicht freigegeben.
+class _KostenZeile extends StatelessWidget {
+  const _KostenZeile({
+    required this.kosten,
+    required this.gesperrt,
+    required this.onBearbeiten,
+  });
+
+  final Map<String, dynamic> kosten;
+  final bool gesperrt;
+  final VoidCallback onBearbeiten;
+
+  @override
+  Widget build(BuildContext context) {
+    final art =
+        _kostenarten['${kosten['kostenart']}'] ?? '${kosten['kostenart']}';
+    final bezeichnung = '${kosten['bezeichnung'] ?? ''}'.trim();
+    final betrag = Formatters.euro(_zahl(kosten['betrag_brutto']));
+
+    final inhalt = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  art,
+                  style: AppTypography.body(
+                    size: 13,
+                    color: AppColors.textDefault,
+                  ),
+                ),
+                if (bezeichnung.isNotEmpty)
+                  Text(
+                    bezeichnung,
+                    style: AppTypography.body(
+                      size: 11,
+                      color: AppColors.textMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            betrag,
+            style: AppTypography.body(
+              size: 13,
+              weight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+          if (!gesperrt) ...[
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.edit_outlined,
+              size: 16,
+              color: AppColors.textMuted,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (gesperrt) return inhalt;
+    return Semantics(
+      button: true,
+      label: '$art $betrag korrigieren',
+      child: InkWell(onTap: onBearbeiten, child: inhalt),
+    );
+  }
+}
+
+/// Der Hinweis, dass diese Anlage abgeschlossen ist.
+class _Sperrhinweis extends StatelessWidget {
+  const _Sperrhinweis({required this.jahr, required this.freigabe});
+
+  final int jahr;
+  final Map<String, dynamic>? freigabe;
+
+  @override
+  Widget build(BuildContext context) {
+    final am = DateTime.tryParse('${freigabe?['freigegeben_am'] ?? ''}');
+    final namen = ((freigabe?['unterzeichner'] as List?) ?? const [])
+        .map((e) => '${(e as Map)['name'] ?? ''}')
+        .where((n) => n.isNotEmpty)
+        .toList();
+
+    return AppCard(
+      color: AppColors.surfaceAlt,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.lock_outline, color: AppColors.statusPositive),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Freigegeben und unterschrieben',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Die Anlage $jahr ist abgeschlossen'
+                  '${am == null ? '' : ' seit ${Formatters.date(am)}'}'
+                  '${namen.isEmpty ? '' : ', unterschrieben von ${namen.join(' und ')}'}'
+                  '. Korrekturen sind nicht mehr möglich, weder hier noch '
+                  'über einen anderen Weg.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textDefault,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ist etwas falsch, gehört die Berichtigung in eine neue '
+                  'Anlage. Ein unterschriebenes Dokument nachträglich zu '
+                  'ändern, wäre keine Korrektur.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

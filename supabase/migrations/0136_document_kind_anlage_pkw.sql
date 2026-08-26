@@ -1,0 +1,22 @@
+-- ============================================================================
+-- 0136 — `anlage_pkw` fehlte im Enum app.document_kind
+-- ----------------------------------------------------------------------------
+-- Nachtrag zu 0135, und ein Fehler, den ich gemacht habe: Der Bildschirm ruft
+-- `requestApproval` mit `documentKind = 'anlage_pkw'` auf. `document_kind` ist
+-- aber ein Enum und kein freier Text. Die Schaltfläche „Freigabe anfordern"
+-- wäre zur Laufzeit mit 22P02 abgebrochen.
+--
+-- Aufgefallen ist es erst beim Bauen der Änderungssperre (0137), die
+-- denselben Wert vergleicht. Ein einziger Aufruf des Ablaufs hätte es sofort
+-- gezeigt; ich hatte den Ablauf gebaut und nicht durchlaufen lassen.
+--
+-- Eigener Wert und nicht `finance_period`: Die Anlage ist ein eigenes
+-- Dokument mit eigenem Zeitraum und eigener Sperre. Zwei verschiedene
+-- Dokumente unter einem Kennzeichen hätten die Sperre auf die Finanzperiode
+-- mit ausgedehnt.
+--
+-- `add value` läuft in PostgreSQL nicht in derselben Transaktion wie eine
+-- Verwendung des neuen Werts. Deshalb eine eigene Migration vor 0137.
+-- ============================================================================
+
+alter type app.document_kind add value if not exists 'anlage_pkw';
