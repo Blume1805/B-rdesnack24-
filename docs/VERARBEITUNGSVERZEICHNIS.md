@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 7**
+**Stand: 26.08.2026 · Fassung 8**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -200,6 +200,19 @@ Eine so unterdrückte Buchung wird **weich** gelöscht (`deleted_at`), nicht
 entfernt. Sie zählt nicht mehr in die Auswertung, bleibt aber unter der
 Aufbewahrungsfrist des § 147 AO lesbar — eine Buchung, die spurlos
 verschwindet, wäre nach GoBD gerade das Falsche.
+
+Seit dem 26.08.2026 gilt dasselbe für Belege, die **in sevDesk gelöscht**
+wurden. Bis dahin schrieb der Connector nur und löschte nie; was in sevDesk
+verschwand, blieb hier dauerhaft stehen. Fünf Telefonbelege standen dadurch
+doppelt in der Auswertung. Jetzt wird im synchronisierten Zeitraum weich
+gelöscht, was der Lauf nicht mehr geliefert hat; der Schlüssel
+`in_sevdesk_geloescht` hält die betroffenen **Belegkennungen** fest — wie bei
+den Nachbarschlüsseln ohne Lieferantennamen, Belegnummern und Beträge.
+`aufraeumen_ausgesetzt` nennt den Grund, wenn nicht aufgeräumt wurde.
+
+Das ist zugleich eine **Datenminimierung** nach Art. 5 Abs. 1 lit. c: Ein
+Beleg, den das führende System nicht mehr führt, gehört nicht in die
+Auswertung. Die Zeile selbst bleibt für die Frist des § 147 AO lesbar.
 
 ### V9 — Beschäftigten-, Gesellschafter- und Betriebsunterlagen
 

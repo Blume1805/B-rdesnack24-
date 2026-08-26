@@ -598,7 +598,11 @@ Deno.serve(async (req) => {
     //     Vorlaufs (`beleg-position`) sähen alle wie gelöscht aus.
     //   * Der Lauf muss überhaupt etwas gebucht haben. Ein Lauf mit null
     //     Zeilen ist kein Beweis dafür, dass sevDesk leer ist.
-    let verschwunden: { source_ref: string; beschreibung: string | null }[] = [];
+    // Nur die Belegkennung, kein Freitext — dieselbe Zurückhaltung wie bei
+    // `doppelte_zahlungen_verdacht` und `richtung_abweichungen`. Der
+    // Lieferantenname und die Rechnungsnummer stehen im Beleg selbst; das
+    // Protokoll braucht sie nicht, um nachvollziehbar zu sein.
+    let verschwunden: string[] = [];
     let aufraeumen_ausgesetzt: string | null = null;
     if (positionsFehler) {
       aufraeumen_ausgesetzt =
@@ -610,17 +614,13 @@ Deno.serve(async (req) => {
       const geliefert = new Set(gebucht.map((r) => String(r.source_ref)));
       const { data: bestand, error: bErr } = await admin
         .from("finance_bookings")
-        .select("id, source_ref, description")
+        .select("id, source_ref")
         .eq("source", "sevdesk")
         .is("deleted_at", null)
         .gte("booking_date", from)
         .lte("booking_date", to);
       if (bErr) throw bErr;
-      type Bestandszeile = {
-        id: string;
-        source_ref: string | null;
-        description: string | null;
-      };
+      type Bestandszeile = { id: string; source_ref: string | null };
       const weg = ((bestand ?? []) as Bestandszeile[]).filter(
         (b) => !geliefert.has(String(b.source_ref)),
       );
@@ -630,10 +630,7 @@ Deno.serve(async (req) => {
           .update({ deleted_at: new Date().toISOString() })
           .in("id", weg.map((b) => b.id));
         if (wErr) throw wErr;
-        verschwunden = weg.map((b) => ({
-          source_ref: String(b.source_ref),
-          beschreibung: (b.description as string | null) ?? null,
-        }));
+        verschwunden = weg.map((b) => String(b.source_ref));
       }
     }
 
