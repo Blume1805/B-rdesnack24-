@@ -156,6 +156,31 @@ das man nicht versteht, wird keine Buchungsregel.
 in der Buchung „expense" — dieselbe Anschaffung stand in einer Ansicht
 rot, in der anderen grau (Migration 0131).
 
+## Nach jeder Neuerung den Link mitschicken (Pflicht, ohne Nachfrage)
+
+Vorgabe des Auftraggebers vom 26.08.2026: „Sende den aktuellen Link immer,
+wenn es Neuerungen gibt."
+
+Sobald eine Änderung ausgerollt ist, gehört die Adresse der Web-Demo in die
+Antwort, vollständig und anklickbar:
+
+**https://blume1805.github.io/B-rdesnack24-/**
+
+Der Bindestrich am Ende gehört zum Repositoriumsnamen und damit zur
+Adresse. Ohne ihn läuft der Aufruf ins Leere.
+
+Nicht aus dem Gedächtnis zitieren, sondern vor dem Senden nachsehen, ob sie
+noch stimmt: `base href` in `index.html` auf `gh-pages` und die An- oder
+Abwesenheit einer `CNAME`-Datei entscheiden darüber. Zieht die Adresse
+einmal auf die eigene Domain um (siehe `CUSTOM_DOMAIN` in
+`scripts/deploy_web.sh`), ändert sich beides, und diese Regel hier ist
+mitzuziehen.
+
+Dazu gehört, den Stand ehrlich zu nennen: ob der Ausroll-Lauf durch ist,
+und ob ein zweiter Aufruf nötig ist, weil der Service Worker erst bei der
+nächsten Navigation übernimmt. Ein Link ohne diese Angabe schickt den
+Auftraggeber auf eine Seite, die noch die alte Fassung zeigt.
+
 ## Rechtstexte mitziehen (Pflicht, ohne Nachfrage)
 
 **Nach jeder inhaltlichen, funktionalen oder strukturellen Änderung ist
