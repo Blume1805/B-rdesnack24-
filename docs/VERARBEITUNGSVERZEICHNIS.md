@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 25.08.2026 · Fassung 5**
+**Stand: 25.08.2026 · Fassung 6**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -261,6 +261,36 @@ wird `mailConfig.supportEmail` beim Domainwechsel **zuletzt** umgestellt.
 | Empfänger | S |
 | Drittland | nein |
 | Löschfrist | **10 Jahre**, täglich automatisch (`cron.job` „purge_audit_log", 03:25 Uhr, ruft `app.purge_audit_log()`); Frist nach § 147 Abs. 3 AO, weil das Protokoll auch Änderungen an steuerlich relevanten Daten enthält |
+
+### V13 — Fahrtenaufzeichnung für die Nutzungseinlage
+
+| | |
+|---|---|
+| Zweck | Ermittlung der individuellen Kilometersätze der privaten PKW der Gesellschafter und Bewertung der betrieblich gefahrenen Strecken als Nutzungseinlage, Anlage zum Jahresabschluss |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. c (§ 140 ff. AO, § 4 Abs. 4 EStG, GoBD) |
+| Betroffene | die beiden Gesellschafter |
+| Datenkategorien | `pkw` (**Kfz-Kennzeichen**), `pkw_jahr` (Kilometerstände zum 01.01. und 31.12.), `pkw_kosten` (Kostenart, Belegdatum, Bezeichnung, Bruttobetrag — **private Ausgaben der Gesellschafter**), `pkw_fahrten` (**Datum, Anlass und Strecke jeder betrieblichen Fahrt**) |
+| Empfänger | S; die Anlage geht als PDF an die Steuerberatung |
+| Drittland | nein |
+| Löschfrist | 10 Jahre (§ 147 AO), wie die übrigen Buchhaltungsunterlagen |
+
+Diese Verarbeitung ist heikler als ihr Umfang vermuten lässt, und das soll
+hier stehen statt beschönigt zu werden: `pkw_fahrten` hält Datum, Anlass und
+Strecke jeder einzelnen Fahrt fest. In der Summe ist das ein
+**Bewegungsprofil** der beiden Gesellschafter. Es entsteht freiwillig und in
+eigener Sache — die Aufzeichnung ist die Voraussetzung dafür, die Fahrten
+steuerlich geltend zu machen —, aber es bleibt eines.
+
+Zugriff nur mit `finance.view`, also den beiden Rollen `system_admin` und
+`shareholder`; kein eigenes Recht, damit keines gepflegt werden muss und
+beim nächsten Rollenwechsel vergessen wird. Serverseitig über RLS auf allen
+vier Tabellen und in der Auswertung `anlage_pkw` erzwungen, nachgestellt am
+25.08.2026: Der Aufruf ohne passende Identität scheitert mit „Keine
+Berechtigung für Finanzdaten".
+
+Die Kosten werden von Hand erfasst und stammen nicht aus sevDesk. Es sind
+private Fahrzeuge; ihre Kosten sind keine Betriebsausgaben und stehen
+deshalb in keiner Buchung.
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 

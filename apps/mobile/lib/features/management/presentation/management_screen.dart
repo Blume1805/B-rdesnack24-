@@ -7,6 +7,7 @@ import '../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../finance/presentation/screens/datev_export_screen.dart';
 import '../domain/verwaltungs_struktur.dart';
+import 'screens/anlagen_screen.dart';
 import 'screens/approvals_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
@@ -280,6 +281,15 @@ class _ManagementScreenState extends ConsumerState<ManagementScreen> {
           ziel: () => const InventoryHubScreen(),
           sichtbar: (p) =>
               p.contains('inventory.view') || p.contains('inventory.edit'),
+          ablageOrdner: 'steuern',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.steuern,
+          label: 'Anlagen',
+          beschreibung: 'Übersichten zum Jahresabschluss',
+          icon: Icons.attach_file_outlined,
+          ziel: () => const AnlagenScreen(),
+          sichtbar: (p) => p.contains('finance.view'),
           ablageOrdner: 'steuern',
         ),
         Verwaltungsfunktion(

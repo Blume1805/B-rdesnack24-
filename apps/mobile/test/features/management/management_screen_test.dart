@@ -24,6 +24,11 @@ void main() {
     'employees.manage',
     'customers.manage',
     'finance.export',
+    // Beide Rollen, die diesen Bereich sehen (system_admin, shareholder),
+    // tragen laut role_permissions beides. Ohne finance.view fehlte die
+    // Kachel „Anlagen", und der Test hätte einen Zustand geprüft, den es
+    // in der Anwendung nicht gibt.
+    'finance.view',
   };
 
   Future<void> zeige(WidgetTester tester, Set<String> rechte) async {
@@ -82,6 +87,18 @@ void main() {
     await tester.tap(find.text('Protokolle'));
     await tester.pumpAndSettle();
     expect(find.text('Befüllung'), findsNothing);
+  });
+
+  testWidgets('Steuern führt die Anlagen', (tester) async {
+    // „Im Bereich Verwaltung unter dem Oberbegriff Steuern möchte ich noch
+    // einen Unterbegriff Anlagen haben."
+    await zeige(tester, alleRechte);
+
+    await tester.tap(find.text('Steuern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Anlagen'), findsOneWidget);
+    expect(find.text('Übersichten zum Jahresabschluss'), findsOneWidget);
   });
 
   testWidgets('Inventur gibt es nur noch einmal', (tester) async {
