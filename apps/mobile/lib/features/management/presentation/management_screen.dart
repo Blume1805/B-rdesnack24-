@@ -11,6 +11,7 @@ import 'screens/anlagen_screen.dart';
 import 'screens/approvals_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/bildregister_screen.dart';
+import 'screens/firmenkunden_screen.dart';
 import 'screens/cancellations_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
@@ -212,6 +213,17 @@ class _ManagementScreenState extends ConsumerState<ManagementScreen> {
           ziel: () => const EmployeesScreen(),
           sichtbar: (p) => p.contains('employees.manage'),
           ablageOrdner: 'arbeitsvertrag',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Firmenkunden',
+          beschreibung: 'Unternehmen, Mitarbeiter, Budgets, Abrechnung',
+          icon: Icons.domain_outlined,
+          ziel: () => const FirmenkundenScreen(),
+          // Eine Firma wird bei uns angelegt, nicht von ihr selbst — deshalb
+          // dasselbe Recht wie die Firmenverwaltung in der Datenbank.
+          sichtbar: (p) => p.contains('businesses.manage'),
+          ablageOrdner: 'sonstiges',
         ),
         Verwaltungsfunktion(
           gruppe: Oberbegriff.vorgaenge,

@@ -29,6 +29,9 @@ void main() {
     // Kachel „Anlagen", und der Test hätte einen Zustand geprüft, den es
     // in der Anwendung nicht gibt.
     'finance.view',
+    // Beide Rollen, die diesen Bereich sehen, tragen es laut
+    // role_permissions — ohne das fehlte die Kachel „Firmenkunden".
+    'businesses.manage',
   };
 
   Future<void> zeige(WidgetTester tester, Set<String> rechte) async {
@@ -114,6 +117,27 @@ void main() {
       find.text('Herkunft und Bearbeitung je Produktbild'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Vorgänge & Prozesse führt die Firmenkunden', (tester) async {
+    await zeige(tester, alleRechte);
+    await tester.tap(find.text('Vorgänge & Prozesse'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Firmenkunden'), findsOneWidget);
+    expect(
+      find.text('Unternehmen, Mitarbeiter, Budgets, Abrechnung'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ohne businesses.manage keine Firmenkunden-Kachel',
+      (tester) async {
+    await zeige(tester, alleRechte.difference({'businesses.manage'}));
+    await tester.tap(find.text('Vorgänge & Prozesse'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Firmenkunden'), findsNothing);
   });
 
   testWidgets('ohne inventory.view keine Bilder-Kachel', (tester) async {
