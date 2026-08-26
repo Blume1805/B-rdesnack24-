@@ -42,21 +42,46 @@ Future<void> printAnlagePkw({
     // derselbe wie beim FIFO-Inventurreport, und der Druckdialog erscheint
     // erst, wenn die Seite wirklich steht.
     ..write('<style>${_stil()}</style></head>')
-    ..write('<body onload="window.print()">');
-
-  if (freigegeben) {
-    puffer.write('<div class="stempel">Freigegeben</div>');
-  }
+    ..write('<body onload="window.print()">')
+    // Gold-Balken und Wortmarke wie im FIFO-Inventurreport: Beide Anlagen
+    // gehen an dieselbe Steuerberatung und sollen als ein Haus erkennbar
+    // sein.
+    ..write('<div class="topbar"></div>')
+    ..write('<div class="wrap">')
+    ..write('<div class="brand">BÖRDESNACK24</div>');
 
   // ── Kopf ────────────────────────────────────────────────────────────────
+  // Titel fett und eine Stufe grösser, darunter kleiner die Stammdaten, so
+  // vom Auftraggeber vorgegeben. Rechts steht, was den Beleg einordnet.
   puffer
+    ..write('<div class="head">')
+    ..write('<div>')
     ..write('<h1>Anlage zur Ermittlung der individuellen '
         'PKW-Kosten $jahr</h1>')
     ..write('<p class="stammdaten">')
     ..write('${_esc(firma)}<br>')
     ..write('Steuernummer: ${_esc(steuernummer)}<br>')
     ..write('USt-IdNr.: ${_esc(ustIdNr)}')
-    ..write('</p>');
+    ..write('</p>')
+    ..write('</div>')
+    ..write('<div class="meta">')
+    ..write('<div><span class="meta-label">Zeitraum</span>'
+        '01.01.$jahr bis 31.12.$jahr</div>')
+    ..write('<div><span class="meta-label">Ermittlung</span>'
+        'Bruttokosten je gefahrenem Kilometer</div>')
+    ..write('<div><span class="meta-label">Erstellt am</span>'
+        '${Formatters.date(DateTime.now())}</div>')
+    ..write('</div>')
+    ..write('</div>');
+
+  if (freigegeben) {
+    puffer
+      ..write('<section class="stamp">')
+      ..write('<span class="stamp-badge">FREIGEGEBEN</span>')
+      ..write('<div class="stamp-note">Von beiden Gesellschaftern signiert '
+          'und freigegeben. Korrekturen sind für dieses Jahr gesperrt.</div>')
+      ..write('</section>');
+  }
 
   // ── Fahrzeuge und Kilometersatz ─────────────────────────────────────────
   puffer.write('<h2>Fahrzeugkosten und Satz je Kilometer</h2>');
@@ -120,7 +145,8 @@ Future<void> printAnlagePkw({
     ..write('<th class="l" rowspan="2">Anlass der Fahrt</th>')
     ..write('<th class="r" rowspan="2">Kilometer<br><span class="klein">'
         'Hin- und Rückweg</span></th>')
-    ..write('<th colspan="${fahrzeuge.length}">Kosten je Kilometer</th>')
+    ..write('<th class="c" colspan="${fahrzeuge.length}">'
+        'Kosten je Kilometer</th>')
     ..write('<th class="r" rowspan="2">Betrag</th>')
     ..write('</tr><tr>');
   for (final f in fahrzeuge) {
@@ -167,25 +193,29 @@ Future<void> printAnlagePkw({
     final name = '${s['full_name'] ?? ''}';
     final rolle = '${s['role_label'] ?? ''}';
     final bild = freigegeben ? _bildAus(approvalDecisions, name) : null;
+    // Ein Kasten mit Vorlauf statt einer nackten Linie: So bleibt Platz,
+    // von Hand zu unterschreiben, wenn keine hinterlegte Signatur da ist.
     puffer
       ..write('<div class="feld">')
+      ..write('<div class="sig-box">')
       ..write(
-        bild == null
-            ? '<div class="linie"></div>'
-            : '<img class="signatur" src="${_esc(bild)}" alt="">'
-                '<div class="linie"></div>',
+        bild == null ? '' : '<img class="signatur" src="${_esc(bild)}" alt="">',
       )
+      ..write('</div>')
+      ..write('<div class="linie"></div>')
       ..write('<div class="name">${_esc(name)}</div>')
       ..write('<div class="rolle">${_esc(rolle)}</div>')
       ..write('</div>');
   }
   puffer.write('</div>');
 
-  puffer.write('<p class="fuss">Erstellt am '
-      '${Formatters.date(DateTime.now())}. Die Beträge beruhen auf den in '
-      'der App erfassten Kosten, Kilometerständen und Fahrten.</p>');
+  // Das Erstellungsdatum steht schon im Kopf. Hier nur noch, worauf die
+  // Zahlen beruhen, damit die Steuerberatung die Quelle kennt.
+  puffer.write('<p class="fuss">Die Beträge beruhen auf den in der App '
+      'erfassten Kosten, Kilometerständen und Fahrten der Bördesnack24 GbR. '
+      'Alle Angaben brutto.</p>');
 
-  puffer.write('</body></html>');
+  puffer.write('</div></body></html>');
 
   // Über einen Blob und nicht über document.write: Derselbe Weg wie beim
   // FIFO-Inventurreport, und der einzige, der im iOS-In-App-Browser
@@ -255,37 +285,101 @@ String _esc(String s) => s
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
+/// Hausstil der Bördesnack24-Belege.
+///
+/// Abgeleitet vom FIFO-Inventurreport, damit beide Anlagen bei derselben
+/// Steuerberatung als ein Haus ankommen: Gold-Balken über der Seite,
+/// Wortmarke, Ink-Tabellenköpfe, goldener Unterstrich an den Überschriften.
+///
+/// Dazu die Vorgaben des Branding Guide v1.0 für formelle Dokumente: A4 mit
+/// 25 mm Seitenrändern, Arial, Beträge rechtsbündig, Hinweise grau und
+/// kursiv, Unterschriftsfelder mit Vorlauf.
+///
+/// EINE ABWEICHUNG, BEWUSST: Der Guide setzt für Reports einen zweispaltigen
+/// Kopf mit den Stammdaten RECHTS. Der Auftraggeber hat die Stammdaten
+/// ausdrücklich unter der Überschrift und in kleinerer Schrift verlangt.
+/// Seine Vorgabe gilt; rechts steht stattdessen, was den Beleg einordnet.
 String _stil() => '''
-  @page { size: A4 portrait; margin: 18mm 14mm; }
-  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-         font-size: 10pt; color: #202321; margin: 0; }
-  h1 { font-size: 14pt; font-weight: 800; margin: 0 0 4pt 0; }
-  h2 { font-size: 11pt; font-weight: 700; margin: 16pt 0 4pt 0; }
-  .stammdaten { font-size: 8.5pt; color: #4A4844; margin: 0 0 14pt 0;
-                line-height: 1.45; }
+  @page { size: A4 portrait; margin: 0 25mm 18mm 25mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, "Liberation Sans", -apple-system,
+                      "Segoe UI", Roboto, sans-serif;
+         color: #14110E; margin: 0; padding: 0; font-size: 10pt; }
+
+  /* Gold-Balken über der Breite des Satzspiegels, NICHT randabfallend.
+     Der FIFO-Report zieht ihn über negative Ränder bis an den Papierrand;
+     im Druck beschneidet Chrome das am Seitenrand, und übrig blieb ein
+     Balken, der willkürlich kürzer war als der Text darunter. Am echten
+     PDF nachgesehen, nicht vermutet. Über den Satzspiegel gezogen sitzt er
+     in jeder Druck-Engine gleich. */
+  .topbar { height: 4mm; background: #FDC102; margin: 0 0 7mm;
+            border-radius: 1pt; }
+  .wrap { max-width: 100%; }
+  .brand { font-weight: 900; letter-spacing: 2px; font-size: 10pt;
+           margin-bottom: 8pt; }
+
+  .head { display: flex; justify-content: space-between;
+          align-items: flex-end; gap: 12mm;
+          border-bottom: 1.5pt solid #FDC102; padding-bottom: 6pt; }
+  h1 { margin: 0 0 4pt 0; font-size: 15pt; font-weight: 800;
+       letter-spacing: 0.2px; color: #B8860B; }
+  .stammdaten { font-size: 9pt; color: #6f6a5b; margin: 0; line-height: 1.45; }
+  /* Kein `nowrap`: Die längste Zeile hing sonst am rechten Rand. Der Block
+     bleibt linksbündig, damit alle Werte an derselben Kante beginnen. */
+  .meta { font-size: 8.5pt; color: #6f6a5b; text-align: left;
+          max-width: 74mm; line-height: 1.45; }
+  .meta > div { display: flex; gap: 2.5mm; margin-bottom: 1pt; }
+  .meta .meta-label { flex: 0 0 18mm; color: #14110E; font-weight: 700; }
+
+  h2 { font-size: 11pt; margin: 14pt 0 4pt 0; color: #14110E;
+       font-weight: 800;
+       border-bottom: 1.5pt solid #FDC102; padding-bottom: 2pt; }
+
   table { width: 100%; border-collapse: collapse; margin-top: 4pt; }
-  th, td { border: 0.5pt solid #C9C4BC; padding: 3.5pt 5pt;
-           vertical-align: top; }
-  th { background: #F7F5F1; font-weight: 700; font-size: 9pt; }
+  th, td { padding: 3.5pt 6pt; text-align: left;
+           border-bottom: 1pt solid #E8E2D6; vertical-align: top; }
+  thead th { background: #14110E; color: #F9F5EC; font-weight: 700;
+             font-size: 9pt; border-bottom: none; }
+  /* Kopf wiederholen, wenn eine Tabelle umbricht. */
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
   .l { text-align: left; }
+  .c { text-align: center; }
   .r { text-align: right; white-space: nowrap; }
-  .klein { font-weight: 400; font-size: 7.5pt; color: #6E6A66; }
-  .summe td { font-weight: 800; background: #FBF9F5; }
-  .leer { color: #6E6A66; font-style: italic; }
-  .hinweis { font-size: 8pt; color: #4A4844; margin: 6pt 0 0 0;
-             line-height: 1.4; }
-  .warnung { font-size: 8.5pt; color: #B31C1C; margin: 6pt 0 0 0; }
-  .fahrten th, .fahrten td { font-size: 9pt; }
-  .unterschriften { display: flex; gap: 24mm; margin-top: 22mm;
+  .klein { font-weight: 400; font-size: 7.5pt; color: #C9C4BC; }
+  .summe td { background: #FFF5CC; font-weight: 800;
+              border-top: 1pt solid #14110E;
+              border-bottom: 1pt solid #14110E; }
+  .leer { color: #6f6a5b; font-style: italic; }
+
+  /* Hinweise: grau, kursiv, zwei Punkt kleiner als der Fliesstext. */
+  .hinweis { font-size: 8pt; color: #595959; font-style: italic;
+             margin: 5pt 0 0 0; line-height: 1.4; }
+  .warnung { font-size: 9pt; color: #B2311C; font-weight: 700;
+             margin: 6pt 0 0 0; }
+
+  /* Freigabe-Stempel, Form wie im FIFO-Report. */
+  section.stamp { margin: 10pt 0 2pt 0; padding: 6pt 10pt;
+                  border: 1pt solid #5C9A3F; border-radius: 6pt;
+                  background: #EEF6E8; }
+  section.stamp .stamp-badge { display: inline-block; font-weight: 800;
+                               letter-spacing: 1px; color: #3E7A25;
+                               font-size: 11pt; }
+  section.stamp .stamp-note { color: #14110E; font-size: 9pt;
+                              margin-top: 2pt; }
+
+  /* Unterschriften mit Vorlauf, damit von Hand gezeichnet werden kann. */
+  .unterschriften { display: flex; gap: 18mm; margin-top: 18mm;
                     page-break-inside: avoid; }
   .feld { flex: 1; }
-  .signatur { display: block; max-height: 16mm; max-width: 100%;
-              margin-bottom: 1pt; }
-  .linie { border-bottom: 0.75pt solid #202321; height: 0; }
-  .name { font-size: 9pt; font-weight: 700; margin-top: 3pt; }
-  .rolle { font-size: 8pt; color: #6E6A66; }
-  .fuss { font-size: 7.5pt; color: #6E6A66; margin-top: 10mm; }
-  .stempel { float: right; border: 1.5pt solid #5C9A3F; color: #5C9A3F;
-             font-weight: 800; font-size: 12pt; padding: 3pt 10pt;
-             transform: rotate(-4deg); letter-spacing: 1pt; }
+  .sig-box { height: 22mm; border: 1pt solid #E8E2D6; border-radius: 6pt;
+             background: #FAF6ED; padding: 5pt; display: flex;
+             align-items: flex-end; }
+  .signatur { max-height: 18mm; max-width: 100%; object-fit: contain; }
+  .linie { border-bottom: 1pt solid #14110E; height: 0; margin-top: 3pt; }
+  .name { font-size: 9.5pt; font-weight: 700; margin-top: 3pt; }
+  .rolle { font-size: 8pt; color: #6f6a5b; }
+
+  .fuss { font-size: 7.5pt; color: #6f6a5b; margin-top: 12mm;
+          border-top: 1pt solid #E8E2D6; padding-top: 4pt; }
 ''';
