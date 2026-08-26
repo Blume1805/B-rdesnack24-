@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v14 · 2026-08';
+  static const version = 'v15 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -1016,6 +1016,29 @@ zum Zeitpunkt des Kaufs.
 Wir halten Produktangaben aktuell und richtig. Für offensichtliche Schreib- oder
 Übertragungsfehler übernehmen wir keine Gewähr; gesetzliche Ansprüche bleiben
 unberührt.
+
+**Produktbilder stammen von uns.** Alle Produktabbildungen in dieser App und in
+unserer Werbung sind eigene Aufnahmen der Bördesnack24 GbR. Die Rechte daran liegen bei
+uns. Zu jedem Bild halten wir intern fest, wer es wann aufgenommen hat und was
+daran bearbeitet wurde.
+
+Bearbeitet wird nur, was die Darstellung sauber macht — Hintergrund freistellen,
+zuschneiden, Helligkeit angleichen. Das abgebildete Produkt selbst zeigen wir so,
+wie es im Automaten liegt: Aufmachung, Etikett und Füllmenge werden nicht
+verändert. Sollten wir ein Bild einsetzen, das ganz oder in Teilen durch
+künstliche Intelligenz erzeugt oder so verändert wurde, dass es etwas anderes
+zeigt als die Wirklichkeit, kennzeichnen wir es an Ort und Stelle sichtbar.
+
+**Die abgebildeten Marken gehören nicht uns.** Namen, Logos und Verpackungen der
+Hersteller sind Marken der jeweiligen Rechteinhaber. Wir zeigen sie, weil wir
+diese Ware verkaufen und dich darüber informieren müssen, was du am Automaten
+bekommst — nach § 23 Abs. 1 Nr. 3 MarkenG ist das zulässig.
+
+Zwischen uns und den Herstellern der abgebildeten Produkte besteht
+**keine geschäftliche Verbindung**: keine Partnerschaft, kein Sponsoring,
+keine Kooperation und kein Auftrag. Die Auswahl der Produkte treffen wir selbst. Wo ein
+Angebot einmal auf einer Vereinbarung mit einem Hersteller beruhen sollte, sagen
+wir das an dieser Stelle ausdrücklich dazu.
 
 
 **9) BEWERTUNGEN**

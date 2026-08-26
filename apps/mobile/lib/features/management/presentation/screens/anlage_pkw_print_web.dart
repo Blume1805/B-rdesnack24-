@@ -300,7 +300,14 @@ String _esc(String s) => s
 /// ausdrücklich unter der Überschrift und in kleinerer Schrift verlangt.
 /// Seine Vorgabe gilt; rechts steht stattdessen, was den Beleg einordnet.
 String _stil() => '''
-  @page { size: A4 portrait; margin: 0 25mm 18mm 25mm; }
+  /* Oben randlos NUR auf der ersten Seite: Dort sitzt der Gold-Balken bündig
+     am Papierrand. Stand hier vorher ohne die Ausnahme, und damit begann
+     auch jede Folgeseite an der Papierkante. Bislang unauffällig, weil die
+     Anlage auf eine Seite passt — beim Bildregister, das umbricht, standen
+     die Unterschriftsfelder dadurch oben angeschnitten. Dieselbe Ursache,
+     also hier gleich mit behoben, bevor die Fahrtentabelle lang genug wird. */
+  @page { size: A4 portrait; margin: 18mm 25mm; }
+  @page :first { margin-top: 0; }
   * { box-sizing: border-box; }
   body { font-family: Arial, "Liberation Sans", -apple-system,
                       "Segoe UI", Roboto, sans-serif;

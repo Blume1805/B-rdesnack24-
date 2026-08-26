@@ -10,6 +10,7 @@ import '../domain/verwaltungs_struktur.dart';
 import 'screens/anlagen_screen.dart';
 import 'screens/approvals_screen.dart';
 import 'screens/b2b_customers_screen.dart';
+import 'screens/bildregister_screen.dart';
 import 'screens/cancellations_screen.dart';
 import 'screens/cash_screen.dart';
 import 'screens/cleaning_screen.dart';
@@ -211,6 +212,17 @@ class _ManagementScreenState extends ConsumerState<ManagementScreen> {
           ziel: () => const EmployeesScreen(),
           sichtbar: (p) => p.contains('employees.manage'),
           ablageOrdner: 'arbeitsvertrag',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Bilder',
+          beschreibung: 'Herkunft und Bearbeitung je Produktbild',
+          icon: Icons.photo_library_outlined,
+          ziel: () => const BildregisterScreen(),
+          // Dieselbe Berechtigung wie der Produktkatalog: Wer Produkte
+          // pflegt, pflegt auch deren Bilddokumentation.
+          sichtbar: (p) => p.contains('inventory.view'),
+          ablageOrdner: 'sonstiges',
         ),
         Verwaltungsfunktion(
           gruppe: Oberbegriff.vorgaenge,

@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 8**
+**Stand: 26.08.2026 · Fassung 9**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -314,6 +314,43 @@ unveränderlich; durchgesetzt in der Datenbank über den Trigger
 Nachgestellt am 26.08.2026: sechs Schreibversuche im freigegebenen Jahr,
 darunter ein Umdatieren einer Fahrt in ein offenes Jahr, alle mit 42501
 abgewiesen; das offene Jahr blieb schreibbar.
+
+### V14 — Bildregister der Produktfotos
+
+| | |
+|---|---|
+| Zweck | Nachweis der eigenen Urheberschaft an Produktfotos, markenrechtliche Abgrenzung gegenüber den abgebildeten Herstellern, Prüfung der Kennzeichnungspflicht nach Art. 50 Abs. 4 EU AI Act |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. f (berechtigtes Interesse an der Beweisbarkeit der eigenen Rechtsposition); für die Freigabe zusätzlich Art. 6 Abs. 1 lit. b |
+| Betroffene | Gesellschafter und künftige Beschäftigte, soweit sie fotografieren oder freigeben |
+| Datenkategorien | `produktbilder`: **Name des Fotografen**, **Name der freigebenden Person** samt Freigabedatum, dazu Produktbezeichnung, Dateiname der Aufnahme, Aufnahmedatum, eingesetztes KI-System, Beschreibung der Bearbeitung |
+| Empfänger | S |
+| Drittland | nein |
+| Löschfrist | solange das Bild verwendet wird, danach 3 Jahre (Verjährung urheber- und wettbewerbsrechtlicher Ansprüche, §§ 195, 199 BGB) |
+
+Der Personenbezug ist gering, aber vorhanden und deshalb hier geführt: Zwei
+Freitextfelder tragen Klarnamen. Genau darin liegt ihr Zweck — ein Nachweis
+„die Aufnahme stammt von uns" ohne die Person, die sie gemacht hat, wäre
+keiner. Weitere Personendaten enthält die Tabelle nicht; abgebildet sind
+Waren, keine Menschen.
+
+Das Feld `kennzeichnung_noetig` ist eine **generierte Spalte**, kein
+Ankreuzfeld: Es steht auf wahr, wenn ein KI-System eingesetzt wurde UND dabei
+das Produkt verändert, ein Produkt neu erzeugt oder eine Umgebung erzeugt
+wurde. Damit ist die Einstufung für jedes Bild dieselbe und nicht von der
+Tagesform dessen abhängig, der das Formular ausfüllt.
+
+Vier Prüfregeln der Tabelle sichern die Aussagekraft ab, alle am 26.08.2026
+mit echten Schreibversuchen nachgestellt und mit 23514 abgewiesen: „KI
+verwendet" ohne genanntes System; ein System ohne KI-Einsatz; eine Freigabe
+ohne vorherige Prüfung nach Art. 50; eine halbe Freigabe (Person ohne Datum
+oder umgekehrt). Ein gültiger Eintrag ging im selben Lauf durch.
+
+Gestrichen wird weich (`deleted_at`). Ein Register, aus dem Zeilen spurlos
+verschwinden, taugt als Nachweis nichts — gerade dann, wenn jemand behauptet,
+ein Bild sei nie dokumentiert worden.
+
+Stand 26.08.2026: 62 Produkte im Katalog, davon 0 mit hinterlegtem Bild, und
+0 Einträge im Register. Es ist noch kein Produktfoto im Kundenbereich.
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 

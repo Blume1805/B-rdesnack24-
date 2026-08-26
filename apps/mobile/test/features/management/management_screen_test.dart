@@ -101,6 +101,33 @@ void main() {
     expect(find.text('Übersichten zum Jahresabschluss'), findsOneWidget);
   });
 
+  testWidgets('Vorgänge & Prozesse führt die Bilder', (tester) async {
+    // „Diese Übersicht soll bei Aufgaben und Prozesse als Unterbegriff
+    // Bilder entstehen." Vorgabe des Auftraggebers vom 26.08.2026.
+    await zeige(tester, alleRechte);
+
+    await tester.tap(find.text('Vorgänge & Prozesse'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bilder'), findsOneWidget);
+    expect(
+      find.text('Herkunft und Bearbeitung je Produktbild'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ohne inventory.view keine Bilder-Kachel', (tester) async {
+    // Die Kachel hängt an derselben Berechtigung wie der Produktkatalog.
+    // Ohne den Gegenprobe-Test prüfte der obige nur, dass ein Text
+    // irgendwo steht — nicht, dass die Sichtbarkeit wirkt.
+    await zeige(tester, alleRechte.difference({'inventory.view'}));
+
+    await tester.tap(find.text('Vorgänge & Prozesse'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bilder'), findsNothing);
+  });
+
   testWidgets('Inventur gibt es nur noch einmal', (tester) async {
     // Vorher standen zwei Kacheln „Inventur" nebeneinander, mit demselben
     // Symbol. Der Auftraggeber: „Inventur je Automat soll künftig über die

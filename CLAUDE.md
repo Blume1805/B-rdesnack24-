@@ -35,6 +35,39 @@ Chat-Assistent" gekennzeichnet — nicht als „KI", weil er kein
 AI-System i. S. v. Art. 3 EU AI Act ist. Für zukünftige LLM-Backends
 das gleiche Prinzip anwenden.
 
+## Produktbilder: jedes Bild wird dokumentiert (Pflicht, ohne Nachfrage)
+
+Vorgabe des Auftraggebers vom 26.08.2026: „Zukünftig sollen alle
+Produktbilder in dem Format dokumentiert werden, um urheberrechtlich und
+markenrechtlich geschützt zu sein."
+
+Jedes Produktfoto, das in der App, im Web oder in Werbung erscheint,
+bekommt vorher einen Eintrag in `public.produktbilder` — erreichbar über
+Verwaltung → Vorgänge & Prozesse → **Bilder**. Ohne Eintrag kein Einsatz.
+Wer ein Bild einbaut, legt den Eintrag mit an; das ist kein
+Nachdokumentieren „bei Gelegenheit", sondern Teil derselben Änderung.
+
+**Die Einstufung wird nicht eingetragen, sondern gerechnet.**
+`kennzeichnung_noetig` ist eine generierte Spalte (Migration 0139):
+KI verwendet UND (Produkt verändert ODER KI-Produkt ODER KI-Umgebung).
+Freistellen, Zuschneiden und Helligkeit lösen sie nicht aus — das Bild
+zeigt den Gegenstand weiterhin, wie er ist. Wer die Einschätzung ändern
+will, ändert die Regel und nicht 200 Häkchen.
+
+**Steht sie einmal auf „Ja", ist ein `AiBadge` fällig** — an jeder Stelle
+im Kundenbereich, an der dieses Bild erscheint, plus ein Satz im
+`AiInfoScreen`. Das ist derselbe Automatismus wie oben, nur ausgelöst
+durch ein Bild statt durch eine Funktion. Solange kein Bild die Marke
+trägt, wird auch keine gesetzt: Ein Hinweis auf etwas, das es nicht gibt,
+ist genauso falsch wie ein fehlender.
+
+Zugesagt ist beides bereits nach aussen — Nutzungsbedingungen Abschnitt 8
+(„Produktbilder stammen von uns", „Die abgebildeten Marken gehören nicht
+uns") und der Abschnitt „Und die Produktbilder?" im `AiInfoScreen`. Ändert
+sich die Praxis, sind diese beiden Texte mitzuziehen; das Register führt
+`produktbild_bearbeitung` mit gelber Ampel, bis die Kennzeichnung am
+ersten betroffenen Bild wirklich nachgewiesen ist.
+
 ## Behauptungen vorher prüfen (Pflicht, ohne Nachfrage)
 
 **Nichts behaupten, was sich nachsehen lässt, ohne es nachgesehen zu

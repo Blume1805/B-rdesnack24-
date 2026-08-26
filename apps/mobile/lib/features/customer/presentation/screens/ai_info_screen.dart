@@ -96,6 +96,21 @@ class AiInfoScreen extends StatelessWidget {
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
+            title: 'Und die Produktbilder?',
+            body:
+                'Produktfotos nehmen wir selbst auf. Wird ein Foto mit einem '
+                'KI-Werkzeug nachbearbeitet, dann nur für die Darstellung: '
+                'Hintergrund freistellen, zuschneiden, Helligkeit angleichen. '
+                'Das Produkt selbst zeigen wir so, wie es im Automaten liegt.\n\n'
+                'Sollten wir jemals ein Bild verwenden, bei dem KI das Produkt '
+                'oder seine Umgebung anders zeigt, als sie sind, steht der '
+                'Hinweis direkt am Bild — nicht nur auf dieser Seite. Zu jedem '
+                'Foto halten wir intern fest, wer es aufgenommen hat, was '
+                'daran bearbeitet wurde und mit welchem Werkzeug.\n\n'
+                'Stand heute zeigt die App noch keine Produktfotos. Diese '
+                'Zusage gilt ab dem ersten.',
+          ),
+          const _InfoBlock(
             title: 'Zweck',
             body:
                 'Bessere Sichtbarkeit von Angeboten, die zu deinem bisherigen '
