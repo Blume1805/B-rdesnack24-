@@ -1,6 +1,6 @@
 # Masterprompt „Bördesnack24 Business" — Abgleich mit dem Bestand
 
-**Stand: 26.08.2026 · Fassung 2**
+**Stand: 26.08.2026 · Fassung 3**
 
 Der Auftraggeber hat einen Masterprompt für ein B2B-Ökosystem vorgelegt
 (Business, Advertising, Werbeflächen, Sponsoring) und gefragt, ob er der
@@ -305,6 +305,21 @@ Vertrag, Freigabe der Gestaltung. **Keine Ausspielung in der App.**
 Rechnung, keine Einwilligung, kein Tracking, keine Kennzeichnung im
 Kundenbereich, keine Rechtstextänderung. Der schnellste Umsatz mit dem
 geringsten Risiko.
+
+> **Erledigt am 26.08.2026** (Migrationen 0145–0146), Backend. Gebaut:
+> Flächeninventar je Automat, Mietverträge mit Motivfreigabe, Auslastung und
+> Werbeumsatz je Automat, Sicht des Werbekunden auf seine eigenen Verträge.
+> Nicht gebaut und bewusst nicht: Ausspielung in der App, Marktplatz,
+> Zahlungen, Reichweitenangaben.
+>
+> Doppelbelegung verhindert die Datenbank über einen Ausschluss
+> (`gist (space_id =, laufzeit &&)`), nicht die Oberfläche — zwei
+> gleichzeitige Buchungen sehen beide eine freie Fläche. Entwürfe dürfen sich
+> überschneiden, damit mehrere Angebote für denselben Platz vorbereitet
+> werden können; verbindlich wird nur einer.
+>
+> Offen: der Bildschirm dazu. Das Inventar ist eine interne Sache
+> (`locations.manage`) und gehört wie die Firmenkunden in die App.
 
 **Schritt 6 — Sponsoring und Vereinsbeteiligung**
 `businesses` mit Typ Sponsor/Verein, Pakete, Laufzeiten, Umsatzbeteiligung je

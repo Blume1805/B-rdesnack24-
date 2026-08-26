@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 10**
+**Stand: 26.08.2026 · Fassung 11**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -393,6 +393,35 @@ nicht von ihm selbst haben, sondern von seinem Arbeitgeber. Die Information
 nach Art. 14 muss deshalb **in der Einladungsmail** stehen. Die Mailvorlage
 gibt es noch nicht — die RPC gibt den Token zurück und verschickt nichts. Vor
 dem ersten Versand nachzuholen.
+
+### V16 — Werbeflächen und Werbeverträge
+
+| | |
+|---|---|
+| Zweck | Vermietung physischer Werbeflächen an unseren Automaten: Inventar, Verträge, Freigabe des Motivs, Auslastung |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. b (Vertrag mit dem Werbekunden); für die Motivfreigabe Art. 6 Abs. 1 lit. f (Nachweis, wer eine Gestaltung an unserem Automaten freigegeben hat) |
+| Betroffene | Ansprechpersonen des Werbekunden über die Mitgliedschaft (siehe V15); die eigene Person, die ein Motiv freigibt |
+| Datenkategorien | `advertising_spaces` (**keine personenbezogenen Daten** — Automat, Position, Maße, Preis, Zustand); `advertising_space_contracts` (Firma, Laufzeit, Preis, Motivbeschreibung, **Name der freigebenden Person**, Bearbeiterkennungen) |
+| Empfänger | S |
+| Drittland | nein |
+| Löschfrist | 10 Jahre nach Vertragsende (§ 147 AO, § 257 HGB) |
+
+**Der Personenbezug ist dünn und wird hier trotzdem geführt.** Der
+Vertragspartner ist eine juristische Person; personenbezogen sind nur der
+Name der freigebenden Person und die Bearbeiterkennungen. Genau diese
+Freigabe ist aber der Punkt: Was an unserem Automaten klebt, verantworten
+wir mit, und ohne Namen ist der Nachweis keiner.
+
+**Wer sieht was.** Der Werbekunde sieht ausschliesslich seine eigenen
+Verträge (`app.is_business_member`) und nur die Flächen, auf die sich einer
+davon bezieht. Einen Marktplatz mit allen freien Flächen gibt es bewusst
+noch nicht.
+
+**Keine Ausspielung, kein Tracking.** Diese Tätigkeit betrifft ausschliesslich
+physische Flächen. Es wird nichts in der App eingeblendet, nichts gemessen
+und nichts über Kundinnen und Kunden an Werbekunden übermittelt. Reichweiten
+werden zurzeit nicht ausgewiesen — dafür gibt es zu wenige Verkaufsdaten,
+und eine geschätzte Reichweite zu bewerben wäre nach § 5 UWG angreifbar.
 
 ### Nicht personenbezogen — der Vollständigkeit halber
 
