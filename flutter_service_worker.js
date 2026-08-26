@@ -1,5 +1,5 @@
-// Bördesnack24 Web — Offline-Cache v1787731112 (generiert von deploy_web.sh).
-const CACHE = 'bs24-1787731112';
+// Bördesnack24 Web — Offline-Cache v1787731881 (generiert von deploy_web.sh).
+const CACHE = 'bs24-1787731881';
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
