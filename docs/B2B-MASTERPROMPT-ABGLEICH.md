@@ -1,6 +1,6 @@
 # Masterprompt „Bördesnack24 Business" — Abgleich mit dem Bestand
 
-**Stand: 26.08.2026 · Fassung 1**
+**Stand: 26.08.2026 · Fassung 2**
 
 Der Auftraggeber hat einen Masterprompt für ein B2B-Ökosystem vorgelegt
 (Business, Advertising, Werbeflächen, Sponsoring) und gefragt, ob er der
@@ -282,6 +282,21 @@ mit PDF/CSV — Rechnungsstellung zunächst über sevDesk, damit die
 Zahlungssperre unberührt bleibt.
 *Rechtlich:* Datenschutzerklärung um Arbeitgeber-Sicht ergänzen; der Hinweis
 am Firmenautomaten (offener Punkt 3) wird hier fällig.
+
+> **Erledigt am 26.08.2026** (Migrationen 0141–0143). Gebaut: Firma anlegen,
+> einladen, Einladung annehmen, Mitglieder verwalten, Budget als Deckel,
+> Übersicht und Monatsabrechnung. Nicht gebaut und bewusst nicht:
+> Zahlungen, Guthaben, Firmen-Selbstregistrierung. Der Auftrag an Lovable
+> liegt in `docs/lovable-warteschlange/04-b2b-firmenportal.md`.
+>
+> Zwei Dinge sind dabei aufgefallen und behoben: Der Monatstopf wurde vom
+> ungedeckelten Anspruch statt vom tatsächlich Gezahlten geleert (0143), und
+> die Datenschutzerklärung nannte den Namen der kaufenden Person nicht,
+> obwohl er dem Arbeitgeber übermittelt wird (Fassung v16).
+>
+> Offen geblieben: die Einladungsmail. Die RPC gibt den Token zurück und
+> verschickt nichts; die Information nach Art. 14 DSGVO gehört in diese Mail
+> und ist vor dem ersten Versand nachzuholen.
 
 **Schritt 5 — Werbeflächen** (physisch)
 Reines Inventar: `advertising_spaces` je Automat, Verfügbarkeit, Preis,

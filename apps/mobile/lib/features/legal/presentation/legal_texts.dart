@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v15 · 2026-08';
+  static const version = 'v16 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -301,9 +301,19 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
 
      * Der Kauf geht **auf Rechnung Ihres Arbeitgebers**, nicht auf Ihre.
      * **Ihr Arbeitgeber erfährt von diesem Kauf.** Übermittelt werden
-       Zeitpunkt, Betrag, Automat und die gekauften Artikel. Einsehen können
-       das die Personen, die Ihr Arbeitgeber bei uns als Firmen-Administrator
-       benannt hat.
+       Zeitpunkt, Betrag, Automat, die gekauften Artikel und **Ihr Name**.
+       Der Name gehört dazu, weil Ihr Arbeitgeber die Abrechnung sonst
+       niemandem zuordnen und Ihnen kein eigenes Budget einräumen könnte.
+       Einsehen können das die Personen, die Ihr Arbeitgeber bei uns als
+       Firmen-Administrator benannt hat.
+     * **Ihr Arbeitgeber kann ein Budget festlegen** — einen Betrag je Monat
+       und je Tag, bis zu dem er den Einkauf trägt. Wir rechnen zu jedem Kauf
+       aus, welcher Anteil auf den Arbeitgeber und welcher auf Sie entfällt,
+       und weisen beides in der Monatsabrechnung aus. Legt er kein Budget
+       fest, trägt er den Einkauf vollständig.
+     * Wir buchen dabei **kein Guthaben** für Sie und laden nichts auf. Ob und
+       wie Ihr Arbeitgeber einen auf Sie entfallenden Anteil von Ihnen
+       verlangt, ist Sache Ihres Arbeitsverhältnisses.
      * Sie sammeln dafür **keine** Treuepunkte, keinen Statusumsatz, keinen
        Aufgabenfortschritt und keine Spendenzuschreibung. Dieser Kauf zählt
        für Ihr privates Konto nicht mit — wir schreiben Ihnen keinen Vorteil

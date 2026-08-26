@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 9**
+**Stand: 26.08.2026 · Fassung 10**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -352,6 +352,48 @@ ein Bild sei nie dokumentiert worden.
 Stand 26.08.2026: 62 Produkte im Katalog, davon 0 mit hinterlegtem Bild, und
 0 Einträge im Register. Es ist noch kein Produktfoto im Kundenbereich.
 
+### V15 — Firmenkunden: Mitgliedschaft, Einladung, Budget, Abrechnung
+
+| | |
+|---|---|
+| Zweck | Abwicklung des Vertrages mit einem Firmenkunden: Mitgliedschaft im Firmenkonto, Einladung, Budgetgrenzen, Monatsabrechnung der auf Firmenrechnung getätigten Käufe |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. b (Vertrag mit dem Firmenkunden, den die beschäftigte Person am Automaten in Anspruch nimmt); für die Abrechnung zusätzlich Art. 6 Abs. 1 lit. f (nachvollziehbare Rechnung) |
+| Betroffene | Beschäftigte von Firmenkunden; eingeladene Personen, die noch kein Konto haben |
+| Datenkategorien | `business_members` (Profil-Zuordnung, Rolle, Status, Einladungs- und Aktivierungszeitpunkt); `business_invitations` (**E-Mail-Adresse**, Rolle, Ablauf, Token als SHA-256); `business_budgets` (Monats- und Tagesgrenze, Zuschussanteil je Person); `purchases.business_id` |
+| Empfänger | S, **AG** |
+| Drittland | nein |
+| Löschfrist | Mitgliedschaft und Budget: bis Vertragsende, danach 3 Jahre; Käufe und Abrechnung: 10 Jahre (§ 147 AO); erledigte Einladungen: 12 Monate |
+
+**Der Arbeitgeber ist eigener Verantwortlicher, nicht Auftragsverarbeiter.**
+Er erhält die Daten für seinen eigenen Zweck — Verpflegungszuschuss und
+Abrechnung —, nicht weisungsgebunden für uns. Übermittelt werden je Kauf
+Zeitpunkt, Betrag, Automat, Artikel und **der Name der kaufenden Person**;
+Letzteres, weil eine Abrechnung ohne Zuordnung keine ist und ein Budget je
+Person sonst nicht möglich wäre. Die Datenschutzerklärung nennt seit Fassung
+v16 alle fünf Angaben ausdrücklich — bis dahin fehlte der Name in der
+Aufzählung, obwohl er fachlich nötig ist.
+
+Was der Arbeitgeber **nicht** erhält: alles Übrige aus dem Kundenkonto.
+Insbesondere keine Privatkäufe an öffentlichen Automaten — die Zuordnung
+entsteht ausschliesslich aus dem **Standort des Automaten**
+(`app.purchase_business_pruefen`), nicht aus der Person.
+
+**Kein Guthaben.** `business_budgets` deckelt nur, was der Arbeitgeber trägt;
+es wird nichts aufgeladen und nichts ausgezahlt. Der Anteil wird bei der
+Abrechnung gerechnet (`app.business_split`) und nicht gespeichert.
+
+**Der Einladungs-Token** steht als SHA-256 in der Tabelle, nie im Klartext;
+der Klartext wird einmalig an den Aufrufer zurückgegeben. Angenommen werden
+kann eine Einladung nur von der Person, deren Profil-E-Mail zur Einladung
+passt — am 26.08.2026 mit einer weitergeleiteten Einladung nachgestellt und
+mit 42501 abgewiesen.
+
+**Offen (Art. 14 DSGVO):** Eine Einladung geht an jemanden, dessen E-Mail wir
+nicht von ihm selbst haben, sondern von seinem Arbeitgeber. Die Information
+nach Art. 14 muss deshalb **in der Einladungsmail** stehen. Die Mailvorlage
+gibt es noch nicht — die RPC gibt den Token zurück und verschickt nichts. Vor
+dem ersten Versand nachzuholen.
+
 ### Nicht personenbezogen — der Vollständigkeit halber
 
 * **Automatentelemetrie** (`machine_telemetry_events`, `machine_health`,
@@ -372,6 +414,7 @@ Stand 26.08.2026: 62 Produkte im Katalog, davon 0 mit hinterlegtem Bild, und
 | sevD | sevDesk | Buchhaltung | Deutschland | AV-Vertrag nach Art. 28 |
 | DS | DocuSign | elektronische Unterschriften (nur intern) | **USA** | Art. 46: Standardvertragsklauseln |
 | **G** | **Google (Gmail)** | **Rückkanal jeder Systemmail, Support-Postfach** | **USA** | **kein AV-Vertrag — offene Lücke, Abschnitt 5** |
+| AG | Arbeitgeber des Kunden (Firmenkunde) | Verpflegungszuschuss und Abrechnung der Käufe an seinem Standort | Deutschland | **eigener Verantwortlicher**, kein AV-Vertrag — Art. 6 Abs. 1 lit. b |
 
 Externe Links (Google Maps im Automatenfinder) sind keine Übermittlung durch
 uns: Der Aufruf erfolgt erst, wenn die Nutzerin oder der Nutzer den Link
