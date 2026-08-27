@@ -25,6 +25,7 @@ import 'screens/maintenance_screen.dart';
 import 'screens/my_signature_tasks_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
+import 'screens/werbeflaechen_screen.dart';
 import 'widgets/anhang_sheet.dart';
 import 'widgets/oberbegriff_gruppe.dart';
 
@@ -223,6 +224,19 @@ class _ManagementScreenState extends ConsumerState<ManagementScreen> {
           // Eine Firma wird bei uns angelegt, nicht von ihr selbst — deshalb
           // dasselbe Recht wie die Firmenverwaltung in der Datenbank.
           sichtbar: (p) => p.contains('businesses.manage'),
+          ablageOrdner: 'sonstiges',
+        ),
+        Verwaltungsfunktion(
+          gruppe: Oberbegriff.vorgaenge,
+          label: 'Werbeflächen',
+          beschreibung: 'Flächen am Automaten, Mieter, Motivfreigabe',
+          icon: Icons.campaign_outlined,
+          ziel: () => const WerbeflaechenScreen(),
+          // Dasselbe Recht wie die Standortverwaltung: Die Flächen hängen an
+          // unseren Automaten — wer die verwaltet, verwaltet auch sie. Ein
+          // eigenes Recht wäre beim nächsten Rollenwechsel vergessen worden
+          // (begründet im Kopf von Migration 0146).
+          sichtbar: (p) => p.contains('locations.manage'),
           ablageOrdner: 'sonstiges',
         ),
         Verwaltungsfunktion(

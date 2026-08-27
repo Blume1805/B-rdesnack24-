@@ -330,8 +330,22 @@ geringsten Risiko.
 > überschneiden, damit mehrere Angebote für denselben Platz vorbereitet
 > werden können; verbindlich wird nur einer.
 >
-> Offen: der Bildschirm dazu. Das Inventar ist eine interne Sache
-> (`locations.manage`) und gehört wie die Firmenkunden in die App.
+> ~~Offen: der Bildschirm dazu.~~ **Nachgeholt am 27.08.2026:**
+> „Werbeflächen" unter Vorgänge & Prozesse, sichtbar mit `locations.manage`.
+> Inventar zum Stichtag, Auslastung, Werbeumsatz je Automat, Fläche anlegen
+> und ändern, Vertrag anlegen und ändern, Motivfreigabe, Vertragsstatus.
+>
+> Der Durchlauf ist am laufenden System nachgestellt, mit der Kennung des
+> Gesellschafters und über dieselben Funktionen, die die App ruft: Fläche
+> angelegt, Vertrag angelegt, Aktivierung ohne Motivfreigabe abgewiesen
+> (`werbevertrag_aktiv_nur_mit_freigabe`), nach der Freigabe angenommen,
+> überschneidender **Entwurf** zulässig, derselbe Entwurf verbindlich
+> gemacht abgewiesen (23P01). Testdaten anschliessend entfernt; die
+> Übersicht steht wieder bei 0 Flächen.
+>
+> Beide Abweisungen erklärt die Oberfläche in ganzen Sätzen statt den
+> Fehlercode zu zeigen — ein „23P01" sagt niemandem, dass die Fläche in
+> diesem Zeitraum schon vermietet ist.
 
 **Schritt 6 — Sponsoring und Vereinsbeteiligung**
 `businesses` mit Typ Sponsor/Verein, Pakete, Laufzeiten, Umsatzbeteiligung je
