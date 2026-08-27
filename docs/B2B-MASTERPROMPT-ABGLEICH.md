@@ -1,6 +1,6 @@
 # Masterprompt „Bördesnack24 Business" — Abgleich mit dem Bestand
 
-**Stand: 27.08.2026 · Fassung 4**
+**Stand: 27.08.2026 · Fassung 5**
 
 Der Auftraggeber hat einen Masterprompt für ein B2B-Ökosystem vorgelegt
 (Business, Advertising, Werbeflächen, Sponsoring) und gefragt, ob er der
@@ -303,6 +303,26 @@ am Firmenautomaten (offener Punkt 3) wird hier fällig.
 > jede Firma gesperrt. Nachgeholt mit `business_update` und einem Abschnitt
 > „Stammdaten" im Firmenkunden-Bildschirm, der die Lücke benennt, bevor
 > jemand auf „Anfordern" drückt.
+>
+> **Durchgespielt am 27.08.2026** an der vom Auftraggeber angelegten
+> Muster GmbH, jeder Schritt über dieselben Funktionen, die die App ruft,
+> und jeder Lauf am Ende zurückgerollt: einladen → annehmen → Budget →
+> Standort zuordnen → Kauf am Automaten → Aufstellung → Rechnung anfordern →
+> freigeben. Der Kauf wurde ohne Firmenangabe angelegt und von der Datenbank
+> korrekt der Firma zugeordnet; die Aufteilung 50 % Zuschuss mit 5 €
+> Tagesdeckel ergab 5,24 € Arbeitgeber zu 5,23 € Mitarbeiter von 10,47 € und
+> stimmte mit der Rechnung von Hand überein. Abgewiesen wurden, wie
+> vorgesehen: Anfordern ohne sevDesk-Kontakt, Anfordern für einen laufenden
+> Monat, ein zweiter Lauf für denselben Monat, Freigabe vor der Übertragung
+> und Freigabe durch ein Firmenmitglied.
+>
+> Zwei Dinge waren dabei kaputt und sind es nicht mehr:
+>
+> * **Der Automatenpreis ist brutto** — `business_invoice_basis` nahm ihn als
+>   netto und schlug die Steuer oben drauf (0152). Derselbe Fehler steckte in
+>   der älteren Einzelrechnung `create_invoice_for_purchase`.
+> * **Es gab keinen Weg, einen Automaten der Firma zuzuordnen** (0153). Ohne
+>   ihn blieb jeder Kauf privat und die Abrechnung leer — ohne Fehlermeldung.
 >
 > Dabei ist aufgefallen, dass die Schreibregel auf `businesses` dem
 > Firmen-Administrator des Kunden die ganze Zeile öffnete — Zeilensicherheit

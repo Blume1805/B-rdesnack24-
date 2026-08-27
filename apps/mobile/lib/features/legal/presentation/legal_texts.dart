@@ -47,7 +47,7 @@ abstract final class LegalTexts {
   // die Einschränkung, dass ohne Abo zwar gesammelt, aber kein Gutschein
   // vergeben wird — sonst weckt ein voller Fortschrittsbalken eine
   // Erwartung, die die Datenbank nicht einlöst.
-  static const version = 'v17 · 2026-08';
+  static const version = 'v18 · 2026-08';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -301,9 +301,11 @@ Abschnitt 3. Wir halten das für ehrlicher als eine lange Liste von Klauseln auf
 
      * Der Kauf geht **auf Rechnung Ihres Arbeitgebers**, nicht auf Ihre.
      * **Ihr Arbeitgeber erfährt von diesem Kauf.** Übermittelt werden
-       Zeitpunkt, Betrag, Automat, die gekauften Artikel und **Ihr Name**.
-       Der Name gehört dazu, weil Ihr Arbeitgeber die Abrechnung sonst
-       niemandem zuordnen und Ihnen kein eigenes Budget einräumen könnte.
+       Zeitpunkt, Betrag, Automat, die gekauften Artikel und **Ihr Name** —
+       und wenn in Ihrem Konto kein Name hinterlegt ist, stattdessen die
+       E-Mail-Adresse, unter der Sie eingeladen wurden. Eine Zuordnung
+       gehört dazu, weil Ihr Arbeitgeber die Abrechnung sonst niemandem
+       zuordnen und Ihnen kein eigenes Budget einräumen könnte.
        Einsehen können das die Personen, die Ihr Arbeitgeber bei uns als
        Firmen-Administrator benannt hat.
      * **Ihr Arbeitgeber kann ein Budget festlegen** — einen Betrag je Monat

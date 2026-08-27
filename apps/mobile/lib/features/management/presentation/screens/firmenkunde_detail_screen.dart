@@ -38,6 +38,7 @@ class _FirmenkundeDetailScreenState
     extends ConsumerState<FirmenkundeDetailScreen> {
   Map<String, dynamic>? _daten;
   Map<String, dynamic>? _stamm;
+  List<Map<String, dynamic>> _standorte = const [];
   List<Map<String, dynamic>> _rechnungen = const [];
   bool _laedt = false;
   bool _uebertraegt = false;
@@ -84,6 +85,11 @@ class _FirmenkundeDetailScreenState
           .eq('id', widget.firmaId)
           .maybeSingle();
       _stamm = stamm == null ? null : Map<String, dynamic>.from(stamm);
+      final orte = await client.rpc(
+        'business_locations_list',
+        params: {'p_business': widget.firmaId},
+      );
+      _standorte = (orte as List).cast<Map<String, dynamic>>();
     } catch (e) {
       _fehler = e.toString();
       _daten = null;
@@ -155,6 +161,27 @@ class _FirmenkundeDetailScreenState
               ),
               _StammdatenKarte(stamm: _stamm),
               const SizedBox(height: AppSpacing.s5),
+              _Abschnitt(
+                'Standorte',
+                aktion: TextButton.icon(
+                  onPressed: _standortWaehlen,
+                  icon: const Icon(Icons.add_location_alt_outlined, size: 18),
+                  label: const Text('Zuordnen'),
+                ),
+              ),
+              _StandortErklaerung(
+                zugeordnet: _zugeordneteStandorte.length,
+                automaten: _zugeordneteStandorte.fold<int>(
+                  0,
+                  (n, o) => n + ((o['automaten'] as num?)?.toInt() ?? 0),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              for (final o in _zugeordneteStandorte) ...[
+                _StandortKarte(standort: o, onLoesen: () => _standortLoesen(o)),
+                const SizedBox(height: AppSpacing.s2),
+              ],
+              const SizedBox(height: AppSpacing.s3),
               _Abschnitt(
                 'Mitglieder',
                 aktion: TextButton.icon(
@@ -249,6 +276,81 @@ class _FirmenkundeDetailScreenState
       if (leer('billing_city')) 'Ort',
       if (leer('sevdesk_contact_id')) 'sevDesk-Kontaktnummer',
     ];
+  }
+
+  List<Map<String, dynamic>> get _zugeordneteStandorte =>
+      _standorte.where((o) => o['zugeordnet'] == true).toList();
+
+  /// Ohne Firmenstandort entsteht am Automaten kein Firmenkauf.
+  ///
+  /// Die Datenbank leitet die Firma aus dem Standort her (0122/0123):
+  /// Firmengelände + Zuordnung + aktive Mitgliedschaft. Fehlt die Zuordnung,
+  /// bleibt jeder Kauf privat — und die Abrechnung bleibt leer, ohne dass
+  /// eine Fehlermeldung erschiene.
+  Future<void> _standortWaehlen() async {
+    final frei = _standorte.where((o) => o['zugeordnet'] != true).toList();
+    if (frei.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Alle Standorte sind dieser Firma bereits zugeordnet.'),
+        ),
+      );
+      return;
+    }
+    final wahl = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surfaceCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _StandortWahl(standorte: frei),
+    );
+    if (wahl == null || !mounted) return;
+    await _rufe(
+      'business_location_set',
+      {
+        'p_business': widget.firmaId,
+        'p_location': wahl,
+        'p_zuordnen': true,
+      },
+      'Standort zugeordnet',
+    );
+  }
+
+  Future<void> _standortLoesen(Map<String, dynamic> ort) async {
+    final ja = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: const Text('Zuordnung lösen'),
+        content: Text(
+          'Käufe an den Automaten von „${ort['name']}" gehen danach wieder '
+          'auf die private Rechnung der kaufenden Person. Bereits '
+          'abgerechnete Käufe bleiben, wie sie sind.\n\n'
+          'Der Standort bleibt als Firmengelände gekennzeichnet — dass dort '
+          'ein Betrieb sitzt, ändert sich durch das Vertragsende nicht.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(d, true),
+            child: const Text('Lösen'),
+          ),
+        ],
+      ),
+    );
+    if (ja != true || !mounted) return;
+    await _rufe(
+      'business_location_set',
+      {
+        'p_business': widget.firmaId,
+        'p_location': ort['id'],
+        'p_zuordnen': false,
+      },
+      'Zuordnung gelöst',
+    );
   }
 
   Future<void> _stammdatenAendern() async {
@@ -1215,6 +1317,199 @@ class _BudgetDialogState extends State<_BudgetDialog> {
 ///
 /// Ohne diesen Satz wirkt der Ausdruck aus der App wie eine Rechnung, und
 /// genau das ist er nicht: Er ist der Nachweis, der ihr beiliegt.
+/// Sagt in einem Satz, warum dieser Abschnitt über allem anderen steht.
+///
+/// Ohne zugeordneten Standort bleibt jeder Kauf privat, die Abrechnung leer
+/// und das Anfordern einer Rechnung sinnlos — und nichts davon erzeugt eine
+/// Fehlermeldung. Ein leerer Bildschirm, der nicht sagt, was fehlt, kostet
+/// mehr Zeit als ein Satz, der es sagt.
+class _StandortErklaerung extends StatelessWidget {
+  const _StandortErklaerung({
+    required this.zugeordnet,
+    required this.automaten,
+  });
+
+  final int zugeordnet;
+  final int automaten;
+
+  @override
+  Widget build(BuildContext context) {
+    final (farbe, text) = switch ((zugeordnet, automaten)) {
+      (0, _) => (
+          AppColors.statusWarning,
+          'Noch kein Standort zugeordnet. Solange keiner zugeordnet ist, '
+              'gehen Käufe der Beschäftigten auf ihre private Rechnung — die '
+              'Abrechnung dieser Firma bleibt leer.',
+        ),
+      (_, 0) => (
+          AppColors.statusWarning,
+          'Zugeordnet, aber an diesem Standort steht kein Automat. Damit '
+              'kann kein Firmenkauf entstehen.',
+        ),
+      _ => (
+          AppColors.statusPositive,
+          // „an 1 Automaten", „an 3 Automaten" — im Dativ gleich.
+          'Käufe der Mitglieder an $automaten Automaten auf diesem Gelände '
+              'gehen auf die Rechnung der Firma.',
+        ),
+    };
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s3),
+      decoration: BoxDecoration(
+        color: farbe.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: farbe.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            zugeordnet == 0 || automaten == 0
+                ? Icons.info_outline
+                : Icons.check_circle_outline,
+            size: 18,
+            color: farbe,
+          ),
+          const SizedBox(width: AppSpacing.s2),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTypography.body(size: 12, color: AppColors.ink),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StandortKarte extends StatelessWidget {
+  const _StandortKarte({required this.standort, required this.onLoesen});
+
+  final Map<String, dynamic> standort;
+  final VoidCallback onLoesen;
+
+  @override
+  Widget build(BuildContext context) {
+    final automaten = (standort['automaten'] as num?)?.toInt() ?? 0;
+    return AppCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${standort['name']}',
+                  style: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  [
+                    if ('${standort['ort'] ?? ''}'.trim().isNotEmpty)
+                      '${standort['ort']}',
+                    '$automaten ${automaten == 1 ? 'Automat' : 'Automaten'}',
+                  ].join(' · '),
+                  style: AppTypography.body(
+                    size: 12,
+                    color: automaten == 0
+                        ? AppColors.statusWarning
+                        : AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Zuordnung lösen',
+            onPressed: onLoesen,
+            icon: const Icon(Icons.link_off, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StandortWahl extends StatelessWidget {
+  const _StandortWahl({required this.standorte});
+
+  final List<Map<String, dynamic>> standorte;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: AppSpacing.s4),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Standort zuordnen',
+                  style: AppTypography.body(
+                    size: 16,
+                    weight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s2),
+                Text(
+                  'Der Standort wird damit als Firmengelände gekennzeichnet. '
+                  'Ein Standort gehört zu einer Firma — ein bereits '
+                  'vergebener lässt sich nicht ein zweites Mal zuordnen.',
+                  style: AppTypography.body(
+                    size: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s2),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final o in standorte)
+                  ListTile(
+                    enabled: o['fremd'] != true,
+                    leading: Icon(
+                      o['fremd'] == true
+                          ? Icons.lock_outline
+                          : Icons.place_outlined,
+                      color: o['fremd'] == true
+                          ? AppColors.textMuted
+                          : AppColors.brand,
+                    ),
+                    title: Text('${o['name']}'),
+                    subtitle: Text(
+                      o['fremd'] == true
+                          ? 'Vergeben an ${o['fremde_firma']}'
+                          : '${o['automaten']} Automat(en)'
+                              '${'${o['ort'] ?? ''}'.trim().isEmpty ? '' : ' · ${o['ort']}'}',
+                    ),
+                    onTap: o['fremd'] == true
+                        ? null
+                        : () => Navigator.pop(context, '${o['id']}'),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+        ],
+      ),
+    );
+  }
+}
+
 /// Anschrift, Steuernummern und die Kennung, unter der sevDesk diese Firma
 /// führt.
 ///

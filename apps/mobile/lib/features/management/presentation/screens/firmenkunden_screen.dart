@@ -197,6 +197,18 @@ String firmenFehlertext(Object e) {
   if (s.contains('Unbekanntes Feld') || s.contains('Unbekannter Status')) {
     return 'Diese Angabe kennt die Datenbank nicht: $s';
   }
+  if (s.contains('bereits einem anderen Firmenkunden zugeordnet')) {
+    return 'Dieser Standort gehört schon zu einer anderen Firma. Ein Ort '
+        'gehört zu einem Betrieb — sonst wäre bei einem Kauf nicht '
+        'entscheidbar, wer ihn trägt.';
+  }
+  if (s.contains('Standort nicht gefunden')) {
+    return 'Diesen Standort gibt es nicht (mehr). Bitte neu laden.';
+  }
+  if (s.contains('Keine Berechtigung, Firmenstandorte zu ändern')) {
+    return 'Standorte ordnet nur die Verwaltung zu (Berechtigung '
+        '„businesses.manage").';
+  }
   if (s.contains('kein sevDesk-Kontakt hinterlegt')) {
     return 'Für diese Firma fehlt die sevDesk-Kontaktnummer. Trage sie unter '
         'Stammdaten ein — ohne sie lässt sich dort keine Rechnung '

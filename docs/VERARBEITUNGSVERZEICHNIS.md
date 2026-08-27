@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 27.08.2026 · Fassung 13**
+**Stand: 27.08.2026 · Fassung 14**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -509,6 +509,13 @@ gibt.
 **Trennung der Firmenkunden.** Tabellen mit `business_id` prüfen die
 Mitgliedschaft über `app.is_business_member`; ein Wächter im Bauablauf
 (`check_mandantentrennung.py`) blockiert eine neue Tabelle ohne diese Prüfung.
+
+**Zuordnung eines Standortes zu einer Firma.** Ein Ort gehört zu höchstens
+einem Firmenkunden (`business_location_set`, 0153). Das ist keine
+Bequemlichkeit, sondern Datenschutz: Wären zwei Betriebe an einem Ort
+zugeordnet und jemand in beiden Mitglied, liesse sich nicht entscheiden, wem
+sein Einkauf zu melden ist. Die Herleitung bräche in diesem Fall ab (0123);
+die Zuordnung wird deshalb schon vorher abgewiesen.
 
 **Stammdaten der Firmenkunden.** Row-Level-Security wirkt je Zeile, nicht je
 Spalte. Die Schreibregel auf `public.businesses` liess deshalb dem
