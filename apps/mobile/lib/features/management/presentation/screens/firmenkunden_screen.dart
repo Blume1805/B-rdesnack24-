@@ -133,20 +133,24 @@ class _FirmenkundenScreenState extends ConsumerState<FirmenkundenScreen> {
   }
 
   Future<void> _anlegen() async {
-    final werte = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surfaceCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _FirmaFormular(),
-    );
+    final werte = await firmaFormularOeffnen(context);
     if (werte == null || !mounted) return;
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('business_create', params: werte);
+      await client.rpc(
+        'business_create',
+        params: {
+          'p_name': werte['name'],
+          'p_legal_form': werte['legal_form'],
+          'p_billing_street': werte['billing_street'],
+          'p_billing_zip': werte['billing_zip'],
+          'p_billing_city': werte['billing_city'],
+          'p_billing_email': werte['billing_email'],
+          'p_tax_number': werte['tax_number'],
+          'p_vat_id': werte['vat_id'],
+        },
+      );
       await _laden();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,6 +188,23 @@ String firmenFehlertext(Object e) {
   }
   if (s.contains('Firmenname fehlt')) {
     return 'Der Firmenname braucht mindestens zwei Zeichen.';
+  }
+  if (s.contains('Keine Berechtigung, Firmenkunden zu ändern') ||
+      s.contains('ändert nur Bördesnack24')) {
+    return 'Stammdaten eines Firmenkunden ändert nur die Verwaltung '
+        '(Berechtigung „businesses.manage").';
+  }
+  if (s.contains('Unbekanntes Feld') || s.contains('Unbekannter Status')) {
+    return 'Diese Angabe kennt die Datenbank nicht: $s';
+  }
+  if (s.contains('kein sevDesk-Kontakt hinterlegt')) {
+    return 'Für diese Firma fehlt die sevDesk-Kontaktnummer. Trage sie unter '
+        'Stammdaten ein — ohne sie lässt sich dort keine Rechnung '
+        'adressieren.';
+  }
+  if (s.contains('Rechnungsanschrift des Firmenkunden ist unvollständig')) {
+    return 'Die Rechnungsanschrift ist unvollständig (Straße, PLZ, Ort). '
+        'Ohne sie entsteht keine ordnungsgemäße Rechnung nach § 14 UStG.';
   }
   if (s.contains('42501') || s.contains('row-level security')) {
     return 'Dafür fehlt die Berechtigung.';
@@ -239,8 +260,7 @@ class _FirmenKarte extends StatelessWidget {
             ),
             if (status != 'active')
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.textMuted.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
@@ -336,50 +356,101 @@ class _Hinweis extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Formular zum Anlegen
+// Formular zum Anlegen und Ändern
 // ═══════════════════════════════════════════════════════════════════════════
 
+/// Öffnet das Stammdatenformular.
+///
+/// Ohne `vorgabe` legt es an, mit `vorgabe` ändert es. Zurück kommen in
+/// beiden Fällen Spaltennamen (`name`, `billing_city`, …) — beim Ändern nur
+/// die Felder, die der Benutzer wirklich angefasst hat. Das passt zu
+/// `business_update`: Was nicht mitkommt, bleibt stehen; ein mitgeschicktes
+/// `null` leert das Feld.
+Future<Map<String, dynamic>?> firmaFormularOeffnen(
+  BuildContext context, {
+  Map<String, dynamic>? vorgabe,
+}) {
+  return showModalBottomSheet<Map<String, dynamic>>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surfaceCard,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => _FirmaFormular(vorgabe: vorgabe),
+  );
+}
+
 class _FirmaFormular extends StatefulWidget {
-  const _FirmaFormular();
+  const _FirmaFormular({this.vorgabe});
+
+  final Map<String, dynamic>? vorgabe;
 
   @override
   State<_FirmaFormular> createState() => _FirmaFormularState();
 }
 
 class _FirmaFormularState extends State<_FirmaFormular> {
-  final _name = TextEditingController();
-  final _rechtsform = TextEditingController();
-  final _strasse = TextEditingController();
-  final _plz = TextEditingController();
-  final _ort = TextEditingController();
-  final _mail = TextEditingController();
-  final _steuernummer = TextEditingController();
-  final _ustId = TextEditingController();
+  late final Map<String, TextEditingController> _felder = {
+    for (final spalte in const [
+      'name',
+      'legal_form',
+      'billing_street',
+      'billing_zip',
+      'billing_city',
+      'billing_email',
+      'tax_number',
+      'vat_id',
+      'sevdesk_contact_id',
+    ])
+      spalte: TextEditingController(
+        text: '${widget.vorgabe?[spalte] ?? ''}',
+      ),
+  };
+
+  bool get _aendern => widget.vorgabe != null;
+
+  TextEditingController _c(String spalte) => _felder[spalte]!;
 
   @override
   void dispose() {
-    for (final c in [
-      _name,
-      _rechtsform,
-      _strasse,
-      _plz,
-      _ort,
-      _mail,
-      _steuernummer,
-      _ustId,
-    ]) {
+    for (final c in _felder.values) {
       c.dispose();
     }
     super.dispose();
   }
 
-  String? _leer(TextEditingController c) =>
-      c.text.trim().isEmpty ? null : c.text.trim();
+  String? _wert(String spalte) {
+    final t = _c(spalte).text.trim();
+    return t.isEmpty ? null : t;
+  }
+
+  /// Beim Anlegen alles, beim Ändern nur das Geänderte.
+  ///
+  /// Der Unterschied ist nicht Kosmetik: `business_update` fasst nur die
+  /// übergebenen Schlüssel an. Wer nur die sevDesk-Nummer einträgt, soll
+  /// nicht nebenbei die Anschrift neu schreiben — und ein Feld, das ein
+  /// späterer Bildschirm gar nicht kennt, bleibt unangetastet.
+  Map<String, dynamic> _ergebnis() {
+    final werte = <String, dynamic>{};
+    for (final spalte in _felder.keys) {
+      final neu = _wert(spalte);
+      if (!_aendern) {
+        if (spalte == 'sevdesk_contact_id') continue;
+        werte[spalte] = neu;
+        continue;
+      }
+      final alt = '${widget.vorgabe?[spalte] ?? ''}'.trim();
+      if (neu != (alt.isEmpty ? null : alt)) werte[spalte] = neu;
+    }
+    return werte;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.85,
@@ -405,7 +476,7 @@ class _FirmaFormularState extends State<_FirmaFormular> {
             ),
             const SizedBox(height: AppSpacing.s4),
             Text(
-              'Firma anlegen',
+              _aendern ? 'Stammdaten ändern' : 'Firma anlegen',
               style: AppTypography.body(
                 size: 18,
                 weight: FontWeight.w700,
@@ -414,14 +485,18 @@ class _FirmaFormularState extends State<_FirmaFormular> {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Die Rechnungsangaben brauchst Du erst zur ersten Abrechnung — '
-              'Du kannst sie später ergänzen.',
+              _aendern
+                  ? 'Diese Angaben stehen auf der Rechnung. Geändert wird '
+                      'nur, was Du hier anfasst.'
+                  : 'Die Rechnungsangaben brauchst Du erst zur ersten '
+                      'Abrechnung — Du kannst sie später ergänzen.',
               style: AppTypography.body(size: 12, color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.s4),
             TextField(
-              controller: _name,
-              autofocus: true,
+              key: const ValueKey('feld_name'),
+              controller: _c('name'),
+              autofocus: !_aendern,
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Firmenname',
@@ -429,14 +504,16 @@ class _FirmaFormularState extends State<_FirmaFormular> {
               ),
             ),
             TextField(
-              controller: _rechtsform,
+              key: const ValueKey('feld_legal_form'),
+              controller: _c('legal_form'),
               decoration: const InputDecoration(
                 labelText: 'Rechtsform (freiwillig)',
                 hintText: 'GmbH',
               ),
             ),
             TextField(
-              controller: _strasse,
+              key: const ValueKey('feld_billing_street'),
+              controller: _c('billing_street'),
               decoration:
                   const InputDecoration(labelText: 'Straße und Hausnummer'),
             ),
@@ -445,7 +522,8 @@ class _FirmaFormularState extends State<_FirmaFormular> {
                 SizedBox(
                   width: 110,
                   child: TextField(
-                    controller: _plz,
+                    key: const ValueKey('feld_billing_zip'),
+                    controller: _c('billing_zip'),
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'PLZ'),
                   ),
@@ -453,7 +531,8 @@ class _FirmaFormularState extends State<_FirmaFormular> {
                 const SizedBox(width: AppSpacing.s3),
                 Expanded(
                   child: TextField(
-                    controller: _ort,
+                    key: const ValueKey('feld_billing_city'),
+                    controller: _c('billing_city'),
                     textCapitalization: TextCapitalization.words,
                     decoration: const InputDecoration(labelText: 'Ort'),
                   ),
@@ -461,20 +540,52 @@ class _FirmaFormularState extends State<_FirmaFormular> {
               ],
             ),
             TextField(
-              controller: _mail,
+              key: const ValueKey('feld_billing_email'),
+              controller: _c('billing_email'),
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 labelText: 'Rechnungs-E-Mail',
               ),
             ),
             TextField(
-              controller: _steuernummer,
+              key: const ValueKey('feld_tax_number'),
+              controller: _c('tax_number'),
               decoration: const InputDecoration(labelText: 'Steuernummer'),
             ),
             TextField(
-              controller: _ustId,
+              key: const ValueKey('feld_vat_id'),
+              controller: _c('vat_id'),
               decoration: const InputDecoration(labelText: 'USt-IdNr.'),
             ),
+            if (_aendern) ...[
+              const SizedBox(height: AppSpacing.s4),
+              Text(
+                'sevDesk',
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
+              ),
+              TextField(
+                key: const ValueKey('feld_sevdesk_contact_id'),
+                controller: _c('sevdesk_contact_id'),
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Kontaktnummer in sevDesk',
+                  hintText: 'z. B. 1000123',
+                ),
+              ),
+              const SizedBox(height: AppSpacing.s2),
+              Text(
+                'Die Nummer des Kontakts, den sevDesk für diese Firma führt. '
+                'Ohne sie lässt sich dort keine Rechnung adressieren — das '
+                'Anfordern bricht vorher ab, statt eine zweite Kundenakte zu '
+                'erzeugen. Zu finden in sevDesk unter Kontakte in der '
+                'Adresszeile des Browsers.',
+                style: AppTypography.body(size: 11, color: AppColors.textMuted),
+              ),
+            ],
             const SizedBox(height: AppSpacing.s5),
             Row(
               children: [
@@ -486,7 +597,7 @@ class _FirmaFormularState extends State<_FirmaFormular> {
                 const SizedBox(width: AppSpacing.s2),
                 FilledButton(
                   onPressed: () {
-                    if (_name.text.trim().length < 2) {
+                    if (_c('name').text.trim().length < 2) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -496,18 +607,14 @@ class _FirmaFormularState extends State<_FirmaFormular> {
                       );
                       return;
                     }
-                    Navigator.pop(context, {
-                      'p_name': _name.text.trim(),
-                      'p_legal_form': _leer(_rechtsform),
-                      'p_billing_street': _leer(_strasse),
-                      'p_billing_zip': _leer(_plz),
-                      'p_billing_city': _leer(_ort),
-                      'p_billing_email': _leer(_mail),
-                      'p_tax_number': _leer(_steuernummer),
-                      'p_vat_id': _leer(_ustId),
-                    });
+                    final werte = _ergebnis();
+                    if (_aendern && werte.isEmpty) {
+                      Navigator.pop(context);
+                      return;
+                    }
+                    Navigator.pop(context, werte);
                   },
-                  child: const Text('Anlegen'),
+                  child: Text(_aendern ? 'Speichern' : 'Anlegen'),
                 ),
               ],
             ),

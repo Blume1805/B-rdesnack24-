@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 26.08.2026 · Fassung 12**
+**Stand: 27.08.2026 · Fassung 13**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -509,6 +509,20 @@ gibt.
 **Trennung der Firmenkunden.** Tabellen mit `business_id` prüfen die
 Mitgliedschaft über `app.is_business_member`; ein Wächter im Bauablauf
 (`check_mandantentrennung.py`) blockiert eine neue Tabelle ohne diese Prüfung.
+
+**Stammdaten der Firmenkunden.** Row-Level-Security wirkt je Zeile, nicht je
+Spalte. Die Schreibregel auf `public.businesses` liess deshalb dem
+Firmen-Administrator des Kunden die ganze Zeile offen — einschliesslich
+`sevdesk_contact_id`, an der die Rechnungsstellung hängt (V17). Am 27.08.2026
+nachgestellt und mit Migration 0151 geschlossen: Ein Trigger lässt eine
+Änderung nur zu, wenn der Aufrufer `businesses.manage` hat oder ohne
+Nutzerkontext arbeitet (Wartung, Dienstschlüssel); der einzige Weg für die
+Verwaltung ist `public.business_update`. **Kein Vorfall nach Art. 33:** Zum
+Zeitpunkt der Entdeckung standen 0 Firmenkunden, 0 Firmenmitglieder,
+0 Einladungen und 0 Rechnungsläufe in der Datenbank — abgefragt, nicht
+geschätzt; sämtliche 16 Einträge in `audit_log` zu dieser Tabelle stammen aus
+den eigenen Prüfläufen vom 26./27.08.2026. Es gab niemanden, der die Lücke
+hätte nutzen können, und keine personenbezogenen Daten, die sie berührt hätte.
 
 **Geheimnisse.** Sämtliche Zugangsdaten zu Fremdsystemen liegen serverseitig
 als Edge-Function-Secrets. Im ausgelieferten Bundle stehen nur Supabase-URL

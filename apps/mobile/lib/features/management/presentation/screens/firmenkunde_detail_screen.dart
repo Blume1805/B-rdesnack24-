@@ -37,6 +37,7 @@ const _ustIdNr = 'DE 458804058';
 class _FirmenkundeDetailScreenState
     extends ConsumerState<FirmenkundeDetailScreen> {
   Map<String, dynamic>? _daten;
+  Map<String, dynamic>? _stamm;
   List<Map<String, dynamic>> _rechnungen = const [];
   bool _laedt = false;
   bool _uebertraegt = false;
@@ -71,6 +72,18 @@ class _FirmenkundeDetailScreenState
         params: {'p_business': widget.firmaId},
       );
       _rechnungen = (laeufe as List).cast<Map<String, dynamic>>();
+      // Die Stammdaten direkt aus der Tabelle: Das Dashboard rechnet, es
+      // führt keine Anschrift. Geschrieben wird sie ausschliesslich über
+      // `business_update` — seit 0151 lässt die Datenbank nichts anderes zu.
+      final stamm = await client
+          .from('businesses')
+          .select(
+            'name, legal_form, billing_street, billing_zip, billing_city, '
+            'billing_email, tax_number, vat_id, sevdesk_contact_id, status',
+          )
+          .eq('id', widget.firmaId)
+          .maybeSingle();
+      _stamm = stamm == null ? null : Map<String, dynamic>.from(stamm);
     } catch (e) {
       _fehler = e.toString();
       _daten = null;
@@ -133,6 +146,16 @@ class _FirmenkundeDetailScreenState
               _Kennzahlen(werte: _kennzahlen),
               const SizedBox(height: AppSpacing.s5),
               _Abschnitt(
+                'Stammdaten',
+                aktion: TextButton.icon(
+                  onPressed: _stammdatenAendern,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Ändern'),
+                ),
+              ),
+              _StammdatenKarte(stamm: _stamm),
+              const SizedBox(height: AppSpacing.s5),
+              _Abschnitt(
                 'Mitglieder',
                 aktion: TextButton.icon(
                   onPressed: _einladen,
@@ -181,6 +204,13 @@ class _FirmenkundeDetailScreenState
                 ),
               ),
               const _RechnungsHinweis(),
+              if (_fehlendeRechnungsangaben.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.s2),
+                _FehlendeAngaben(
+                  felder: _fehlendeRechnungsangaben,
+                  onNachtragen: _stammdatenAendern,
+                ),
+              ],
               const SizedBox(height: AppSpacing.s2),
               if (_rechnungen.isEmpty)
                 const _Leerzeile(
@@ -201,6 +231,33 @@ class _FirmenkundeDetailScreenState
           ],
         ),
       ),
+    );
+  }
+
+  /// Was `business_invoice_request` verlangt und hier noch fehlt.
+  ///
+  /// Dieselben Bedingungen stehen in 0149 — die Datenbank bleibt die
+  /// Entscheidung. Diese Liste nimmt sie nur vorweg, damit die Lücke sichtbar
+  /// ist, bevor jemand auf „Anfordern" drückt und eine Fehlermeldung bekommt.
+  List<String> get _fehlendeRechnungsangaben {
+    final st = _stamm;
+    if (st == null) return const [];
+    bool leer(String k) => '${st[k] ?? ''}'.trim().isEmpty;
+    return [
+      if (leer('billing_street')) 'Straße',
+      if (leer('billing_zip')) 'PLZ',
+      if (leer('billing_city')) 'Ort',
+      if (leer('sevdesk_contact_id')) 'sevDesk-Kontaktnummer',
+    ];
+  }
+
+  Future<void> _stammdatenAendern() async {
+    final werte = await firmaFormularOeffnen(context, vorgabe: _stamm ?? {});
+    if (werte == null || werte.isEmpty || !mounted) return;
+    await _rufe(
+      'business_update',
+      {'p_business': widget.firmaId, 'p_werte': werte},
+      'Stammdaten gespeichert',
     );
   }
 
@@ -1158,6 +1215,150 @@ class _BudgetDialogState extends State<_BudgetDialog> {
 ///
 /// Ohne diesen Satz wirkt der Ausdruck aus der App wie eine Rechnung, und
 /// genau das ist er nicht: Er ist der Nachweis, der ihr beiliegt.
+/// Anschrift, Steuernummern und die Kennung, unter der sevDesk diese Firma
+/// führt.
+///
+/// Bewusst als ruhige Liste und nicht als Kachelreihe: Es sind Angaben zum
+/// Nachlesen, keine Kennzahlen. Fehlendes steht als „—" da, damit eine Lücke
+/// eine Zeile hat und nicht einfach verschwindet.
+class _StammdatenKarte extends StatelessWidget {
+  const _StammdatenKarte({required this.stamm});
+
+  final Map<String, dynamic>? stamm;
+
+  @override
+  Widget build(BuildContext context) {
+    final st = stamm;
+    if (st == null) {
+      return const _Leerzeile('Die Stammdaten liessen sich nicht laden.');
+    }
+    String w(String k) {
+      final v = '${st[k] ?? ''}'.trim();
+      return v.isEmpty ? '—' : v;
+    }
+
+    final anschrift = [
+      '${st['billing_street'] ?? ''}'.trim(),
+      [
+        '${st['billing_zip'] ?? ''}'.trim(),
+        '${st['billing_city'] ?? ''}'.trim(),
+      ].where((t) => t.isNotEmpty).join(' '),
+    ].where((t) => t.isNotEmpty).join(', ');
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _StammZeile('Name', w('name')),
+          if ('${st['legal_form'] ?? ''}'.trim().isNotEmpty)
+            _StammZeile('Rechtsform', w('legal_form')),
+          _StammZeile('Anschrift', anschrift.isEmpty ? '—' : anschrift),
+          _StammZeile('Rechnungs-E-Mail', w('billing_email')),
+          _StammZeile('Steuernummer', w('tax_number')),
+          _StammZeile('USt-IdNr.', w('vat_id')),
+          _StammZeile(
+            'sevDesk-Kontakt',
+            w('sevdesk_contact_id'),
+            warnen: '${st['sevdesk_contact_id'] ?? ''}'.trim().isEmpty,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StammZeile extends StatelessWidget {
+  const _StammZeile(this.titel, this.wert, {this.warnen = false});
+
+  final String titel;
+  final String wert;
+  final bool warnen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 132,
+            child: Text(
+              titel,
+              style: AppTypography.body(size: 12, color: AppColors.textMuted),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              wert,
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w600,
+                color: warnen ? AppColors.statusWarning : AppColors.ink,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Steht nur da, wenn wirklich etwas fehlt.
+///
+/// Ein Hinweis auf eine Lücke, die es nicht gibt, ist genauso falsch wie eine
+/// Lücke ohne Hinweis — deshalb baut die Liste sich aus dem geladenen Stand
+/// und nicht aus einer Vermutung.
+class _FehlendeAngaben extends StatelessWidget {
+  const _FehlendeAngaben({required this.felder, required this.onNachtragen});
+
+  final List<String> felder;
+  final VoidCallback onNachtragen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s3),
+      decoration: BoxDecoration(
+        color: AppColors.statusWarning.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border:
+            Border.all(color: AppColors.statusWarning.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.report_gmailerrorred_outlined,
+                size: 18,
+                color: AppColors.statusWarning,
+              ),
+              const SizedBox(width: AppSpacing.s2),
+              Expanded(
+                child: Text(
+                  'Anfordern ist gesperrt, solange das hier fehlt: '
+                  '${felder.join(', ')}.',
+                  style: AppTypography.body(size: 12, color: AppColors.ink),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onNachtragen,
+              child: const Text('Nachtragen'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RechnungsHinweis extends StatelessWidget {
   const _RechnungsHinweis();
 

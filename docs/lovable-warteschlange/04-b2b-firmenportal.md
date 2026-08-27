@@ -41,6 +41,13 @@ Alles am laufenden System nachgestellt, nicht aus dem Gedächtnis:
   nicht aus der Person. Ein Beschäftigter, der am öffentlichen Automaten
   kauft, kauft privat; sein Arbeitgeber erfährt davon nichts. Das darf die
   Oberfläche nirgends anders darstellen.
+* **Die Stammdaten der Firma gehören nicht ins Portal.** Name, Anschrift,
+  Steuernummern und die sevDesk-Kontaktnummer sind Vertragsdaten; geändert
+  werden sie bei uns, nicht vom Kunden. Seit Migration 0151 weist die
+  Datenbank jeden Schreibversuch auf `businesses` ab, der nicht aus der
+  Verwaltung kommt — auch den eines Firmen-Administrators. Zeige die Angaben
+  ruhig an; baue **kein** Formular dafür, es liefe in eine Fehlermeldung.
+  Eine Adressänderung meldet der Kunde uns, wir tragen sie ein.
 * **Das Budget ist kein Guthaben.** Es wird nichts aufgeladen. Es sagt nur,
   bis zu welchem Betrag der Arbeitgeber trägt. Vermeide jedes Wort, das nach
   Konto klingt — kein „Guthaben", kein „Aufladen", kein „Restbetrag auf der

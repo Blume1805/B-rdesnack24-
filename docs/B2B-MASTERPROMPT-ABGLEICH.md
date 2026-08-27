@@ -1,6 +1,6 @@
 # Masterprompt „Bördesnack24 Business" — Abgleich mit dem Bestand
 
-**Stand: 26.08.2026 · Fassung 3**
+**Stand: 27.08.2026 · Fassung 4**
 
 Der Auftraggeber hat einen Masterprompt für ein B2B-Ökosystem vorgelegt
 (Business, Advertising, Werbeflächen, Sponsoring) und gefragt, ob er der
@@ -297,6 +297,18 @@ am Firmenautomaten (offener Punkt 3) wird hier fällig.
 > Offen geblieben: die Einladungsmail. Die RPC gibt den Token zurück und
 > verschickt nichts; die Information nach Art. 14 DSGVO gehört in diese Mail
 > und ist vor dem ersten Versand nachzuholen.
+>
+> **Nachtrag vom 27.08.2026** (Migration 0151). Die sevDesk-Kontaktnummer aus
+> 0147 hatte kein Eingabefeld — das Anfordern einer Rechnung war damit für
+> jede Firma gesperrt. Nachgeholt mit `business_update` und einem Abschnitt
+> „Stammdaten" im Firmenkunden-Bildschirm, der die Lücke benennt, bevor
+> jemand auf „Anfordern" drückt.
+>
+> Dabei ist aufgefallen, dass die Schreibregel auf `businesses` dem
+> Firmen-Administrator des Kunden die ganze Zeile öffnete — Zeilensicherheit
+> wirkt je Zeile, nicht je Spalte. Nachgestellt: Er konnte die
+> sevDesk-Kontaktnummer seiner Firma auf den Kontakt einer anderen umbiegen.
+> Ein Trigger lässt Änderungen jetzt nur noch aus der Verwaltung zu.
 
 **Schritt 5 — Werbeflächen** (physisch)
 Reines Inventar: `advertising_spaces` je Automat, Verfügbarkeit, Preis,
