@@ -54,6 +54,14 @@ KEINE_MANDANTENPRUEFUNG: dict[str, str] = {
         "zu welchem Unternehmen er gehört. Sie ruft die Funktion trotzdem auf — "
         "steht hier nur, falls das je zerfällt."
     ),
+    "leads": (
+        "Rein internes Vertriebsprotokoll (0154). business_id verweist erst "
+        "auf das Unternehmen, sobald aus der Anfrage ein Vertrag wird — der "
+        "Werbekunde selbst darf diese Zeile nie sehen, sonst bekäme er "
+        "unser eigenes Vertriebsprotokoll über sich zu Gesicht. Die Regel "
+        "gibt deshalb ausschliesslich leads.manage frei, absichtlich ohne "
+        "is_business_member."
+    ),
 }
 
 # `create table … public.<name> ( … )` — Körper bis zur schliessenden Klammer

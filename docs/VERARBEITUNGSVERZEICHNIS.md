@@ -1,6 +1,6 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 Abs. 1 DSGVO)
 
-**Stand: 27.08.2026 · Fassung 14**
+**Stand: 27.08.2026 · Fassung 15**
 
 Dieses Verzeichnis ist bis heute nicht vorhanden gewesen. Es stand seit dem
 24.08.2026 als offener Punkt in `CLAUDE.md`, und die Datenschutzerklärung
@@ -459,6 +459,63 @@ nicht aufgeht, wird verweigert statt gestellt: fehlende Einzelposten,
 unbekannter Steuersatz oder eine Abweichung zwischen Postensumme und
 Kaufbetrag über zwei Cent brechen den Vorgang ab.
 
+### V18 — Anfragen zu Werbung, Sponsoring und Partnerschaft (Leads)
+
+| | |
+|---|---|
+| Zweck | Vertriebliche Bearbeitung von Anfragen regionaler Unternehmen zu Werbung, Werbeflächen, Sponsoring, Partnerschaft, Recruiting, Events |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. f (berechtigtes Interesse an der Geschäftsanbahnung im B2B-Bereich, Erwägungsgrund 47) |
+| Betroffene | Ansprechpersonen bei anfragenden Unternehmen — nicht das Unternehmen selbst |
+| Datenkategorien | `leads`: Firmenname, Ansprechperson, E-Mail, Telefon, Nachricht, Herkunft, Bearbeiterkennungen; `lead_activities`: Gesprächsnotizen |
+| Empfänger | S |
+| Drittland | nein |
+| Löschfrist | noch offen — siehe Abschnitt 5 |
+
+**Rein internes Vertriebsprotokoll.** Das angefragte Unternehmen sieht diese
+Zeile nie — die Zeilensicherheit gibt sie ausschliesslich frei, wer
+`leads.manage` hat (`check_mandantentrennung.py` führt die Tabelle
+ausdrücklich als begründete Ausnahme, weil eine Prüfung über die eigene
+Mitgliedschaft hier das Gegenteil von Schutz wäre: Sie würde dem
+Werbekunden unser eigenes Vertriebsprotokoll über sich selbst zeigen).
+
+**Noch kein öffentlicher Erfassungsweg.** Stand 27.08.2026 legt ausschliesslich
+internes Personal Anfragen an (`lead_create`, verlangt `leads.manage`); ein
+öffentliches Formular auf einer Landing Page existiert nicht. Sobald eines
+entsteht, wird hier die Informationspflicht nach Art. 13 fällig — vorher
+betrifft diese Tätigkeit nur Kontaktdaten, die uns ohnehin (telefonisch, per
+E-Mail) erreicht haben.
+
+### V19 — Werbekampagnen, Sponsoring und Coupon-Logoplatz
+
+| | |
+|---|---|
+| Zweck | Buchung von Werbeflächen-Kampagnen, Sponsoring von Standorten und Logoplätzen auf Coupon-Anlässen durch Werbekunden |
+| Rechtsgrundlage | Art. 6 Abs. 1 lit. b (Vertrag mit dem Werbekunden); für Prüfvermerke Art. 6 Abs. 1 lit. f |
+| Betroffene | Ansprechpersonen des Werbekunden über die Mitgliedschaft (siehe V15); Personen, die ein Werbemittel prüfen oder freigeben |
+| Datenkategorien | `advertising_campaigns` (Firma, Name, Laufzeit, Budget, Zielseite, Bearbeiterkennungen); `advertising_creatives` (Datei, Prüfstatus, **Name der prüfenden Person**); `sponsorships` (Firma, Standort, Betrag, Beteiligung); `advertising_coupon_sponsorships` (Kampagne, Anlass, Laufzeit) |
+| Empfänger | S |
+| Drittland | nein |
+| Löschfrist | 10 Jahre nach Vertragsende (§ 147 AO, § 257 HGB), analog V16 |
+
+**Der Bericht am Ende der Laufzeit bleibt ausserhalb dieser Tätigkeit.**
+`advertising_campaign_report` liest `personal_offers` und
+`offer_activations`, gibt aber ausschliesslich Anzahlen zurück — nie eine
+Kundenzeile, nie unter der Mindestzahl 30 (`ausgabe_unter_mindestzahl`).
+Es entsteht dadurch **kein neuer Personenbezug** gegenüber dem Werbekunden;
+die zugrunde liegenden Kaufzeilen sind bereits unter V4 erfasst und werden
+hier nicht ein zweites Mal personenbezogen verarbeitet.
+
+**Aufrufzähler ohne Personenbezug.** `advertising_redirect_counts` zählt
+Weiterleitungen über einen QR-Code oder Coupon-Link als eine Zeile je
+Kampagne und Tag — ohne IP-Adresse, Sitzung, Cookie oder sonstige Kennung.
+Diese Tabelle enthält deshalb von vornherein nichts Personenbezogenes, nicht
+weil etwas anonymisiert würde, sondern weil nie ein Ereignis mit
+Personenbezug entsteht.
+
+**Genau ein Partner je Coupon-Anlass gleichzeitig** erzwingt ein
+Datenbank-Ausschluss (`exclude using gist`), nicht die Oberfläche — dieselbe
+Mechanik wie die Doppelbelegung von Werbeflächen (V16).
+
 ### Nicht personenbezogen — der Vollständigkeit halber
 
 * **Automatentelemetrie** (`machine_telemetry_events`, `machine_health`,
@@ -531,6 +588,24 @@ geschätzt; sämtliche 16 Einträge in `audit_log` zu dieser Tabelle stammen aus
 den eigenen Prüfläufen vom 26./27.08.2026. Es gab niemanden, der die Lücke
 hätte nutzen können, und keine personenbezogenen Daten, die sie berührt hätte.
 
+**Eine gemeinsame Rollenfunktion, nicht nur einzelne Migrationen.**
+`public.is_admin()` lieferte für ein Konto ohne aktives Profil (gesperrt oder
+gelöscht, mit noch gültigem Zugangstoken) NULL statt `false` — und `NULL or
+false` ist wieder NULL, was `if not (is_admin() or …) then raise` in 23
+Migrationen unbemerkt umgangen hätte. Gefunden am 27.08.2026 beim
+Nachstellen der Zeilensicherheit für den Werbebericht, nicht durch
+`check_rollenpruefung.py` (der sucht Textmuster in einzelnen Migrationen,
+nicht die Zusammensetzung gemeinsam genutzter Funktionen). Geschlossen mit
+Migration 0156 (`coalesce(app_role(uid) = 'system_admin', false)`) und
+gegengeprüft über alle booleschen `security definer`-Funktionen in
+`public`/`app`, nicht nur `is_admin()` selbst. **Kein Vorfall nach Art. 33:**
+Die Voraussetzung — ein gesperrtes oder gelöschtes Konto mit noch gültigem
+Token — ist nie eingetreten; nachweisbar wäre das über `audit_log`, geprüft
+wurde es nicht gesondert, weil die Lücke innerhalb desselben Prüflaufs
+gefunden und geschlossen wurde, in dem sie entdeckt wurde. Ausführlich in
+CLAUDE.md, Abschnitt „Eine gemeinsame Rollenfunktion kann jede Prüfung stumm
+durchlassen".
+
 **Geheimnisse.** Sämtliche Zugangsdaten zu Fremdsystemen liegen serverseitig
 als Edge-Function-Secrets. Im ausgelieferten Bundle stehen nur Supabase-URL
 und der öffentliche `anon`-Schlüssel; der Schutz liegt vollständig in den
@@ -586,6 +661,13 @@ offen und gehören dem Verantwortlichen vorgelegt:
    Connectors ist noch nicht einmalig gegen das echte sevDesk-Konto geprüft.
 6. **Keine anwaltliche Freigabe.** Dieses Verzeichnis beschreibt die Technik
    belastbar; es ersetzt keine Rechtsberatung.
+7. **Löschfrist für `leads`/`lead_activities` (V18) ist noch nicht
+   festgelegt.** Eine abgelehnte oder verlaufene Anfrage hat kein
+   gesetzliches Aufbewahrungserfordernis wie eine Rechnung; ohne eigene Frist
+   gilt implizit „unbegrenzt", und das ist gegenüber der Ansprechperson nicht
+   zu rechtfertigen. Vorschlag: 24 Monate nach dem letzten Kontakt (Stand
+   `lost` oder `won`, danach greift für gewonnene Leads die Löschfrist des
+   entstandenen Vertrags in V19), noch nicht umgesetzt.
 
 ---
 

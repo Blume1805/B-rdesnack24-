@@ -347,3 +347,46 @@ diese Rollen überhaupt. Diese Zahlen werden abgefragt, nicht geschätzt.
   und ist **vor dem ersten echten Verkauf** darauf zu prüfen, ob Nayax
   Personenbezogenes mitsendet; kein Wiederherstellungstest der Sicherungen;
   die sevDesk-Verifikationspflicht; keine anwaltliche Freigabe.
+
+## Eine gemeinsame Rollenfunktion kann jede Prüfung stumm durchlassen (Pflicht, ohne Nachfrage)
+
+Migration 0079 und 0095/0096 haben die NULL-Falle in **einzelnen**
+Rollenprüfungen behoben (`role not in (...)` lässt ein Konto ohne Profilzeile
+durch, weil der Vergleich mit NULL wieder NULL ist, nicht `false`).
+`check_rollenpruefung.py` sucht seither genau dieses Textmuster in jeder
+Migration ab 0096.
+
+Am 27.08.2026 zeigte sich beim Nachstellen der Zeilensicherheit für den
+Werbebericht (`advertising_campaign_report`, 0155) dieselbe Fehlerklasse an
+einer Stelle, die dieser Wächter **nicht sieht**: nicht im Text einer neuen
+Migration, sondern in der gemeinsam genutzten Funktion `public.is_admin()`
+selbst, definiert schon in Migration 0002. `app_role(uid)` liefert für ein
+Konto ohne aktives Profil (gesperrt, gelöscht — nicht „gibt es nicht") NULL
+statt einer Rolle; `NULL = 'system_admin'` ist wieder NULL. Für sich allein
+harmlos — aber `is_admin()` steht praktisch nie allein. Das Muster
+`if not (public.is_admin() or <etwas anderes>) then raise exception … end
+if;` steht in 23 Migrationen. Ist `<etwas anderes>` für die aufrufende
+Person `false` (der Normalfall für jeden ohne die gefragte Rolle) und
+`is_admin()` NULL, ergibt `false or NULL` wieder NULL, `not NULL` ist NULL,
+und `if NULL then` nimmt in PL/pgSQL den Zweig **nicht** — die Ausnahme
+bleibt aus. `public.is_shareholder()` erbte denselben Fehler, weil sie mit
+`… or public.is_admin(uid)` endet.
+
+Betroffen wäre eine Person mit einem noch gültigen Zugangstoken, deren
+`profiles`-Zeile inzwischen gesperrt oder gelöscht ist — zwischen der
+Sperrung und dem Ablauf des Tokens hätte sie auf jede Funktion zugegriffen,
+die ihre Berechtigung über `is_admin()`/`is_shareholder()` **und** ein
+weiteres, für sie falsches Merkmal prüft, unabhängig davon, ob sie je eine
+Berechtigung hatte. Gefunden nicht durch Lesen, sondern durch Nachstellen
+mit einer echten, aber inaktiven Kennung — Migration 0156 (`coalesce(...,
+false)`) schliesst es an der einen Stelle, an der `app_role()` verglichen
+wird; danach mit derselben Kennung und einer Gegenprobe über alle
+booleschen `security definer`-Funktionen in `public`/`app` erneut geprüft.
+
+**Was daraus folgt:** „Nachstellen mit echten Identitäten" (siehe
+„Behauptungen vorher prüfen") heisst nicht nur, den Fall zu prüfen, den man
+gerade baut, sondern auch den Fall einer Kennung, die es *fast* gibt — ein
+gesperrtes oder gelöschtes Konto, nicht nur ein völlig fremdes. Ein
+Textmuster-Wächter wie `check_rollenpruefung.py` findet nur, was er
+kennengelernt hat; eine Komposition aus zwei für sich genommen unauffälligen
+Funktionen findet er nicht. Das ersetzt das Nachstellen nicht, es ergänzt es.

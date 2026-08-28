@@ -1,6 +1,6 @@
 # Werbenetzwerk: Abgleich des Masterprompts mit dem Bestand
 
-**Stand: 27.08.2026 · Fassung 4 · Schritte 1 bis 15, noch keine Zeile Code**
+**Stand: 27.08.2026 · Fassung 5 · Schritt 16, Datenmodell umgesetzt**
 
 Der Auftrag vom 27.08.2026 beschreibt ein regionales Medien- und Handelsnetzwerk
 in 62 Punkten. Dieses Dokument hält fest, was davon schon steht, was fehlt, was
@@ -263,10 +263,81 @@ kostet sie jede bestehende Beziehung.
 * Jede neue Auswahllogik löst Eintrag im KI-Register, Kennzeichnung in der App
   und eine Ergänzung der Datenschutzerklärung aus.
 
-## Offen, wartet auf Entscheidung
+## Antworten vom 27.08.2026
 
-1. Die Preisliste, gemessen an Deiner Kenntnis der regionalen Betriebe.
-2. Die Pionierklausel: 24 Monate Preisbindung gegen Referenznennung.
-3. Die vier gestrichenen Punkte.
-4. **Die Standortnamen.** Alle vier heißen „(ANPASSEN)". Ohne echte Namen lässt
-   sich keine Werbefläche verkaufen, weil niemand weiß, wo sie hängt.
+3. **Bestätigt: Display, Regional Takeover, Marktplatz, Gewinnspiele
+   entfallen.** Nicht gebaut, nicht in der Roadmap.
+4. **Standortnamen werden nachgetragen** — vom Auftraggeber, nicht von hier
+   aus geraten.
+5. **Dritte Zahl im Bericht: Einlösungen.** `advertising_campaign_report`
+   liefert jetzt Ausgabe/Aktivierung, Einlösung und Aufrufe — alle mit der
+   Mindestzahl 30.
+6. **Kein Wochenangebot.** Es bleibt bei den fünf bestehenden Anlässen
+   (Tagesangebot, Geburtstag, Meilenstein, Jahrestag, persönliches Angebot).
+7. **Umsetzung begonnen.** Migrationen 0154–0155.
+
+Weiterhin offen: die Preisliste (Punkt 1) und die Pionierklausel (Punkt 2) —
+beides Vertragsinhalt, nicht Code, blockiert die Umsetzung deshalb nicht.
+
+## Was gebaut ist (Migrationen 0154–0155)
+
+Sieben neue Tabellen: `leads`, `lead_activities`, `advertising_campaigns`,
+`advertising_creatives`, `sponsorships`, `advertising_coupon_sponsorships`,
+`advertising_redirect_counts` — mehr als die sechs aus der ersten Schätzung
+vom 27.08.2026, weil der Weiterleitungszähler als eigene Tabelle dazukam.
+Vier neue Rechte: `leads.manage`, `advertising.manage`,
+`creatives.approve`, `sponsorship.manage`. **Keine neue Spalte auf
+`businesses`** — ein Unternehmen ist Werbekunde, weil es eine Kampagne hat,
+und Sponsor, weil es eine Zeile in `sponsorships` hat; das erfüllt Punkt 62
+(ein Konto, mehrere Aktivitäten) ohne eine Eigenschaftsspalte, die denselben
+Sachverhalt zweimal sagen würde.
+
+**Der Coupon-Anlass als Werbeplatz** ist über einen Datenbank-Ausschluss
+abgesichert (`exclude using gist (anlass with =, laufzeit with &&) where
+(status in ('zur_unterschrift','aktiv'))`) — dieselbe Mechanik wie die
+Doppelbelegung von Werbeflächen (0145). Nachgestellt: zwei Kampagnen
+verschiedener Werbekunden auf denselben Anlass, überlappender Zeitraum,
+beide als Entwurf zulässig, beim Verbindlichmachen des zweiten `23P01`.
+
+**Der Abschlussbericht** (`advertising_campaign_report`) leitet Ausgabe,
+Aktivierung und Einlösung rückwirkend aus `personal_offers` und
+`offer_activations` her, ohne dass diese je eine Kampagnen-Spalte bekommen
+hätten — der Ausschluss garantiert, dass während der gebuchten Zeit nur ein
+Logo auf dem Anlass stand. Dabei aufgefallen und korrigiert: `personal_
+offers.source` speichert englische Werte (`birthday`, `loyalty`,
+`anniversary`, `auto`), der neue `app.coupon_anlass`-Typ ist deutsch
+benannt. Ein textgleicher Vergleich hätte für vier von fünf Anlässen
+dauerhaft 0 Treffer ergeben, ohne dass ein Fehler aufgetreten wäre — jetzt
+bildet `app.coupon_anlass_zu_offer_source()` explizit ab.
+
+**Der Weiterleitungszähler** (`advertising_redirect_count`) ist für `anon`
+freigegeben und kann ausschliesslich hochzählen, nichts lesen — der Aufruf
+kommt von einem angetippten Link ohne Anmeldung.
+
+Alles mit echten Kennungen nachgestellt: Firmenadmin sieht die eigene
+Kampagne, nicht die fremde; interne Leads bleiben dem Werbekunden
+verschlossen (`leads.manage`, nicht `is_business_member`); der Bericht
+verweigert sich einer fremden Kennung.
+
+### Ein Fund unterwegs, außerhalb dieses Auftrags
+
+Beim Nachstellen der Zeilensicherheit für den Bericht zeigte eine Kennung
+ohne aktives Profil vollen Zugriff auf einen fremden Bericht — die Ursache
+lag nicht im neuen Code, sondern in `public.is_admin()` selbst, die für ein
+gesperrtes oder gelöschtes Konto NULL statt `false` lieferte und damit jede
+Prüfung der Form `is_admin() or X` unbemerkt umging, in 23 bestehenden
+Migrationen. Geschlossen mit Migration 0156, gegengeprüft über alle
+booleschen `security definer`-Funktionen im Schema. Ausführlich in
+`docs/VERARBEITUNGSVERZEICHNIS.md` Abschnitt 4 und `CLAUDE.md`.
+
+## Noch nicht gebaut
+
+* **Die Edge Function für die Weiterleitung selbst** — die Tabelle und die
+  RPC stehen, der öffentliche Umleitungsendpunkt (`/w/<campaign>` o. ä.)
+  noch nicht.
+* **Jede Oberfläche.** Weder ein interner Bildschirm für Leads/Kampagnen/
+  Sponsoring in der Verwaltung noch etwas im Firmenportal bei Lovable. Reine
+  Backend-Migration, wie Werbeflächen (0145/0146) es vor dem 27.08.2026 auch
+  war.
+* **Die Landing Page** „Werbung bei Bördesnack24".
+* **Das Wochenangebot** — bewusst nicht gebaut, siehe Antwort 6 oben.
