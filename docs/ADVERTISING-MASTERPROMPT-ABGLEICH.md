@@ -1,6 +1,6 @@
 # Werbenetzwerk: Abgleich des Masterprompts mit dem Bestand
 
-**Stand: 27.08.2026 · Fassung 1 · Schritte 1 bis 15, noch keine Zeile Code**
+**Stand: 27.08.2026 · Fassung 2 · Schritte 1 bis 15, noch keine Zeile Code**
 
 Der Auftrag vom 27.08.2026 beschreibt ein regionales Medien- und Handelsnetzwerk
 in 62 Punkten. Dieses Dokument hält fest, was davon schon steht, was fehlt, was
@@ -67,10 +67,73 @@ Anfragen im Monat), Lead Score (gewichtet nach Reichweite), AI (Punkt 54 sagt
 es selbst, und jede Auswahllogik löst bei uns Kennzeichnung und
 Registereintrag aus).
 
-**Aufgeschoben mit ausdrücklicher Schwelle:** App-Werbung und Premium-Partner
-beim App-Start erst ab 250 Konten mit mindestens einer Öffnung in 30 Tagen,
-gemessen. Social Media erst mit belegten Followerzahlen. Reporting erst, wenn
-die Automaten Verkäufe melden.
+**Aufgeschoben mit ausdrücklicher Schwelle:** Premium-Partner beim App-Start
+erst ab 250 Konten mit mindestens einer Öffnung in 30 Tagen, gemessen.
+Exklusivität ist bei diesem Produkt die ganze Leistung; einmal zum Pionierpreis
+vergeben, lässt sie sich später nicht neu verkaufen. Reporting erst, wenn die
+Automaten Verkäufe melden.
+
+**Nicht möglich, nicht nur unverkäuflich:** Push-Benachrichtigungen.
+`device_tokens` hat 0 Zeilen, es kann heute keine Push zugestellt werden.
+
+## App-Werbung, Nachtrag vom 27.08.2026
+
+Der Auftraggeber will App-Werbung jetzt anbieten, nicht ab 250 Konten. Das geht,
+wenn der Preis nicht so tut, als gäbe es Reichweite. Zwei Konstruktionen leisten
+das, und beide sind für den Werbekunden günstiger als ein Festpreis.
+
+**Erfolgspreis statt Festpreis bei Coupons.** Einlösungen werden bereits gezählt
+(`offer_activations`, heute 2 Zeilen). Der Werbekunde zahlt je Einlösung, nicht
+je Anzeige. Bei zwei Konten kostet ihn das fast nichts, bei fünfhundert wird es
+wertvoll. Kein Satz über Reichweite ist dafür nötig.
+
+**Offene Reichweitenstaffel.** Die Preisliste nennt die geltende Stufe und die
+darüber. „Aktiv" heißt mindestens eine Öffnung in 30 Tagen, gezählt.
+
+| Stufe | Aktive Konten im Vormonat | Faktor |
+|---|---|---|
+| **Pionier**, aktuell gültig | unter 100 | 1,0 |
+| Aufbau | 100 bis 499 | 1,5 |
+| Etabliert | ab 500 | 2,5 |
+
+Pionierverträge behalten Stufe 1 für 24 Monate. Damit wird die Preisbindung
+bezifferbar: Wer heute unterschreibt, zahlt später weniger als die Hälfte dessen,
+was ein Neukunde zahlt.
+
+| Leistung in der App und Social | Vorschlag |
+|---|---|
+| Partner-Coupon | 1,50 € je Einlösung, kein Grundpreis in der Pionierstufe |
+| Einrichtung eines Coupons | 39 € einmalig, entfällt im ersten Jahr und in jedem Paket |
+| Stellenanzeige unter „Neues", 30 Tage | 49 € |
+| Stellenanzeige plus A5-Aushang mit QR an allen Automaten | 89 €, Druck enthalten |
+| Social Media, Story-Erwähnung | 25 € |
+| Social Media, Beitrag mit Story | 49 € |
+| Social Media, Reel | 99 € |
+
+Die Social-Preise sind Produktionspreise, keine Reichweitenpreise. Die
+Followerzahlen sind von hier nicht prüfbar und stehen deshalb auch nicht im
+Angebot.
+
+### Pakete
+
+| Paket | Preis | Inhalt | Nachlass |
+|---|---|---|---|
+| Starter, nur App | 29 € je Monat | Coupon ohne Einrichtung zu 1,20 €, eine Story im Monat, Unternehmensprofil, 6 Monate | Einrichtung entfällt |
+| Regional | 89 € je Monat | Front komplett, Coupon zu 1,20 €, ein Social-Beitrag im Monat, ein Beitrag unter „Neues" je Quartal | einzeln 104,33 €, rund 15 % |
+| Komplett | 179 € je Monat | alle Flächen, Coupon zu 1,00 €, zwei Social-Beiträge, ein Beitrag unter „Neues" je Monat, Partnernennung | einzeln 226 €, rund 21 % |
+
+Laufzeit 12 Monate, Montage einmalig 90 € je Fläche, offen ausgewiesen.
+
+### Was im Angebot stehen muss, damit es ehrlich bleibt
+
+* Die Zahl der aktiven Konten des Vormonats, ausgeschrieben. Heute sind das zwei,
+  beide intern.
+* Kein Wort über Impressionen, Sichtkontakte oder Reichweite in der App.
+* Jede bezahlte Platzierung trägt sichtbar **„Anzeige"** als Text, auch der
+  Coupon und der Beitrag unter „Neues". Für einen Beitrag, der aussieht wie
+  Redaktion, gilt § 5a UWG doppelt.
+* Der Coupon-Report nennt Aktivierungen und Einlösungen, keine Personen, keine
+  Uhrzeiten je Person, keine Standortprofile.
 
 ## Preisvorschlag
 
