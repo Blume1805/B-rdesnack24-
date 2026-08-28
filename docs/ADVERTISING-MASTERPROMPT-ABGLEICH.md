@@ -1,6 +1,6 @@
 # Werbenetzwerk: Abgleich des Masterprompts mit dem Bestand
 
-**Stand: 27.08.2026 · Fassung 2 · Schritte 1 bis 15, noch keine Zeile Code**
+**Stand: 27.08.2026 · Fassung 3 · Schritte 1 bis 15, noch keine Zeile Code**
 
 Der Auftrag vom 27.08.2026 beschreibt ein regionales Medien- und Handelsnetzwerk
 in 62 Punkten. Dieses Dokument hält fest, was davon schon steht, was fehlt, was
@@ -76,19 +76,85 @@ Automaten Verkäufe melden.
 **Nicht möglich, nicht nur unverkäuflich:** Push-Benachrichtigungen.
 `device_tokens` hat 0 Zeilen, es kann heute keine Push zugestellt werden.
 
-## App-Werbung, Nachtrag vom 27.08.2026
+## Werbeangebot: digital, analog, komplett
 
-Der Auftraggeber will App-Werbung jetzt anbieten, nicht ab 250 Konten. Das geht,
-wenn der Preis nicht so tut, als gäbe es Reichweite. Zwei Konstruktionen leisten
-das, und beide sind für den Werbekunden günstiger als ein Festpreis.
+**Fassung 3, 27.08.2026.** Der Auftraggeber hat zwei Vorgaben nachgereicht:
+Coupons werden **nicht nach Einlösung** abgerechnet, sondern als **Logoplatz auf
+einem Anlass** vergeben; und der Kunde wählt zuerst zwischen **digitaler Werbung
+(App)** und **analoger Werbung (Automat)**, mit Einzel- und Komplettpreisen je
+Welt.
 
-**Erfolgspreis statt Festpreis bei Coupons.** Einlösungen werden bereits gezählt
-(`offer_activations`, heute 2 Zeilen). Der Werbekunde zahlt je Einlösung, nicht
-je Anzeige. Bei zwei Konten kostet ihn das fast nichts, bei fünfhundert wird es
-wertvoll. Kein Satz über Reichweite ist dafür nötig.
+### Der Coupon-Anlass als Werbeplatz
 
-**Offene Reichweitenstaffel.** Die Preisliste nennt die geltende Stufe und die
-darüber. „Aktiv" heißt mindestens eine Öffnung in 30 Tagen, gezählt.
+Bördesnack24 gibt ohnehin Gutscheine aus. Der Werbekunde kauft nicht die
+Einlösung, sondern das Logo darauf: „Dein Geburtstagsgutschein, präsentiert von
+Autohaus Müller." Das ist ein Platz, kein Erfolgsversprechen, und damit ohne jede
+Reichweitenzahl verkäuflich. **Je Anlass gibt es genau einen Partner
+gleichzeitig**, das ist Knappheit aus der Sache und nicht aus einem Zähler.
+
+Welche Anlässe es gibt, am Code geprüft:
+
+| Anlass | Leistung | Stand |
+|---|---|---|
+| Tagesangebot | Angebot des Tages, für alle | **gebaut**, `offers.kind = daily`, 64 Einträge |
+| Geburtstag | 50 % auf ein Produkt der Wahl, 14 Tage | **gebaut**, `PersonalOfferSource.birthday` |
+| Meilenstein | 5, 10, 15 oder 25 % bei erreichter Stufe | **gebaut**, `loyalty` |
+| Jahrestag der Anmeldung | 30 % auf ein Produkt der Wahl, 14 Tage | **gebaut**, `anniversary` |
+| Persönliches Angebot | 10 % aus dem bisherigen Einkauf | **gebaut**, `auto` |
+| Wochenangebot | vom Auftraggeber genannt | **fehlt**, `offers.kind` kennt nur `daily` |
+
+Das Wochenangebot lässt sich in einem Tag ergänzen, verkaufen kann man es erst
+danach.
+
+**Folge für die Kennzeichnung:** Vier der fünf Anlässe wählen das Produkt
+regelbasiert aus und tragen deshalb bereits das Kennzeichen für algorithmische
+Auswahl. Kommt ein Sponsorenlogo dazu, steht auf derselben Karte zusätzlich
+„Anzeige". Zwei Kennzeichen auf einer Karte sind kein Fehler, sie müssen nur
+gestaltet werden.
+
+### Die Dauer bestimmt die Zahl der Anlässe
+
+| Laufzeit | Anlässe | Auswahl |
+|---|---|---|
+| 3 Monate | 1 | ein Anlass nach Wahl |
+| 6 Monate | 2 | zwei Anlässe nach Wahl |
+| 12 Monate | alle | exklusiv, kein zweiter Partner auf irgendeinem Anlass |
+
+Längere Bindung bringt mehr Fläche statt Rabatt. Der Kunde bekommt etwas
+Sichtbares, wir behalten den Preis.
+
+### Digital, in der App
+
+| Leistung | Preis |
+|---|---|
+| Logo auf einem Coupon-Anlass | 15 € je Monat, ab 3 Monaten |
+| Logo auf allen Anlässen, exklusiv | 45 € je Monat, ab 12 Monaten |
+| Unternehmensprofil in der App | 12 € je Monat |
+| Beitrag unter „Neues", etwa Stellenanzeige | 49 € für 30 Tage |
+| Social Media, Beitrag mit Story | 49 € (Story 25 €, Reel 99 €) |
+| **Digital komplett** | **99 € je Monat**, einzeln 122,33 €, rund 19 % weniger |
+
+### Analog, am Automaten
+
+| Leistung | Preis |
+|---|---|
+| Teilfläche Front, etwa DIN A3 | 15 € je Monat, ab 6 Monaten |
+| Front komplett | 39 € je Monat |
+| Seitenfläche, je Seite | 25 € je Monat |
+| Aushang A5 mit QR an allen Automaten | 19 € je Monat, Druck enthalten |
+| Namensrecht am Standort | 49 € je Monat, nicht Teil der Pakete |
+| **Analog komplett** | **89 € je Monat**, einzeln 108 €, rund 18 % weniger |
+
+### Beides zusammen
+
+| Paket | Preis |
+|---|---|
+| **Komplett, digital und analog** | **149 € je Monat**, einzeln 188 €, rund 21 % weniger |
+| Starter, Logo auf einem Anlass plus Unternehmensprofil | 25 € je Monat, ab 3 Monaten |
+| Einmalig: Logo für die App aufbereiten | 39 €, entfällt ab 12 Monaten und in jedem Paket |
+| Einmalig: Produktion und Montage je Fläche | 90 €, offen ausgewiesen |
+
+### Reichweitenstaffel, nur für die digitale Hälfte
 
 | Stufe | Aktive Konten im Vormonat | Faktor |
 |---|---|---|
@@ -96,66 +162,26 @@ darüber. „Aktiv" heißt mindestens eine Öffnung in 30 Tagen, gezählt.
 | Aufbau | 100 bis 499 | 1,5 |
 | Etabliert | ab 500 | 2,5 |
 
-Pionierverträge behalten Stufe 1 für 24 Monate. Damit wird die Preisbindung
-bezifferbar: Wer heute unterschreibt, zahlt später weniger als die Hälfte dessen,
-was ein Neukunde zahlt.
+„Aktiv" heißt mindestens eine Öffnung in 30 Tagen, gezählt. Die Flächenpreise am
+Automaten bleiben unberührt, sie hängen an der Fläche. Pionierverträge behalten
+Stufe 1 für 24 Monate.
 
-| Leistung in der App und Social | Vorschlag |
-|---|---|
-| Partner-Coupon | 1,50 € je Einlösung, kein Grundpreis in der Pionierstufe |
-| Einrichtung eines Coupons | 39 € einmalig, entfällt im ersten Jahr und in jedem Paket |
-| Stellenanzeige unter „Neues", 30 Tage | 49 € |
-| Stellenanzeige plus A5-Aushang mit QR an allen Automaten | 89 €, Druck enthalten |
-| Social Media, Story-Erwähnung | 25 € |
-| Social Media, Beitrag mit Story | 49 € |
-| Social Media, Reel | 99 € |
+### Was im Angebot stehen muss, damit es hält
 
-Die Social-Preise sind Produktionspreise, keine Reichweitenpreise. Die
-Followerzahlen sind von hier nicht prüfbar und stehen deshalb auch nicht im
-Angebot.
+* Die Zahl der aktiven Konten des Vormonats, ausgeschrieben. Heute zwei, beide
+  intern.
+* Kein Wort über Impressionen oder Sichtkontakte.
+* Jede bezahlte Platzierung trägt sichtbar **„Anzeige"** als Text. Auf einem
+  Gutschein, der aussieht wie eine Wohltat des Hauses, gilt das besonders.
+* **Der Gutschein bleibt unser Gutschein.** Der Sponsor bekommt einen Platz
+  darauf, aber keinen Einfluss darauf, wer ihn bekommt und wofür er gilt. Sonst
+  würde aus dem Logoplatz eine Auswahl nach Werbeinteresse.
+* Der Sponsor erfährt nicht, wer einen Gutschein bekommen hat. Keine Namen, keine
+  Geburtstage, keine Kaufhistorie.
 
-### Pakete
-
-| Paket | Preis | Inhalt | Nachlass |
-|---|---|---|---|
-| Starter, nur App | 29 € je Monat | Coupon ohne Einrichtung zu 1,20 €, eine Story im Monat, Unternehmensprofil, 6 Monate | Einrichtung entfällt |
-| Regional | 89 € je Monat | Front komplett, Coupon zu 1,20 €, ein Social-Beitrag im Monat, ein Beitrag unter „Neues" je Quartal | einzeln 104,33 €, rund 15 % |
-| Komplett | 179 € je Monat | alle Flächen, Coupon zu 1,00 €, zwei Social-Beiträge, ein Beitrag unter „Neues" je Monat, Partnernennung | einzeln 226 €, rund 21 % |
-
-Laufzeit 12 Monate, Montage einmalig 90 € je Fläche, offen ausgewiesen.
-
-### Was im Angebot stehen muss, damit es ehrlich bleibt
-
-* Die Zahl der aktiven Konten des Vormonats, ausgeschrieben. Heute sind das zwei,
-  beide intern.
-* Kein Wort über Impressionen, Sichtkontakte oder Reichweite in der App.
-* Jede bezahlte Platzierung trägt sichtbar **„Anzeige"** als Text, auch der
-  Coupon und der Beitrag unter „Neues". Für einen Beitrag, der aussieht wie
-  Redaktion, gilt § 5a UWG doppelt.
-* Der Coupon-Report nennt Aktivierungen und Einlösungen, keine Personen, keine
-  Uhrzeiten je Person, keine Standortprofile.
-
-## Preisvorschlag
-
-Hergeleitet aus eigenen Kosten und Vergleichsgrößen (Vereinsheft, Plakat,
-regionale Suchanzeigen), nicht aus gemessener Leistung. Nicht im Code
-festschreiben, Punkt 23.
-
-| Leistung | Vorschlag |
-|---|---|
-| Teilfläche Front, etwa DIN A3 | 15 € je Monat, mindestens 6 Monate |
-| Front komplett | 39 € je Monat |
-| Seitenfläche, je Seite | 25 € je Monat |
-| Komplettbranding, alle Flächen | 79 € je Monat |
-| Namensrecht am Standort | 49 € je Monat, nur mit Zustimmung des Standortgebers |
-| Produktion und Montage | 90 € einmalig je Fläche, offen ausgewiesen |
-| Sponsoring eines Vereinsstandorts | ab 25 € je Monat plus Umsatzbeteiligung |
-
-**Pionierklausel statt erfundener Knappheit:** Wer jetzt bucht, bekommt den
-Preis für 24 Monate festgeschrieben, und der Vertrag sagt ausdrücklich, dass wir
-heute keine Reichweite nennen, weil wir keine gemessen haben. Sobald die
-Automaten Verkaufsdaten liefern, bekommt jeder laufende Vertrag den Report
-kostenlos.
+**Nicht möglich:** Push-Benachrichtigungen, `device_tokens` hat 0 Zeilen.
+**Weiter zurückgehalten:** Premium-Partner beim App-Start, weil Exklusivität dort
+die ganze Leistung ist und sich einmal vergeben nicht neu verkaufen lässt.
 
 ## Umsatzmodell
 
