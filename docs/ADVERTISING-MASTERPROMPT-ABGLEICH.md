@@ -1,6 +1,6 @@
 # Werbenetzwerk: Abgleich des Masterprompts mit dem Bestand
 
-**Stand: 27.08.2026 · Fassung 3 · Schritte 1 bis 15, noch keine Zeile Code**
+**Stand: 27.08.2026 · Fassung 4 · Schritte 1 bis 15, noch keine Zeile Code**
 
 Der Auftrag vom 27.08.2026 beschreibt ein regionales Medien- und Handelsnetzwerk
 in 62 Punkten. Dieses Dokument hält fest, was davon schon steht, was fehlt, was
@@ -43,9 +43,10 @@ Punkt 62 verlangt **ein** Konto je Unternehmen. Das existiert: `businesses`.
 
 ## Entscheidungen
 
-**Datenmodell (Punkt 42): fünf neue Tabellen statt siebzehn.**
+**Datenmodell (Punkt 42): sechs neue Tabellen statt siebzehn.**
 Neu: `leads`, `lead_activities`, `advertising_campaigns`,
-`advertising_creatives`, `sponsorships`.
+`advertising_creatives`, `sponsorships` und ein Zähler für Weiterleitungen
+(eine Zeile je Kampagne und Tag).
 `businesses` bekommt eine Spalte für die Eigenschaft (Kunde, Werbekunde,
 Sponsor, Verein). Es entfallen `advertising_accounts`, `clubs`, `sponsors`,
 `partnerships`, `contracts`, `invoices` und `sponsorship_packages`, weil sie
@@ -178,6 +179,54 @@ Stufe 1 für 24 Monate.
   würde aus dem Logoplatz eine Auswahl nach Werbeinteresse.
 * Der Sponsor erfährt nicht, wer einen Gutschein bekommen hat. Keine Namen, keine
   Geburtstage, keine Kaufhistorie.
+
+### Der Bericht am Ende der Laufzeit
+
+Vorgabe des Auftraggebers: Nach Vertragsende erhält der Werbekunde eine
+Übersicht mit **zwei Angaben**, anonym, nur Anzahlen, keine Kundendaten.
+
+**Die erste Zahl heißt je nach Anlass etwas Verschiedenes**, und das ist der
+Unterschied zwischen zählbar und geschätzt:
+
+| Anlass | Was im Bericht steht | Woher |
+|---|---|---|
+| Geburtstag, Meilenstein, Jahrestag, persönliches Angebot | „An **47** Kundinnen und Kunden ausgegeben" | Zeilen in `personal_offers`, je Kunde eine |
+| Tagesangebot | „Von **31** Kundinnen und Kunden aktiviert", dazu die Zahl der Tage | `offer_activations`, existiert bereits |
+| alle | „**23** Aufrufe Deiner Website über den Gutschein" | Zähler je Kampagne und Tag |
+
+Das Tagesangebot ist eine Zeile für alle. Wie viele Menschen sie gesehen haben,
+wissen wir nicht und würden es nur erfahren, wenn wir jeden Blick mitschreiben.
+Das wollen wir nicht.
+
+**Zwei Wörter, die im Bericht nicht vorkommen:** „gesehen" und „Personen". Wir
+wissen nicht, wer hingesehen hat, und ein Aufruf ist kein Mensch. Wer denselben
+Link dreimal antippt, erzeugt drei Aufrufe. Das steht als Satz unter der Zahl.
+
+**Der Klick wird gezählt, ohne dass ein Klick gespeichert wird.** Der Link führt
+über eine eigene Weiterleitungsadresse. Dort wird kein Ereignis abgelegt, sondern
+ein Zähler erhöht: eine Zeile je Kampagne und Tag. Kein Nutzerkennzeichen, keine
+IP, keine Sitzung, kein Cookie. Damit gibt es nichts zu anonymisieren, weil nie
+etwas Personenbezogenes entsteht. Das ist der Unterschied zwischen „wir werten
+anonymisiert aus" und „es ist anonym"; nur das Zweite hält einer Prüfung stand.
+Was wir nicht verhindern können und deshalb im Angebot steht: Der Server des
+Werbekunden sieht die IP des Besuchers, sobald er dort ankommt.
+
+**Mindestzahl 30 je ausgewiesener Angabe.** Bei zwei aktiven Konten wäre „an 2
+Kunden ausgegeben, 1 Aufruf" kein Bericht, sondern ein Steckbrief. Darunter steht:
+„Weniger als 30, wir weisen die Zahl nicht aus." Kein Näherungswert, keine Spanne,
+keine Grafik ohne Achse. Der erste Bericht dieses Jahres wird voraussichtlich genau
+so aussehen. Das entwertet das Angebot nicht: Verkauft wurde ein Platz, kein
+Ergebnis.
+
+**Was dafür entsteht:** der Zähler als sechste Tabelle, ein Feld an Gutschein und
+Angebot für die Kampagne, eine Weiterleitung als Edge Function, die nichts
+protokolliert, auch nicht versehentlich über die Serverprotokolle des Anbieters.
+**Datenschutzerklärung und Verarbeitungsverzeichnis werden fällig** — auch eine
+Zählung ohne Personenbezug ist eine Verarbeitung, die beschrieben gehört, schon
+damit nachvollziehbar ist, dass sie ohne Personenbezug arbeitet.
+
+Die Einlösung wird bereits gezählt und steht bewusst **nicht** im Bericht, weil
+zwei Zahlen vereinbart sind. Sie ließe sich ohne Zusatzaufwand ergänzen.
 
 **Nicht möglich:** Push-Benachrichtigungen, `device_tokens` hat 0 Zeilen.
 **Weiter zurückgehalten:** Premium-Partner beim App-Start, weil Exklusivität dort
