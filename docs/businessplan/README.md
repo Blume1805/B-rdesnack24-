@@ -106,6 +106,47 @@ Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
 oder Begründung direkt im Kopf von `businessplan_model.py`.
 
+## Editierbare Fassung (.docx)
+
+**Stand 30.08.2026.** Auf Wunsch des Auftraggebers gibt es den Plan auch
+als Word-Dokument, das er selbst punktuell ändern kann — die PDF-Fassung
+oben ist dafür nicht gedacht, sie wird über `pdf_builder.py` gebaut und
+lässt sich nicht in Word öffnen und bearbeiten.
+
+| Datei | Zweck |
+|---|---|
+| `build_docx.js` | Baut `Boerdesnack24_Businessplan.docx` mit dem npm-Paket `docx` (docx-js). Eigenständiges Skript, dieselben Inhalte/Zahlen wie `make_businessplan.py`, aber als editierbares Word-Dokument statt PDF. |
+| `automatennetz_linie.png`, `umsatz_balken.png`, `ebit_balken.png` | Die drei Diagramme, die im PDF über `pdf_builder.py`s interne `diagramm()`-Funktion entstehen (dort nicht als eigene Datei erreichbar) — für die docx-Fassung als eigenständige PNGs neu erzeugt (gleicher matplotlib-Stil, gleiche Zahlen aus `businessplan_zahlen.json`). |
+| `erloesmix.png`, `iconstrip_trim.png` | Dieselben Grafiken wie in der PDF-Fassung, hier zusätzlich für die docx-Fassung im Repo gesichert. |
+
+**Neu bauen:**
+```bash
+cd docs/businessplan
+npm install docx image-size   # einmalig
+node build_docx.js
+```
+
+**Das Inhaltsverzeichnis ist ein echtes Word-Feld** (`TableOfContents`),
+kein fest eingetragener Text wie in der PDF-Fassung. Es zeigt beim ersten
+Öffnen ggf. veraltete oder keine Seitenzahlen — in Word: Rechtsklick auf
+das Verzeichnis → Felder aktualisieren (oder die ganze Datei markieren
+und F9 drücken). Das ist der Vorteil gegenüber der PDF: Wer Text
+hinzufügt oder löscht, muss das Verzeichnis nicht von Hand nachführen.
+
+**Bekannte Lücke, ehrlich benannt:** Diese Sitzung konnte die docx-Datei
+nicht visuell rendern, um sie vor dem Versand anzusehen — LibreOffice
+scheiterte in dieser Sandbox an jeder Konvertierung, auch an einer
+leeren `.txt`-Datei und einem docx-js-Minimalbeispiel ohne meinen
+Inhalt (`Error: source file could not be loaded`, unabhängig vom
+Dateiinhalt) — ein Sandbox-Defekt, kein Hinweis auf einen Fehler in der
+erzeugten Datei. Geprüft wurde stattdessen: vollständige OOXML-Schema-
+Validierung (`scripts/office/validate.py`, „All validations PASSED!“),
+Inhaltsextraktion mit `pandoc -t markdown` (alle Abschnitte, Tabellen und
+Bildverweise vollständig und in der richtigen Reihenfolge) und eine
+Pixel-Prüfung aller eingebetteten PNGs (`PIL.Image.verify()`, alle
+sechs unbeschädigt). Ein Blick in echtem Word/LibreOffice Writer auf
+einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
+
 ## Seitenaufbau (Stand 30.08.2026)
 
 - **Kein Logo im Kopf.** Auf Wunsch des Auftraggebers entfernt — die Datei

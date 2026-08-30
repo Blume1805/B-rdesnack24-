@@ -1,0 +1,335 @@
+const fs = require("fs");
+const {
+  Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
+  Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType,
+  ImageRun, TableOfContents, PageBreak, Header, Footer, PageNumber,
+  LevelFormat, convertInchesToTwip, VerticalAlign, TableLayoutType,
+} = require("docx");
+
+const daten = JSON.parse(fs.readFileSync("businessplan_zahlen.json", "utf8"));
+const datenKons = JSON.parse(fs.readFileSync("businessplan_zahlen_konservativ.json", "utf8"));
+
+// ---------------------------------------------------------------------
+// Marke
+// ---------------------------------------------------------------------
+const GOLD = "F3BE21";
+const GOLD_DUNKEL = "8A6E00";
+const SCHWARZ = "000000";
+const GRAU = "595959";
+const HELLGRAU = "D9D9D9";
+const FONT_TEXT = "Hanken Grotesk";
+const FONT_DISPLAY = "Bricolage Grotesque";
+
+const de = (n) => Math.round(n).toLocaleString("de-DE");
+
+// ---------------------------------------------------------------------
+// Kleine Bausteine
+// ---------------------------------------------------------------------
+function bold(text, opts = {}) {
+  // **wort** -> fett; Rest normal. Gibt eine Liste von TextRun zurueck.
+  const teile = text.split(/(\*\*.+?\*\*)/g).filter((t) => t.length);
+  return teile.map((t) => {
+    const istFett = t.startsWith("**") && t.endsWith("**");
+    const inhalt = istFett ? t.slice(2, -2) : t;
+    return new TextRun({ text: inhalt, bold: istFett, font: FONT_TEXT, size: 21, ...opts });
+  });
+}
+
+function hook(text) {
+  return new Paragraph({ children: bold(text), spacing: { after: 160 } });
+}
+
+function ueberschrift(titel, ebene = 1, introText = null) {
+  const stil = ebene === 1 ? HeadingLevel.HEADING_1 : HeadingLevel.HEADING_2;
+  const abs = [
+    new Paragraph({
+      heading: stil,
+      keepNext: true,
+      spacing: { before: 320, after: 40 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: ebene === 1 ? 10 : 6, color: GOLD, space: 4 } },
+      children: [new TextRun({ text: titel, bold: true, font: FONT_DISPLAY, color: SCHWARZ, size: ebene === 1 ? 30 : 25 })],
+    }),
+  ];
+  if (introText) {
+    abs.push(new Paragraph({ keepNext: true, spacing: { after: 160 }, children: bold(introText) }));
+  }
+  return abs;
+}
+
+function hinweis(text) {
+  return new Paragraph({
+    spacing: { after: 160 },
+    children: [new TextRun({ text, italics: true, color: GRAU, font: FONT_TEXT, size: 18 })],
+  });
+}
+
+function kennzahlenReihe(werte) {
+  const spalten = werte.map(([zahl, label], i) => new TableCell({
+    width: { size: Math.floor(9000 / werte.length), type: WidthType.DXA },
+    borders: {
+      top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
+      left: i === 0 ? { style: BorderStyle.NONE } : { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      right: { style: BorderStyle.NONE },
+    },
+    verticalAlign: VerticalAlign.CENTER,
+    children: [
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 20 },
+        children: [new TextRun({ text: zahl, bold: true, color: GOLD_DUNKEL, font: FONT_DISPLAY, size: 26 })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: label, color: GRAU, font: FONT_TEXT, size: 15 })] }),
+    ],
+  }));
+  return new Table({
+    width: { size: 9000, type: WidthType.DXA },
+    layout: TableLayoutType.FIXED,
+    rows: [new TableRow({ children: spalten })],
+    margins: { top: 100, bottom: 100 },
+  });
+}
+
+function spacer(after = 160) {
+  return new Paragraph({ spacing: { after } });
+}
+
+const { imageSize } = require("image-size");
+
+function bild(pfad, breitePx, unterschrift = null) {
+  const buf = fs.readFileSync(pfad);
+  const dim = imageSize(buf);
+  const hoehePx = Math.round(breitePx * (dim.height / dim.width));
+  const kinder = [
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 120, after: unterschrift ? 40 : 160 },
+      children: [new ImageRun({ data: buf, type: "png", transformation: { width: breitePx, height: hoehePx } })],
+    }),
+  ];
+  if (unterschrift) {
+    kinder.push(new Paragraph({
+      alignment: AlignmentType.CENTER, spacing: { after: 200 },
+      children: [new TextRun({ text: unterschrift, italics: true, color: GRAU, font: FONT_TEXT, size: 16 })],
+    }));
+  }
+  return kinder;
+}
+
+function zelle(text, { kopf = false, rechts = false, breite = null } = {}) {
+  return new TableCell({
+    width: breite ? { size: breite, type: WidthType.DXA } : undefined,
+    shading: kopf ? { type: ShadingType.CLEAR, fill: SCHWARZ } : undefined,
+    verticalAlign: VerticalAlign.CENTER,
+    margins: { top: 60, bottom: 60, left: 100, right: 100 },
+    children: [new Paragraph({
+      alignment: rechts ? AlignmentType.RIGHT : AlignmentType.LEFT,
+      children: [new TextRun({ text: String(text), font: FONT_TEXT, size: 16, bold: kopf, color: kopf ? "FFFFFF" : SCHWARZ })],
+    })],
+  });
+}
+
+function tabelle(kopfzeilen, zeilen, breiten, rechtsSpalten = []) {
+  const rows = [];
+  rows.push(new TableRow({
+    tableHeader: true,
+    children: kopfzeilen.map((k, i) => zelle(k, { kopf: true, breite: breiten[i] })),
+  }));
+  zeilen.forEach((z) => {
+    rows.push(new TableRow({
+      children: z.map((v, i) => zelle(v, { rechts: rechtsSpalten.includes(i), breite: breiten[i] })),
+    }));
+  });
+  return new Table({
+    width: { size: breiten.reduce((a, b) => a + b, 0), type: WidthType.DXA },
+    layout: TableLayoutType.FIXED,
+    rows,
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      bottom: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      left: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      right: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+      insideVertical: { style: BorderStyle.SINGLE, size: 4, color: HELLGRAU },
+    },
+  });
+}
+
+// ---------------------------------------------------------------------
+// Inhalt
+// ---------------------------------------------------------------------
+const children = [];
+
+// Titelblock
+children.push(new Paragraph({
+  alignment: AlignmentType.RIGHT, spacing: { after: 40 },
+  children: [new TextRun({ text: "Bördesnack24 GbR", bold: true, font: FONT_TEXT, size: 18 })],
+}));
+children.push(new Paragraph({
+  alignment: AlignmentType.RIGHT, spacing: { after: 240 },
+  children: [new TextRun({ text: "Sülldorfer Str. 3A · 39171 Sülzetal · Boerdesnack24@gmail.com", color: GRAU, font: FONT_TEXT, size: 15 })],
+}));
+children.push(new Paragraph({
+  spacing: { after: 80 },
+  border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: GOLD, space: 6 } },
+  children: [new TextRun({ text: "Businessplan Bördesnack24 GbR", bold: true, font: FONT_DISPLAY, size: 40 })],
+}));
+children.push(new Paragraph({
+  spacing: { after: 400 },
+  children: [new TextRun({ text: "Planungszeitraum 2027–2036 · Stand 30.08.2026 · alle Annahmen einzeln ausgewiesen und mit Quelle versehen, wo eine externe Quelle vorliegt.", italics: true, color: GRAU, font: FONT_TEXT, size: 18 })],
+}));
+
+// Inhaltsverzeichnis (Word-Feld -- aktualisiert sich beim Oeffnen/F9,
+// bleibt also korrekt, auch wenn punktuelle Aenderungen den Umfang
+// veraendern)
+children.push(new Paragraph({
+  heading: HeadingLevel.HEADING_1, keepNext: true, spacing: { before: 0, after: 120 },
+  children: [new TextRun({ text: "Inhalt", bold: true, font: FONT_DISPLAY, size: 30 })],
+}));
+children.push(new TableOfContents("Inhaltsverzeichnis", { hyperlink: true, headingStyleRange: "1-2" }));
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// Kennzahlen + Hook oben
+children.push(hook("**Ein Automat verkauft. Vier Quellen verdienen.** Snacks und Getränke rund um die Uhr, App-Abo, eine Werbeplattform für regionale Unternehmen und Sponsoring, plus **5 % jedes Warenverkaufs** für eine regionale gemeinnützige Organisation."));
+children.push(spacer(120));
+children.push(kennzahlenReihe([["62", "Produkte im Sortiment"], ["4", "Erlösquellen"], ["11", "Automaten bis 2036"], ["5 %", "Spendenquote"]]));
+children.push(spacer(240));
+children.push(...bild("iconstrip_trim.png", 600));
+
+// 1) Zusammenfassung
+children.push(...ueberschrift("1. Zusammenfassung", 1, "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle."));
+children.push(hook("**Start: 3 Automaten** (2 in 2027, 1 in 2028), **4. bis 2029, danach +1 pro Jahr.** Bahnhof Osterweddingen, Freibad Langenweddingen, Sporthalle Langenweddingen."));
+children.push(spacer(120));
+children.push(kennzahlenReihe([["8.300 €", "Umsatz 2027"], ["103.900 €", "Umsatz 2036"], ["223.900 €", "EBIT, 10 Jahre kumuliert"], ["124.500 €", "EBIT konservativ, 10 Jahre"]]));
+children.push(spacer(240));
+children.push(hook("**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6)."));
+
+// 2) Geschäftsmodell
+children.push(...ueberschrift("2. Geschäftsmodell und Standort", 1, "**Kein Nahversorger hat nachts oder sonntags offen.** Genau diese Lücke füllt Bördesnack24, App-Abo bindet zurück statt jeden Einkauf als Einzelereignis zu behandeln."));
+children.push(spacer(120));
+children.push(kennzahlenReihe([["168.000", "Einwohner Bördekreis"], ["9.000", "davon Sülzetal"], ["24/7", "Öffnungszeit"]]));
+children.push(spacer(120));
+children.push(hinweis("Angaben des Auftraggebers; öffentliche Vergleichszahlen (citypopulation.de, Statista) liegen mit rund 171.000 bzw. 8.600–9.900 in derselben Größenordnung."));
+
+children.push(...ueberschrift("Standort- und Ausbauplan", 2, "**Vorgabe des Auftraggebers**, wörtlich umgesetzt: 3 Automaten zum Start, 4. bis 2029, danach +1 pro Jahr. **Die Zuordnung der ersten drei Standorte zu den Jahren ist ein Vorschlag dieses Plans**, keine Vorgabe."));
+
+const standortZeilen = [
+  ["2027", "Heißgetränkeautomat", "Bahnhof Osterweddingen", "Pendlerfrequenz, kein Kühlbedarf"],
+  ["2027", "Mixautomat", "Bahnhof Osterweddingen", "Snacks + gekühlte Getränke"],
+  ["2028", "Kombiautomat", "Freibad Langenweddingen", "stark saisonal, Mai–September"],
+  ["2029", "Kombiautomat", "Sporthalle Langenweddingen (Handball)", "Trainings- und Spielbetrieb"],
+];
+for (let j = 2030; j <= 2036; j++) standortZeilen.push([String(j), "Kombiautomat (Vorschlag)", "Standort noch offen", "+1 Automat/Jahr laut Vorgabe"]);
+children.push(tabelle(["Jahr", "Neuer Automat", "Standort", "Besonderheit"], standortZeilen, [1000, 2200, 3000, 2800]));
+children.push(spacer(200));
+children.push(...bild("automatennetz_linie.png", 600, "Abb. 1: 3 Automaten zum Start, +1 pro Jahr ab 2030."));
+
+// 3) Erlösquellen
+children.push(...ueberschrift("3. Die vier Erlösquellen", 1, "**Keine Quelle steht für sich.** Der Automat bringt Kunden, die App macht sie zählbar, das macht die Werbeplattform wertvoll, Sponsoring bringt neue Standorte zurück zum Automaten."));
+children.push(...bild("zusammenspiel_pdf.png", 600, "Abb. 2: Zusammenspiel der vier Erlösquellen als ein System, nicht als vier getrennte Geschäfte."));
+children.push(kennzahlenReihe([["62", "Produkte"], ["0,99 € / 9,99 €", "App-Abo Monat/Jahr"], ["ab 15 €", "Werbung / Monat"], ["149 €", "Komplettpaket"]]));
+children.push(spacer(120));
+children.push(hinweis("Preise real, bereits entschieden (docs/ADVERTISING-MASTERPROMPT-ABGLEICH.md), nicht Teil dieses Plans neu festgelegt. Vor dem ersten Sponsoring-Vertrag: umsatzsteuerliche Prüfung durch den Steuerberater."));
+children.push(hook("**Offener Punkt bei der 5 %-Spende:** Heute kann jedes App-Konto vorschlagen und abstimmen, nicht nur zahlende Abonnenten, wie für diesen Plan angefragt (Abschnitt 7)."));
+
+// 4) Annahmen
+children.push(...ueberschrift("4. Annahmen dieses Plans", 1, "**Planungsannahmen, keine gemessenen Werte.** Mit Quelle, wo eine externe existiert, sonst eigene, im Text begründete Schätzung."));
+const annahmenZeilen = [
+  ["Bruttoumsatz/Automat/Monat", "500–1.400 €, je Standort", "GTR Automaten/Maschinenpartner: 300–1.500 €/Monat typisch"],
+  ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste, an DB geprüft"],
+  ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
+  ["Anschaffung je Automat", "6.000 € netto", "VENDY1/dasvending: 4.989–9.000 € netto"],
+  ["Abschreibungsdauer", "8 Jahre linear", "angenommene Nutzungsdauer"],
+  ["Nayax-Grundgebühr", "14 €/Monat je Terminal", "Nayax-Shop FAQ"],
+  ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %, Anteil angenommen"],
+  ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", "eigene Schätzung, nicht extern geprüft"],
+  ["Standortprovision", "5 % vom Bruttoumsatz", "branchenüblich, nicht belegt"],
+  ["Zahlende App-Abonnenten", "40 (2027) bis 720 (2036)", "eigene Schätzung, an Wachstum gekoppelt"],
+  ["Ø Erlös je Abonnent", "0,90 €/Monat", "60 % Jahres-, 40 % Monatsabo"],
+  ["Auslastung Werbeflächen", "0 % (27/28) bis 70 % (36)", "eigene Rampe, Obergrenze wie Advertising-Dok."],
+  ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "eigene Schätzung, Pakete real"],
+  ["Personal", "1 Minijob je 6 Automaten, 556 €", "Minijob-Grenze 2026, Schwelle Annahme"],
+];
+children.push(tabelle(["Größe", "Annahme", "Quelle / Begründung"], annahmenZeilen, [2600, 2400, 4000]));
+
+// 5) Finanzplan
+children.push(...ueberschrift("5. Finanzplan, Jahr 1 bis 10", 1, "**Das Planungsszenario, Jahr für Jahr.** Automatenzahl, Erlöse, Kosten ohne Abschreibung und das Betriebsergebnis."));
+const fpZeilen = daten.map((r) => [String(r.jahr), String(r.automaten), `${de(r.summe_erloese)} €`, `${de(r.summe_kosten_ohne_afa)} €`, `${de(r.afa_jahr)} €`, `${de(r.ebit)} €`]);
+children.push(tabelle(["Jahr", "Automaten", "Erlöse gesamt", "Kosten (o. AfA)", "Abschreibung", "EBIT"], fpZeilen, [1000, 1400, 1700, 1700, 1600, 1600], [1, 2, 3, 4, 5]));
+children.push(spacer(200));
+children.push(...bild("umsatz_balken.png", 600, "Abb. 3: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
+children.push(...bild("erloesmix.png", 600, "Abb. 4: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
+children.push(...bild("ebit_balken.png", 600, "Abb. 5: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
+
+const kumSpende = daten.reduce((s, r) => s + r.spende, 0);
+const kumInvest = daten.reduce((s, r) => s + r.investition_jahr, 0);
+const kumEbit = daten.reduce((s, r) => s + r.ebit, 0);
+children.push(...ueberschrift("Spenden und Investitionen im Überblick", 2, "**Drei Zahlen, die den Plan zusammenfassen:**"));
+children.push(kennzahlenReihe([[`${de(kumSpende)} €`, "Spendentopf, 10 Jahre"], [`${de(kumInvest)} €`, "Investition, 11 Automaten"], [`${de(kumEbit)} €`, "EBIT kumuliert, 10 Jahre"]]));
+
+// 6) Konservatives Szenario
+children.push(...ueberschrift("6. Konservatives Szenario", 1, "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit eigener Spalte durchgerechnet, alle übrigen Annahmen unverändert."));
+const sensZeilen = daten.map((r, i) => [String(r.jahr), `${de(r.ebit)} €`, `${de(datenKons[i].ebit)} €`]);
+children.push(tabelle(["Jahr", "EBIT Planungsszenario", "EBIT konservativ (−40 % Umsatz/Automat)"], sensZeilen, [1400, 3200, 4400], [1, 2]));
+const kumKons = datenKons.reduce((s, r) => s + r.ebit, 0);
+children.push(spacer(160));
+children.push(hook(`**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`));
+
+// 7) Risiken
+children.push(...ueberschrift("7. Risiken und offene Punkte", 1, "**Ehrlich benannt, statt beschönigt** (interne Arbeitsregel „Behauptungen vorher prüfen“):"));
+const risiken = [
+  "**Keine eigenen Ist-Verkaufsdaten.** Die Verkaufsdatenbank enthält 0 echte Zeilen (Stand 27.08.2026); jede Umsatzannahme hier ist extern hergeleitet oder eigene Schätzung.",
+  "**Standortzuordnung für Automat 1–3** auf 2027/2028 ist ein Vorschlag dieses Plans, keine Vorgabe des Auftraggebers. Standorte ab Automat 5 (2030) sind offen.",
+  "**Vereinsbeteiligung** ist umsatzsteuerlich in der Regel Leistungsaustausch, sobald Sichtbarkeit gewährt wird, vor dem ersten Sponsoring-Vertrag steuerlich zu bestätigen.",
+  "**Spendenabstimmung heute offen für alle Konten**, nicht nur zahlende Abonnenten. Die für diesen Plan angefragte Beschränkung ist im System nicht umgesetzt.",
+  "**Nayax-Gebühren, Standortprovision, Strom- und Wartungskosten** sind branchenübliche Annahmen, nicht am eigenen Betrieb geprüft (keine laufenden Verträge zum Planungszeitpunkt).",
+  "**sevDesk-Kontozuordnung** braucht laut docs/FINANCE.md eine einmalige Prüfung gegen das echte Konto, bevor Ist-Zahlen produktiv genutzt werden.",
+];
+risiken.forEach((r) => {
+  children.push(new Paragraph({
+    numbering: { reference: "risiken-liste", level: 0 },
+    spacing: { after: 140 },
+    children: bold(r),
+  }));
+});
+
+// ---------------------------------------------------------------------
+// Dokument zusammenbauen
+// ---------------------------------------------------------------------
+const doc = new Document({
+  creator: "Bördesnack24 GbR",
+  title: "Businessplan Bördesnack24 GbR",
+  styles: {
+    default: {
+      document: { run: { font: FONT_TEXT, size: 21, color: SCHWARZ } },
+    },
+  },
+  numbering: {
+    config: [{
+      reference: "risiken-liste",
+      levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT,
+        style: { paragraph: { indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.25) } } } }],
+    }],
+  },
+  sections: [{
+    properties: {
+      page: {
+        margin: { top: convertInchesToTwip(0.9), bottom: convertInchesToTwip(0.9), left: convertInchesToTwip(1.0), right: convertInchesToTwip(1.0) },
+      },
+    },
+    headers: {
+      default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT,
+        children: [new TextRun({ text: "Businessplan Bördesnack24 GbR", color: GRAU, size: 15, font: FONT_TEXT })] })] }),
+    },
+    footers: {
+      default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.RIGHT,
+        children: [new TextRun({ text: "Seite ", color: GRAU, size: 15, font: FONT_TEXT }),
+                   new TextRun({ children: [PageNumber.CURRENT], color: GRAU, size: 15, font: FONT_TEXT }),
+                   new TextRun({ text: " von ", color: GRAU, size: 15, font: FONT_TEXT }),
+                   new TextRun({ children: [PageNumber.TOTAL_PAGES], color: GRAU, size: 15, font: FONT_TEXT })] })] }),
+    },
+    children,
+  }],
+});
+
+Packer.toBuffer(doc).then((buf) => {
+  fs.writeFileSync("Boerdesnack24_Businessplan.docx", buf);
+  console.log("gespeichert: Boerdesnack24_Businessplan.docx");
+});
