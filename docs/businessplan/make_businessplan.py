@@ -301,6 +301,43 @@ def erlösmix_szenario_diagramm(pfad):
 
 erlösmix_szenario_diagramm("erloesmix_szenario.png")
 
+def marge_diagramm(pfad):
+    """Linienchart: EBIT-Marge je Jahr in allen drei Szenarien -- zeigt auf
+    einen Blick, dass die Marge nicht flach bei 38-42 % liegt, sondern mit
+    der Automatenzahl von deutlich darunter (Anlaufjahre) auf deutlich
+    darueber (Skaleneffekt) steigt (30.08.2026, Auftraggeber-Zielkorridor
+    38-42 %, hier ehrlich mit den tatsaechlichen Werten abgeglichen statt
+    erzwungen)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    jahre = [r["jahr"] for r in daten]
+    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=200)
+    ax.plot(jahre, [r["ebit_marge"] for r in daten_pess], color="#8C8C8C", linewidth=2.2, marker="o", markersize=4, label="Pessimistisch (−40 %)")
+    ax.plot(jahre, [r["ebit_marge"] for r in daten], color="#F3BE21", linewidth=2.2, marker="o", markersize=4, label="Planungsszenario")
+    ax.plot(jahre, [r["ebit_marge"] for r in daten_opt], color="#5C9A3F", linewidth=2.2, marker="o", markersize=4, label="Optimistisch (+40 %)")
+    ax.axhspan(38, 42, color="#F3BE21", alpha=0.12, zorder=0)
+    ax.axhline(38, color="#8A6E00", linewidth=0.8, linestyle="--")
+    ax.axhline(42, color="#8A6E00", linewidth=0.8, linestyle="--")
+    ax.text(jahre[0], 40, " Zielkorridor 38–42 %", color="#8A6E00", fontsize=8, va="center")
+
+    ax.set_xlabel("Jahr", color="#595959", fontsize=11)
+    ax.set_ylabel("EBIT-Marge in %", color="#595959", fontsize=11)
+    ax.set_title("EBIT-Marge je Jahr -- Zielkorridor vs. tatsächlicher Verlauf", color="#000000", fontsize=12, fontweight="bold")
+    ax.tick_params(colors="#595959", labelsize=9)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    for s in ("left", "bottom"):
+        ax.spines[s].set_color("#595959")
+    ax.grid(axis="y", color="#D9D9D9", linewidth=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(fontsize=8, loc="lower right", frameon=False)
+    fig.tight_layout()
+    fig.savefig(pfad, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+marge_diagramm("marge_verlauf.png")
+
 # ---------------------------------------------------------------------
 # Abschnittstitel fuers Inhaltsverzeichnis (Reihenfolge = Reihenfolge im
 # Text; ebene 2 = eingerueckter Unterpunkt)
@@ -314,6 +351,7 @@ TOC_ABSCHNITTE = [
     ("5. Finanzplan, Jahr 1 bis 10", 1),
     ("Spenden und Investitionen im Überblick", 2),
     ("6. Szenariovergleich", 1),
+    ("7. Wachstumsraten und Marge", 1),
 ]
 
 # ---------------------------------------------------------------------
@@ -328,6 +366,8 @@ ANNAHMEN_TABELLE = [
     ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
     ["Anschaffung je Automat", "10.000 € netto", "Angabe des Auftraggebers"],
     ["Abschreibungsdauer", "6 Jahre linear", "Angabe des Auftraggebers"],
+    ["KfW-Gründerkredit", "3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit 3 Jahre, nur Automat 1–3", "Angabe des Auftraggebers"],
+    ["Finanzierung Automat 4–11", "sofort aus dem Cashflow, ohne Kredit", "Angabe des Auftraggebers"],
     ["Nayax-Grundgebühr", "14 €/Monat je Terminal", "Nayax-Shop FAQ"],
     ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %"],
     ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", ""],
@@ -538,6 +578,87 @@ def baue_inhalt(doc, toc_seiten):
         hook(doc, f"**Kumuliert reicht das EBIT von {ebit_kum_pess_de} (pessimistisch) über {_kum_ebit_de} EUR (Planungsszenario) bis {ebit_kum_opt_de} (optimistisch).** Nur im pessimistischen Szenario ist {jahre_text_pess} leicht negativ ({erstes_neg_betrag_pess}), alle übrigen Jahre bleiben in allen drei Szenarien positiv.")
     else:
         hook(doc, f"**Kumuliert reicht das EBIT von {ebit_kum_pess_de} (pessimistisch) über {_kum_ebit_de} EUR (Planungsszenario) bis {ebit_kum_opt_de} (optimistisch), bleibt aber in allen drei Szenarien in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.")
+
+    # 7) Wachstumsraten und Marge --------------------------------------------
+    def _wachstum_prozent(werte):
+        """werte: 10 Jahreswerte. Gibt 9 Prozent-Strings zurueck (2028..2036
+        gegen das jeweilige Vorjahr). Bei Vorzeichenwechsel (z. B. EBIT von
+        negativ auf positiv) ist eine Prozentzahl irrefuehrend -- "n. a."
+        statt einer falsch lesbaren Zahl."""
+        ergebnis = []
+        for i in range(1, len(werte)):
+            v0, v1 = werte[i - 1], werte[i]
+            if v0 == 0 or (v0 < 0) != (v1 < 0):
+                ergebnis.append("n. a.")
+            else:
+                wert = (v1 / v0 - 1) * 100
+                ergebnis.append(f'{wert:.1f} %'.replace(".", ",").replace("-", "−"))
+        return ergebnis
+
+    abschnitt(doc, "7. Wachstumsraten und Marge", 1,
+              "**Wie schnell wächst das Geschäft, und wie viel bleibt hängen?** Umsatz- und Gewinnwachstum je Jahr in allen drei Szenarien, dazu die Finanzierung der ersten drei Automaten und die tatsächliche Marge im Vergleich zum Zielkorridor.")
+
+    hook(doc, "**Umsatzwachstum, Jahr für Jahr.** 2027 ist das Startjahr ohne Vorjahr, deshalb beginnt die Tabelle 2028.")
+    u_pess = [r["summe_erloese"] for r in daten_pess]
+    u_norm = [r["summe_erloese"] for r in daten]
+    u_opt = [r["summe_erloese"] for r in daten_opt]
+    wg_pess, wg_norm, wg_opt = _wachstum_prozent(u_pess), _wachstum_prozent(u_norm), _wachstum_prozent(u_opt)
+    umsatzwachstum_tabelle = [["Jahr", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]]
+    for i in range(1, len(daten)):
+        umsatzwachstum_tabelle.append([str(daten[i]["jahr"]), wg_pess[i - 1], wg_norm[i - 1], wg_opt[i - 1]])
+    tabelle_seite(doc, trenn_tabelle(umsatzwachstum_tabelle), zahlen_rechts={1, 2, 3})
+
+    hook(doc, "**Gewinnwachstum (EBIT), Jahr für Jahr.** „n. a.“ dort, wo das EBIT von negativ auf positiv wechselt (pessimistisch, 2028) — eine Prozentzahl wäre dort irreführend, nicht aussagekräftig.")
+    e_pess = [r["ebit"] for r in daten_pess]
+    e_norm = [r["ebit"] for r in daten]
+    e_opt = [r["ebit"] for r in daten_opt]
+    eg_pess, eg_norm, eg_opt = _wachstum_prozent(e_pess), _wachstum_prozent(e_norm), _wachstum_prozent(e_opt)
+    gewinnwachstum_tabelle = [["Jahr", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]]
+    for i in range(1, len(daten)):
+        gewinnwachstum_tabelle.append([str(daten[i]["jahr"]), eg_pess[i - 1], eg_norm[i - 1], eg_opt[i - 1]])
+    tabelle_seite(doc, trenn_tabelle(gewinnwachstum_tabelle), zahlen_rechts={1, 2, 3})
+
+    hook(doc, "**Finanzierung: KfW-Gründerkredit für die ersten drei Automaten.** 3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit 3 Jahre je Tranche (2027: 20.000 € für 2 Automaten, 2028: 10.000 € für den dritten) — endfällig, die volle Tilgung fällt im jeweils letzten Jahr der Laufzeit. Automat 4 bis 11 werden sofort aus dem Cashflow bezahlt, ohne Kredit und ohne Zinsen. Zinsen und Tilgung sind unabhängig vom Szenario, dieselbe Summe in allen dreien.")
+    kredit_tabelle = [["Jahr", "Kredit offen (Jahresende)", "Zinsen", "Tilgung"]]
+    for r in daten:
+        kredit_tabelle.append([
+            str(r["jahr"]),
+            f'{r["kredit_offen"]:,.0f} €'.replace(",", "."),
+            f'{r["zinsen_jahr"]:,.0f} €'.replace(",", "."),
+            f'{r["tilgung_jahr"]:,.0f} €'.replace(",", "."),
+        ])
+    tabelle_seite(doc, trenn_tabelle(kredit_tabelle), zahlen_rechts={1, 2, 3})
+
+    kum_ueberschuss_pess = sum(r["jahresueberschuss"] for r in daten_pess)
+    kum_ueberschuss_norm = sum(r["jahresueberschuss"] for r in daten)
+    kum_ueberschuss_opt = sum(r["jahresueberschuss"] for r in daten_opt)
+    _zinsen_de = f'{sum(r["zinsen_jahr"] for r in daten):,.0f} €'.replace(",", ".")
+    hook(doc, f"**Jahresüberschuss nach Zinsen, 10 Jahre kumuliert** — EBIT abzüglich der {_zinsen_de} Kreditzinsen (2027–2030, danach 0):")
+    kennzahlen_reihe(doc, [
+        (f'{kum_ueberschuss_pess:,.0f} €'.replace(",", "."), "Pessimistisch, 10 Jahre"),
+        (f'{kum_ueberschuss_norm:,.0f} €'.replace(",", "."), "Planungsszenario, 10 Jahre"),
+        (f'{kum_ueberschuss_opt:,.0f} €'.replace(",", "."), "Optimistisch, 10 Jahre"),
+    ])
+
+    marge_kum_pess = sum(r["ebit"] for r in daten_pess) / sum(r["summe_erloese"] for r in daten_pess) * 100
+    marge_kum_norm = ebit_kum / sum(r["summe_erloese"] for r in daten) * 100
+    marge_kum_opt = sum(r["ebit"] for r in daten_opt) / sum(r["summe_erloese"] for r in daten_opt) * 100
+    _marge_min_de = f"{min(r['ebit_marge'] for r in daten_pess):.1f}".replace(".", ",").replace("-", "−")
+    _marge_max_de = f"{max(r['ebit_marge'] for r in daten_opt):.1f}".replace(".", ",")
+    _marge_kum_pess_de = f"{marge_kum_pess:.1f}".replace(".", ",")
+    _marge_kum_norm_de = f"{marge_kum_norm:.1f}".replace(".", ",")
+    _marge_kum_opt_de = f"{marge_kum_opt:.1f}".replace(".", ",")
+    hook(doc, f"**Zielkorridor 38–42 % EBIT-Marge — ehrlich abgeglichen, nicht erzwungen.** Kumuliert über 10 Jahre: {_marge_kum_pess_de} % (pessimistisch, unter dem Korridor), {_marge_kum_norm_de} % (Planungsszenario, im Korridor), {_marge_kum_opt_de} % (optimistisch, knapp darüber). Je Jahr schwankt die Marge deutlich stärker — von {_marge_min_de} % im ersten Jahr (wenige Automaten, hohe Abschreibung relativ zum Umsatz) bis {_marge_max_de} % im letzten (Skaleneffekt). Ein flaches Band über alle zehn Jahre und alle drei Szenarien ist mit den hier dokumentierten, einzeln belegten Kostenannahmen nicht erreichbar, ohne eine davon ohne Beleg zu ändern.")
+    marge_tabelle = [["Jahr", "Marge pessimistisch", "Marge Planungsszenario", "Marge optimistisch"]]
+    for r, p, o in zip(daten, daten_pess, daten_opt):
+        marge_tabelle.append([
+            str(r["jahr"]),
+            f'{p["ebit_marge"]:.1f} %'.replace(".", ",").replace("-", "−"),
+            f'{r["ebit_marge"]:.1f} %'.replace(".", ",").replace("-", "−"),
+            f'{o["ebit_marge"]:.1f} %'.replace(".", ",").replace("-", "−"),
+        ])
+    tabelle_seite(doc, trenn_tabelle(marge_tabelle), zahlen_rechts={1, 2, 3})
+    doc.bild("marge_verlauf.png", unterschrift="Abb. 7: EBIT-Marge je Jahr gegen den Zielkorridor 38–42 %; die Marge wächst mit der Automatenzahl, statt flach zu bleiben.")
 
 
 def baue_dokument(pfad, toc_seiten):

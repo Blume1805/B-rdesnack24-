@@ -122,6 +122,28 @@ python3 make_businessplan.py
   Auftraggebers (30.08.2026), vorher 6.000 €/8 Jahre/556 €. Die Änderung
   wirkt sich auf jedes EBIT im Modell aus (mehr Investition, kürzere
   Abschreibungsdauer → höhere jährliche AfA).
+- **KfW-Gründerkredit für Automat 1–3** (Angabe des Auftraggebers,
+  30.08.2026): 3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit 3 Jahre je
+  Tranche, endfällig (volle Tilgung im letzten Laufzeitjahr). Zwei
+  Tranchen, exakt entlang der `MACHINES`-Reihenfolge: 20.000 € 2027
+  (2 Automaten), 10.000 € 2028 (1 Automat) — `KFW_TRANCHEN` in
+  `businessplan_model.py`, berechnet über `kfw_jahreswerte(jahr)`.
+  Automat 4–11 werden sofort aus dem Cashflow bezahlt, ohne Kredit.
+  **Zinsen wirken sich NICHT auf EBIT aus** (EBIT bleibt per Definition
+  vor Zinsen) — neues Feld `jahresueberschuss` (= EBIT − Zinsen) trägt
+  die Zinslast, damit EBIT als Kennzahl über alle bisherigen Runden
+  hinweg konsistent bleibt, ohne rückwirkend jede EBIT-Aussage im
+  Dokument neu zu formulieren.
+- **Gewinnmarge, Zielkorridor 38–42 %** (Angabe des Auftraggebers,
+  30.08.2026) — **bewusst nicht ins Modell einkalibriert.** Nachgerechnet
+  (EBIT/Umsatz je Jahr) schwankt die tatsächliche Marge zwischen −19,5 %
+  (2027, pessimistisch) und 50,6 % (2036, optimistisch); kumuliert über
+  10 Jahre liegt nur das Planungsszenario im Korridor (38,3 %),
+  pessimistisch darunter (29,8 %), optimistisch knapp darüber (42,8 %).
+  Auf Rückfrage hat der Auftraggeber entschieden: **ehrlich ausweisen,
+  nicht erzwingen** — keine der einzeln belegten Kostenannahmen wurde
+  verändert, um eine unbelegte Zielzahl zu treffen. Vgl. „Behauptungen
+  vorher prüfen“ in `CLAUDE.md`.
 - **Einwohnerzahlen**: öffentliche Vergleichszahlen statt der gerundeten
   Schätzung des Auftraggebers — Bördekreis 170.984 (Statistisches
   Landesamt Sachsen-Anhalt, Stand 31.12.2025), Sülzetal 8.841 (Gemeinde
@@ -258,10 +280,13 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   Auftraggeber aus der Grafik selbst schon entfernen liess. Dadurch beginnt
   die Abbildungsnummerierung der übrigen Grafiken bei „Abb. 1“
   (Standortnetz), nicht bei „Abb. 2“.
-- **Abschnitt „7. Risiken und offene Punkte“ existiert nicht mehr** (PDF
-  und DOCX gleichermaßen, entfernt 30.08.2026 auf Wunsch des
-  Auftraggebers — siehe „Bekannte Grenzen“ unten für den einzigen Punkt,
-  der dadurch nicht mehr im Businessplan selbst steht).
+- **Die ursprüngliche Abschnitt „7. Risiken und offene Punkte“ existiert
+  nicht mehr** (PDF und DOCX gleichermaßen, entfernt 30.08.2026 auf
+  Wunsch des Auftraggebers — siehe „Bekannte Grenzen“ unten für den
+  einzigen Punkt, der dadurch nicht mehr im Businessplan selbst steht).
+  **Die Nummer 7 ist seit 30.08.2026 wieder vergeben**, an einen völlig
+  neuen Abschnitt „7. Wachstumsraten und Marge“ (siehe unten) — reiner
+  Zufall der Reihenfolge, kein Zusammenhang mit dem entfernten Original.
 - **Abschnitt 6 heißt „Szenariovergleich“**, nicht mehr „Konservatives
   Szenario“ (30.08.2026, Auftraggeber: „ein pessimistisch, normales und
   optimistisches Szenario einarbeiten“). Vier-Spalten-Tabelle (Jahr +
@@ -269,6 +294,22 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   Balkenchart aus `szenario_diagramm()` — eigene Funktion, nicht
   `doc.diagramm()` aus dem Skill, weil die nur eine Datenreihe je Chart
   kann.
+- **Neuer Abschnitt „7. Wachstumsraten und Marge“** (30.08.2026,
+  Auftraggeber: Wachstumsraten je Szenario ergänzen, KfW-Gründerkredit
+  für die ersten drei Automaten einrechnen, Gewinnmarge gegen einen
+  38–42-%-Zielkorridor abgleichen). Vier Tabellen und ein Chart, in
+  dieser Reihenfolge: Umsatzwachstum % p.a. (3 Szenarien, ab 2028 — 2027
+  hat kein Vorjahr), Gewinnwachstum % p.a. (EBIT-basiert, dieselbe
+  Struktur, mit „n. a.“ dort, wo das EBIT das Vorzeichen wechselt — eine
+  Prozentzahl wäre dort irreführend, siehe `_wachstum_prozent()` /
+  `wachstumProzent()`), die KfW-Kredittabelle (Jahr × Kredit offen/
+  Zinsen/Tilgung, szenariounabhängig) mit einer `kennzahlen_reihe()` für
+  den kumulierten Jahresüberschuss nach Zinsen je Szenario, und die
+  EBIT-Marge-Tabelle mit `marge_verlauf.png` (Linienchart, Zielkorridor
+  als schattiertes Band). Die Marge-Aussage ist bewusst **nicht** auf
+  38–42 % kalibriert — siehe „Zentrale Annahmen“ oben, Abschnitt
+  „Gewinnmarge“, für die Begründung und die Entscheidung des
+  Auftraggebers dazu.
 - **Erlösmix je Jahr, Planungsszenario, direkt nach „Abb. 3“ in
   Abschnitt 5** (30.08.2026, Auftraggeber: „aus dem Diagramm sind die
   absoluten Zahlen der einzelnen Geschäftsfelder schwer abzulesen“) —

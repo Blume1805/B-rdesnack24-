@@ -292,6 +292,8 @@ const annahmenZeilen = [
   ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
   ["Anschaffung je Automat", "10.000 € netto", "Angabe des Auftraggebers"],
   ["Abschreibungsdauer", "6 Jahre linear", "Angabe des Auftraggebers"],
+  ["KfW-Gründerkredit", "3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit 3 Jahre, nur Automat 1–3", "Angabe des Auftraggebers"],
+  ["Finanzierung Automat 4–11", "sofort aus dem Cashflow, ohne Kredit", "Angabe des Auftraggebers"],
   ["Nayax-Grundgebühr", "14 €/Monat je Terminal", "Nayax-Shop FAQ"],
   ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %"],
   ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", ""],
@@ -364,6 +366,77 @@ children.push(...bild("szenariovergleich.png", 600, "Abb. 6: EBIT je Jahr in all
 children.push(hook(negPess.jahre.length
   ? `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch).** Nur im pessimistischen Szenario ist ${jahreTextPess} leicht negativ (${negPess.betrag}), alle übrigen Jahre bleiben in allen drei Szenarien positiv.`
   : `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch), bleibt aber in allen drei Szenarien in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.`));
+
+// 7) Wachstumsraten und Marge
+function wachstumProzent(werte) {
+  // werte: 10 Jahreswerte -> 9 Prozent-Strings (2028..2036 gg. Vorjahr).
+  // "n. a." bei Vorzeichenwechsel (z.B. EBIT von negativ auf positiv) --
+  // eine Prozentzahl waere dort irrefuehrend.
+  const ergebnis = [];
+  for (let i = 1; i < werte.length; i++) {
+    const v0 = werte[i - 1], v1 = werte[i];
+    if (v0 === 0 || (v0 < 0) !== (v1 < 0)) {
+      ergebnis.push("n. a.");
+    } else {
+      const wert = (v1 / v0 - 1) * 100;
+      ergebnis.push(`${wert.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`.replace("-", "−"));
+    }
+  }
+  return ergebnis;
+}
+
+children.push(...ueberschrift("7. Wachstumsraten und Marge", 1, "**Wie schnell wächst das Geschäft, und wie viel bleibt hängen?** Umsatz- und Gewinnwachstum je Jahr in allen drei Szenarien, dazu die Finanzierung der ersten drei Automaten und die tatsächliche Marge im Vergleich zum Zielkorridor."));
+
+children.push(hook("**Umsatzwachstum, Jahr für Jahr.** 2027 ist das Startjahr ohne Vorjahr, deshalb beginnt die Tabelle 2028."));
+const uPess = datenPess.map((r) => r.summe_erloese);
+const uNorm = daten.map((r) => r.summe_erloese);
+const uOpt = datenOpt.map((r) => r.summe_erloese);
+const wgPess = wachstumProzent(uPess), wgNorm = wachstumProzent(uNorm), wgOpt = wachstumProzent(uOpt);
+const umsatzwachstumZeilen = daten.slice(1).map((r, i) => [String(r.jahr), wgPess[i], wgNorm[i], wgOpt[i]]);
+children.push(tabelle(trenn(["Jahr", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]), trennZeilen(umsatzwachstumZeilen), [1000, 2600, 2600, 2600], [1, 2, 3]));
+
+children.push(hook("**Gewinnwachstum (EBIT), Jahr für Jahr.** „n. a.“ dort, wo das EBIT von negativ auf positiv wechselt (pessimistisch, 2028) — eine Prozentzahl wäre dort irreführend, nicht aussagekräftig."));
+const ePess = datenPess.map((r) => r.ebit);
+const eNorm = daten.map((r) => r.ebit);
+const eOpt = datenOpt.map((r) => r.ebit);
+const egPess = wachstumProzent(ePess), egNorm = wachstumProzent(eNorm), egOpt = wachstumProzent(eOpt);
+const gewinnwachstumZeilen = daten.slice(1).map((r, i) => [String(r.jahr), egPess[i], egNorm[i], egOpt[i]]);
+children.push(tabelle(trenn(["Jahr", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]), trennZeilen(gewinnwachstumZeilen), [1000, 2600, 2600, 2600], [1, 2, 3]));
+
+children.push(hook("**Finanzierung: KfW-Gründerkredit für die ersten drei Automaten.** 3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit 3 Jahre je Tranche (2027: 20.000 € für 2 Automaten, 2028: 10.000 € für den dritten) — endfällig, die volle Tilgung fällt im jeweils letzten Jahr der Laufzeit. Automat 4 bis 11 werden sofort aus dem Cashflow bezahlt, ohne Kredit und ohne Zinsen. Zinsen und Tilgung sind unabhängig vom Szenario, dieselbe Summe in allen dreien."));
+const kreditZeilen = daten.map((r) => [String(r.jahr), `${de(r.kredit_offen)} €`, `${de(r.zinsen_jahr)} €`, `${de(r.tilgung_jahr)} €`]);
+children.push(tabelle(trenn(["Jahr", "Kredit offen (Jahresende)", "Zinsen", "Tilgung"]), trennZeilen(kreditZeilen), [1000, 2600, 1800, 1800], [1, 2, 3]));
+
+const kumUeberschussPess = summe(datenPess.map((r) => r.jahresueberschuss));
+const kumUeberschussNorm = summe(daten.map((r) => r.jahresueberschuss));
+const kumUeberschussOpt = summe(datenOpt.map((r) => r.jahresueberschuss));
+const kumZinsen = summe(daten.map((r) => r.zinsen_jahr));
+children.push(hook(`**Jahresüberschuss nach Zinsen, 10 Jahre kumuliert** — EBIT abzüglich der ${de(kumZinsen)} € Kreditzinsen (2027–2030, danach 0):`));
+children.push(kennzahlenReihe([
+  [`${de(kumUeberschussPess)} €`, "Pessimistisch, 10 Jahre"],
+  [`${de(kumUeberschussNorm)} €`, "Planungsszenario, 10 Jahre"],
+  [`${de(kumUeberschussOpt)} €`, "Optimistisch, 10 Jahre"],
+]));
+children.push(spacer(160));
+
+const margeKumPess = summe(datenPess.map((r) => r.ebit)) / summe(datenPess.map((r) => r.summe_erloese)) * 100;
+const margeKumNorm = kumEbit / summe(daten.map((r) => r.summe_erloese)) * 100;
+const margeKumOpt = summe(datenOpt.map((r) => r.ebit)) / summe(datenOpt.map((r) => r.summe_erloese)) * 100;
+const margeMinDe = Math.min(...datenPess.map((r) => r.ebit_marge)).toFixed(1).replace(".", ",").replace("-", "−");
+const margeMaxDe = Math.max(...datenOpt.map((r) => r.ebit_marge)).toFixed(1).replace(".", ",");
+const margeKumPessDe = margeKumPess.toFixed(1).replace(".", ",");
+const margeKumNormDe = margeKumNorm.toFixed(1).replace(".", ",");
+const margeKumOptDe = margeKumOpt.toFixed(1).replace(".", ",");
+children.push(hook(`**Zielkorridor 38–42 % EBIT-Marge — ehrlich abgeglichen, nicht erzwungen.** Kumuliert über 10 Jahre: ${margeKumPessDe} % (pessimistisch, unter dem Korridor), ${margeKumNormDe} % (Planungsszenario, im Korridor), ${margeKumOptDe} % (optimistisch, knapp darüber). Je Jahr schwankt die Marge deutlich stärker — von ${margeMinDe} % im ersten Jahr (wenige Automaten, hohe Abschreibung relativ zum Umsatz) bis ${margeMaxDe} % im letzten (Skaleneffekt). Ein flaches Band über alle zehn Jahre und alle drei Szenarien ist mit den hier dokumentierten, einzeln belegten Kostenannahmen nicht erreichbar, ohne eine davon ohne Beleg zu ändern.`));
+const margeZeilen = daten.map((r, i) => [
+  String(r.jahr),
+  `${datenPess[i].ebit_marge.toFixed(1).replace(".", ",")} %`.replace("-", "−"),
+  `${r.ebit_marge.toFixed(1).replace(".", ",")} %`.replace("-", "−"),
+  `${datenOpt[i].ebit_marge.toFixed(1).replace(".", ",")} %`.replace("-", "−"),
+]);
+children.push(tabelle(trenn(["Jahr", "Marge pessimistisch", "Marge Planungsszenario", "Marge optimistisch"]), trennZeilen(margeZeilen), [1000, 2600, 2600, 2600], [1, 2, 3]));
+children.push(spacer(200));
+children.push(...bild("marge_verlauf.png", 600, "Abb. 7: EBIT-Marge je Jahr gegen den Zielkorridor 38–42 %; die Marge wächst mit der Automatenzahl, statt flach zu bleiben."));
 
 // ---------------------------------------------------------------------
 // Dokument zusammenbauen

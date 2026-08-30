@@ -156,6 +156,44 @@ PREISSTEIGERUNG_SATZ = 0.03  # p.a., Angabe des Auftraggebers (30.08.2026)
 def preissteigerung_faktor(jahr):
     return (1 + PREISSTEIGERUNG_SATZ) ** (jahr - YEARS[0])
 
+# ---------------------------------------------------------------------------
+# 10) Finanzierung -- Angabe des Auftraggebers (30.08.2026): die ersten drei
+#     Automaten (2027: 2 Stueck, 2028: 1 Stueck -- deckt sich exakt mit den
+#     ersten beiden MACHINES-Jahrgaengen) werden ueber einen KfW-Gruender-
+#     kredit finanziert, ca. 3 % Zinsen, 2 Jahre tilgungsfrei, Laufzeit
+#     3 Jahre -- also im 3. Jahr der jeweiligen Tranche die vollstaendige
+#     Tilgung (endfaellig), in den ersten beiden Jahren nur Zinsen. Alle
+#     weiteren Automaten (ab 2029) werden sofort aus dem Cashflow bezahlt,
+#     tragen keine Zinsen. Kreditsumme und -verlauf haengen nur am
+#     Automaten-Rollout (fix je Jahr), nicht am Szenario-Faktor -- dieselben
+#     Zinsen/Tilgungen gelten in allen drei Szenarien, nur EBIT und damit der
+#     Jahresueberschuss nach Zinsen unterscheiden sich.
+# ---------------------------------------------------------------------------
+KFW_ZINSSATZ = 0.03           # p.a., Angabe des Auftraggebers (30.08.2026)
+KFW_TILGUNGSFREI_JAHRE = 2    # Angabe des Auftraggebers
+KFW_LAUFZEIT_JAHRE = 3        # Angabe des Auftraggebers, endfaellig im letzten Jahr
+KFW_TRANCHEN = [
+    dict(jahr=2027, betrag=2 * INVESTITION_PRO_AUTOMAT),  # 2 Automaten Bahnhof Osterweddingen
+    dict(jahr=2028, betrag=1 * INVESTITION_PRO_AUTOMAT),  # Freibad Langenweddingen
+]
+
+def kfw_jahreswerte(jahr):
+    """Zinsen, Tilgung und Kredit-Restschuld (jeweils zum Jahresende) fuer ein
+    gegebenes Jahr, ueber alle KfW-Tranchen summiert."""
+    zinsen = 0.0
+    tilgung = 0.0
+    offen_jahresende = 0.0
+    for tranche in KFW_TRANCHEN:
+        start = tranche["jahr"]
+        letztes_jahr = start + KFW_LAUFZEIT_JAHRE - 1
+        if start <= jahr <= letztes_jahr:
+            zinsen += tranche["betrag"] * KFW_ZINSSATZ
+            if jahr == letztes_jahr:
+                tilgung += tranche["betrag"]
+            else:
+                offen_jahresende += tranche["betrag"]
+    return round(zinsen, 2), round(tilgung, 2), round(offen_jahresende, 2)
+
 # ===========================================================================
 # Berechnung
 # ===========================================================================
@@ -242,6 +280,9 @@ def berechne(umsatz_faktor=1.0):
             + standortprovision + personal, 2
         )
         ebit = round(summe_erloese - summe_kosten_ohne_afa - afa_jahr, 2)
+        zinsen_jahr, tilgung_jahr, kredit_offen = kfw_jahreswerte(y)
+        jahresueberschuss = round(ebit - zinsen_jahr, 2)
+        ebit_marge = round(ebit / summe_erloese * 100, 2) if summe_erloese else 0.0
 
         ergebnisse.append(dict(
             jahr=y, automaten=gesamt_automaten, neue_automaten=len(neue),
@@ -256,7 +297,9 @@ def berechne(umsatz_faktor=1.0):
             minijobs=minijobs,
             investition_jahr=round(investition_jahr, 2), afa_jahr=round(afa_jahr, 2),
             summe_kosten_ohne_afa=summe_kosten_ohne_afa,
-            ebit=ebit,
+            ebit=ebit, ebit_marge=ebit_marge,
+            zinsen_jahr=zinsen_jahr, tilgung_jahr=tilgung_jahr, kredit_offen=kredit_offen,
+            jahresueberschuss=jahresueberschuss,
             aktive_konten=AKTIVE_KONTEN[y], abonnenten=ZAHLENDE_ABONNENTEN[y],
             auslastung_werbeflaechen=AUSLASTUNG_WERBEFLAECHEN[y],
             werbekunden_digital=WERBEKUNDEN_DIGITAL[y],
