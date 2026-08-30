@@ -117,16 +117,22 @@ python3 make_businessplan.py
   pauschale „durchgehend positiv“-Behauptung. Kumuliertes EBIT, 10 Jahre:
   85.136 € (pessimistisch) / 180.526 € (Planungsszenario) / 275.915 €
   (optimistisch).
-- **Erlösmix nach Szenario**: von den vier Geschäftsbereichen skaliert nur
-  der Automatenumsatz (Snack-/Getränkeverkauf) mit dem Bruttoumsatz je
-  Automat — App-Abo (38.578 €), Werbeflächen (28.375 €) und Sponsoring
-  (68.040 €) hängen an eigenen, vom Szenario unabhängigen Planzahlen und
-  sind über alle drei Szenarien hinweg **exakt identisch** (kumuliert,
-  10 Jahre). Nachgerechnet, nicht vermutet: `_erlösmix_summen()` in
-  `make_businessplan.py` summiert `app_erlös`/`werbeflaechen_erlös`/
+- **Erlösmix nach Szenario, je Jahr**: von den vier Geschäftsbereichen
+  skaliert nur der Automatenumsatz (Snack-/Getränkeverkauf) mit dem
+  Bruttoumsatz je Automat — App-Abo (38.578 €), Werbeflächen (28.375 €)
+  und Sponsoring (68.040 €) hängen an eigenen, vom Szenario unabhängigen
+  Planzahlen und sind über alle drei Szenarien hinweg **exakt identisch**
+  (kumuliert, 10 Jahre). Nachgerechnet, nicht vermutet: `_erlösmix_jahre()`
+  in `make_businessplan.py` summiert `app_erlös`/`werbeflaechen_erlös`/
   `sponsoring_erlös` unabhängig vom Szenario-Faktor, weil
   `businessplan_model.py`s `berechne(umsatz_faktor)` diesen nur auf
-  `REVENUE_BRUTTO_PRO_MONAT` anwendet.
+  `REVENUE_BRUTTO_PRO_MONAT` anwendet. Tabelle und Grafik zeigen deshalb
+  **je Jahr** nur noch die eine Zeile, die sich zwischen den Szenarien
+  tatsächlich unterscheidet (Snack-/Getränkeverkauf) — nicht mehr nur die
+  10-Jahres-Summe aller vier Bereiche wie in der ersten Fassung
+  (30.08.2026, Auftraggeber: „nicht nur die Summe nach 10 Jahren …
+  sondern für [jedes] Jahr, um transparenter die Entwicklung zu
+  überprüfen“).
 
 Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
@@ -144,7 +150,7 @@ lässt sich nicht in Word öffnen und bearbeiten.
 | `build_docx.js` | Baut `Boerdesnack24_Businessplan.docx` mit dem npm-Paket `docx` (docx-js). Eigenständiges Skript, dieselben Inhalte/Zahlen wie `make_businessplan.py`, aber als editierbares Word-Dokument statt PDF. Ruft für die Silbentrennung in Tabellen `python3` per `child_process` auf (siehe „Silbentrennung“ unten) — Node braucht dafür kein eigenes Hyphenation-Paket. |
 | `automatennetz_linie.png`, `umsatz_balken.png`, `ebit_balken.png` | Die Diagramme, die im PDF über `pdf_builder.py`s interne `diagramm()`-Funktion entstehen (dort nicht als eigene Datei erreichbar) — für die docx-Fassung als eigenständige PNGs neu erzeugt (gleicher matplotlib-Stil, gleiche Zahlen aus `businessplan_zahlen.json`). |
 | `szenariovergleich.png` | Gruppierter Balkenchart, EBIT je Jahr in allen drei Szenarien nebeneinander (grau/gold/grün) — erzeugt von `szenario_diagramm()` in `make_businessplan.py`, dieselbe Datei wird auch von `build_docx.js` eingebettet. |
-| `erloesmix_szenario.png` | Gruppierter Balkenchart, kumulierter 10-Jahres-Erlös je Geschäftsbereich (Snack-/Getränke, App-Abo, Werbeflächen, Sponsoring) in allen drei Szenarien — erzeugt von `erlösmix_szenario_diagramm()`. Macht sichtbar, dass nur der Automatenumsatz mit dem Szenario skaliert: die drei anderen Balkenpaare sind praktisch gleich hoch. |
+| `erloesmix_szenario.png` | Drei Erlösmix-Charts nebeneinander (pessimistisch/Planungsszenario/optimistisch), jeweils wie `erloesmix.png`, aber mit gemeinsamer y-Achse — erzeugt von `erlösmix_szenario_diagramm()`. Zeigt die Entwicklung über die zehn Jahre UND den Unterschied zwischen den Szenarien gleichzeitig, nicht nur eine 10-Jahres-Summe je Bereich. |
 | `erloesmix.png`, `iconstrip_trim.png` | Dieselben Grafiken wie in der PDF-Fassung, hier zusätzlich für die docx-Fassung im Repo gesichert. |
 
 **Neu bauen:**
@@ -235,16 +241,23 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   Balkenchart aus `szenario_diagramm()` — eigene Funktion, nicht
   `doc.diagramm()` aus dem Skill, weil die nur eine Datenreihe je Chart
   kann.
-- **Erlösmix nach Szenario, direkt bei „Abb. 3“ in Abschnitt 5** (nach
-  demselben Auftrag wie oben): Vier-Spalten-Tabelle (Geschäftsbereich +
-  drei Szenario-Spalten, plus Summenzeile) und `erloesmix_szenario.png`
-  (gruppierter Balkenchart aus `erlösmix_szenario_diagramm()`), direkt
-  im Anschluss an `erloesmix.png`. Verschiebt die Abbildungsnummerierung
-  ab dort um eins: EBIT-Chart in Abschnitt 5 ist seither „Abb. 5“ (vorher
-  „Abb. 4“), der Szenariovergleich-Chart in Abschnitt 6 „Abb. 6“ (vorher
-  „Abb. 5“) — bei einer künftigen Änderung an der Abbildungsreihenfolge
-  IMMER beide Dateien (`make_businessplan.py` und `build_docx.js`)
-  gemeinsam durchnummerieren, sie laufen unabhängig auseinander sonst.
+- **Erlösmix nach Szenario, je Jahr, direkt bei „Abb. 3“ in Abschnitt 5**
+  (nach demselben Auftrag wie oben; **Stand 30.08.2026 präzisiert**: erst
+  nur die 10-Jahres-Summe je Bereich, auf Wunsch des Auftraggebers
+  „nicht nur die Summe … sondern für [jedes] Jahr, um transparenter die
+  Entwicklung zu überprüfen“ dann auf Jahreswerte umgestellt): Vier-
+  Spalten-Tabelle (Jahr + drei Szenario-Spalten, plus Summenzeile am
+  Ende) nur noch für Snack-/Getränkeverkauf — die einzige Zeile, die sich
+  zwischen den Szenarien unterscheidet, siehe „Zentrale Annahmen“ oben —
+  und `erloesmix_szenario.png` (drei nebeneinander gestellte
+  Erlösmix-Charts, gemeinsame y-Achse, aus `erlösmix_szenario_diagramm()`
+  statt eines einzelnen gruppierten Balkendiagramms), direkt im Anschluss
+  an `erloesmix.png`. Verschiebt die Abbildungsnummerierung ab dort um
+  eins: EBIT-Chart in Abschnitt 5 ist seither „Abb. 5“ (vorher „Abb. 4“),
+  der Szenariovergleich-Chart in Abschnitt 6 „Abb. 6“ (vorher „Abb. 5“)
+  — bei einer künftigen Änderung an der Abbildungsreihenfolge IMMER beide
+  Dateien (`make_businessplan.py` und `build_docx.js`) gemeinsam
+  durchnummerieren, sie laufen unabhängig auseinander sonst.
 - **Silbentrennung in allen Tabellen** (`trenn_tabelle()` in
   `make_businessplan.py`, `pyphen`-basiert, weiche Trennzeichen U+00AD).
   **Wichtige Nebenwirkung, die dabei auffiel:** `doc.tabelle()`s

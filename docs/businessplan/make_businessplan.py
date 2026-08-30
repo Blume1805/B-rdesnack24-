@@ -244,51 +244,57 @@ def szenario_diagramm(pfad):
 
 szenario_diagramm("szenariovergleich.png")
 
-def _erlösmix_summen(daten_liste):
-    """Kumulierte 10-Jahres-Summe je Geschäftsbereich -- dieselbe Aufteilung
-    wie in erlösmix_diagramm(), nur ueber die Jahre aufsummiert statt je
-    Jahr gestapelt."""
-    produkt = sum(r["produkt_netto"] - r["spende"] for r in daten_liste)
-    app = sum(r["app_erlös"] for r in daten_liste)
-    werbeflaeche = sum(r["werbeflaechen_erlös"] for r in daten_liste)
-    sponsoring = sum(r["sponsoring_erlös"] for r in daten_liste)
+def _erlösmix_jahre(daten_liste):
+    """Je Jahr die vier Geschäftsbereiche -- dieselbe Aufteilung wie in
+    erlösmix_diagramm(), als vier Listen (eine je Bereich, ein Wert je Jahr)
+    statt zu einer 10-Jahres-Summe verdichtet."""
+    produkt = [r["produkt_netto"] - r["spende"] for r in daten_liste]
+    app = [r["app_erlös"] for r in daten_liste]
+    werbeflaeche = [r["werbeflaechen_erlös"] for r in daten_liste]
+    sponsoring = [r["sponsoring_erlös"] for r in daten_liste]
     return produkt, app, werbeflaeche, sponsoring
 
 def erlösmix_szenario_diagramm(pfad):
-    """Gruppierte Balken: kumulierter 10-Jahres-Erlös je Geschäftsbereich,
-    nebeneinander fuer alle drei Szenarien -- macht sichtbar, dass nur der
-    Automatenumsatz mit dem Szenario skaliert, die drei anderen Quellen an
-    fester Planzahl (Abonnenten, Auslastung, Werbekunden) haengen, nicht am
-    Bruttoumsatz je Automat."""
+    """Drei Erlösmix-Charts nebeneinander (pessimistisch/Planungsszenario/
+    optimistisch), jedes wie erlösmix_diagramm() -- je Jahr gestapelt nach
+    Geschäftsbereich, gleiche y-Achse fuer alle drei, damit die Entwicklung
+    über die Jahre UND der Unterschied zwischen den Szenarien auf einen
+    Blick vergleichbar sind (Vorgabe des Auftraggebers, 30.08.2026: nicht
+    nur die 10-Jahres-Summe, sondern die Entwicklung je Jahr)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    import numpy as np
-    kategorien = ["Snack-/\nGetränkeverkauf", "App-Abo", "Werbeflächen\nam Automat", "Digitale Werbe-/\nSponsoringpakete"]
-    pess = _erlösmix_summen(daten_pess)
-    normal = _erlösmix_summen(daten)
-    opt = _erlösmix_summen(daten_opt)
+    jahre = [r["jahr"] for r in daten]
+    farben = ["#F3BE21", "#8A6E00", "#000000", "#8C8C8C"]
+    labels = ["Snack-/Getränkeverkauf", "App-Abo", "Werbeflächen", "Sponsoring"]
+    szenarien = [
+        ("Pessimistisch (−40 %)", _erlösmix_jahre(daten_pess)),
+        ("Planungsszenario", _erlösmix_jahre(daten)),
+        ("Optimistisch (+40 %)", _erlösmix_jahre(daten_opt)),
+    ]
+    y_max = max(sum(jahres_werte) for _, mix in szenarien for jahres_werte in zip(*mix))
 
-    x = np.arange(len(kategorien))
-    breite = 0.27
-    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=200)
-    ax.bar(x - breite, pess, breite, color="#8C8C8C", edgecolor="#000000", linewidth=0.5, label="Pessimistisch (−40 %)")
-    ax.bar(x, normal, breite, color="#F3BE21", edgecolor="#000000", linewidth=0.5, label="Planungsszenario")
-    ax.bar(x + breite, opt, breite, color="#5C9A3F", edgecolor="#000000", linewidth=0.5, label="Optimistisch (+40 %)")
-
-    ax.set_xlabel("Geschäftsbereich", color="#595959", fontsize=11)
-    ax.set_ylabel("Erlös in EUR, 10 Jahre kumuliert", color="#595959", fontsize=11)
-    ax.set_title("Erlösmix nach Szenario, 10 Jahre kumuliert", color="#000000", fontsize=12, fontweight="bold")
-    ax.set_xticks(x)
-    ax.set_xticklabels(kategorien, fontsize=8.5)
-    ax.tick_params(colors="#595959", labelsize=9)
-    for s in ("top", "right"):
-        ax.spines[s].set_visible(False)
-    for s in ("left", "bottom"):
-        ax.spines[s].set_color("#595959")
-    ax.grid(axis="y", color="#D9D9D9", linewidth=0.6)
-    ax.set_axisbelow(True)
-    ax.legend(fontsize=8, loc="upper right", frameon=False)
+    fig, achsen = plt.subplots(1, 3, figsize=(10.8, 3.8), dpi=200, sharey=True)
+    for ax, (titel, mix) in zip(achsen, szenarien):
+        bottom = [0.0] * len(jahre)
+        for werte, farbe in zip(mix, farben):
+            ax.bar(jahre, werte, bottom=bottom, color=farbe, edgecolor="white", linewidth=0.3)
+            bottom = [b + w for b, w in zip(bottom, werte)]
+        ax.set_title(titel, color="#000000", fontsize=10.5, fontweight="bold")
+        ax.set_xlabel("Jahr", color="#595959", fontsize=9)
+        ax.set_xticks(jahre[::2])
+        ax.set_xticklabels([str(j) for j in jahre[::2]], fontsize=7.5, rotation=45)
+        ax.tick_params(colors="#595959", labelsize=8)
+        ax.set_ylim(0, y_max * 1.05)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        for s in ("left", "bottom"):
+            ax.spines[s].set_color("#595959")
+        ax.grid(axis="y", color="#D9D9D9", linewidth=0.6)
+        ax.set_axisbelow(True)
+    achsen[0].set_ylabel("Erlöse in EUR", color="#595959", fontsize=9)
+    handles = [plt.Rectangle((0, 0), 1, 1, color=f) for f in farben]
+    fig.legend(handles, labels, fontsize=8, loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.06))
     fig.tight_layout()
     fig.savefig(pfad, bbox_inches="tight", facecolor="white")
     plt.close(fig)
@@ -456,27 +462,29 @@ def baue_inhalt(doc, toc_seiten):
     )
     doc.bild("erloesmix.png", unterschrift="Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum.")
 
-    pess_mix = _erlösmix_summen(daten_pess)
-    normal_mix = _erlösmix_summen(daten)
-    opt_mix = _erlösmix_summen(daten_opt)
-    hook(doc, "**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat; App-Abo, Werbeflächen und Sponsoring hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und bleiben in allen drei Szenarien unverändert.")
-    mix_tabelle = [["Geschäftsbereich", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]]
-    mix_labels = ["Snack-/Getränkeverkauf (netto, nach Spende)", "App-Abo", "Werbeflächen am Automat", "Digitale Werbe-/Sponsoringpakete"]
-    for i, label in enumerate(mix_labels):
+    pess_produkt, pess_app, pess_werbe, pess_spons = _erlösmix_jahre(daten_pess)
+    normal_produkt, normal_app, normal_werbe, normal_spons = _erlösmix_jahre(daten)
+    opt_produkt, opt_app, opt_werbe, opt_spons = _erlösmix_jahre(daten_opt)
+    _app_de = f'{sum(normal_app):,.0f} €'.replace(",", ".")
+    _werbe_de = f'{sum(normal_werbe):,.0f} €'.replace(",", ".")
+    _spons_de = f'{sum(normal_spons):,.0f} €'.replace(",", ".")
+    hook(doc, f"**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil, und nicht nur als 10-Jahres-Summe, sondern schon Jahr für Jahr sichtbar.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat, deshalb einzeln nach Jahr unten. App-Abo ({_app_de}), Werbeflächen ({_werbe_de}) und Sponsoring ({_spons_de}) hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und sind, 10 Jahre kumuliert, in allen drei Szenarien identisch.")
+    mix_tabelle = [["Jahr", "Snack-/Getränke pessimistisch (−40 %)", "Snack-/Getränke Planungsszenario", "Snack-/Getränke optimistisch (+40 %)"]]
+    for i, r in enumerate(daten):
         mix_tabelle.append([
-            label,
-            f'{pess_mix[i]:,.0f} €'.replace(",", "."),
-            f'{normal_mix[i]:,.0f} €'.replace(",", "."),
-            f'{opt_mix[i]:,.0f} €'.replace(",", "."),
+            str(r["jahr"]),
+            f'{pess_produkt[i]:,.0f} €'.replace(",", "."),
+            f'{normal_produkt[i]:,.0f} €'.replace(",", "."),
+            f'{opt_produkt[i]:,.0f} €'.replace(",", "."),
         ])
     mix_tabelle.append([
         "Summe, 10 Jahre",
-        f'{sum(pess_mix):,.0f} €'.replace(",", "."),
-        f'{sum(normal_mix):,.0f} €'.replace(",", "."),
-        f'{sum(opt_mix):,.0f} €'.replace(",", "."),
+        f'{sum(pess_produkt):,.0f} €'.replace(",", "."),
+        f'{sum(normal_produkt):,.0f} €'.replace(",", "."),
+        f'{sum(opt_produkt):,.0f} €'.replace(",", "."),
     ])
     tabelle_seite(doc, trenn_tabelle(mix_tabelle), zahlen_rechts={1, 2, 3})
-    doc.bild("erloesmix_szenario.png", unterschrift="Abb. 4: Kumulierter Erlös je Geschäftsbereich, 10 Jahre, in allen drei Szenarien.")
+    doc.bild("erloesmix_szenario.png", unterschrift="Abb. 4: Erlösmix je Jahr, nebeneinander für alle drei Szenarien (gleiche y-Achse).")
 
     doc.diagramm(
         [r["jahr"] for r in daten], [r["ebit"] for r in daten],

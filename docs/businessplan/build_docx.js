@@ -311,23 +311,23 @@ children.push(spacer(200));
 children.push(...bild("umsatz_balken.png", 600, "Abb. 2: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
 children.push(...bild("erloesmix.png", 600, "Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
 
-function erlösmixSummen(d) {
-  const produkt = d.reduce((s, r) => s + (r.produkt_netto - r.spende), 0);
-  const app = d.reduce((s, r) => s + r.app_erlös, 0);
-  const werbeflaeche = d.reduce((s, r) => s + r.werbeflaechen_erlös, 0);
-  const sponsoring = d.reduce((s, r) => s + r.sponsoring_erlös, 0);
-  return [produkt, app, werbeflaeche, sponsoring];
+function erlösmixJahre(d) {
+  const produkt = d.map((r) => r.produkt_netto - r.spende);
+  const app = d.map((r) => r.app_erlös);
+  const werbeflaeche = d.map((r) => r.werbeflaechen_erlös);
+  const sponsoring = d.map((r) => r.sponsoring_erlös);
+  return { produkt, app, werbeflaeche, sponsoring };
 }
-const mixPess = erlösmixSummen(datenPess);
-const mixNormal = erlösmixSummen(daten);
-const mixOpt = erlösmixSummen(datenOpt);
-children.push(hook("**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat; App-Abo, Werbeflächen und Sponsoring hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und bleiben in allen drei Szenarien unverändert."));
-const mixLabels = ["Snack-/Getränkeverkauf (netto, nach Spende)", "App-Abo", "Werbeflächen am Automat", "Digitale Werbe-/Sponsoringpakete"];
-const mixZeilen = mixLabels.map((label, i) => [label, `${de(mixPess[i])} €`, `${de(mixNormal[i])} €`, `${de(mixOpt[i])} €`]);
-mixZeilen.push(["Summe, 10 Jahre", `${de(mixPess.reduce((a, b) => a + b, 0))} €`, `${de(mixNormal.reduce((a, b) => a + b, 0))} €`, `${de(mixOpt.reduce((a, b) => a + b, 0))} €`]);
-children.push(tabelle(trenn(["Geschäftsbereich", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]), trennZeilen(mixZeilen), [3000, 2200, 2200, 2200], [1, 2, 3]));
+const mixPess = erlösmixJahre(datenPess);
+const mixNormal = erlösmixJahre(daten);
+const mixOpt = erlösmixJahre(datenOpt);
+const summe = (arr) => arr.reduce((a, b) => a + b, 0);
+children.push(hook(`**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil, und nicht nur als 10-Jahres-Summe, sondern schon Jahr für Jahr sichtbar.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat, deshalb einzeln nach Jahr unten. App-Abo (${de(summe(mixNormal.app))} €), Werbeflächen (${de(summe(mixNormal.werbeflaeche))} €) und Sponsoring (${de(summe(mixNormal.sponsoring))} €) hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und sind, 10 Jahre kumuliert, in allen drei Szenarien identisch.`));
+const mixZeilen = daten.map((r, i) => [String(r.jahr), `${de(mixPess.produkt[i])} €`, `${de(mixNormal.produkt[i])} €`, `${de(mixOpt.produkt[i])} €`]);
+mixZeilen.push(["Summe, 10 Jahre", `${de(summe(mixPess.produkt))} €`, `${de(summe(mixNormal.produkt))} €`, `${de(summe(mixOpt.produkt))} €`]);
+children.push(tabelle(trenn(["Jahr", "Snack-/Getränke pessimistisch (−40 %)", "Snack-/Getränke Planungsszenario", "Snack-/Getränke optimistisch (+40 %)"]), trennZeilen(mixZeilen), [1000, 2600, 2600, 2600], [1, 2, 3]));
 children.push(spacer(200));
-children.push(...bild("erloesmix_szenario.png", 600, "Abb. 4: Kumulierter Erlös je Geschäftsbereich, 10 Jahre, in allen drei Szenarien."));
+children.push(...bild("erloesmix_szenario.png", 600, "Abb. 4: Erlösmix je Jahr, nebeneinander für alle drei Szenarien (gleiche y-Achse)."));
 
 children.push(...bild("ebit_balken.png", 600, "Abb. 5: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
 
