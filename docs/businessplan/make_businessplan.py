@@ -3,7 +3,7 @@ import sys, json, re, subprocess
 sys.path.insert(0, "/root/.claude/skills/synced/8679d439-3b7c-44a2-84d8-50f499b43fd0_0ef6de42-5319-4234-9f65-9ef4d034777c/boerdesnack24-pdf/scripts")
 import pdf_builder as pb
 from pdf_builder import Dokument, _esc
-from reportlab.platypus import Paragraph, Table, TableStyle, Spacer, Image, KeepTogether, HRFlowable
+from reportlab.platypus import Paragraph, Table, TableStyle, Spacer, Image, KeepTogether, HRFlowable, PageBreak, NextPageTemplate
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib import colors
@@ -43,6 +43,23 @@ def _spaltenbreiten_ohne_trennzeichen(daten, fs, kopfzeile, pad):
     ohne = [[str(z).replace("­", "") for z in zeile] for zeile in daten]
     return _orig_spaltenbreiten(ohne, fs, kopfzeile, pad)
 pb._spaltenbreiten = _spaltenbreiten_ohne_trennzeichen
+
+def tabelle_seite(doc, daten, **kwargs):
+    """Wie doc.tabelle(), haelt die Tabelle aber als Ganzes zusammen: passt
+    sie nicht mehr auf die aktuelle Seite, beginnt eine neue Seite, statt
+    die Tabelle über zwei Seiten zu brechen -- Vorgabe des Auftraggebers
+    (30.08.2026): Tabellen laufen nie über mehrere Seiten. doc.tabelle()
+    kann dabei selbst einen Format-Wechsel (Hoch-/Querformat) ausloesen --
+    dessen NextPageTemplate/PageBreak bleibt bewusst AUSSERHALB des
+    KeepTogether, sonst verwirrt das reportlabs eigene Seitenumbruch-Logik."""
+    start = len(doc.story)
+    doc.tabelle(daten, **kwargs)
+    neu = doc.story[start:]
+    del doc.story[start:]
+    wechsel = [f for f in neu if isinstance(f, (NextPageTemplate, PageBreak))]
+    rest = [f for f in neu if not isinstance(f, (NextPageTemplate, PageBreak))]
+    doc.story.extend(wechsel)
+    doc.story.append(KeepTogether(rest))
 
 # ---------------------------------------------------------------------
 # Kleine Erweiterungen ueber die oeffentliche pdf_builder-API hinaus:
@@ -227,6 +244,57 @@ def szenario_diagramm(pfad):
 
 szenario_diagramm("szenariovergleich.png")
 
+def _erlösmix_summen(daten_liste):
+    """Kumulierte 10-Jahres-Summe je Geschäftsbereich -- dieselbe Aufteilung
+    wie in erlösmix_diagramm(), nur ueber die Jahre aufsummiert statt je
+    Jahr gestapelt."""
+    produkt = sum(r["produkt_netto"] - r["spende"] for r in daten_liste)
+    app = sum(r["app_erlös"] for r in daten_liste)
+    werbeflaeche = sum(r["werbeflaechen_erlös"] for r in daten_liste)
+    sponsoring = sum(r["sponsoring_erlös"] for r in daten_liste)
+    return produkt, app, werbeflaeche, sponsoring
+
+def erlösmix_szenario_diagramm(pfad):
+    """Gruppierte Balken: kumulierter 10-Jahres-Erlös je Geschäftsbereich,
+    nebeneinander fuer alle drei Szenarien -- macht sichtbar, dass nur der
+    Automatenumsatz mit dem Szenario skaliert, die drei anderen Quellen an
+    fester Planzahl (Abonnenten, Auslastung, Werbekunden) haengen, nicht am
+    Bruttoumsatz je Automat."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    kategorien = ["Snack-/\nGetränkeverkauf", "App-Abo", "Werbeflächen\nam Automat", "Digitale Werbe-/\nSponsoringpakete"]
+    pess = _erlösmix_summen(daten_pess)
+    normal = _erlösmix_summen(daten)
+    opt = _erlösmix_summen(daten_opt)
+
+    x = np.arange(len(kategorien))
+    breite = 0.27
+    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=200)
+    ax.bar(x - breite, pess, breite, color="#8C8C8C", edgecolor="#000000", linewidth=0.5, label="Pessimistisch (−40 %)")
+    ax.bar(x, normal, breite, color="#F3BE21", edgecolor="#000000", linewidth=0.5, label="Planungsszenario")
+    ax.bar(x + breite, opt, breite, color="#5C9A3F", edgecolor="#000000", linewidth=0.5, label="Optimistisch (+40 %)")
+
+    ax.set_xlabel("Geschäftsbereich", color="#595959", fontsize=11)
+    ax.set_ylabel("Erlös in EUR, 10 Jahre kumuliert", color="#595959", fontsize=11)
+    ax.set_title("Erlösmix nach Szenario, 10 Jahre kumuliert", color="#000000", fontsize=12, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels(kategorien, fontsize=8.5)
+    ax.tick_params(colors="#595959", labelsize=9)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    for s in ("left", "bottom"):
+        ax.spines[s].set_color("#595959")
+    ax.grid(axis="y", color="#D9D9D9", linewidth=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(fontsize=8, loc="upper right", frameon=False)
+    fig.tight_layout()
+    fig.savefig(pfad, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+erlösmix_szenario_diagramm("erloesmix_szenario.png")
+
 # ---------------------------------------------------------------------
 # Abschnittstitel fuers Inhaltsverzeichnis (Reihenfolge = Reihenfolge im
 # Text; ebene 2 = eingerueckter Unterpunkt)
@@ -350,7 +418,7 @@ def baue_inhalt(doc, toc_seiten):
             standort_tabelle.append([str(jahr), typ, ort, note])
     for jahr in range(2030, 2037):
         standort_tabelle.append([str(jahr), "Kombiautomat (Vorschlag)", "Standort noch offen", "+1 Automat/Jahr laut Vorgabe"])
-    doc.tabelle(trenn_tabelle(standort_tabelle))
+    tabelle_seite(doc, trenn_tabelle(standort_tabelle))
 
     doc.diagramm(
         [r["jahr"] for r in daten], [r["automaten"] for r in daten],
@@ -365,7 +433,7 @@ def baue_inhalt(doc, toc_seiten):
     # 4) Annahmen -------------------------------------------------------------
     abschnitt(doc, "4. Annahmen dieses Plans", 1,
               "**Planungsannahmen, keine gemessenen Werte.** Mit Quelle, wo eine externe existiert, sonst eigene, im Text begründete Schätzung.")
-    doc.tabelle(trenn_tabelle(ANNAHMEN_TABELLE), quer=False)
+    tabelle_seite(doc, trenn_tabelle(ANNAHMEN_TABELLE), quer=False)
 
     # 5) Finanzplan -------------------------------------------------------------
     abschnitt(doc, "5. Finanzplan, Jahr 1 bis 10", 1,
@@ -379,7 +447,7 @@ def baue_inhalt(doc, toc_seiten):
             f'{r["afa_jahr"]:,.0f} EUR'.replace(",", "."),
             f'{r["ebit"]:,.0f} EUR'.replace(",", "."),
         ])
-    doc.tabelle(trenn_tabelle(fp_tabelle), zahlen_rechts={1, 2, 3, 4, 5})
+    tabelle_seite(doc, trenn_tabelle(fp_tabelle), zahlen_rechts={1, 2, 3, 4, 5})
 
     doc.diagramm(
         [r["jahr"] for r in daten], [r["summe_erloese"] for r in daten],
@@ -387,10 +455,33 @@ def baue_inhalt(doc, toc_seiten):
         art="balken", unterschrift="Abb. 2: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."
     )
     doc.bild("erloesmix.png", unterschrift="Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum.")
+
+    pess_mix = _erlösmix_summen(daten_pess)
+    normal_mix = _erlösmix_summen(daten)
+    opt_mix = _erlösmix_summen(daten_opt)
+    hook(doc, "**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat; App-Abo, Werbeflächen und Sponsoring hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und bleiben in allen drei Szenarien unverändert.")
+    mix_tabelle = [["Geschäftsbereich", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]]
+    mix_labels = ["Snack-/Getränkeverkauf (netto, nach Spende)", "App-Abo", "Werbeflächen am Automat", "Digitale Werbe-/Sponsoringpakete"]
+    for i, label in enumerate(mix_labels):
+        mix_tabelle.append([
+            label,
+            f'{pess_mix[i]:,.0f} €'.replace(",", "."),
+            f'{normal_mix[i]:,.0f} €'.replace(",", "."),
+            f'{opt_mix[i]:,.0f} €'.replace(",", "."),
+        ])
+    mix_tabelle.append([
+        "Summe, 10 Jahre",
+        f'{sum(pess_mix):,.0f} €'.replace(",", "."),
+        f'{sum(normal_mix):,.0f} €'.replace(",", "."),
+        f'{sum(opt_mix):,.0f} €'.replace(",", "."),
+    ])
+    tabelle_seite(doc, trenn_tabelle(mix_tabelle), zahlen_rechts={1, 2, 3})
+    doc.bild("erloesmix_szenario.png", unterschrift="Abb. 4: Kumulierter Erlös je Geschäftsbereich, 10 Jahre, in allen drei Szenarien.")
+
     doc.diagramm(
         [r["jahr"] for r in daten], [r["ebit"] for r in daten],
         x_label="Jahr", y_label="EBIT in EUR", titel="Betriebsergebnis, Planungsszenario",
-        art="balken", unterschrift="Abb. 4: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."
+        art="balken", unterschrift="Abb. 5: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."
     )
 
     kum_spende = sum(r["spende"] for r in daten)
@@ -415,9 +506,9 @@ def baue_inhalt(doc, toc_seiten):
             f'{r["ebit"]:,.0f} EUR'.replace(",", ".").replace("-", "−"),
             f'{o["ebit"]:,.0f} EUR'.replace(",", ".").replace("-", "−"),
         ])
-    doc.tabelle(trenn_tabelle(sens_tabelle), zahlen_rechts={1, 2, 3})
+    tabelle_seite(doc, trenn_tabelle(sens_tabelle), zahlen_rechts={1, 2, 3})
 
-    doc.bild("szenariovergleich.png", unterschrift="Abb. 5: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.")
+    doc.bild("szenariovergleich.png", unterschrift="Abb. 6: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.")
 
     _kum_ebit_de = f'{ebit_kum:,.0f}'.replace(",", ".")
     if negative_jahre_pess:

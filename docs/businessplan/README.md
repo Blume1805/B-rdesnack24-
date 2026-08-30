@@ -117,6 +117,16 @@ python3 make_businessplan.py
   pauschale „durchgehend positiv“-Behauptung. Kumuliertes EBIT, 10 Jahre:
   85.136 € (pessimistisch) / 180.526 € (Planungsszenario) / 275.915 €
   (optimistisch).
+- **Erlösmix nach Szenario**: von den vier Geschäftsbereichen skaliert nur
+  der Automatenumsatz (Snack-/Getränkeverkauf) mit dem Bruttoumsatz je
+  Automat — App-Abo (38.578 €), Werbeflächen (28.375 €) und Sponsoring
+  (68.040 €) hängen an eigenen, vom Szenario unabhängigen Planzahlen und
+  sind über alle drei Szenarien hinweg **exakt identisch** (kumuliert,
+  10 Jahre). Nachgerechnet, nicht vermutet: `_erlösmix_summen()` in
+  `make_businessplan.py` summiert `app_erlös`/`werbeflaechen_erlös`/
+  `sponsoring_erlös` unabhängig vom Szenario-Faktor, weil
+  `businessplan_model.py`s `berechne(umsatz_faktor)` diesen nur auf
+  `REVENUE_BRUTTO_PRO_MONAT` anwendet.
 
 Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
@@ -134,6 +144,7 @@ lässt sich nicht in Word öffnen und bearbeiten.
 | `build_docx.js` | Baut `Boerdesnack24_Businessplan.docx` mit dem npm-Paket `docx` (docx-js). Eigenständiges Skript, dieselben Inhalte/Zahlen wie `make_businessplan.py`, aber als editierbares Word-Dokument statt PDF. Ruft für die Silbentrennung in Tabellen `python3` per `child_process` auf (siehe „Silbentrennung“ unten) — Node braucht dafür kein eigenes Hyphenation-Paket. |
 | `automatennetz_linie.png`, `umsatz_balken.png`, `ebit_balken.png` | Die Diagramme, die im PDF über `pdf_builder.py`s interne `diagramm()`-Funktion entstehen (dort nicht als eigene Datei erreichbar) — für die docx-Fassung als eigenständige PNGs neu erzeugt (gleicher matplotlib-Stil, gleiche Zahlen aus `businessplan_zahlen.json`). |
 | `szenariovergleich.png` | Gruppierter Balkenchart, EBIT je Jahr in allen drei Szenarien nebeneinander (grau/gold/grün) — erzeugt von `szenario_diagramm()` in `make_businessplan.py`, dieselbe Datei wird auch von `build_docx.js` eingebettet. |
+| `erloesmix_szenario.png` | Gruppierter Balkenchart, kumulierter 10-Jahres-Erlös je Geschäftsbereich (Snack-/Getränke, App-Abo, Werbeflächen, Sponsoring) in allen drei Szenarien — erzeugt von `erlösmix_szenario_diagramm()`. Macht sichtbar, dass nur der Automatenumsatz mit dem Szenario skaliert: die drei anderen Balkenpaare sind praktisch gleich hoch. |
 | `erloesmix.png`, `iconstrip_trim.png` | Dieselben Grafiken wie in der PDF-Fassung, hier zusätzlich für die docx-Fassung im Repo gesichert. |
 
 **Neu bauen:**
@@ -161,7 +172,7 @@ Validierung (`scripts/office/validate.py`, „All validations PASSED!“),
 Inhaltsextraktion mit `pandoc -t markdown` (alle Abschnitte, Tabellen und
 Bildverweise vollständig und in der richtigen Reihenfolge) und eine
 Pixel-Prüfung aller eingebetteten PNGs (`PIL.Image.verify()`, alle
-sieben unbeschädigt). Ein Blick in echtem Word/LibreOffice Writer auf
+acht unbeschädigt). Ein Blick in echtem Word/LibreOffice Writer auf
 einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
 
 **Silbentrennung in Tabellen (Vorgabe des Auftraggebers, 30.08.2026):**
@@ -224,6 +235,16 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   Balkenchart aus `szenario_diagramm()` — eigene Funktion, nicht
   `doc.diagramm()` aus dem Skill, weil die nur eine Datenreihe je Chart
   kann.
+- **Erlösmix nach Szenario, direkt bei „Abb. 3“ in Abschnitt 5** (nach
+  demselben Auftrag wie oben): Vier-Spalten-Tabelle (Geschäftsbereich +
+  drei Szenario-Spalten, plus Summenzeile) und `erloesmix_szenario.png`
+  (gruppierter Balkenchart aus `erlösmix_szenario_diagramm()`), direkt
+  im Anschluss an `erloesmix.png`. Verschiebt die Abbildungsnummerierung
+  ab dort um eins: EBIT-Chart in Abschnitt 5 ist seither „Abb. 5“ (vorher
+  „Abb. 4“), der Szenariovergleich-Chart in Abschnitt 6 „Abb. 6“ (vorher
+  „Abb. 5“) — bei einer künftigen Änderung an der Abbildungsreihenfolge
+  IMMER beide Dateien (`make_businessplan.py` und `build_docx.js`)
+  gemeinsam durchnummerieren, sie laufen unabhängig auseinander sonst.
 - **Silbentrennung in allen Tabellen** (`trenn_tabelle()` in
   `make_businessplan.py`, `pyphen`-basiert, weiche Trennzeichen U+00AD).
   **Wichtige Nebenwirkung, die dabei auffiel:** `doc.tabelle()`s
@@ -236,6 +257,25 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   tatsächlichen Zellentext) statt am Skill selbst — wer den Skill in
   einer neuen Sitzung neu synct, bekommt den Patch automatisch wieder
   mit, weil er in `make_businessplan.py` steht, nicht im Skill.
+- **Tabellen laufen nie über zwei Seiten** (Vorgabe des Auftraggebers,
+  30.08.2026: passt eine Tabelle nicht mehr auf die aktuelle Seite,
+  beginnt eine neue Seite, statt sie zu zerschneiden). Im PDF exakt
+  umgesetzt über `tabelle_seite(doc, daten, **kwargs)` in
+  `make_businessplan.py` (Ersatz für jeden direkten `doc.tabelle()`-
+  Aufruf): nimmt eine Momentaufnahme von `doc.story`, ruft `doc.tabelle()`
+  auf, und packt alles, was neu dazukam, in `KeepTogether` — reportlab
+  verschiebt die ganze Tabelle geschlossen auf die nächste Seite, wenn
+  sie nicht mehr passt. Ein von `doc.tabelle()` selbst ausgelöster
+  Format-Wechsel (Hoch-/Querformat, eigene `NextPageTemplate`/
+  `PageBreak`-Flowables) bleibt dabei bewusst außerhalb des
+  `KeepTogether`, sonst verwechselt reportlab die Seitenumbruch-Logik.
+  **In der docx-Fassung nur angenähert, nicht exakt gleich — ehrlich
+  benannt:** OOXML kennt kein Attribut, das eine ganze Tabelle geschlossen
+  auf eine Seite zwingt (Word layoutet dynamisch beim Öffnen, nicht wie
+  reportlab beim Erzeugen). Gesetzt ist stattdessen `cantSplit: true` auf
+  jeder `TableRow` in `build_docx.js`s `tabelle()`-Helfer — verhindert,
+  dass eine einzelne Zeile mitten im Text über zwei Seiten bricht, zwingt
+  aber nicht die ganze Tabelle auf eine Seite.
 
 ## Bekannte Grenzen
 

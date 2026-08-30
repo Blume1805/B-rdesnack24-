@@ -172,14 +172,24 @@ function zelle(text, { kopf = false, rechts = false, breite = null } = {}) {
   });
 }
 
+// cantSplit auf jeder Zeile: verhindert, dass Word eine einzelne Zeile mitten
+// im Text ueber zwei Seiten bricht (Vorgabe des Auftraggebers, 30.08.2026:
+// Tabellen laufen nie ueber mehrere Seiten). Wichtig ehrlich benannt: das ist
+// die naechstliegende OOXML-Entsprechung, keine exakte Parität zur PDF-
+// Fassung -- Word kennt kein Attribut, das eine GANZE Tabelle geschlossen auf
+// eine Seite zwingt (die PDF-Fassung kann das, weil reportlab die Seiten beim
+// Erzeugen fest layoutet; Word layoutet dynamisch beim Oeffnen). cantSplit
+// verhindert nur, dass eine Zeile selbst mitten durchgeschnitten wird.
 function tabelle(kopfzeilen, zeilen, breiten, rechtsSpalten = []) {
   const rows = [];
   rows.push(new TableRow({
     tableHeader: true,
+    cantSplit: true,
     children: kopfzeilen.map((k, i) => zelle(k, { kopf: true, breite: breiten[i] })),
   }));
   zeilen.forEach((z) => {
     rows.push(new TableRow({
+      cantSplit: true,
       children: z.map((v, i) => zelle(v, { rechts: rechtsSpalten.includes(i), breite: breiten[i] })),
     }));
   });
@@ -300,7 +310,26 @@ children.push(tabelle(trenn(["Jahr", "Automaten", "Erlöse gesamt", "Kosten (o. 
 children.push(spacer(200));
 children.push(...bild("umsatz_balken.png", 600, "Abb. 2: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
 children.push(...bild("erloesmix.png", 600, "Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
-children.push(...bild("ebit_balken.png", 600, "Abb. 4: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
+
+function erlösmixSummen(d) {
+  const produkt = d.reduce((s, r) => s + (r.produkt_netto - r.spende), 0);
+  const app = d.reduce((s, r) => s + r.app_erlös, 0);
+  const werbeflaeche = d.reduce((s, r) => s + r.werbeflaechen_erlös, 0);
+  const sponsoring = d.reduce((s, r) => s + r.sponsoring_erlös, 0);
+  return [produkt, app, werbeflaeche, sponsoring];
+}
+const mixPess = erlösmixSummen(datenPess);
+const mixNormal = erlösmixSummen(daten);
+const mixOpt = erlösmixSummen(datenOpt);
+children.push(hook("**Der Erlösmix verschiebt sich mit dem Szenario — aber nur zum Teil.** Nur der Automatenumsatz (Snack-/Getränkeverkauf) skaliert mit dem Bruttoumsatz je Automat; App-Abo, Werbeflächen und Sponsoring hängen an eigenen Planzahlen (Abonnenten, Auslastung, Werbekunden) und bleiben in allen drei Szenarien unverändert."));
+const mixLabels = ["Snack-/Getränkeverkauf (netto, nach Spende)", "App-Abo", "Werbeflächen am Automat", "Digitale Werbe-/Sponsoringpakete"];
+const mixZeilen = mixLabels.map((label, i) => [label, `${de(mixPess[i])} €`, `${de(mixNormal[i])} €`, `${de(mixOpt[i])} €`]);
+mixZeilen.push(["Summe, 10 Jahre", `${de(mixPess.reduce((a, b) => a + b, 0))} €`, `${de(mixNormal.reduce((a, b) => a + b, 0))} €`, `${de(mixOpt.reduce((a, b) => a + b, 0))} €`]);
+children.push(tabelle(trenn(["Geschäftsbereich", "Pessimistisch (−40 %)", "Planungsszenario", "Optimistisch (+40 %)"]), trennZeilen(mixZeilen), [3000, 2200, 2200, 2200], [1, 2, 3]));
+children.push(spacer(200));
+children.push(...bild("erloesmix_szenario.png", 600, "Abb. 4: Kumulierter Erlös je Geschäftsbereich, 10 Jahre, in allen drei Szenarien."));
+
+children.push(...bild("ebit_balken.png", 600, "Abb. 5: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
 
 const kumSpende = daten.reduce((s, r) => s + r.spende, 0);
 const kumInvest = daten.reduce((s, r) => s + r.investition_jahr, 0);
@@ -317,7 +346,7 @@ const sensZeilen = daten.map((r, i) => [
 ]);
 children.push(tabelle(trenn(["Jahr", "EBIT pessimistisch (−40 %)", "EBIT Planungsszenario", "EBIT optimistisch (+40 %)"]), sensZeilen, [1000, 2600, 2600, 2600], [1, 2, 3]));
 children.push(spacer(200));
-children.push(...bild("szenariovergleich.png", 600, "Abb. 5: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben."));
+children.push(...bild("szenariovergleich.png", 600, "Abb. 6: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben."));
 children.push(hook(negPess.jahre.length
   ? `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch).** Nur im pessimistischen Szenario ist ${jahreTextPess} leicht negativ (${negPess.betrag}), alle übrigen Jahre bleiben in allen drei Szenarien positiv.`
   : `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch), bleibt aber in allen drei Szenarien in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.`));
