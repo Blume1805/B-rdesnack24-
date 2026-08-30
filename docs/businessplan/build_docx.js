@@ -286,7 +286,8 @@ children.push(...bild("zusammenspiel_pdf.png", 600));
 // 4) Annahmen
 children.push(...ueberschrift("4. Annahmen dieses Plans", 1, "**Planungsannahmen, keine gemessenen Werte.** Mit Quelle, wo eine externe existiert, sonst eigene, im Text begründete Schätzung."));
 const annahmenZeilen = [
-  ["Bruttoumsatz/Automat/Monat", "500–1.400 €, je Standort", "GTR Automaten/Maschinenpartner: 300–1.500 €/Monat typisch"],
+  ["Bruttoumsatz/Automat/Monat", "500–1.400 €, je Standort, Preisstand 2027", "GTR Automaten/Maschinenpartner: 300–1.500 €/Monat typisch"],
+  ["Preissteigerung", "3 % p.a. auf Automat, Werbefläche, Sponsoring; App-Abo ausgenommen", "Angabe des Auftraggebers"],
   ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste"],
   ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
   ["Anschaffung je Automat", "10.000 € netto", "Angabe des Auftraggebers"],

@@ -14,6 +14,7 @@ gehören nicht ins Git, der Rechenweg schon). Wer die Zahlen ändern will,
 | `make_szenarien.py` | Ruft `berechne()` mit 0.6 bzw. 1.4 auf und schreibt `businessplan_zahlen_pessimistisch.json` / `businessplan_zahlen_optimistisch.json`. Ersetzt seit 30.08.2026 eine frühere Monkeypatch-Technik (Quelltext per Regex ändern, dann `exec()`), die vor dem dritten Szenario noch als Einmal-Skript existierte, nirgends im Repo lag und deshalb nicht reproduzierbar war. |
 | `businessplan_zahlen.json` / `businessplan_zahlen_pessimistisch.json` / `businessplan_zahlen_optimistisch.json` | Ergebnis des Modells in drei Szenarien: Planungsszenario (Basis), pessimistisch (−40 % Bruttoumsatz/Automat) und optimistisch (+40 %) — siehe unten, „Szenariovergleich“. |
 | `make_businessplan.py` | Baut `Boerdesnack24_Businessplan.pdf` aus den JSON-Zahlen, über den `boerdesnack24-pdf`-Skill (`pdf_builder.py`). Baut **zweimal** hintereinander (siehe unten, „Inhaltsverzeichnis“) — das ist kein Fehler. |
+| `make_ebit_balken.py` / `make_umsatz_balken.py` | Erzeugen `ebit_balken.png` / `umsatz_balken.png` aus `businessplan_zahlen.json`, über dieselbe `_erzeuge_diagramm()`-Funktion wie `make_businessplan.py`s eigene PDF-Diagramme — nur als eigenständige Dateien, weil `build_docx.js` (kein `pdf_builder.py`) sie braucht. Nach jeder Änderung an `businessplan_model.py` **beide** ausführen, bevor `build_docx.js` läuft, sonst zeigt die docx-Fassung veraltete Balken. |
 | `infografik.html` | Die A3-quer-Infografik. Wird mit einem headless Chrome zu PDF gedruckt (kein Playwright-Paket nötig, das Chromium-Binary reicht). |
 | `iconstrip.html` | Vier-Icon-Leiste (dieselben Icons wie in der Infografik), wird zu `iconstrip_trim.png` gerendert und im Businessplan eingebettet. |
 | `boerdekreis_umriss.png` | Aus `apps/mobile/assets/images/brand_hero.jpg` extrahierte Umriss-Silhouette (nur der obere Glow-Bogen, per Helligkeitsschwelle isoliert). Kein eigenständig gezeichneter Umriss — echte Bildinformation aus dem vorhandenen Marken-Asset. Der Umriss ist **nicht geschlossen**: Der Automat verdeckt im Originalfoto einen Teil der Kontur, das lässt sich aus dem Foto nicht rekonstruieren. |
@@ -38,6 +39,12 @@ python3 businessplan_model.py
 # 2) Pessimistisches/optimistisches Szenario (±40 % Umsatz/Automat) --
 #    schreibt businessplan_zahlen_pessimistisch.json / _optimistisch.json
 python3 make_szenarien.py
+
+# 2b) Eigenstaendige Diagramme fuer die docx-Fassung (nur diese beiden --
+#     die uebrigen entstehen inline beim PDF-Bau bzw. direkt in
+#     make_businessplan.py)
+python3 make_ebit_balken.py
+python3 make_umsatz_balken.py
 
 # 3) Icon-Leiste rendern
 <chrome-binary> --headless --disable-gpu --no-sandbox \
@@ -91,6 +98,17 @@ python3 make_businessplan.py
   im Modell verwendete Mischerlös je zahlendem Abonnenten (0,90 €/Monat)
   geht von 60 % Jahresabo zu 40 % Monatsabo aus — eine Annahme, keine
   Messung.
+- **Preissteigerung 3 % p.a.** (Angabe des Auftraggebers, 30.08.2026) auf
+  Automatenpreise, Werbeflächen-Mischpreis und Sponsoring-Durchschnittspaket
+  — zusammengesetzt ab 2027 (`preissteigerung_faktor(jahr)` in
+  `businessplan_model.py`, `(1,03)^(Jahr−2027)`). **App-Abo-Preise (0,99 €/
+  9,99 €) ausdrücklich ausgenommen**, bleiben über den ganzen Zeitraum
+  konstant — auf Nachfrage vom Auftraggeber so entschieden, nicht diesem
+  Plan zur eigenen Auslegung überlassen. Kosten (Wareneinsatz, Nayax-
+  Gebühr, Strom/Wartung/Versicherung, Standortprovision, Personal) sind
+  nicht Teil dieser Vorgabe und bleiben nominal unverändert; Wareneinsatz/
+  Standortprovision/Kartengebühr wachsen als Prozentsätze vom (jetzt
+  höheren) Bruttoumsatz trotzdem automatisch mit.
 - **Wareneinsatzquote** 34,0 % (Snacks/Getränke) bzw. 16,5 %
   (Heißgetränke) — aus der aktuellen Preisliste berechnet (Ø aller
   Positionen je Kategorie), nicht geschätzt.
@@ -115,14 +133,24 @@ python3 make_businessplan.py
   positiv — beide Dokumente formulieren das bedingt (`negative_jahre_pess`
   in `make_businessplan.py` / `negPess` in `build_docx.js`), nicht als
   pauschale „durchgehend positiv“-Behauptung. Kumuliertes EBIT, 10 Jahre:
-  85.136 € (pessimistisch) / 180.526 € (Planungsszenario) / 275.915 €
-  (optimistisch).
+  134.348 € (pessimistisch) / 247.770 € (Planungsszenario) / 361.191 €
+  (optimistisch) — Stand nach Einführung der 3-%-Preissteigerung
+  (30.08.2026); vorher 85.136 € / 180.526 € / 275.915 €. Diese Zahlen bei
+  jeder Modelländerung neu aus `businessplan_zahlen*.json` ablesen, nicht
+  aus diesem README zitieren — sie veralten hier zuverlässig schneller als
+  im Dokument selbst.
 - **Erlösmix nach Szenario, je Jahr**: von den vier Geschäftsbereichen
-  skaliert nur der Automatenumsatz (Snack-/Getränkeverkauf) mit dem
-  Bruttoumsatz je Automat — App-Abo (38.578 €), Werbeflächen (28.375 €)
-  und Sponsoring (68.040 €) hängen an eigenen, vom Szenario unabhängigen
-  Planzahlen und sind über alle drei Szenarien hinweg **exakt identisch**
-  (kumuliert, 10 Jahre). Nachgerechnet, nicht vermutet: `_erlösmix_jahre()`
+  skaliert der Bruttoumsatz-Faktor (pessimistisch/optimistisch, ±40 %) nur
+  den Automatenumsatz (Snack-/Getränkeverkauf) — App-Abo (38.578 €),
+  Werbeflächen (34.892 €) und Sponsoring (83.687 €, alle drei kumuliert
+  10 Jahre, Planungsszenario, Stand nach Einführung der 3-%-
+  Preissteigerung) hängen an eigenen, vom Szenario-Faktor unabhängigen
+  Planzahlen und sind über alle drei Szenarien hinweg **exakt identisch**.
+  **Nicht dasselbe wie zeitlich konstant:** Werbeflächen und Sponsoring
+  wachsen jetzt mit der 3-%-Preissteigerung Jahr für Jahr (App-Abo nicht,
+  siehe „Zentrale Annahmen“ oben) — das ist unabhängig vom
+  Szenario-Vergleich hier und ändert nichts an der Aussage, nur an den
+  absoluten Zahlen. Nachgerechnet, nicht vermutet: `_erlösmix_jahre()`
   in `make_businessplan.py` summiert `app_erlös`/`werbeflaechen_erlös`/
   `sponsoring_erlös` unabhängig vom Szenario-Faktor, weil
   `businessplan_model.py`s `berechne(umsatz_faktor)` diesen nur auf
@@ -298,6 +326,19 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   jeder `TableRow` in `build_docx.js`s `tabelle()`-Helfer — verhindert,
   dass eine einzelne Zeile mitten im Text über zwei Seiten bricht, zwingt
   aber nicht die ganze Tabelle auf eine Seite.
+- **Preissteigerung 3 % p.a. (30.08.2026)** wirkt sich auf jede Zahl aus,
+  die von `summe_erloese`/`ebit` abhängt — praktisch das ganze Dokument.
+  **Nach dieser Änderung betroffen und neu geprüft:** Section-1-
+  Kennzahlen, Finanzplan-Tabelle, alle drei Szenario-Tabellen/-Charts,
+  die Erlösmix-Tabellen/-Charts (Werbeflächen/Sponsoring jetzt höher,
+  App-Abo unverändert — siehe „Zentrale Annahmen“), Spenden/Investition-
+  Kennzahlen. **Nicht betroffen, absichtlich unverändert:**
+  `automatennetz_linie.png` (reine Automatenzahl, keine Erlöse) und die
+  Annahmen zu Automatenausbau/Standorten. Wer `businessplan_model.py`
+  künftig wieder ändert: `make_ebit_balken.py` und `make_umsatz_balken.py`
+  laufen NICHT automatisch mit `make_businessplan.py` mit — vor jedem
+  docx-Bau beide von Hand neu ausführen, sonst zeigt `build_docx.js`
+  aktuelle Tabellenzahlen neben veralteten Balkendiagrammen.
 
 ## Bekannte Grenzen
 

@@ -141,6 +141,21 @@ MINIJOB_MONAT = 603.0  # EUR/Monat, Minijob-Grenze 2026, Angabe des Auftraggeber
 def anzahl_minijobs(automaten_anzahl):
     return automaten_anzahl // 6  # 1 Kraft ab 6, 2. ab 12 usw.
 
+# ---------------------------------------------------------------------------
+# 9) Jaehrliche Preissteigerung -- Angabe des Auftraggebers (30.08.2026):
+#    3 % p.a. auf Automatenpreise, Werbeflaechen und Sponsoringpakete.
+#    App-Abo (0,99 EUR/9,99 EUR) ausdruecklich AUSGENOMMEN, bleibt ueber den
+#    gesamten Planungszeitraum konstant. Kosten (Wareneinsatz, Nayax-Gebuehr,
+#    Strom/Wartung/Versicherung, Standortprovision, Personal) sind nicht Teil
+#    dieser Vorgabe und bleiben unveraendert -- Wareneinsatz/Standortprovision/
+#    Kartengebuehr sind ohnehin Prozentsaetze vom (jetzt hoeheren) Bruttoumsatz
+#    und wachsen dadurch automatisch mit.
+# ---------------------------------------------------------------------------
+PREISSTEIGERUNG_SATZ = 0.03  # p.a., Angabe des Auftraggebers (30.08.2026)
+
+def preissteigerung_faktor(jahr):
+    return (1 + PREISSTEIGERUNG_SATZ) ** (jahr - YEARS[0])
+
 # ===========================================================================
 # Berechnung
 # ===========================================================================
@@ -172,6 +187,7 @@ def berechne(umsatz_faktor=1.0):
         standortprovision = 0.0
         investition_jahr = sum(INVESTITION_PRO_AUTOMAT for m in neue)
         afa_jahr = 0.0
+        preis_faktor = preissteigerung_faktor(y)
 
         for m in kumuliert:
             start_jahr = m["jahr_start"]
@@ -193,10 +209,10 @@ def berechne(umsatz_faktor=1.0):
                     neben_monate = monate_aktiv - saison_monate
                 else:
                     saison_monate, neben_monate = 5, 7
-                brutto = umsatz_faktor * (saison_monate * REVENUE_BRUTTO_PRO_MONAT["freibad_saison"]
+                brutto = umsatz_faktor * preis_faktor * (saison_monate * REVENUE_BRUTTO_PRO_MONAT["freibad_saison"]
                           + neben_monate * REVENUE_BRUTTO_PRO_MONAT["freibad_nebensaison"])
             else:
-                brutto = umsatz_faktor * monate_aktiv * REVENUE_BRUTTO_PRO_MONAT[typ]
+                brutto = umsatz_faktor * preis_faktor * monate_aktiv * REVENUE_BRUTTO_PRO_MONAT[typ]
 
             netto = brutto / (1 + vat)
             produkt_brutto += brutto
@@ -212,10 +228,10 @@ def berechne(umsatz_faktor=1.0):
 
         spende = round(produkt_netto * DONATION_RATE, 2)
 
-        app_erlös = ZAHLENDE_ABONNENTEN[y] * ERLOES_JE_ABONNENT_MONAT * 12
-        werbeflaechen_erlös = gesamt_automaten * FLAECHEN_PRO_AUTOMAT * MISCHPREIS_FLAECHE_MONAT * 12 * AUSLASTUNG_WERBEFLAECHEN[y]
+        app_erlös = ZAHLENDE_ABONNENTEN[y] * ERLOES_JE_ABONNENT_MONAT * 12  # keine Preissteigerung, Vorgabe Auftraggeber
+        werbeflaechen_erlös = gesamt_automaten * FLAECHEN_PRO_AUTOMAT * MISCHPREIS_FLAECHE_MONAT * preis_faktor * 12 * AUSLASTUNG_WERBEFLAECHEN[y]
         reichweite = reichweitenfaktor(AKTIVE_KONTEN[y])
-        sponsoring_erlös = WERBEKUNDEN_DIGITAL[y] * DURCHSCHNITTSPAKET_MONAT * reichweite * 12
+        sponsoring_erlös = WERBEKUNDEN_DIGITAL[y] * DURCHSCHNITTSPAKET_MONAT * preis_faktor * reichweite * 12
 
         minijobs = anzahl_minijobs(gesamt_automaten)
         personal = minijobs * MINIJOB_MONAT * 12
