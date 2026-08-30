@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Bördesnack24 Geschäftsmodell</title>
+<style>
+  @page { size: 420mm 297mm; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 420mm; height: 297mm;
+    font-family: "Liberation Sans", Arial, sans-serif;
+    color: #000; background: #ffffff;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  :root {
+    --gold: #F3BE21;
+    --gold-dark: #8A6E00;
+    --ink: #000000;
+    --grau: #595959;
+    --hellgrau: #D9D9D9;
+    --bg: #FCFBF8;
+  }
+  .page {
+    width: 420mm; height: 297mm; padding: 10mm 12mm 8mm 12mm;
+    display: flex; gap: 8mm;
+  }
+
+  /* ===== linke Spalte: Hero mit Logo/Automat/Bördekreis-Umriss ===== */
+  .hero {
+    flex: 0 0 118mm; border-radius: 4mm; overflow: hidden; position: relative;
+    background: #0a0a0a; display: flex; flex-direction: column;
+  }
+  .hero-umriss {
+    position: absolute; top: 14mm; left: -6mm; width: 130mm; opacity: 0.5;
+  }
+  .hero-mark {
+    position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 10mm;
+  }
+  .hero-mark img.icon { width: 58mm; height: 58mm; }
+  .hero-mark .wortmarke { color: #fff; font-size: 20pt; font-weight: 800; letter-spacing: 0.02em; margin-top: 5mm; text-align: center; line-height: 1.05; }
+  .hero-mark .wortmarke b { color: var(--gold); }
+  .hero-mark .claim { color: var(--gold); font-size: 9pt; font-weight: 700; margin-top: 2mm; letter-spacing: 0.03em; }
+  .hero-inhalt { position: relative; z-index: 2; padding: 0 8mm 8mm 8mm; }
+  .hero-inhalt .hook { color: #fff; font-size: 14.5pt; font-weight: 800; line-height: 1.22; }
+  .hero-inhalt .hook b { color: var(--gold); }
+  .hero-inhalt .sub { color: #B3B3B3; font-size: 8.2pt; margin-top: 3mm; line-height: 1.4; }
+
+  /* ===== rechte Spalte ===== */
+  .rechts { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  .kopf { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4mm; }
+  .kopf .marke { font-size: 10pt; font-weight:800; color: var(--gold-dark); letter-spacing: 0.08em; text-transform: uppercase; }
+  .kopf h1 { margin: 1mm 0 0 0; font-size: 20pt; font-weight: 800; color: var(--ink); line-height: 1.15; }
+  .kopf .rechts-info { text-align:right; font-size: 7.6pt; color: var(--grau); line-height: 1.5; }
+  .goldlinie { height: 2px; background: var(--gold); margin-bottom: 5mm; }
+
+  /* Vier Saeulen, 2x2 */
+  .saeulen { display:grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 5mm; }
+  .saeule {
+    background: var(--bg); border: 1px solid var(--hellgrau);
+    border-left: 4px solid var(--gold); border-radius: 2.5mm; padding: 4mm 5mm;
+    display:flex; gap: 4mm; align-items: flex-start;
+  }
+  .saeule .icon-badge {
+    flex: 0 0 12mm; width: 12mm; height: 12mm; border-radius: 50%;
+    background: var(--ink); display:flex; align-items:center; justify-content:center;
+  }
+  .saeule .icon-badge svg { width: 6.5mm; height: 6.5mm; }
+  .saeule .txt { flex: 1; }
+  .saeule h2 { font-size: 10.5pt; margin: 0 0 1.3mm 0; color: var(--ink); font-weight: 800; }
+  .saeule p { font-size: 8pt; color: var(--grau); margin: 0 0 2mm 0; line-height: 1.35; }
+  .saeule .anker { font-size: 9pt; font-weight: 800; color: var(--gold-dark); }
+
+  /* Spendenfluss */
+  .spende-block {
+    background: var(--ink); border-radius: 3mm; padding: 4.5mm 7mm; color: #fff;
+    display:flex; align-items:center; gap: 5mm; margin-bottom: 5mm;
+  }
+  .spende-titel { flex: 0 0 42mm; }
+  .spende-titel .prozent { font-size: 26pt; font-weight: 800; color: var(--gold); line-height: 1; }
+  .spende-titel .label { font-size: 8pt; color: #D9D9D9; margin-top: 1mm; line-height: 1.3; }
+  .fluss { flex: 1; display:flex; align-items:center; }
+  .fluss-schritt { flex: 1; text-align:center; padding: 0 2mm; }
+  .fluss-schritt .kreis {
+    width: 8mm; height: 8mm; border-radius: 50%; background: var(--gold);
+    margin: 0 auto 1.6mm auto; display:flex; align-items:center; justify-content:center;
+    font-size: 9pt; font-weight: 800; color: var(--ink);
+  }
+  .fluss-schritt .txt2 { font-size: 7pt; color: #E6E6E6; line-height: 1.25; }
+  .fluss-pfeil { flex: 0 0 6mm; text-align:center; color: var(--gold); font-size: 12pt; }
+  .fluss-hinweis { flex: 0 0 44mm; font-size: 6.8pt; color: #B3B3B3; line-height: 1.3; border-left: 1px solid #444; padding-left: 4mm; }
+
+  /* Unten: Standorte + Ausbau + Preis-Hook */
+  .unten { display:flex; gap: 5mm; flex: 1; min-height: 0; }
+  .karte {
+    flex: 1; border: 1px solid var(--hellgrau); border-radius: 2.5mm; padding: 4mm 5mm;
+    display:flex; flex-direction: column;
+  }
+  .karte h3 {
+    font-size: 8.6pt; margin: 0 0 2.5mm 0; color: var(--ink); text-transform: uppercase; letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--hellgrau); padding-bottom: 1.5mm;
+  }
+  .standort-zeile { display:flex; align-items:baseline; gap: 3mm; font-size: 8.2pt; color: var(--ink); margin-bottom: 1.6mm; }
+  .standort-zeile .jahr { font-weight: 800; color: var(--gold-dark); width: 15mm; flex-shrink:0; white-space: nowrap; }
+  .standort-zeile .ort { color: var(--grau); }
+
+  .ausbau-reihe { display:flex; align-items:flex-end; gap: 2mm; flex: 1; margin-top: 1mm; }
+  .ausbau-balken { flex:1; background: var(--gold); border-radius: 1mm 1mm 0 0; position: relative; }
+  .ausbau-balken .n { position:absolute; top:-4mm; width:100%; text-align:center; font-size: 7.2pt; font-weight:800; color:var(--ink); }
+  .ausbau-balken .j { position:absolute; bottom:-4mm; width:100%; text-align:center; font-size: 6.4pt; color: var(--grau); }
+
+  .preis-hook { display:flex; flex-direction:column; gap: 2.6mm; justify-content:center; }
+  .preis-zeile { display:flex; justify-content:space-between; align-items:baseline; font-size: 8.4pt; }
+  .preis-zeile .was { color: var(--grau); }
+  .preis-zeile .preis { font-weight:800; color: var(--ink); font-size: 10.5pt; }
+  .preis-note { font-size: 6.6pt; color: var(--grau); margin-top: 2mm; line-height: 1.35; }
+
+  .fusszeile {
+    margin-top: 3mm; padding-top: 2mm; border-top: 1px solid var(--hellgrau);
+    display:flex; justify-content:space-between; font-size: 6.6pt; color: var(--grau);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <img class="hero-umriss" src="boerdekreis_umriss.png" alt="">
+    <div class="hero-mark">
+      <img class="icon" src="brand_icon.png" alt="Bördesnack24 Logo: Automat im Ring">
+      <div class="wortmarke">BÖRDE<br><b>SNACK 24</b></div>
+      <div class="claim">Genießen. Geben. Gutes tun.</div>
+    </div>
+    <div class="hero-inhalt">
+      <div class="hook">Rund um die Uhr im <b>Bördekreis</b>. Vier Erlösquellen, ein Netzwerk.</div>
+      <div class="sub">Snackautomaten an Orten ohne feste Öffnungszeiten, verbunden mit App, Werbeplattform und Sponsoring.</div>
+    </div>
+  </div>
+
+  <div class="rechts">
+    <div class="kopf">
+      <div>
+        <div class="marke">Geschäftsmodell auf einen Blick</div>
+        <h1>Ein Automat verkauft. Vier Quellen verdienen.</h1>
+      </div>
+      <div class="rechts-info">
+        Bördesnack24 GbR &middot; Sülldorfer Str. 3A &middot; 39171 Sülzetal<br>
+        Planungsgrundlage: Businessplan Bördesnack24, Stand 30.08.2026
+      </div>
+    </div>
+    <div class="goldlinie"></div>
+
+    <div class="saeulen">
+      <div class="saeule">
+        <div class="icon-badge"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="4" width="28" height="40" rx="2" stroke="#F3BE21" stroke-width="2.6"/><rect x="15" y="9" width="18" height="14" rx="1" stroke="#F3BE21" stroke-width="2.2"/><line x1="15" y1="28" x2="33" y2="28" stroke="#F3BE21" stroke-width="1.8"/><line x1="15" y1="33" x2="33" y2="33" stroke="#F3BE21" stroke-width="1.8"/><line x1="15" y1="38" x2="26" y2="38" stroke="#F3BE21" stroke-width="1.8"/></svg></div>
+        <div class="txt">
+          <h2>Snacks &amp; Getränke am Automaten</h2>
+          <p>Der Kernerlös: Verkauf rund um die Uhr an Bahnhof, Freibad und Sporthalle, ohne Öffnungszeiten.</p>
+          <div class="anker">62 Produkte im Sortiment</div>
+        </div>
+      </div>
+      <div class="saeule">
+        <div class="icon-badge"><svg viewBox="0 0 48 48" fill="none"><rect x="13" y="4" width="22" height="40" rx="4" stroke="#F3BE21" stroke-width="2.6"/><line x1="13" y1="36" x2="35" y2="36" stroke="#F3BE21" stroke-width="2.2"/><circle cx="24" cy="40" r="1.7" fill="#F3BE21"/></svg></div>
+        <div class="txt">
+          <h2>App-Abo</h2>
+          <p>Rabatt am Automaten, Bonusstufen und persönliche Coupons für Abonnentinnen und Abonnenten.</p>
+          <div class="anker">0,99 €/Monat &middot; 9,99 €/Jahr</div>
+        </div>
+      </div>
+      <div class="saeule">
+        <div class="icon-badge"><svg viewBox="0 0 48 48" fill="none"><path d="M6 20 L26 12 L26 36 L6 28 Z" stroke="#F3BE21" stroke-width="2.6" stroke-linejoin="round"/><path d="M26 16 L40 10 V38 L26 32" stroke="#F3BE21" stroke-width="2.6" stroke-linejoin="round"/><line x1="12" y1="28" x2="14" y2="38" stroke="#F3BE21" stroke-width="2.4"/></svg></div>
+        <div class="txt">
+          <h2>Werbeplattform für regionale Unternehmen</h2>
+          <p>Logoplatz auf Gutschein-Anlässen statt Abrechnung nach Einlösung, plus Werbeflächen am Automaten.</p>
+          <div class="anker">digital ab 15 €/Monat &middot; analog ab 15 €/Monat</div>
+        </div>
+      </div>
+      <div class="saeule">
+        <div class="icon-badge"><svg viewBox="0 0 48 48" fill="none"><path d="M24 6 L40 12 V22 C40 32 33 40 24 43 C15 40 8 32 8 22 V12 Z" stroke="#F3BE21" stroke-width="2.6" stroke-linejoin="round"/><path d="M17 23 L22 28 L32 17" stroke="#F3BE21" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="txt">
+          <h2>Sponsoring</h2>
+          <p>Regionale Unternehmen und Vereine, etwa der Handballverein an der Sporthalle, als sichtbare Partner.</p>
+          <div class="anker">Sichtbarkeit statt Einzelverkauf</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spende-block">
+      <div class="spende-titel">
+        <div class="prozent">5&nbsp;%</div>
+        <div class="label">jedes Netto-Warenverkaufs wandern in einen Spendentopf</div>
+      </div>
+      <div class="fluss">
+        <div class="fluss-schritt"><div class="kreis">1</div><div class="txt2">Kauf an Automat oder App</div></div>
+        <div class="fluss-pfeil">&#8594;</div>
+        <div class="fluss-schritt"><div class="kreis">2</div><div class="txt2">5&nbsp;% des Netto-Umsatzes in den Spendentopf</div></div>
+        <div class="fluss-pfeil">&#8594;</div>
+        <div class="fluss-schritt"><div class="kreis">3</div><div class="txt2">Quartalsweise Abstimmung in der App</div></div>
+        <div class="fluss-pfeil">&#8594;</div>
+        <div class="fluss-schritt"><div class="kreis">4</div><div class="txt2">Auszahlung an regionale gemeinnützige Organisation</div></div>
+      </div>
+      <div class="fluss-hinweis">Ziel: Auswahl durch zahlende App-Abonnentinnen und -Abonnenten. Heute können alle App-Konten vorschlagen und abstimmen, die Einschränkung ist noch nicht umgesetzt (siehe Businessplan, Abschnitt 7).</div>
+    </div>
+
+    <div class="unten">
+      <div class="karte" style="flex: 0 0 42mm;">
+        <h3>Preise auf einen Blick</h3>
+        <div class="preis-hook">
+          <div class="preis-zeile"><span class="was">App-Abo Monat</span><span class="preis">0,99 €</span></div>
+          <div class="preis-zeile"><span class="was">App-Abo Jahr</span><span class="preis">9,99 €</span></div>
+          <div class="preis-zeile"><span class="was">Werbung digital ab</span><span class="preis">15 €</span></div>
+          <div class="preis-zeile"><span class="was">Werbung analog ab</span><span class="preis">15 €</span></div>
+          <div class="preis-zeile"><span class="was">Komplettpaket ab</span><span class="preis">149 €</span></div>
+        </div>
+        <div class="preis-note">Lifetime-Zugang ist in der Datenbank vorbereitet, wird zum Start aber nicht angeboten.</div>
+      </div>
+      <div class="karte" style="flex: 0 0 84mm;">
+        <h3>Standorte im Aufbau</h3>
+        <div class="standort-zeile"><span class="jahr">2027</span><span class="ort">Bahnhof Osterweddingen: Heißgetränkeautomat + Mixautomat</span></div>
+        <div class="standort-zeile"><span class="jahr">2028</span><span class="ort">Freibad Langenweddingen (Vorschlag)</span></div>
+        <div class="standort-zeile"><span class="jahr">2029</span><span class="ort">Sporthalle Langenweddingen, Handball (Vorschlag)</span></div>
+        <div class="standort-zeile"><span class="jahr">ab 2030</span><span class="ort">je ein weiterer Standort im Bördekreis pro Jahr, Lage offen</span></div>
+      </div>
+      <div class="karte" style="flex: 1;">
+        <h3>Automaten im Netz</h3>
+        <div class="ausbau-reihe">
+          <div class="ausbau-balken" style="height: 18%"><span class="n">2</span><span class="j">27</span></div>
+          <div class="ausbau-balken" style="height: 27%"><span class="n">3</span><span class="j">28</span></div>
+          <div class="ausbau-balken" style="height: 36%"><span class="n">4</span><span class="j">29</span></div>
+          <div class="ausbau-balken" style="height: 45%"><span class="n">5</span><span class="j">30</span></div>
+          <div class="ausbau-balken" style="height: 55%"><span class="n">6</span><span class="j">31</span></div>
+          <div class="ausbau-balken" style="height: 64%"><span class="n">7</span><span class="j">32</span></div>
+          <div class="ausbau-balken" style="height: 73%"><span class="n">8</span><span class="j">33</span></div>
+          <div class="ausbau-balken" style="height: 82%"><span class="n">9</span><span class="j">34</span></div>
+          <div class="ausbau-balken" style="height: 91%"><span class="n">10</span><span class="j">35</span></div>
+          <div class="ausbau-balken" style="height: 100%"><span class="n">11</span><span class="j">36</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fusszeile">
+      <span>Bördesnack24 GbR &middot; Boerdesnack24@gmail.com &middot; USt-IdNr. DE 458804058</span>
+      <span>Alle Zahlen sind Planungsannahmen ohne eigene Ist-Verkaufsdaten. Details und Quellen im Businessplan.</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
