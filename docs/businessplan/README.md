@@ -241,6 +241,15 @@ deutsche Silbentrennung in JavaScript zu pflegen.
   Balkenchart aus `szenario_diagramm()` — eigene Funktion, nicht
   `doc.diagramm()` aus dem Skill, weil die nur eine Datenreihe je Chart
   kann.
+- **Erlösmix je Jahr, Planungsszenario, direkt nach „Abb. 3“ in
+  Abschnitt 5** (30.08.2026, Auftraggeber: „aus dem Diagramm sind die
+  absoluten Zahlen der einzelnen Geschäftsfelder schwer abzulesen“) —
+  die genauen Zahlen zum gestapelten Balkendiagramm, als Tabelle: Jahr ×
+  vier Geschäftsbereiche plus Summenspalte (die exakt `summe_erloese`
+  entspricht, kein separat gerundeter Wert — Cross-Check eingebaut, nicht
+  behauptet). Nur Planungsszenario, weil `erloesmix.png` selbst auch nur
+  das Planungsszenario zeigt; die Szenario-Unterschiede stehen bereits in
+  der Tabelle direkt darunter (nächster Punkt).
 - **Erlösmix nach Szenario, je Jahr, direkt bei „Abb. 3“ in Abschnitt 5**
   (nach demselben Auftrag wie oben; **Stand 30.08.2026 präzisiert**: erst
   nur die 10-Jahres-Summe je Bereich, auf Wunsch des Auftraggebers

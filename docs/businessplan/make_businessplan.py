@@ -465,6 +465,19 @@ def baue_inhalt(doc, toc_seiten):
     pess_produkt, pess_app, pess_werbe, pess_spons = _erlösmix_jahre(daten_pess)
     normal_produkt, normal_app, normal_werbe, normal_spons = _erlösmix_jahre(daten)
     opt_produkt, opt_app, opt_werbe, opt_spons = _erlösmix_jahre(daten_opt)
+
+    hook(doc, "**Die genauen Werte zum Diagramm oben, Planungsszenario:** Aus dem gestapelten Balken allein lässt sich der Beitrag der einzelnen Geschäftsbereiche schwer ablesen.")
+    erlösmix_tabelle = [["Jahr", "Snack-/Getränke", "App-Abo", "Werbeflächen", "Sponsoring", "Summe"]]
+    for i, r in enumerate(daten):
+        erlösmix_tabelle.append([
+            str(r["jahr"]),
+            f'{normal_produkt[i]:,.0f} €'.replace(",", "."),
+            f'{normal_app[i]:,.0f} €'.replace(",", "."),
+            f'{normal_werbe[i]:,.0f} €'.replace(",", "."),
+            f'{normal_spons[i]:,.0f} €'.replace(",", "."),
+            f'{r["summe_erloese"]:,.0f} €'.replace(",", "."),
+        ])
+    tabelle_seite(doc, trenn_tabelle(erlösmix_tabelle), zahlen_rechts={1, 2, 3, 4, 5})
     _app_de = f'{sum(normal_app):,.0f} €'.replace(",", ".")
     _werbe_de = f'{sum(normal_werbe):,.0f} €'.replace(",", ".")
     _spons_de = f'{sum(normal_spons):,.0f} €'.replace(",", ".")
