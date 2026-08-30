@@ -17,6 +17,9 @@ gehören nicht ins Git, der Rechenweg schon). Wer die Zahlen ändern will,
 | `iconstrip.html` | Vier-Icon-Leiste (dieselben Icons wie in der Infografik), wird zu `iconstrip_trim.png` gerendert und im Businessplan eingebettet. |
 | `boerdekreis_umriss.png` | Aus `apps/mobile/assets/images/brand_hero.jpg` extrahierte Umriss-Silhouette (nur der obere Glow-Bogen, per Helligkeitsschwelle isoliert). Kein eigenständig gezeichneter Umriss — echte Bildinformation aus dem vorhandenen Marken-Asset. Der Umriss ist **nicht geschlossen**: Der Automat verdeckt im Originalfoto einen Teil der Kontur, das lässt sich aus dem Foto nicht rekonstruieren. |
 | `brand_icon.png` | Kopie von `apps/mobile/assets/images/brand_icon.png` (das kreisrunde Automat-Icon), hier nur zur Selbstständigkeit dieses Ordners dupliziert. |
+| `zusammenspiel_v2.html` | Die Zusammenspiel-Grafik (wie die vier Erlösquellen sich gegenseitig verstärken, als ansteigende Diagonale statt symmetrischer Kreisgrafik — erste Fassung wirkte zu generisch, siehe Chatverlauf 30.08.2026). Referenziert `boerdekreis_umriss.png`, `brand_icon.png` und `fonts_local.css`. |
+| `zusammenspiel_pdf.png` | Gerenderte 2×-Fassung von `zusammenspiel_v2.html` (3600×2920 px), die `make_businessplan.py` als Vollformat-Grafik auf einer eigenen Querseite einbettet. |
+| `fonts_local.css` + `font_*.woff2` | Selbst gehostete Bricolage-Grotesque-/Hanken-Grotesk-Schnitte für `zusammenspiel_v2.html`. Selbst gehostet, weil Chrome im Headless-Betrieb dieser Sitzung der Proxy-CA für `fonts.googleapis.com` nicht vertraute (SSL-Handshake schlug fehl) — mit den lokalen Dateien braucht der Druckvorgang kein Netz mehr. |
 
 ## Neu bauen, Schritt für Schritt
 
@@ -42,6 +45,17 @@ python3 businessplan_model.py
   file://$(pwd)/iconstrip.html
 # danach auf den Inhalt zuschneiden (siehe Kommentar/Code, der das beim
 # ersten Bauen gemacht hat) -> iconstrip_trim.png
+
+# 3b) Zusammenspiel-Grafik rendern (2x fuer Druckschaerfe, dann auf den
+#     Inhalt zugeschnitten -- das exakte Crop-Mass steht im Chatverlauf,
+#     pragmatisch: Screenshot deutlich hoeher als noetig nehmen und mit
+#     PIL auf den sichtbaren Inhalt zurechtschneiden, siehe Hinweis unten)
+<chrome-binary> --headless --disable-gpu --no-sandbox \
+  --screenshot=zusammenspiel_raw.png --window-size=1800,1700 \
+  --force-device-scale-factor=2 --default-background-color=fffbf8f4 \
+  --hide-scrollbars --virtual-time-budget=3000 \
+  file://$(pwd)/zusammenspiel_v2.html
+python3 -c "from PIL import Image; Image.open('zusammenspiel_raw.png').crop((0,0,3600,2920)).save('zusammenspiel_pdf.png')"
 
 # 4) Businessplan-PDF
 python3 make_businessplan.py
@@ -93,6 +107,13 @@ Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
 oder Begründung direkt im Kopf von `businessplan_model.py`.
 
 ## Bekannte Grenzen
+
+- **Chrome-Screenshot mit exakt passendem `--window-size` kann den unteren
+  Rand des Inhalts abschneiden** (in dieser Sitzung beobachtet: die
+  Fußzeile fehlte komplett, obwohl die CSS-Höhe rechnerisch passte). Fix:
+  immer mit spürbar mehr Höhe screenshotten, als der Inhalt braucht, und
+  danach mit PIL auf das gewünschte Maß zurechtschneiden — nicht versuchen,
+  `--window-size` pixelgenau an die CSS-Höhe anzupassen.
 
 - Bördesnack24 hat zum Planungszeitpunkt **0 dokumentierte Verkäufe** — der
   gesamte Umsatzteil des Modells ist branchenüblich hergeleitet oder

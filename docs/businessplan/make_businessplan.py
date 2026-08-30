@@ -3,10 +3,11 @@ import sys, json, re
 sys.path.insert(0, "/root/.claude/skills/synced/8679d439-3b7c-44a2-84d8-50f499b43fd0_0ef6de42-5319-4234-9f65-9ef4d034777c/boerdesnack24-pdf/scripts")
 import pdf_builder as pb
 from pdf_builder import Dokument, _esc
-from reportlab.platypus import Paragraph, Table, TableStyle, Spacer
+from reportlab.platypus import Paragraph, Table, TableStyle, Spacer, Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
 
 daten = json.load(open("businessplan_zahlen.json"))
 daten_kons = json.load(open("businessplan_zahlen_konservativ.json"))
@@ -50,6 +51,29 @@ def kennzahlen_reihe(doc, werte):
     doc.story.append(Spacer(1, 2 * pb.mm))
 
 GOLD_DARK = colors.HexColor("#8A6E00")
+
+def bild_quer(doc, pfad, unterschrift=None):
+    """Vollformatiges Bild auf eigener Querseite -- fuer breite Grafiken,
+    die im Hochformat zu klein und unleserlich wuerden. Passt sich an die
+    kleinere der beiden Querseiten-Grenzen an (hier: die Hoehe bindet)."""
+    doc._nach_quer()
+    iw, ih = ImageReader(pfad).getSize()
+    aspekt = iw / ih
+    max_breite = pb.LANDSCAPE_CONTENT
+    max_hoehe = (pb.LAND_H - pb.RAND_OBEN_OHNE_HEADER) - pb.RAND_UNTEN
+    if unterschrift:
+        max_hoehe -= 14 * pb.mm
+    breite, hoehe = max_breite, max_breite / aspekt
+    if hoehe > max_hoehe:
+        hoehe, breite = max_hoehe, max_hoehe * aspekt
+    img = Image(pfad, width=breite, height=hoehe)
+    img.hAlign = "CENTER"
+    doc.story.append(Spacer(1, 4 * pb.mm))
+    doc.story.append(img)
+    if unterschrift:
+        zentrierte_caption = ParagraphStyle("caption_center", parent=doc.st["caption"], alignment=TA_CENTER)
+        doc.story.append(Paragraph(_esc(unterschrift), zentrierte_caption))
+    doc._ensure_portrait()
 
 # ---------------------------------------------------------------------
 # Grafiken
@@ -110,12 +134,8 @@ kennzahlen_reihe(doc, [
 doc.bild("iconstrip_trim.png", breite_mm=155)
 
 doc.ueberschrift("1. Zusammenfassung", ebene=1)
-hook(doc, "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung. Belegt mit der eigenen Preisliste oder einer externen Quelle, nie geschätzt ohne Kennzeichnung.")
-doc.absatz(
-    "Start mit drei Automaten (zwei 2027, ein weiterer 2028), vierter Automat bis 2029, danach "
-    "**ein weiterer Automat pro Jahr**. Standorte: Bahnhof Osterweddingen, Freibad Langenweddingen, "
-    "Sporthalle Langenweddingen."
-)
+hook(doc, "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle.")
+hook(doc, "**Start: 3 Automaten** (2 in 2027, 1 in 2028), **4. bis 2029, danach +1 pro Jahr.** Bahnhof Osterweddingen, Freibad Langenweddingen, Sporthalle Langenweddingen.")
 kennzahlen_reihe(doc, [
     ("8.300 €", "Umsatz 2027"),
     ("103.900 €", "Umsatz 2036"),
@@ -126,12 +146,13 @@ hook(doc, "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre p
 
 # 2) Geschäftsmodell -----------------------------------------------------
 doc.ueberschrift("2. Geschäftsmodell und Standort", ebene=1)
-hook(doc, "**168.000 Menschen im Bördekreis, 9.000 davon in Sülzetal**, und kein Nahversorger, der nachts oder sonntags offen hat. Genau diese Lücke füllt Bördesnack24.")
-doc.absatz(
-    "Angaben des Auftraggebers; öffentliche Vergleichszahlen (citypopulation.de, Statista) liegen mit "
-    "rund 171.000 bzw. 8.600–9.900 in derselben Größenordnung. Die App bindet zurück: Abo-Rabatt, "
-    "Bonusstufen, persönliche Coupons, statt jeden Einkauf als Einzelereignis zu behandeln."
-)
+hook(doc, "**Kein Nahversorger hat nachts oder sonntags offen.** Genau diese Lücke füllt Bördesnack24, App-Abo bindet zurück statt jeden Einkauf als Einzelereignis zu behandeln.")
+kennzahlen_reihe(doc, [
+    ("168.000", "Einwohner Bördekreis"),
+    ("9.000", "davon Sülzetal"),
+    ("24/7", "Öffnungszeit"),
+])
+doc.hinweis("Angaben des Auftraggebers; öffentliche Vergleichszahlen (citypopulation.de, Statista) liegen mit rund 171.000 bzw. 8.600–9.900 in derselben Größenordnung.")
 doc.ueberschrift("Standort- und Ausbauplan", ebene=2)
 hook(doc, "**Vorgabe des Auftraggebers**, wörtlich umgesetzt: 3 Automaten zum Start, 4. bis 2029, danach +1 pro Jahr. **Die Zuordnung der ersten drei Standorte zu den Jahren ist ein Vorschlag dieses Plans**, keine Vorgabe.")
 
@@ -157,32 +178,19 @@ doc.diagramm(
 
 # 3) Erlösquellen ---------------------------------------------------------
 doc.ueberschrift("3. Die vier Erlösquellen", ebene=1)
+hook(doc, "**Keine Quelle steht für sich.** Der Automat bringt Kunden, die App macht sie zählbar, das macht die Werbeplattform wertvoll, Sponsoring bringt neue Standorte zurück zum Automaten.")
 
-doc.ueberschrift("Snacks & Getränke am Automaten", ebene=2)
-hook(doc, "**62 Produkte, geprüft am laufenden System** (nicht an einer alten Liste). Wareneinsatzquote 34,0 % für Snacks/Getränke, nur **16,5 % bei Heißgetränken**, deutlich margenstärker.")
+bild_quer(doc, "zusammenspiel_pdf.png",
+          unterschrift="Abb. 0: Zusammenspiel der vier Erlösquellen als ein System, nicht als vier getrennte Geschäfte.")
 
-doc.ueberschrift("App-Abo", ebene=2)
-hook(doc, "**0,99 € im Monat oder 9,99 € im Jahr.** Ein Lifetime-Zugang für 79,99 € steht in der Datenbank bereit, wird zum Start aber bewusst nicht angeboten.")
-doc.absatz("Abonnentinnen und Abonnenten erhalten 5 % Rabatt auf den Automatenpreis, Bonusstufen und personalisierte Coupons.")
-
-doc.ueberschrift("Werbeplattform für regionale Unternehmen", ebene=2)
-hook(doc, "**Kein Coupon wird nach Einlösung abgerechnet.** Der Werbekunde kauft einen Logoplatz auf einem Gutschein-Anlass. Die Auswahl, wer den Gutschein bekommt, bleibt bei Bördesnack24.")
-doc.absatz(
-    "Zwei Formen: physische Werbeflächen am Automatengehäuse (3 Flächen je Automat, 28 € je Fläche "
-    "und Monat) und digitale Coupon-/Profilpakete in der App (15 bis 149 € im Monat). Preise real, "
-    "bereits entschieden (docs/ADVERTISING-MASTERPROMPT-ABGLEICH.md)."
-)
-
-doc.ueberschrift("Sponsoring", ebene=2)
-hook(doc, "Regionale Unternehmen und Vereine, etwa der **Handballverein an der Sporthalle Langenweddingen**, als sichtbare Partner. **Vor dem ersten Vertrag: umsatzsteuerliche Prüfung durch den Steuerberater.**")
-
-doc.ueberschrift("5 % Spende: gesellschaftliches Engagement als Teil des Modells", ebene=2)
-hook(doc, "**5 % jedes Netto-Warenverkaufs** (nicht der App-, Werbe- oder Sponsoringerlöse) fließen in einen Spendentopf. Über den Empfänger wird quartalsweise abgestimmt.")
-doc.absatz(
-    "**Offener Punkt:** Nach heutigem Stand des Systems kann jedes App-Konto vorschlagen und "
-    "abstimmen. Eine Beschränkung auf zahlende Abonnenten, wie für diesen Plan angefragt, ist noch "
-    "nicht umgesetzt (Abschnitt 7)."
-)
+kennzahlen_reihe(doc, [
+    ("62", "Produkte"),
+    ("0,99 € / 9,99 €", "App-Abo Monat/Jahr"),
+    ("ab 15 €", "Werbung / Monat"),
+    ("149 €", "Komplettpaket"),
+])
+doc.hinweis("Preise real, bereits entschieden (docs/ADVERTISING-MASTERPROMPT-ABGLEICH.md), nicht Teil dieses Plans neu festgelegt. Vor dem ersten Sponsoring-Vertrag: umsatzsteuerliche Prüfung durch den Steuerberater.")
+hook(doc, "**Offener Punkt bei der 5 %-Spende:** Heute kann jedes App-Konto vorschlagen und abstimmen, nicht nur zahlende Abonnenten, wie für diesen Plan angefragt (Abschnitt 7).")
 
 # 4) Annahmen --------------------------------------------------------------
 doc.ueberschrift("4. Annahmen dieses Plans", ebene=1)
@@ -243,8 +251,7 @@ kennzahlen_reihe(doc, [
 
 # 6) Sensitivität -------------------------------------------------------------
 doc.ueberschrift("6. Konservatives Szenario", ebene=1)
-hook(doc, "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit ihrer eigenen Spalte durchgerechnet.")
-doc.absatz("Alle übrigen Annahmen (Kosten, App-Erlöse, Werbe- und Sponsoringerlöse, Personalschwellen) bleiben unverändert.")
+hook(doc, "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit eigener Spalte durchgerechnet, alle übrigen Annahmen unverändert.")
 sens_tabelle = [["Jahr", "EBIT Planungsszenario", "EBIT konservativ (−40 % Umsatz/Automat)"]]
 for r, k in zip(daten, daten_kons):
     sens_tabelle.append([

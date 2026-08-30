@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Zusammenspiel der Erlösquellen</title>
+<link href="fonts_local.css" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FDC102;
+    --gold-dark: #8A6E00;
+    --ink: #202321;
+    --boerde-grau: #DCD8D3;
+    --cream: #FBF8F4;
+    --gruen: #5C9A3F;
+    --grau-txt: #6B6560;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1800px; height: 1440px;
+    font-family: "Hanken Grotesk", Arial, sans-serif;
+    color: var(--ink); background: var(--cream);
+    overflow: hidden;
+  }
+  .display { font-family: "Bricolage Grotesque", Arial, sans-serif; }
+
+  .page { position: relative; width: 1800px; height: 1440px; }
+
+  /* Textur / Hintergrund */
+  .umriss-bg {
+    position: absolute; top: -180px; right: -260px; width: 1300px; opacity: 0.14;
+    transform: rotate(-6deg);
+  }
+  .dots {
+    position: absolute; inset: 0; opacity: 0.5;
+    background-image: radial-gradient(circle, #C9C2B8 1.6px, transparent 1.6px);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(120deg, black 0%, transparent 46%);
+  }
+
+  /* Kopf */
+  .kopf { position: relative; z-index: 4; padding: 64px 0 0 72px; max-width: 980px; }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold-dark); background: #fff; border: 1.5px solid var(--boerde-grau);
+    padding: 7px 16px 7px 12px; border-radius: 999px;
+  }
+  .kicker .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gruen); }
+  .kopf h1 {
+    font-size: 56px; font-weight: 800; line-height: 1.04; margin-top: 22px; letter-spacing: -0.015em;
+  }
+  .kopf h1 .em { position: relative; display: inline-block; padding: 0 6px; }
+  .kopf h1 .em .bg { position: absolute; inset: 2px -4px; background: var(--gold); transform: rotate(-1.2deg); z-index: -1; border-radius: 6px; }
+  .kopf .sub { font-size: 18px; color: var(--grau-txt); max-width: 640px; margin-top: 18px; line-height: 1.5; font-weight: 500; }
+
+  /* Karten entlang der Diagonale */
+  .buehne { position: absolute; top: 330px; left: 0; z-index: 3; width: 100%; height: 1080px; }
+
+  svg.fluss { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+
+  .karte {
+    position: absolute; width: 372px; background: #fff; border-radius: 22px;
+    box-shadow: 0 18px 40px -12px rgba(32,35,33,0.22), 0 2px 0 rgba(32,35,33,0.04);
+    padding: 26px 26px 24px 26px; z-index: 2;
+  }
+  .karte .ghost {
+    position: absolute; top: -14px; right: 14px; font-size: 108px; font-weight: 800;
+    color: var(--ink); opacity: 0.06; line-height: 1; z-index: 0; pointer-events: none;
+  }
+  .karte .chip {
+    width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center;
+    justify-content: center; margin-bottom: 16px; position: relative; z-index: 1;
+  }
+  .karte .chip svg { width: 30px; height: 30px; }
+  .karte .stufe { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grau-txt); position: relative; z-index: 1; }
+  .karte h2 { font-size: 24px; font-weight: 800; margin: 4px 0 10px 0; position: relative; z-index: 1; }
+  .karte p.hook { font-size: 14.5px; color: var(--ink); font-weight: 700; line-height: 1.4; margin-bottom: 12px; position: relative; z-index: 1; }
+  .karte .pill {
+    display: inline-block; font-size: 12.5px; font-weight: 800; color: var(--ink);
+    background: var(--cream); border: 1.5px solid var(--boerde-grau); border-radius: 999px;
+    padding: 5px 13px; position: relative; z-index: 1;
+  }
+
+  .k1 { left: 40px;   top: 600px; transform: rotate(-2.2deg); }
+  .k2 { left: 480px;  top: 430px; transform: rotate(1.6deg); }
+  .k3 { left: 940px;  top: 205px; transform: rotate(-1.8deg); }
+  .k4 { left: 1400px; top: 20px;  transform: rotate(2deg); }
+
+  .chip-gold  { background: var(--gold); }
+  .chip-ink   { background: var(--ink); }
+  .chip-gruen { background: var(--gruen); }
+  .chip-dark  { background: var(--gold-dark); }
+
+  /* Rückfluss-Label */
+  .rueckfluss {
+    position: absolute; left: 470px; top: 700px; width: 400px; z-index: 3;
+  }
+  .rueckfluss .tag {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800;
+    color: #fff; background: var(--ink); padding: 8px 16px; border-radius: 999px;
+  }
+  .rueckfluss .tag b { color: var(--gold); font-size: 15px; }
+  .rueckfluss p { font-size: 13.5px; color: var(--grau-txt); margin-top: 10px; line-height: 1.4; max-width: 380px; }
+
+  .fuss {
+    position: absolute; bottom: 26px; left: 72px; right: 72px; z-index: 4;
+    display: flex; justify-content: space-between; font-size: 12.5px; color: var(--grau-txt);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <img class="umriss-bg" src="boerdekreis_umriss.png" alt="">
+  <div class="dots"></div>
+
+  <div class="kopf">
+    <div class="kicker"><span class="dot"></span>BÖRDESNACK24 &middot; GESCHÄFTSMODELL</div>
+    <h1 class="display">Kein Erlös steht für sich.<br>Jede Quelle <span class="em"><span class="bg"></span>verstärkt</span> die nächste.</h1>
+    <div class="sub">Der Automat bringt die ersten Kunden, die App macht sie zählbar, die Zählbarkeit macht die Werbeplattform wertvoll, Sponsoring bringt neue Standorte zurück zum Automaten.</div>
+  </div>
+
+  <div class="buehne">
+    <svg class="fluss" viewBox="0 0 1800 960" fill="none">
+      <defs>
+        <marker id="pf" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#202321"/>
+        </marker>
+        <marker id="pfg" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#FDC102"/>
+        </marker>
+      </defs>
+      <!-- Karte 1 -> 2 -->
+      <path d="M 420 710 C 470 610, 440 550, 500 490" stroke="#202321" stroke-width="3" stroke-linecap="round" marker-end="url(#pf)"/>
+      <!-- Karte 2 -> 3 -->
+      <path d="M 875 465 C 930 390, 900 340, 960 285" stroke="#202321" stroke-width="3" stroke-linecap="round" marker-end="url(#pf)"/>
+      <!-- Karte 3 -> 4 -->
+      <path d="M 1335 240 C 1385 190, 1360 150, 1418 100" stroke="#202321" stroke-width="3" stroke-linecap="round" marker-end="url(#pf)"/>
+      <!-- Rueckfluss 4 -> 1, gestrichelt, unter allem entlang -->
+      <path d="M 1520 250 C 1660 500, 950 660, 415 615" stroke="#FDC102" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="2 14" marker-end="url(#pfg)"/>
+    </svg>
+
+    <div class="karte k1">
+      <div class="ghost display">01</div>
+      <div class="chip chip-gold"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="4" width="28" height="40" rx="2" stroke="#202321" stroke-width="2.8"/><rect x="15" y="9" width="18" height="14" rx="1" stroke="#202321" stroke-width="2.4"/><line x1="15" y1="28" x2="33" y2="28" stroke="#202321" stroke-width="2"/><line x1="15" y1="33" x2="33" y2="33" stroke="#202321" stroke-width="2"/></svg></div>
+      <div class="stufe">Fundament</div>
+      <h2 class="display">Snacks &amp; Getränke</h2>
+      <p class="hook">Bringt die ersten Kunden, ohne die kein Netzwerk trägt.</p>
+      <div class="pill">62 Produkte</div>
+    </div>
+
+    <div class="karte k2">
+      <div class="ghost display">02</div>
+      <div class="chip chip-ink"><svg viewBox="0 0 48 48" fill="none"><rect x="13" y="4" width="22" height="40" rx="4" stroke="#FDC102" stroke-width="2.8"/><line x1="13" y1="36" x2="35" y2="36" stroke="#FDC102" stroke-width="2.4"/><circle cx="24" cy="40" r="1.8" fill="#FDC102"/></svg></div>
+      <div class="stufe">Bindung</div>
+      <h2 class="display">App-Abo</h2>
+      <p class="hook">Macht aus Einzelkäufen zählbare, aktive Konten.</p>
+      <div class="pill">0,99 € / 9,99 €</div>
+    </div>
+
+    <div class="karte k3">
+      <div class="ghost display">03</div>
+      <div class="chip chip-gruen"><svg viewBox="0 0 48 48" fill="none"><path d="M6 20 L26 12 L26 36 L6 28 Z" stroke="#fff" stroke-width="2.8" stroke-linejoin="round"/><path d="M26 16 L40 10 V38 L26 32" stroke="#fff" stroke-width="2.8" stroke-linejoin="round"/><line x1="12" y1="28" x2="14" y2="38" stroke="#fff" stroke-width="2.6"/></svg></div>
+      <div class="stufe">Reichweite</div>
+      <h2 class="display">Werbeplattform</h2>
+      <p class="hook">Aktive Konten bestimmen den Wert der Werbeplätze.</p>
+      <div class="pill">ab 15 € / Monat</div>
+    </div>
+
+    <div class="karte k4">
+      <div class="ghost display">04</div>
+      <div class="chip chip-dark"><svg viewBox="0 0 48 48" fill="none"><path d="M24 6 L40 12 V22 C40 32 33 40 24 43 C15 40 8 32 8 22 V12 Z" stroke="#fff" stroke-width="2.8" stroke-linejoin="round"/><path d="M17 23 L22 28 L32 17" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="stufe">Wachstum</div>
+      <h2 class="display">Sponsoring</h2>
+      <p class="hook">Standortpartner schließen den Kreis zum Automaten.</p>
+      <div class="pill">Standortpartner</div>
+    </div>
+
+    <div class="rueckfluss">
+      <div class="tag"><b>5&nbsp;%</b>&nbsp;Rückfluss an die Region</div>
+      <p>Jeder Warenverkauf zahlt in den Spendentopf ein, das schafft Vertrauen, das schafft Stammkunden, die den Kreislauf am Laufen halten.</p>
+    </div>
+  </div>
+
+  <div class="fuss">
+    <span>Bördesnack24 GbR</span>
+    <span>Vier Erlösquellen als ein zusammenhängendes System, nicht als vier getrennte Geschäfte.</span>
+  </div>
+
+</div>
+</body>
+</html>
