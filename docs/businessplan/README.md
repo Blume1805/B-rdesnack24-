@@ -12,7 +12,7 @@ gehören nicht ins Git, der Rechenweg schon). Wer die Zahlen ändern will,
 |---|---|
 | `businessplan_model.py` | Das Finanzmodell, 2027–2036. Läuft eigenständig, schreibt `businessplan_zahlen.json`. Alle Annahmen stehen als benannte Konstanten oben im Skript, mit Quellenkommentar. |
 | `businessplan_zahlen.json` / `businessplan_zahlen_konservativ.json` | Ergebnis des Modells: Planungsszenario und das Szenario mit 40 % niedrigerem Umsatz je Automat (siehe README unten, „Konservatives Szenario“). |
-| `make_businessplan.py` | Baut `Boerdesnack24_Businessplan.pdf` aus den JSON-Zahlen, über den `boerdesnack24-pdf`-Skill (`pdf_builder.py`). |
+| `make_businessplan.py` | Baut `Boerdesnack24_Businessplan.pdf` aus den JSON-Zahlen, über den `boerdesnack24-pdf`-Skill (`pdf_builder.py`). Baut **zweimal** hintereinander (siehe unten, „Inhaltsverzeichnis“) — das ist kein Fehler. |
 | `infografik.html` | Die A3-quer-Infografik. Wird mit einem headless Chrome zu PDF gedruckt (kein Playwright-Paket nötig, das Chromium-Binary reicht). |
 | `iconstrip.html` | Vier-Icon-Leiste (dieselben Icons wie in der Infografik), wird zu `iconstrip_trim.png` gerendert und im Businessplan eingebettet. |
 | `boerdekreis_umriss.png` | Aus `apps/mobile/assets/images/brand_hero.jpg` extrahierte Umriss-Silhouette (nur der obere Glow-Bogen, per Helligkeitsschwelle isoliert). Kein eigenständig gezeichneter Umriss — echte Bildinformation aus dem vorhandenen Marken-Asset. Der Umriss ist **nicht geschlossen**: Der Automat verdeckt im Originalfoto einen Teil der Kontur, das lässt sich aus dem Foto nicht rekonstruieren. |
@@ -105,6 +105,32 @@ python3 make_businessplan.py
 Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
 oder Begründung direkt im Kopf von `businessplan_model.py`.
+
+## Seitenaufbau (Stand 30.08.2026)
+
+- **Kein Logo im Kopf.** Auf Wunsch des Auftraggebers entfernt — die Datei
+  liegt nicht mehr unter dem `boerdesnack24-pdf`-Skill in
+  `assets/logo/`. Wird dort künftig wieder ein Bild abgelegt, erscheint es
+  automatisch wieder im Header (Skill-Verhalten, nicht dieses Skripts).
+- **Jede Überschrift ist mit ihrem einleitenden Satz in einem
+  `KeepTogether`-Block** (`abschnitt()` in `make_businessplan.py`) — eine
+  Überschrift steht nie allein am Seitenende mit dem Text erst auf der
+  nächsten Seite. Neue Abschnitte immer über `abschnitt(doc, titel, ebene,
+  intro)` anlegen, nicht über das nackte `doc.ueberschrift()` aus dem Skill.
+- **Die Annahmen-Tabelle (Abschnitt 4) bleibt absichtlich im Hochformat**
+  (`doc.tabelle(ANNAHMEN_TABELLE, quer=False)`), dafür sind die
+  „Quelle/Begründung“-Texte kurz gehalten. Wer dort wieder ausführlichere
+  Begründungen einträgt, riskiert, dass die Tabelle nicht mehr ins
+  Hochformat passt und automatisch quer geht — das war vorher der Fall.
+- **Inhaltsverzeichnis auf Seite 1** (zusammen mit dem Dokumenttitel).
+  Da die echten Seitenzahlen erst nach dem Satz feststehen, baut das
+  Skript das Dokument **zweimal**: einmal mit Platzhalter-Seitenzahlen
+  (`/tmp/_bp_entwurf.pdf`), liest die echten Seitenzahlen per `pdftotext`
+  aus (nur auf Seiten NACH dem Inhaltsverzeichnis suchen, sonst findet die
+  Suche die Zeile im Verzeichnis selbst statt der echten Überschrift),
+  und baut dann das finale PDF mit den richtigen Zahlen. Neue Abschnitte
+  gehören zusätzlich in die `TOC_ABSCHNITTE`-Liste am Kopf des Skripts,
+  mit exakt demselben Text wie im `abschnitt()`-Aufruf.
 
 ## Bekannte Grenzen
 
