@@ -9,6 +9,17 @@ const {
 const daten = JSON.parse(fs.readFileSync("businessplan_zahlen.json", "utf8"));
 const datenKons = JSON.parse(fs.readFileSync("businessplan_zahlen_konservativ.json", "utf8"));
 
+const de0 = (n) => Math.round(n).toLocaleString("de-DE");
+const umsatz2027 = `${de0(daten[0].summe_erloese)} €`;
+const umsatz2036 = `${de0(daten[daten.length - 1].summe_erloese)} €`;
+const kumEbit = daten.reduce((s, r) => s + r.ebit, 0);
+const kumKons = datenKons.reduce((s, r) => s + r.ebit, 0);
+const negJahre = datenKons.filter((r) => r.ebit < 0).map((r) => r.jahr);
+const jahreText = negJahre.join(", ");
+const erstesNegBetrag = negJahre.length
+  ? `${de0(datenKons.find((r) => r.ebit < 0).ebit)} €`.replace("-", "−")
+  : "";
+
 // ---------------------------------------------------------------------
 // Marke
 // ---------------------------------------------------------------------
@@ -197,16 +208,18 @@ children.push(...bild("iconstrip_trim.png", 600));
 children.push(...ueberschrift("1. Zusammenfassung", 1, "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle."));
 children.push(hook("**Start: 3 Automaten** (2 in 2027, 1 in 2028), **4. bis 2029, danach +1 pro Jahr.** Bahnhof Osterweddingen, Freibad Langenweddingen, Sporthalle Langenweddingen."));
 children.push(spacer(120));
-children.push(kennzahlenReihe([["8.300 €", "Umsatz 2027"], ["103.900 €", "Umsatz 2036"], ["223.900 €", "EBIT, 10 Jahre kumuliert"], ["124.500 €", "EBIT konservativ, 10 Jahre"]]));
+children.push(kennzahlenReihe([[umsatz2027, "Umsatz 2027"], [umsatz2036, "Umsatz 2036"], [`${de0(kumEbit)} €`, "EBIT, 10 Jahre kumuliert"], [`${de0(kumKons)} €`, "EBIT konservativ, 10 Jahre"]]));
 children.push(spacer(240));
-children.push(hook("**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6)."));
+children.push(hook(negJahre.length
+  ? `**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im konservativen Szenario (Abschnitt 6) ist einzig ${jahreText} leicht negativ (${erstesNegBetrag}), alle übrigen Jahre bleiben positiv.`
+  : "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6)."));
 
 // 2) Geschäftsmodell
 children.push(...ueberschrift("2. Geschäftsmodell und Standort", 1, "**Kein Nahversorger hat nachts oder sonntags offen.** Genau diese Lücke füllt Bördesnack24, App-Abo bindet zurück statt jeden Einkauf als Einzelereignis zu behandeln."));
 children.push(spacer(120));
-children.push(kennzahlenReihe([["168.000", "Einwohner Bördekreis"], ["9.000", "davon Sülzetal"], ["24/7", "Öffnungszeit"]]));
+children.push(kennzahlenReihe([["170.984", "Einwohner Bördekreis"], ["8.841", "davon Sülzetal"], ["24/7", "Öffnungszeit"]]));
 children.push(spacer(120));
-children.push(hinweis("Angaben des Auftraggebers; öffentliche Vergleichszahlen (citypopulation.de, Statista) liegen mit rund 171.000 bzw. 8.600–9.900 in derselben Größenordnung."));
+children.push(hinweis("Öffentliche Vergleichszahlen: Bördekreis, Statistisches Landesamt Sachsen-Anhalt (Stand 31.12.2025); Sülzetal, Gemeinde Sülzetal / citypopulation.de (Stand 01.01.2026)."));
 
 children.push(...ueberschrift("Standort- und Ausbauplan", 2, "**Vorgabe des Auftraggebers**, wörtlich umgesetzt: 3 Automaten zum Start, 4. bis 2029, danach +1 pro Jahr. **Die Zuordnung der ersten drei Standorte zu den Jahren ist ein Vorschlag dieses Plans**, keine Vorgabe."));
 
@@ -222,30 +235,26 @@ children.push(spacer(200));
 children.push(...bild("automatennetz_linie.png", 600, "Abb. 1: 3 Automaten zum Start, +1 pro Jahr ab 2030."));
 
 // 3) Erlösquellen
-children.push(...ueberschrift("3. Die vier Erlösquellen", 1, "**Keine Quelle steht für sich.** Der Automat bringt Kunden, die App macht sie zählbar, das macht die Werbeplattform wertvoll, Sponsoring bringt neue Standorte zurück zum Automaten."));
-children.push(...bild("zusammenspiel_pdf.png", 600, "Abb. 2: Zusammenspiel der vier Erlösquellen als ein System, nicht als vier getrennte Geschäfte."));
-children.push(kennzahlenReihe([["62", "Produkte"], ["0,99 € / 9,99 €", "App-Abo Monat/Jahr"], ["ab 15 €", "Werbung / Monat"], ["149 €", "Komplettpaket"]]));
-children.push(spacer(120));
-children.push(hinweis("Preise real, bereits entschieden (docs/ADVERTISING-MASTERPROMPT-ABGLEICH.md), nicht Teil dieses Plans neu festgelegt. Vor dem ersten Sponsoring-Vertrag: umsatzsteuerliche Prüfung durch den Steuerberater."));
-children.push(hook("**Offener Punkt bei der 5 %-Spende:** Heute kann jedes App-Konto vorschlagen und abstimmen, nicht nur zahlende Abonnenten, wie für diesen Plan angefragt (Abschnitt 7)."));
+children.push(...ueberschrift("3. Die vier Erlösquellen", 1));
+children.push(...bild("zusammenspiel_pdf.png", 600));
 
 // 4) Annahmen
 children.push(...ueberschrift("4. Annahmen dieses Plans", 1, "**Planungsannahmen, keine gemessenen Werte.** Mit Quelle, wo eine externe existiert, sonst eigene, im Text begründete Schätzung."));
 const annahmenZeilen = [
   ["Bruttoumsatz/Automat/Monat", "500–1.400 €, je Standort", "GTR Automaten/Maschinenpartner: 300–1.500 €/Monat typisch"],
-  ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste, an DB geprüft"],
+  ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste"],
   ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
-  ["Anschaffung je Automat", "6.000 € netto", "VENDY1/dasvending: 4.989–9.000 € netto"],
-  ["Abschreibungsdauer", "8 Jahre linear", "angenommene Nutzungsdauer"],
+  ["Anschaffung je Automat", "10.000 € netto", "Angabe des Auftraggebers"],
+  ["Abschreibungsdauer", "6 Jahre linear", "Angabe des Auftraggebers"],
   ["Nayax-Grundgebühr", "14 €/Monat je Terminal", "Nayax-Shop FAQ"],
-  ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %, Anteil angenommen"],
-  ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", "eigene Schätzung, nicht extern geprüft"],
-  ["Standortprovision", "5 % vom Bruttoumsatz", "branchenüblich, nicht belegt"],
-  ["Zahlende App-Abonnenten", "40 (2027) bis 720 (2036)", "eigene Schätzung, an Wachstum gekoppelt"],
+  ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %"],
+  ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", ""],
+  ["Standortprovision", "5 % vom Bruttoumsatz", "branchenüblich"],
+  ["Zahlende App-Abonnenten", "40 (2027) bis 720 (2036)", "an Netzwachstum gekoppelt"],
   ["Ø Erlös je Abonnent", "0,90 €/Monat", "60 % Jahres-, 40 % Monatsabo"],
-  ["Auslastung Werbeflächen", "0 % (27/28) bis 70 % (36)", "eigene Rampe, Obergrenze wie Advertising-Dok."],
-  ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "eigene Schätzung, Pakete real"],
-  ["Personal", "1 Minijob je 6 Automaten, 556 €", "Minijob-Grenze 2026, Schwelle Annahme"],
+  ["Auslastung Werbeflächen", "0 % (27/28) bis 70 % (36)", "Obergrenze wie Advertising-Dok."],
+  ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "Paketpreise real"],
+  ["Personal", "1 Minijob je 6 Automaten, 603 €", "Minijob-Grenze 2026"],
 ];
 children.push(tabelle(["Größe", "Annahme", "Quelle / Begründung"], annahmenZeilen, [2600, 2400, 4000]));
 
@@ -254,13 +263,12 @@ children.push(...ueberschrift("5. Finanzplan, Jahr 1 bis 10", 1, "**Das Planungs
 const fpZeilen = daten.map((r) => [String(r.jahr), String(r.automaten), `${de(r.summe_erloese)} €`, `${de(r.summe_kosten_ohne_afa)} €`, `${de(r.afa_jahr)} €`, `${de(r.ebit)} €`]);
 children.push(tabelle(["Jahr", "Automaten", "Erlöse gesamt", "Kosten (o. AfA)", "Abschreibung", "EBIT"], fpZeilen, [1000, 1400, 1700, 1700, 1600, 1600], [1, 2, 3, 4, 5]));
 children.push(spacer(200));
-children.push(...bild("umsatz_balken.png", 600, "Abb. 3: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
-children.push(...bild("erloesmix.png", 600, "Abb. 4: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
-children.push(...bild("ebit_balken.png", 600, "Abb. 5: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
+children.push(...bild("umsatz_balken.png", 600, "Abb. 2: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
+children.push(...bild("erloesmix.png", 600, "Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
+children.push(...bild("ebit_balken.png", 600, "Abb. 4: EBIT vor Steuern und Gesellschafterentnahmen; Delle 2031 durch die erste Teilzeitkraft ab dem 6. Automaten."));
 
 const kumSpende = daten.reduce((s, r) => s + r.spende, 0);
 const kumInvest = daten.reduce((s, r) => s + r.investition_jahr, 0);
-const kumEbit = daten.reduce((s, r) => s + r.ebit, 0);
 children.push(...ueberschrift("Spenden und Investitionen im Überblick", 2, "**Drei Zahlen, die den Plan zusammenfassen:**"));
 children.push(kennzahlenReihe([[`${de(kumSpende)} €`, "Spendentopf, 10 Jahre"], [`${de(kumInvest)} €`, "Investition, 11 Automaten"], [`${de(kumEbit)} €`, "EBIT kumuliert, 10 Jahre"]]));
 
@@ -268,27 +276,10 @@ children.push(kennzahlenReihe([[`${de(kumSpende)} €`, "Spendentopf, 10 Jahre"]
 children.push(...ueberschrift("6. Konservatives Szenario", 1, "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit eigener Spalte durchgerechnet, alle übrigen Annahmen unverändert."));
 const sensZeilen = daten.map((r, i) => [String(r.jahr), `${de(r.ebit)} €`, `${de(datenKons[i].ebit)} €`]);
 children.push(tabelle(["Jahr", "EBIT Planungsszenario", "EBIT konservativ (−40 % Umsatz/Automat)"], sensZeilen, [1400, 3200, 4400], [1, 2]));
-const kumKons = datenKons.reduce((s, r) => s + r.ebit, 0);
 children.push(spacer(160));
-children.push(hook(`**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`));
-
-// 7) Risiken
-children.push(...ueberschrift("7. Risiken und offene Punkte", 1, "**Ehrlich benannt, statt beschönigt** (interne Arbeitsregel „Behauptungen vorher prüfen“):"));
-const risiken = [
-  "**Keine eigenen Ist-Verkaufsdaten.** Die Verkaufsdatenbank enthält 0 echte Zeilen (Stand 27.08.2026); jede Umsatzannahme hier ist extern hergeleitet oder eigene Schätzung.",
-  "**Standortzuordnung für Automat 1–3** auf 2027/2028 ist ein Vorschlag dieses Plans, keine Vorgabe des Auftraggebers. Standorte ab Automat 5 (2030) sind offen.",
-  "**Vereinsbeteiligung** ist umsatzsteuerlich in der Regel Leistungsaustausch, sobald Sichtbarkeit gewährt wird, vor dem ersten Sponsoring-Vertrag steuerlich zu bestätigen.",
-  "**Spendenabstimmung heute offen für alle Konten**, nicht nur zahlende Abonnenten. Die für diesen Plan angefragte Beschränkung ist im System nicht umgesetzt.",
-  "**Nayax-Gebühren, Standortprovision, Strom- und Wartungskosten** sind branchenübliche Annahmen, nicht am eigenen Betrieb geprüft (keine laufenden Verträge zum Planungszeitpunkt).",
-  "**sevDesk-Kontozuordnung** braucht laut docs/FINANCE.md eine einmalige Prüfung gegen das echte Konto, bevor Ist-Zahlen produktiv genutzt werden.",
-];
-risiken.forEach((r) => {
-  children.push(new Paragraph({
-    numbering: { reference: "risiken-liste", level: 0 },
-    spacing: { after: 140 },
-    children: bold(r),
-  }));
-});
+children.push(hook(negJahre.length
+  ? `**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR.** Einzig ${jahreText} ist leicht negativ (${erstesNegBetrag}), alle übrigen Jahre bleiben positiv. Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`
+  : `**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`));
 
 // ---------------------------------------------------------------------
 // Dokument zusammenbauen
@@ -300,13 +291,6 @@ const doc = new Document({
     default: {
       document: { run: { font: FONT_TEXT, size: 21, color: SCHWARZ } },
     },
-  },
-  numbering: {
-    config: [{
-      reference: "risiken-liste",
-      levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT,
-        style: { paragraph: { indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.25) } } } }],
-    }],
   },
   sections: [{
     properties: {

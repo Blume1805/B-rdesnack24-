@@ -98,9 +98,22 @@ python3 make_businessplan.py
   ersten drei Standorte zu den Jahren (Bahnhof Osterweddingen 2027, Freibad
   Langenweddingen 2028, Sporthalle Langenweddingen 2029) ist ein
   **Vorschlag dieses Plans**, keine Vorgabe.
+- **Anschaffung je Automat 10.000 € netto, Abschreibungsdauer 6 Jahre
+  linear, Minijob-Grenze 603 €/Monat** — alle drei Angabe des
+  Auftraggebers (30.08.2026), vorher 6.000 €/8 Jahre/556 €. Die Änderung
+  wirkt sich auf jedes EBIT im Modell aus (mehr Investition, kürzere
+  Abschreibungsdauer → höhere jährliche AfA).
+- **Einwohnerzahlen**: öffentliche Vergleichszahlen statt der gerundeten
+  Schätzung des Auftraggebers — Bördekreis 170.984 (Statistisches
+  Landesamt Sachsen-Anhalt, Stand 31.12.2025), Sülzetal 8.841 (Gemeinde
+  Sülzetal / citypopulation.de, Stand 01.01.2026).
 - **Konservatives Szenario**: alle Bruttoumsatz-Annahmen je Automat um 40 %
-  gesenkt, alle übrigen Annahmen unverändert. Bleibt in jedem der zehn
-  Planjahre operativ profitabel.
+  gesenkt, alle übrigen Annahmen unverändert. Seit der Anschaffungs-/
+  Abschreibungs-Änderung ist **2027 im konservativen Szenario leicht
+  negativ** (−1.004 €), alle übrigen neun Jahre bleiben positiv — beide
+  Dokumente formulieren das inzwischen bedingt (`negative_jahre_kons` in
+  `make_businessplan.py` / `negJahre` in `build_docx.js`), nicht mehr als
+  pauschale „durchgehend positiv“-Behauptung.
 
 Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
@@ -172,6 +185,22 @@ einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
   und baut dann das finale PDF mit den richtigen Zahlen. Neue Abschnitte
   gehören zusätzlich in die `TOC_ABSCHNITTE`-Liste am Kopf des Skripts,
   mit exakt demselben Text wie im `abschnitt()`-Aufruf.
+- **Abschnitt 3 („Die vier Erlösquellen“) ist Überschrift + Grafik auf
+  einer einzigen Querseite**, ohne Fließtext davor oder danach — auf
+  Wunsch des Auftraggebers (30.08.2026), weil der Text in der Grafik
+  selbst schon steht und sonst doppelt stünde. Löst `abschnitt_bild_quer()`
+  statt der Kombination `abschnitt()` + `doc.bild()`: schreibt Überschrift
+  und Goldlinie direkt auf die Querseite, bevor das Bild folgt (reportlab
+  bietet dafür keine öffentliche API, die Funktion nutzt `doc._nach_quer()`
+  direkt). Die Grafik trägt seither **keine eigene Bildunterschrift** mehr
+  — eine „Abb. 0“-Beschriftung hätte exakt den Satz wiederholt, den der
+  Auftraggeber aus der Grafik selbst schon entfernen liess. Dadurch beginnt
+  die Abbildungsnummerierung der übrigen Grafiken bei „Abb. 1“
+  (Standortnetz), nicht bei „Abb. 2“.
+- **Abschnitt „7. Risiken und offene Punkte“ existiert nicht mehr** (PDF
+  und DOCX gleichermaßen, entfernt 30.08.2026 auf Wunsch des
+  Auftraggebers — siehe „Bekannte Grenzen“ unten für den einzigen Punkt,
+  der dadurch nicht mehr im Businessplan selbst steht).
 
 ## Bekannte Grenzen
 
@@ -187,5 +216,9 @@ einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
   eigene Schätzung, nicht am eigenen Betrieb gemessen.
 - Die Spendenabstimmung ist im heutigen System **für alle App-Konten**
   offen, nicht nur für zahlende Abonnenten — die Infografik zeigt das
-  als Ziel mit sichtbarem Hinweis auf den heutigen Stand, der Businessplan
-  führt es unter „Risiken und offene Punkte“.
+  als Ziel mit sichtbarem Hinweis auf den heutigen Stand. Der Businessplan
+  nannte diesen Punkt bisher unter „7. Risiken und offene Punkte“; dieser
+  Abschnitt wurde am 30.08.2026 auf Wunsch des Auftraggebers entfernt
+  („sind keine Risiken“) und stand seither nirgends mehr im Businessplan
+  selbst — festgehalten hier, damit der Punkt nicht ganz aus dem Blick
+  gerät.

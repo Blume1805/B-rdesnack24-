@@ -76,9 +76,8 @@ WARTUNG_PRO_MONAT = 30.0        # EUR/Monat/Gerät (Annahme)
 VERSICHERUNG_PRO_JAHR = 60.0    # EUR/Jahr/Gerät (Annahme)
 STANDORTPROVISION_SATZ = 0.05   # 5 % vom Bruttoumsatz an Standortgeber (Branchenannahme)
 
-INVESTITION_PRO_AUTOMAT = 6000.0   # EUR netto, Kombiautomat gekühlt inkl. Kartenterminal
-                                    # Quelle Bandbreite: VENDY1/dasvending -- 4.989-9.000 EUR netto
-AFA_JAHRE = 8                      # lineare Abschreibungsdauer (Annahme, betriebsgewöhnliche ND)
+INVESTITION_PRO_AUTOMAT = 10000.0  # EUR netto, Angabe des Auftraggebers (30.08.2026)
+AFA_JAHRE = 6                       # lineare Abschreibungsdauer, Angabe des Auftraggebers (30.08.2026)
 
 # ---------------------------------------------------------------------------
 # 4) Spenden -- 5 % vom Netto-Produktumsatz (nur Automaten-/App-Verkauf,
@@ -137,7 +136,7 @@ def reichweitenfaktor(aktive_konten):
 # ---------------------------------------------------------------------------
 # 8) Personal -- Minijob-Kraft(e) für Befüllung/Logistik ab Netzgröße
 # ---------------------------------------------------------------------------
-MINIJOB_MONAT = 556.0  # EUR/Monat, gesetzliche Minijob-Grenze 2026
+MINIJOB_MONAT = 603.0  # EUR/Monat, Minijob-Grenze 2026, Angabe des Auftraggebers (30.08.2026)
 
 def anzahl_minijobs(automaten_anzahl):
     return automaten_anzahl // 6  # 1 Kraft ab 6, 2. ab 12 usw.

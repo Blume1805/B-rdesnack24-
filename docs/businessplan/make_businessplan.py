@@ -66,14 +66,19 @@ def kennzahlen_reihe(doc, werte):
     doc.story.append(t)
     doc.story.append(Spacer(1, 2 * pb.mm))
 
-def bild_quer(doc, pfad, unterschrift=None):
-    """Vollformatiges Bild auf eigener Querseite -- fuer breite Grafiken,
-    die im Hochformat zu klein und unleserlich wuerden."""
+def abschnitt_bild_quer(doc, titel, pfad, unterschrift=None):
+    """Ueberschrift UND ein Vollformat-Bild zusammen auf einer eigenen
+    Querseite -- fuer breite Grafiken, die im Hochformat zu klein und
+    unleserlich wuerden, aber trotzdem mit ihrer Ueberschrift auf
+    derselben Seite stehen sollen (nicht die Ueberschrift auf der
+    vorherigen Hochformat-Seite)."""
     doc._nach_quer()
+    doc.story.append(Paragraph(_esc(titel), doc.st["h1"]))
+    doc.story.append(HRFlowable(width="100%", thickness=1.2, color=pb.GOLD, spaceBefore=2, spaceAfter=6))
     iw, ih = ImageReader(pfad).getSize()
     aspekt = iw / ih
     max_breite = pb.LANDSCAPE_CONTENT
-    max_hoehe = (pb.LAND_H - pb.RAND_OBEN_OHNE_HEADER) - pb.RAND_UNTEN
+    max_hoehe = (pb.LAND_H - pb.RAND_OBEN_OHNE_HEADER) - pb.RAND_UNTEN - 22 * pb.mm
     if unterschrift:
         max_hoehe -= 14 * pb.mm
     breite, hoehe = max_breite, max_breite / aspekt
@@ -164,7 +169,6 @@ TOC_ABSCHNITTE = [
     ("5. Finanzplan, Jahr 1 bis 10", 1),
     ("Spenden und Investitionen im Überblick", 2),
     ("6. Konservatives Szenario", 1),
-    ("7. Risiken und offene Punkte", 1),
 ]
 
 # ---------------------------------------------------------------------
@@ -174,19 +178,19 @@ TOC_ABSCHNITTE = [
 ANNAHMEN_TABELLE = [
     ["Größe", "Annahme", "Quelle / Begründung"],
     ["Bruttoumsatz/Automat/Monat", "500–1.400 €, je Standort", "GTR Automaten/Maschinenpartner: 300–1.500 €/Monat typisch"],
-    ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste, an DB geprüft"],
+    ["Wareneinsatz Snacks/Getränke", "34,0 % vom Nettoumsatz", "eigene Preisliste"],
     ["Wareneinsatz Heißgetränke", "16,5 % vom Nettoumsatz", "eigene Preisliste, Ø 6 Positionen"],
-    ["Anschaffung je Automat", "6.000 € netto", "VENDY1/dasvending: 4.989–9.000 € netto"],
-    ["Abschreibungsdauer", "8 Jahre linear", "angenommene Nutzungsdauer"],
+    ["Anschaffung je Automat", "10.000 € netto", "Angabe des Auftraggebers"],
+    ["Abschreibungsdauer", "6 Jahre linear", "Angabe des Auftraggebers"],
     ["Nayax-Grundgebühr", "14 €/Monat je Terminal", "Nayax-Shop FAQ"],
-    ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %, Anteil angenommen"],
-    ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", "eigene Schätzung, nicht extern geprüft"],
-    ["Standortprovision", "5 % vom Bruttoumsatz", "branchenüblich, nicht belegt"],
-    ["Zahlende App-Abonnenten", "40 (2027) bis 720 (2036)", "eigene Schätzung, an Wachstum gekoppelt"],
+    ["Kartengebühr", "3 % Kartenumsatz, 85 % Anteil", "Nayax Onyx 2,3–4 %"],
+    ["Strom/Wartung/Versicherung", "40/30 €/Monat, 60 €/Jahr", ""],
+    ["Standortprovision", "5 % vom Bruttoumsatz", "branchenüblich"],
+    ["Zahlende App-Abonnenten", "40 (2027) bis 720 (2036)", "an Netzwachstum gekoppelt"],
     ["Ø Erlös je Abonnent", "0,90 €/Monat", "60 % Jahres-, 40 % Monatsabo"],
-    ["Auslastung Werbeflächen", "0 % (27/28) bis 70 % (36)", "eigene Rampe, Obergrenze wie Advertising-Dok."],
-    ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "eigene Schätzung, Pakete real"],
-    ["Personal", "1 Minijob je 6 Automaten, 556 €", "Minijob-Grenze 2026, Schwelle Annahme"],
+    ["Auslastung Werbeflächen", "0 % (27/28) bis 70 % (36)", "Obergrenze wie Advertising-Dok."],
+    ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "Paketpreise real"],
+    ["Personal", "1 Minijob je 6 Automaten, 603 €", "Minijob-Grenze 2026"],
 ]
 
 # =======================================================================
@@ -214,26 +218,39 @@ def baue_inhalt(doc, toc_seiten):
     ])
     doc.bild("iconstrip_trim.png", breite_mm=155)
 
+    umsatz_2027 = f'{daten[0]["summe_erloese"]:,.0f} €'.replace(",", ".")
+    umsatz_2036 = f'{daten[-1]["summe_erloese"]:,.0f} €'.replace(",", ".")
+    ebit_kum = sum(r["ebit"] for r in daten)
+    ebit_kum_kons = sum(r["ebit"] for r in daten_kons)
+    ebit_kum_de = f'{ebit_kum:,.0f} €'.replace(",", ".")
+    ebit_kum_kons_de = f'{ebit_kum_kons:,.0f} €'.replace(",", ".")
+
     abschnitt(doc, "1. Zusammenfassung", 1,
               "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle.")
     hook(doc, "**Start: 3 Automaten** (2 in 2027, 1 in 2028), **4. bis 2029, danach +1 pro Jahr.** Bahnhof Osterweddingen, Freibad Langenweddingen, Sporthalle Langenweddingen.")
     kennzahlen_reihe(doc, [
-        ("8.300 €", "Umsatz 2027"),
-        ("103.900 €", "Umsatz 2036"),
-        ("223.900 €", "EBIT, 10 Jahre kumuliert"),
-        ("124.500 €", "EBIT konservativ, 10 Jahre"),
+        (umsatz_2027, "Umsatz 2027"),
+        (umsatz_2036, "Umsatz 2036"),
+        (ebit_kum_de, "EBIT, 10 Jahre kumuliert"),
+        (ebit_kum_kons_de, "EBIT konservativ, 10 Jahre"),
     ])
-    hook(doc, "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6).")
+    negative_jahre_kons = [r["jahr"] for r in daten_kons if r["ebit"] < 0]
+    if negative_jahre_kons:
+        jahre_text = ", ".join(str(j) for j in negative_jahre_kons)
+        erstes_neg_betrag = f'{next(r["ebit"] for r in daten_kons if r["ebit"] < 0):,.0f} €'.replace(",", ".").replace("-", "−")
+        hook(doc, f"**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im konservativen Szenario (Abschnitt 6) ist einzig {jahre_text} leicht negativ ({erstes_neg_betrag}), alle übrigen Jahre bleiben positiv.")
+    else:
+        hook(doc, "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6).")
 
     # 2) Geschäftsmodell ---------------------------------------------------
     abschnitt(doc, "2. Geschäftsmodell und Standort", 1,
               "**Kein Nahversorger hat nachts oder sonntags offen.** Genau diese Lücke füllt Bördesnack24, App-Abo bindet zurück statt jeden Einkauf als Einzelereignis zu behandeln.")
     kennzahlen_reihe(doc, [
-        ("168.000", "Einwohner Bördekreis"),
-        ("9.000", "davon Sülzetal"),
+        ("170.984", "Einwohner Bördekreis"),
+        ("8.841", "davon Sülzetal"),
         ("24/7", "Öffnungszeit"),
     ])
-    doc.hinweis("Angaben des Auftraggebers; öffentliche Vergleichszahlen (citypopulation.de, Statista) liegen mit rund 171.000 bzw. 8.600–9.900 in derselben Größenordnung.")
+    doc.hinweis("Öffentliche Vergleichszahlen: Bördekreis, Statistisches Landesamt Sachsen-Anhalt (Stand 31.12.2025); Sülzetal, Gemeinde Sülzetal / citypopulation.de (Stand 01.01.2026).")
 
     abschnitt(doc, "Standort- und Ausbauplan", 2,
               "**Vorgabe des Auftraggebers**, wörtlich umgesetzt: 3 Automaten zum Start, 4. bis 2029, danach +1 pro Jahr. **Die Zuordnung der ersten drei Standorte zu den Jahren ist ein Vorschlag dieses Plans**, keine Vorgabe.")
@@ -259,20 +276,7 @@ def baue_inhalt(doc, toc_seiten):
     )
 
     # 3) Erlösquellen -------------------------------------------------------
-    abschnitt(doc, "3. Die vier Erlösquellen", 1,
-              "**Keine Quelle steht für sich.** Der Automat bringt Kunden, die App macht sie zählbar, das macht die Werbeplattform wertvoll, Sponsoring bringt neue Standorte zurück zum Automaten.")
-
-    bild_quer(doc, "zusammenspiel_pdf.png",
-              unterschrift="Abb. 0: Zusammenspiel der vier Erlösquellen als ein System, nicht als vier getrennte Geschäfte.")
-
-    kennzahlen_reihe(doc, [
-        ("62", "Produkte"),
-        ("0,99 € / 9,99 €", "App-Abo Monat/Jahr"),
-        ("ab 15 €", "Werbung / Monat"),
-        ("149 €", "Komplettpaket"),
-    ])
-    doc.hinweis("Preise real, bereits entschieden (docs/ADVERTISING-MASTERPROMPT-ABGLEICH.md), nicht Teil dieses Plans neu festgelegt. Vor dem ersten Sponsoring-Vertrag: umsatzsteuerliche Prüfung durch den Steuerberater.")
-    hook(doc, "**Offener Punkt bei der 5 %-Spende:** Heute kann jedes App-Konto vorschlagen und abstimmen, nicht nur zahlende Abonnenten, wie für diesen Plan angefragt (Abschnitt 7).")
+    abschnitt_bild_quer(doc, "3. Die vier Erlösquellen", "zusammenspiel_pdf.png")
 
     # 4) Annahmen -------------------------------------------------------------
     abschnitt(doc, "4. Annahmen dieses Plans", 1,
@@ -330,21 +334,10 @@ def baue_inhalt(doc, toc_seiten):
     kum_kons = sum(r["ebit"] for r in daten_kons)
     _kum_ebit_de = f'{kum_ebit:,.0f}'.replace(",", ".")
     _kum_kons_de = f'{kum_kons:,.0f}'.replace(",", ".")
-    hook(doc, f"**Kumuliert sinkt das EBIT von {_kum_ebit_de} EUR auf {_kum_kons_de} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.")
-
-    # 7) Risiken und offene Punkte -----------------------------------------------
-    abschnitt(doc, "7. Risiken und offene Punkte", 1,
-              "**Ehrlich benannt, statt beschönigt** (interne Arbeitsregel „Behauptungen vorher prüfen“):")
-    risiken = [
-        "**Keine eigenen Ist-Verkaufsdaten.** Die Verkaufsdatenbank enthält 0 echte Zeilen (Stand 27.08.2026); jede Umsatzannahme hier ist extern hergeleitet oder eigene Schätzung.",
-        "**Standortzuordnung für Automat 1–3** auf 2027/2028 ist ein Vorschlag dieses Plans, keine Vorgabe des Auftraggebers. Standorte ab Automat 5 (2030) sind offen.",
-        "**Vereinsbeteiligung** ist umsatzsteuerlich in der Regel Leistungsaustausch, sobald Sichtbarkeit gewährt wird, vor dem ersten Sponsoring-Vertrag steuerlich zu bestätigen.",
-        "**Spendenabstimmung heute offen für alle Konten**, nicht nur zahlende Abonnenten. Die für diesen Plan angefragte Beschränkung ist im System nicht umgesetzt.",
-        "**Nayax-Gebühren, Standortprovision, Strom- und Wartungskosten** sind branchenübliche Annahmen, nicht am eigenen Betrieb geprüft (keine laufenden Verträge zum Planungszeitpunkt).",
-        "**sevDesk-Kontozuordnung** braucht laut docs/FINANCE.md eine einmalige Prüfung gegen das echte Konto, bevor Ist-Zahlen produktiv genutzt werden.",
-    ]
-    for r in risiken:
-        hook(doc, "• " + r)
+    if negative_jahre_kons:
+        hook(doc, f"**Kumuliert sinkt das EBIT von {_kum_ebit_de} EUR auf {_kum_kons_de} EUR.** Einzig {jahre_text} ist leicht negativ ({erstes_neg_betrag}), alle übrigen Jahre bleiben positiv. Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.")
+    else:
+        hook(doc, f"**Kumuliert sinkt das EBIT von {_kum_ebit_de} EUR auf {_kum_kons_de} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.")
 
 
 def baue_dokument(pfad, toc_seiten):
