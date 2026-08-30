@@ -7,18 +7,53 @@ const {
 } = require("docx");
 
 const daten = JSON.parse(fs.readFileSync("businessplan_zahlen.json", "utf8"));
-const datenKons = JSON.parse(fs.readFileSync("businessplan_zahlen_konservativ.json", "utf8"));
+const datenPess = JSON.parse(fs.readFileSync("businessplan_zahlen_pessimistisch.json", "utf8"));
+const datenOpt = JSON.parse(fs.readFileSync("businessplan_zahlen_optimistisch.json", "utf8"));
+
+// Silbentrennung fuer Tabellenzellen (Vorgabe des Auftraggebers, 30.08.2026:
+// ordentliche Trennung, kein einzelnes Zeichen auf einer neuen Zeile).
+// docx-js' Document-Option "hyphenation: { autoHyphenation: true }" wurde
+// geprueft, erzeugt aber eine laut OOXML-Schema ungueltige settings.xml
+// (w:autoHyphenation an falscher Position -- validate.py schlaegt fehl,
+// Word wuerde beim Oeffnen eine Reparatur anbieten). Stattdessen dieselbe
+// Technik wie im PDF: weiche Trennzeichen (U+00AD) direkt im Zellentext,
+// per pyphen berechnet (ruft python3 -- in dieser Umgebung bereits als
+// Abhaengigkeit vorhanden -- statt eine zweite Silbentrennung in JS zu
+// pflegen).
+const { execFileSync } = require("child_process");
+function trenn(strings) {
+  const out = execFileSync("python3", ["-c", `
+import sys, json, pyphen
+dic = pyphen.Pyphen(lang="de_DE")
+data = json.loads(sys.argv[1])
+def h(s):
+    return " ".join(dic.inserted(w, hyphen="\\u00ad") for w in str(s).split(" "))
+print(json.dumps([h(s) for s in data]))
+`, JSON.stringify(strings)], { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 });
+  return JSON.parse(out);
+}
+function trennZeilen(zeilen) {
+  const flach = trenn(zeilen.flat());
+  let i = 0;
+  return zeilen.map((zeile) => zeile.map(() => flach[i++]));
+}
 
 const de0 = (n) => Math.round(n).toLocaleString("de-DE");
 const umsatz2027 = `${de0(daten[0].summe_erloese)} €`;
 const umsatz2036 = `${de0(daten[daten.length - 1].summe_erloese)} €`;
 const kumEbit = daten.reduce((s, r) => s + r.ebit, 0);
-const kumKons = datenKons.reduce((s, r) => s + r.ebit, 0);
-const negJahre = datenKons.filter((r) => r.ebit < 0).map((r) => r.jahr);
-const jahreText = negJahre.join(", ");
-const erstesNegBetrag = negJahre.length
-  ? `${de0(datenKons.find((r) => r.ebit < 0).ebit)} €`.replace("-", "−")
-  : "";
+const kumPess = datenPess.reduce((s, r) => s + r.ebit, 0);
+const kumOpt = datenOpt.reduce((s, r) => s + r.ebit, 0);
+
+function negativeInfo(szenarioDaten) {
+  const jahre = szenarioDaten.filter((r) => r.ebit < 0).map((r) => r.jahr);
+  if (!jahre.length) return { jahre: [], betrag: "" };
+  const erster = szenarioDaten.find((r) => r.ebit < 0).ebit;
+  return { jahre, betrag: `${de0(erster)} €`.replace("-", "−") };
+}
+const negPess = negativeInfo(datenPess);
+const negOpt = negativeInfo(datenOpt);
+const jahreTextPess = negPess.jahre.join(", ");
 
 // ---------------------------------------------------------------------
 // Marke
@@ -208,11 +243,11 @@ children.push(...bild("iconstrip_trim.png", 600));
 children.push(...ueberschrift("1. Zusammenfassung", 1, "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle."));
 children.push(hook("**Start: 3 Automaten** (2 in 2027, 1 in 2028), **4. bis 2029, danach +1 pro Jahr.** Bahnhof Osterweddingen, Freibad Langenweddingen, Sporthalle Langenweddingen."));
 children.push(spacer(120));
-children.push(kennzahlenReihe([[umsatz2027, "Umsatz 2027"], [umsatz2036, "Umsatz 2036"], [`${de0(kumEbit)} €`, "EBIT, 10 Jahre kumuliert"], [`${de0(kumKons)} €`, "EBIT konservativ, 10 Jahre"]]));
+children.push(kennzahlenReihe([[umsatz2027, "Umsatz 2027"], [umsatz2036, "Umsatz 2036"], [`${de0(kumEbit)} €`, "EBIT, 10 Jahre kumuliert"], [`${de0(kumPess)} €`, "EBIT pessimistisch, 10 Jahre"]]));
 children.push(spacer(240));
-children.push(hook(negJahre.length
-  ? `**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im konservativen Szenario (Abschnitt 6) ist einzig ${jahreText} leicht negativ (${erstesNegBetrag}), alle übrigen Jahre bleiben positiv.`
-  : "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6)."));
+children.push(hook(negPess.jahre.length
+  ? `**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im pessimistischen Szenario (Abschnitt 6) ist einzig ${jahreTextPess} leicht negativ (${negPess.betrag}), alle übrigen Jahre bleiben positiv. Im optimistischen Szenario bleibt es durchgehend positiv, kumuliert ${de0(kumOpt)} €.`
+  : "**Das Betriebsergebnis bleibt in allen drei Szenarien in jedem einzelnen der zehn Planjahre positiv** — pessimistisch, Planungsszenario und optimistisch (Abschnitt 6)."));
 
 // 2) Geschäftsmodell
 children.push(...ueberschrift("2. Geschäftsmodell und Standort", 1, "**Kein Nahversorger hat nachts oder sonntags offen.** Genau diese Lücke füllt Bördesnack24, App-Abo bindet zurück statt jeden Einkauf als Einzelereignis zu behandeln."));
@@ -230,7 +265,7 @@ const standortZeilen = [
   ["2029", "Kombiautomat", "Sporthalle Langenweddingen (Handball)", "Trainings- und Spielbetrieb"],
 ];
 for (let j = 2030; j <= 2036; j++) standortZeilen.push([String(j), "Kombiautomat (Vorschlag)", "Standort noch offen", "+1 Automat/Jahr laut Vorgabe"]);
-children.push(tabelle(["Jahr", "Neuer Automat", "Standort", "Besonderheit"], standortZeilen, [1000, 2200, 3000, 2800]));
+children.push(tabelle(trenn(["Jahr", "Neuer Automat", "Standort", "Besonderheit"]), trennZeilen(standortZeilen), [1000, 2200, 3000, 2800]));
 children.push(spacer(200));
 children.push(...bild("automatennetz_linie.png", 600, "Abb. 1: 3 Automaten zum Start, +1 pro Jahr ab 2030."));
 
@@ -256,12 +291,12 @@ const annahmenZeilen = [
   ["Digitale Werbekunden", "0 (27/28) bis 10 (36), Ø 60 €", "Paketpreise real"],
   ["Personal", "1 Minijob je 6 Automaten, 603 €", "Minijob-Grenze 2026"],
 ];
-children.push(tabelle(["Größe", "Annahme", "Quelle / Begründung"], annahmenZeilen, [2600, 2400, 4000]));
+children.push(tabelle(trenn(["Größe", "Annahme", "Quelle / Begründung"]), trennZeilen(annahmenZeilen), [2600, 2400, 4000]));
 
 // 5) Finanzplan
 children.push(...ueberschrift("5. Finanzplan, Jahr 1 bis 10", 1, "**Das Planungsszenario, Jahr für Jahr.** Automatenzahl, Erlöse, Kosten ohne Abschreibung und das Betriebsergebnis."));
 const fpZeilen = daten.map((r) => [String(r.jahr), String(r.automaten), `${de(r.summe_erloese)} €`, `${de(r.summe_kosten_ohne_afa)} €`, `${de(r.afa_jahr)} €`, `${de(r.ebit)} €`]);
-children.push(tabelle(["Jahr", "Automaten", "Erlöse gesamt", "Kosten (o. AfA)", "Abschreibung", "EBIT"], fpZeilen, [1000, 1400, 1700, 1700, 1600, 1600], [1, 2, 3, 4, 5]));
+children.push(tabelle(trenn(["Jahr", "Automaten", "Erlöse gesamt", "Kosten (o. AfA)", "Abschreibung", "EBIT"]), fpZeilen, [1000, 1400, 1700, 1700, 1600, 1600], [1, 2, 3, 4, 5]));
 children.push(spacer(200));
 children.push(...bild("umsatz_balken.png", 600, "Abb. 2: Summe aller vier Erlösquellen nach Abzug des Spendenanteils."));
 children.push(...bild("erloesmix.png", 600, "Abb. 3: Anteil der vier Geschäftsbereiche am Erlös über den Planungszeitraum."));
@@ -272,14 +307,20 @@ const kumInvest = daten.reduce((s, r) => s + r.investition_jahr, 0);
 children.push(...ueberschrift("Spenden und Investitionen im Überblick", 2, "**Drei Zahlen, die den Plan zusammenfassen:**"));
 children.push(kennzahlenReihe([[`${de(kumSpende)} €`, "Spendentopf, 10 Jahre"], [`${de(kumInvest)} €`, "Investition, 11 Automaten"], [`${de(kumEbit)} €`, "EBIT kumuliert, 10 Jahre"]]));
 
-// 6) Konservatives Szenario
-children.push(...ueberschrift("6. Konservatives Szenario", 1, "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit eigener Spalte durchgerechnet, alle übrigen Annahmen unverändert."));
-const sensZeilen = daten.map((r, i) => [String(r.jahr), `${de(r.ebit)} €`, `${de(datenKons[i].ebit)} €`]);
-children.push(tabelle(["Jahr", "EBIT Planungsszenario", "EBIT konservativ (−40 % Umsatz/Automat)"], sensZeilen, [1400, 3200, 4400], [1, 2]));
-children.push(spacer(160));
-children.push(hook(negJahre.length
-  ? `**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR.** Einzig ${jahreText} ist leicht negativ (${erstesNegBetrag}), alle übrigen Jahre bleiben positiv. Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`
-  : `**Kumuliert sinkt das EBIT von ${de(kumEbit)} EUR auf ${de(kumKons)} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.`));
+// 6) Szenariovergleich
+children.push(...ueberschrift("6. Szenariovergleich", 1, "**Was, wenn der Umsatz je Automat abweicht?** Die unsicherste Annahme in diesem Plan, in drei Szenarien durchgerechnet: pessimistisch (−40 %), Planungsszenario (Basis) und optimistisch (+40 %), alle übrigen Annahmen unverändert."));
+const sensZeilen = daten.map((r, i) => [
+  String(r.jahr),
+  `${de(datenPess[i].ebit)} €`.replace("-", "−"),
+  `${de(r.ebit)} €`.replace("-", "−"),
+  `${de(datenOpt[i].ebit)} €`.replace("-", "−"),
+]);
+children.push(tabelle(trenn(["Jahr", "EBIT pessimistisch (−40 %)", "EBIT Planungsszenario", "EBIT optimistisch (+40 %)"]), sensZeilen, [1000, 2600, 2600, 2600], [1, 2, 3]));
+children.push(spacer(200));
+children.push(...bild("szenariovergleich.png", 600, "Abb. 5: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben."));
+children.push(hook(negPess.jahre.length
+  ? `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch).** Nur im pessimistischen Szenario ist ${jahreTextPess} leicht negativ (${negPess.betrag}), alle übrigen Jahre bleiben in allen drei Szenarien positiv.`
+  : `**Kumuliert reicht das EBIT von ${de(kumPess)} € (pessimistisch) über ${de(kumEbit)} EUR (Planungsszenario) bis ${de(kumOpt)} € (optimistisch), bleibt aber in allen drei Szenarien in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.`));
 
 // ---------------------------------------------------------------------
 // Dokument zusammenbauen
@@ -289,7 +330,7 @@ const doc = new Document({
   title: "Businessplan Bördesnack24 GbR",
   styles: {
     default: {
-      document: { run: { font: FONT_TEXT, size: 21, color: SCHWARZ } },
+      document: { run: { font: FONT_TEXT, size: 21, color: SCHWARZ, language: { value: "de-DE" } } },
     },
   },
   sections: [{

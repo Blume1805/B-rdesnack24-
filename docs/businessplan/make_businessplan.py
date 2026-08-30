@@ -10,8 +10,39 @@ from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 
 daten = json.load(open("businessplan_zahlen.json"))
-daten_kons = json.load(open("businessplan_zahlen_konservativ.json"))
+daten_pess = json.load(open("businessplan_zahlen_pessimistisch.json"))
+daten_opt = json.load(open("businessplan_zahlen_optimistisch.json"))
 GOLD_DARK = colors.HexColor("#8A6E00")
+GRUEN = colors.HexColor("#5C9A3F")
+
+import pyphen
+_TRENN_DIC = pyphen.Pyphen(lang="de_DE")
+def _trenn(text):
+    """Fuegt weiche Trennzeichen (U+00AD) an den von pyphen erkannten
+    Silbengrenzen ein. reportlab bricht Zeilen an dieser Stelle mit
+    sichtbarem Bindestrich um, statt ein einzelnes Zeichen (oder generell
+    eine unschoene Stelle) auf eine neue Zeile zu werfen -- Vorgabe des
+    Auftraggebers (30.08.2026): ordentliche Silbentrennung in Tabellen,
+    kein einzelnes Zeichen auf einer neuen Zeile."""
+    return " ".join(_TRENN_DIC.inserted(w, hyphen="­") for w in str(text).split(" "))
+
+def trenn_tabelle(zeilen):
+    """Wendet _trenn() auf jede Zellen-Zeichenkette einer Tabelle an."""
+    return [[_trenn(zelle) for zelle in zeile] for zeile in zeilen]
+
+# doc.tabelle() schaetzt die noetige Spaltenbreite (fuer Schriftgroesse UND
+# die automatische Hoch-/Querformat-Entscheidung) ueber pdfmetrics.stringWidth
+# auf dem rohen Zellentext. Das Zeichen U+00AD (weiche Trennung) ist beim
+# tatsaechlichen Zeilenumbruch unsichtbar/breitenlos, solange dort kein
+# Umbruch stattfindet -- pdfmetrics.stringWidth weiss das nicht und zaehlt es
+# mit, was Tabellen mit Silbentrennung faelschlich zu breit schaetzt und
+# unnoetig ins Querformat schickt (beobachtet: Standort-Tabelle). Patch
+# entfernt die weichen Trennzeichen nur fuer die Breitenschaetzung.
+_orig_spaltenbreiten = pb._spaltenbreiten
+def _spaltenbreiten_ohne_trennzeichen(daten, fs, kopfzeile, pad):
+    ohne = [[str(z).replace("­", "") for z in zeile] for zeile in daten]
+    return _orig_spaltenbreiten(ohne, fs, kopfzeile, pad)
+pb._spaltenbreiten = _spaltenbreiten_ohne_trennzeichen
 
 # ---------------------------------------------------------------------
 # Kleine Erweiterungen ueber die oeffentliche pdf_builder-API hinaus:
@@ -156,6 +187,46 @@ def erlösmix_diagramm(pfad):
 
 erlösmix_diagramm("erloesmix.png")
 
+def szenario_diagramm(pfad):
+    """Gruppierte Balken: EBIT je Jahr in allen drei Szenarien nebeneinander
+    -- pessimistisch/Planungsszenario/optimistisch, dieselbe Aufteilung wie
+    in der Vergleichstabelle in Abschnitt 6."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    jahre = [r["jahr"] for r in daten]
+    pess = [r["ebit"] for r in daten_pess]
+    normal = [r["ebit"] for r in daten]
+    opt = [r["ebit"] for r in daten_opt]
+
+    x = np.arange(len(jahre))
+    breite = 0.27
+    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=200)
+    ax.bar(x - breite, pess, breite, color="#8C8C8C", edgecolor="#000000", linewidth=0.5, label="Pessimistisch (−40 %)")
+    ax.bar(x, normal, breite, color="#F3BE21", edgecolor="#000000", linewidth=0.5, label="Planungsszenario")
+    ax.bar(x + breite, opt, breite, color="#5C9A3F", edgecolor="#000000", linewidth=0.5, label="Optimistisch (+40 %)")
+    ax.axhline(0, color="#595959", linewidth=0.8)
+
+    ax.set_xlabel("Jahr", color="#595959", fontsize=11)
+    ax.set_ylabel("EBIT in EUR", color="#595959", fontsize=11)
+    ax.set_title("Szenariovergleich: EBIT pessimistisch / Planungsszenario / optimistisch", color="#000000", fontsize=12, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(j) for j in jahre])
+    ax.tick_params(colors="#595959", labelsize=9)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    for s in ("left", "bottom"):
+        ax.spines[s].set_color("#595959")
+    ax.grid(axis="y", color="#D9D9D9", linewidth=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(fontsize=8, loc="upper left", frameon=False)
+    fig.tight_layout()
+    fig.savefig(pfad, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+szenario_diagramm("szenariovergleich.png")
+
 # ---------------------------------------------------------------------
 # Abschnittstitel fuers Inhaltsverzeichnis (Reihenfolge = Reihenfolge im
 # Text; ebene 2 = eingerueckter Unterpunkt)
@@ -168,7 +239,7 @@ TOC_ABSCHNITTE = [
     ("4. Annahmen dieses Plans", 1),
     ("5. Finanzplan, Jahr 1 bis 10", 1),
     ("Spenden und Investitionen im Überblick", 2),
-    ("6. Konservatives Szenario", 1),
+    ("6. Szenariovergleich", 1),
 ]
 
 # ---------------------------------------------------------------------
@@ -221,9 +292,24 @@ def baue_inhalt(doc, toc_seiten):
     umsatz_2027 = f'{daten[0]["summe_erloese"]:,.0f} €'.replace(",", ".")
     umsatz_2036 = f'{daten[-1]["summe_erloese"]:,.0f} €'.replace(",", ".")
     ebit_kum = sum(r["ebit"] for r in daten)
-    ebit_kum_kons = sum(r["ebit"] for r in daten_kons)
+    ebit_kum_pess = sum(r["ebit"] for r in daten_pess)
+    ebit_kum_opt = sum(r["ebit"] for r in daten_opt)
     ebit_kum_de = f'{ebit_kum:,.0f} €'.replace(",", ".")
-    ebit_kum_kons_de = f'{ebit_kum_kons:,.0f} €'.replace(",", ".")
+    ebit_kum_pess_de = f'{ebit_kum_pess:,.0f} €'.replace(",", ".")
+    ebit_kum_opt_de = f'{ebit_kum_opt:,.0f} €'.replace(",", ".")
+
+    def _negative_info(szenario_daten):
+        """Liste der Jahre mit negativem EBIT + deutschsprachiger Text zum
+        ersten negativen Betrag, oder (None, None) wenn kein Jahr negativ ist."""
+        jahre = [r["jahr"] for r in szenario_daten if r["ebit"] < 0]
+        if not jahre:
+            return [], None
+        erster = next(r["ebit"] for r in szenario_daten if r["ebit"] < 0)
+        betrag = f'{erster:,.0f} €'.replace(",", ".").replace("-", "−")
+        return jahre, betrag
+
+    negative_jahre_pess, erstes_neg_betrag_pess = _negative_info(daten_pess)
+    negative_jahre_opt, erstes_neg_betrag_opt = _negative_info(daten_opt)
 
     abschnitt(doc, "1. Zusammenfassung", 1,
               "**Bördesnack24 hat heute 0 dokumentierte Verkäufe.** Jede Zahl in diesem Plan ist deshalb eine Annahme, keine Messung, belegt mit der eigenen Preisliste oder einer externen Quelle.")
@@ -232,15 +318,13 @@ def baue_inhalt(doc, toc_seiten):
         (umsatz_2027, "Umsatz 2027"),
         (umsatz_2036, "Umsatz 2036"),
         (ebit_kum_de, "EBIT, 10 Jahre kumuliert"),
-        (ebit_kum_kons_de, "EBIT konservativ, 10 Jahre"),
+        (ebit_kum_pess_de, "EBIT pessimistisch, 10 Jahre"),
     ])
-    negative_jahre_kons = [r["jahr"] for r in daten_kons if r["ebit"] < 0]
-    if negative_jahre_kons:
-        jahre_text = ", ".join(str(j) for j in negative_jahre_kons)
-        erstes_neg_betrag = f'{next(r["ebit"] for r in daten_kons if r["ebit"] < 0):,.0f} €'.replace(",", ".").replace("-", "−")
-        hook(doc, f"**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im konservativen Szenario (Abschnitt 6) ist einzig {jahre_text} leicht negativ ({erstes_neg_betrag}), alle übrigen Jahre bleiben positiv.")
+    if negative_jahre_pess:
+        jahre_text_pess = ", ".join(str(j) for j in negative_jahre_pess)
+        hook(doc, f"**Im Planungsszenario ist das Betriebsergebnis in jedem der zehn Jahre positiv.** Im pessimistischen Szenario (Abschnitt 6) ist einzig {jahre_text_pess} leicht negativ ({erstes_neg_betrag_pess}), alle übrigen Jahre bleiben positiv. Im optimistischen Szenario bleibt es durchgehend positiv, kumuliert {ebit_kum_opt_de}.")
     else:
-        hook(doc, "**Das Betriebsergebnis bleibt in jedem einzelnen der zehn Planjahre positiv**, auch im konservativen Szenario mit 40 % niedrigerem Umsatz je Automat (Abschnitt 6).")
+        hook(doc, "**Das Betriebsergebnis bleibt in allen drei Szenarien in jedem einzelnen der zehn Planjahre positiv** — pessimistisch, Planungsszenario und optimistisch (Abschnitt 6).")
 
     # 2) Geschäftsmodell ---------------------------------------------------
     abschnitt(doc, "2. Geschäftsmodell und Standort", 1,
@@ -266,7 +350,7 @@ def baue_inhalt(doc, toc_seiten):
             standort_tabelle.append([str(jahr), typ, ort, note])
     for jahr in range(2030, 2037):
         standort_tabelle.append([str(jahr), "Kombiautomat (Vorschlag)", "Standort noch offen", "+1 Automat/Jahr laut Vorgabe"])
-    doc.tabelle(standort_tabelle)
+    doc.tabelle(trenn_tabelle(standort_tabelle))
 
     doc.diagramm(
         [r["jahr"] for r in daten], [r["automaten"] for r in daten],
@@ -281,7 +365,7 @@ def baue_inhalt(doc, toc_seiten):
     # 4) Annahmen -------------------------------------------------------------
     abschnitt(doc, "4. Annahmen dieses Plans", 1,
               "**Planungsannahmen, keine gemessenen Werte.** Mit Quelle, wo eine externe existiert, sonst eigene, im Text begründete Schätzung.")
-    doc.tabelle(ANNAHMEN_TABELLE, quer=False)
+    doc.tabelle(trenn_tabelle(ANNAHMEN_TABELLE), quer=False)
 
     # 5) Finanzplan -------------------------------------------------------------
     abschnitt(doc, "5. Finanzplan, Jahr 1 bis 10", 1,
@@ -295,7 +379,7 @@ def baue_inhalt(doc, toc_seiten):
             f'{r["afa_jahr"]:,.0f} EUR'.replace(",", "."),
             f'{r["ebit"]:,.0f} EUR'.replace(",", "."),
         ])
-    doc.tabelle(fp_tabelle, zahlen_rechts={1, 2, 3, 4, 5})
+    doc.tabelle(trenn_tabelle(fp_tabelle), zahlen_rechts={1, 2, 3, 4, 5})
 
     doc.diagramm(
         [r["jahr"] for r in daten], [r["summe_erloese"] for r in daten],
@@ -320,24 +404,27 @@ def baue_inhalt(doc, toc_seiten):
         (f'{kum_ebit:,.0f} €'.replace(",", "."), "EBIT kumuliert, 10 Jahre"),
     ])
 
-    # 6) Sensitivität -----------------------------------------------------------
-    abschnitt(doc, "6. Konservatives Szenario", 1,
-              "**Was, wenn der Umsatz je Automat 40 % niedriger ausfällt?** Die unsicherste Annahme in diesem Plan, mit eigener Spalte durchgerechnet, alle übrigen Annahmen unverändert.")
-    sens_tabelle = [["Jahr", "EBIT Planungsszenario", "EBIT konservativ (−40 % Umsatz/Automat)"]]
-    for r, k in zip(daten, daten_kons):
+    # 6) Szenariovergleich --------------------------------------------------
+    abschnitt(doc, "6. Szenariovergleich", 1,
+              "**Was, wenn der Umsatz je Automat abweicht?** Die unsicherste Annahme in diesem Plan, in drei Szenarien durchgerechnet: pessimistisch (−40 %), Planungsszenario (Basis) und optimistisch (+40 %), alle übrigen Annahmen unverändert.")
+    sens_tabelle = [["Jahr", "EBIT pessimistisch (−40 %)", "EBIT Planungsszenario", "EBIT optimistisch (+40 %)"]]
+    for r, p, o in zip(daten, daten_pess, daten_opt):
         sens_tabelle.append([
             str(r["jahr"]),
-            f'{r["ebit"]:,.0f} EUR'.replace(",", "."),
-            f'{k["ebit"]:,.0f} EUR'.replace(",", "."),
+            f'{p["ebit"]:,.0f} EUR'.replace(",", ".").replace("-", "−"),
+            f'{r["ebit"]:,.0f} EUR'.replace(",", ".").replace("-", "−"),
+            f'{o["ebit"]:,.0f} EUR'.replace(",", ".").replace("-", "−"),
         ])
-    doc.tabelle(sens_tabelle, zahlen_rechts={1, 2})
-    kum_kons = sum(r["ebit"] for r in daten_kons)
-    _kum_ebit_de = f'{kum_ebit:,.0f}'.replace(",", ".")
-    _kum_kons_de = f'{kum_kons:,.0f}'.replace(",", ".")
-    if negative_jahre_kons:
-        hook(doc, f"**Kumuliert sinkt das EBIT von {_kum_ebit_de} EUR auf {_kum_kons_de} EUR.** Einzig {jahre_text} ist leicht negativ ({erstes_neg_betrag}), alle übrigen Jahre bleiben positiv. Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.")
+    doc.tabelle(trenn_tabelle(sens_tabelle), zahlen_rechts={1, 2, 3})
+
+    doc.bild("szenariovergleich.png", unterschrift="Abb. 5: EBIT je Jahr in allen drei Szenarien; die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.")
+
+    _kum_ebit_de = f'{ebit_kum:,.0f}'.replace(",", ".")
+    if negative_jahre_pess:
+        jahre_text_pess = ", ".join(str(j) for j in negative_jahre_pess)
+        hook(doc, f"**Kumuliert reicht das EBIT von {ebit_kum_pess_de} (pessimistisch) über {_kum_ebit_de} EUR (Planungsszenario) bis {ebit_kum_opt_de} (optimistisch).** Nur im pessimistischen Szenario ist {jahre_text_pess} leicht negativ ({erstes_neg_betrag_pess}), alle übrigen Jahre bleiben in allen drei Szenarien positiv.")
     else:
-        hook(doc, f"**Kumuliert sinkt das EBIT von {_kum_ebit_de} EUR auf {_kum_kons_de} EUR, bleibt aber in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das trägt den Unterschied.")
+        hook(doc, f"**Kumuliert reicht das EBIT von {ebit_kum_pess_de} (pessimistisch) über {_kum_ebit_de} EUR (Planungsszenario) bis {ebit_kum_opt_de} (optimistisch), bleibt aber in allen drei Szenarien in jedem einzelnen Jahr positiv.** Die drei zusätzlichen Erlösquellen hängen nicht am Automatenumsatz, das dämpft den Ausschlag nach unten und oben.")
 
 
 def baue_dokument(pfad, toc_seiten):

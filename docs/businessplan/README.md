@@ -10,8 +10,9 @@ gehören nicht ins Git, der Rechenweg schon). Wer die Zahlen ändern will,
 
 | Datei | Zweck |
 |---|---|
-| `businessplan_model.py` | Das Finanzmodell, 2027–2036. Läuft eigenständig, schreibt `businessplan_zahlen.json`. Alle Annahmen stehen als benannte Konstanten oben im Skript, mit Quellenkommentar. |
-| `businessplan_zahlen.json` / `businessplan_zahlen_konservativ.json` | Ergebnis des Modells: Planungsszenario und das Szenario mit 40 % niedrigerem Umsatz je Automat (siehe README unten, „Konservatives Szenario“). |
+| `businessplan_model.py` | Das Finanzmodell, 2027–2036, als Funktion `berechne(umsatz_faktor=1.0)`. Direkt ausgeführt (`python3 businessplan_model.py`) rechnet es das Planungsszenario (Faktor 1.0) und schreibt `businessplan_zahlen.json`. Alle Annahmen stehen als benannte Konstanten oben im Skript, mit Quellenkommentar. |
+| `make_szenarien.py` | Ruft `berechne()` mit 0.6 bzw. 1.4 auf und schreibt `businessplan_zahlen_pessimistisch.json` / `businessplan_zahlen_optimistisch.json`. Ersetzt seit 30.08.2026 eine frühere Monkeypatch-Technik (Quelltext per Regex ändern, dann `exec()`), die vor dem dritten Szenario noch als Einmal-Skript existierte, nirgends im Repo lag und deshalb nicht reproduzierbar war. |
+| `businessplan_zahlen.json` / `businessplan_zahlen_pessimistisch.json` / `businessplan_zahlen_optimistisch.json` | Ergebnis des Modells in drei Szenarien: Planungsszenario (Basis), pessimistisch (−40 % Bruttoumsatz/Automat) und optimistisch (+40 %) — siehe unten, „Szenariovergleich“. |
 | `make_businessplan.py` | Baut `Boerdesnack24_Businessplan.pdf` aus den JSON-Zahlen, über den `boerdesnack24-pdf`-Skill (`pdf_builder.py`). Baut **zweimal** hintereinander (siehe unten, „Inhaltsverzeichnis“) — das ist kein Fehler. |
 | `infografik.html` | Die A3-quer-Infografik. Wird mit einem headless Chrome zu PDF gedruckt (kein Playwright-Paket nötig, das Chromium-Binary reicht). |
 | `iconstrip.html` | Vier-Icon-Leiste (dieselben Icons wie in der Infografik), wird zu `iconstrip_trim.png` gerendert und im Businessplan eingebettet. |
@@ -34,9 +35,9 @@ cd docs/businessplan
 # 1) Finanzmodell rechnen (Planungsszenario)
 python3 businessplan_model.py
 
-# 2) Konservatives Szenario (−40 % Umsatz/Automat) — eigener Lauf,
-#    schreibt businessplan_zahlen_konservativ.json (siehe Kopf des Skripts
-#    für den Patch-Mechanismus über den Quelltext, kein Extra-Flag)
+# 2) Pessimistisches/optimistisches Szenario (±40 % Umsatz/Automat) --
+#    schreibt businessplan_zahlen_pessimistisch.json / _optimistisch.json
+python3 make_szenarien.py
 
 # 3) Icon-Leiste rendern
 <chrome-binary> --headless --disable-gpu --no-sandbox \
@@ -107,13 +108,15 @@ python3 make_businessplan.py
   Schätzung des Auftraggebers — Bördekreis 170.984 (Statistisches
   Landesamt Sachsen-Anhalt, Stand 31.12.2025), Sülzetal 8.841 (Gemeinde
   Sülzetal / citypopulation.de, Stand 01.01.2026).
-- **Konservatives Szenario**: alle Bruttoumsatz-Annahmen je Automat um 40 %
-  gesenkt, alle übrigen Annahmen unverändert. Seit der Anschaffungs-/
-  Abschreibungs-Änderung ist **2027 im konservativen Szenario leicht
-  negativ** (−1.004 €), alle übrigen neun Jahre bleiben positiv — beide
-  Dokumente formulieren das inzwischen bedingt (`negative_jahre_kons` in
-  `make_businessplan.py` / `negJahre` in `build_docx.js`), nicht mehr als
-  pauschale „durchgehend positiv“-Behauptung.
+- **Szenariovergleich**: alle Bruttoumsatz-Annahmen je Automat symmetrisch
+  um ±40 % verschoben (pessimistisch/optimistisch), alle übrigen Annahmen
+  unverändert. **2027 ist einzig im pessimistischen Szenario leicht
+  negativ** (−1.004 €), alle übrigen Jahre bleiben in allen drei Szenarien
+  positiv — beide Dokumente formulieren das bedingt (`negative_jahre_pess`
+  in `make_businessplan.py` / `negPess` in `build_docx.js`), nicht als
+  pauschale „durchgehend positiv“-Behauptung. Kumuliertes EBIT, 10 Jahre:
+  85.136 € (pessimistisch) / 180.526 € (Planungsszenario) / 275.915 €
+  (optimistisch).
 
 Alle weiteren Annahmen (Nayax-Gebühren, Standortprovision, Strom/Wartung,
 Personal, Werbeflächen-Auslastung, digitale Werbekunden) stehen mit Quelle
@@ -128,8 +131,9 @@ lässt sich nicht in Word öffnen und bearbeiten.
 
 | Datei | Zweck |
 |---|---|
-| `build_docx.js` | Baut `Boerdesnack24_Businessplan.docx` mit dem npm-Paket `docx` (docx-js). Eigenständiges Skript, dieselben Inhalte/Zahlen wie `make_businessplan.py`, aber als editierbares Word-Dokument statt PDF. |
-| `automatennetz_linie.png`, `umsatz_balken.png`, `ebit_balken.png` | Die drei Diagramme, die im PDF über `pdf_builder.py`s interne `diagramm()`-Funktion entstehen (dort nicht als eigene Datei erreichbar) — für die docx-Fassung als eigenständige PNGs neu erzeugt (gleicher matplotlib-Stil, gleiche Zahlen aus `businessplan_zahlen.json`). |
+| `build_docx.js` | Baut `Boerdesnack24_Businessplan.docx` mit dem npm-Paket `docx` (docx-js). Eigenständiges Skript, dieselben Inhalte/Zahlen wie `make_businessplan.py`, aber als editierbares Word-Dokument statt PDF. Ruft für die Silbentrennung in Tabellen `python3` per `child_process` auf (siehe „Silbentrennung“ unten) — Node braucht dafür kein eigenes Hyphenation-Paket. |
+| `automatennetz_linie.png`, `umsatz_balken.png`, `ebit_balken.png` | Die Diagramme, die im PDF über `pdf_builder.py`s interne `diagramm()`-Funktion entstehen (dort nicht als eigene Datei erreichbar) — für die docx-Fassung als eigenständige PNGs neu erzeugt (gleicher matplotlib-Stil, gleiche Zahlen aus `businessplan_zahlen.json`). |
+| `szenariovergleich.png` | Gruppierter Balkenchart, EBIT je Jahr in allen drei Szenarien nebeneinander (grau/gold/grün) — erzeugt von `szenario_diagramm()` in `make_businessplan.py`, dieselbe Datei wird auch von `build_docx.js` eingebettet. |
 | `erloesmix.png`, `iconstrip_trim.png` | Dieselben Grafiken wie in der PDF-Fassung, hier zusätzlich für die docx-Fassung im Repo gesichert. |
 
 **Neu bauen:**
@@ -157,8 +161,20 @@ Validierung (`scripts/office/validate.py`, „All validations PASSED!“),
 Inhaltsextraktion mit `pandoc -t markdown` (alle Abschnitte, Tabellen und
 Bildverweise vollständig und in der richtigen Reihenfolge) und eine
 Pixel-Prüfung aller eingebetteten PNGs (`PIL.Image.verify()`, alle
-sechs unbeschädigt). Ein Blick in echtem Word/LibreOffice Writer auf
+sieben unbeschädigt). Ein Blick in echtem Word/LibreOffice Writer auf
 einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
+
+**Silbentrennung in Tabellen (Vorgabe des Auftraggebers, 30.08.2026):**
+kein einzelnes Zeichen auf einer neuen Zeile. Erster Versuch war Words
+eigene Funktion (`hyphenation: { autoHyphenation: true }` in der
+`Document`-Konfiguration von docx-js) — verworfen, weil die erzeugte
+`settings.xml` dabei laut OOXML-Schema ungültig ist (`w:autoHyphenation`
+an falscher Position in der Element-Reihenfolge; `validate.py` schlägt
+fehl, Word hätte beim Öffnen eine Reparatur angeboten). Stattdessen
+dieselbe Technik wie im PDF: weiche Trennzeichen (U+00AD) direkt im
+Zellentext, berechnet mit `pyphen` — `build_docx.js` ruft dafür kurz
+`python3` auf (`trenn()`/`trennZeilen()` im Skript), statt eine zweite
+deutsche Silbentrennung in JavaScript zu pflegen.
 
 ## Seitenaufbau (Stand 30.08.2026)
 
@@ -201,6 +217,25 @@ einem Rechner ohne diesen Sandbox-Defekt ersetzt das nicht vollständig.
   und DOCX gleichermaßen, entfernt 30.08.2026 auf Wunsch des
   Auftraggebers — siehe „Bekannte Grenzen“ unten für den einzigen Punkt,
   der dadurch nicht mehr im Businessplan selbst steht).
+- **Abschnitt 6 heißt „Szenariovergleich“**, nicht mehr „Konservatives
+  Szenario“ (30.08.2026, Auftraggeber: „ein pessimistisch, normales und
+  optimistisches Szenario einarbeiten“). Vier-Spalten-Tabelle (Jahr +
+  drei EBIT-Spalten) plus `szenariovergleich.png`, ein gruppierter
+  Balkenchart aus `szenario_diagramm()` — eigene Funktion, nicht
+  `doc.diagramm()` aus dem Skill, weil die nur eine Datenreihe je Chart
+  kann.
+- **Silbentrennung in allen Tabellen** (`trenn_tabelle()` in
+  `make_businessplan.py`, `pyphen`-basiert, weiche Trennzeichen U+00AD).
+  **Wichtige Nebenwirkung, die dabei auffiel:** `doc.tabelle()`s
+  Breitenschätzung (`_spaltenbreiten()` im `boerdesnack24-pdf`-Skill)
+  misst die rohe Zeichenkette inklusive der weichen Trennzeichen und
+  schätzt Zellen dadurch zu breit — eine Tabelle mit Silbentrennung
+  kippte dadurch fälschlich ins Querformat. Gepatcht per Monkeypatch
+  (`pb._spaltenbreiten = ...` in `make_businessplan.py`, entfernt die
+  U+00AD-Zeichen nur für die Breitenschätzung, nicht für den
+  tatsächlichen Zellentext) statt am Skill selbst — wer den Skill in
+  einer neuen Sitzung neu synct, bekommt den Patch automatisch wieder
+  mit, weil er in `make_businessplan.py` steht, nicht im Skill.
 
 ## Bekannte Grenzen
 
