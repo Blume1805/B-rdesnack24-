@@ -503,6 +503,13 @@ Nur in der Live-Datenbank vorhanden (Auswahl der ~119 fehlenden Migrationen):
 | `protokolle_bekommen_eine_loeschfrist` | Löschfristen |
 | `rpc_hardening*`, `role_checks_require_active_status` (6) | Sicherheitshärtung |
 
+**Nachtrag aus der Umsetzung (Kap. 23): Die Drift war größer als hier
+beschrieben.** Ein MD5-Abgleich der 61 Repo-Dateien gegen das
+Migrationsregister ergab, dass **nur eine einzige** mit dem übereinstimmte,
+was tatsächlich angewendet wurde. Die Repo-Dateien waren eine redigierte
+Fassung mit teils abweichendem DDL — es fehlten also nicht 119 Migrationen,
+sondern es stimmten 181 von 182 nicht.
+
 **Edge-Function-Drift:**
 
 * Nur live (7): `install-signature`, `weather-sync`, `account-deletion-request`,
@@ -891,7 +898,7 @@ korrigiert übernehmen, Projekt B stilllegen.
 
 | Nr. | Maßnahme | Warum |
 | --- | --- | --- |
-| **R-1** | **119 Live-Migrationen ins Repository zurückführen.** Schema als Baseline ziehen (`supabase db pull`), gegen die Live-DB verifizieren, einchecken. Zusätzlich die 7 nur live vorhandenen Edge Functions. Danach Regel: **keine Schemaänderung ohne Migration im Repository.** | Fünf Wochen Arbeit sind unversioniert. Kein Review, kein Rollback, keine Testumgebung, kein Wiederaufbau. Blockiert jede sichere Weiterentwicklung. |
+| **R-1** ✅ | **ERLEDIGT (31.08.2026, siehe Kap. 23). 182 Live-Migrationen ins Repository zurückgeführt.** Schema als Baseline ziehen (`supabase db pull`), gegen die Live-DB verifizieren, einchecken. Zusätzlich die 7 nur live vorhandenen Edge Functions. Danach Regel: **keine Schemaänderung ohne Migration im Repository.** | Fünf Wochen Arbeit sind unversioniert. Kein Review, kein Rollback, keine Testumgebung, kein Wiederaufbau. Blockiert jede sichere Weiterentwicklung. |
 | **R-2** | **Klickzähler absichern.** `anon`-Grant auf `advertising_redirect_count` entziehen, Zählung über Edge Function mit Rate-Limit und kurzlebiger, gehashter Entprellung. Ohne IP-/Cookie-Speicherung. | Kennzahlen, die zahlenden Werbekunden als Nachweis dienen, sind beliebig fälschbar. |
 | **R-3** | **Mock-Automaten entfernen.** `src/lib/data.ts` löschen, `app.automaten.tsx` an `locations`/`machines` binden. Bis die Stammdaten gepflegt sind: ehrlicher Leerzustand statt erfundener Liste. „live aktualisiert" entfernen. | Erfundene Standort- und Verfügbarkeitsangaben; Verstoß gegen Arbeitsregel 36.7. |
 | **R-4** | **Rabattanzeige korrigieren.** `appPrice()` aus `my_subscription_benefits()` speisen; ohne Abo keinen reduzierten Preis zeigen. | Preis wird Nutzern gezeigt, die ihn nicht bekommen. |
@@ -945,3 +952,115 @@ Architekturänderungen erfolgt. Konkret zur Entscheidung stehen an:
 
 Bis zur Freigabe wurde **kein produktiver Code verändert**. Dieses Dokument ist
 die einzige Änderung.
+
+---
+
+## 23. Umsetzung R-1 — Rückführung aus der Live-Datenbank (31.08.2026)
+
+### 23.1 Ergebnis
+
+| | vorher | nachher |
+| --- | --- | --- |
+| Migrationen im Repository | 61 handgepflegte Dateien | **182 Dateien, byte-genau wie angewendet** |
+| davon mit dem Live-Stand übereinstimmend | **1** | **182** |
+| Edge Functions nur live vorhanden | 7 | **0** |
+| `_shared/`-Module im Repository | 1 | 10 |
+
+### 23.2 Der eigentliche Befund
+
+Der Auditbericht ging von „119 fehlenden Migrationen" aus. Der
+Prüfsummenabgleich beim Zurückführen hat das korrigiert: Von den 61
+vorhandenen Repo-Dateien stimmte **genau eine** mit dem überein, was
+tatsächlich auf die Datenbank angewendet worden war.
+
+Beispiel `0001_extensions_and_conventions`: 2 192 Bytes im Repository gegen
+723 Bytes angewendet. Der Unterschied ist nicht bloß Kommentar — die
+Repo-Fassung setzt zusätzlich `set search_path = public, app` auf
+`app.set_updated_at()` und `app.set_created_by()` und enthält
+`comment on function`-Anweisungen, die in dieser Migration nie ausgeführt
+wurden.
+
+Die Repo-Dateien waren also keine unvollständige Historie, sondern eine
+**parallele, redigierte Fassung**. Wer sie las, um zu erfahren, was die
+Datenbank kann, bekam eine plausible, aber falsche Antwort.
+
+### 23.3 Vorgehen
+
+Das Supabase-CLI ist aus dieser Umgebung nicht nutzbar (`api.supabase.com`
+wird vom Egress-Proxy abgelehnt — dieselbe Beschränkung, die im Kopf von
+`deploy-functions.yaml` beschrieben ist). Ein direkter Datenbankzugang
+besteht ebenfalls nicht.
+
+Genutzt wurde stattdessen, dass Supabase den **vollständigen SQL-Text jeder
+Migration** in `supabase_migrations.schema_migrations.statements`
+aufbewahrt:
+
+1. Register auslesen (182 Zeilen, alle einteilig, zusammen 760 352 Zeichen).
+2. Inhalte **Base64-kodiert** übertragen — damit kann kein Escaping an
+   Dollar-Quoting, Anführungszeichen oder Umlauten scheitern.
+3. Lokal dekodieren und **jede Datei einzeln gegen die MD5-Summe und die
+   Zeichenlänge aus der Datenbank prüfen**: 182 von 182 exakt, 0 Abweichungen.
+4. Nach dem Einsetzen erneut gegen das Register geprüft: 182/182 exakt,
+   Namen korrekt, lexikografische Reihenfolge = chronologische Reihenfolge.
+
+Die 61 handgepflegten Dateien wurden **nicht gelöscht**, sondern per
+`git mv` nach `docs/migrations-legacy/` verschoben; ihre Kommentare bleiben
+als Dokumentation erhalten (siehe README dort).
+
+### 23.4 Edge Functions
+
+Alle 7 nur live vorhandenen Functions sind zurückgeführt:
+`account-deletion-request`, `auth-email-hook`, `email-export`,
+`email-inbound`, `install-signature`, `sevdesk-invoice`, `weather-sync` —
+samt des kompletten `_shared/email/`-Baums (`send`, `config`, `components`,
+`theme`, `render`, `db_templates`, `webhook`, `templates/auth`,
+`templates/account_deletion`), der bis dahin **vollständig** nur auf dem
+Server existierte. Alle 61 relativen Importe lösen auf.
+
+Zwei Funde am Rande:
+
+* **`install-signature` ist ein dokumentierter Grabstein.** Die Function
+  beschreibt in ihrem Kopf eine am 03.08.2026 stillgelegte
+  Sicherheitslücke: `verify_jwt = false`, ein geteiltes Geheimnis **mit
+  einkompiliertem Rückfallwert**, Schreibzugriff mit dem Service-Role-
+  Schlüssel und ein Ablagepfad ungeprüft aus einem Header, mit
+  `upsert: true`. In Summe konnte damit die Unterschrift eines beliebigen
+  Partners überschrieben werden. Diese Historie hätte im Repository
+  vollständig gefehlt.
+* **`_shared/email/webhook.ts` lief in zwei verschiedenen Fassungen.**
+  `email-inbound` trug eine ältere Kopie mit einem einzelnen Secret,
+  `auth-email-hook` eine neuere mit Unterstützung für mehrere Secrets
+  (Schlüsselwechsel). Ein Modul namens „shared" war also keines.
+
+### 23.5 Eine bewusste Abweichung
+
+Alle Dateien wurden byte-genau übernommen — mit **einer** Ausnahme:
+
+`email-inbound` importiert im ausgelieferten Stand seine eigene, ältere
+Kopie von `webhook.ts` (flach im Function-Ordner, weil sie seinerzeit per
+MCP statt per CLI ausgerollt wurde). Im Repository importiert die Function
+nun das gemeinsame `../_shared/email/webhook.ts` in der neueren Fassung.
+
+Begründung: Beide Fassungen exportieren `verifyWebhookSignature` und
+`WebhookError` mit identischer Signatur; `email-inbound` verwendet nur
+diese beiden. Die neuere Fassung ist rein additiv (mehrere Secrets statt
+eines). Und `email-inbound` ist ausweislich seines eigenen Kopfkommentars
+**noch nicht scharf** — es gibt keine MX-Einträge, die Function wird derzeit
+nicht aufgerufen. Zwei Kopien eines geteilten Moduls im Repository zu
+zementieren, widerspräche außerdem Ziffer 27 (Single Source of Truth).
+
+**Beim nächsten Ausrollen von `email-inbound` gilt damit die neuere
+Signaturprüfung.** Wer das nicht will, stellt den Import vor dem Deploy
+zurück.
+
+### 23.6 Was R-1 nicht gelöst hat
+
+* `nayax-webhook` und `send-push` liegen weiterhin im Repository, sind aber
+  **nicht deployed** (R-5). Die Drift in dieser Richtung besteht fort.
+* Der CI-Schritt `supabase db reset` läuft weiterhin mit `|| true` und ist
+  damit nicht blockierend. Jetzt, wo das Verzeichnis den Produktionsstand
+  abbildet, wäre ein scharfer Lauf erstmals aussagekräftig.
+* Ob `supabase db reset` tatsächlich durchläuft, konnte hier **nicht
+  geprüft werden** — dafür fehlt der lokale Supabase-Stack. Die
+  Reihenfolge und die Byte-Gleichheit sind geprüft, das Abspielen selbst
+  nicht.
