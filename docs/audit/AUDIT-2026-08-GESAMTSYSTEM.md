@@ -1064,3 +1064,84 @@ zurück.
   geprüft werden** — dafür fehlt der lokale Supabase-Stack. Die
   Reihenfolge und die Byte-Gleichheit sind geprüft, das Abspielen selbst
   nicht.
+
+---
+
+## 24. Umsetzung E-1 — Unternehmensbereich in die Kunden-App (31.08.2026)
+
+**Stand: vorbereitet, Ausführung blockiert.** Die Lovable-Workspace hat keine
+Credits mehr. Der Frontend-Code kann deshalb nicht geschrieben werden; das
+Projekt hat auch keine GitHub-Anbindung, über die sich das umgehen ließe.
+
+### 24.1 Was erledigt ist
+
+| Schritt | Zustand |
+| --- | --- |
+| API-Vertrag geprüft und dokumentiert | ✅ `docs/API-UNTERNEHMENSBEREICH.md` |
+| Projektwissen von Projekt A korrigiert | ✅ wirksam, kostet keine Credits |
+| Bauauftrag geschrieben und geprüft | ✅ `docs/lovable/E-1-UMSETZUNGSAUFTRAG.md` |
+| Bauauftrag an Lovable gesendet | ⛔ keine Credits |
+| Ergebnis abgenommen | ⛔ steht aus |
+| Projekt B stillgelegt | ⛔ steht aus, bewusst erst nach Abnahme |
+
+### 24.2 Die offenen Fragen aus R-6 sind beantwortet
+
+Der Auditbericht ließ zwei Punkte offen, weil sie ohne Prüfung nicht zu
+entscheiden waren. Beide sind jetzt geklärt — durch Nachsehen, nicht durch
+Annahme:
+
+**Dürfen Firmenkunden ihre Stammdaten selbst pflegen? Nein.**
+`business_update` und `business_location_set` verlangen `is_admin()` oder
+`businesses.manage`. Bemerkenswert: Das Projektwissen von Projekt A wusste
+das bereits und nennt sogar die Migrationen (0151, 0153) — das Partnerportal
+wurde trotzdem mit Formularen dafür gebrieft. Die Information war da, sie ist
+nur nicht angekommen.
+
+Umsetzung: Stammdaten und Standorte werden **angezeigt, nicht bearbeitet**,
+mit Verweis auf den Kontaktweg.
+
+**Ist der Werbemittel-Upload baubar? Nein.**
+`advertising_creative_upload` erwartet eine fertige HTTPS-Adresse. Es gibt
+aber **keinen Storage-Bucket für Kampagnenmaterial** — vorhanden sind nur
+`documents`, `employee-signatures`, `haccp`, `partner-signatures`,
+`signed-documents`, alle privat und ohne Policy für Firmenkunden. Ein
+Firmenkunde hat keinen Ort, an den er die Datei legen könnte.
+
+Das ist eine **echte Backend-Lücke**, kein Frontend-Problem. Bis ein Bucket
+samt Policy existiert, wird die Funktion nicht angeboten.
+
+### 24.3 Weitere Funde bei der Vorbereitung
+
+* **Kontakt geht, aber anders als gedacht.** `lead_create` verlangt
+  `leads.manage` und ist damit internes CRM. Für die Kontaktfunktion eignet
+  sich stattdessen ein direkter Insert in `contact_messages`: Die
+  INSERT-Policy erlaubt jeder angemeldeten Person eine Zeile mit
+  `customer_id = auth.uid()`.
+* **`is_admin()` ist enger als der Name vermuten lässt** — ausschließlich
+  `system_admin`. Gesellschafter kommen nicht darüber, sondern über die
+  Berechtigung `businesses.manage`, die sie besitzen. Wer `is_admin()` als
+  „ist irgendwie Verwaltung" liest, sperrt die Gesellschafter aus.
+* **Das Projektwissen von Projekt A beschrieb sich selbst als
+  „Firmenportal"** — der Text stammte aus Projekt B. Die Design- und
+  Compliance-Regeln darin sind gut und wurden vollständig übernommen; nur die
+  Rahmung war falsch und ist korrigiert.
+
+### 24.4 Abweichung von der Skizze in Kapitel 17
+
+Kapitel 17 schlug fünf gleichrangige Bereiche vor. Das geht nicht: Die untere
+Leiste ist bewusst als vier Reiter plus Kundenkarte in der Mitte gebaut
+(„Die Mitte ist kein Reiter, sondern eine Handlung", Kommentar in
+`bottom-nav.tsx`). Ein fünfter Reiter zerstört diese Anordnung.
+
+Der Unternehmensbereich ist für seine Nutzer ohnehin ein **Modus**, kein
+Geschwister von „Bonus". Deshalb: Einstiegskarte im Profil, sichtbar nur bei
+nicht-leerem `my_businesses()`, dahinter ein eigener Bereich mit eigener
+Unternavigation. Die Kernforderung aus Ziffer 9 des Auftrags — eine App, eine
+Anmeldung, klar getrennte Nutzerbereiche — bleibt erfüllt.
+
+### 24.5 Nächster Schritt
+
+Credits aufladen, dann den Auftrag aus
+`docs/lovable/E-1-UMSETZUNGSAUFTRAG.md` unverändert an Projekt A senden. Die
+Abnahmeprüfung steht am Ende derselben Datei. Projekt B bleibt bis zur
+Abnahme unangetastet.
