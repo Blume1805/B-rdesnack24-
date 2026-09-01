@@ -1272,3 +1272,81 @@ Regel aus `supabase/migrations/README.md` gilt ab sofort auch für mich.
 * **R-3, R-4, R-8, R-9** — allesamt Frontend und damit von Lovable-Credits
   abhängig.
 * **R-5** (Kaufdatenerfassung) — braucht die Nayax-Zugänge.
+
+---
+
+## 26. Umsetzung R-11 — Querinformation im Firmenportal geschlossen (01.09.2026)
+
+Migration `20260901045559_standortliste_zeigt_keine_fremden_firmen`.
+
+### 26.1 Der Befund
+
+`business_locations_list()` lieferte **jedem** Firmen-Administrator **alle**
+Standorte — auch die anderer Firmenkunden, samt deren Namen im Feld
+`fremde_firma`. Für die interne Zuordnungsmaske ist das nötig: Wer einen
+Standort vergibt, muss sehen, dass er belegt ist und von wem. Für einen
+Firmenkunden ist es eine Aussage über einen Dritten.
+
+### 26.2 Die Lösung
+
+Verzweigung im Rumpf statt einer zweiten Funktion. Das gerade gebaute
+Frontend ruft weiterhin denselben Namen mit demselben Parameter auf und
+bricht nicht:
+
+* **Intern** (`is_admin()` oder `businesses.manage`) → unverändert die volle
+  Sicht inklusive `fremd` und `fremde_firma`.
+* **Firmen-Administrator** → ausschließlich die eigenen Standorte, ohne jede
+  Aussage über andere Firmenkunden. Die beiden Leak-Felder werden gar nicht
+  erst erzeugt.
+
+Der clientseitige Filter auf `zugeordnet === true` in `business.ts` bleibt
+bewusst bestehen. Die Datenbank ist die Zusage, das Frontend nur die Anzeige.
+
+### 26.3 Nachweis — 8 von 8 grün
+
+Für den Test wurden vorübergehend eine zweite Firma, eine Mitgliedschaft und
+zwei Standortzuordnungen angelegt und im selben Lauf wieder entfernt; die
+Zeilenzahlen wurden vorher und nachher verglichen.
+
+| ID | Test | Erwartet | Ergebnis |
+| --- | --- | --- | --- |
+| R-11/1 | Firmenkunde: Feld `fremde_firma` enthalten | false | 🟢 false |
+| R-11/2 | Firmenkunde: Name der Fremdfirma sichtbar | false | 🟢 false |
+| R-11/3 | Firmenkunde: Anzahl Standorte | 1 (nur eigener) | 🟢 1 |
+| R-11/4 | Intern: Fremdbelegung weiterhin sichtbar | true | 🟢 true |
+| R-11/5 | Intern: alle Standorte | 4 | 🟢 4 |
+| — | Aufräumen `business_members` | 0 | 🟢 0 |
+| — | Aufräumen `business_locations` | 0 | 🟢 0 |
+| — | Aufräumen `businesses` | 1 | 🟢 1 |
+
+Damit ist auch **CORP-007** aus der Testmatrix teilweise erledigt: Erstmals
+wurde mit zwei tatsächlich bestückten Firmenkunden geprüft, dass Firma A
+nichts über Firma B erfährt. Was weiterhin fehlt, ist der umgekehrte Test mit
+einem echten Mitglied auf beiden Seiten über alle B2B-Funktionen hinweg.
+
+Ein Nebeneffekt der Testanlage ist erwähnenswert: Der Versuch, eine aktive
+Mitgliedschaft ohne `activated_at` einzufügen, scheiterte an der CHECK-Bedingung
+`business_members_aktiv_hat_zeitpunkt`. Das Datenmodell lässt einen
+inkonsistenten Zustand also gar nicht erst zu — ein gutes Zeichen.
+
+### 26.4 Stand der Roadmap nach diesem Durchgang
+
+| Nr. | Maßnahme | Zustand |
+| --- | --- | --- |
+| R-1 | Migrationen zurückgeführt | ✅ erledigt (Kap. 23) |
+| R-2 | Klickzähler `anon` entzogen | 🟡 Loch geschlossen, Edge Function mit Rate-Limit steht aus |
+| R-3 | Mock-Automaten entfernen | ⛔ Lovable-Credits |
+| R-4 | Rabattanzeige korrigieren | ⛔ Lovable-Credits |
+| R-5 | Kaufdatenerfassung deployen | ⛔ Nayax-Zugänge |
+| R-6 | Partnerportal-Datenschicht | ✅ erledigt (Kap. 24, in E-1 aufgegangen) |
+| R-7 | API-Vertrag generieren | ✅ erledigt (Kap. 25) |
+| R-8 | Admin-Rollenprüfung reparieren | ⛔ Lovable-Credits |
+| R-9 | Statusrabatt in die Kunden-App | ⛔ Lovable-Credits |
+| R-10 | E-1 Integration | 🟡 zur Hälfte gebaut (Kap. 24) |
+| R-11 | Standortliste trennen | ✅ erledigt (dieses Kapitel) |
+| R-17 | Offene Tests | 🟡 Storage und Webhooks erledigt, Rate Limiting offen |
+| R-19 | `search_path` fixieren | ✅ erledigt (Kap. 25) |
+| R-15, R-20 | Least Privilege, Passwortschutz | 🟡 bewusst zurückgestellt bzw. manuell |
+
+**Von den vier P0-Punkten sind zwei erledigt (R-1, R-2 im wesentlichen), die
+beiden übrigen (R-3, R-4) hängen an Lovable-Credits.**
