@@ -1422,3 +1422,68 @@ grün sind. Sie sagen **nicht**, dass die Bildschirme mit echten Daten richtig
 aussehen — dafür fehlen die Daten. Sobald die erste Werbefläche und der erste
 Firmenkunde angelegt sind, gehört jeder Bildschirm einmal von Hand
 durchgesehen. Eigene Widget-Tests für die neuen Module gibt es noch nicht.
+
+---
+
+## 28. Nachtrag Tests: Verwaltungsmodule und Rate Limiting (01.09.2026)
+
+### 28.1 Tests für die R-12-Module (nachgeholt)
+
+Kapitel 27.5 hielt fest, dass eigene Tests fehlen. Nachgeholt: 19 neue
+Tests, **93 von 93 grün** (vorher 74). Geprüft wird nicht das Aussehen —
+dafür fehlen echte Daten —, sondern die Zusicherungen, die auch ohne Daten
+gelten müssen:
+
+* Die **Unterdrückungsregel** für kleine Fallzahlen lag als private Methode
+  im Kampagnenbildschirm. Sie ist jetzt `unterdrueckteKennzahl()` in
+  `admin_shell.dart` und an ihren Rändern geprüft — einschließlich des
+  gefährlichen Falls, dass die Datenbank versehentlich einen Wert **mit**
+  gesetztem Unterdrückungsmerkmal liefert. Dann gilt das Merkmal, und die
+  Zahl erscheint nicht.
+* Die vier **Leerzustände** benennen, dass der Bereich gebaut, aber nicht in
+  Betrieb ist, statt Platzhalter zu zeigen.
+* Ein **abgewiesener Zugriff** (`42501`) erscheint als Berechtigungsaussage;
+  der Fehlercode taucht nirgends im sichtbaren Text auf. Dasselbe für
+  `PGRST202` (als Programmierfehler benannt).
+* Ein **Vorlagen-Katalogeintrag ohne Inhalt** ersetzt die Fassung aus dem
+  Code nicht.
+
+Nebenbei geschlossen: Der bestehende `management_screen_test` rendert
+bewusst **alle** Modul-Kacheln, damit ein Baufehler sofort auffällt statt
+als graues ErrorWidget. Seine Rechteliste kannte die fünf neuen Kacheln
+nicht — dort hatte das Sicherheitsnetz ein Loch. Rechte ergänzt, Kacheln
+werden mitgeprüft.
+
+### 28.2 Rate Limiting auf /auth/v1 — nicht scharf prüfbar von hier
+
+Der Versuch, das Anmelde-Rate-Limit mit einer nicht existierenden Adresse
+(`…@example.invalid`, kein echtes Konto betroffen) zu messen, scheitert an
+derselben Netzsperre wie das CLI: Der Egress-Proxy weist
+`nnfsyuglkqycwenwxmuw.supabase.co` mit `CONNECT tunnel failed, response 403`
+ab. Aus dieser Umgebung ist der Auth-Endpunkt nicht erreichbar.
+
+Was sich statt des Lasttests sagen lässt:
+
+* Die Repo-`config.toml` setzt **kein** eigenes Rate Limit. Sie hat
+  `minimum_password_length = 10`, `enable_refresh_token_rotation = true` und
+  `refresh_token_reuse_interval = 10` — sinnvolle Härtung, aber keine
+  Frequenzbegrenzung.
+* Gehostete Supabase-Projekte tragen serverseitige Standard-Rate-Limits
+  (u. a. für Token-, OTP- und Signup-Endpunkte), die **nicht** über
+  `config.toml` sichtbar sind, sondern nur im Auth-Bereich des Dashboards.
+
+**Damit bleibt AUTH-002/Rate-Limiting weiterhin ungeprüft** und ist der
+letzte offene Punkt aus Kapitel 13.3. Er lässt sich nur aus einer Umgebung
+mit Zugang zu `supabase.co` messen oder im Dashboard ablesen. Empfehlung:
+beim Go-Live die Auth-Rate-Limits im Dashboard einmal ansehen und den
+für Bördesnack24 sinnvollen Wert bewusst setzen, statt sich auf den
+Standard zu verlassen.
+
+### 28.3 Testmatrix — aktueller Stand
+
+| Bereich | 31.08. | 01.09. |
+| --- | --- | --- |
+| grün geprüft (Backend, SQL) | 36 | **44** (+ Storage 5, R-2/R-19 3) |
+| grün geprüft (Frontend, Flutter-Tests) | 0 | **93 Unit/Widget** |
+| Rate Limiting `/auth/v1` | offen | **offen (nicht erreichbar)** |
+| Firma-A-gegen-B, alle B2B-Funktionen | offen | teilweise (Standortliste, R-11) |
