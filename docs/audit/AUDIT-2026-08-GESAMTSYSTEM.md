@@ -1350,3 +1350,75 @@ inkonsistenten Zustand also gar nicht erst zu — ein gutes Zeichen.
 
 **Von den vier P0-Punkten sind zwei erledigt (R-1, R-2 im wesentlichen), die
 beiden übrigen (R-3, R-4) hängen an Lovable-Credits.**
+
+---
+
+## 27. Umsetzung R-12 — Verwaltungsoberflächen für das Werbegeschäft (01.09.2026)
+
+Kapitel 8 hielt fest: rund 45 RPCs sind vollständig gebaut, aber nur per SQL
+bedienbar. Ohne Oberfläche ist das Werbegeschäft nicht betreibbar. Diese
+Lücke ist jetzt geschlossen — in der **Flutter-App**, unabhängig von Lovable.
+
+### 27.1 Was entstanden ist
+
+Neues Feature `apps/mobile/lib/features/admin/` (~1 900 Zeilen), vier Module
+im Verwaltungs-Hub:
+
+| Modul | Sichtbar bei | Inhalt |
+| --- | --- | --- |
+| **Werbeflächen** | `locations.manage` oder `advertising.manage` | Belegung zum Stichtag, Kennzahlen, je Automat die Flächen mit Vertragszustand, Motivfreigabe |
+| **Kampagnen** | `advertising.manage` oder `creatives.approve` | Kampagnenliste, Statuswechsel, Werbemittelprüfung, Kampagnenbericht |
+| **Anfragen** | `leads.manage` | Leads nach Stufe gefiltert, Stufenwechsel mit Notiz, Verlauf |
+| **Firmenkunden** | `businesses.manage` | Stammdaten, Mitglieder, offene Einladungen, Rechnungsläufe mit Freigabe |
+| **E-Mail** | `customers.manage` | Vorlagen bearbeiten, Versandprotokoll, Warteschlange |
+
+### 27.2 Zwei Entwurfsentscheidungen
+
+**Gemischter Zugriffsweg.** Wo eine RPC existiert, wird sie benutzt — sie
+trägt die Berechtigungsprüfung und die Aufbereitung. Für die Listen der
+Kampagnen, Firmenkunden, Werbemittel und Vorlagen gibt es **keine interne
+RPC**: `my_advertising_campaigns()` und `my_businesses()` sind
+mitgliedschaftsbasiert und liefern einem Gesellschafter nichts. Dort wird die
+Tabelle direkt gelesen; die SELECT-Policies schließen interne Rollen
+ausdrücklich ein (am 01.09. geprüft).
+
+**Kein Anlege-Formular für Firmenkunden.** `business_create` existiert, aber
+Vertragsdaten kommen aus dem Vertrag und nicht aus einem Formular. Die
+Oberfläche sagt das, statt ein Feld anzubieten, das niemand verantworten kann.
+
+### 27.3 Was die Oberfläche bewusst nicht behauptet
+
+Alle vier Bereiche haben heute **0 Zeilen**. Statt Platzhaltern zeigt jeder
+Leerzustand, dass der Bereich gebaut, aber nicht in Betrieb ist. Im
+Kampagnenbericht gilt zusätzlich die Unterdrückung kleiner Fallzahlen: Liegt
+ein Wert unter 30, steht dort „weniger als 30" — nie eine Zahl, nie „0", nie
+ein Schätzwert. An der Aufrufzahl steht der Hinweis, dass sie ein technisch
+gezählter Rohwert ohne Bereinigung ist (siehe R-2).
+
+### 27.4 Geprüft
+
+Für diesen Schritt wurde das Flutter-SDK 3.47.2 in der Arbeitsumgebung
+eingerichtet — bis dahin war Dart-Code hier nicht überprüfbar.
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| `flutter analyze` | 🟢 No issues found |
+| `flutter test` | 🟢 74 von 74 bestanden (inkl. Golden- und Kontrasttests) |
+| `dart format --set-exit-if-changed` | 🟢 159 Dateien, 0 geändert |
+| Parameternamen gegen `docs/API-UNTERNEHMENSBEREICH.md` | 🟢 |
+| Nebenwirkungen (`pubspec.lock`, `analysis_options.yaml`) | 🟢 keine |
+
+Zwei Fassungsrisiken wurden bewusst umgangen, weil `pubspec` Flutter ab 3.24
+zulässt, die CI aber `channel: stable` ohne Pin zieht:
+`DropdownButtonFormField` wird ohne `value`/`initialValue` verwendet (die
+Parameter heißen je nach Fassung anders), und statt `RadioListTile` steht
+eine schlichte Auswahlliste (dessen `groupValue` ist seit 3.32 abgelöst, der
+Ersatz `RadioGroup` existiert davor nicht).
+
+### 27.5 Was damit NICHT geprüft ist
+
+Analyzer und Tests sagen, dass der Code übersetzt und die vorhandenen Tests
+grün sind. Sie sagen **nicht**, dass die Bildschirme mit echten Daten richtig
+aussehen — dafür fehlen die Daten. Sobald die erste Werbefläche und der erste
+Firmenkunde angelegt sind, gehört jeder Bildschirm einmal von Hand
+durchgesehen. Eigene Widget-Tests für die neuen Module gibt es noch nicht.
