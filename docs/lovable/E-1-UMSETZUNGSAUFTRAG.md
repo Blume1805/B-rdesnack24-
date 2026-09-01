@@ -1,9 +1,11 @@
 # E-1 — Unternehmensbereich in die Kunden-App integrieren
 
-**Stand 31.08.2026: vorbereitet, Ausführung blockiert.** Die Lovable-Workspace
-hat keine Credits mehr (`Your workspace is out of credits`). Der Bauauftrag
-unten ist fertig und geprüft; er lässt sich unverändert in Projekt A einfügen,
-sobald Credits vorhanden sind.
+**Stand 01.09.2026: zur Hälfte gebaut, erneut durch Credits blockiert.**
+Der Auftrag unten wurde am 01.09. um 04:33 gesendet und ausgeführt (Commit
+`a2594032`, „Unternehmensbereich gescannt"). Der Agent hat seinen Zug sauber
+beendet und selbst aufgelistet, was noch offen ist. Der Folgeauftrag für die
+restlichen vier Seiten wurde abgewiesen: die Credits waren wieder aufgebraucht.
+Der Fortsetzungstext steht unten unter „Fortsetzung".
 
 * Projekt A (Ziel): **BÖRDESNACK Hub**, `d5033021-6dce-4044-8bf6-bb50d80aa8ff`
 * Projekt B (löst sich auf): **Bördesnack24 Partner Portal**,
@@ -122,3 +124,68 @@ Halte Dich an das Projektwissen: keine rohen Hex-Werte, Gold nie als Schriftfarb
 | Nicht gebaut | kein Stammdaten-Formular, kein Standort-Formular, kein Upload |
 | Navigation | weiterhin vier Reiter plus Kundenkarte |
 | Einstieg | Karte im Profil nur bei nicht-leerem `my_businesses()` |
+
+---
+
+## Stand nach dem ersten Zug (01.09.2026, Commit `a2594032`)
+
+### Gebaut und geprüft
+
+| Datei | Zustand |
+| --- | --- |
+| `src/lib/business.ts` | ✅ Datenschicht vollständig, alle Signaturen korrekt |
+| `src/components/business-shell.tsx` | ✅ Kopfband, Kennzahl-Rangfolge, Hinweis- und Fehlerzustände |
+| `src/routes/app.unternehmen.tsx` | ✅ Rahmen mit Gate über `my_businesses()`, Firmenumschalter über `?firma=` |
+| `src/routes/app.unternehmen.index.tsx` | ✅ Dashboard für `admin`, erklärender Zustand für `member` |
+| `src/routes/app.unternehmen.kontoauszug.tsx` | ✅ Summen, Einzelzeilen im eigenen Scroll-Container, Rechnungsläufe nur lesend |
+| `src/routes/app.unternehmen.vertraege.tsx` | ✅ |
+
+**Die Datenschicht ist gegen den Vertrag geprüft und stimmt in allen Punkten:**
+
+| Prüfpunkt | Ergebnis |
+| --- | --- |
+| `business_dashboard` | `p_business`, `p_von`, `p_bis` ✅ |
+| `business_statement` | `p_business`, `p_jahr`, `p_monat` ✅ |
+| `business_locations_list` | `p_business` ✅ |
+| `business_invoice_runs_list` | `p_business` ✅ |
+| `advertising_campaign_report` | `p_campaign` ✅ |
+| `my_businesses`, `my_advertising_contracts`, `my_advertising_campaigns` | ohne Argument ✅ |
+| Objekt bleibt Objekt | kein `first()`-Auspacken ✅ |
+| Standorte | filtert `zugeordnet === true`, übernimmt `fremd`/`fremde_firma` gar nicht ✅ |
+| Unterdrückung unter 30 | `reportValue()` liefert „weniger als 30", nie eine Zahl, nie „0" ✅ |
+| Fehlerdeutung | `42501` und `P0002` als ruhige Zustände, kein Fehlercode im Text ✅ |
+| Beispieldaten | keine, kein Demo-Fallback ✅ |
+| Kontakt | Insert in `contact_messages` mit `customer_id`, nicht `lead_create` ✅ |
+
+Damit sind **alle acht zuvor defekten Aufrufe des Partnerportals korrigiert.**
+
+### Noch offen
+
+- `app.unternehmen.kampagnen.index.tsx`
+- `app.unternehmen.kampagnen.$id.tsx` (mit „weniger als 30" und Rohwert-Hinweis)
+- `app.unternehmen.stammdaten.tsx`
+- `app.unternehmen.kontakt.tsx`
+- Einstiegskarte „Für Unternehmen" oben in `/app/profil`
+- Ein Durchbau samt Ansichtsprüfung
+
+Solange die Einstiegskarte fehlt, ist der Bereich nur über die direkte Adresse
+erreichbar. Das ist kein Sicherheitsproblem — das Gate im Rahmen und die
+Datenbank entscheiden unabhängig davon —, aber Firmenkunden finden ihn nicht.
+
+---
+
+## Fortsetzung (bei verfügbaren Credits unverändert senden)
+
+Weiter. Bitte die vier restlichen Seiten und den Profil-Einstieg, mit denselben Regeln wie bisher.
+
+**`app.unternehmen.kampagnen.index.tsx`** — `member` genügt. `my_advertising_campaigns()`. Name, Welt, Laufzeit, Budget, Status.
+
+**`app.unternehmen.kampagnen.$id.tsx`** — `advertising_campaign_report(p_campaign)` über `campaignReportQueryOptions`. Für jeden Wert `reportValue(...)` benutzen, damit bei gesetztem `*_unter_mindestzahl` „weniger als 30" steht und niemals eine Zahl oder „0". Ein Satz erklärt die Unterdrückung sichtbar, damit sie nicht wie ein Fehler wirkt. An `aufrufe` gehört der Hinweis, dass das ein technisch gezählter Rohwert ohne Bereinigung ist.
+
+**`app.unternehmen.stammdaten.tsx`** — nur `admin`, reine Anzeige. Firmenangaben aus `business_statement().business`, Standorte aus `locationsQueryOptions` (die filtern bereits auf `zugeordnet === true`). Kein Formular, sondern ein Satz, dass Vertragsdaten bei Bördesnack24 gepflegt werden, mit Link auf die Kontaktseite.
+
+**`app.unternehmen.kontakt.tsx`** — Formular über `sendContactMessage` mit den Kategorien aus `CONTACT_CATEGORIES`. `customerId` ist die User-Id aus der Session. Nach dem Absenden eine klare Bestätigung. Hier gehört auch der Hinweis hin, dass Werbematerial derzeit per Nachricht eingereicht wird, weil es dafür noch keinen Upload gibt.
+
+**Profil-Einstieg** — in `/app/profil` ganz oben eine ruhige Karte „Für Unternehmen" mit dem Firmennamen, die nach `/app/unternehmen` führt. Nur rendern, wenn `myBusinessesQueryOptions` mindestens eine Zeile liefert; bei leerem Array darf nichts erscheinen.
+
+Danach bitte einmal durchbauen und prüfen, dass die App fehlerfrei lädt. Keine neuen RPC-Namen, keine Formulare für Stammdaten oder Standorte, kein Werbemittel-Upload.
