@@ -1145,3 +1145,130 @@ Credits aufladen, dann den Auftrag aus
 `docs/lovable/E-1-UMSETZUNGSAUFTRAG.md` unverändert an Projekt A senden. Die
 Abnahmeprüfung steht am Ende derselben Datei. Projekt B bleibt bis zur
 Abnahme unangetastet.
+
+---
+
+## 25. Umsetzung R-2, R-19 und R-7 sowie Nachholen der offenen Tests (01.09.2026)
+
+### 25.1 R-17 — die im Audit offen gelassenen Prüfungen sind nachgeholt
+
+Kapitel 13.3 nannte fünf Punkte als „nicht geprüft". Drei davon sind jetzt
+geprüft, mit Ergebnis.
+
+**Storage-Policies — 5 von 5 grün** (Rollenwechsel gegen die Live-Datenbank,
+alles in einer zurückgerollten Transaktion):
+
+| ID | Test | Ergebnis |
+| --- | --- | --- |
+| STO-001 | `anon` liest `storage.objects` | 🟢 0 Objekte |
+| STO-002 | `anon` schreibt nach `employee-signatures` | 🟢 abgewiesen `42501` |
+| STO-003 | Kunde schreibt unter **fremder** Benutzer-Id | 🟢 abgewiesen `42501` |
+| STO-004 | Kunde liest `documents`/`haccp`/`signed-documents` | 🟢 0 |
+| STO-005 | Kunde löscht ein Dokument | 🟢 abgewiesen `42501` |
+
+Bemerkenswert: Für `documents`, `haccp`, `partner-signatures` und
+`signed-documents` gibt es **keine** UPDATE- und DELETE-Policy. RLS verweigert
+damit beides grundsätzlich — genau die Eigenschaft, deren Fehlen die
+`install-signature`-Lücke ausmachte (dort war `upsert: true` mit
+Service-Role-Schlüssel möglich).
+
+🟡 Ein Randbefund: Die beiden Policies auf `employee-signatures` gelten für die
+Rolle `public` statt für `authenticated`. Ausnutzbar ist das nicht — sie
+vergleichen gegen `auth.uid()`, das für `anon` NULL ist, und STO-002 bestätigt
+die Abweisung. Sauberer wäre `authenticated`.
+
+**Webhook-Signaturen — alle drei Functions ohne JWT tragen echte Prüfungen:**
+
+| Function | Prüfung |
+| --- | --- |
+| `iot-webhook` | HMAC-SHA256 gegen das Secret **des jeweiligen Providers aus der Datenbank**, konstante Vergleichszeit, unbekannter Provider ⇒ 401, inaktiv ⇒ 403, zusätzlich Uhr-Drift-Prüfung (`time_skew_max_s`) und Idempotenz über `(provider_id, event_uid)` |
+| `email-inbound` | Standard-Webhooks-HMAC, **kein Rückfallwert** — fehlt das Secret, antwortet die Function mit 500 und tut nichts |
+| `auth-email-hook` | HMAC mit Unterstützung mehrerer Secrets (Schlüsselwechsel), 401 bei Abweichung |
+
+Kein einziger Rückfallwert für ein Geheimnis im Quelltext. Die Lehre aus
+`install-signature` ist erkennbar umgesetzt.
+
+**Weiterhin offen:** Rate Limiting und Brute-Force-Schutz auf `/auth/v1`
+sowie ein echter Firma-A-gegen-Firma-B-Test — dafür müssten zwei Firmenkunden
+mit Mitgliedschaften angelegt werden, und `business_members` ist leer.
+
+### 25.2 R-2 — der fälschbare Klickzähler ist geschlossen
+
+Migration `20260901045050_klickzaehler_nicht_mehr_anonym`.
+
+`advertising_redirect_count()` ist `anon` und `PUBLIC` entzogen. Der Zeitpunkt
+war günstig: Es existiert noch keine Kampagne und kein Weiterleitungsendpunkt,
+der Entzug kostet also nichts.
+
+| ID | Test | Ergebnis |
+| --- | --- | --- |
+| R-2/1 | `anon` ruft `advertising_redirect_count` | 🟢 abgewiesen `42501` |
+| R-2/2 | `service_role` darf weiterhin | 🟢 `true` |
+
+**Damit ist R-2 noch nicht vollständig erledigt.** Sobald es einen
+Weiterleitungslink gibt, braucht es eine Edge Function, die den Klick mit
+Rate-Limit und kurzlebiger, gehashter Entprellung zählt und dabei bewusst
+weiterhin keine IP, Sitzung oder Cookie speichert. Bis dahin ist die Kennzahl
+schlicht nicht erhebbar — und das ist die richtige Reihenfolge: lieber keine
+Zahl als eine fälschbare.
+
+### 25.3 R-19 — search_path fixiert
+
+Migration `20260901045102_search_path_fuer_coupon_anlass`.
+`app.coupon_anlass_zu_offer_source()` war die einzige Funktion ohne festes
+`search_path`. 🟢 geprüft: `search_path=public, app`.
+
+### 25.4 R-7 — der generierte API-Vertrag
+
+`packages/api-types/database.types.ts` (229 511 Bytes), erzeugt aus der
+Live-Datenbank. Das ist das Werkzeug, das den Partnerportal-Fehler maschinell
+verhindert hätte.
+
+Gegenprobe:
+
+| Erwartet vorhanden | Ergebnis | Verboten | Ergebnis |
+| --- | --- | --- | --- |
+| `business_dashboard` → `p_business` | ✅ | `p_business_id` | ✅ kommt nicht vor |
+| `business_statement` → `p_jahr` | ✅ | `p_campaign_id` | ✅ kommt nicht vor |
+| `advertising_campaign_report` → `p_campaign` | ✅ | `p_payload` | ✅ kommt nicht vor |
+| `business_locations_list` → `p_business` | ✅ | `p_content_base64` | ✅ kommt nicht vor |
+
+### 25.5 Advisor-Stand
+
+| | 31.08. | 01.09. |
+| --- | --- | --- |
+| Findings gesamt | 141 | **139** |
+| davon ERROR | 0 | **0** |
+| `function_search_path_mutable` | 1 | **0** |
+| `anon_security_definer_function_executable` | 5 | **4** |
+
+Die verbleibenden vier anon-ausführbaren Funktionen sind **bewusst öffentlich
+und dürfen nicht „behoben" werden**:
+
+* `email_unsubscribe(p_token)` — der Abmeldelink muss ohne Anmeldung
+  funktionieren (§ 7 UWG), er ist über den Token geschützt.
+* `fetch_email_report_share(p_token, …)` — Freigabelink, tokengeschützt.
+* `ki_funktion_freigegeben(p_key)` — Transparenzauskunft zum KI-Register.
+* `subscription_plans()` — die Preisliste ist öffentlich und muss es sein.
+
+### 25.6 Repository-Stand
+
+184 Migrationen, deckungsgleich mit der Live-Datenbank. Beide neuen
+Migrationen wurden nach dem Anwenden sofort per Prüfsumme zurückgeholt — die
+Regel aus `supabase/migrations/README.md` gilt ab sofort auch für mich.
+
+### 25.7 Was aus der Roadmap bewusst nicht angefasst wurde
+
+* **R-15** (Least Privilege: `REVOKE SELECT … FROM anon`) — technisch
+  vorbereitet, aber **nicht angewendet**. `anon` sieht heute auf allen
+  geprüften Tabellen 0 Zeilen; der Gewinn ist reine Tiefenstaffelung. Der
+  Entzug verwandelt aber ein stilles „leer" in einen sichtbaren Fehler. Bevor
+  das angewendet wird, gehört geprüft, welche Tabellen die öffentlichen
+  Seiten (Startseite, Rechtstexte, Kündigung, Freigabelink) tatsächlich
+  abfragen. Ohne diese Prüfung wäre es ein Eingriff mit Ausfallrisiko und
+  ohne messbaren Sicherheitsgewinn.
+* **R-20** (Leaked-Password-Protection) — eine Dashboard-Einstellung, per
+  Migration nicht setzbar. Bleibt ein manueller Handgriff, etwa zwei Minuten.
+* **R-3, R-4, R-8, R-9** — allesamt Frontend und damit von Lovable-Credits
+  abhängig.
+* **R-5** (Kaufdatenerfassung) — braucht die Nayax-Zugänge.
