@@ -43,6 +43,31 @@ String adminErrorText(Object error) {
       'Bitte versuchen Sie es in einem Moment erneut.';
 }
 
+/// Stellt eine Kennzahl dar, die die Datenbank bei kleinen Fallzahlen
+/// unterdrückt.
+///
+/// Liegt ein Wert unter der Mindestzahl, liefert die Datenbank ihn NICHT und
+/// setzt stattdessen ein `*_unter_mindestzahl`-Merkmal. Dann steht hier
+/// „weniger als 30" — **niemals** die Zahl, **niemals** „0" und **niemals**
+/// ein Schätzwert.
+///
+/// Warum das eine eigene, benannte Funktion ist und keine private Methode
+/// im Bildschirm: Diese Regel ist der Unterschied zwischen einer zulässigen
+/// und einer unzulässigen Auswertung. Sie gehört an eine Stelle, und sie
+/// gehört geprüft.
+///
+/// `null` ohne Unterdrückung heißt „nicht erhoben" und wird auch so genannt.
+/// Eine 0 daraus zu machen wäre eine Behauptung.
+String unterdrueckteKennzahl(
+  Object? wert,
+  bool unterdrueckt,
+  int mindestzahl,
+) {
+  if (unterdrueckt) return 'weniger als $mindestzahl';
+  if (wert == null) return 'keine Angabe';
+  return wert.toString();
+}
+
 /// Grundgerüst eines Verwaltungsschirms mit Titel, Vorspann und
 /// Aktualisieren-Geste.
 class AdminScaffold extends StatelessWidget {

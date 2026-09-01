@@ -377,12 +377,6 @@ class _ReportSheet extends ConsumerWidget {
   const _ReportSheet({required this.campaignId});
   final String campaignId;
 
-  String _wert(dynamic value, bool unterdrueckt, int mindestzahl) {
-    if (unterdrueckt) return 'weniger als $mindestzahl';
-    if (value == null) return 'keine Angabe';
-    return value.toString();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final report = ref.watch(campaignReportProvider(campaignId));
@@ -433,7 +427,7 @@ class _ReportSheet extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.s4),
                 AdminValueRow(
                   label: 'Aufrufe der Zielseite',
-                  value: _wert(
+                  value: unterdrueckteKennzahl(
                     data['aufrufe'],
                     data['aufrufe_unter_mindestzahl'] == true,
                     mindestzahl,
@@ -468,7 +462,7 @@ class _ReportSheet extends ConsumerWidget {
                     ),
                     AdminValueRow(
                       label: 'Ausgegeben',
-                      value: _wert(
+                      value: unterdrueckteKennzahl(
                         a['ausgabe'],
                         a['ausgabe_unter_mindestzahl'] == true,
                         mindestzahl,
@@ -476,7 +470,7 @@ class _ReportSheet extends ConsumerWidget {
                     ),
                     AdminValueRow(
                       label: 'Eingelöst',
-                      value: _wert(
+                      value: unterdrueckteKennzahl(
                         a['einloesung'],
                         a['einloesung_unter_mindestzahl'] == true,
                         mindestzahl,
