@@ -79,7 +79,11 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | AUTH-002 | Rate Limiting `/auth/v1` | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-003 | Passwort-Reset: Einmaligkeit, Ablauf, Session-Invalidierung | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-004 | Benutzerenumeration `/auth/v1/recover` | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
-| AUTH-005 | Schutz vor kompromittierten Passwörtern | ✗ im Dashboard aus, per SQL nicht setzbar | 🔴 S-13 ⏸ EXTERN (Dashboard, Philipp) |
+| AUTH-005 | Schutz vor kompromittierten Passwörtern | ✗ Schalter nicht bedienbar — Feature ab Pro, Organisation auf `free` | 🔴 S-13 ⏸ EXTERN (Tarifentscheidung) |
+| AUTH-006 | Mindestpasswortlänge | ✓ live 6, `config.toml` sagt 10 | 🔴 S-15 |
+| AUTH-007 | Passwortwechsel nur nach kürzlicher Anmeldung | ✓ aus | 🔴 S-16 |
+| AUTH-008 | Aktuelles Passwort beim Ändern verlangen | ✓ aus | 🔴 S-17 |
+| AUTH-009 | `config.toml` beschreibt die gehosteten Auth-Einstellungen | ✓ widerlegt (10 gegen 6) | 🔴 S-18 |
 
 ## 6. Speicher, E-Mail, Protokollierung
 
@@ -101,7 +105,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 9   🟡 GELB: 0   🟢 GRÜN: 35
+🔴 ROT: 14   🟡 GELB: 0   🟢 GRÜN: 35
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -109,9 +113,22 @@ und GELB = 0. Formulierungen wie „erfolgreich implementiert",
 „abgeschlossen" oder „keine weiteren Maßnahmen erforderlich" sind bis
 dahin unzulässig.
 
-Von den neun roten Zeilen ist **keine ein offener Sicherheitsbefund**.
-Acht sind Prüfungen, die aus dieser Umgebung nicht durchführbar sind,
-eine ist eine offene Rechtsfrage:
+Neu am 02.09.2026, nachmittags: Der Versuch, S-13 zu schließen, hat vier
+weitere Befunde sichtbar gemacht (S-15 bis S-18, siehe
+`docs/SECURITY.md` Abschnitt 11). **Drei davon sind offene
+Sicherheitsbefunde, die ohne Tarifwechsel sofort behebbar sind** —
+anders als die übrigen roten Zeilen:
+
+| ID | Befund | Behebbar durch | Verantwortlich |
+| --- | --- | --- | --- |
+| AUTH-006 / S-15 | Mindestpasswortlänge 6 statt 10 | ein Feld im Dashboard | Philipp |
+| AUTH-007 / S-16 | Passwortwechsel ohne kürzliche Anmeldung möglich | ein Schalter im Dashboard | Philipp |
+| AUTH-008 / S-17 | Aktuelles Passwort wird beim Ändern nicht verlangt | ein Schalter im Dashboard | Philipp |
+| AUTH-009 / S-18 | `config.toml` beschreibt die gehosteten Auth-Einstellungen nicht | Entscheidung: Einstellungen dokumentieren oder per CLI verwalten | offen |
+
+Die übrigen roten Zeilen sind **keine offenen Sicherheitsbefunde**:
+Prüfungen, die aus dieser Umgebung nicht durchführbar sind, eine
+Tarifentscheidung und eine offene Rechtsfrage:
 
 | ID | Warum rot | Fehlendes Mittel | Verantwortlich |
 | --- | --- | --- | --- |
@@ -119,7 +136,7 @@ eine ist eine offene Rechtsfrage:
 | AUTH-002 | Rate Limiting `/auth/v1` nicht messbar | Zugriff auf `*.supabase.co` (Egress `403`) | Philipp |
 | AUTH-003 | Passwort-Reset nicht durchspielbar | dito + Testpostfach | Philipp |
 | AUTH-004 | Enumeration nicht prüfbar | dito | Philipp |
-| AUTH-005 | Leaked-Password-Schutz aus | Supabase-Dashboard, per SQL nicht setzbar | Philipp |
+| AUTH-005 | Leaked-Password-Schutz nicht aktivierbar | Supabase Pro (Organisation auf `free`) — Tarifentscheidung | Philipp |
 | API-002 | 20 B2B-RPCs gegen zweiten Firmenkunden | zweiter Firmenkunde mit Mitgliedschaft in den Prüfdaten | offen |
 | MAIL-004 | Resend-Zustellung nicht belegt | Testpostfach in `projekt-konfig.md` | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |

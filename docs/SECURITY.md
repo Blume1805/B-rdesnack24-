@@ -417,3 +417,79 @@ Verbleibende Advisor-Meldungen (141), alle geprüft und eingeordnet:
   der Preis der Spaltenrechte. Für die Flutter-App geprüft und in
   Ordnung; für die Lovable-Oberflächen in
   `docs/API-UNTERNEHMENSBEREICH.md` vermerkt.
+
+---
+
+## 11. Auth-Einstellungen: was der Screenshot vom 02.09.2026 zeigte
+
+S-13 ließ sich nicht schließen. Der Versuch, den Schalter zu setzen, hat
+aber vier weitere Punkte sichtbar gemacht — und einen Projektfakt
+widerlegt.
+
+### S-13 korrigiert: keine vergessene Einstellung, sondern der Tarif
+
+Der Schalter „Prevent use of leaked passwords" ist **nicht bedienbar**.
+Der Hinweistext daneben nennt den Grund: *„Only available on Pro plan and
+above."* Abfrage der Organisation bestätigt das:
+
+```
+Bördesnack24 GbR — plan: "free"
+```
+
+**Damit ist S-13 ohne Tarifwechsel nicht behebbar.** Die bisherige
+Beschreibung („zwei Minuten im Dashboard") war falsch und ist hiermit
+berichtigt.
+
+### S-18: `projekt-konfig.md` nennt einen Tarif, den es nicht gibt
+
+Die Projektkonfiguration führt unter „Systeme" den Eintrag
+**„Backend/Datenbank: Supabase Pro"**. Tatsächlich läuft die
+Organisation auf **Free**. Das ist keine Kleinigkeit, weil an dem Tarif
+mehr hängt als dieser eine Schalter — unter anderem Sicherungen und
+Point-in-Time-Recovery, die Aufbewahrungsdauer der Protokolle und eben
+der Abgleich gegen HaveIBeenPwned.
+
+Jede Aussage in diesem Bericht, die stillschweigend auf Pro-Eigenschaften
+beruht, ist damit neu zu prüfen. Zu korrigieren in
+`boerdesnack24-verify/references/projekt-konfig.md` — die Datei liegt
+außerhalb dieses Repositories.
+
+### Drei Einstellungen, die ohne Tarifwechsel sofort besser wären
+
+Alle drei waren auf demselben Bildschirm sichtbar und sind im Free-Tarif
+verfügbar:
+
+| ID | Einstellung | Live | Repo (`config.toml`) | Wirkung |
+| --- | --- | --- | --- | --- |
+| **S-15** | Minimum password length | **6** | `minimum_password_length = 10` | Sechs Zeichen sind bei offener Selbstregistrierung und ohne Abgleich gegen geleakte Passwörter die schwächste Stelle der Anmeldung. Repo und Wirklichkeit widersprechen sich. |
+| **S-16** | Secure password change | **aus** | — | Ein Passwortwechsel ist ohne kürzliche Anmeldung möglich. Wer eine fremde Sitzung in die Hand bekommt, kann das Passwort ändern und das Konto übernehmen, ohne das alte zu kennen. |
+| **S-17** | Require current password when updating | **aus** | — | Dasselbe aus der anderen Richtung: Das bisherige Passwort wird beim Ändern nicht verlangt. |
+
+S-16 und S-17 wirken zusammen: Beide aus heißt, eine übernommene Sitzung
+genügt für die vollständige Kontoübernahme. Das ist der einzige
+Punkt dieser Liste, der ohne Tarifwechsel und ohne Codeänderung sofort
+zu schließen ist.
+
+### Korrektur zu S-5
+
+Die Migration `20260902052115` begründet den Nachlauf der E-Mail-Adresse
+unter anderem damit, dass Supabase eine Adressänderung doppelt bestätigt
+(`double_confirm_changes = true`). Diese Angabe stammt aus
+`supabase/config.toml` — und `config.toml` beschreibt den **lokalen**
+Stack, nicht das gehostete Projekt. Für das gehostete Projekt ist die
+Einstellung **nicht verifiziert**; der betreffende Schalter war auf dem
+Bildschirm nach oben weggescrollt.
+
+Die Korrektur selbst hängt nicht daran: Sie sperrt den direkten
+Schreibzugriff auf `profiles.email` unabhängig davon, wie `auth` die
+Adressänderung bestätigt. Die *Begründung* im Migrationskommentar ist
+aber weiter, als der Nachweis trägt, und wird hiermit eingeschränkt.
+
+### Die allgemeine Lehre
+
+`supabase/config.toml` ist im Repository die einzige Beschreibung der
+Auth-Einstellungen — und sie gilt für das gehostete Projekt **nicht**.
+Mindestpasswortlänge 10 gegen tatsächlich 6 ist der Beleg. Solange die
+Einstellungen nur im Dashboard leben, beschreibt das Repository ein
+System, das es nicht gibt. Das ist derselbe Befund wie S-14, nur an
+einer anderen Stelle.
