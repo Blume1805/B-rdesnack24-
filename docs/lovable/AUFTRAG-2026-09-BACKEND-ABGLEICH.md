@@ -434,33 +434,47 @@ Prüfe insbesondere:
 
 ---
 
-## 8. Projekt B — „Bördesnack24 Partner Portal": zwei Korrekturen am Auftrag
+## 8. Projekt B wird die Gesellschafter-App — was das für dich bedeutet
 
-Nicht Gegenstand dieses Auftrags, aber im selben Abgleich aufgefallen und
-festzuhalten, damit es niemand baut:
+Die Zielarchitektur besteht aus zwei Anwendungen: dieser Kunden-App mit
+Privat- **und** Unternehmensbereich, und der eigenständigen
+Gesellschafter-App. Ein separates Portal für Firmenkunden gibt es nicht mehr
+— **der Unternehmensbereich dieser App ist der einzige Zugang für
+Firmenkunden.** Der eigene Auftrag dafür steht in
+`docs/lovable/AUFTRAG-2026-09-GESELLSCHAFTER-APP.md`.
 
-Der ursprüngliche Projektauftrag nannte `business_update` (Stammdaten pflegen)
-und `business_location_set` (Standorte pflegen) als Selbstbedienung für
-Firmenkunden. **Beides ist falsch.** Aus der Produktionsdatenbank:
+Für dich folgt daraus: `/app/unternehmen/*` ist kein Nebenschauplatz mehr,
+sondern die produktive Oberfläche der Firmenkunden. Diese RPCs sind
+mitgliedschaftsgebunden und gehören hierher:
 
 ```
-business_update       → is_admin() ODER auth_has_permission('businesses.manage')
-business_location_set → is_admin() ODER auth_has_permission('businesses.manage')
+my_businesses · business_dashboard · business_statement
+business_locations_list · business_budget_set · business_invite
+business_member_set · my_advertising_contracts · my_advertising_campaigns
+advertising_campaign_report · advertising_creative_upload
+```
+
+Heute deckt die App davon nur `index`, `kontoauszug` und `vertraege` ab. Es
+fehlen die Kampagnenansicht samt anonymem Abschlussbericht, der
+Material-Upload, die Standortliste, die Budgets und die
+Mitgliederverwaltung. Bau sie im ruhigen, tabellarischen Register aus § 5.2.
+
+**Zwei Funktionen gehören ausdrücklich NICHT hierher.** Der ursprüngliche
+Auftrag des Partner-Portals hatte sie als Selbstbedienung vorgesehen; das war
+ein Irrtum. Aus der Produktionsdatenbank:
+
+```
+business_update       -> is_admin() ODER auth_has_permission('businesses.manage')
+business_location_set -> is_admin() ODER auth_has_permission('businesses.manage')
 ```
 
 Beide prüfen **nicht** auf Firmenmitgliedschaft. Ein Firmen-Admin bekommt
-`42501`. Wird dafür eine Oberfläche gebaut, ist sie für jeden Firmenkunden tot.
-Stammdaten- und Standortpflege sind internes Bördesnack24-Tooling.
+`42501`. Baust du dafür eine Oberfläche, ist sie für jeden Firmenkunden tot.
+Firmenstammdaten und Standorte pflegt die Gesellschafter-App.
 
-Tatsächlich mitgliedschaftsgebunden und damit für das Portal geeignet:
+Ebenfalls nur intern: `business_invoice_request`,
+`advertising_campaign_status`, `advertising_creative_review`.
 
-```
-my_businesses, my_advertising_contracts, my_advertising_campaigns   is_business_member
-business_dashboard, business_statement, business_locations_list     is_business_member(…,'admin')
-business_budget_set, business_invite, business_member_set           is_business_member(…,'admin')
-advertising_campaign_report                                         is_business_member
-advertising_creative_upload                                         is_business_member(…,'admin')
-```
-
-Nur intern, kein Firmen-UI: `business_update`, `business_location_set`,
-`business_invoice_request`, `advertising_campaign_status`.
+Will ein Firmenkunde seine Stammdaten geändert haben, ist der richtige Weg
+ein Hinweis mit Kontaktmöglichkeit — kein Formular, das beim Absenden
+scheitert.
