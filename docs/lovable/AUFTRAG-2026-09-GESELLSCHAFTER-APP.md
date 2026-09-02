@@ -273,6 +273,44 @@ sichtbar als erzeugt kennzeichnen. Und schärfer als der AI Act wirkt hier
 § 5 UWG: Ein erzeugtes Bild darf nicht als Aufnahme des tatsächlichen
 Artikels erscheinen.
 
+## 5b. Bildplatzhalter
+
+Auch hier gilt der Grundsatz aus dem Kundenauftrag: **Kein Bild ist der
+Normalzustand.** Von 63 aktiven Produkten hat keines ein Bild.
+
+Wo in dieser App Bilder vorkommen — Produktlisten im Bestand, Kampagnenmotive
+in der Freigabe, Belege, Unterschriften — gilt:
+
+* Der Platzhalter reserviert dasselbe Seitenverhältnis wie das echte Bild,
+  damit beim Nachladen nichts springt.
+* Er sieht aus wie ein Platzhalter: Fläche, Symbol, Name. Kein Stockfoto, kein
+  erzeugtes Bild, das ein Produktfoto imitiert.
+* Er fängt auch den Ladefehler ab, nicht nur das fehlende Bild.
+* Für Screenreader ist er ein Bild mit echtem Namen (`role="img"` plus
+  `aria-label`), nicht „Platzhalter".
+* Kein Skeleton als Dauerzustand — was nie kommt, wird zum Platzhalter.
+
+**Besonders bei der Motivfreigabe:** Ein nicht geladenes Kampagnenmotiv darf
+nicht wie ein leeres Motiv aussehen. Wer freigibt, muss den Unterschied
+zwischen „kein Motiv hochgeladen" und „Motiv konnte nicht geladen werden"
+sehen — sonst gibt jemand etwas frei, das er nie gesehen hat.
+
+## 5c. Gemeinsame Migration auf GitHub
+
+Der Weg steht in `docs/GITHUB-MIGRATION.md` im Backend-Repository: eigenes
+Repository für dieses Projekt, Einzug ins Backend-Monorepo als `git subtree`
+unter `apps/gesellschafter-web/`.
+
+Für dich gilt dieselbe Liste wie für die Kunden-App: keine Zugangsdaten im
+Quelltext, `.env.example`, README an der Wurzel mit Supabase-Instanz und
+Bau-Anleitung, `bun.lock` eingecheckt, Bau aus frischem Klon geprüft, keine
+Historie umschreiben.
+
+**Für diese App zusätzlich:** Sie zeigt Finanzzahlen, Kundendaten und
+Belegdaten. Schreib in das README ausdrücklich, dass ein Betrieb außerhalb
+einer geschützten Umgebung nicht vorgesehen ist, und dass die Rechteprüfung
+vollständig in der Datenbank liegt — nicht in dieser Oberfläche.
+
 ## 6. Reihenfolge — nicht alles auf einmal
 
 27 Bereiche sind kein Auftrag, sondern ein Programm. Bau in dieser Reihenfolge

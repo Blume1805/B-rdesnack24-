@@ -55,40 +55,82 @@ schreib es in deinen Abschlussbericht, statt es im Frontend nachzubauen.
 
 ### 2.1 Aufrufbare RPCs für Kundenkonten
 
-Diese Liste ist vollständig und aus der Produktionsdatenbank ausgelesen. Alles,
-was hier nicht steht, ist für ein Kundenkonto **nicht** aufrufbar — ein Versuch
-endet mit `42501`.
+Aus der Produktionsdatenbank ausgelesen. Alles, was hier nicht steht, endet
+für ein Kundenkonto mit `42501` oder liefert nachweislich nichts.
 
+**Konto, Abo, Vorteile**
 ```
-app_role(uid uuid DEFAULT auth.uid())      -> app.role_key
-my_subscription()                          -> jsonb
-my_subscription_benefits()                 -> jsonb
-choose_subscription_plan(p_plan text, p_withdrawal_consent bool, p_age_consent bool) -> jsonb
-my_store_subscription()                    -> record
-my_loyalty_status()                        -> record
-my_gamification_status()                   -> jsonb
-my_active_personal_offer()                 -> personal_offers
-my_active_personal_offers()                -> personal_offers
-ensure_my_special_offers()                 -> personal_offers
-my_receipts()                              -> jsonb
-my_invoices()                              -> invoices
-my_customer_card()                         -> text
-my_referral_code()                         -> text
-my_referral_status()                       -> jsonb
-my_notifications(p_limit int DEFAULT 30)   -> record
-my_notifications_unread_count()            -> integer
-my_login_week()                            -> jsonb
-my_donation_summary()                      -> record
-my_donations_by_purchase()                 -> record
-my_permissions()                           -> text[]
-product_detail(p_product_id uuid)          -> record
-rate_product(p_product_id uuid, p_rating int) -> void
-advertising_redirect_count(p_campaign uuid)   -> void
-export_my_data()                           -> jsonb
-request_account_deletion(p_reason text DEFAULT NULL) -> account_deletion_requests
-my_businesses() / my_advertising_contracts() / my_advertising_campaigns() -> jsonb
-list_my_signature_tasks()                  -> record
+app_role(uid uuid DEFAULT auth.uid())      my_subscription()
+my_subscription_benefits()                 my_store_subscription()
+subscription_plans()                       lifetime_founders_status()
+choose_subscription_plan(p_plan, p_withdrawal_consent, p_age_consent)
+store_subscription_claim(p_store, p_store_ref)
+my_permissions()                           my_customer_card()
+export_my_data()                           request_account_deletion(p_reason)
 ```
+
+**Katalog und Produkte**
+```
+catalog_facts()                            search_products(p_query, p_limit, p_category, p_subcategory)
+product_detail(p_product_id)               product_availability(p_product_id)
+top_products_by_category(p_category, p_limit)
+rate_product(p_product_id, p_rating)
+```
+
+**Bonus, Angebote, Empfehlungen**
+```
+my_loyalty_status()                        my_gamification_status()
+my_active_personal_offer()                 my_active_personal_offers()
+ensure_my_special_offers()                 activate_personal_offer(p_offer_id)
+deactivate_personal_offer(p_offer_id)      activate_offer(p_offer_id)
+deactivate_offer(p_offer_id)               my_login_week()
+record_daily_login()                       my_referral_code()
+my_referral_status()                       register_referral(p_code)
+```
+
+**Spenden**
+```
+donation_causes_list()                     donation_pool_summary()
+donation_rate()                            purchase_donation(p_gross)
+vote_donation_cause(p_cause_id)            suggest_donation_cause(p_title, p_description)
+my_donation_summary()                      my_donations_by_purchase()
+```
+
+**Belege, Nachrichten, Einwilligungen**
+```
+my_receipts()                              my_invoices()
+my_notifications(p_limit)                  my_notifications_unread_count()
+mark_notification_read(p_key)              mark_all_notifications_read()
+list_news(p_limit)
+email_consent_state()                      email_consent_grant(p_topic, p_proof_text, p_source, p_user_agent)
+email_consent_revoke(p_topic, p_source)    email_unsubscribe(p_token)
+```
+
+**Unternehmensbereich** (mitgliedschaftsgebunden, siehe § 8)
+```
+my_businesses()                            business_dashboard(p_business)
+business_statement(p_business)             business_locations_list(p_business)
+business_budget_set(...)                   business_invite(...)
+business_member_set(...)                   business_invitation_accept(p_token)
+my_advertising_contracts()                 my_advertising_campaigns()
+advertising_campaign_report(p_campaign)    advertising_creative_upload(...)
+advertising_redirect_count(p_campaign)
+```
+
+**KI-Freigabe**
+```
+ki_funktion_freigegeben(p_key)
+```
+Diese Funktion sagt, ob eine KI-gestützte Funktion freigegeben ist. Frag sie
+ab, bevor du eine solche Fläche zeigst — und richte die Kennzeichnung aus § 5a
+danach aus.
+
+> **Korrektur an einer früheren Fassung dieses Auftrags.** Die erste Liste
+> hier war unvollständig: Sie entstand aus einer Namenssuche nach `my_…` und
+> hat unter anderem `list_news`, den ganzen Spendenbereich, `search_products`,
+> `subscription_plans` und die Einwilligungsverwaltung übersehen. Wenn dir
+> eine Funktion fehlt, sag es — die Datenbank ist die Wahrheit, nicht diese
+> Liste.
 
 ### 2.2 `products` — die 24 lesbaren Spalten
 
@@ -520,6 +562,99 @@ Weicht die Darstellung vom echten Produkt ab, ist das irreführende Werbung
 nach § 5 UWG — unabhängig davon, ob ein KI-Hinweis daneben steht. Im Zweifel:
 das erzeugte Bild als Stimmungsbild einsetzen, das echte Produktfoto für die
 Produktseite.
+
+## 5b. Bildplatzhalter — an jeder Stelle, an der ein Bild stehen kann
+
+**Die Ausgangslage, gemessen:** Von 63 aktiven Produkten hat **kein einziges**
+ein Bild (`products.image_url` ist überall leer). `personal_offers` und
+`advertising_campaigns` sind noch leer, bekommen aber beide ein `image_url`.
+Der Regelfall ist also nicht „Bild vorhanden", sondern „Bild fehlt" — und das
+wird noch eine Weile so bleiben.
+
+Ein Platzhalter ist damit kein Randfall, sondern der Normalzustand. Er muss
+entsprechend gut sein.
+
+### 5b.1 Was schon da ist und bleibt
+
+`src/components/product-image.tsx` macht es richtig: Fläche in Flächenfarbe,
+Warenkorb-Symbol bei 35 % Deckkraft, darüber der erste Buchstabe des
+Produktnamens. `role="img"` mit `aria-label`, und ein `onError`, der auch bei
+kaputtem Bild auf den Platzhalter zurückfällt. Die Flutter-App hat dieselbe
+Lösung.
+
+**Nimm dieses Muster als Vorlage** und zieh es zu einer allgemeinen Komponente
+hoch, statt es je Fläche neu zu erfinden.
+
+### 5b.2 Wo Platzhalter fehlen
+
+| Fläche | Quelle | Platzhalter |
+|---|---|---|
+| Persönliche Gutscheine | `personal_offers.image_url` | Produktbild-Muster; ohne verknüpftes Produkt ein Gutschein-Symbol mit dem Titel des Angebots |
+| Werbecoupons mit Sponsor | Kampagnenmotiv | neutrale Fläche mit dem Firmennamen. **Nie** ein erfundenes Logo |
+| Spendenbereich | `donation_causes_list()` — **kein Bildfeld** | Es gibt kein Bild und darf keins geben: Ein Platzhalterlogo für eine reale gemeinnützige Organisation wäre eine Falschangabe über Dritte (§ 5 UWG). Die Karte trägt Name, Zweck, Ort und Website als Text |
+| News | `list_news(p_limit)` | neutrale Fläche in Markenfarbe mit dem Datum; kein Symbolbild |
+| Automaten und Standorte | `locations`, `machines` | Kartenausschnitt nur bei echten Koordinaten, sonst eine ruhige Fläche mit dem Ortsnamen |
+| Abzeichen und Stufen | `my_gamification_status().badges` | gezeichnete Symbole aus einer Bibliothek, kein Emoji |
+| Profilbild | keins in der Datenbank | Initialen auf Fläche, wie heute im Profil |
+
+### 5b.3 Die Regeln für jeden Platzhalter
+
+1. **Gleiches Seitenverhältnis wie das echte Bild.** Der Platzhalter reserviert
+   den Platz, damit beim Nachladen nichts springt. Ein Layoutsprung ist
+   messbar und zählt in der technischen Prüfung.
+2. **Er sieht aus wie ein Platzhalter, nicht wie ein Foto.** Fläche, Symbol,
+   Buchstabe oder Name — kein Stockfoto, kein erzeugtes Bild, das ein
+   Produktfoto imitiert. Ein generisches Getränkefoto neben einem konkreten
+   Artikel ist irreführende Werbung nach § 5 UWG, auch wenn es hübsch ist.
+3. **Er trägt eine Bedeutung.** Der erste Buchstabe des Produktnamens ist
+   besser als ein graues Rechteck, weil er die Karten unterscheidbar macht.
+4. **Er ist für Screenreader ein Bild mit Namen** — `role="img"` und
+   `aria-label` mit dem echten Namen, nicht „Platzhalter".
+5. **Er fängt auch den Ladefehler.** Eine tote `image_url` fällt auf denselben
+   Platzhalter zurück, nicht auf ein kaputtes Bildsymbol.
+6. **Kein Skeleton als Dauerzustand.** Ein pulsierendes graues Feld heißt „wird
+   geladen". Wenn nichts kommt, muss es zum Platzhalter werden, sonst wartet
+   der Nutzer auf etwas, das nie erscheint.
+
+### 5b.4 Die vier vorhandenen Produktbilder
+
+`src/assets/produkt-drink.jpg`, `produkt-eis.jpg`, `produkt-kaffee.jpg`,
+`produkt-suesswaren.jpg` sind Kategoriebilder. Sie dürfen als **Stimmungsbild
+einer Kategorie** stehen — als Kopfbild eines Abschnitts, mit Bildunterschrift.
+Sie dürfen **nicht** an der Stelle eines Produktbildes erscheinen, wo der
+Nutzer sie für eine Aufnahme dieses Artikels halten könnte. Dort gehört der
+Platzhalter hin.
+
+## 5c. Das Projekt muss gemeinsam mit dem Backend auf GitHub wandern können
+
+Frontend und Backend sollen als **ein Stand** auf GitHub liegen. Der Weg dahin
+steht in `docs/GITHUB-MIGRATION.md` im Backend-Repository: Dieses Projekt
+bekommt ein eigenes Repository, das Backend-Monorepo zieht es als `git subtree`
+unter `apps/kunden-web/` ein. Die Verbindung richtet Philipp im Dashboard ein.
+
+Deine Aufgabe ist, dass ein Auschecken **ohne Lovable** baut und prüfbar ist:
+
+1. **Keine Zugangsdaten im Quelltext.** Der Supabase-Schlüssel im Browser ist
+   ein *publishable key* und darf dort stehen — der Kommentar in
+   `src/lib/supabase.ts` erklärt das richtig und verbietet den
+   `service_role`-Schlüssel. Serverseitige Geheimnisse
+   (`LOVABLE_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM`, `ADMIN_EMAILS`) kommen
+   aus `process.env`. **Das bleibt so.**
+2. **`.env.example`** mit allen Variablennamen und leeren Werten.
+3. **`README.md` an der Wurzel**: welche Supabase-Instanz
+   (`nnfsyuglkqycwenwxmuw`), welche Bun-Version, wie man baut, wie man testet.
+4. **`bun.lock` bleibt eingecheckt.**
+5. **Prüf den Bau aus einem frischen Klon** — `bun install`, `bun run build`.
+   Was fehlt, gehört ins README.
+6. **Keine Historie umschreiben.** Kein `--force`, kein Rebase auf gepushte
+   Commits, kein Squash. Lovable hängt daran und der Verlauf ginge verloren.
+7. **Nenn im README, was mitwandert.** Der Mailversand läuft über
+   `https://connector-gateway.lovable.dev/resend` und braucht einen
+   `LOVABLE_API_KEY`. Wer die App außerhalb von Lovable betreibt, nimmt diese
+   Abhängigkeit mit. Kein Fehler, aber es muss dokumentiert sein.
+
+Das Backend-Repository ist derzeit **öffentlich**. Schreib nichts in dieses
+Projekt, was das nicht verträgt.
 
 ## 6. Was ausdrücklich **nicht** zu tun ist
 

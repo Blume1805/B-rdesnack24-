@@ -111,6 +111,7 @@ dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 | `93_b2b_gegenprobe.sql` | was der Firmen-Admin auf der eigenen Firma darf — und was bewusst intern bleibt |
 | `94_loeschung.sql` | was mit einem gelöschten Konto noch geschieht |
 | `95_loeschung_gegenprobe.sql` | dieselben Prüfungen gegen ein aktives Konto |
+| `81_weitere_rpc.sql` | die 32 Verwaltungsfunktionen, die in `80` fehlten — DATEV-Export, Finanzbilanz, Dokumentenfreigaben, Maillog, Telemetrie-Schlüssel — samt Gegenprobe mit vorhandener Maillog-Zeile |
 | `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt, dass ein unbeteiligtes Konto unberührt bleibt — und seit S-23/S-24, dass das Änderungsprotokoll die Löschung nicht zurückträgt und die Frist erst mit dem Ende des Vorgangs beginnt |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
@@ -145,11 +146,11 @@ Zu den beiden oben genannten kam am 02.09.2026 eine dritte:
 
 ## Der vollständige Lauf
 
-Elf Skripte, jedes für sich zurückgesetzt (`91_b2b_pruefdaten.sql` ist
+Zwölf Skripte, jedes für sich zurückgesetzt (`91_b2b_pruefdaten.sql` ist
 Datenaufbau, kein Test):
 
 ```
-gruen=187   rot=0   Messung ohne Wertung=118
+gruen=221   rot=0   Messung ohne Wertung=118
 ```
 
 Dreimal hintereinander, jedes Mal dieselbe Zahl. Die 118 ohne Wertung

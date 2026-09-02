@@ -1159,3 +1159,70 @@ Das ist dasselbe Muster wie bei S-20: Was die Tests nicht abfragen,
 melden sie nicht als fehlend. Die Vollständigkeit einer Aufstellung ist
 keine Eigenschaft, die eine Suite prüfen kann — sie muss von außen
 angezweifelt werden.
+
+---
+
+## 19. Nachtrag: 32 Verwaltungsfunktionen, die nie geprüft worden waren
+
+Beim Zusammenstellen des RPC-Vertrags für den Lovable-Auftrag fiel auf, dass
+die Liste in `80_verwaltungs_rpc.sql` **von Hand** entstanden war. Sie deckte
+48 Funktionen ab. Tatsächlich darf `authenticated` deutlich mehr aufrufen —
+darunter Dinge, bei denen man es nicht vermutet:
+
+`datev_export_rows` · `finance_balance_kpis` · `upsert_finance_balance` ·
+`business_customers_csv` · `email_template_save` · `set_machine_slot` ·
+`rotate_provider_secret` · `register_telemetry_provider` ·
+`approve_shareholder` · `email_log_list` · `email_log_detail` ·
+`list_documents` · `request_document_approval` · `decide_document_approval`
+und weitere.
+
+Keine davon war je gegen ein Kundenkonto gelaufen. Der Grund ist derselbe wie
+bei S-23: **Was eine Liste nicht enthält, meldet keine Suite als fehlend.**
+
+### Das Ergebnis
+
+Alle 32 wurden nachgeprüft. **Kein Befund** — jede weist ab oder liefert
+nachweislich nichts. Das neue Skript `81_weitere_rpc.sql` hält den Stand fest;
+zweimal hintereinander 34 grün, 0 rot.
+
+Ein Fall war zunächst rot und lohnt die Erwähnung, weil er zeigt, wie leicht
+man sich selbst täuscht:
+
+**`email_log_stats` gab dem Kundenkonto eine Zeile zurück** — `(0,0,0,0,0,)`.
+Die Zeilenzahl allein liest sich wie ein Treffer. Zwei Fragen waren zu klären:
+
+1. *Sind die Nullen echt oder ist die Tabelle leer?* Sie war leer. Damit war
+   die Messung wertlos. Also erst eine Zeile ins Maillog gelegt, dann erneut
+   gemessen: Wahrheit 1 Zeile, Kunde sieht weiterhin lauter Nullen.
+2. *Woran liegt es?* Die Funktion ist **SECURITY INVOKER**, die Absicherung
+   liegt in der Policy `email_log_read_leitung`
+   (`is_admin() OR is_shareholder()`). Die Bauart ist damit richtig: keine
+   Prüfung im Funktionsrumpf nötig, weil die Zeilen gar nicht erst sichtbar
+   werden.
+
+Die Gegenprobe mit vorhandener Zeile steht jetzt dauerhaft im Skript. Eine
+Null, die niemand gegen eine Wahrheit gehalten hat, ist kein Nachweis.
+
+### Nebenbefund: `is_shareholder()` ist strenger als die Rolle
+
+Das Gesellschafter-Testkonto trägt `profiles.role = 'shareholder'`, aber
+`is_shareholder()` liefert `false`. Der Grund steht in der Funktion: Sie
+verlangt zusätzlich einen **freigegebenen** Eintrag in
+`shareholder_approvals`. Das ist Absicht und die sichere Richtung — die Rolle
+allein öffnet nichts. Drei Policies hängen daran.
+
+Für die Prüfumgebung heißt es allerdings, dass das Konto `G` schwächer ist als
+gedacht: Es prüft die Kundensicht zuverlässig, die Gesellschaftersicht auf
+diesen drei Policies nicht. Wer dort etwas nachweisen will, muss dem Konto
+erst eine Freigabe anlegen.
+
+### Was im Auftrag falsch stand
+
+Der Lovable-Auftrag nannte in § 2.1 eine „vollständige" Liste der für Kunden
+aufrufbaren RPCs. Sie war es nicht — sie entstand aus einer Namenssuche nach
+`my_…` und übersah unter anderem `list_news`, den gesamten Spendenbereich
+(`donation_causes_list`, `vote_donation_cause`, `suggest_donation_cause`,
+`donation_pool_summary`, `donation_rate`, `purchase_donation`),
+`search_products`, `catalog_facts`, `subscription_plans`, die
+Einwilligungsverwaltung und `ki_funktion_freigegeben`. Korrigiert und nach
+Themen geordnet.
