@@ -90,9 +90,11 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | AUTH-003 | Passwort-Reset: Einmaligkeit, Ablauf, Session-Invalidierung | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-004 | Benutzerenumeration `/auth/v1/recover` | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-005 | Schutz vor kompromittierten Passwörtern | ✗ Schalter nicht bedienbar — Feature ab Pro, Organisation auf `free` | 🔴 S-13 ⏸ EXTERN (Tarifentscheidung) |
-| AUTH-006 | Mindestpasswortlänge | Philipp hat am 02.09.2026 auf 10 gestellt; aus dieser Umgebung nicht messbar | 🔴 S-15 ⏸ EXTERN (Nachweis: Screenshot) |
-| AUTH-007 | Passwortwechsel nur nach kürzlicher Anmeldung | Philipp hat am 02.09.2026 eingeschaltet; aus dieser Umgebung nicht messbar | 🔴 S-16 ⏸ EXTERN (Nachweis: Screenshot) |
-| AUTH-008 | Aktuelles Passwort beim Ändern verlangen | Philipp hat am 02.09.2026 eingeschaltet; aus dieser Umgebung nicht messbar | 🔴 S-17 ⏸ EXTERN (Nachweis: Screenshot) |
+| AUTH-006 | Mindestpasswortlänge | ✓ 10 Zeichen, belegt durch Screenshot vom 02.09.2026, 13:40 | 🟢 (S-15 behoben) |
+| AUTH-007 | Passwortwechsel nur nach kürzlicher Anmeldung | ✓ eingeschaltet, belegt durch Screenshot vom 02.09.2026, 13:39 | 🟢 (S-16 behoben) |
+| AUTH-008 | Aktuelles Passwort beim Ändern verlangen | ✓ eingeschaltet, belegt durch Screenshot vom 02.09.2026, 13:39 | 🟢 (S-17 behoben) |
+| AUTH-010 | Doppelte Bestätigung bei Adressänderung (`Secure email change`) | ✓ eingeschaltet, belegt durch Screenshot — damit ist die Annahme aus S-5 bestätigt | 🟢 |
+| AUTH-011 | Zeichenklassen im Passwort serverseitig verlangt | ✓ „Password requirements" steht auf „Select an option" — nicht gesetzt | 🔴 S-22 |
 | AUTH-009 | `config.toml` beschreibt die gehosteten Auth-Einstellungen | ✓ widerlegt (10 gegen 6) | 🔴 S-18 |
 
 ## 6. Speicher, E-Mail, Protokollierung
@@ -117,7 +119,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 11   🟡 GELB: 0   🟢 GRÜN: 47
+🔴 ROT: 9   🟡 GELB: 0   🟢 GRÜN: 51
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -125,16 +127,14 @@ und GELB = 0. Formulierungen wie „erfolgreich implementiert",
 „abgeschlossen" oder „keine weiteren Maßnahmen erforderlich" sind bis
 dahin unzulässig.
 
-Stand am Abend des 02.09.2026: Alle elf roten Zeilen sind entweder eine
+Stand am Abend des 02.09.2026: Alle roten Zeilen sind entweder eine
 **Entscheidung**, ein **fehlendes Mittel** oder ein **Nachweis, den ich
 aus dieser Umgebung nicht führen kann** — keine ist ein offener
 Sicherheitsbefund im Code.
 
 | ID | Warum rot | Was es braucht | Verantwortlich |
 | --- | --- | --- | --- |
-| AUTH-006 / S-15 | Mindestpasswortlänge — von Philipp am 02.09. auf 10 gestellt | ein Screenshot als Nachweis, dann grün | Philipp |
-| AUTH-007 / S-16 | Passwortwechsel nur nach kürzlicher Anmeldung — eingeschaltet | dito | Philipp |
-| AUTH-008 / S-17 | Aktuelles Passwort beim Ändern — eingeschaltet | dito | Philipp |
+| AUTH-011 / S-22 | Keine Zeichenklassen-Anforderung serverseitig — der Client verlangt sie, die API nicht | ein Feld im Dashboard („Password requirements") | Philipp |
 | AUTH-005 / S-13 | Leaked-Password-Schutz | Supabase Pro; kommt vor der Live-Schaltung | Philipp |
 | AUTH-009 / S-18 | `config.toml` beschreibt die gehosteten Auth-Einstellungen nicht | Entscheidung: dokumentieren oder per CLI verwalten | offen |
 | CUST-018 | 15 Tabellen ohne Löschregel — der Löschlauf fasst sie nicht an und nennt sie im Bericht | eine Festlegung je Tabelle | Philipp |

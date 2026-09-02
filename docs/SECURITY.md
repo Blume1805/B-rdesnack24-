@@ -946,3 +946,44 @@ eine unsichtbare Lücke. So bleibt beides sichtbar (CUST-018).
 Der Löschtest ist außerdem **wiederholbar** gemacht: Er räumt zuerst auf,
 statt beim zweiten Lauf an einem Unique-Index zu scheitern. Zweimal
 hintereinander ausgeführt, zweimal 13 grün.
+
+---
+
+## 17. Auth-Einstellungen: der Nachweis (02.09.2026, 13:39/13:40)
+
+Philipp hat die drei Einstellungen gesetzt und den Zustand per Screenshot
+belegt. Aus dieser Umgebung ist die Auth-Konfiguration nicht messbar —
+der Screenshot ist damit der einzige mögliche Nachweis und wird als
+solcher geführt.
+
+| Einstellung | Stand | Befund |
+| --- | --- | --- |
+| Minimum password length | **10** | S-15 behoben |
+| Secure password change | **an** | S-16 behoben |
+| Require current password when updating | **an** | S-17 behoben |
+| Secure email change | **an** | siehe unten |
+
+### Nebenbei bestätigt: die Annahme aus S-5
+
+Die Migration `20260902052115` begründete den E-Mail-Nachlauf damit, dass
+Supabase eine Adressänderung doppelt bestätigt. Diese Angabe stammte aus
+`config.toml`, und `config.toml` beschreibt den lokalen Stack — für das
+gehostete Projekt war sie **unbestätigt**, was in Abschnitt 11
+ausdrücklich als Einschränkung vermerkt wurde.
+
+Der Screenshot zeigt „Secure email change: an". Die Einschränkung ist
+damit aufgehoben: Die Begründung trägt.
+
+### Neu gesehen: S-22
+
+Auf demselben Bildschirm steht **„Password requirements: Select an
+option"** — es ist also keine Zeichenklassen-Anforderung gesetzt. Der
+Client verlangt Groß- und Kleinbuchstabe plus Ziffer oder Sonderzeichen
+(`validators.dart`); die API verlangt nur die zehn Zeichen.
+
+Das ist dieselbe Bauart wie S-15 vor der Korrektur: eine Regel, die nur
+im Client steht. Wer sich direkt gegen die API registriert, umgeht sie.
+Zu setzen im selben Bildschirm, ein Feld.
+
+Ebenfalls abgelesen, ohne Befund: „Email OTP expiration 3600 s",
+„Email OTP length 8 Ziffern".
