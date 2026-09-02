@@ -146,9 +146,121 @@ Stelle, die auseinanderlaufen kann.
 Freigegeben waren Stufe 1 und 2 mit Halt danach. Gebaut wurden alle sechs.
 Das Ergebnis ist überwiegend gut, aber die Absprache galt nicht.
 
-## Noch ungeprüft
+## Nachtrag 02.09.2026, zweiter Prüfgang
 
-* Ob die Tests tatsächlich laufen und grün sind
-* Die Token-Umbenennung in `styles.css` (§ 5.1)
-* Die neuen Routen: Auskunft, Löschung, Nachrichten, KI-Hinweis, Kampagnen
-* Ob die KI-Chips an allen sieben Stellen sitzen
+Der zuvor als „noch ungeprüft" geführte Rest ist abgearbeitet. Drei
+zusätzliche Befunde, davon einer rot.
+
+### 🔴 9. Die einzige echte KI-Funktion ist nicht gekennzeichnet
+
+Gelesen aus `public.ki_register` (Produktion, nur lesend):
+
+| key | ist_ki_system | kennzeichnung_noetig | kennzeichnung_umgesetzt | ampel |
+|---|---|---|---|---|
+| `produktbild_bearbeitung` | **true** | **true** | false | gelb |
+| `challenge_rewards` | false | true | true | gruen |
+| `customer_chatbot` | false | false | true | gruen |
+| `generate_daily_offers` | false | false | true | gruen |
+| `generate_personal_offer` | false | false | true | gruen |
+| `generate_weekly_offers` | false | false | true | gruen |
+| `grant_birthday_offer` | false | false | false | gelb |
+| `loyalty_login_points` | false | false | false | gelb |
+
+`produktbild_bearbeitung` („KI-Bearbeitung von Produktfotos") ist der einzige
+Eintrag mit `ist_ki_system = true`. Alles andere im System ist regelbasiert.
+Genau diese Funktion trägt keine Kennzeichnung:
+
+* `src/components/product-image.tsx` rendert das Bild ohne Hinweis
+* die Liste `SURFACES` in `src/routes/app.ki-hinweis.tsx` führt sieben Flächen,
+  Produktbilder sind nicht darunter
+* der Abschnitt „Was wird eingesetzt?" nennt nur den Empfehlungsgenerator und
+  den Chat-Assistenten
+
+Der Schlüssel liegt in `KI_KEYS` bereits als `productImages` vor, wird aber
+nirgends verwendet.
+
+Abgrenzung: Ob die Bildbearbeitung unter Art. 50 Abs. 2 oder Abs. 4 EU AI Act
+fällt, ist auslegungsbedürftig und hier **nicht entschieden**. Die
+Kennzeichnungspflicht folgt an dieser Stelle nicht aus einer Rechtsauslegung
+von mir, sondern aus dem Register selbst: der Betreiber hat
+`kennzeichnung_noetig = true` gesetzt. Die fachliche Prüfung der Norm bleibt
+offen und liegt beim Betreiber.
+
+Korrektur an den Agenten übermittelt (Nachtrag, Punkt 8).
+
+### 🔴 10. Ein Test schreibt den Fehler aus Befund 1 fest
+
+`src/lib/loyalty.test.ts` prüft `milestoneForTier(1) === {points:500,percent:5}`
+und kommentiert: „`loyalty_bonus_grants.tier` ist die Stufe 1 bis 4". Beides
+ist falsch und stammt aus meinem Auftrag. Der Test war grün und hat den Defekt
+gedeckt — die Suite belegt an dieser Stelle nichts.
+
+Gegenbeleg, `app.grant_loyalty_bonuses` aus der Produktion:
+
+```sql
+foreach v_tier in array app.loyalty_milestones() loop   -- array[500, 1200, 2000, 3000]
+  ...
+  insert into public.loyalty_bonus_grants(customer_id, month_start, tier, offer_id)
+  values (p_customer_id, v_month_start, v_tier, v_offer.id);
+```
+
+`pg_constraint` führt für `loyalty_bonus_grants` keine Check-Constraint, die
+etwas anderes erzwingen würde. Der Funktionsrumpf ist der Beweis.
+
+Lehre für die übrigen sechs Testdateien: sie sind daraufhin durchzusehen, ob
+sie Auftragsannahmen statt Backend-Verhalten absichern.
+
+### 🟡 11. Ein Design-Token weicht ab
+
+`--warning-ink: #8c6104` statt `#8A6100` aus dem Kontrakt. Kein
+Kontrastproblem, aber drei Oberflächen sollen denselben Wert tragen.
+
+## Nachweise, die der zweite Prüfgang erbracht hat
+
+**Design-Tokens 🟢.** `src/styles.css` gegen
+`docs/DESIGN-SYSTEM-EINHEITLICH.md` geprüft, Wert für Wert: Gold `#fdc102`,
+Gold-auf-Hell `#8a6a00`, Ink `#202321`, Hintergrund `#fbf8f4`, Karte
+`#ffffff`, Sekundär/Muted `#f2eee8`, Akzent `#fdf3d6`, Rahmen `#cfc7bb`,
+Rahmen-stark `#8f887e`, Text-gedämpft `#6b6862`, Erfolg `#5c9a3f` /
+`#406c2b`, Gefahr `#b31c1c`, Info `#0066cc`, Radius `0.625rem`,
+`--ease-house: cubic-bezier(0.22, 1, 0.36, 1)` mit 200/350/450/900 ms.
+Einzige Abweichung ist Befund 11.
+
+**Die fünf Routen 🟢.** Alle vorhanden: `src/routes/app.konto.auskunft.tsx`,
+`app.konto.loeschen.tsx`, `app.nachrichten.tsx`, `app.ki-hinweis.tsx`,
+`app.unternehmen.kampagnen.index.tsx` samt `app.unternehmen.kampagnen.$id.tsx`.
+
+**KI-Info-Seite 🟢 für sieben von acht Funktionen.** `SURFACES` führt sieben
+Flächen textlich auf; der Chat-Assistent ist korrekt als regelbasiert
+ausgenommen und trägt bewusst keinen Chip. Der achte Eintrag fehlt — siehe
+Befund 9.
+
+**Chip-Bauteil 🟢.** `src/components/ai-chip.tsx` verlinkt fest auf
+`/app/ki-hinweis`, ist nicht wegklickbar, hat ein `aria-label` und mindestens
+44 px Tipphöhe (`min-h-11`).
+
+**Freigabe-Gate 🟢.** `ki_funktion_freigegeben` gibt nur bei
+`aktiv and ampel = 'gruen'` ein `true` zurück; `useKiEnabled` behandelt
+Fehler und Ladezustand als „nicht freigegeben". Die Fläche selbst wird
+ausgeblendet, nicht bloß ihre Kennzeichnung.
+
+**Chip-Positionen 🔴 unbelegt.** Datei und Zeile je Chip liegen mir nicht
+vor; angefordert.
+
+**Testlauf 🔴 unbelegt.** Sieben Testdateien liegen vor, der Agent nennt 35
+Tests. Ohne Ausgabe mit Testnamen und Zählung ist das eine Zusage, kein
+Nachweis. Befund 10 zeigt, warum die bloße Zahl nichts trägt.
+
+## Folge für den Betreiber
+
+Drei Register-Ampeln stehen auf Gelb: `grant_birthday_offer`,
+`loyalty_login_points`, `produktbild_bearbeitung`. Für angemeldete echte
+Nutzer sind damit drei Flächen dunkel — darunter die vollständige
+Tageslogin-Mechanik. Das ist das gewollte Verhalten des Gates, kein Fehler.
+Die Ampeln gehen auf Grün, sobald die jeweilige Kennzeichnung steht; bei
+`produktbild_bearbeitung` also erst nach Befund 9.
+
+In der Vorschau ist das nicht sichtbar: `useDemoQuery` liefert im Demozugang
+`true` für jede Ampel. Der Vorschaustand zeigt die Freigabelogik daher
+**nicht**. Bestätigung angefordert, dass dieser Zweig ausschließlich im
+Demozugang greift.
