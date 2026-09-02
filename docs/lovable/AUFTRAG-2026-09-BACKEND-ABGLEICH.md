@@ -346,12 +346,53 @@ diesem Auftrag bereitgestellt:
 | `frontend-taste` | Anti-Slop-Ebene. Gegen generische KI-Optik, für Layout-Varianz und maßvolle Bewegung. |
 | `humanizer` | Für **jeden** sichtbaren Text. Die neuen Flächen sind Rechtstexte in Alltagssprache — dort ist aufgeblasene Sprache besonders schädlich. |
 
-Wende sie zusätzlich zu `boerdesnack24-design` an, nicht statt seiner. Die
-Markenfarben und Tokens bleiben, wie sie sind.
+Wende sie zusätzlich zu `boerdesnack24-design` an, nicht statt seiner.
 
-**Bewegung:** Die App hat bereits reichlich Animation. Für die neuen Flächen
-gilt Zurückhaltung — eine Datenauskunft und eine Kontolöschung sind keine Orte
-für Konfetti.
+### 5.1 Einheitliches Design über alle drei Oberflächen
+
+Bördesnack24 hat drei Oberflächen, die dieselbe Marke in drei Dialekten
+aufschreiben: die Gesellschafter-App (Flutter), diese Kunden-App und das
+Partner-Portal. Der verbindliche Vertrag steht in
+**`docs/DESIGN-SYSTEM-EINHEITLICH.md`** im Backend-Repository — lies ihn,
+bevor du eine Farbe, einen Radius oder eine Bewegungsdauer anfasst.
+
+**Diese App ist der Maßstab.** Ihre Tokens, ihre Typo-Skala, ihre
+Bewegungskurve und ihre selbst ausgelieferten Schriften sind die Fassung, an
+der die beiden anderen sich ausrichten. Ändere sie deshalb nur dort, wo dieser
+Auftrag es ausdrücklich verlangt:
+
+1. `--navy` trägt Ink `#202321` — der Name behauptet das Gegenteil seines
+   Werts. Umbenennen in `--ink`, `--navy: var(--ink)` als Verweis stehen
+   lassen, damit nichts auf einen Schlag bricht.
+2. `--gradient-navy` und `--gradient-gold` sind keine Verläufe
+   (`linear-gradient(#202321, #202321)`). Zu Flächen auflösen.
+3. `--gold-ink` → `--gold-on-light`, `--success-ink` → `--success-on-light`
+   (alte Namen als Verweis). Diese Rollennamen gelten künftig in allen drei
+   Oberflächen; erst dadurch kann eine Komponente von einem Projekt ins
+   andere wandern.
+4. `warning` und `info` fehlen hier ganz, die beiden anderen Oberflächen
+   haben sie. Ergänzen: Fläche `#E8A206` / Text auf Hell `#8A6100`;
+   Info `#0066CC`.
+
+**Zwei Farbregeln, die dabei nicht verletzt werden dürfen:** Gold trägt nur
+auf Ink — als Text auf Cream gilt `#8A6A00`. Und eine goldene Fläche pro
+Bildschirm; zwei heben sich gegenseitig auf.
+
+### 5.2 Der Unternehmensbereich hat ein anderes Register
+
+`/app/unternehmen/*` gehört zur selben App, aber nicht zur selben Lautstärke.
+Der Privatkundenbereich darf warm sein: große Bilder, animierte Zahlen, Gold
+als Fläche. Der Unternehmensbereich ist Zahlenarbeit — ruhiger, dichter,
+tabellarisch, Beträge grundsätzlich mit Tabellenziffern (`type-num`), wenig
+Bewegung.
+
+Gleiche Farben, gleiche Schriften, gleiche Radien, gleiche Kurve — andere
+Betonung. Ein Firmenkunde will Vertragsstatus und Zahlen in wenigen Blicken,
+keine Produktinszenierung.
+
+**Bewegung allgemein:** Die App hat bereits reichlich Animation. Für die neuen
+Flächen aus § 4 gilt Zurückhaltung — eine Datenauskunft und eine Kontolöschung
+sind keine Orte für Konfetti.
 
 ---
 
