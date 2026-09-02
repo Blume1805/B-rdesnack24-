@@ -365,6 +365,39 @@ danach stimmen alle sechs Fingerabdrücke wieder überein.
 Der eigentliche Punkt: Die Migration sah in beiden Umgebungen identisch
 aus. Sichtbar wurde der Unterschied allein im Vergleich der Wirkung.
 
+### Nachzug: zwei Meldungen, die erst die Korrektur erzeugt hat
+
+Der Supabase-Advisor zeigte nach dem Ausrollen zwei neue Punkte — beide
+aus den eigenen Änderungen. Eine Korrektur, die neue Befunde erzeugt, ist
+erst fertig, wenn auch die weg sind.
+
+* `app.klick_obergrenze_je_konto()` hatte keinen festen `search_path`.
+  Die Funktion ist eine Konstante, das Risiko gering — aber R-19 hat
+  genau diese Klasse im August bereinigt, und eine neue Funktion darf sie
+  nicht wieder aufmachen. Behoben mit leerem `search_path`.
+* `product_rating_summary` läuft jetzt mit Eigentümerrechten, was der
+  Advisor als **ERROR** meldet. **Diese eine Meldung bleibt bewusst
+  stehen.** Begründung: Die Sicht gibt ausschließlich `product_id`,
+  Durchschnitt und Anzahl heraus — kein personenbezogenes Feld, keine
+  Konto-ID. Genau deshalb *darf* sie über alle Zeilen rechnen. Liefe sie
+  mit Aufruferrechten, sähe jeder Kunde seine eigene Bewertung als
+  „Durchschnitt": eine falsche Zahl auf der Produktseite, ohne
+  Fehlermeldung. Das wiegt schwerer als die Warnung.
+  Entzogen wurden dafür die Schreibrechte, die Supabase einer Sicht
+  automatisch mitgibt — auf einer Sicht mit Eigentümerrechten wären sie
+  der gefährliche Teil.
+
+Verbleibende Advisor-Meldungen (141), alle geprüft und eingeordnet:
+
+| Meldung | Anzahl | Einordnung |
+| --- | --- | --- |
+| `authenticated_security_definer_function_executable` | 129 | Bauart des Systems: jede Verwaltungs-RPC ist SECURITY DEFINER mit eigener Berechtigungsprüfung. Alle 48 aufrufbaren wurden gegen ein Kundenkonto durchgespielt und weisen ab. |
+| `rls_enabled_no_policy` | 5 | Absicht: `customer_card`, `customer_login_days`, `customer_challenge_awards`, `email_unsubscribe_token`, `advertising_redirect_actors` sind ohne Policy und ohne Rechte — erreichbar nur über geprüfte RPCs. Der stärkste Schutz im System. |
+| `anon_security_definer_function_executable` | 4 | Die vier bewusst öffentlichen Endpunkte: Abmeldelink, Freigabelink (seit S-1 gehärtet), KI-Register, Preisliste. |
+| `security_definer_view` | 1 | Die begründete Ausnahme oben. |
+| `extension_in_public` | 1 | `pg_net`. Bemängelt wird der Registrierungseintrag; die zwölf Funktionen liegen längst im eigenen Schema `net`. Ein Verschieben bräche die Aufrufe in `legal_text_uebernahme_funktionen` und den Cron-Jobs — der Hinweis wiegt weniger als der Schaden. |
+| `auth_leaked_password_protection` | 1 | **Offen (S-13).** Nur im Dashboard setzbar, nicht per SQL. Verantwortlich: Philipp. |
+
 ### Was die Korrekturen ausdrücklich **nicht** leisten
 
 * **Der Klickzähler kennt anonyme Aufrufe nicht.** Wer den
