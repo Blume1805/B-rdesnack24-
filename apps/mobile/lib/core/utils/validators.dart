@@ -13,7 +13,14 @@ abstract final class Validators {
   ///   - mindestens 10 Zeichen
   ///   - je ein Groß-/Kleinbuchstabe UND
   ///   - mindestens eine Ziffer ODER ein Sonderzeichen.
-  /// Serverseitig ergänzend geprüft (Supabase-Auth-Mindestlänge).
+  /// ACHTUNG — diese Policy gilt nur hier im Client. Die Auth-Einstellung
+  /// des gehosteten Projekts stand am 02.09.2026 auf **6 Zeichen**
+  /// (Befund S-15), nicht auf den 10 aus `supabase/config.toml`; und der
+  /// Abgleich gegen geleakte Passwörter ist nicht aktivierbar, weil er
+  /// Supabase Pro voraussetzt (S-13). Ein Registrierungsversuch direkt
+  /// gegen die API umgeht diese Prüfung deshalb vollständig.
+  /// Der Kommentar „serverseitig ergänzend geprüft" stand hier früher
+  /// ohne Nachweis — er trug weiter, als er durfte.
   static String? password(String? value, {int min = 10}) {
     final v = value ?? '';
     if (v.isEmpty) return 'required';

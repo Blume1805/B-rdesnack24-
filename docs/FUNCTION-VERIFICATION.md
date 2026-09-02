@@ -68,7 +68,9 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | ID | Funktion | Test | Negativ | Security | Status |
 | --- | --- | --- | --- | --- | --- |
 | API-001 | `business_locations_list` — Firma A gegen B | ✓ | ✓ | ✓ | 🟢 (R-11) |
-| API-002 | übrige 20 B2B-RPCs gegen zweiten Firmenkunden | ✗ | ✗ | ✗ | 🔴 |
+| API-002 | übrige B2B- und Werbe-RPCs gegen zweiten Firmenkunden | ✓ | ✓ | ✓ | 🟢 (33 Prüfungen, `docs/SECURITY.md` Abschnitt 12) |
+| API-004 | Rechteausweitung innerhalb eines Mandanten (Mitglied → Admin) | ✓ | ✓ | ✓ | 🟢 |
+| API-005 | Einladung mit fremdem Rohtoken annehmen | ✓ | ✓ | ✓ | 🟢 |
 | API-003 | `my_businesses` / `my_advertising_*` — Mitgliedschaftsbindung | ✓ | ✓ | ✓ | 🟢 |
 
 ## 5. Auth
@@ -105,7 +107,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 14   🟡 GELB: 0   🟢 GRÜN: 35
+🔴 ROT: 13   🟡 GELB: 0   🟢 GRÜN: 38
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -137,7 +139,6 @@ Tarifentscheidung und eine offene Rechtsfrage:
 | AUTH-003 | Passwort-Reset nicht durchspielbar | dito + Testpostfach | Philipp |
 | AUTH-004 | Enumeration nicht prüfbar | dito | Philipp |
 | AUTH-005 | Leaked-Password-Schutz nicht aktivierbar | Supabase Pro (Organisation auf `free`) — Tarifentscheidung | Philipp |
-| API-002 | 20 B2B-RPCs gegen zweiten Firmenkunden | zweiter Firmenkunde mit Mitgliedschaft in den Prüfdaten | offen |
 | MAIL-004 | Resend-Zustellung nicht belegt | Testpostfach in `projekt-konfig.md` | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |
 | DB-003 | Migrationen nicht von Null wiederholbar | — (Befund S-14, bewusst offen geführt) | offen |

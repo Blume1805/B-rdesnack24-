@@ -93,6 +93,9 @@ Bauplan.** Für die Verfahrensdokumentation ist das der wichtigere Satz.
 | `70_vertikal.sql` | Kunde gegen Gesellschafterdaten und -funktionen |
 | `80_verwaltungs_rpc.sql` | alle 48 Verwaltungs-RPCs, die `authenticated` aufrufen darf |
 | `90_nachweis_korrekturen.sql` | die Korrekturen S-1 bis S-12, jede mit Gegenprobe |
+| `91_b2b_pruefdaten.sql` | zwei Firmenkunden mit spiegelbildlichem Bestand |
+| `92_b2b_matrix.sql` | Firma A gegen Firma B über alle B2B- und Werbe-RPCs |
+| `93_b2b_gegenprobe.sql` | was der Firmen-Admin auf der eigenen Firma darf — und was bewusst intern bleibt |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

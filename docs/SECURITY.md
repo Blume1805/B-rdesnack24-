@@ -493,3 +493,94 @@ Mindestpasswortlänge 10 gegen tatsächlich 6 ist der Beleg. Solange die
 Einstellungen nur im Dashboard leben, beschreibt das Repository ein
 System, das es nicht gibt. Das ist derselbe Befund wie S-14, nur an
 einer anderen Stelle.
+
+---
+
+## 12. Protokoll — Firma A gegen Firma B (API-002), 02.09.2026
+
+Die letzte rote Zeile ohne fehlendes Mittel. Zwei Firmenkunden mit
+spiegelbildlichem Bestand in der Prüfumgebung: **Firma Eins GmbH** mit
+Admin und einfachem Mitglied, **Firma Zwei GmbH** mit Admin, dazu je
+Standort, Kampagne, Werbemittel, Werbevertrag, Abrechnungslauf, Budget,
+Einladung und Lead. Der Admin von Firma Eins ist der Angreifer.
+
+**33 Prüfungen, alle grün.** Jeder Schreibversuch mit anschließendem
+Lesen des gespeicherten Zustands.
+
+### Lesen mit fremder Firmen-ID
+
+| Funktion | Ergebnis |
+| --- | --- |
+| `business_dashboard` | `42501` |
+| `business_locations_list` | `42501` |
+| `business_statement` | `42501` |
+| `business_invoice_runs_list` | `42501` |
+| `advertising_campaign_report` | `42501` |
+
+### Schreiben mit fremder ID — Zustand danach geprüft
+
+| Angriff | Ergebnis | Gespeicherter Zustand |
+| --- | --- | --- |
+| Firmennamen überschreiben | `42501` | „Firma Zwei GmbH" |
+| Fremde Firma einladen lassen | `42501` | 1 Einladung, unverändert |
+| **Fremden Admin absetzen** (`business_member_set` → `removed`) | `42501` | weiterhin `admin/active` |
+| Fremdes Budget auf 999.999 setzen | `42501` | weiterhin 200,00 |
+| Fremder Firma den Standort entziehen | `42501` | Zuordnung bleibt |
+| Fremde Einladung widerrufen | `42501` | bleibt offen |
+| Abrechnung für fremde Firma anfordern | `42501` | — |
+| **Fremden Abrechnungslauf freigeben** | `42501` | Status `angefordert` |
+| Kampagne unter fremder Firma anlegen | `42501` | 1 Kampagne bleibt |
+| **Fremde Kampagne stoppen** | `42501` | bleibt `active` |
+| Werbemittel in fremde Kampagne laden | `42501` | 1 Werbemittel bleibt |
+| **Eigenes Werbemittel selbst freigeben** | `42501` | bleibt `pending_review` |
+| **Fremden Werbevertrag kündigen** | `42501` | bleibt `aktiv` |
+| Fremdes Motiv freigeben | `42501` | — |
+| Coupon-Sponsoring an fremder Kampagne | `42501` | — |
+
+### Zwei Angriffe, die über die Firmengrenze hinausgehen
+
+| Angriff | Ergebnis |
+| --- | --- |
+| **Fremde Einladung mit dem Rohtoken annehmen** (`business_invitation_accept('geheim-f2')`, Einladung war an `neu@firma-zwei.invalid` adressiert) | `42501`, keine Mitgliedschaft entstanden |
+| **Einfaches Mitglied macht sich selbst zum Admin** der eigenen Firma | `42501`, bleibt `member` |
+| Einfaches Mitglied lädt jemanden ein | `42501` |
+
+Der zweite Fall ist der, den man leicht übersieht: Rechteausweitung
+findet nicht nur zwischen Mandanten statt, sondern auch **innerhalb**
+eines Mandanten.
+
+### Sichtbarkeit
+
+`my_businesses()`, `my_advertising_campaigns()` und
+`my_advertising_contracts()` liefern dem Admin von Firma Eins
+ausschließlich Firma Eins — der Werbevertrag von Firma Zwei taucht nicht
+auf, obwohl er an einer Fläche hängt, die im Bestand von Firma Eins
+sichtbar ist.
+
+### Das Rollenmodell, das die Gegenprobe sichtbar gemacht hat
+
+Zwei meiner Gegenproben schlugen zunächst fehl: Der Admin von Firma Eins
+konnte weder die eigenen Stammdaten ändern noch die eigene Kampagne
+pausieren. **Nicht die Funktionen waren falsch, sondern meine
+Erwartung.** Der Unternehmensbereich hat zwei Stufen:
+
+| Stufe | Funktionen | Prüfung |
+| --- | --- | --- |
+| **mitgliedschaftsgebunden** — der Firmen-Admin darf | `business_dashboard`, `business_locations_list`, `business_statement`, `business_invoice_runs_list`, `business_invoice_request`, `business_invite`, `business_member_set`, `business_budget_set`, `business_location_set` | `app.is_business_member(…, 'admin')` oder intern |
+| **rein intern** — nur Bördesnack24 | `business_update`, `advertising_campaign_set/_status`, `advertising_contract_set/_status`, `advertising_creative_review`, `advertising_motif_approve` | `is_admin()` oder `businesses.manage` / `advertising.manage` |
+
+Beide Stufen sind mit Gegenprobe belegt: Der Firmen-Admin kann auf der
+eigenen Firma einladen und Budgets setzen; der Gesellschafter kann
+Stammdaten ändern und Kampagnen pausieren; der Firmen-Admin kann es
+nicht — und das ist Absicht, kein Fehler.
+
+### Eine Beobachtung ohne Sicherheitsbezug
+
+Weil `business_update` rein intern ist, kann ein Firmenkunde **seine
+eigene Rechnungsanschrift nicht korrigieren**. Auf einer Rechnung ist die
+vollständige Anschrift des Leistungsempfängers eine Pflichtangabe
+(§ 14 Abs. 4 UStG); ist sie falsch, kostet das den Kunden den
+Vorsteuerabzug. Das ist kein Sicherheitsbefund und wird hier nicht als
+solcher geführt — aber es ist eine Entscheidung, die bewusst getroffen
+sein sollte: entweder ein Selbstpflege-Weg für Anschriftsfelder, oder
+ein dokumentierter Prozess, über den der Kunde eine Änderung meldet.
