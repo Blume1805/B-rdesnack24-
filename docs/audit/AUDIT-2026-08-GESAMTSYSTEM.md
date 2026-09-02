@@ -1487,3 +1487,98 @@ Standard zu verlassen.
 | grün geprüft (Frontend, Flutter-Tests) | 0 | **93 Unit/Widget** |
 | Rate Limiting `/auth/v1` | offen | **offen (nicht erreichbar)** |
 | Firma-A-gegen-B, alle B2B-Funktionen | offen | teilweise (Standortliste, R-11) |
+
+## 29. Security-Regression über den gesamten Code (02.09.2026)
+
+Auftrag: „Prüfe den Code" unter `boerdesnack24-security-regression` und
+`boerdesnack24-verify`. Ergebnis vollständig in `/docs/SECURITY.md`,
+Matrix in `/docs/FUNCTION-VERIFICATION.md`, Skripte in
+`scripts/pruefumgebung/`.
+
+### 29.1 Der eigentliche Fortschritt: Nachweise sind jetzt möglich
+
+Bis zum 01.09. war jede Schreib- und Löschprüfung unbelegbar. Die
+Prüfskills verlangen ausgeführte Nachweise **und** verbieten Tests gegen
+die Produktion; ohne dritte Umgebung ist beides zusammen unerfüllbar,
+und genau daran hingen die offenen Punkte der Kapitel 13 und 25.
+
+Aufgelöst durch eine lokale Nachbildung aus den 185 Migrationen dieses
+Repositories. Ihre Gleichheit mit der Produktion ist gemessen, nicht
+behauptet: 111 Tabellen, 186 Policies, 1568 Tabellenrechte und die
+Ausführungsrechte für `anon`, `authenticated` und `service_role` stimmen
+**MD5-identisch** überein. Aus der Produktion wurden nur Metadaten
+gelesen, kein Datensatz und kein Schreibzugriff.
+
+Damit sind Kunde A, Kunde B, ein Gesellschafter und ein
+Minderjährigen-Konto als echte Testkonten vorhanden — die Zeile
+„Testkonten: TODO" aus `projekt-konfig.md` ist für die Datenbankebene
+geschlossen.
+
+### 29.2 Zählstand
+
+**74 Tests grün, 3 rot, 2 nicht aussagekräftig.** Dazu drei Befunde aus
+dem Lesedurchlauf über alle 111 Tabellen und 93 grüne Flutter-Tests.
+
+Was **hält**: die Isolation zwischen Kunden. A kann Daten von B nicht
+lesen, nicht ändern, nicht löschen und nichts unter B's ID anlegen —
+je mit anschließendem Lesen des gespeicherten Zustands, nicht mit einem
+Statuscode. Die Gegenprobe auf eigene Daten gelingt, der Test verbietet
+also nicht einfach alles. 47 der 48 Verwaltungs-RPCs weisen ein
+Kundenkonto ab. Preis und Punktestand sind serverseitig.
+
+Was **nicht hält**: die Trennung zwischen „angemeldet" und „berechtigt"
+bei betrieblichen Daten — und die Altersschranke.
+
+### 29.3 Die zwei Befunde, die vor dem Start weg müssen
+
+**S-2 — Einkaufspreise stehen jedem angemeldeten Konto offen.** Die
+Policy `products_read` prüft nur `deleted_at is null`. Als Kunde A
+gelesen: „Arizona Eistee Pfirsich = EK 0,87 / VK 1,8487", 61 Artikel.
+Die Marge jedes Artikels ist damit öffentlich, sobald sich jemand
+registriert — und die Registrierung steht offen. Die Flutter-App fragt
+die Spalte nirgends ab; das ändert nichts, denn geschützt wird der
+Endpunkt, nicht die Oberfläche.
+
+**S-6 — die Volljährigkeit bestimmt der Client.** `choose_subscription_plan`
+prüft ausschließlich das übergebene `p_age_consent`. Das gespeicherte
+`birth_date` wird nie gelesen. Ein Konto mit Geburtsdatum 05.05.2012 hat
+im Test das Monatsabo zu 99 Cent abgeschlossen. Derzeit trägt kein
+einziges Profil ein Geburtsdatum — die Prüfung könnte also nicht einmal
+greifen, wenn sie eingebaut wäre. Genau der Fall, den der Legal-Skill
+benennt: ein Häkchen ist keine Umsetzung, sondern eine Anzeige.
+
+### 29.4 Kein meldepflichtiger Datenschutzvorfall
+
+S-4 (`product_ratings` samt `customer_id` für alle Angemeldeten lesbar)
+ist ein möglicher Fremdzugriff auf personenbezogene Daten und löst die
+Bewertung nach Art. 33/34 DSGVO aus. In der Produktion enthält die
+Tabelle **0 Zeilen**, es gibt zwei Kundenkonten, beide aus dem eigenen
+Haus. Ein Zugriff Dritter konnte nicht stattfinden; eine Meldung ist
+nicht veranlasst. Die Bewertung wird dokumentiert, weil die
+Dokumentationspflicht unabhängig vom Ergebnis besteht — und sie gilt nur,
+solange die Tabelle leer ist.
+
+### 29.5 Warum hier nichts repariert wurde
+
+Alle Befunde sind K3 (RLS, Rollen, personenbezogene und
+buchführungsrelevante Daten). Der Auftrag lautete „prüfen"; Regel 5 der
+absoluten Regeln verlangt vor solchen Eingriffen die ausdrückliche
+Freigabe. Die Korrekturen sind klein und liegen fachlich fest — sie
+brauchen ein Ja, keinen Entwurf:
+
+1. `products`: `cost_price_net` aus der Kundensicht nehmen (Sicht oder
+   Spaltenrechte), Schreibrecht bleibt bei `inventory.edit`.
+2. `choose_subscription_plan`: gegen `profiles.birth_date` prüfen und das
+   Geburtsdatum bei der Registrierung verlangen, wenn ein Abo möglich sein soll.
+3. `machine_sales_daily`, `inventory`: Lesen auf interne Rollen begrenzen.
+4. `product_ratings`: Rohtabelle schließen, `product_rating_summary` liefern.
+5. `profiles`: `email` in `app.guard_profile_update` aufnehmen.
+6. `advertising_redirect_count`: Frequenzbegrenzung je Konto und Tag.
+7. `purchases`, `purchase_items`, `invoices`: Änderungsprotokoll ergänzen.
+8. Kleinkram: Bucket-Grenzen, `permissions`/`roles` schließen,
+   `auth_has_permission` ohne fremde UID, Leaked-Password-Schutz an.
+
+Jede dieser Änderungen zieht nach der Umsetzung einen erneuten Lauf der
+Skripte in `scripts/pruefumgebung/` nach sich — die Fingerabdrücke sagen
+dabei zuerst, ob die Prüfumgebung überhaupt noch der Produktion
+entspricht.
