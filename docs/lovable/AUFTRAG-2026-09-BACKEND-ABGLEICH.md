@@ -396,6 +396,131 @@ sind keine Orte für Konfetti.
 
 ---
 
+### 5.3 Enterprise heißt nicht brav
+
+Diese App soll wie ein fertiges Produkt wirken, nicht wie ein Prototyp mit
+Markenfarben. Der Maßstab sind Apple Wallet, Revolut oder Too Good To Go —
+nicht die nächstbeste Automaten-App.
+
+Was das konkret ausschließt:
+
+* **Keine gleichförmige Kartenwand.** Wenn jeder Abschnitt dieselbe
+  abgerundete Karte mit Icon links und Pfeil rechts ist, sieht die App aus
+  wie aus dem Baukasten. Wechsle die Bausteine: Trennlinien-Liste
+  (`hairline-list`) für Aufzählungen, Vollflächen-Band (`band-ink`) als
+  Kapitelmarke, Karte nur dort, wo etwas wirklich für sich steht.
+* **Keine dekorativen Icons als Platzhalter.** Ein schwebendes Symbol neben
+  einer Überschrift trägt nichts. Die App hat `animate-float-slow` bereits
+  bewusst stillgelegt — halte es so.
+* **Keine drei gleich lauten Elemente nebeneinander.** Pro Bildschirm eine
+  Sache, die zuerst gelesen wird. Eine goldene Fläche, nicht drei.
+* **Keine Fülltexte.** „Entdecke unsere vielfältige Auswahl an
+  hochwertigen Produkten" sagt nichts. Wenn ein Satz gestrichen werden kann,
+  ohne dass Information verloren geht, gehört er gestrichen. Dafür ist
+  `humanizer` da.
+
+Dichte ist kein Gegensatz zu Qualität: Der Unternehmensbereich darf ruhig und
+tabellarisch sein und trotzdem sorgfältig gebaut — gleiche Ausrichtung,
+Tabellenziffern, echte Leerzustände, klare Zustandsworte.
+
+### 5.4 Die drei Qualitäts-Skills
+
+`impeccable` (Modus **Operate** — der Besucher erledigt eine Aufgabe;
+Scanbarkeit und Verlässlichkeit vor Ausdruck; für die neuen Flächen
+zusätzlich `harden`: Fehler-, Leer- und Randzustände), `frontend-taste` gegen
+generische Optik, `humanizer` für jeden sichtbaren Text.
+
+---
+
+## 5a. Kennzeichnungspflicht nach Art. 50 EU AI Act — Pflicht, nicht Kür
+
+Das ist eine **stehende Regel des Projekts**, keine Anforderung dieses
+Auftrags allein. Sie steht in `CLAUDE.md` des Backend-Repositories und gilt
+für jede Fläche im Kundenbereich, deren Inhalt **algorithmisch, regelbasiert
+oder KI-basiert erzeugt oder ausgewählt** wird.
+
+Die Flutter-App setzt das bereits um (`core/widgets/design_system/ai_badge.dart`,
+`features/customer/presentation/screens/ai_info_screen.dart`). **Im Web fehlt
+es vollständig.** Das ist nachzuholen.
+
+### Der Chip
+
+Ein sichtbarer, antippbarer Chip neben dem Abschnitts-Titel — Gold auf Ink
+mit Ink-Rand, Funkel-Symbol, Text `KI`, dahinter ein Info-Zeichen. In der
+kompakten Form (`dense`) 10 px Schrift, sonst 11 px. Er öffnet die Info-Seite
+aus § 5a.3. Er wird nicht weggeklickt und nicht in eine Fußzeile verschoben.
+
+### 5a.1 Wo der Chip hingehört
+
+| Fläche | Route | Warum |
+|---|---|---|
+| Persönliche Gutscheine | `/app/bonus/gutscheine` | `personal_offers` entsteht regelbasiert aus Kaufhistorie, Kategorie-Vorlieben und Punktestand |
+| Angebote auf der Startseite | `/app` | dieselbe Quelle |
+| „Empfohlene Produkte", „Beliebteste Snacks/Getränke" | `/app` | dynamisch gewählte Produktkombination |
+| Bonusstufen, Abzeichen, Aufgaben | `/app/bonus` | `my_gamification_status` wählt Stufe, Abzeichen und Aufgaben regelbasiert |
+| Tages-Login-Belohnung | Overlay | regelbasierte Vergabe |
+| Werbe-Coupons mit Sponsorenplatzierung | wo sie erscheinen | fremde Kampagne, algorithmisch ausgespielt — zusätzlich zur Werbekennzeichnung |
+| Geburtstags- und Jubiläumsgutschein | wo er erscheint | `grant_birthday_offer`, regelbasiert |
+
+### 5a.2 Wo der Chip ausdrücklich **nicht** hingehört
+
+**Der Chat-Assistent** (`src/components/chat-assistant.tsx`) trägt das Label
+**„Automatischer Chat-Assistent"** — **nicht** „KI". Er ist ein regelbasierter
+Frage-Antwort-Bot ohne generatives Modell und damit kein AI-System im Sinne
+von Art. 3 EU AI Act. Ihn als KI zu kennzeichnen wäre eine falsche Angabe in
+die andere Richtung.
+
+Sollte später ein Sprachmodell dahinterkommen, gilt dasselbe Prinzip
+umgekehrt: dann wird daraus die KI-Kennzeichnung.
+
+Ebenfalls kein Chip: reine Datenanzeigen ohne Auswahl — Kontoauszug,
+Rechnungsliste, Bestellhistorie, Produktdetailseite eines vom Nutzer selbst
+gewählten Artikels.
+
+### 5a.3 Die Info-Seite
+
+Jeder Chip führt dorthin. Inhaltlich die Web-Entsprechung von
+`AiInfoScreen`, mit diesen Abschnitten:
+
+* **Was wird eingesetzt?** — ein regelbasierter Empfehlungs- und
+  Angebotsgenerator; der Chat-Assistent als regelbasierter Bot ohne
+  generatives Modell.
+* **Wozu?** — bessere Sichtbarkeit passender Angebote. Vorschläge sind
+  Empfehlungen, keine Zusagen.
+* **Welche Daten fließen ein?** — Kaufhistorie, Kategorie-Vorlieben,
+  Punktestand. Keine Weitergabe an Dritte zu Werbezwecken. Keine
+  automatisierte Einzelentscheidung mit rechtlicher Wirkung im Sinne von
+  Art. 22 DSGVO.
+* **Widerspruch und Opt-out** — wie man die personalisierte Anzeige abstellt
+  und was dann bleibt.
+* **Kennzeichnung im Kundenbereich** — dass dieser Chip überall dort steht,
+  und dass der Chat-Assistent bewusst anders heißt.
+* **Beschwerde** — Aufsichtsbehörde benennen (BfDI beziehungsweise für
+  Sachsen-Anhalt die Landesbeauftragte für den Datenschutz).
+
+**Die Regel, die dabei am leichtesten vergessen wird:** Kommt später eine
+weitere algorithmisch erzeugte Fläche hinzu, wird sie **auch textlich** in
+„Was wird eingesetzt?" ergänzt. Ein Chip ohne Eintrag auf der Info-Seite
+macht die Seite unvollständig.
+
+### 5a.4 Bilder
+
+Jedes Bild, das **du** erzeugst, wird als erzeugt gekennzeichnet — sichtbar
+an der Stelle, an der es steht, nicht nur in den Metadaten.
+
+Für die vorhandenen Bilder (`hero-genuss.jpg`, `keyvisual.png`,
+`produkt-*.jpg`, `charity-spenden-neu.png`,
+`kunden-werben-kunden-neu.png`) sagen die Metadaten nichts über die Herkunft.
+Kläre das nicht selbst — schreib in deinen Bericht, welche Bilder wo
+verwendet werden, damit Philipp die Herkunft bestätigen kann.
+
+Unabhängig vom AI Act gilt für Produktbilder eine schärfere Grenze: Ein
+erzeugtes Bild darf nicht als Aufnahme des tatsächlichen Artikels erscheinen.
+Weicht die Darstellung vom echten Produkt ab, ist das irreführende Werbung
+nach § 5 UWG — unabhängig davon, ob ein KI-Hinweis daneben steht. Im Zweifel:
+das erzeugte Bild als Stimmungsbild einsetzen, das echte Produktfoto für die
+Produktseite.
+
 ## 6. Was ausdrücklich **nicht** zu tun ist
 
 * Keine Datenbankänderungen, keine Migrationen, keine neuen Tabellen, kein

@@ -213,7 +213,29 @@ Zustand nie nur über Farbe: „Ausverkauft" braucht ein Wort, nicht nur ein
 rotes Feld. Mindestens 44 × 44 px Tippfläche, sichtbarer Fokusring auf jedem
 Bedienelement.
 
-### 5.4 Die drei Qualitäts-Skills
+### 5.4 Enterprise heißt nicht brav
+
+Dicht ist nicht dasselbe wie öde. Diese App wird täglich benutzt — von
+Menschen, die schnell etwas finden und sicher etwas auslösen müssen. Das
+verlangt mehr Sorgfalt als ein Schaufenster, nicht weniger.
+
+Was das ausschließt:
+
+* **Keine gleichförmige Kartenwand.** Wenn jeder Abschnitt dieselbe Karte mit
+  Icon links und Pfeil rechts ist, sieht die App aus wie aus dem Baukasten.
+  Wechsle die Bausteine: Trennlinien-Liste für Aufzählungen, Tabelle für
+  Vergleichbares, Karte nur, wo etwas für sich steht.
+* **Keine Kennzahl ohne Bezug.** „2.945,23 €" allein ist eine Zahl. Mit
+  Zeitraum, Vergleichswert und Einheit ist es eine Aussage.
+* **Keine Tabelle ohne Sortierung, Filter und Leerzustand.** Eine leere
+  Tabelle mit Kopfzeile ist kein Ergebnis, sondern eine offene Frage.
+* **Keine Fülltexte.** Wenn ein Satz gestrichen werden kann, ohne dass
+  Information verloren geht, gehört er gestrichen. Dafür ist `humanizer` da.
+
+Zierbewegung entfällt — aber Zustandswechsel dürfen weich sein: eine Zeile,
+die sich beim Speichern kurz hervorhebt, ist Rückmeldung, keine Dekoration.
+
+### 5.5 Die drei Qualitäts-Skills
 
 `impeccable` (Modus **Operate** — der Besucher erledigt eine Aufgabe;
 Scanbarkeit und Verlässlichkeit vor Ausdruck), `frontend-taste` gegen
@@ -221,6 +243,35 @@ generische Optik, `humanizer` für jeden sichtbaren Text. Zusätzlich zu
 `boerdesnack24-design`, nicht statt seiner.
 
 ---
+
+
+---
+
+## 5a. EU AI Act — was diese App dabei zu leisten hat
+
+Die Kennzeichnungspflicht aus Art. 50 EU AI Act trifft den **Kundenbereich**;
+die Regel dazu steht in `CLAUDE.md` des Backend-Repositories. Diese App ist
+kein Kundenbereich — sie ist aber die Stelle, an der die gekennzeichneten
+Inhalte **entstehen und freigegeben werden**. Daraus folgen drei Pflichten:
+
+1. **Herkunft sichtbar machen.** Wo eine Ansicht Inhalte zeigt, die im
+   Kundenbereich mit dem KI-Chip erscheinen — persönliche Angebote,
+   Werbecoupons, Empfehlungen —, wird das auch hier benannt. Wer freigibt,
+   muss wissen, was er freigibt.
+2. **Bei der Freigabe von Kampagnenmaterial** (`advertising_creative_review`,
+   `advertising_motif_approve`) muss erfasst und angezeigt werden, ob das
+   Motiv erzeugt wurde. Eine Freigabe ohne diese Angabe ist eine Freigabe ins
+   Blinde.
+3. **Kein neuer algorithmischer Ausspielweg ohne Kennzeichnung.** Legst du
+   eine Funktion an, die dem Kunden künftig etwas regelbasiert oder
+   KI-gestützt vorschlägt, gehört der Chip im Kundenbereich dazu **und** der
+   Eintrag auf dessen Info-Seite. Schreib es in deinen Bericht, wenn du so
+   etwas anlegst.
+
+**Für Bilder, die du selbst erzeugst,** gilt dasselbe wie in der Kunden-App:
+sichtbar als erzeugt kennzeichnen. Und schärfer als der AI Act wirkt hier
+§ 5 UWG: Ein erzeugtes Bild darf nicht als Aufnahme des tatsächlichen
+Artikels erscheinen.
 
 ## 6. Reihenfolge — nicht alles auf einmal
 
