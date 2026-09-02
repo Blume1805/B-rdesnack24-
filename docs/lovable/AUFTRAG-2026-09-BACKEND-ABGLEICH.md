@@ -108,12 +108,23 @@ email_consent_revoke(p_topic, p_source)    email_unsubscribe(p_token)
 
 **Unternehmensbereich** (mitgliedschaftsgebunden, siehe § 8)
 ```
-my_businesses()                            business_dashboard(p_business)
-business_statement(p_business)             business_locations_list(p_business)
-business_budget_set(...)                   business_invite(...)
-business_member_set(...)                   business_invitation_accept(p_token)
+my_businesses()
+business_dashboard(p_business uuid, p_von date DEFAULT null, p_bis date DEFAULT null)
+business_statement(p_business uuid, p_jahr integer, p_monat integer)   -- keine Defaults!
+business_locations_list(p_business uuid)
+business_budget_set(p_business uuid, p_profile uuid DEFAULT null,
+                    p_monatslimit numeric DEFAULT null, p_tageslimit numeric DEFAULT null,
+                    p_zuschuss numeric DEFAULT 100,
+                    p_gueltig_von date DEFAULT current_date, p_gueltig_bis date DEFAULT null)
+business_invite(p_business uuid, p_email text,
+                p_role app.business_role DEFAULT 'member', p_tage integer DEFAULT 14)
+business_member_set(p_business uuid, p_profile uuid,
+                    p_role app.business_role DEFAULT null,
+                    p_status app.business_member_status DEFAULT null)
+business_invitation_accept(p_token text)
 my_advertising_contracts()                 my_advertising_campaigns()
-advertising_campaign_report(p_campaign)    advertising_creative_upload(...)
+advertising_campaign_report(p_campaign uuid)
+advertising_creative_upload(p_campaign uuid, p_kind app.creative_kind, p_file_url text)
 advertising_redirect_count(p_campaign)
 ```
 
@@ -162,6 +173,15 @@ locations:
   id, code, name, kind, street, zip, city, country, lat, lng,
   access_hours, status, created_at, created_by, updated_at, updated_by,
   archived_at, deleted_at
+
+machines (Policy `machines_read`: deleted_at is null — für Kundenkonten lesbar):
+  id, code, name, type, is_cooled, location_name, street, zip, city,
+  lat, lng, nayax_terminal_id, status, image_url, access_hours, location_id,
+  created_at, created_by, updated_at, updated_by, archived_at, deleted_at
+
+  `machines` trägt eigene Adressfelder und ein `image_url` — die Automatenansicht
+  braucht `locations` nicht zwingend. `nayax_terminal_id` ist eine interne
+  Terminalkennung und gehört nicht in die Oberfläche, auch wenn sie lesbar ist.
 ```
 
 ### 2.4 Was `my_subscription_benefits()` liefert
@@ -492,6 +512,41 @@ mit Ink-Rand, Funkel-Symbol, Text `KI`, dahinter ein Info-Zeichen. In der
 kompakten Form (`dense`) 10 px Schrift, sonst 11 px. Er öffnet die Info-Seite
 aus § 5a.3. Er wird nicht weggeklickt und nicht in eine Fußzeile verschoben.
 
+### 5a.0 Das KI-Register ist die Wahrheit
+
+`public.ki_register` führt jede algorithmische Funktion mit ihrer rechtlichen
+Bewertung. `ki_funktion_freigegeben(p_key)` liefert `aktiv AND ampel = 'gruen'`.
+Stand 02.09.2026:
+
+| key | Bezeichnung | KI-System? | Kennz. nötig | freigegeben |
+|---|---|---|---|---|
+| `challenge_rewards` | Punkte für erfüllte Aufgaben | nein | **ja** | ja |
+| `customer_chatbot` | Automatischer Chat-Assistent | nein | nein | ja |
+| `generate_daily_offers` | Tagesangebot nach Wetterlage | nein | nein | ja |
+| `generate_weekly_offers` | Wochenangebot nach MHD | nein | nein | ja |
+| `generate_personal_offer` | Individuelles Angebot aus der Kaufhistorie | nein | nein | ja |
+| `grant_birthday_offer` | Geburtstagsgutschein | nein | nein | **nein** (gelb) |
+| `loyalty_login_points` | Punkte für tägliches Einloggen | nein | nein | **nein** (gelb) |
+| `produktbild_bearbeitung` | KI-Bearbeitung von Produktfotos | **ja** | **ja** | **nein** (gelb) |
+
+**Das Gate wirkt auf die Fläche, nicht auf den Chip.** Liefert die Funktion
+`false`, wird das Feature nicht gezeigt. Ein Chip an einer Fläche, die es nicht
+gibt, wäre sinnlos.
+
+**Die Spalte `kennzeichnung_noetig` ist das gesetzliche Minimum, nicht die
+Hausregel.** `CLAUDE.md` verlangt den Chip überall dort, wo Inhalte
+algorithmisch erzeugt oder ausgewählt werden — bewusst weiter als Art. 50. Das
+Register hält die rechtliche Bewertung fest, die Hausregel die Anzeige. Kein
+Widerspruch.
+
+**Zwei Einträge stehen auf gelb, weil `kennzeichnung_umgesetzt = false` ist** —
+genau das behebt dieser Auftrag. Das Umschalten auf grün macht Philipp.
+`produktbild_bearbeitung` ist ein echtes KI-System und nicht freigegeben:
+keine Produktbilder erzeugen oder bearbeiten.
+
+Nimm die Schlüssel aus dem Register, nicht aus der Tabelle unten. Fehlt für
+eine Fläche ein Eintrag, benenne das — erfinde keinen.
+
 ### 5a.1 Wo der Chip hingehört
 
 | Fläche | Route | Warum |
@@ -533,8 +588,11 @@ Jeder Chip führt dorthin. Inhaltlich die Web-Entsprechung von
   Punktestand. Keine Weitergabe an Dritte zu Werbezwecken. Keine
   automatisierte Einzelentscheidung mit rechtlicher Wirkung im Sinne von
   Art. 22 DSGVO.
-* **Widerspruch und Opt-out** — wie man die personalisierte Anzeige abstellt
-  und was dann bleibt.
+* **Widerspruch und Opt-out** — **es gibt heute keinen technischen Opt-out.**
+  Nachgesehen: `consents.type` kennt nur `privacy, analytics, marketing, maps,
+  terms`, und keine RPC trägt „opt" oder „personalis" im Namen. Die Seite nennt
+  deshalb den Kontaktweg. Das ist eine Backend-Lücke und gehört als solche in
+  den Abschlussbericht — keine Auslassung des Frontends.
 * **Kennzeichnung im Kundenbereich** — dass dieser Chip überall dort steht,
   und dass der Chat-Assistent bewusst anders heißt.
 * **Beschwerde** — Aufsichtsbehörde benennen (BfDI beziehungsweise für
