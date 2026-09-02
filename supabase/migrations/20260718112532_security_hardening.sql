@@ -1,11 +1,27 @@
 -- 0045 — Security-Hardening (Empfehlungen 1, 2, 16 aus dem Audit).
 
+-- NACHTRAG 02.09.2026 (Befund S-14, Wiederholbarkeit):
+-- `_sig_upload` und `_pia_sig` waren Arbeitstabellen des Signatur-Imports.
+-- Sie sind NIE über eine Migration entstanden, sondern von Hand auf dem
+-- Server angelegt worden — dieselbe Herkunft wie die stillgelegte Function
+-- `install-signature`. Auf einer leeren Datenbank gibt es sie nicht, und
+-- die `comment on`-Zeilen brachen den Lauf ab. Migration 0082 hat sie
+-- später ohnehin entfernt.
+-- Der Zusatz ändert an der Produktion nichts; er macht den Lauf auf einer
+-- LEEREN Datenbank möglich.
 alter table if exists public._sig_upload set schema app;
 alter table if exists public._pia_sig    set schema app;
-comment on table app._sig_upload is
-  'Import-Rest DocuSign-Signaturen (gemerged in partner_signatures) — nach Go-Live löschen.';
-comment on table app._pia_sig is
-  'Import-Rest Demo-Signatur Pia (gemerged in partner_signatures) — nach Go-Live löschen.';
+do $$
+begin
+  if to_regclass('app._sig_upload') is not null then
+    comment on table app._sig_upload is
+      'Import-Rest DocuSign-Signaturen (gemerged in partner_signatures) — nach Go-Live löschen.';
+  end if;
+  if to_regclass('app._pia_sig') is not null then
+    comment on table app._pia_sig is
+      'Import-Rest Demo-Signatur Pia (gemerged in partner_signatures) — nach Go-Live löschen.';
+  end if;
+end $$;
 
 alter table public.document_folders enable row level security;
 

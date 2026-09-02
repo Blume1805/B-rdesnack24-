@@ -1,3 +1,13 @@
+-- NACHTRAG 02.09.2026 (Befund S-14, Wiederholbarkeit):
+-- Wie oben: `donation_causes_list()` aendert ihren
+-- Rueckgabetyp, `create or replace` scheitert daran.
+-- An der Wirkung auf die bereits bespielte Produktion ändert der Zusatz
+-- nichts; er macht den Lauf auf einer LEEREN Datenbank möglich. Der
+-- ursprüngliche Wortlaut steht weiterhin im Migrationsverzeichnis der
+-- Datenbank (supabase_migrations.schema_migrations.statements).
+
+drop function if exists public.donation_causes_list();
+
 create or replace function public.donation_causes_list()
 returns table (
   id uuid,

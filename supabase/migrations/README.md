@@ -2,9 +2,39 @@
 
 Dieses Verzeichnis ist ein **Spiegel des Migrationsregisters der
 Live-Datenbank** (`supabase_migrations.schema_migrations` im Projekt
-`nnfsyuglkqycwenwxmuw`). Es enthält 182 Dateien: genau die SQL-Anweisungen,
-die tatsächlich auf die Produktionsdatenbank angewendet wurden — byte-genau,
-gegen die MD5-Summe der Datenbank verifiziert.
+`nnfsyuglkqycwenwxmuw`) — und seit dem 02.09.2026 zusätzlich ein
+**von Null reproduzierbarer Bauplan**.
+
+Beides ist nicht dasselbe, und der Unterschied ist der Grund für diesen
+Abschnitt. Bis dahin galt nur das Erste: Die Dateien entsprachen
+byte-genau dem, was auf der Produktion gelaufen ist. Auf einer leeren
+Datenbank liefen sie trotzdem nicht durch — sechs von ihnen setzten einen
+Zwischenzustand voraus, den keine Migration herstellt (von Hand angelegte
+Arbeitstabellen, eine von Hand gesetzte Datenänderung).
+
+## Nachweis der Reproduzierbarkeit
+
+Ein vollständiger Neuaufbau aus diesem Verzeichnis auf einer leeren
+Datenbank ergibt seit dem 02.09.2026 **197 von 197** erfolgreichen
+Migrationen und in allen neun gemessenen Merkmalen denselben Stand wie
+die Produktion — 112 Tabellen, 186 Policies (`c8fbc1d9…`), 1561
+Tabellenrechte (`da069539…`), die Ausführungsrechte je Rolle
+(`bdc07832…` / `c5f00ccb…` / `7056df4e…`) und null Funktionen mit
+PUBLIC-Ausführungsrecht.
+
+Der Ablauf steht in `scripts/pruefumgebung/README.md`. **Er gehört vor
+jedes Release einmal ausgeführt**: Weicht ein Fingerabdruck ab, ist
+entweder an der Produktion vorbei gearbeitet worden oder eine Migration
+tut nicht, was sie zu tun vorgibt.
+
+## Sechs Dateien tragen einen datierten Nachtrag
+
+Die sechs nicht wiederholbaren Migrationen haben einen kommentierten
+Zusatz bekommen (`-- NACHTRAG 02.09.2026 (Befund S-14, …)`), der ihren
+Lauf auf einer leeren Datenbank möglich macht. An der Wirkung auf die
+bereits bespielte Produktion ändert er nichts; der ursprüngliche Wortlaut
+steht weiterhin im Register der Datenbank. Damit weicht bei diesen sechs
+Dateien die MD5-Summe vom Register ab — bewusst, und hier vermerkt.
 
 ## Dateinamen
 
@@ -30,6 +60,20 @@ Konkret:
 2. Über den üblichen Weg anwenden (`supabase db push` bzw.
    `apply_migration` mit demselben Namen).
 3. Datei committen — im selben Commit wie die Anwendung.
+4. **Neuaufbau laufen lassen und die Fingerabdrücke vergleichen.** Was
+   dabei auffällt, fällt sonst nirgends auf: Am 02.09.2026 hat genau
+   dieser Vergleich zwei Rechteausweitungen sichtbar gemacht, die eine
+   grüne Regression nicht gezeigt hat.
+
+Zwei Fallen, die dabei schon zugeschlagen haben:
+
+* **Eine neue Tabelle bekommt automatisch Rechte.** Supabase vergibt
+  `anon` und `authenticated` volle DML-Rechte auf jede neu angelegte
+  Tabelle in `public`. Soll sie nur über eine RPC erreichbar sein, gehört
+  ein ausdrückliches `revoke all … from anon, authenticated` in dieselbe
+  Migration.
+* **`grant execute on all functions` ist fast nie gemeint.** Der Blankett-
+  Grant öffnet auch alles, was bewusst zu war.
 
 Wer eine Änderung direkt an der Datenbank vornimmt, ohne sie hier
 abzulegen, erzeugt genau den Zustand, der im August 2026 aufgeräumt werden

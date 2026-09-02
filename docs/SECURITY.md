@@ -584,3 +584,117 @@ Vorsteuerabzug. Das ist kein Sicherheitsbefund und wird hier nicht als
 solcher geführt — aber es ist eine Entscheidung, die bewusst getroffen
 sein sollte: entweder ein Selbstpflege-Weg für Anschriftsfelder, oder
 ein dokumentierter Prozess, über den der Kunde eine Änderung meldet.
+
+---
+
+## 13. S-14 geschlossen: das Verzeichnis ist ein Bauplan (02.09.2026)
+
+Bis heute liefen 179 von 185 Migrationen auf einer leeren Datenbank; sechs
+setzten einen Zwischenzustand voraus, den keine Migration herstellt.
+Jetzt laufen **197 von 197** durch — und das Ergebnis ist mit der
+Produktion in **allen neun gemessenen Merkmalen identisch**:
+
+| Merkmal | Produktion | Neuaufbau aus dem Repository |
+| --- | --- | --- |
+| Tabellen / Views / Funktionen | 112 / 2 / 156 | 112 / 2 / 156 |
+| RLS-Policies | 186 · `c8fbc1d9…` | 186 · `c8fbc1d9…` |
+| Tabellenrechte | 1561 · `da069539…` | 1561 · `da069539…` |
+| Ausführungsrechte `anon` | 4 · `bdc07832…` | 4 · `bdc07832…` |
+| Ausführungsrechte `authenticated` | 138 · `c5f00ccb…` | 138 · `c5f00ccb…` |
+| Ausführungsrechte `service_role` | 156 · `7056df4e…` | 156 · `7056df4e…` |
+| Funktionen mit PUBLIC-Ausführungsrecht | 0 | 0 |
+
+### Was die sechs Migrationen brauchten
+
+| Migration | Ursache | Behebung |
+| --- | --- | --- |
+| `…_inventory_at_cost_v2` | `inventory_summary_by_product()` ändert den Rückgabetyp; `create or replace` kann das nicht | `drop function if exists` davor |
+| `…_spendenvorschlaege_nicht_oeffentlich` | dasselbe für `donation_causes_list()` | dito |
+| `…_security_hardening` | `comment on` auf `app._sig_upload` / `_pia_sig` | in eine Existenzprüfung gefasst |
+| `…_revoke_anon_on_signature_scratch` | `revoke` auf dieselben Tabellen | dito |
+| `…_donation_causes_stammdaten` | Prüfregel setzt einen Datenstand voraus | der fehlende Schritt wird nachgetragen |
+| `…_konten_kommen_aus_sevdesk` | prüft Rechte, die Supabase automatisch vergibt | Standardrechte im Nachbau ergänzt |
+
+### Drei Eingriffe an der Produktion, die nie eine Migration hatten
+
+Die Reparatur hat sichtbar gemacht, dass an drei Stellen von Hand am
+Produktionsstand gearbeitet wurde, ohne dass es im Verzeichnis steht:
+
+1. **Die Arbeitstabellen `_sig_upload` und `_pia_sig`** wurden auf dem
+   Server angelegt — dieselbe Herkunft wie die stillgelegte Function
+   `install-signature`.
+2. **Die drei Spendenzwecke** aus dem Juli wurden zurückgezogen
+   (`deleted_at` gesetzt). Ohne diesen Schritt greift die Prüfregel vom
+   03.08. nicht. Er ist jetzt in der Migration nachgetragen.
+3. **PUBLIC wurde bei drei Finanz- und Produktfunktionen entzogen** —
+   siehe unten.
+
+Für die Verfahrensdokumentation ist das der eigentliche Ertrag: Nicht die
+sechs Fehler, sondern die Erkenntnis, dass Handbetrieb an der Produktion
+stattgefunden hat und im Verzeichnis nicht auftaucht.
+
+### S-19 — was der Neuaufbau als Erstes gefunden hat
+
+Der erste vollständige Lauf ergab: **`anon` durfte 8 Funktionen
+ausführen, die Produktion erlaubt 5.** Die drei zusätzlichen waren
+`product_detail`, `finance_balance_kpis` und **`upsert_finance_balance`**
+— letztere schreibt Bilanzzahlen.
+
+Ursache: Migration 0046 vom 18.07. hatte das Problem schon einmal gelöst
+(„Funktionen erben execute über PUBLIC"), aber ihre **Standardregel hält
+nicht**. In PostgreSQL bleibt der eingebaute Vorgabewert — PUBLIC darf
+ausführen — wirksam, wenn das gespeicherte Standardrecht den Eigentümer
+nicht mitführt. Jede seit dem 19.07. angelegte Funktion trug PUBLIC
+wieder. In der Produktion waren es zuletzt elf, darunter drei aus den
+Sicherheitskorrekturen von heute früh.
+
+Über die API erreichbar waren die `app`-Funktionen nicht — PostgREST
+veröffentlicht nur `public`. Aber im Repository stand ein anonym
+aufrufbarer Schreibzugriff auf Finanzdaten, und jeder Neuaufbau hätte ihn
+hergestellt. Migration `20260902060051` entzieht PUBLIC und setzt die
+Standardregel in der Form, die tatsächlich greift.
+
+### S-20 — der Fehler, den diese Korrektur selbst erzeugt hat
+
+Der erste Anlauf von `20260902060051` übernahm aus 0046 die Zeile
+
+```sql
+grant execute on all functions in schema public to authenticated;
+```
+
+Damit bekam **jedes angemeldete Konto** Ausführungsrechte auf 18
+Funktionen, die vorher bewusst zu waren:
+
+* `email_enqueue` — Post an eine beliebige Adresse einstellen
+* `next_invoice_number` — Rechnungsnummern verbrauchen; jede Lücke in der
+  Nummernfolge ist ein GoBD-Problem
+* `create_invoice_for_purchase`, `store_notification_apply`,
+  `upsert_finance_balance_synced`
+* `grant_birthday_offer`, `grant_anniversary_offer` — Rabatte an eine
+  beliebige Kunden-ID
+* `email_unsubscribe_token_for` — Abmeldetoken eines fremden Profils
+* dazu `card_entitlements`, `email_has_consent`, `email_outbox_claim`,
+  `email_outbox_mark`, `generate_daily_offers`, `generate_weekly_offers`,
+  `has_paid_subscription`, `legal_text_abrufen`, `legal_text_uebernehmen`,
+  `run_daily_special_offers`
+
+**Der Regressionslauf blieb dabei grün.** Er prüft die 48 Verwaltungs-RPCs,
+die `authenticated` vorher aufrufen durfte — diese 18 waren nie darunter.
+Gesehen wurde der Fehler allein daran, dass der Fingerabdruck von
+`authenticated` nach dem Ausrollen von 138 auf 156 sprang. Migration
+`20260902060345` nimmt die 18 Rechte einzeln zurück; die Ursache ist in
+`20260902060051` entfernt.
+
+Das ist die Lehre dieses Abschnitts, und sie geht über die Befunde hinaus:
+**Eine Testsuite prüft, was sie kennt. Der Fingerabdruck prüft, was sich
+geändert hat.** Ohne den Vergleich wäre diese Ausweitung durchgegangen —
+mit grüner Regression.
+
+### Zwei bewusste Abweichungen der Prüfumgebung
+
+* **PostgreSQL 16 gegen 17.6** in der Produktion. Für die
+  Autorisierungsfläche ohne Wirkung — alle neun Merkmale stimmen überein.
+  Für Fragen, die an der Serverversion hängen, ist die Umgebung nicht
+  aussagekräftig.
+* **pgTAP** liegt im eigenen Schema `tap`, damit es die über tausend
+  eigenen Funktionen nicht in `public` mitzählt.

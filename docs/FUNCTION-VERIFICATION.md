@@ -98,7 +98,9 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | MAIL-003 | `email_report_share` / `fetch_email_report_share` | ✓ | 🟢 (S-1 behoben) |
 | MAIL-004 | Zustellung über Resend an Testpostfach | ✗ kein Testpostfach | 🔴 |
 | DOC-001 | Änderungsprotokoll buchführungsrelevanter Tabellen | ✓ | 🟢 (S-7 behoben) |
-| DB-003 | Migrationen von Null wiederholbar | ✓ 179/185 | 🔴 S-14 |
+| DB-003 | Migrationen von Null wiederholbar | ✓ 197/197, Ergebnis in neun Merkmalen deckungsgleich mit der Produktion | 🟢 (S-14 behoben) |
+| DB-004 | PUBLIC hat kein Ausführungsrecht auf Funktionen | ✓ 0 von 156 | 🟢 (S-19 behoben) |
+| DB-005 | `authenticated` führt nur die vorgesehenen 138 Funktionen aus | ✓ Fingerabdruck `c5f00ccb…` | 🟢 (S-20 behoben) |
 
 ---
 
@@ -107,7 +109,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 13   🟡 GELB: 0   🟢 GRÜN: 38
+🔴 ROT: 12   🟡 GELB: 0   🟢 GRÜN: 41
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -141,7 +143,6 @@ Tarifentscheidung und eine offene Rechtsfrage:
 | AUTH-005 | Leaked-Password-Schutz nicht aktivierbar | Supabase Pro (Organisation auf `free`) — Tarifentscheidung | Philipp |
 | MAIL-004 | Resend-Zustellung nicht belegt | Testpostfach in `projekt-konfig.md` | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |
-| DB-003 | Migrationen nicht von Null wiederholbar | — (Befund S-14, bewusst offen geführt) | offen |
 
 Kein Eintrag steht auf 🟡: Wo ein Nachweis fehlt, steht ROT mit
 benanntem fehlendem Mittel und Verantwortlichem — nicht Gelb.

@@ -1,3 +1,15 @@
+-- NACHTRAG 02.09.2026 (Befund S-14, Wiederholbarkeit):
+-- Die Funktion aendert ihren Rueckgabetyp. `create or replace`
+-- kann das nicht; auf einer leeren Datenbank ist sie noch nicht da, in der
+-- Produktion war sie es mit alter Signatur. Ein vorangestelltes
+-- `drop function if exists` deckt beide Faelle ab.
+-- An der Wirkung auf die bereits bespielte Produktion ändert der Zusatz
+-- nichts; er macht den Lauf auf einer LEEREN Datenbank möglich. Der
+-- ursprüngliche Wortlaut steht weiterhin im Migrationsverzeichnis der
+-- Datenbank (supabase_migrations.schema_migrations.statements).
+
+drop function if exists public.inventory_summary_by_product();
+
 create or replace function public.inventory_summary_by_product()
 returns table(
   product_id       uuid,

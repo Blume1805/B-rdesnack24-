@@ -1678,3 +1678,65 @@ Registrierungseintrag der Erweiterung, ihre zwölf Funktionen liegen aber
 längst im eigenen Schema `net`. Ein Verschieben würde die Aufrufe in
 `legal_text_uebernahme_funktionen` und den Cron-Jobs brechen — der
 Warnhinweis wiegt weniger als der Schaden.
+
+## 31. B2B-Isolation und Reproduzierbarkeit (02.09.2026, nachmittags)
+
+Zwei rote Zeilen ohne fehlendes Mittel abgearbeitet. Vollständige
+Protokolle in `docs/SECURITY.md`, Abschnitte 12 und 13.
+
+### 31.1 API-002 — Firma A gegen Firma B
+
+33 Prüfungen, alle grün. Zwei Firmenkunden mit spiegelbildlichem Bestand,
+jeder Schreibversuch mit anschließendem Lesen des gespeicherten Zustands.
+Abgewiesen werden unter anderem: fremden Admin absetzen, fremdes Budget
+auf 999.999 setzen, fremden Abrechnungslauf freigeben, fremde Kampagne
+stoppen, fremden Werbevertrag kündigen. Dazu zwei Angriffe jenseits der
+Firmengrenze — eine fremde Einladung mit dem Rohtoken annehmen, und ein
+einfaches Mitglied, das sich innerhalb der eigenen Firma zum Admin macht.
+
+Die Gegenprobe hat ein Rollenmodell sichtbar gemacht, das vorher nirgends
+stand: Der Unternehmensbereich hat zwei Stufen — mitgliedschaftsgebunden
+(Dashboard, Standorte, Abrechnung, Einladungen, Mitglieder, Budgets) und
+rein intern (Stammdatenpflege, Kampagnen, Verträge,
+Werbemittelfreigabe). Beide sind jetzt belegt und in
+`docs/API-UNTERNEHMENSBEREICH.md` festgehalten.
+
+Ohne Sicherheitsbezug, aber entscheidungsbedürftig: Ein Firmenkunde kann
+seine eigene Rechnungsanschrift nicht korrigieren, weil `business_update`
+intern ist. Die vollständige Anschrift des Leistungsempfängers ist
+Pflichtangabe nach § 14 Abs. 4 UStG.
+
+### 31.2 S-14 — und was der erste Neuaufbau zutage gefördert hat
+
+Die sechs nicht wiederholbaren Migrationen sind repariert; **197 von 197**
+laufen auf einer leeren Datenbank durch, und das Ergebnis ist in allen
+neun gemessenen Merkmalen deckungsgleich mit der Produktion.
+
+Der erste vollständige Lauf hat sofort etwas gefunden, das keine
+Codelektüre gezeigt hätte: **`anon` durfte im Repository-Stand acht
+Funktionen ausführen, die Produktion erlaubt fünf** — die drei
+zusätzlichen waren `product_detail`, `finance_balance_kpis` und
+`upsert_finance_balance`, letztere schreibt Bilanzzahlen (S-19). Ursache
+war eine Standardregel aus Migration 0046, die in PostgreSQL nicht greift,
+weil das gespeicherte Standardrecht den Eigentümer nicht mitführte.
+
+**Die Korrektur dafür hat selbst einen Fehler erzeugt (S-20):** Ein aus
+0046 übernommener Blankett-Grant hat 18 Funktionen für jedes angemeldete
+Konto geöffnet, darunter `email_enqueue`, `next_invoice_number` und
+`store_notification_apply`. Der Regressionslauf blieb dabei **grün** — er
+prüft die 48 vorher aufrufbaren Verwaltungs-RPCs, und diese 18 waren nie
+darunter. Gesehen wurde es allein daran, dass der Fingerabdruck von
+`authenticated` von 138 auf 156 sprang.
+
+Das ist der Ertrag dieses Nachmittags, über die Befunde hinaus: **Eine
+Testsuite prüft, was sie kennt. Der Fingerabdruck prüft, was sich geändert
+hat.** Beides zusammen hat gehalten; jedes für sich hätte diesen Fehler
+durchgelassen.
+
+### 31.3 Drei Eingriffe an der Produktion ohne Migration
+
+Die Reparatur hat belegt, dass an drei Stellen von Hand am
+Produktionsstand gearbeitet wurde: die Arbeitstabellen des
+Signatur-Imports, der Rückzug der drei Spendenzwecke, und der
+PUBLIC-Entzug bei drei Finanz- und Produktfunktionen. Für die
+Verfahrensdokumentation ist das wichtiger als die sechs Fehler selbst.

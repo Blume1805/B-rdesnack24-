@@ -73,15 +73,18 @@ Die Tabellen- und Funktionsrechte werden **aus der Produktion ausgelesen**
 Negativtests aus dem falschen Grund bestehen — nämlich weil ein `GRANT`
 fehlt statt weil eine Policy greift.
 
-### Sechs Migrationen sind nicht wiederholbar
+### Reproduzierbarkeit — seit 02.09.2026 gegeben
 
-Von 185 Migrationen laufen 179 auf einer leeren Datenbank durch. Sechs
-scheitern, weil sie einen Zwischenzustand der Produktion voraussetzen
-(entfernte Hilfstabellen `app._sig_upload`/`app._pia_sig`, eine geänderte
-Rückgabesignatur, Bestandsdaten, die eine später ergänzte Prüfregel noch
-nicht erfüllen). Für die Prüfumgebung werden sie nachgezogen; als Befund
-bleibt: **das Verzeichnis ist ein Protokoll, kein von Null reproduzierbarer
-Bauplan.** Für die Verfahrensdokumentation ist das der wichtigere Satz.
+Bis dahin liefen 179 von 185 Migrationen auf einer leeren Datenbank; sechs
+setzten einen Zwischenzustand der Produktion voraus. Sie sind repariert
+(Befund S-14, `docs/SECURITY.md` Abschnitt 13). Der vollständige Neuaufbau
+ergibt jetzt **197 von 197** und denselben Stand wie die Produktion.
+
+Die Rechte werden dabei **nicht mehr aus der Produktion importiert**: Der
+Nachbau setzt die Supabase-Standardrechte selbst (`alter default
+privileges`, abgelesen aus `pg_default_acl` der Produktion). Das ist der
+Unterschied zwischen „gleich, weil abgeschrieben" und „gleich, weil
+dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 
 ## Prüfskripte
 

@@ -2,7 +2,11 @@ create schema if not exists extensions; create extension if not exists pgcrypto 
 create extension if not exists pg_trgm with schema extensions;
 create extension if not exists citext with schema extensions;
 create extension if not exists btree_gist with schema extensions;
-create extension if not exists pgtap;
+-- pgTAP in ein eigenes Schema: In `public` brächte es über tausend
+-- Funktionen und zwei Views mit, die es in der Produktion nicht gibt —
+-- jeder Abgleich müsste sie danach mühsam herausrechnen.
+create schema if not exists tap;
+create extension if not exists pgtap with schema tap;
 
 do $$ begin
   if not exists (select 1 from pg_roles where rolname='anon') then create role anon nologin noinherit; end if;
@@ -14,6 +18,38 @@ do $$ begin
 end $$;
 grant anon, authenticated, service_role to authenticator;
 grant usage on schema public to anon, authenticated, service_role;
+
+-- Standardrechte wie bei Supabase: Jede von `postgres` in `public` neu
+-- angelegte Tabelle bekommt automatisch Rechte für anon, authenticated und
+-- service_role. Ohne diese Zeilen fehlen dem Nachbau genau die Rechte, die
+-- die Produktion still vergibt — und Migrationen, die solche Rechte
+-- voraussetzen, scheitern hier aus dem falschen Grund.
+-- Abgelesen aus pg_default_acl der Produktion am 02.09.2026 — genau so,
+-- nicht ungefähr. Beachte: Funktionen bekommen ihr EXECUTE ausdrücklich
+-- NICHT für `anon`, und PUBLIC wird entzogen. Wäre das hier großzügiger,
+-- bestünden Negativtests aus dem falschen Grund.
+--   postgres|public  tabellen   → anon=arwdm, authenticated=arwdm, service_role=alle
+--   postgres|public  sequenzen  → anon/authenticated/service_role = rwU
+--   postgres|public  funktionen → authenticated=X, service_role=X (kein anon, kein PUBLIC)
+--   postgres|app     tabellen   → service_role=r;  funktionen → service_role=X
+alter default privileges for role postgres in schema public
+  grant select, insert, update, delete on tables to anon, authenticated;
+alter default privileges for role postgres in schema public
+  grant all on tables to service_role;
+alter default privileges for role postgres in schema public
+  grant usage, select, update on sequences to anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public;
+alter default privileges for role postgres in schema public
+  grant execute on functions to authenticated, service_role;
+
+create schema if not exists app;
+alter default privileges for role postgres in schema app
+  grant select on tables to service_role;
+alter default privileges for role postgres in schema app
+  revoke execute on functions from public;
+alter default privileges for role postgres in schema app
+  grant execute on functions to service_role;
 
 create schema if not exists auth;
 create schema if not exists storage;

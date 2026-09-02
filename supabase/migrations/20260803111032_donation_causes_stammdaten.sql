@@ -27,6 +27,25 @@ comment on column public.donation_causes.tax_number is
 comment on column public.donation_causes.verified_at is
   'Zeitpunkt der Prüfung der Bescheinigungsberechtigung. NULL = ungeprüft.';
 
+-- NACHTRAG 02.09.2026 (Befund S-14, Wiederholbarkeit):
+-- Diese Prüfregel setzt einen Datenstand voraus, den keine Migration
+-- herstellt. Die drei Spendenzwecke aus 20260710104458 wurden 'active'
+-- angelegt, ohne bestätigte Bescheinigungsberechtigung. In der Produktion
+-- sind sie inzwischen zurückgezogen (`deleted_at` gesetzt) — von Hand, ohne
+-- Migration. Genau deshalb lief die Regel dort durch und auf einer leeren
+-- Datenbank nicht.
+--
+-- Der Rückzug wird hier nachgetragen, damit ein Neuaufbau denselben Stand
+-- erreicht wie die Produktion. Fachlich ist er richtig: Ein Spendenzweck
+-- ohne bestätigte Bescheinigungsberechtigung darf nicht aktiv zur Wahl
+-- stehen — nichts anderes sagt die Regel darunter. In der Produktion ist
+-- die Anweisung wirkungslos, weil die Zeilen bereits zurückgezogen sind.
+update public.donation_causes
+   set deleted_at = coalesce(deleted_at, now())
+ where status = 'active'
+   and deleted_at is null
+   and not coalesce(receipt_eligible, false);
+
 alter table public.donation_causes
   drop constraint if exists donation_causes_active_needs_receipt;
 alter table public.donation_causes
