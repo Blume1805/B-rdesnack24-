@@ -10,6 +10,8 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/l10n/generated/**"
+    - build/**
+    - web/**
 
 linter:
   rules:
