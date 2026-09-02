@@ -987,3 +987,175 @@ Zu setzen im selben Bildschirm, ein Feld.
 
 Ebenfalls abgelesen, ohne Befund: „Email OTP expiration 3600 s",
 „Email OTP length 8 Ziffern".
+
+---
+
+## 18. S-23 und S-24 — was das Ausrollen der letzten Löschregeln zutage förderte
+
+Der Auftrag war eng: Die 15 Tabellen, die bei der Freigabe des
+Löschkonzepts noch ohne Regel dastanden, sollten ihre Einordnung
+bekommen (CUST-018). Die Einordnung selbst war unstrittig — sie lag dem
+Verantwortlichen vor und wurde am 02.09.2026 freigegeben. Beim Ausrollen
+fielen zwei Fehler auf, die mit der Einordnung nichts zu tun hatten,
+sondern mit dem Prozess, in den sie hineinlief.
+
+Beide sind **gemessen**, nicht vermutet. Beide sind behoben, mit
+Gegenprobe.
+
+| ID | P | Befund | Nachweis |
+| --- | --- | --- | --- |
+| **S-23** | P1 | Der Löschvorgang schrieb die gelöschten Daten ins Änderungsprotokoll zurück. `public.audit_log` protokolliert 40 Tabellen, darunter `profiles` und `customers`. Jede Anonymisierung und jedes `DELETE` legt dort eine Zeile mit dem **vollständigen alten Datensatz** an. `audit_log` stand in keiner der 35 Löschregeln — die Tabelle war in der Aufstellung gar nicht vorgekommen. | Nach `execute_account_deletion` in der Prüfumgebung gezählt: **4 Zeilen mit Klarnamen und E-Mail** des gelöschten Kontos, 31 weitere mit Inhalten aus gelöschten Tabellen. Beispielzeile: `{"email": "loeschkandidat@test.invalid", "full_name": "Zu Loeschen", …}` |
+| **S-24** | P1 | Die Aufbewahrungsfrist lief ab **Anlage** des Datensatzes, auch wenn der Vorgang noch läuft. Bis CUST-018 war das folgenlos: Alle acht Fristtabellen waren abgeschlossene Vorgänge — ein Kauf, eine Rechnung, eine Zahlung. Mit den zehn neuen kamen erstmals *laufende* Sachverhalte hinzu. `purge_nach_frist` hätte ein seit neun Jahren laufendes Abo gelöscht: den Vertrag selbst, nicht seinen Beleg. Dasselbe galt bereits für `consents` — die geltende Einwilligung wäre nach acht Jahren gefallen, während die Verarbeitung weiterläuft. | In der Prüfumgebung nachgestellt: zwei gleich alte Datensätze, einer abgelöst, einer laufend. Vor der Korrektur fielen beide. |
+
+### S-23 — warum die Tabelle unsichtbar war
+
+`audit_log` trägt den Personenbezug nicht in einer Spalte, sondern in
+`old_data`/`new_data` als JSON. Eine Aufstellung, die Tabellen nach
+Fremdschlüsseln auf `profiles` sucht, findet sie deshalb nicht. Genau
+darum stand sie nicht in den 35.
+
+Die Behandlung ist `anonymisieren`, nicht `loeschen`. Wer wann welchen
+Datensatz geändert hat, ist die Protokollierung, die die GoBD für
+nachträgliche Änderungen an buchführungsrelevanten Daten verlangen —
+diese Angabe bleibt. Entfernt wird der **Inhalt** der Änderung, und zwar
+nur dort, wo er zu einer Tabelle gehört, die gelöscht oder anonymisiert
+wurde: Kontaktnachrichten, Gerätetoken, persönliche Angebote, Profil,
+Kundenstammdaten. Nichts davon ist buchführungsrelevant. Protokollzeilen
+über aufbewahrungspflichtige Tabellen behalten ihren Inhalt und teilen
+dessen Frist.
+
+Die Bereinigung läuft als **letzter** Schritt von
+`execute_account_deletion` — sie muss die Zeilen erfassen, die die
+Anonymisierung von `profiles` selbst gerade erzeugt hat.
+
+### S-24 — wann eine Frist beginnt
+
+§ 147 Abs. 4 AO lässt die Frist mit dem Schluss des Kalenderjahres
+beginnen, in dem der Vorgang endet. Für einen Kauf ist das der Kauf
+selbst; für einen laufenden Vertrag hat sie **noch nicht begonnen**.
+
+`loeschregeln` hat dafür eine neue Spalte `frist_ab`: ein SQL-Ausdruck,
+der den Zeitpunkt liefert, ab dem gerechnet wird. Liefert er `NULL`, ist
+der Vorgang nicht beendet und die Zeile wird nie gelöscht. Sieben Regeln
+tragen ihn:
+
+| Tabelle | Der Vorgang endet … |
+| --- | --- |
+| `customer_subscriptions` | wenn eine neuere Wahl desselben Kunden vorliegt |
+| `store_subscription` | mit Widerruf, Kündigung oder Ablauf der Periode |
+| `business_members` | wenn die Mitgliedschaft auf `removed` steht (`suspended` ist ausgesetzt, nicht beendet) |
+| `referral_codes` | mit der Löschung des Inhaberkontos |
+| `customer_prices` | mit Ablauf von `valid_to` |
+| `business_budgets` | mit Aufhebung oder Ablauf der Gültigkeit |
+| `consents` | wenn eine neuere Erklärung für denselben Zweck vorliegt |
+
+Ein Ausdruck, der erst 2034 zum ersten Mal ausgeführt wird, ist bis
+dahin ungeprüft. Die Migration führt deshalb **jeden** von ihnen beim
+Ausrollen einmal aus und bricht ab, wenn einer nicht läuft.
+
+### Die Gegenproben
+
+Der entscheidende Test ist nicht, dass etwas gelöscht wird, sondern dass
+das Richtige stehen bleibt. Aufbau: zwei gleich alte Datensätze,
+neun Jahre, Frist acht — einer abgelöst, einer laufend.
+
+| Prüfung | Erwartet | Gemessen |
+| --- | --- | --- |
+| Klarname im Änderungsprotokoll nach der Löschung | 0 Zeilen | **0** |
+| Protokollzeile bleibt bestehen, nur ihr Inhalt geht | > 0 bereinigt | **9** |
+| Gegenprobe: Protokoll über einen Kaufbeleg behält seinen Betrag | > 0 | **4** |
+| Gegenprobe: Protokoll eines unbeteiligten Kontos unberührt | > 0 mit Namen | **5** |
+| Abgelöste Einwilligung nach Fristablauf | 0 Zeilen | **0** |
+| Gegenprobe: geltende Einwilligung, gleich alt | bleibt | **1** |
+| Abgelöstes Abo nach Fristablauf | 0 Zeilen | **0** |
+| Gegenprobe: laufendes Abo, gleich alt | bleibt | **1** |
+| Der Fristlauf benennt, was er gelöscht hat | beide Tabellen | `{"consents": 1, "customer_subscriptions": 1}` |
+| Keine Tabelle mehr ohne Entscheidung | 0 | **0** |
+| Beschäftigtendaten als eigener Vorgang ausgewiesen | 2 | `employee_trainings, ifsg_briefings` |
+
+`scripts/pruefumgebung/96_loeschprozess.sql`, 25 Prüfungen, dreimal
+hintereinander mit identischem Ergebnis.
+
+### Was dabei noch aufgefallen ist — die Prüfskripte selbst
+
+Ein Regressionstest, der nur beim ersten Lauf stimmt, ist keiner. Fünf
+Skripte maßen Reste des Vorlaufs statt der Sache:
+
+* `93` verglich die Zahl der Einladungen mit einer festen `1` — jeder
+  Lauf legt eine weitere an. Gemessen wird jetzt die **Veränderung**.
+* `94` prüfte die Aufbewahrungsfrist, indem es die Tabellennamen im
+  **Quelltext** der purge-Funktion suchte. Seit CUST-018 stehen die
+  Fristen als Daten in `loeschregeln`, die Funktion nennt keine Tabelle
+  mehr — der Test wäre rot geworden, obwohl die Fristen stehen. Er misst
+  jetzt die Regel und führt den Fristlauf aus.
+* `94` ließ Kunde B dauerhaft als gelöscht zurück und verfälschte damit
+  jeden späteren Lauf. Es räumt jetzt auf.
+* `95` zählte die Warteschlange kumulativ und maß beim dritten Lauf `3`
+  statt `1`.
+* `50` baute für einen Negativtest auf eine Zeile, die ein anderes
+  Skript hinterlassen hatte. Es stellt seine Voraussetzung jetzt selbst
+  her.
+
+Zwei Erwartungen waren zudem inhaltlich falsch:
+
+* `95` verlangte, an ein gelöschtes Konto dürfe **gar keine** Post mehr
+  gehen. Art. 18 DSGVO schränkt die Verarbeitung ein, er verbietet sie
+  nicht — über das Ergebnis seines Löschverlangens ist der Betroffene
+  gerade zu informieren. Diese Einsicht stand seit dem 02.09.2026 im
+  Text dieses Dokuments, aber nicht im Skript. Jetzt misst es beides:
+  die Vertragsnachricht geht hinaus, die Werbung wird mit
+  `suppressed/konto_geloescht` unterdrückt.
+* `80` wertete vier Verwaltungs-RPCs als Treffer, weil sie *eine Zeile*
+  zurückgaben — nämlich ein leeres `jsonb`-Array. Die Zusicherung las
+  die Zeilenzahl, obwohl ihr eigener Erwartungstext „oder leere Menge"
+  sagte. Sie liest jetzt den **Inhalt** nach. `advertising_redirect_count`
+  gehört nicht in diese Liste: Der Klickzähler ist bewusst für jedes
+  Kundenkonto aufrufbar; geprüft wird er in `90` (S-12, Frequenzgrenze
+  mit Gegenprobe).
+
+### Stand des Regressionslaufs
+
+Elf Skripte, jedes für sich zurückgesetzt, **dreimal** hintereinander:
+
+```
+gruen=187   rot=0   Messung ohne Wertung=118
+```
+
+Die 118 ohne Wertung sind die Tabellensicht aus `40_lese_isolation.sql`:
+Zeilenzahl je Tabelle und Rolle gegen die Wahrheit. Sie ist eine
+Aufnahme, kein Urteil — bewertet wird sie in Abschnitt 4.
+
+### Gleichheit mit der Produktion — nach dem Ausrollen erneut gemessen
+
+Ein Testergebnis von hier gilt dort nur, solange die Umgebungen gleich
+sind. Nach dem Ausrollen der beiden Migrationen wurde die Prüfumgebung
+**von Null** aus den 202 Migrationen des Repositories neu gebaut und
+gegen die Produktion gestellt:
+
+| Merkmal | Produktion | Neubau aus dem Repository |
+| --- | --- | --- |
+| RLS-Policies | 189 · `a44cb08bf9c4dcb3de3a8224dbed366b` | 189 · **identisch** |
+| Tabellenrechte anon/authenticated/service_role | 1575 · `98a96151ba93bfcea06773c6cad5bec8` | 1575 · **identisch** |
+| Ausführungsrechte `anon` | 4 · `fd7d91d85d4bb23c8e786fc430e772bf` | 4 · **identisch** |
+| Ausführungsrechte `authenticated` | 139 · `de2ba940c1690120d4bd7d11ebf0f3b3` | 139 · **identisch** |
+| Ausführungsrechte `service_role` | 157 · `9d6a87944be388aad57f7eaed6372385` | 157 · **identisch** |
+| Löschregeln | 36, davon 0 offen | 36, davon 0 offen |
+| `execute_account_deletion` | `e52044e1ce790c9b22c23a2f1ef7048a` | **identisch** |
+| `app.purge_nach_frist` | `94c52c5d176ff7f3bc6dbd1ce24a1980` | **identisch** |
+
+202 von 202 Migrationen laufen auf einer leeren Datenbank durch. Die
+beiden Funktionen, gegen die oben gemessen wurde, sind **byteweise**
+dieselben, die jetzt in der Produktion stehen — nicht bloß gleichwertig.
+
+### Was das über die Arbeitsweise sagt
+
+S-23 wurde nicht von einer Testsuite gefunden. Alle 13 Prüfungen des
+Löschprozesses waren grün, während das Änderungsprotokoll den Klarnamen
+weiterhin trug — sie fragten es schlicht nicht ab. Gefunden wurde es
+beim Lesen der Trigger auf den zehn neu eingeordneten Tabellen, mit der
+Frage: *Was passiert eigentlich, wenn hier gelöscht wird?*
+
+Das ist dasselbe Muster wie bei S-20: Was die Tests nicht abfragen,
+melden sie nicht als fehlend. Die Vollständigkeit einer Aufstellung ist
+keine Eigenschaft, die eine Suite prüfen kann — sie muss von außen
+angezweifelt werden.

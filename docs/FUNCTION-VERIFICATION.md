@@ -29,7 +29,9 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-014 | Werbung und Gutscheine für ein gelöschtes Konto | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-015 | Geburtstags-/Jubiläumsgutschein erzeugbar | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-21 behoben) |
 | CUST-016 | Löschverlangen wird ausgeführt | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (13 Prüfungen) |
-| CUST-018 | Löschregeln für die restlichen 15 Tabellen festgelegt | D3/D6 | ✓ gemessen: 15 ohne Entscheidung | — | — | — | — | offen | ✓ | 🔴 |
+| CUST-018 | Löschregeln für die restlichen 15 Tabellen festgelegt | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (Freigabe 02.09.2026) |
+| CUST-020 | Änderungsprotokoll trägt die Löschung nicht zurück | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-23 behoben) |
+| CUST-021 | Fristbeginn erst mit Ende des Vorgangs (§ 147 Abs. 4 AO) | D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-24 behoben) |
 | CUST-019 | Fristlauf je Dokumentart, mit Ablaufhemmung | D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-017 | Auskunft nach Art. 15 erreichbar (`export_my_data`) | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (R-13, 38 statt 9 Bereiche) |
 | CUST-009 | Individuelle Preise lesen | D2/D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
@@ -39,9 +41,12 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-013 | Rechnungssicht | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 
 ¹ Der Ablauf steht seit dem 02.09.2026 (Kapitel 32 freigegeben, Kapitel 33
-umgesetzt). Offen ist nur noch die Festlegung für 15 Tabellen, die in der
-Vorlage nicht genannt waren — sie werden vom Löschlauf **nicht angefasst**
-und in seinem Bericht namentlich ausgewiesen (CUST-018).
+und 34 umgesetzt). Seit der Freigabe der letzten 15 Tabellen trägt **jede**
+Tabelle mit Personenbezug eine Regel; `offen` gibt es nicht mehr. Zwei
+Tabellen mit Beschäftigtendaten (`ifsg_briefings`, `employee_trainings`)
+stehen bewusst auf `ausserhalb` — sie folgen dem Arbeits- und
+Lebensmittelrecht, nicht § 147 AO, und der Löschlauf weist sie unter
+`nicht_zustaendig` aus, statt sie stillschweigend zu übergehen.
 
 ## 2. Zahlung, Abo, Jugendschutz
 
@@ -119,7 +124,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 9   🟡 GELB: 0   🟢 GRÜN: 51
+🔴 ROT: 8   🟡 GELB: 0   🟢 GRÜN: 54
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -137,7 +142,6 @@ Sicherheitsbefund im Code.
 | AUTH-011 / S-22 | Keine Zeichenklassen-Anforderung serverseitig — der Client verlangt sie, die API nicht | ein Feld im Dashboard („Password requirements") | Philipp |
 | AUTH-005 / S-13 | Leaked-Password-Schutz | Supabase Pro; kommt vor der Live-Schaltung | Philipp |
 | AUTH-009 / S-18 | `config.toml` beschreibt die gehosteten Auth-Einstellungen nicht | Entscheidung: dokumentieren oder per CLI verwalten | offen |
-| CUST-018 | 15 Tabellen ohne Löschregel — der Löschlauf fasst sie nicht an und nennt sie im Bericht | eine Festlegung je Tabelle | Philipp |
 | AUTH-002/003/004 | Rate Limiting, Passwort-Reset, Enumeration | Zugriff auf `*.supabase.co` (Egress `403`) | fehlendes Mittel |
 | MAIL-004 | Zustellung über Resend | ein Testpostfach | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |

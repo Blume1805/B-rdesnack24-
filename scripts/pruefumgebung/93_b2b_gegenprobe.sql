@@ -13,13 +13,18 @@ declare
   G  uuid := '33333333-3333-3333-3333-333333333333';
   F1 uuid := 'b1000000-0000-0000-0000-0000000000f1';
   C1 uuid := 'c1000000-0000-0000-0000-0000000000f1';
-  w text; r text;
+  w text; r text; vorher int; nachher int;
 begin
   -- Was der Firmen-Admin auf der eigenen Firma DARF (mitgliedschaftsgebunden)
+  -- Gemessen wird die Veraenderung, nicht ein fester Stand: Jeder Lauf legt
+  -- eine weitere Einladung an. Eine Zusicherung auf "= 1" waere beim zweiten
+  -- Lauf rot geworden, ohne dass sich an der Sache etwas geaendert haette.
+  vorher := pruef.wahrheit(format('select count(*)::text from public.business_invitations where business_id=%L', F1))::int;
   w := pruef.schreibe(format('select public.business_invite(%L,''kollege@firma-eins.invalid'')', F1), A1);
-  r := pruef.wahrheit(format('select count(*)::text from public.business_invitations where business_id=%L', F1));
+  nachher := pruef.wahrheit(format('select count(*)::text from public.business_invitations where business_id=%L', F1))::int;
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Gegenprobe','business_invite eigene Firma','Admin Firma 1','Firma 1','Einladung entsteht', w||' / Einladungen='||r, r='1');
+   values ('Gegenprobe','business_invite eigene Firma','Admin Firma 1','Firma 1','genau eine Einladung mehr',
+           w||' / '||vorher||' -> '||nachher, nachher = vorher + 1);
 
   w := pruef.schreibe(format('select public.business_budget_set(%L,%L,150)', F1, A1), A1);
   r := pruef.wahrheit(format('select max(monatslimit_brutto)::text from public.business_budgets where business_id=%L', F1));

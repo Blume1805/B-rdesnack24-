@@ -18,15 +18,25 @@ Original. Deshalb wird die Gleichheit **gemessen**, nicht behauptet.
 Stand nach dem Ausrollen der Korrekturen S-1 bis S-12 und ihres Nachzugs
 am 02.09.2026:
 
-| Merkmal | Produktion | lokal | Fingerabdruck |
+Stand nach dem Ausrollen von CUST-018 sowie S-23 und S-24 am 02.09.2026.
+Die lokale Spalte stammt aus einem **Neubau von Null** über alle 202
+Migrationen des Repositories — nicht aus einer fortgeschriebenen
+Datenbank:
+
+| Merkmal | Produktion | Neubau aus dem Repository | Fingerabdruck |
 | --- | --- | --- | --- |
-| Tabellen in `public` | 112 | 112 | — |
-| RLS-Policies | 186 | 186 | `c8fbc1d9132a89ae30264983dfd4e067` (identisch) |
-| Tabellenrechte für anon/authenticated/service_role | 1561 | 1561 | `da0695390dfecc8d3dfbebb611b45519` (identisch) |
-| Ausführungsrechte `anon` | 5 | 5 | `0a706e4f08ab64b9aaaf7a795db534b6` (identisch) |
-| Ausführungsrechte `authenticated` | 138 | 138 | `c5f00ccba46d3fdd0ce473c34aa2b81d` (identisch) |
-| Ausführungsrechte `service_role` | 156 | 156 | `7056df4ed6abfded2d474057f36de9dc` (identisch) |
-| Funktionen in `public` (ohne Erweiterungen) | 156 | 156 | — |
+| RLS-Policies | 189 | 189 | `a44cb08bf9c4dcb3de3a8224dbed366b` (identisch) |
+| Tabellenrechte für anon/authenticated/service_role | 1575 | 1575 | `98a96151ba93bfcea06773c6cad5bec8` (identisch) |
+| Ausführungsrechte `anon` | 4 | 4 | `fd7d91d85d4bb23c8e786fc430e772bf` (identisch) |
+| Ausführungsrechte `authenticated` | 139 | 139 | `de2ba940c1690120d4bd7d11ebf0f3b3` (identisch) |
+| Ausführungsrechte `service_role` | 157 | 157 | `9d6a87944be388aad57f7eaed6372385` (identisch) |
+| Löschregeln, davon offen | 36 / 0 | 36 / 0 | — |
+| `execute_account_deletion` | — | — | `e52044e1ce790c9b22c23a2f1ef7048a` (identisch) |
+| `app.purge_nach_frist` | — | — | `94c52c5d176ff7f3bc6dbd1ce24a1980` (identisch) |
+
+Die beiden letzten Zeilen sind MD5 über den Funktionsrumpf. Sie sagen
+mehr als jeder Rechtevergleich: Was hier geprüft wurde, ist **byteweise**
+dasselbe, was in der Produktion läuft.
 
 Vor dem Ausrollen lauteten die beiden ersten Fingerabdrücke
 `6d300aabed59a0c1065ac2100e0701fb` (186 Policies) und
@@ -78,7 +88,7 @@ fehlt statt weil eine Policy greift.
 Bis dahin liefen 179 von 185 Migrationen auf einer leeren Datenbank; sechs
 setzten einen Zwischenzustand der Produktion voraus. Sie sind repariert
 (Befund S-14, `docs/SECURITY.md` Abschnitt 13). Der vollständige Neuaufbau
-ergibt jetzt **197 von 197** und denselben Stand wie die Produktion.
+ergibt jetzt **202 von 202** und denselben Stand wie die Produktion.
 
 Die Rechte werden dabei **nicht mehr aus der Produktion importiert**: Der
 Nachbau setzt die Supabase-Standardrechte selbst (`alter default
@@ -101,7 +111,7 @@ dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 | `93_b2b_gegenprobe.sql` | was der Firmen-Admin auf der eigenen Firma darf — und was bewusst intern bleibt |
 | `94_loeschung.sql` | was mit einem gelöschten Konto noch geschieht |
 | `95_loeschung_gegenprobe.sql` | dieselben Prüfungen gegen ein aktives Konto |
-| `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt — und dass ein unbeteiligtes Konto unberührt bleibt |
+| `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt, dass ein unbeteiligtes Konto unberührt bleibt — und seit S-23/S-24, dass das Änderungsprotokoll die Löschung nicht zurückträgt und die Frist erst mit dem Ende des Vorgangs beginnt |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.
@@ -116,3 +126,32 @@ Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 2. **Statuscode statt Zustand.** RLS wirft keinen Fehler, sie liefert
    keine Zeilen. Gemessen wird deshalb die Zeilenzahl, und nach jedem
    Schreibversuch wird der **gespeicherte** Zustand erneut gelesen.
+
+## Drei Fallen, die hier bewusst umgangen werden
+
+Zu den beiden oben genannten kam am 02.09.2026 eine dritte:
+
+3. **Der Lauf, der nur einmal stimmt.** Fünf Skripte maßen Reste des
+   Vorlaufs statt der Sache — eine feste Zahl statt der Veränderung,
+   eine kumulierte Warteschlange, eine Voraussetzung aus einem fremden
+   Skript, ein Testkonto, das verändert zurückblieb. Ein Regressionstest,
+   der beim zweiten Lauf rot wird, ohne dass sich etwas geändert hat,
+   wird nicht gelesen, sondern übergangen — und das ist schlimmer, als
+   ihn gar nicht zu haben.
+
+   Deshalb gilt jetzt: Jedes Skript stellt seine Voraussetzungen selbst
+   her, räumt hinter sich auf, und misst Veränderungen statt Stände. Der
+   Nachweis ist der dreifache Lauf mit identischem Ergebnis.
+
+## Der vollständige Lauf
+
+Elf Skripte, jedes für sich zurückgesetzt (`91_b2b_pruefdaten.sql` ist
+Datenaufbau, kein Test):
+
+```
+gruen=187   rot=0   Messung ohne Wertung=118
+```
+
+Dreimal hintereinander, jedes Mal dieselbe Zahl. Die 118 ohne Wertung
+sind die Tabellensicht aus `40_lese_isolation.sql` — eine Aufnahme, kein
+Urteil.

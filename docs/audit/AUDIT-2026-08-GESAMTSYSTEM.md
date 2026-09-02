@@ -1867,3 +1867,118 @@ nicht angefasst und in seinem Bericht namentlich genannt — darunter
 `referral_codes` und `business_members`. Drei davon berühren Dritte
 (geworbene Personen, die Firma), was die Entscheidung fachlich sperriger
 macht als bei den übrigen.
+
+---
+
+## 34. Die letzten 15 Tabellen — und zwei Fehler, die dabei sichtbar wurden (02.09.2026, spätabends)
+
+Kapitel 33 endete mit einer offenen Entscheidung: 15 Tabellen mit
+Personenbezug hatten noch keine Löschregel. Sie wurden vorgelegt,
+begründet, und am 02.09.2026 freigegeben:
+
+* **3 löschen** — `customer_notification_reads` (Lesebestätigungen),
+  `advertising_redirect_actors` (Anzeigenklicks), `offer_activations`
+  (Angebotsaktivierung; wurde der Rabatt eingelöst, steht er auf dem
+  Kaufbeleg, und der bleibt acht Jahre)
+* **10 aufbewahren** — neun mit acht Jahren, `purchase_complaints` mit
+  sechs. Eine Reklamation ist ein Geschäftsbrief, kein Buchungsbeleg;
+  folgte eine Gutschrift, hängt diese an ihrer eigenen Frist.
+* **2 außerhalb** — `ifsg_briefings` und `employee_trainings` sind
+  Beschäftigtendaten. Sie folgen dem Arbeits- und Lebensmittelrecht,
+  nicht § 147 AO. Wer sein *Kundenkonto* löschen lässt, verliert nicht
+  seine Belehrungsnachweise als Mitarbeiter. Sie mitzulöschen wäre keine
+  Gründlichkeit, sondern ein Zuständigkeitsfehler.
+
+Dafür kam eine neue Behandlung `ausserhalb` hinzu. Der Löschlauf weist
+sie unter `nicht_zustaendig` aus — er übergeht sie nicht stillschweigend.
+`offen` gibt es seitdem nicht mehr: 36 Tabellen, 36 Regeln.
+
+### Was beim Ausrollen auffiel
+
+Die Einordnung war unstrittig. Der Prozess, in den sie hineinlief, hatte
+zwei Fehler — beide gemessen, beide behoben, beide mit Gegenprobe. Sie
+stehen ausführlich in `docs/SECURITY.md`, Abschnitt 18.
+
+**S-23: Das Änderungsprotokoll machte die Löschung rückgängig.**
+`audit_log` protokolliert 40 Tabellen, darunter `profiles` und
+`customers`. Jede Anonymisierung legte dort eine Zeile mit dem
+vollständigen alten Datensatz an. Nach einem vollständigen Löschlauf
+standen **vier Zeilen mit Klarnamen und E-Mail** des gelöschten Kontos
+in der Datenbank, 31 weitere mit Inhalten aus gelöschten Tabellen.
+
+Die Tabelle war in den 35 nie vorgekommen, weil sie den Personenbezug
+nicht in einer Spalte trägt, sondern in JSON. Eine Aufstellung, die nach
+Fremdschlüsseln auf `profiles` sucht, findet sie nicht.
+
+Behoben mit `anonymisieren`, nicht `loeschen`: Wer wann welchen
+Datensatz geändert hat, bleibt — das ist die Protokollierung, die die
+GoBD verlangen. Der Inhalt fällt weg, aber nur dort, wo er zu einer
+gelöschten oder anonymisierten Tabelle gehört. Protokollzeilen über
+Kaufbelege behalten ihren Betrag.
+
+**S-24: Die Frist lief, während der Vertrag noch lief.**
+Bis zu diesem Kapitel waren alle Fristtabellen abgeschlossene Vorgänge —
+ein Kauf, eine Rechnung. Mit den zehn neuen kamen erstmals laufende
+Sachverhalte hinzu. Der nächtliche Fristlauf hätte ein seit neun Jahren
+bestehendes Abo gelöscht: den Vertrag, nicht seinen Beleg. Dasselbe galt
+bereits vorher für `consents` — die geltende Einwilligung wäre nach acht
+Jahren gefallen, während die Verarbeitung weiterläuft.
+
+§ 147 Abs. 4 AO lässt die Frist mit dem Schluss des Kalenderjahres
+beginnen, in dem der Vorgang **endet**. Die Regeln tragen dafür jetzt
+eine Spalte `frist_ab`. Liefert sie NULL, ist der Vorgang nicht beendet
+und die Zeile wird nie gelöscht.
+
+### Der Nachweis
+
+Der aussagekräftige Test ist nicht, dass etwas gelöscht wird, sondern
+dass das Richtige stehen bleibt. Aufbau in jedem Fall: zwei gleich alte
+Datensätze — neun Jahre bei acht Jahren Frist — einer abgelöst, einer
+laufend. Vor der Korrektur fielen beide, danach genau der abgelöste.
+
+25 Prüfungen im Löschprozess, dreimal hintereinander identisch grün.
+Über alle elf Prüfskripte: **187 grün, 0 rot**, ebenfalls dreimal.
+
+### Nebenbefund: fünf Prüfskripte, die nur einmal stimmten
+
+Beim Nachlauf zeigte sich, dass mehrere Skripte Reste des Vorlaufs maßen
+statt der Sache: eine feste Zahl statt der Veränderung, eine kumulierte
+Warteschlange, eine Voraussetzung aus einem fremden Skript, ein
+Testkonto, das verändert zurückblieb. Und eines prüfte die
+Aufbewahrungsfrist, indem es Tabellennamen im **Quelltext** der
+purge-Funktion suchte — seit CUST-018 stehen die Fristen als Daten, die
+Funktion nennt keine Tabelle mehr.
+
+Ein Regressionstest, der beim zweiten Lauf rot wird, ohne dass sich
+etwas geändert hat, wird nicht gelesen, sondern übergangen. Alle fünf
+sind repariert; der Nachweis ist der dreifache Lauf mit identischem
+Ergebnis.
+
+Zwei Erwartungen waren zudem inhaltlich falsch — am deutlichsten die
+Annahme, an ein gelöschtes Konto dürfe gar keine Post mehr gehen.
+Art. 18 DSGVO schränkt die Verarbeitung ein, er verbietet sie nicht;
+über das Ergebnis seines Löschverlangens ist der Betroffene gerade zu
+informieren. Diese Einsicht stand seit dem Vormittag im Text, aber nicht
+im Skript. Jetzt misst es beides: die Vertragsnachricht geht hinaus, die
+Werbung wird mit `suppressed/konto_geloescht` unterdrückt.
+
+### Gleichheit mit der Produktion
+
+Nach dem Ausrollen wurde die Prüfumgebung **von Null** aus den 202
+Migrationen des Repositories neu gebaut. Alle fünf Rechte-Fingerabdrücke
+stimmen mit der Produktion überein, ebenso die Rümpfe von
+`execute_account_deletion` und `app.purge_nach_frist` — byteweise, nicht
+bloß gleichwertig. Was geprüft wurde, ist also genau das, was läuft.
+
+### Was das über die Arbeitsweise sagt
+
+S-23 fand keine Testsuite. Alle 13 Prüfungen des Löschprozesses waren
+grün, während das Protokoll den Klarnamen weiterhin trug — sie fragten
+es schlicht nicht ab. Gefunden wurde es beim Lesen der Trigger auf den
+zehn neu eingeordneten Tabellen, mit der Frage: *Was passiert
+eigentlich, wenn hier gelöscht wird?*
+
+Dasselbe Muster wie bei S-20 im Kapitel 30. Die Vollständigkeit einer
+Aufstellung ist keine Eigenschaft, die eine Suite prüfen kann. Sie muss
+von außen angezweifelt werden — und der Anlass dazu war hier ausgerechnet
+eine Aufgabe, die als reine Dateneingabe begonnen hatte.

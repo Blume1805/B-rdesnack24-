@@ -104,10 +104,15 @@ begin
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('Loeschprozess','Vorgang festgehalten','System','account_deletion_requests','ausgefuehrt', r, r='ausgefuehrt');
 
-  -- 9) Der Bericht nennt die offenen Tabellen
+  -- 9) Der Bericht nennt keine offene Tabelle mehr (CUST-018, 02.09.2026) und
+  --    weist die beiden Beschaeftigtentabellen als eigenen Vorgang aus.
   n := jsonb_array_length(v_bericht->'ohne_entscheidung');
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Loeschprozess','Offene Tabellen werden benannt','System','Bericht','mehr als 0', n::text, n>0);
+   values ('Loeschprozess','Keine offene Tabelle im Bericht','System','Bericht','0', n::text, n=0);
+  n := jsonb_array_length(v_bericht->'nicht_zustaendig');
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Beschaeftigtendaten im Bericht benannt','System','Bericht','2',
+           coalesce(n::text,'kein Feld'), n=2);
 
   -- 10) GEGENPROBE: Das unbeteiligte Konto ist unberuehrt
   select (select count(*) from public.product_ratings where customer_id=U)
@@ -130,3 +135,143 @@ begin
    values ('Aufbewahrung','Fristlauf ohne Hemmung','System','purge_nach_frist','laeuft, loescht heute nichts',
            left(v_bericht::text,80), (v_bericht->>'uebersprungen')='false' and v_bericht->'geloescht' = '{}'::jsonb);
 end $$;
+
+-- ===========================================================================
+-- S-23 und S-24: die beiden Fehler, die beim Ausrollen von CUST-018 auffielen
+-- ===========================================================================
+do $$
+declare
+  L uuid := '88888888-8888-8888-8888-888888888888';  -- geloeschtes Konto
+  U uuid := '99999999-9999-9999-9999-999999999999';  -- unbeteiligtes Konto
+  A uuid := '11111111-1111-1111-1111-111111111111';  -- Kunde A
+  n int; m int; r text; v_bericht jsonb;
+begin
+  -- ---------------------------------------------------------------------
+  -- S-23: Steht das Geloeschte noch im Aenderungsprotokoll?
+  -- Der Loeschlauf ist im Block darueber bereits erfolgt.
+  -- ---------------------------------------------------------------------
+
+  select count(*) into n from public.audit_log
+   where (record_id = L::text
+          or old_data->>'user_id' = L::text or old_data->>'profile_id' = L::text
+          or old_data->>'customer_id' = L::text)
+     and table_name in (select tabelle from public.loeschregeln
+                         where behandlung in ('loeschen','anonymisieren'))
+     and (old_data::text ilike '%loeschkandidat@test.invalid%'
+          or old_data::text ilike '%Zu Loeschen%'
+          or new_data::text ilike '%loeschkandidat@test.invalid%'
+          or new_data::text ilike '%Zu Loeschen%');
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Klarname im Aenderungsprotokoll','System','audit_log',
+           '0 Zeilen', n::text, n=0);
+
+  -- Die Zeilen selbst bleiben: Wer wann welchen Datensatz geaendert hat, ist
+  -- die Protokollierung, die die GoBD verlangt. Nur der Inhalt faellt weg.
+  select count(*) into n from public.audit_log
+   where record_id = L::text and table_name = 'profiles'
+     and old_data->>'entfernt' is not null;
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Protokollzeile bleibt, Inhalt geht','System','audit_log',
+           'mehr als 0 bereinigte Zeilen', n::text, n>0);
+
+  -- GEGENPROBE 1: Protokollzeilen ueber aufbewahrungspflichtige Tabellen
+  -- behalten ihren Inhalt. Sie sind Teil des Belegs, nicht des Geloeschten.
+  select count(*) into n from public.audit_log
+   where old_data->>'customer_id' = L::text and table_name = 'purchases'
+     and old_data->>'total_gross' is not null;
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Gegenprobe','Beleg-Protokoll bleibt inhaltlich','System','audit_log/purchases',
+           'mehr als 0 Zeilen mit Betrag', n::text, n>0);
+
+  -- GEGENPROBE 2: Das unbeteiligte Konto steht unveraendert im Protokoll.
+  select count(*) into n from public.audit_log
+   where record_id = U::text and new_data::text ilike '%Unbeteiligt%';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Gegenprobe','Fremdes Protokoll unberuehrt','System','audit_log',
+           'mehr als 0 Zeilen mit Namen', n::text, n>0);
+
+  -- ---------------------------------------------------------------------
+  -- S-24: Laeuft die Frist ab Anlage oder ab Ende des Vorgangs?
+  -- Aufbau: je ein abgeloester und ein noch laufender Vorgang, beide neun
+  -- Jahre alt. Bei acht Jahren Frist muss genau einer von beiden fallen.
+  -- ---------------------------------------------------------------------
+
+  delete from public.consents where version = 'pruef-s24';
+  delete from public.customer_subscriptions where source = 'pruef-s24';
+
+  -- Kunde A: Einwilligung von vor neun Jahren, heute durch eine neue abgeloest
+  insert into public.consents(profile_id,type,granted,version,created_at) values
+    (A,'marketing',true,'pruef-s24', now() - interval '9 years'),
+    (A,'marketing',false,'pruef-s24', now());
+  -- Kunde U: Einwilligung von vor neun Jahren, bis heute die geltende
+  insert into public.consents(profile_id,type,granted,version,created_at) values
+    (U,'marketing',true,'pruef-s24', now() - interval '9 years');
+
+  -- Dasselbe beim Abo
+  insert into public.customer_subscriptions
+    (id,customer_id,plan,price_cents,billing_label,chosen_at,source,withdrawal_consent,age_consent)
+  values
+    (gen_random_uuid(),A,'monthly',499,'mtl.', now() - interval '9 years','pruef-s24',true,true),
+    (gen_random_uuid(),A,'yearly',4990,'jaehrl.', now(),'pruef-s24',true,true),
+    (gen_random_uuid(),U,'monthly',499,'mtl.', now() - interval '9 years','pruef-s24',true,true);
+
+  v_bericht := app.purge_nach_frist();
+
+  -- Abgeloest und ueber der Frist: weg
+  select count(*) into n from public.consents
+   where profile_id = A and version = 'pruef-s24' and created_at < now() - interval '8 years';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Aufbewahrung','Abgeloeste Einwilligung nach Frist','System','consents',
+           '0 Zeilen', n::text, n=0);
+
+  -- GEGENPROBE: Noch geltend, gleich alt: bleibt
+  select count(*) into n from public.consents
+   where profile_id = U and version = 'pruef-s24';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Gegenprobe','Geltende Einwilligung bleibt','System','consents',
+           '1 Zeile — die Frist hat nicht begonnen', n::text, n=1);
+
+  select count(*) into n from public.customer_subscriptions
+   where customer_id = A and source = 'pruef-s24' and chosen_at < now() - interval '8 years';
+  select count(*) into m from public.customer_subscriptions
+   where customer_id = U and source = 'pruef-s24';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Aufbewahrung','Abgeloestes Abo nach Frist','System','customer_subscriptions',
+           '0 Zeilen', n::text, n=0);
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Gegenprobe','Laufendes Abo bleibt','System','customer_subscriptions',
+           '1 Zeile — laufender Vertrag, keine Frist', m::text, m=1);
+
+  -- Der Bericht nennt, was er geloescht hat
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Aufbewahrung','Fristlauf berichtet die Loeschung','System','purge_nach_frist',
+           'consents und customer_subscriptions genannt',
+           left(v_bericht->>'geloescht',120),
+           (v_bericht->'geloescht') ? 'consents'
+           and (v_bericht->'geloescht') ? 'customer_subscriptions');
+
+  -- Aufraeumen, damit der naechste Lauf wieder von vorn beginnt und der Test
+  -- oben ("loescht heute nichts") nicht auf Resten dieses Blocks anschlaegt.
+  delete from public.consents where version = 'pruef-s24';
+  delete from public.customer_subscriptions where source = 'pruef-s24';
+
+  -- ---------------------------------------------------------------------
+  -- Der Bericht der Loeschung nach CUST-018
+  -- ---------------------------------------------------------------------
+  select count(*) into n from public.loeschregeln where behandlung = 'offen';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Keine Tabelle mehr ohne Entscheidung','System','loeschregeln',
+           '0 offen', n::text, n=0);
+
+  select string_agg(tabelle,', ' order by tabelle) into r
+    from public.loeschregeln where behandlung = 'ausserhalb';
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Beschaeftigtendaten als eigener Vorgang','System','loeschregeln',
+           'employee_trainings, ifsg_briefings', coalesce(r,'-'),
+           r = 'employee_trainings, ifsg_briefings');
+end $$;
+
+select gruppe, test, erwartet, gemessen, case when ok then 'GRUEN' else 'ROT' end as ergebnis
+from pruef.ergebnis order by id;
+select count(*) filter (where ok) as gruen, count(*) filter (where not ok) as rot
+from pruef.ergebnis;

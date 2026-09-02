@@ -42,6 +42,13 @@ begin
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('T4-Loeschen','device_tokens','Kunde A','Kunde B','0 geloescht; Zeile bleibt', w||' / verbleibend='||r, r <> '0');
 
+  -- Voraussetzung selbst herstellen. Diese Zeile stammte bisher aus einem
+  -- anderen Pruefskript; raeumt das auf, misst dieser Negativtest nichts mehr
+  -- und faellt rot aus, obwohl der Schutz greift.
+  insert into public.account_deletion_requests(profile_id, reason)
+  select Bb, 'Voraussetzung fuer T4'
+   where not exists (select 1 from public.account_deletion_requests where profile_id = Bb);
+
   w := pruef.schreibe(format('delete from public.account_deletion_requests where profile_id=%L', Bb), A);
   r := pruef.wahrheit(format('select count(*)::text from public.account_deletion_requests where profile_id=%L', Bb));
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
