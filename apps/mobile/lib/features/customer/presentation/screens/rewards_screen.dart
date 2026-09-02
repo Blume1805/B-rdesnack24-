@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
+import 'ai_info_screen.dart';
 
 /// „Status & Belohnungen" — Gamification-Übersicht für Kund:innen.
 /// Zeigt die kumulative Status-Stufe (Bronze/Silber/Gold) mit Fortschritt
@@ -86,6 +87,7 @@ class RewardsScreen extends ConsumerWidget {
               const _SectionTitle(
                 eyebrow: 'Dauerrabatt',
                 title: 'Dein Rabatt wächst mit',
+                ai: true,
               ),
               const SizedBox(height: AppSpacing.s3),
               TierTiles(
@@ -97,6 +99,7 @@ class RewardsScreen extends ConsumerWidget {
               const _SectionTitle(
                 eyebrow: 'Challenges',
                 title: 'Aktuelle Herausforderungen',
+                ai: true,
               ),
               const SizedBox(height: AppSpacing.s3),
               for (final (i, c)
@@ -112,6 +115,7 @@ class RewardsScreen extends ConsumerWidget {
               const _SectionTitle(
                 eyebrow: 'Sammlung',
                 title: 'Deine Abzeichen',
+                ai: true,
               ),
               const SizedBox(height: AppSpacing.s3),
               _BadgeGrid(
@@ -130,9 +134,18 @@ class RewardsScreen extends ConsumerWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.eyebrow, required this.title});
+  const _SectionTitle({
+    required this.eyebrow,
+    required this.title,
+    this.ai = false,
+  });
   final String eyebrow;
   final String title;
+
+  /// Setzt den KI-Chip neben den Abschnittstitel. Art. 50 EU AI Act:
+  /// Stufe, Challenges und Abzeichen werden serverseitig aus der
+  /// Kaufhistorie gerechnet, nicht redaktionell gepflegt.
+  final bool ai;
 
   @override
   Widget build(BuildContext context) {
@@ -141,15 +154,42 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Eyebrow(eyebrow),
         const SizedBox(height: 2),
-        Text(
-          title,
-          style: AppTypography.display(
-            size: 18,
-            weight: FontWeight.w800,
-            color: AppColors.ink,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: AppTypography.display(
+                  size: 18,
+                  weight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
+              ),
+            ),
+            if (ai) ...[
+              const SizedBox(width: AppSpacing.s3),
+              const _RewardsAiBadge(),
+            ],
+          ],
         ),
       ],
+    );
+  }
+}
+
+/// KI-Chip dieses Bildschirms. Öffnet den `AiInfoScreen` mit den Angaben
+/// nach Art. 50 EU AI Act. Eigenes Widget, weil der Chip an mehreren
+/// Stellen sitzt und jeweils einen eigenen BuildContext zum Pushen braucht.
+class _RewardsAiBadge extends StatelessWidget {
+  const _RewardsAiBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return AiBadge(
+      dense: true,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AiInfoScreen()),
+      ),
     );
   }
 }
@@ -212,6 +252,8 @@ class _TierCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: AppSpacing.s2),
+              const _RewardsAiBadge(),
             ],
           ),
           const SizedBox(height: AppSpacing.s3),

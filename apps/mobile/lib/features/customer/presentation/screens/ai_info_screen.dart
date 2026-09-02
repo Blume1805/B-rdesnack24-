@@ -70,6 +70,35 @@ class AiInfoScreen extends StatelessWidget {
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
+            title: 'Welche Bereiche das im Einzelnen sind',
+            body: '• Persönliche Coupons und Bonus-Angebote — berechnet aus '
+                'Kaufhistorie, Kategorie-Präferenzen und Punktestand\n'
+                '• Wochenangebote und die Tages-Deals (Frühstück, Feierabend)\n'
+                '• Dein Status, der lebenslange Dauerrabatt und der '
+                'Fortschritt zur nächsten Stufe\n'
+                '• Aktuelle Herausforderungen und die Punkte, die du dafür '
+                'gutgeschrieben bekommst\n'
+                '• Deine Abzeichen\n'
+                '• Punkte für das tägliche Einloggen und der Wochenbonus\n'
+                '• Der Geburtstagsgutschein\n\n'
+                'All diese Berechnungen laufen nach festen Regeln auf unserem '
+                'Server. Es ist kein lernendes System beteiligt und es trifft '
+                'keine Einzelfallentscheidung über dich.',
+          ),
+          const _InfoBlock(
+            title: 'Produktbilder',
+            body: 'Für die Bearbeitung eigener Produktaufnahmen setzen wir '
+                'generative KI-Werkzeuge ein — zum Freistellen, Zuschneiden '
+                'und Aufhellen. Das ist die einzige Stelle in dieser App, an '
+                'der ein KI-System im Sinne von Art. 3 EU AI Act arbeitet; '
+                'alles andere oben ist regel-basiert.\n\n'
+                'Wo dabei das Produkt selbst oder seine Umgebung verändert '
+                'wird, weisen wir das am jeweiligen Bild aus. Freistellen, '
+                'Zuschneiden und Helligkeit allein lösen keinen Hinweis aus, '
+                'weil das Bild den Gegenstand weiterhin so zeigt, wie er ist. '
+                'Massgeblich ist immer die Ware am Automaten.',
+          ),
+          const _InfoBlock(
             title: 'Zweck',
             body:
                 'Bessere Sichtbarkeit von Angeboten, die zu deinem bisherigen '
