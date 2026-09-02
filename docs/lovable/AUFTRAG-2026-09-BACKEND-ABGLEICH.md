@@ -656,6 +656,46 @@ Deine Aufgabe ist, dass ein Auschecken **ohne Lovable** baut und prüfbar ist:
 Das Backend-Repository ist derzeit **öffentlich**. Schreib nichts in dieses
 Projekt, was das nicht verträgt.
 
+## 5d. Tests — heute gibt es keine
+
+`package.json` enthält weder Vitest noch Testing-Library noch Playwright, kein
+`test`- und kein `typecheck`-Skript. Die Flutter-App hat 110 Tests, die
+Datenbank 221 geprüfte Zusicherungen. Diese Oberfläche hat **null** — und sie
+soll künftig die Datenauskunft nach Art. 15, die Kontolöschung und die
+Preisberechnung tragen.
+
+Das ist keine Stilfrage. Die Arbeitsregeln des Projekts verlangen für jede
+Funktion einen Positiv-, einen Negativ- und einen Regressionstest, und eine
+Funktion gilt nicht als fertig, solange sie ungetestet ist.
+
+### Was einzurichten ist
+
+Vitest plus Testing Library, dazu die Skripte `test` und `typecheck`. Halt es
+schlank — kein Karussell an Werkzeugen, eine Zeile `bun run test` muss reichen.
+
+### Was zuerst getestet gehört
+
+Zieh die Logik aus den Komponenten heraus, damit sie ohne Rendern prüfbar ist.
+Die Flutter-App macht das vor: `bereicheAusAuskunft()` und
+`auskunftFehlertext()` sind dort freie Funktionen mit neun Tests.
+
+| Was | Warum zuerst |
+|---|---|
+| Rabatt aus `my_subscription_benefits()` | Der heutige Fehler. **Zwei Tests: mit Abo 5 %, ohne Abo 0 %.** Ohne beide ist nichts bewiesen |
+| Übersetzung der Art.-15-Auskunft | Jeder der 38 Bereiche bekommt einen deutschen Namen; ein unbekannter Bereich erscheint **roh** statt zu verschwinden; leer heißt „nichts gespeichert", nie „0 Einträge" |
+| Fehlertexte | Kein Fehlercode erreicht den Nutzer; bei fehlender Anmeldung steht „angemeldet" im Text |
+| Bildplatzhalter | Ohne `image_url` erscheint der Platzhalter; bei kaputter URL ebenfalls; `aria-label` trägt den echten Namen |
+| KI-Kennzeichnung | Für jede der sieben Flächen aus § 5a.1 ein Test, dass der Chip da ist — und einer, dass er beim Chat-Assistenten **nicht** „KI" sagt |
+| Preisformatierung | `list_price_net` ist netto, `tax_rate` steht in Prozent. Ein Test auf 19 % und einer auf 7 % |
+
+### Die Regel dahinter
+
+Ein Test, der nur den Erfolgsfall zeigt, ist kein Test. Zu jedem Positivtest
+gehört die Gegenprobe: Was passiert **ohne** Abo, **ohne** Bild, **ohne**
+Anmeldung, bei **leerer** Antwort. Und ein Test, der beim zweiten Lauf rot
+wird, ohne dass sich etwas geändert hat, wird nicht gelesen, sondern
+übergangen — also keine festen Zahlen, wo eine Veränderung gemeint ist.
+
 ## 6. Was ausdrücklich **nicht** zu tun ist
 
 * Keine Datenbankänderungen, keine Migrationen, keine neuen Tabellen, kein
@@ -670,6 +710,25 @@ Projekt, was das nicht verträgt.
 * Keine Preisaussage, die nicht aus der Datenbank stammt.
 
 ---
+
+## 6a. Was Philipp macht, nicht du
+
+Damit es nicht zwischen den Stühlen liegt:
+
+* **Standortstammdaten pflegen.** Die vier Standorte heißen „Standort 1
+  (ANPASSEN)" bis „Standort Heißgetränke (ANPASSEN)", ohne Straße und ohne
+  Koordinaten. Bis das gepflegt ist, bleibt die Automatenseite zwangsläufig
+  dünn. Das ist richtig so — füll sie nicht auf.
+* **Produktbilder einpflegen.** 63 Produkte, kein einziges Bild. Bis dahin
+  trägt der Platzhalter aus § 5b.
+* **Herkunft der vorhandenen Bilder bestätigen** — du listest sie nur auf.
+* **Die GitHub-Repositories anlegen** (§ 5c).
+* **Ob das BFSG gilt**, ist eine Rechtsfrage, keine technische. Du baust nach
+  WCAG 2.1 AA, weil das die Qualitätsanforderung ist — unabhängig davon, ob
+  eine gesetzliche Pflicht besteht.
+
+Die Angleichung der Flutter-App an den Designvertrag macht ebenfalls nicht du,
+sondern Claude Code im Backend-Repository.
 
 ## 7. Wie du den Abschluss belegst
 

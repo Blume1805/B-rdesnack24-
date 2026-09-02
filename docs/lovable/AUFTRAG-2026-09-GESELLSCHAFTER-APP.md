@@ -311,6 +311,26 @@ Belegdaten. Schreib in das README ausdrücklich, dass ein Betrieb außerhalb
 einer geschützten Umgebung nicht vorgesehen ist, und dass die Rechteprüfung
 vollständig in der Datenbank liegt — nicht in dieser Oberfläche.
 
+## 5d. Tests gehören in Stufe 1
+
+Das Projekt hat keinen Testrahmen. Richte in Stufe 1 Vitest plus Testing
+Library ein, dazu die Skripte `test` und `typecheck` — vor der ersten
+Fachfläche, nicht danach.
+
+Was zuerst geprüft gehört:
+
+| Was | Gegenprobe |
+|---|---|
+| Rechteprüfung: die Navigation zeigt nur, was `my_permissions()` hergibt | ein Konto **ohne** das Recht sieht den Punkt nicht |
+| Die Abweisung `42501` erscheint als Satz, nie als Code | ein Konto **mit** dem Recht kommt durch |
+| Zahlenformatierung: Beträge mit Tabellenziffern, deutsche Trennzeichen | Null-Beträge und negative Beträge |
+| Leerzustand einer Tabelle | mit Daten erscheint die Tabelle |
+| Bildplatzhalter bei fehlendem und bei kaputtem Bild | mit Bild erscheint das Bild |
+
+Ein Test, der nur den Erfolgsfall zeigt, ist kein Test. Und keine festen
+Zahlen dort, wo eine Veränderung gemeint ist — sonst wird der Test beim
+zweiten Lauf rot, ohne dass sich etwas geändert hat.
+
 ## 6. Reihenfolge — nicht alles auf einmal
 
 27 Bereiche sind kein Auftrag, sondern ein Programm. Bau in dieser Reihenfolge
