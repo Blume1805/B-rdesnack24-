@@ -78,6 +78,10 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _guard(() => _remote.updateGender(gender));
 
   @override
+  Future<void> setBirthDateOnce(DateTime birthDate) =>
+      _guard(() => _remote.setBirthDateOnce(birthDate));
+
+  @override
   Future<void> activateWeeklyOffer(String offerId) =>
       _guard(() => _remote.activateWeeklyOffer(offerId));
 

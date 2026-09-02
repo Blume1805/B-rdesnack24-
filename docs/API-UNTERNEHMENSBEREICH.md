@@ -259,3 +259,26 @@ als ein ehrlicher Hinweis.
 `PGRST202` ist der Code, den das Partnerportal bei 7 von 10 Aufrufen
 bekommen hätte. Er bedeutet nie „Server kaputt", sondern immer „Signatur
 falsch".
+
+---
+
+## 6. Tabellenzugriffe, die sich am 02.09.2026 geändert haben
+
+Diese Änderungen betreffen **jede** Oberfläche, die direkt gegen
+PostgREST spricht — auch die Lovable-Projekte.
+
+| Tabelle | Was gilt jetzt |
+| --- | --- |
+| `products` | **`select=*` antwortet mit `42501`.** Die Spalte `cost_price_net` ist für `anon` und `authenticated` entzogen; alle übrigen Spalten sind einzeln freigegeben. Wer den Katalog liest, zählt seine Spalten auf: `select=id,name,category,list_price_net,image_url,allergens,…` |
+| `machine_sales_daily` | nur noch für interne Rollen lesbar |
+| `inventory` | nur noch für interne Rollen lesbar |
+| `permissions`, `roles`, `role_permissions` | nur noch für interne Rollen lesbar; eigene Rechte weiterhin über `my_permissions()` |
+| `product_ratings` | nur noch die eigene Zeile. Durchschnitt und Anzahl kommen aus `product_rating_summary` oder `product_detail` |
+| `profiles.email` | für Nicht-Administratoren nicht mehr schreibbar (`42501`). Die Adresse folgt der bestätigten Anmeldeadresse aus `auth` |
+| `advertising_redirect_count` | zählt je Konto, Kampagne und Tag höchstens dreimal; Aufrufe ohne Anmeldung zählen nicht |
+| `choose_subscription_plan` | prüft zusätzlich `profiles.birth_date`. Neue Fehlerfälle: `P0001` „kein Geburtsdatum hinterlegt", `42501` „nicht volljährig" |
+
+**Für eine neu angelegte Tabelle gilt:** Supabase vergibt automatisch
+volle DML-Rechte an `anon` und `authenticated`. Soll die Tabelle nur über
+eine RPC erreichbar sein, gehört ein ausdrückliches
+`revoke all … from anon, authenticated` in dieselbe Migration.

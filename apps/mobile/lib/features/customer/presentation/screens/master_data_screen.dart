@@ -9,7 +9,13 @@ import '../controllers/customer_providers.dart';
 /// Stammdaten-Anzeige (read-only) mit optionalem Gender-Eintrag.
 ///
 /// Name, Geburtsdatum, E-Mail und Registrierungsdatum wurden bei der
-/// Registrierung erfasst und lassen sich nicht mehr ändern.  Das
+/// Registrierung erfasst und lassen sich nicht mehr ändern.  Eine
+/// Ausnahme: Konten aus der Zeit vor der Pflichtabfrage haben kein
+/// Geburtsdatum.  Sie können es hier **einmalig** nachtragen — sonst
+/// bliebe ihnen das kostenpflichtige Abo dauerhaft verschlossen, weil
+/// `choose_subscription_plan` die Volljährigkeit gegen dieses Feld prüft
+/// (S-6).  Nachträglich ändern lässt es sich danach nicht mehr; dafür
+/// sorgt der Trigger in der Datenbank, nicht dieser Bildschirm.  Das
 /// Geschlecht (m/w/d) darf hier einmalig ergänzt bzw. angepasst werden —
 /// wir brauchen es für den jährlichen Aktions-Report und Ansprache in
 /// Marketing-Mitteilungen.  Das Registrierungsdatum ist bewusst
@@ -26,6 +32,65 @@ class MasterDataScreen extends ConsumerWidget {
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+  /// Einmaliges Nachtragen des Geburtsdatums.
+  ///
+  /// Bewusst zweistufig: erst wählen, dann bestätigen. Die Angabe lässt
+  /// sich danach nicht mehr korrigieren — das steht in der Rückfrage, weil
+  /// ein Tippfehler hier den Zugang zum Abo dauerhaft verstellen würde.
+  Future<void> _nachtragen(BuildContext context, WidgetRef ref) async {
+    final now = DateTime.now();
+    final gewaehlt = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year - 25, now.month, now.day),
+      firstDate: DateTime(now.year - 120),
+      lastDate: DateTime(now.year - 14, now.month, now.day),
+      locale: const Locale('de'),
+      helpText: 'Geburtsdatum wählen',
+    );
+    if (gewaehlt == null || !context.mounted) return;
+
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Geburtsdatum festlegen'),
+        content: Text(
+          'Wir speichern den ${_formatDate(gewaehlt)}. '
+          'Diese Angabe lässt sich später nicht mehr ändern.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Speichern'),
+          ),
+        ],
+      ),
+    );
+    if (bestaetigt != true) return;
+
+    try {
+      await ref.read(customerRepositoryProvider).setBirthDateOnce(gewaehlt);
+      ref.invalidate(myCustomerProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Geburtsdatum gespeichert.')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Das Geburtsdatum konnte nicht gespeichert werden. '
+            'Steht bereits eines im Konto, bleibt es bestehen.',
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,9 +151,14 @@ class MasterDataScreen extends ConsumerWidget {
             ),
             children: [
               Text(
-                'Diese Angaben stammen aus deiner Registrierung und sind '
-                'nicht veränderbar. Nur dein Geschlecht kannst du hier '
-                'ergänzen.',
+                birthDate == null
+                    ? 'Diese Angaben stammen aus deiner Registrierung und '
+                        'sind nicht veränderbar. Dein Geschlecht kannst du '
+                        'hier ergänzen — und dein Geburtsdatum einmalig '
+                        'nachtragen.'
+                    : 'Diese Angaben stammen aus deiner Registrierung und '
+                        'sind nicht veränderbar. Nur dein Geschlecht kannst '
+                        'du hier ergänzen.',
                 style: AppTypography.body(size: 13, color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.s5),
@@ -112,8 +182,17 @@ class MasterDataScreen extends ConsumerWidget {
                       icon: Icons.cake_outlined,
                       label: 'Geburtsdatum',
                       value: birthDate != null ? _formatDate(birthDate) : '—',
-                      hint:
-                          'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl.',
+                      hint: birthDate != null
+                          ? 'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl.'
+                          : 'Noch nicht hinterlegt. Für Bördesnack24 Plus '
+                              'brauchen wir es — alle kostenfreien Vorteile '
+                              'gelten auch ohne.',
+                      trailing: birthDate == null
+                          ? TextButton(
+                              onPressed: () => _nachtragen(context, ref),
+                              child: const Text('Nachtragen'),
+                            )
+                          : null,
                     ),
                     const Divider(height: 1, color: AppColors.borderSubtle),
                     _DataRow(
@@ -275,11 +354,13 @@ class _DataRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.hint,
+    this.trailing,
   });
   final IconData icon;
   final String label;
   final String value;
   final String? hint;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -328,6 +409,10 @@ class _DataRow extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) ...[
+            const SizedBox(width: AppSpacing.s2),
+            trailing!,
+          ],
         ],
       ),
     );

@@ -55,7 +55,7 @@ create table if not exists auth.sessions (
 
 -- Identitätsfunktionen exakt wie bei Supabase: aus den JWT-Claims der Sitzung.
 create or replace function auth.uid() returns uuid language sql stable as $$
-  select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub','')::uuid
+  select nullif(coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb ->> 'sub',''),'')::uuid
 $$;
 create or replace function auth.jwt() returns jsonb language sql stable as $$
   select coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb, '{}'::jsonb)
@@ -64,7 +64,7 @@ create or replace function auth.role() returns text language sql stable as $$
   select coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb ->> 'role', current_user)
 $$;
 create or replace function auth.email() returns text language sql stable as $$
-  select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'email','')
+  select nullif(coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb ->> 'email',''),'')
 $$;
 grant execute on function auth.uid(), auth.jwt(), auth.role(), auth.email() to anon, authenticated, service_role;
 

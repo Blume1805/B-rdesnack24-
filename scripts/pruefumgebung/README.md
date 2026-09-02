@@ -14,18 +14,27 @@ sind diese dritte Umgebung.
 ## Warum das Ergebnis überhaupt etwas über die Produktion aussagt
 
 Eine lokale Nachbildung ist nur so viel wert wie ihre Gleichheit mit dem
-Original. Deshalb wird die Gleichheit **gemessen**, nicht behauptet. Am
-01./02.09.2026 ergab der Vergleich:
+Original. Deshalb wird die Gleichheit **gemessen**, nicht behauptet.
+Stand nach dem Ausrollen der Korrekturen S-1 bis S-12 am 02.09.2026:
 
 | Merkmal | Produktion | lokal | Fingerabdruck |
 | --- | --- | --- | --- |
-| Tabellen in `public` | 111 | 111 | — |
-| RLS-Policies | 186 | 186 | `6d300aabed59a0c1065ac2100e0701fb` (identisch) |
-| Tabellenrechte für anon/authenticated/service_role | 1568 | 1568 | `d29b4dccf48c09cf6914e325f597f429` (identisch) |
+| Tabellen in `public` | 112 | 112 | — |
+| RLS-Policies | 186 | 186 | `c8fbc1d9132a89ae30264983dfd4e067` (identisch) |
+| Tabellenrechte für anon/authenticated/service_role | 1573 | 1573 | `75cea60715ab83473828efb0a30bbbee` (identisch) |
 | Ausführungsrechte `anon` | 5 | 5 | `0a706e4f08ab64b9aaaf7a795db534b6` (identisch) |
 | Ausführungsrechte `authenticated` | 138 | 138 | `c5f00ccba46d3fdd0ce473c34aa2b81d` (identisch) |
 | Ausführungsrechte `service_role` | 156 | 156 | `7056df4ed6abfded2d474057f36de9dc` (identisch) |
 | Funktionen in `public` (ohne Erweiterungen) | 156 | 156 | — |
+
+Vor dem Ausrollen lauteten die beiden ersten Fingerabdrücke
+`6d300aabed59a0c1065ac2100e0701fb` (186 Policies) und
+`d29b4dccf48c09cf6914e325f597f429` (1568 Rechte) — ebenfalls beidseitig
+identisch. Der Vergleich hat sich unmittelbar bezahlt gemacht: Nach dem
+Ausrollen standen 1581 Rechte in der Produktion gegen 1573 lokal. Die
+acht zusätzlichen waren die Standardrechte, die Supabase einer neu
+angelegten Tabelle automatisch für `anon` und `authenticated` gibt —
+sichtbar nur im Abgleich, nicht in der Migration.
 
 Die Fingerabdrücke sind MD5 über die vollständige, sortierte Auflistung
 (Tabelle, Policy, Kommando, Rolle, `USING`, `WITH CHECK` bzw. Rolle,
@@ -81,6 +90,7 @@ Bauplan.** Für die Verfahrensdokumentation ist das der wichtigere Satz.
 | `60_abo_und_finanzen.sql` | Altersprüfung beim Abo, Preis- und Punktemanipulation |
 | `70_vertikal.sql` | Kunde gegen Gesellschafterdaten und -funktionen |
 | `80_verwaltungs_rpc.sql` | alle 48 Verwaltungs-RPCs, die `authenticated` aufrufen darf |
+| `90_nachweis_korrekturen.sql` | die Korrekturen S-1 bis S-12, jede mit Gegenprobe |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

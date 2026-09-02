@@ -1582,3 +1582,99 @@ Jede dieser Änderungen zieht nach der Umsetzung einen erneuten Lauf der
 Skripte in `scripts/pruefumgebung/` nach sich — die Fingerabdrücke sagen
 dabei zuerst, ob die Prüfumgebung überhaupt noch der Produktion
 entspricht.
+
+## 30. Umsetzung der Sicherheitsbefunde S-1 bis S-12 (02.09.2026)
+
+Freigabe: „Alles umsetzen" (Philipp Blume, 02.09.2026). Zehn Migrationen,
+ausgerollt nach vollständigem Durchlauf in der Prüfumgebung. Nachweise
+und Gegenproben: `/docs/SECURITY.md`, Abschnitt 10.
+
+### 30.1 Reihenfolge: erst beweisen, dann ausrollen
+
+Jede Korrektur lief zuerst gegen die lokale Nachbildung, deren Gleichheit
+mit der Produktion über sechs MD5-Fingerabdrücke belegt ist. Erst als
+dort **34 Nachweise grün** waren und die Regression über die
+ursprünglichen Prüfläufe **77 grün / 0 rot** ergab, ging etwas in die
+Produktion. Danach wurden die Fingerabdrücke erneut verglichen — und
+genau das hat sich sofort ausgezahlt (30.3).
+
+### 30.2 Zwei Stellen, an denen die Korrektur beinahe etwas kaputtgemacht hätte
+
+**Der Durchschnitt der Produktbewertungen.** `product_rating_summary`
+stand auf `security_invoker = true`, lief also mit den Rechten des
+Aufrufers. Hätte man nur die Rohtabelle geschlossen, hätte jeder Kunde
+als „Durchschnittsbewertung" seine eigene Bewertung gesehen — eine
+falsche Zahl, ohne Fehlermeldung, auf der Produktseite. Die Sicht musste
+im selben Zug auf Eigentümerrechte umgestellt werden.
+
+**Der Dokument-Upload.** Der Bucket `documents` bekam eine Typgrenze;
+die App lud aber mit dem Standardwert `application/octet-stream` hoch.
+Ohne die gleichzeitige Anpassung des Upload-Pfades hätte die Härtung
+jeden Dokument-Upload abgewiesen. Die Zuordnung steht jetzt als geprüfte
+Funktion `mimeTypFuerDokument` auf Dateiebene, nicht als private Methode
+im Bildschirm.
+
+Beides fiel nicht beim Nachdenken auf, sondern beim Suchen der Verbraucher
+— die Regel „wer eine Abhängigkeit nicht gesucht hat, darf sie nicht als
+nicht vorhanden melden" hat hier zwei stille Fehler verhindert.
+
+### 30.3 Der Fund aus dem Fingerabdruck-Vergleich
+
+Nach dem Ausrollen: 1581 Tabellenrechte in der Produktion gegen 1573 in
+der Prüfumgebung. Supabase vergibt einer **neu angelegten** Tabelle
+automatisch volle DML-Rechte an `anon` und `authenticated`; die
+Prüfumgebung kennt diesen Automatismus nicht. Die neue Tabelle
+`advertising_redirect_actors` hatte die Rechte also, obwohl keine
+Migration sie vergibt.
+
+Gefährlich war es nicht — RLS ist aktiv, die Tabelle hat keine Policy,
+der Zugriff wäre abgewiesen worden. Aber ein Recht, das nur deshalb
+wirkungslos ist, weil eine zweite Schranke hält, ist eine Falle für den,
+der später eine Policy ergänzt. Eine zehnte Migration hat es entzogen.
+
+Die Lehre für künftige Migrationen: **Jede neu angelegte Tabelle braucht
+ein ausdrückliches `revoke`, wenn sie nur über RPCs erreichbar sein
+soll.** Die Migration allein sah in beiden Umgebungen identisch aus;
+sichtbar wurde der Unterschied erst im Vergleich der Wirkung.
+
+### 30.4 Client-Änderungen
+
+* `master_data_screen.dart` — Konten ohne Geburtsdatum können es
+  **einmalig** nachtragen. Ohne diesen Weg wäre die neue Fehlermeldung
+  der Datenbank („bitte in den Stammdaten nachtragen") eine Sackgasse
+  gewesen: Bestandskonten hätten nie ein Abo abschließen können. Der
+  Dialog nennt die Endgültigkeit, bevor gespeichert wird.
+* `documents_screen.dart` — Medientyp aus der Dateiendung statt
+  `application/octet-stream`.
+* `customer_repository` / `customer_remote_data_source` — `setBirthDateOnce`,
+  mit `isFilter('birth_date', null)`: Der Client versucht gar nicht erst
+  zu überschreiben, was schon steht. Die eigentliche Sperre bleibt der
+  Trigger in der Datenbank.
+
+Flutter: `analyze` ohne Befund, **100 Tests grün** (93 vorher, 7 neu für
+Nachtrag-Weg und Medientyp-Zuordnung).
+
+### 30.5 Was offen bleibt
+
+Der Zählstand steht bei **🔴 9, 🟡 0, 🟢 35**. Keine der neun roten
+Zeilen ist ein offener Sicherheitsbefund:
+
+* sieben sind Prüfungen ohne Mittel — Passwort-Reset, Enumeration, Rate
+  Limiting und Resend-Zustellung brauchen Zugriff auf `*.supabase.co`
+  bzw. ein Testpostfach; der Store-Beleg braucht ein Sandbox-Konto; die
+  B2B-Vollmatrix einen zweiten Firmenkunden in den Prüfdaten
+* eine ist eine Einstellung, die nur im Dashboard gesetzt werden kann
+  (Schutz vor kompromittierten Passwörtern)
+* eine ist die offene Rechtsfrage Löschung gegen Aufbewahrung
+
+Ausdrücklich **nicht** behauptet wird: eine belastbare Zählung anonymer
+Anzeigenklicks (dafür fehlt die Edge Function mit Frequenzbegrenzung),
+eine Altersprüfung mit Ausweis (das Geburtsdatum bleibt Selbstauskunft)
+und die Unveränderbarkeit von Belegen (das Protokoll macht Änderungen
+sichtbar, verhindert sie nicht).
+
+`pg_net` bleibt bewusst im Schema `public`: Der Advisor bemängelt den
+Registrierungseintrag der Erweiterung, ihre zwölf Funktionen liegen aber
+längst im eigenen Schema `net`. Ein Verschieben würde die Aufrufe in
+`legal_text_uebernahme_funktionen` und den Cron-Jobs brechen — der
+Warnhinweis wiegt weniger als der Schaden.

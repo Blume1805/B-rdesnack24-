@@ -8,6 +8,11 @@ Letzter vollständiger Durchlauf: **02.09.2026**, Prüfer: Claude Code
 (beauftragt durch Philipp Blume), Umfang: gesamter Code — Datenbank,
 Edge Functions, Flutter-App.
 
+**Die in Abschnitt 8 aufgeführten Befunde sind am 02.09.2026 behoben und
+ausgerollt.** Abschnitt 10 hält die Korrekturen und ihre Nachweise fest;
+Abschnitt 8 bleibt als Befundlage stehen, weil ein Bericht, der seine
+eigenen Feststellungen nachträglich glättet, als Nachweis nichts taugt.
+
 ---
 
 ## 1. Wie geprüft wurde
@@ -285,25 +290,97 @@ Bewertungsfunktion, nicht danach.
 
 ## 9. Security Green Gate
 
+Stand nach dem Ausrollen der Korrekturen (siehe Abschnitt 10):
+
 | Prüfpunkt | Stand |
 | --- | --- |
 | Authentication | ✓ Identität serverseitig aus `auth.uid()`, nie aus einem Client-Parameter |
-| Authorization | ✓ 47 von 48 Verwaltungs-RPCs weisen ab; `advertising_redirect_count` nicht (S-12) |
-| RLS / Storage-Policy | ✓ 186 Policies, alle Buckets privat mit eigener Policy |
+| Authorization | ✓ alle 48 Verwaltungs-RPCs weisen ein Kundenkonto ab; der Klickzähler ist begrenzt |
+| RLS / Storage-Policy | ✓ 186 Policies, alle Buckets privat, mit Policy und mit Größen- und Typgrenze |
 | User Isolation | ✓ horizontal belegt (T1–T4 + Gegenprobe) |
-| IDOR/BOLA (5 Tests) | ✓ T1–T4 ausgeführt; T5 (manipulierter HTTP-Request) nur als SQL-Ebene, nicht über PostgREST — Egress gesperrt |
+| IDOR/BOLA (5 Tests) | ✓ T1–T4 ausgeführt; T5 (manipulierter HTTP-Request) nur auf SQL-Ebene, nicht über PostgREST — Egress gesperrt |
 | Negativtests N1–N12 | teilweise — ohne Token und mit fremder ID belegt; abgelaufener Token, Doppelabsendung, unzulässiger Statusübergang offen |
-| Abuse Cases | teilweise — Rechteausweitung, Mass Assignment, IDOR belegt; Brute Force, Enumeration, Replay nicht erreichbar |
+| Abuse Cases | teilweise — Rechteausweitung, Mass Assignment, IDOR, Zählermanipulation belegt; Brute Force, Enumeration, Replay nicht erreichbar |
 | Rechteausweitung | ✓ vertikal und horizontal geprüft |
-| Mass Assignment | ✗ `profiles.email` (S-5) |
-| Finanzintegrität | ✓ Preis serverseitig; ✗ Altersschranke (S-6) |
-| Audit-Logging | ✗ Lücke bei buchführungsrelevanten Tabellen (S-7) |
+| Mass Assignment | ✓ Rolle, Status, Identität, E-Mail, Preis, Punkte |
+| Finanzintegrität | ✓ Preis serverseitig, Altersschranke gegen gespeichertes Geburtsdatum |
+| Audit-Logging | ✓ 41 Tabellen, belegführende eingeschlossen |
 | Secrets | ✓ |
-| Datenminimierung | ✗ S-2, S-3, S-4, S-8 |
+| Datenminimierung | ✓ EK-Preise, Umsätze, Bestände, Bewertungen und Rechtekatalog geschlossen |
 | Security-Regression | ✓ Verfahren steht und ist wiederholbar (`scripts/pruefumgebung/`) |
 
-**Ergebnis: 🔴 ROT.** Ein einziger offener Punkt genügt dafür; es sind
-vierzehn. Das ist kein Widerspruch zu den 74 bestandenen Tests — die
-Isolation zwischen Kunden hält nachweislich. Was nicht hält, ist die
-Trennung zwischen „angemeldet" und „berechtigt" bei betrieblichen Daten,
-und die Altersschranke.
+**Ergebnis: 🔴 ROT** — aber aus einem anderen Grund als am Morgen. Alle
+inhaltlichen Befunde sind geschlossen; offen sind ausschließlich
+Prüfungen, die aus dieser Umgebung **nicht durchführbar** sind
+(Abschnitt 7: Passwort-Reset, Enumeration, Rate Limiting, Resend-Zustellung,
+B2B-Vollmatrix) sowie eine Einstellung, die nur im Supabase-Dashboard
+gesetzt werden kann (Leaked-Password-Schutz). Nicht durchführbar heißt
+nach den Prüfregeln 🔴, nicht Gelb — auch wenn niemand mehr daran
+arbeiten kann, solange das Mittel fehlt.
+
+---
+
+## 10. Korrekturen vom 02.09.2026 und ihre Nachweise
+
+Neun Migrationen, ausgerollt nach vollständigem Durchlauf in der
+Prüfumgebung. Jede Korrektur hat eine **Gegenprobe**: eine Prüfung, dass
+die erlaubte Nutzung weiterhin funktioniert. Eine Sperre, die alles
+sperrt, wäre kein Erfolg.
+
+| Befund | Korrektur | Nachweis | Gegenprobe |
+| --- | --- | --- | --- |
+| S-2 | Tabellenrecht auf `products` entzogen, alle Spalten außer `cost_price_net` einzeln vergeben | Kunde A: `42501` beim Lesen des EK | Katalog weiter lesbar (64 Zeilen); `inventory_summary_by_product` liefert dem Gesellschafter weiter 64 Zeilen mit EK |
+| S-6 | `choose_subscription_plan` prüft `profiles.birth_date` | Konto Jg. 2012: `42501`, kein Abo. Konto ohne Datum: `P0001`, kein Abo | Konto Jg. 1990 schließt `monthly` ab |
+| S-3 | `machine_sales_daily` nur intern | Kunde A: 0 Zeilen | Gesellschafter: 93 Zeilen |
+| S-9 | `inventory` nur intern | Kunde A: 0 Zeilen | — |
+| S-8 | `permissions`, `roles`, `role_permissions` nur intern | Kunde A: je 0 Zeilen | Gesellschafter: 29 Zeilen; `my_permissions()` für den Kunden unverändert nutzbar |
+| S-4 | `product_ratings` nur eigene Zeile; Aggregatsicht auf Eigentümerrechte umgestellt | Kunde A sieht 0 fremde Bewertungen | eigene Bewertung sichtbar; `product_rating_summary` zählt weiter alle (2); `product_detail` liefert den fremden Schnitt 4,00 |
+| S-5 | `email` in die Profil-Schleuse aufgenommen, Nachlauf aus `auth.users` ergänzt | Selbst setzen: `42501`, Wert unverändert | Name weiter änderbar; Änderung in `auth.users` zieht ins Profil nach |
+| S-12 | Klicks je Konto und Tag auf drei begrenzt | 10 Klicks eines Kontos → berichtet: 3 | zweites Konto zählt weiter (4); alle 10 Aufrufe bleiben im Detailsatz sichtbar |
+| S-7 | Änderungsprotokoll für fünf belegführende Tabellen | 5 von 5 Triggern vorhanden | — |
+| S-11 | Auskunft über fremde Konten unterbunden | Kunde A → `auth_has_permission(..., fremd)` = false, `app_role(fremd)` = NULL | eigene Abfrage weiter true; interne Rolle darf über fremde Konten urteilen |
+| S-1 | Token serverseitig erzeugt, Mindestlänge 32, Laufzeit ≤ 90 Tage, Kurz-Token wird nicht protokolliert | Kurz-Token: `not_found` ohne Protokolleintrag; Anlage mit `"kurz"`: `23514` | gültige Freigabe entsteht mit 48-Zeichen-Token |
+| S-10 | Größen- und Typgrenzen für alle fünf Buckets | 0 Buckets ohne Grenze | Upload-Pfad der App auf den passenden Medientyp umgestellt |
+
+**34 Nachweise, alle grün.** Anschließende Regression über die
+ursprünglichen Prüfläufe: **77 grün, 0 rot.** Flutter: `analyze` ohne
+Befund, **100 Tests grün** (93 vorher, 7 neu).
+
+### Der Fund, den erst der Abgleich sichtbar gemacht hat
+
+Nach dem Ausrollen wichen die Rechte-Fingerabdrücke voneinander ab:
+1581 in der Produktion gegen 1573 in der Prüfumgebung. Ursache: Supabase
+vergibt einer neu angelegten Tabelle automatisch volle DML-Rechte an
+`anon` und `authenticated`. Die neue Tabelle
+`advertising_redirect_actors` hatte sie also, obwohl die Migration sie
+nirgends vergibt — in der Prüfumgebung, die diesen Automatismus nicht
+kennt, fehlten sie folgerichtig.
+
+Gefährlich war das nicht: RLS ist aktiv und die Tabelle hat keine Policy,
+der Zugriff wäre abgewiesen worden. Aber ein Recht, das nur deshalb
+wirkungslos ist, weil eine zweite Schranke hält, ist eine Falle für den,
+der später eine Policy ergänzt. Eine zehnte Migration hat es entzogen;
+danach stimmen alle sechs Fingerabdrücke wieder überein.
+
+Der eigentliche Punkt: Die Migration sah in beiden Umgebungen identisch
+aus. Sichtbar wurde der Unterschied allein im Vergleich der Wirkung.
+
+### Was die Korrekturen ausdrücklich **nicht** leisten
+
+* **Der Klickzähler kennt anonyme Aufrufe nicht.** Wer den
+  Weiterleitungslink ohne Anmeldung öffnet, wird gar nicht gezählt. Für
+  eine belastbare Reichweitenmessung braucht es eine Edge Function mit
+  eigener Frequenzbegrenzung — die steht in der Roadmap und wird hier
+  nicht behauptet.
+* **Das Geburtsdatum ist eine Selbstauskunft.** Ein Ausweis wird nicht
+  geprüft. Die Schranke steigt von „einmal tippen" auf „ein Datum
+  angeben, das danach feststeht und serverseitig geprüft wird". Für ein
+  Snack-Abo ist das das angemessene Mittel; die Einordnung gehört in die
+  Datenschutzdokumentation.
+* **Das Änderungsprotokoll ist keine Festschreibung.** Es macht
+  Änderungen an Belegen sichtbar, verhindert sie aber nicht. Storno statt
+  Änderung bleibt ein offener Punkt der Verfahrensdokumentation.
+* **`select=*` auf `products` ist keine gültige Abfrage mehr.** Das ist
+  der Preis der Spaltenrechte. Für die Flutter-App geprüft und in
+  Ordnung; für die Lovable-Oberflächen in
+  `docs/API-UNTERNEHMENSBEREICH.md` vermerkt.
