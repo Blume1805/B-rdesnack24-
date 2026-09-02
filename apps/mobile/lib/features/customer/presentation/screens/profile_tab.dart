@@ -14,6 +14,7 @@ import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
+import 'data_export_screen.dart';
 import 'master_data_screen.dart';
 import 'receipts_screen.dart';
 import 'rewards_screen.dart';
@@ -169,6 +170,14 @@ class ProfileTab extends ConsumerWidget {
               subtitle: 'Analyse, Marketing, Karten',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ConsentScreen()),
+              ),
+            ),
+            _ProfileRow(
+              icon: Icons.download_outlined,
+              title: 'Meine Daten',
+              subtitle: 'Auskunft nach Art. 15 DSGVO — sofort abrufbar',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DataExportScreen()),
               ),
             ),
             _ProfileRow(

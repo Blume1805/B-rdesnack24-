@@ -29,7 +29,7 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-014 | Werbung und Gutscheine für ein gelöschtes Konto | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-015 | Geburtstags-/Jubiläumsgutschein erzeugbar | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-21 behoben) |
 | CUST-016 | Löschverlangen wird ausgeführt | D3/D6 | ✓ gemessen: nein | — | — | — | — | offen | ✓ | 🔴 |
-| CUST-017 | Auskunft nach Art. 15 erreichbar (`export_my_data`) | D3 | ✓ ohne Oberfläche | — | — | — | — | offen | ✓ | 🔴 (R-13) |
+| CUST-017 | Auskunft nach Art. 15 erreichbar (`export_my_data`) | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (R-13, 38 statt 9 Bereiche) |
 | CUST-009 | Individuelle Preise lesen | D2/D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-010 | Produktbewertung abgeben/lesen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-4 behoben) |
 | CUST-011 | Produktdetails (`product_detail`) | D0 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
@@ -115,7 +115,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 14   🟡 GELB: 0   🟢 GRÜN: 43
+🔴 ROT: 13   🟡 GELB: 0   🟢 GRÜN: 44
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -144,7 +144,6 @@ Tarifentscheidung und eine offene Rechtsfrage:
 | --- | --- | --- | --- |
 | CUST-008 | Löschverlangen wird nicht ausgeführt | Entscheidung über Kapitel 32, dann Umsetzung | Philipp, vor der ersten echten Registrierung |
 | CUST-016 | dito, Ausführung | dito | Philipp |
-| CUST-017 | `export_my_data` ohne Oberfläche | Oberfläche (R-13) | offen |
 | AUTH-002 | Rate Limiting `/auth/v1` nicht messbar | Zugriff auf `*.supabase.co` (Egress `403`) | Philipp |
 | AUTH-003 | Passwort-Reset nicht durchspielbar | dito + Testpostfach | Philipp |
 | AUTH-004 | Enumeration nicht prüfbar | dito | Philipp |

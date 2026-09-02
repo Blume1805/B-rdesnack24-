@@ -786,3 +786,69 @@ Behoben mit dem kleinstmöglichen Eingriff: Das Platzhalterprodukt bekommt
 keine Kategorie. Es ist kein Sortimentsartikel. Nachgewiesen mit
 Gegenprobe: aktives Konto mit Geburtstag heute → ein Gutschein;
 gelöschtes Konto mit Geburtstag heute → keiner.
+
+---
+
+## 15. R-13 / CUST-017 — Die Auskunft nach Art. 15 DSGVO (02.09.2026)
+
+`export_my_data()` gab es seit Wochen in der Datenbank. Zwei Dinge fehlten,
+und das zweite war das größere.
+
+### Sie deckte 9 von 35 Bereichen ab
+
+Ein Abgleich aller Tabellen mit Personenbezug auf ein Konto ergab **35**.
+Die Auskunft enthielt **9**. Nicht enthalten waren unter anderem:
+Rechnungen, Zahlungen, die Positionen der Käufe, der Abo-Verlauf,
+persönliche Angebote, Bewertungen, Loyalty-Gutschriften,
+Benachrichtigungen, der Einwilligungsverlauf, versandte E-Mails,
+Reklamationen, Empfehlungen, Spendenstimmen, Anmeldetage — und der
+Löschantrag selbst.
+
+Art. 15 Abs. 3 DSGVO verlangt eine Kopie **der** verarbeiteten
+personenbezogenen Daten, nicht eine Auswahl. Jetzt sind es **38 Bereiche**,
+gemessen am Aufruf, nicht am Quelltext.
+
+**Zwei Dinge bleiben bewusst draußen.** `customer_card.token` und
+`email_unsubscribe_token.token` sind Geheimnisse, mit denen sich Karte und
+Abmeldung eines Kontos bedienen lassen. Dass sie zu dieser Person gehören,
+macht sie nicht zu Auskunftsinhalt: Ein Auskunftsdokument wandert per Mail,
+liegt im Download-Ordner und wird weitergeleitet. Ausgewiesen wird, **dass**
+es sie gibt und seit wann. Die Migration prüft das selbst nach — sie
+schlägt fehl, wenn der Kartentoken im Ergebnis auftaucht.
+
+### Sie war von nirgends erreichbar
+
+Kein Bildschirm, kein Knopf, keine Edge Function rief sie auf. Eine
+Auskunft, die berechenbar wäre, aber nicht abrufbar ist, erfüllt Art. 15
+nicht — die Vorschrift verlangt, dass der Betroffene sie **bekommt**.
+
+Neu: `data_export_screen.dart`, erreichbar über Profil → Rechtliches →
+„Meine Daten". Der Bildschirm zeigt zuerst Bereich für Bereich, was
+gespeichert ist und wie viel — wer eine Auskunft anfordert, will wissen,
+*was* über ihn gespeichert ist, und nicht 4000 Zeilen JSON deuten. Die
+Datei gibt es zusätzlich (Web: Download, sonst Zwischenablage — dieselbe
+Bauart wie beim Belegexport).
+
+Zwei Entscheidungen im Detail, die leicht falsch herum ausgehen:
+
+* Leere Bereiche stehen als **„nichts gespeichert"** da, nicht als „0
+  Einträge". Eine Null liest sich wie ein Messwert.
+* Bereiche, die die App **nicht kennt**, erscheinen trotzdem — mit ihrem
+  Rohnamen. Käme in der Datenbank ein Bereich dazu und die Liste würde ihn
+  stillschweigend weglassen, wäre die Auskunft unvollständig, ohne dass es
+  jemand merkt. Ein Test prüft genau diesen Fall.
+
+### Ein Fehler auf dem Weg, der Erwähnung verdient
+
+Der erste Anlauf der Migration trug eine Zusicherung, die **nichts
+prüfte** — ein Platzhalter, der eine `1` zählte. Die Funktion war dabei
+kaputt: Sie sortierte `email_consent_event` nach einer Spalte, die es nicht
+gibt, und schlug bei jedem Aufruf fehl. Aufgefallen ist es erst beim
+Ausprobieren.
+
+Eine Zusicherung, die nichts prüft, ist schlechter als keine: Sie
+signalisiert Sicherheit, die nicht da ist. Die jetzige ruft die Funktion
+tatsächlich auf — in der Haut eines echten Kontos — und zählt die
+Bereiche.
+
+**10 neue Tests** (110 gesamt), `flutter analyze` ohne Befund.
