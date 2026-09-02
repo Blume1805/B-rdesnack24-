@@ -99,6 +99,8 @@ dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 | `91_b2b_pruefdaten.sql` | zwei Firmenkunden mit spiegelbildlichem Bestand |
 | `92_b2b_matrix.sql` | Firma A gegen Firma B über alle B2B- und Werbe-RPCs |
 | `93_b2b_gegenprobe.sql` | was der Firmen-Admin auf der eigenen Firma darf — und was bewusst intern bleibt |
+| `94_loeschung.sql` | was mit einem gelöschten Konto noch geschieht |
+| `95_loeschung_gegenprobe.sql` | dieselben Prüfungen gegen ein aktives Konto |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

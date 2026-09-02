@@ -1740,3 +1740,92 @@ Produktionsstand gearbeitet wurde: die Arbeitstabellen des
 Signatur-Imports, der Rückzug der drei Spendenzwecke, und der
 PUBLIC-Entzug bei drei Finanz- und Produktfunktionen. Für die
 Verfahrensdokumentation ist das wichtiger als die sechs Fehler selbst.
+
+## 32. Entscheidungsvorlage: Löschkonzept (CUST-008)
+
+Diese Vorlage braucht eine Entscheidung, keinen weiteren Bericht. Der
+Befund ist gemessen (`docs/SECURITY.md`, Abschnitt 14): Ein Löschverlangen
+wird entgegengenommen und nicht ausgeführt.
+
+### 32.1 Was heute passiert
+
+`request_account_deletion` legt eine Zeile in `account_deletion_requests`
+an. Ein Administrator kann deren Status ändern. **Das ist alles.** Keine
+Funktion löscht, sperrt oder anonymisiert. Der Kunde sieht in der App
+„Löschung beantragt" — und im Datenbestand ändert sich nichts.
+
+Zwei Wirkungen sind seit heute vorhanden: Ein Konto mit gesetztem
+`deleted_at` bekommt keine Werbung mehr und keine Gutscheine. Das ist die
+Sperrwirkung, nicht die Löschung.
+
+### 32.2 Die Rechtslage, auf der der Vorschlag steht
+
+Aus dem Rechtsstand des Projekts (`boerdesnack24-legal-impact/references/
+rechtsstand.md`, Nr. 2, Konfidenz hoch, Re-Verifizierung fällig
+01.09.2028):
+
+* **Acht Jahre** für Buchungsbelege — seit 01.01.2025, vorher zehn
+  (§ 147 Abs. 1 Nr. 4 i. V. m. Abs. 3 Satz 1 AO, § 257 HGB,
+  § 14b Abs. 1 UStG; Viertes Bürokratieentlastungsgesetz,
+  BGBl. 2024 I Nr. 323)
+* **Zehn Jahre** für Bücher, Aufzeichnungen, Inventare, Jahresabschlüsse
+* **Sechs Jahre** für Handels- und Geschäftsbriefe einschließlich E-Mails
+* **Ablaufhemmung**: Die Frist läuft nicht ab, solange die Unterlagen für
+  eine noch offene Steuerfestsetzung von Bedeutung sind
+  (§ 147 Abs. 3 Satz 5 AO)
+
+Und der Satz, der die Umsetzung bestimmt: *„Fristen sind je Dokumentart zu
+implementieren, nicht pauschal. Ein einheitlicher Löschjob nach acht
+Jahren würde Inventare zu früh löschen."*
+
+### 32.3 Vorschlag — zu bestätigen, nicht zu übernehmen
+
+Die Rechtsfolgen oben sind belegt. Die **Zuordnung der Tabellen** zu den
+Kategorien ist mein Vorschlag und braucht deine Bestätigung, weil sie
+davon abhängt, wofür ein Datensatz im Betrieb tatsächlich steht.
+
+| Tabelle | Vorschlag | Begründung |
+| --- | --- | --- |
+| `invoices`, `purchases`, `purchase_items`, `payments` | **sperren, 8 Jahre** | Buchungsbelege |
+| `business_invoice_runs`, `finance_bookings` | **sperren, 8 Jahre** | Buchungsbelege |
+| `finance_balance_snapshots`, `inventory*` | **sperren, 10 Jahre** | Aufzeichnungen und Inventare |
+| `audit_log` | **10 Jahre** — bereits umgesetzt | Aufzeichnung; Job läuft täglich |
+| `email_log`, `email_outbox` | **6 Jahre**, soweit Geschäftsbrief | teils bereits umgesetzt |
+| `profiles`, `customers` | **anonymisieren**, Kennung bleibt | Beleg braucht den Namen des Leistungsempfängers; alles darüber hinaus kann weg |
+| `consents`, `email_consent_event` | **behalten** bis Fristablauf | Nachweis der Einwilligung, Art. 7 Abs. 1 DSGVO |
+| `product_ratings`, `recommendations`, `personal_offers`, `donation_votes`, `customer_login_days`, `customer_card`, `device_tokens`, `notifications`, `contact_messages` | **löschen** | keine Aufbewahrungspflicht erkennbar |
+| `account_deletion_requests` | **behalten** | Nachweis, dass und wann bearbeitet wurde |
+
+### 32.4 Was danach zu bauen wäre
+
+1. **Ein Sperrkennzeichen, das überall wirkt.** Heute prüfen die
+   RLS-Regeln des Kundenbereichs `id = auth.uid()` ohne Löschstand — ein
+   gesperrtes Konto liest seine Daten weiter (gemessen). Der saubere Weg
+   führt nicht über zwanzig Policy-Änderungen, sondern über die
+   Anmeldung: Wer gelöscht ist, bekommt keine Sitzung mehr.
+2. **`execute_account_deletion(profile)`** — löscht die Tabellen ohne
+   Pflicht, setzt bei den übrigen das Kennzeichen, terminiert die
+   Löschung auf das Fristende und protokolliert, wer wann was.
+3. **Fristläufe je Dokumentart** als `pg_cron`-Jobs, nach dem Muster von
+   `purge_audit_log`.
+4. **Die Ablaufhemmung** als bewusster Halt: ein Schalter, der die Läufe
+   während einer Außenprüfung anhält. Ohne ihn löscht der Job Unterlagen,
+   die noch gebraucht werden.
+5. **Speicherorte außerhalb der Datenbank**: Storage-Objekte, die
+   Resend-Kontaktliste, Sicherungen. Eine Löschung, die nur die Tabelle
+   räumt, ist keine.
+6. **`export_my_data()` an eine Oberfläche hängen** — die Funktion
+   existiert, wird aber von nichts aufgerufen (R-13). Auskunft nach
+   Art. 15 DSGVO ist damit vorbereitet und nicht erreichbar.
+
+### 32.5 Warum ich hier aufgehört habe
+
+Eine Löschfunktion, die den Aufbewahrungsfall nicht abbildet, ist nicht
+halb fertig — sie ist falsch. Entweder löscht sie einen Beleg, den die
+Betriebsprüfung sehen will, oder sie erfüllt das Löschverlangen nicht.
+Beides ist schlechter als ein offener, benannter Punkt.
+
+**Verantwortlich: Philipp Blume. Fällig: vor der ersten Registrierung
+eines echten Kunden.** Solange es zwei Konten aus dem eigenen Haus gibt,
+ist der Punkt theoretisch; mit dem ersten fremden Konto ist er es nicht
+mehr.

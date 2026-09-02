@@ -26,14 +26,20 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-006 | Benachrichtigungen lesen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-007 | Kontaktnachrichten | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-008 | Löschantrag stellen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | offen¹ | ✓ | 🔴 |
+| CUST-014 | Werbung und Gutscheine für ein gelöschtes Konto | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
+| CUST-015 | Geburtstags-/Jubiläumsgutschein erzeugbar | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-21 behoben) |
+| CUST-016 | Löschverlangen wird ausgeführt | D3/D6 | ✓ gemessen: nein | — | — | — | — | offen | ✓ | 🔴 |
+| CUST-017 | Auskunft nach Art. 15 erreichbar (`export_my_data`) | D3 | ✓ ohne Oberfläche | — | — | — | — | offen | ✓ | 🔴 (R-13) |
 | CUST-009 | Individuelle Preise lesen | D2/D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-010 | Produktbewertung abgeben/lesen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-4 behoben) |
 | CUST-011 | Produktdetails (`product_detail`) | D0 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-012 | Produktkatalog über Tabelle `products` | D2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-2 behoben) |
 | CUST-013 | Rechnungssicht | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 
-¹ Löschung gegen Aufbewahrung (Art. 17 vs. § 147 AO) ist als Ablauf
-nicht nachgewiesen — siehe Legal-Abschnitt in `AUDIT-2026-08`.
+¹ Löschung gegen Aufbewahrung (Art. 17 DSGVO vs. § 147 AO): gemessen, dass
+kein Ablauf existiert. Entscheidungsvorlage mit belegten Fristen in
+`docs/audit/AUDIT-2026-08-GESAMTSYSTEM.md`, Kapitel 32. Verantwortlich:
+Philipp Blume, fällig vor der ersten Registrierung eines echten Kunden.
 
 ## 2. Zahlung, Abo, Jugendschutz
 
@@ -109,7 +115,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 12   🟡 GELB: 0   🟢 GRÜN: 41
+🔴 ROT: 14   🟡 GELB: 0   🟢 GRÜN: 43
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -136,7 +142,9 @@ Tarifentscheidung und eine offene Rechtsfrage:
 
 | ID | Warum rot | Fehlendes Mittel | Verantwortlich |
 | --- | --- | --- | --- |
-| CUST-008 | Löschung gegen Aufbewahrung (Art. 17 DSGVO vs. § 147 AO) als Ablauf nicht nachgewiesen | Löschkonzept je Dokumentart, dann Test | Philipp |
+| CUST-008 | Löschverlangen wird nicht ausgeführt | Entscheidung über Kapitel 32, dann Umsetzung | Philipp, vor der ersten echten Registrierung |
+| CUST-016 | dito, Ausführung | dito | Philipp |
+| CUST-017 | `export_my_data` ohne Oberfläche | Oberfläche (R-13) | offen |
 | AUTH-002 | Rate Limiting `/auth/v1` nicht messbar | Zugriff auf `*.supabase.co` (Egress `403`) | Philipp |
 | AUTH-003 | Passwort-Reset nicht durchspielbar | dito + Testpostfach | Philipp |
 | AUTH-004 | Enumeration nicht prüfbar | dito | Philipp |

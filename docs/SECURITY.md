@@ -698,3 +698,91 @@ mit grüner Regression.
   aussagekräftig.
 * **pgTAP** liegt im eigenen Schema `tap`, damit es die über tausend
   eigenen Funktionen nicht in `public` mitzählt.
+
+---
+
+## 14. CUST-008 — Löschung gegen Aufbewahrung, gemessen (02.09.2026)
+
+Ein Konto wurde in der Prüfumgebung auf gelöscht gesetzt und danach
+geprüft, was das System noch mit ihm tut. Gemessen, nicht gelesen.
+
+| Prüfung | Ergebnis | |
+| --- | --- | --- |
+| Kennzeichen `deleted_at` wird gesetzt | ja | ✓ |
+| Werbung an ein gelöschtes Konto | `suppressed / konto_geloescht` | ✓ |
+| Vertragsnachricht an ein gelöschtes Konto | geht hinaus | ✓ |
+| Geburtstagsgutschein für ein gelöschtes Konto | kein Angebot | ✓ |
+| Gegenprobe: Werbung/Gutschein an ein aktives Konto | 1 / 1 | ✓ |
+| **Gelöschtes Konto liest sein Profil** | **1 Zeile** | ✗ |
+| **Gelöschtes Konto liest seine Kaufhistorie** | **1 Zeile** | ✗ |
+| **Funktion, die den Löschantrag ausführt** | **0** | ✗ |
+| **Aufbewahrungsfrist für Käufe und Rechnungen** | **0** | ✗ |
+
+Zwei dieser Prüfungen waren im ersten Anlauf ungültig: Der Mailtest
+scheiterte an einer Vorlage, die es gar nicht gibt, der Gutscheintest am
+Geburtsdatum des Testkontos — beide also **nicht** an der Löschung. Beide
+wurden neu aufgesetzt. Und eine Erwartung war schlicht falsch: Ich hatte
+angenommen, an ein gelöschtes Konto dürfe gar keine Post mehr gehen.
+Art. 18 DSGVO schränkt die Verarbeitung ein, er verbietet sie nicht — über
+das Ergebnis seines Löschverlangens ist der Betroffene gerade zu
+informieren. Gesperrt gehört Werbung, nicht die Nachricht.
+
+### Was geschlossen wurde
+
+* Werbung an ein gelöschtes Konto wird unterdrückt, mit Grund im Datensatz
+* Geburtstags- und Jubiläumsgutscheine entstehen nicht mehr für gelöschte
+  Konten
+
+### Was offen bleibt — und warum ich es nicht gebaut habe
+
+**Es gibt keinen Löschprozess.** `request_account_deletion` legt eine
+Zeile in `account_deletion_requests` an, ein Administrator kann deren
+Status ändern — und damit endet es. Keine Funktion löscht, sperrt oder
+anonymisiert etwas. Ein Löschverlangen nach Art. 17 DSGVO wird also
+entgegengenommen und nicht ausgeführt.
+
+Was dazu fehlt, ist keine Programmierarbeit, sondern eine **Entscheidung**:
+Welcher Datensatz wird gelöscht, welcher nur gesperrt, und wie lange?
+Die Fristen unterscheiden sich je Dokumentart, und sie aus dem Gedächtnis
+zu setzen wäre genau der Fehler, den die Prüfregeln verbieten. Eine
+Löschfunktion, die den Aufbewahrungsfall nicht abbildet, ist nicht
+„teilweise fertig" — sie ist falsch, weil sie entweder zu viel löscht
+(Beleg weg, Betriebsprüfung offen) oder zu wenig (Löschverlangen nicht
+erfüllt).
+
+Deshalb: Der Befund bleibt 🔴 mit Verantwortlichem und Frist, und der
+Vorschlag steht in `docs/audit/AUDIT-2026-08-GESAMTSYSTEM.md`,
+Kapitel 32.
+
+**Ebenfalls offen:** `export_my_data()` existiert in der Datenbank, wird
+aber von keiner Oberfläche aufgerufen — die Auskunft nach Art. 15 DSGVO
+ist damit technisch vorbereitet und praktisch nicht erreichbar.
+
+### S-21 — ein Fund am Rande, der schwerer wiegt als die Löschung
+
+Beim Aufsetzen der Gutschein-Gegenprobe stellte sich heraus: **Der
+Geburtstagsgutschein konnte überhaupt nicht erzeugt werden.**
+
+`app.wildcard_product()` legt das Platzhalterprodukt „Produkt deiner
+Wahl" mit `category = 'Aktion'` an. Am 28.07.2026 kam die Regel
+`products_category_check` dazu, die genau vier Kategorien erlaubt —
+Getränke, Süßwaren, Snacks, Eis. Seither scheitert jeder Aufruf von
+`grant_birthday_offer` und `grant_anniversary_offer` an dieser Regel.
+
+Nie aufgefallen, weil bis heute kein einziges Profil ein Geburtsdatum
+trägt und der Pfad nie erreicht wurde. **Das ändert sich gerade:** Seit
+S-6 verlangt das kostenpflichtige Abo ein hinterlegtes Geburtsdatum. Der
+Fehler wäre exakt dann sichtbar geworden, wenn der erste zahlende Kunde
+Geburtstag hat.
+
+Dass das kein reiner Programmfehler ist, steht auf der Stammdatenseite:
+„Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl." Der
+Abo-Vergleich führt den Geburtstagsgutschein als Leistung des
+kostenpflichtigen Abos. Ein zugesagter Vorteil, der technisch nicht
+entstehen kann, ist eine Angabe über das eigene Angebot, die nicht
+stimmt — und damit kein Randthema.
+
+Behoben mit dem kleinstmöglichen Eingriff: Das Platzhalterprodukt bekommt
+keine Kategorie. Es ist kein Sortimentsartikel. Nachgewiesen mit
+Gegenprobe: aktives Konto mit Geburtstag heute → ein Gutschein;
+gelöschtes Konto mit Geburtstag heute → keiner.
