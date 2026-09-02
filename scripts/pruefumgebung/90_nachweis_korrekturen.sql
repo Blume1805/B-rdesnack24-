@@ -10,8 +10,12 @@ begin
   -- S-2 -------------------------------------------------------------------
   r := pruef.lies('select count(*)::text from (select cost_price_net from products) x', A);
   insert into pruef.ergebnis values (default,'S-2','EK-Preis als Kunde lesen','Kunde A','products.cost_price_net','Abweisung',r, r like 'ERR:42501%');
+  -- Gegen die WAHRHEIT vergleichen, nicht gegen eine feste Zahl: Der
+  -- Katalog waechst, und eine Zusicherung, die bei jeder neuen Zeile
+  -- bricht, wird irgendwann ignoriert statt geglaubt.
   r := pruef.lies('select count(*)::text from (select id,name,list_price_net,allergens from products) x', A);
-  insert into pruef.ergebnis values (default,'S-2','Katalog bleibt lesbar (Gegenprobe)','Kunde A','products','64 Zeilen',r, r='64');
+  insert into pruef.ergebnis values (default,'S-2','Katalog bleibt lesbar (Gegenprobe)','Kunde A','products','so viele wie vorhanden',r,
+    r = (select count(*)::text from public.products));
   r := pruef.lies('select count(*)::text from public.inventory_summary_by_product()', G);
   insert into pruef.ergebnis values (default,'S-2','EK ueber Auswertung (Gegenprobe)','Gesellschafter','inventory_summary_by_product','>0',r, r <> '0' and r not like 'ERR%');
 
@@ -57,8 +61,11 @@ begin
   insert into pruef.ergebnis values (default,'S-4','fremde Bewertungen','Kunde A','product_ratings','0 Zeilen', n::text, n=0);
   n := pruef.zaehle(format('select 1 from public.product_ratings where customer_id = %L', A), A);
   insert into pruef.ergebnis values (default,'S-4','eigene Bewertung (Gegenprobe)','Kunde A','product_ratings','>0', n::text, n>0);
+  -- Ebenfalls gegen die Wahrheit: Das Aggregat muss ALLE Bewertungen
+  -- zaehlen, egal wie viele es gerade gibt.
   r := pruef.lies('select sum(review_count)::text from public.product_rating_summary', A);
-  insert into pruef.ergebnis values (default,'S-4','Aggregat rechnet ueber alle','Kunde A','product_rating_summary','2 Bewertungen', r, r='2');
+  insert into pruef.ergebnis values (default,'S-4','Aggregat rechnet ueber alle','Kunde A','product_rating_summary','alle Bewertungen', r,
+    r = (select count(*)::text from public.product_ratings));
   r := pruef.lies('select (avg_rating)::text from public.product_detail(''e0000000-0000-0000-0000-00000000000b'')', A);
   insert into pruef.ergebnis values (default,'S-4','product_detail zeigt fremden Schnitt','Kunde A','product_detail','Schnitt vorhanden', r, r not like 'ERR%' and r <> '0');
 

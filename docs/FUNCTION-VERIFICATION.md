@@ -25,10 +25,12 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-005 | Push-Token verwalten | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-006 | Benachrichtigungen lesen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-007 | Kontaktnachrichten | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
-| CUST-008 | Löschantrag stellen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | offen¹ | ✓ | 🔴 |
+| CUST-008 | Löschantrag stellen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-014 | Werbung und Gutscheine für ein gelöschtes Konto | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-015 | Geburtstags-/Jubiläumsgutschein erzeugbar | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-21 behoben) |
-| CUST-016 | Löschverlangen wird ausgeführt | D3/D6 | ✓ gemessen: nein | — | — | — | — | offen | ✓ | 🔴 |
+| CUST-016 | Löschverlangen wird ausgeführt | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (13 Prüfungen) |
+| CUST-018 | Löschregeln für die restlichen 15 Tabellen festgelegt | D3/D6 | ✓ gemessen: 15 ohne Entscheidung | — | — | — | — | offen | ✓ | 🔴 |
+| CUST-019 | Fristlauf je Dokumentart, mit Ablaufhemmung | D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-017 | Auskunft nach Art. 15 erreichbar (`export_my_data`) | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (R-13, 38 statt 9 Bereiche) |
 | CUST-009 | Individuelle Preise lesen | D2/D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 | CUST-010 | Produktbewertung abgeben/lesen | D3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-4 behoben) |
@@ -36,10 +38,10 @@ Nachweise: `/docs/SECURITY.md`, Skripte: `scripts/pruefumgebung/`.
 | CUST-012 | Produktkatalog über Tabelle `products` | D2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 (S-2 behoben) |
 | CUST-013 | Rechnungssicht | D3/D6 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
 
-¹ Löschung gegen Aufbewahrung (Art. 17 DSGVO vs. § 147 AO): gemessen, dass
-kein Ablauf existiert. Entscheidungsvorlage mit belegten Fristen in
-`docs/audit/AUDIT-2026-08-GESAMTSYSTEM.md`, Kapitel 32. Verantwortlich:
-Philipp Blume, fällig vor der ersten Registrierung eines echten Kunden.
+¹ Der Ablauf steht seit dem 02.09.2026 (Kapitel 32 freigegeben, Kapitel 33
+umgesetzt). Offen ist nur noch die Festlegung für 15 Tabellen, die in der
+Vorlage nicht genannt waren — sie werden vom Löschlauf **nicht angefasst**
+und in seinem Bericht namentlich ausgewiesen (CUST-018).
 
 ## 2. Zahlung, Abo, Jugendschutz
 
@@ -88,9 +90,9 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | AUTH-003 | Passwort-Reset: Einmaligkeit, Ablauf, Session-Invalidierung | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-004 | Benutzerenumeration `/auth/v1/recover` | ✗ Egress gesperrt | 🔴 ⏸ EXTERN |
 | AUTH-005 | Schutz vor kompromittierten Passwörtern | ✗ Schalter nicht bedienbar — Feature ab Pro, Organisation auf `free` | 🔴 S-13 ⏸ EXTERN (Tarifentscheidung) |
-| AUTH-006 | Mindestpasswortlänge | ✓ live 6, `config.toml` sagt 10 | 🔴 S-15 |
-| AUTH-007 | Passwortwechsel nur nach kürzlicher Anmeldung | ✓ aus | 🔴 S-16 |
-| AUTH-008 | Aktuelles Passwort beim Ändern verlangen | ✓ aus | 🔴 S-17 |
+| AUTH-006 | Mindestpasswortlänge | Philipp hat am 02.09.2026 auf 10 gestellt; aus dieser Umgebung nicht messbar | 🔴 S-15 ⏸ EXTERN (Nachweis: Screenshot) |
+| AUTH-007 | Passwortwechsel nur nach kürzlicher Anmeldung | Philipp hat am 02.09.2026 eingeschaltet; aus dieser Umgebung nicht messbar | 🔴 S-16 ⏸ EXTERN (Nachweis: Screenshot) |
+| AUTH-008 | Aktuelles Passwort beim Ändern verlangen | Philipp hat am 02.09.2026 eingeschaltet; aus dieser Umgebung nicht messbar | 🔴 S-17 ⏸ EXTERN (Nachweis: Screenshot) |
 | AUTH-009 | `config.toml` beschreibt die gehosteten Auth-Einstellungen | ✓ widerlegt (10 gegen 6) | 🔴 S-18 |
 
 ## 6. Speicher, E-Mail, Protokollierung
@@ -115,7 +117,7 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 13   🟡 GELB: 0   🟢 GRÜN: 44
+🔴 ROT: 11   🟡 GELB: 0   🟢 GRÜN: 47
 ```
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
@@ -123,32 +125,21 @@ und GELB = 0. Formulierungen wie „erfolgreich implementiert",
 „abgeschlossen" oder „keine weiteren Maßnahmen erforderlich" sind bis
 dahin unzulässig.
 
-Neu am 02.09.2026, nachmittags: Der Versuch, S-13 zu schließen, hat vier
-weitere Befunde sichtbar gemacht (S-15 bis S-18, siehe
-`docs/SECURITY.md` Abschnitt 11). **Drei davon sind offene
-Sicherheitsbefunde, die ohne Tarifwechsel sofort behebbar sind** —
-anders als die übrigen roten Zeilen:
+Stand am Abend des 02.09.2026: Alle elf roten Zeilen sind entweder eine
+**Entscheidung**, ein **fehlendes Mittel** oder ein **Nachweis, den ich
+aus dieser Umgebung nicht führen kann** — keine ist ein offener
+Sicherheitsbefund im Code.
 
-| ID | Befund | Behebbar durch | Verantwortlich |
+| ID | Warum rot | Was es braucht | Verantwortlich |
 | --- | --- | --- | --- |
-| AUTH-006 / S-15 | Mindestpasswortlänge 6 statt 10 | ein Feld im Dashboard | Philipp |
-| AUTH-007 / S-16 | Passwortwechsel ohne kürzliche Anmeldung möglich | ein Schalter im Dashboard | Philipp |
-| AUTH-008 / S-17 | Aktuelles Passwort wird beim Ändern nicht verlangt | ein Schalter im Dashboard | Philipp |
-| AUTH-009 / S-18 | `config.toml` beschreibt die gehosteten Auth-Einstellungen nicht | Entscheidung: Einstellungen dokumentieren oder per CLI verwalten | offen |
-
-Die übrigen roten Zeilen sind **keine offenen Sicherheitsbefunde**:
-Prüfungen, die aus dieser Umgebung nicht durchführbar sind, eine
-Tarifentscheidung und eine offene Rechtsfrage:
-
-| ID | Warum rot | Fehlendes Mittel | Verantwortlich |
-| --- | --- | --- | --- |
-| CUST-008 | Löschverlangen wird nicht ausgeführt | Entscheidung über Kapitel 32, dann Umsetzung | Philipp, vor der ersten echten Registrierung |
-| CUST-016 | dito, Ausführung | dito | Philipp |
-| AUTH-002 | Rate Limiting `/auth/v1` nicht messbar | Zugriff auf `*.supabase.co` (Egress `403`) | Philipp |
-| AUTH-003 | Passwort-Reset nicht durchspielbar | dito + Testpostfach | Philipp |
-| AUTH-004 | Enumeration nicht prüfbar | dito | Philipp |
-| AUTH-005 | Leaked-Password-Schutz nicht aktivierbar | Supabase Pro (Organisation auf `free`) — Tarifentscheidung | Philipp |
-| MAIL-004 | Resend-Zustellung nicht belegt | Testpostfach in `projekt-konfig.md` | Philipp |
+| AUTH-006 / S-15 | Mindestpasswortlänge — von Philipp am 02.09. auf 10 gestellt | ein Screenshot als Nachweis, dann grün | Philipp |
+| AUTH-007 / S-16 | Passwortwechsel nur nach kürzlicher Anmeldung — eingeschaltet | dito | Philipp |
+| AUTH-008 / S-17 | Aktuelles Passwort beim Ändern — eingeschaltet | dito | Philipp |
+| AUTH-005 / S-13 | Leaked-Password-Schutz | Supabase Pro; kommt vor der Live-Schaltung | Philipp |
+| AUTH-009 / S-18 | `config.toml` beschreibt die gehosteten Auth-Einstellungen nicht | Entscheidung: dokumentieren oder per CLI verwalten | offen |
+| CUST-018 | 15 Tabellen ohne Löschregel — der Löschlauf fasst sie nicht an und nennt sie im Bericht | eine Festlegung je Tabelle | Philipp |
+| AUTH-002/003/004 | Rate Limiting, Passwort-Reset, Enumeration | Zugriff auf `*.supabase.co` (Egress `403`) | fehlendes Mittel |
+| MAIL-004 | Zustellung über Resend | ein Testpostfach | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |
 
 Kein Eintrag steht auf 🟡: Wo ein Nachweis fehlt, steht ROT mit

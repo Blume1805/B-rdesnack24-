@@ -101,6 +101,7 @@ dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 | `93_b2b_gegenprobe.sql` | was der Firmen-Admin auf der eigenen Firma darf — und was bewusst intern bleibt |
 | `94_loeschung.sql` | was mit einem gelöschten Konto noch geschieht |
 | `95_loeschung_gegenprobe.sql` | dieselben Prüfungen gegen ein aktives Konto |
+| `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt — und dass ein unbeteiligtes Konto unberührt bleibt |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

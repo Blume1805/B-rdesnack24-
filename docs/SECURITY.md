@@ -852,3 +852,97 @@ tatsächlich auf — in der Haut eines echten Kontos — und zählt die
 Bereiche.
 
 **10 neue Tests** (110 gesamt), `flutter analyze` ohne Befund.
+
+---
+
+## 16. Der Löschprozess (CUST-016), 02.09.2026
+
+Freigabe von Philipp Blume auf Kapitel 32. Seither gibt es einen Ablauf,
+und er ist mit **13 Prüfungen** belegt, jede mit Gegenprobe.
+
+### Wer darf löschen
+
+| Rolle | Ergebnis |
+| --- | --- |
+| Kunde, fremdes Konto | `42501` |
+| Kunde, **eigenes** Konto | `42501` — den Antrag stellt er selbst, die Ausführung nicht |
+| **Gesellschafter** | `42501` — `users.manage` trägt nur `system_admin` |
+| Systemadministrator | führt aus, gibt einen Bericht zurück |
+
+Dass der Gesellschafter es nicht darf, war kein Versehen der Prüfung,
+sondern ein Ergebnis: Eine Kontolöschung ist im Rechtemodell dieses
+Systems kein Tagesgeschäft. In der Produktion gibt es genau ein aktives
+`system_admin`-Konto — der Prozess hat also einen Bediener.
+
+### Was der Lauf tut
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Daten ohne Aufbewahrungspflicht (Bewertungen, Hinweise, Geräte) | 0 Zeilen übrig |
+| Belege und Einwilligungen | bleiben erhalten |
+| Profil anonymisiert | „Gelöschtes Konto", Adresse auf `…@invalid` |
+| Anmeldung gesperrt | `banned_until = infinity` |
+| Vorgang festgehalten | Antrag steht auf `ausgefuehrt` |
+| Offene Tabellen benannt | 15 im Bericht |
+| **Unbeteiligtes Konto** | 3 Zeilen, Name unverändert |
+
+Die Sperrung der Anmeldung ist der Punkt, an dem der Entwurf vom
+02.09.2026 vormittags noch scheiterte: Gemessen war, dass ein Konto mit
+gesetztem `deleted_at` sich weiter anmelden und seine
+aufbewahrungspflichtigen Daten lesen konnte. Zwanzig Policies zu ändern
+wäre der umständliche Weg gewesen; die Anmeldung zu sperren ist der
+richtige. Ohne Sitzung kein Zugriff.
+
+### Die Fristen stehen in einer Tabelle, nicht im Code
+
+`public.loeschregeln` — 35 Zeilen, je Tabelle eine Behandlung
+(`loeschen` / `aufbewahren` / `anonymisieren` / `offen`), eine Frist und
+eine Begründung. Das ist Absicht: Fristen sind eine
+kaufmännisch-rechtliche Festlegung, keine Programmiereigenschaft. Wer sie
+ändert, soll das ohne Migration können; wer sie prüft, soll sie lesen
+können, ohne PL/pgSQL zu kennen.
+
+Der Fristlauf `app.purge_nach_frist()` läuft täglich um 03:40 und
+entfernt je Dokumentart, was seine Frist hinter sich hat. **Heute ist er
+folgenlos** — die ältesten Daten stammen aus 2026, er wird 2032 zum
+ersten Mal etwas tun. Genau deshalb gehört er jetzt eingerichtet.
+
+### Die Ablaufhemmung
+
+§ 147 Abs. 3 Satz 5 AO: Die Frist läuft nicht, solange die Unterlagen für
+eine offene Steuerfestsetzung von Bedeutung sind. `aufbewahrung_hemmung`
+ist ein Schalter, der alle Fristläufe anhält — nachgewiesen: mit Hemmung
+meldet der Lauf `uebersprungen: true`, ohne Hemmung läuft er und löscht
+heute nichts.
+
+Ohne diesen Schalter würde der Job in dem Moment aufräumen, in dem eine
+Außenprüfung die Unterlagen sehen will.
+
+### Was offen bleibt: 15 Tabellen ohne Festlegung
+
+Kapitel 32 nannte 20 Tabellen. Das System hat **35** mit Personenbezug.
+Für die übrigen 15 — darunter `customer_subscriptions`,
+`cancellation_requests`, `purchase_complaints`, `referral_codes`,
+`business_members` — steht in den Regeln `offen`. Der Löschlauf **fasst
+sie nicht an** und nennt sie in seinem Bericht.
+
+Das ist die ehrliche Zwischenlösung: Sie stillschweigend mitzulöschen
+wäre eine erfundene Rechtsauffassung, sie stillschweigend zu behalten
+eine unsichtbare Lücke. So bleibt beides sichtbar (CUST-018).
+
+### Zwei Fehler auf dem Weg
+
+* Die Anonymisierung castete auf `citext` — ein Typ, der im Schema
+  `extensions` liegt, das der `search_path` der Funktion nicht kennt.
+  Der Cast ist raus; die Zuweisung castet ohnehin selbst. Aufgefallen
+  beim Ausführen, nicht beim Lesen.
+* Zwei Zusicherungen der Regressionssuite verglichen gegen **feste
+  Zahlen** („64 Produkte", „2 Bewertungen") und schlugen an, als
+  Testdaten dazukamen — obwohl nichts kaputt war. Sie vergleichen jetzt
+  gegen die Wahrheit. Eine Zusicherung, die bei jeder neuen Zeile bricht,
+  wird irgendwann ignoriert statt geglaubt, und dann fängt sie nichts
+  mehr.
+
+Der Löschtest ist außerdem **wiederholbar** gemacht: Er räumt zuerst auf,
+statt beim zweiten Lauf an einem Unique-Index zu scheitern. Zweimal
+hintereinander ausgeführt, zweimal 13 grün.

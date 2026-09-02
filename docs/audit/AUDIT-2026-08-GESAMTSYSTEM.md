@@ -1829,3 +1829,41 @@ Beides ist schlechter als ein offener, benannter Punkt.
 eines echten Kunden.** Solange es zwei Konten aus dem eigenen Haus gibt,
 ist der Punkt theoretisch; mit dem ersten fremden Konto ist er es nicht
 mehr.
+
+## 33. Umsetzung des Löschkonzepts (02.09.2026, abends)
+
+Freigabe auf Kapitel 32 erteilt, Umsetzung erfolgt. Protokoll in
+`docs/SECURITY.md`, Abschnitt 16 — 13 Prüfungen, alle grün, zweimal
+hintereinander.
+
+Gebaut wurden vier Dinge:
+
+1. **`public.loeschregeln`** — 35 Zeilen, je Tabelle Behandlung, Frist
+   und Begründung. Die Fristen stehen bewusst als Daten da: Sie sind eine
+   kaufmännisch-rechtliche Festlegung, keine Programmiereigenschaft.
+2. **`execute_account_deletion(profile)`** — löscht ohne Frist, sperrt
+   mit Frist, anonymisiert Profil und Kundendaten, **sperrt die
+   Anmeldung**, hält den Vorgang fest und gibt einen Bericht zurück.
+3. **`app.purge_nach_frist()`** als täglicher Lauf um 03:40, je
+   Dokumentart.
+4. **Die Ablaufhemmung** als Schalter, der alle Fristläufe anhält
+   (§ 147 Abs. 3 Satz 5 AO).
+
+### Der Punkt, an dem es sonst gescheitert wäre
+
+Am Vormittag war gemessen worden, dass ein Konto mit gesetztem
+`deleted_at` sich weiter anmelden und seine aufbewahrungspflichtigen
+Daten lesen kann. Der naheliegende Weg wäre gewesen, zwanzig
+RLS-Regeln um eine Bedingung zu ergänzen. Der richtige ist, die Anmeldung
+zu sperren: Ohne Sitzung kein Zugriff, und keine zwanzig Stellen, an
+denen man eine vergessen kann.
+
+### Was Philipp noch entscheiden muss
+
+Kapitel 32 nannte 20 Tabellen, das System hat 35 mit Personenbezug. Die
+übrigen **15** stehen in den Regeln auf `offen`, werden vom Löschlauf
+nicht angefasst und in seinem Bericht namentlich genannt — darunter
+`customer_subscriptions`, `cancellation_requests`, `purchase_complaints`,
+`referral_codes` und `business_members`. Drei davon berühren Dritte
+(geworbene Personen, die Firma), was die Entscheidung fachlich sperriger
+macht als bei den übrigen.
