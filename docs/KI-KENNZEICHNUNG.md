@@ -120,12 +120,25 @@ Rechtsauslegung, sondern aus der Festlegung des Betreibers im Register
 (`kennzeichnung_noetig = true`) und aus der Dauerregel in `CLAUDE.md`. Die
 fachliche Prüfung der Norm steht aus.
 
-## Nicht nachgewiesen
+## Nachweis nachgeholt
 
-Die beiden Codeänderungen sind **nicht kompiliert**. In dieser Umgebung ist
-keine Flutter- oder Dart-Toolchain vorhanden; `flutter analyze` und
-`flutter test` konnten nicht laufen. Der Diff wurde manuell gegen die
-bestehenden Muster der Datei geprüft (`_DealAiBadge` in `offers_tab.dart`
-als Vorbild), mehr nicht. Vor dem nächsten Release sind
-`flutter analyze` und ein Blick auf den Statusbildschirm erforderlich.
-Status dieser Änderung: **🔴 unbelegt**, nicht 🟡.
+Beim ersten Anlauf am 03.09.2026 waren diese Änderungen **nicht kompiliert**:
+Ich hatte die Flutter-Toolchain in dieser Umgebung nicht gefunden und den
+Diff nur manuell gegen `_DealAiBadge` in `offers_tab.dart` geprüft. Der
+Status stand deshalb auf 🔴.
+
+Beim späteren Neubau der Web-Fassung stellte sich heraus, dass Flutter unter
+`/opt/flutter` liegt und nur nicht im Suchpfad stand. Nachgeholt am selben
+Tag, Flutter 3.47.2 stable:
+
+* `flutter analyze` — **No issues found**
+* `flutter test` — **110 Tests grün**
+* `flutter build web --release` — durchgelaufen; die vier für diese Änderung
+  kennzeichnenden Zeichenketten stehen im ausgelieferten Bündel
+  („Welche Bereiche das im Einzelnen sind", „Produktbilder",
+  „Aktuelle Herausforderungen", „Automatischer Chat-Assistent")
+
+Status: **🟢**. Was weiterhin **nicht** geprüft ist: wie der Statusbildschirm
+tatsächlich aussieht. Ein bestandener Analyselauf sagt, dass der Code
+übersetzt; er sagt nicht, dass der Chip an der richtigen Stelle sitzt und
+lesbar ist. Das bleibt ein Blick mit dem Auge.
