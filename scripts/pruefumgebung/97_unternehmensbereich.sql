@@ -203,4 +203,34 @@ select pruef.wahrheit($$
   select not app.is_business_member('00000000-0000-0000-0000-000000000000'::uuid)
 $$) as t18_kein_treffer_ohne_mitgliedschaft;
 
+\echo '=== T19  Der oeffentliche Weg funktioniert in der Haut von anon ==='
+-- Dieser Test fehlte und deshalb blieb ein Fehler unentdeckt: Die Funktion
+-- hatte einen Parameter vom Typ app.lead_kind, und ein Aufruf mit einem Typ
+-- aus Schema app verlangt USAGE auf dieses Schema — das anon bewusst nicht
+-- hat. Geprueft wurde aber nur ueber pruef.wahrheit, und das laeuft als
+-- Superuser. Ein Aufruf, der nie in der Haut der Rolle stattfindet, die ihn
+-- im Betrieb ausfuehrt, prueft die Berechtigung nicht mit.
+delete from app.anfrage_drossel;
+select pruef.lies($$
+  select public.advertising_inquiry_submit(
+    'advertising', 'Anonyme GmbH', 'Ohne Konto',
+    'anon@beispiel.example', p_datenschutz := true) ->> 'gespeichert'
+$$, null, 'anon') as t19_anon_darf_absenden;
+
+\echo '=== T20  Gegenprobe: anon kommt weiterhin nicht an Schema app ==='
+select pruef.lies($$select app.heute()::text$$, null, 'anon') as t20_anon_ohne_schema_app;
+select pruef.lies($$select count(*)::text from public.leads$$, null, 'anon') as t20_anon_ohne_leads;
+
+\echo '=== T21  Eine erfundene Anfrageart wird verstaendlich abgewiesen ==='
+select pruef.lies($$
+  select public.advertising_inquiry_submit(
+    'gibtesnicht', 'X GmbH', 'Y Z', 'x@y.example', p_datenschutz := true)::text
+$$, null, 'anon') as t21_unbekannte_art;
+
+\echo '=== T22  Auch der Katalog und die Standortliste gehen ohne Konto ==='
+select pruef.lies($$select jsonb_array_length(public.advertising_catalog())::text$$,
+  null, 'anon') as t22_katalog_fuer_anon;
+select pruef.lies($$select jsonb_array_length(public.advertising_locations())::text$$,
+  null, 'anon') as t22_standorte_fuer_anon;
+
 rollback;
