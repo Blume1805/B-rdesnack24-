@@ -57,7 +57,7 @@ ausschließlich zusammengefasste Kampagnenzahlen.
 | Kategorie | Offen |
 |---|---|
 | **Technisch** | Werbekennzeichnung „Anzeige" und KI-Chip an der Anzeigenfläche; Art.-13-Hinweis am Formular; planmäßiger Lauf von `werbe_events_aufraeumen` und `drossel_aufraeumen`. **Erledigt:** Drossel je Absenderadresse |
-| **Dokumentarisch** | **Erledigt:** Datenschutzerklärung v6. Offen: Rechtstexte liegen nur in der Produktionsdatenbank und in keiner Migration — es gibt für sie keine Versionsgeschichte |
+| **Dokumentarisch** | **Erledigt:** Datenschutzerklärung v6. **Erledigt:** alle sieben Rechtstexte liegen jetzt versioniert im Repository, mit Prüfskript gegen stille Abweichung |
 | **Organisatorisch** | Verzeichnis der Verarbeitungstätigkeiten; Klärung § 147 AO; Festlegung der Mindestgruppengröße rechtlich absichern |
 | **Vertraglich** | Keine neue Auftragsverarbeitung. Rechteeinräumung an Werbemitteln im Werbevertrag |
 
@@ -131,3 +131,52 @@ Datum. Bis dahin: **🔴**.
 🟡 — die Drossel ist gebaut und lokal vollständig geprüft, die
 Wirksamkeit im Betrieb ist noch nicht belegt. Verantwortlich: Entwicklung.
 Fällig: nach der ersten Anfrage über das fertige Formular.
+
+
+---
+
+## 2026-09-03, Nachtrag — Rechtstexte ins Repository
+
+**Sachverhalt.** Impressum, Datenschutzerklärung, Nutzungsbedingungen,
+Widerrufsbelehrung, Zahlungsinformationen, Cookie-Hinweise und
+Barrierefreiheitserklärung lagen ausschließlich in der Produktionsdatenbank.
+Keine Migration enthielt sie; die lokale Prüfumgebung hatte null Zeilen in
+`legal_text`.
+
+**Warum das ein Befund war.** Für sieben Texte, auf die sich das Unternehmen
+im Streitfall beruft, gab es keine Versionsgeschichte, keinen Stand außerhalb
+der Produktion und keine Möglichkeit, eine Änderung vorher zu prüfen. Wer
+einen Satz falsch änderte, konnte nicht mehr sehen, was vorher dastand. Der
+Aufwand, eine Änderung an der Datenschutzerklärung vorzunehmen, war deshalb
+höher als nötig — sie musste über Ankerprüfungen gegen die Produktion laufen,
+statt lokal durchgespielt zu werden.
+
+**Umsetzung.** Alle sieben Texte liegen als lesbare Einzeldateien unter
+`docs/rechtstexte/` und als Migration. Die Migration schreibt einen Text
+**nur, wenn er fehlt** — sie überschreibt keinen laufenden Text. Eine
+Migration, die einen Rechtstext im Betrieb stillschweigend zurücksetzt, wäre
+gefährlicher als das Problem, das sie löst.
+
+**Der Preis dieser Entscheidung, und was ihn abfängt.** Weil nicht
+überschrieben wird, können Repository und Betrieb auseinanderlaufen, ohne dass
+es auffällt. Dagegen steht `app.rechtstext_pruefsummen()` und das Skript
+`scripts/pruefumgebung/prueffe_rechtstexte.sh`, das die Prüfsummen der Dateien
+gegen die der Datenbank hält. Es meldet jede Abweichung mit einem
+Rückgabewert ungleich null.
+
+**Nachweise.** Die sieben Texte wurden zeichengenau übertragen; jede
+Übertragung ist einzeln gegen die md5-Summe der Produktion geprüft worden.
+209 von 209 Migrationen laufen von Null durch. Der Neuaufbau aus Null ergibt
+für alle sieben Texte dieselben Prüfsummen wie die Produktion. Das Prüfskript
+wurde positiv (alles gleich) und negativ (ein Text im Betrieb verändert)
+getestet.
+
+**Status.** 🟢
+
+**Was dabei aufgefallen ist und offen bleibt:** Die Migration
+`20260903101500_datenschutz_werbeanfrage.sql` brach beim Neuaufbau von Null ab,
+weil sie einen Text ändern wollte, den es zu diesem Zeitpunkt noch nicht gab.
+Behoben — sie überspringt sich jetzt mit einem Hinweis, statt den ganzen
+Aufbau scheitern zu lassen. Das ist die Art Fehler, die nur ein
+Neuaufbau-Nachweis findet und die im laufenden Betrieb jahrelang unbemerkt
+bleibt.

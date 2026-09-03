@@ -23,8 +23,16 @@ declare
   v_fehlt   constant text := 'Datenschutzerklärung: Ankertext nicht gefunden — ';
 begin
   select inhalt into v_alt from public.legal_text where slug = 'datenschutz';
+
+  -- Beim Neuaufbau von Null gibt es hier noch keinen Text: die Rechtstexte
+  -- werden erst von der nachfolgenden Migration eingespielt, und zwar bereits
+  -- in der Fassung v6. Dann ist hier nichts zu tun. Kein Abbruch — sonst
+  -- liesse sich die Datenbank nicht mehr von Null aufbauen, und genau das ist
+  -- der Nachweis, an dem dieses Projekt haengt.
   if v_alt is null then
-    raise exception 'Datenschutzerklärung nicht gefunden';
+    raise notice 'Datenschutzerklaerung noch nicht vorhanden — die Fassung v6 '
+      'kommt mit der Migration rechtstexte_ins_repository. Nichts zu tun.';
+    return;
   end if;
   v_neu := v_alt;
 
