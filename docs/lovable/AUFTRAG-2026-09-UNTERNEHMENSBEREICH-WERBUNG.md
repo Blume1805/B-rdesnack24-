@@ -3,6 +3,8 @@
 An den Lovable-Agenten, Projekt A (Kundenapp mit Privat- und
 Unternehmensbereich). Stand 03.09.2026.
 
+**Abgeschickt am 03.09.2026, Nachricht `umsg_01m1jtjnm4edrsxb3x7aa75hp3`.**
+
 Setze bei der Bearbeitung `/impeccable`, `/frontend-taste` und
 `/humanizer` ein. Die drei Skills liegen in der Workspace.
 
