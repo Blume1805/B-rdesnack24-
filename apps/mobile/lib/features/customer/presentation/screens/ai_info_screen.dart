@@ -96,7 +96,7 @@ class AiInfoScreen extends StatelessWidget {
                 'wird, weisen wir das am jeweiligen Bild aus. Freistellen, '
                 'Zuschneiden und Helligkeit allein lösen keinen Hinweis aus, '
                 'weil das Bild den Gegenstand weiterhin so zeigt, wie er ist. '
-                'Massgeblich ist immer die Ware am Automaten.',
+                'Maßgeblich ist immer die Ware am Automaten.',
           ),
           const _InfoBlock(
             title: 'Zweck',
