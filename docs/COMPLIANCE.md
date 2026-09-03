@@ -31,7 +31,7 @@ ausschließlich zusammengefasste Kampagnenzahlen.
 | Impressum | ✓ | Keine neue Anbieterkennzeichnung; Betreiberin unverändert | Nein | |
 | AGB | ✓ | Der Anfrageprozess begründet keinen Vertrag. Für den späteren Werbevertrag gelten eigene Vereinbarungen, keine AGB der App | Nein | |
 | Nutzungsbedingungen | ✓ | Regeln die Nutzung der App durch Verbraucher. Der Unternehmensbereich ist ein getrennter Weg ohne Konto | Nein | |
-| Datenschutzerklärung | ✓ | **Es fehlt ein Abschnitt zur Werbeanfrage**: Zweck, Rechtsgrundlage, Speicherdauer, Empfänger. Ebenso fehlt die Werbekontaktzählung | **Ja** | Betreiber |
+| Datenschutzerklärung | ✓ | **Erledigt am 03.09.2026, Fassung v6.** Neu: Abschnitt 1 k) Werbeanfragen, 1 l) Messung von Werbekontakten, Klarstellung zu IP-Adressen in Abschnitt 3, Werbekunden als Nicht-Empfänger in Abschnitt 4, drei Fristen in Abschnitt 6, Abgrenzung der Anzeigenauswahl in Abschnitt 8 | Erledigt | |
 | DSGVO Art. 13 | ✓ | Die Informationspflicht bei Erhebung ist am Formular selbst zu erfüllen, nicht nur durch einen Link | **Ja** | Entwicklung + Betreiber |
 | DSGVO Art. 6 | ✓ | Anfrage: Art. 6 Abs. 1 lit. b (vorvertragliche Maßnahme auf Anfrage der betroffenen Person). Werbeeinwilligung getrennt über lit. a, serverseitig als eigenes Feld geführt und niemals aus der Anfrage abgeleitet | Nein | |
 | DSGVO Art. 17/18 | ✓ | `leads` hatte **bisher keine Löschregel**. Jetzt eingetragen: erledigte Anfragen ohne Geschäft nach einem Jahr | Erledigt | |
@@ -43,7 +43,7 @@ ausschließlich zusammengefasste Kampagnenzahlen.
 | UWG § 5 | ✓ | Irreführende Preisangaben werden technisch verhindert: Check-Constraints erlauben nicht gleichzeitig „auf Anfrage" und einen Preis, und kein „ab" ohne Preis. Alle zwölf Katalogeinträge stehen derzeit auf „Preis auf Anfrage", weil keine Preise festgelegt sind | Erledigt | |
 | UWG § 5a, TMG § 6 | ✓ | **Sobald eine bezahlte Anzeige im Kundenbereich erscheint, muss sie als Werbung erkennbar sein.** Noch keine Anzeige live (0 Kampagnen) | **Ja, vor der ersten Anzeige** | Entwicklung |
 | UWG § 7 | ✓ | Beide Mails sind Transaktionsmails zum angefragten Vorgang, keine Werbung. Die Einwilligung für Werbung ist ein eigenes, freiwilliges Feld | Nein | |
-| Steuer & Buchführung (§§ 145–147 AO, GoBD) | ✓ | Die Anfrage ist kein Buchungsbeleg. **Offen:** ob eine erfolglose Anfrage ein empfangener Handelsbrief nach § 147 AO ist und sechs Jahre aufzubewahren wäre | 🟡 **offen** | Betreiber |
+| Steuer & Buchführung (§§ 145–147 AO, GoBD) | ✓ | Die Anfrage ist kein Buchungsbeleg. Die Frist ist am 03.09.2026 vom Betreiber auf ein Jahr **entschieden** — in Kenntnis dessen, dass die Frage nach § 147 AO fachlich ungeklärt bleibt. Das ist eine unternehmerische Entscheidung, keine Rechtsauskunft | Entschieden, Rechtsfrage offen | Betreiber |
 | Lebensmittelrecht | ✓ | Keine Produktdarstellung berührt | Nein | |
 | Jugendschutz | ✓ | B2B-Prozess ohne altersbeschränkte Ware | Nein | |
 | Verpackung & Pfand | ✓ | Nicht berührt | Nein | |
@@ -56,8 +56,8 @@ ausschließlich zusammengefasste Kampagnenzahlen.
 
 | Kategorie | Offen |
 |---|---|
-| **Technisch** | Werbekennzeichnung „Anzeige" und KI-Chip an der Anzeigenfläche; Art.-13-Hinweis am Formular; IP-Drossel am Rand des Systems; planmäßiger Lauf von `werbe_events_aufraeumen` |
-| **Dokumentarisch** | Datenschutzerklärung um Werbeanfrage und Werbekontaktmessung ergänzen |
+| **Technisch** | Werbekennzeichnung „Anzeige" und KI-Chip an der Anzeigenfläche; Art.-13-Hinweis am Formular; planmäßiger Lauf von `werbe_events_aufraeumen` und `drossel_aufraeumen`. **Erledigt:** Drossel je Absenderadresse |
+| **Dokumentarisch** | **Erledigt:** Datenschutzerklärung v6. Offen: Rechtstexte liegen nur in der Produktionsdatenbank und in keiner Migration — es gibt für sie keine Versionsgeschichte |
 | **Organisatorisch** | Verzeichnis der Verarbeitungstätigkeiten; Klärung § 147 AO; Festlegung der Mindestgruppengröße rechtlich absichern |
 | **Vertraglich** | Keine neue Auftragsverarbeitung. Rechteeinräumung an Werbemitteln im Werbevertrag |
 
@@ -78,3 +78,56 @@ ausschließlich zusammengefasste Kampagnenzahlen.
 (Datenschutzerklärung, Verzeichnis, § 147 AO, Werbekennzeichnung vor der
 ersten Anzeige). Der Auftrag bleibt insoweit offen. Ohne diese Punkte darf
 keine bezahlte Anzeige im Kundenbereich ausgespielt werden.
+
+
+---
+
+## 2026-09-03, Nachtrag — Drossel je Absenderadresse
+
+**Datenklasse:** D3. Aus einer IP-Adresse wird ein Prüfwert gerechnet.
+**Änderungsklasse:** K3.
+
+### Sachverhalt
+
+Das Anfrageformular war nur je E-Mail-Adresse gedrosselt — wer die Adresse
+wechselt, wechselt das Kontingent mit. Ergänzt wurde eine Grenze je
+Absenderadresse. Gespeichert wird nicht die Adresse, sondern ein HMAC mit
+einem täglich wechselnden Geheimnis; beides wird nach sieben Tagen gelöscht.
+
+### Was daran datenschutzrechtlich zählt
+
+Eine IP-Adresse ist ein personenbezogenes Datum, auch wenn sie nur
+vorübergehend im Arbeitsspeicher verarbeitet und nie geschrieben wird. Die
+Verarbeitung ist deshalb zu benennen und zu begründen — sie steht auf
+Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an der Abwehr
+missbräuchlicher Formularnutzung.
+
+Das tägliche Wechseln des Geheimnisses ist keine Kosmetik: ohne es wäre der
+Prüfwert ein dauerhafter Wiedererkennungswert und damit ein Pseudonym mit
+unbegrenzter Lebensdauer. Mit ihm endet die Verknüpfbarkeit nach einem Tag.
+
+### Der Befund, der die Erklärung ausgelöst hat
+
+Abschnitt 3 der Datenschutzerklärung sagte zu: *„Keine IP-Adressen in
+unseren Anwendungsdaten."* Nach dem Bau der Drossel stimmte der Satz in
+dieser Absolutheit nicht mehr. Die Zusage bleibt der Sache nach richtig — es
+wird keine Adresse gespeichert — aber die Verarbeitung findet statt und ist
+jetzt ausdrücklich beschrieben. Dokumentation, die etwas anderes sagt als
+der Code, ist ein Fehler, auch wenn sie zugunsten des Nutzers irrt.
+
+### Nicht nachgewiesen
+
+**Welche Kopfzeile PostgREST in dieser Installation tatsächlich setzt, ist
+nicht belegt.** Der Egress-Proxy dieser Sitzung blockiert die Projekt-URL
+mit 403, ein HTTP-Aufruf war von hier nicht möglich, und ein Test gegen die
+Produktionsdatenbank ist untersagt. Die Funktion prüft fünf Kopfzeilen in
+absteigender Vertrauenswürdigkeit und hält bei jeder Anfrage in
+`app.betriebsparameter` fest, welche getragen hat — oder dass keine da war.
+Nach der ersten echten Anfrage steht in genau einem der beiden Schlüssel ein
+Datum. Bis dahin: **🔴**.
+
+### Status
+
+🟡 — die Drossel ist gebaut und lokal vollständig geprüft, die
+Wirksamkeit im Betrieb ist noch nicht belegt. Verantwortlich: Entwicklung.
+Fällig: nach der ersten Anfrage über das fertige Formular.
