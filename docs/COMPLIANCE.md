@@ -238,3 +238,61 @@ sichtbare Kennzeichnung noch fehlt und drei Punkte beim Betreiber liegen:
 Jugendschutz, Logo-Nutzungsrechte, Verzeichniseintrag. Ohne die sichtbare
 Kennzeichnung darf keine Kampagne live gehen — eine ungekennzeichnete
 Werbefläche ist der Verstoß, nicht die fehlende Dokumentation dazu.
+
+---
+
+## Legal Impact — Selbstbedienung Rechnungsdaten (03.09.2026)
+
+### Sachverhalt
+
+Ein Firmen-Admin kann Rechnungsanschrift und Rechnungs-E-Mail seiner eigenen
+Firma selbst ändern. Identitäts- (Firmierung, Rechtsform), Steuer-
+(Steuernummer, USt-IdNr.) und Statusangaben bleiben bei der Verwaltung.
+
+**Datenklasse:** überwiegend Unternehmensdaten. `billing_email` kann
+personenbezogen sein, wenn dort eine namentliche Adresse hinterlegt ist.
+
+### Rechtliche Würdigung
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | Nicht berührt. | Nein | |
+| AGB | ✓ | Keine Änderung am Vertragsverhältnis; die Pflicht des Kunden, seine Rechnungsdaten aktuell zu halten, besteht ohnehin. Ein Hinweis im Werbevertragsmuster wäre nützlich, nicht nötig. | Nein | |
+| Nutzungsbedingungen | ✓ | Nicht berührt. | Nein | |
+| Datenschutzerklärung | ✓ | Keine neue Verarbeitung, keine neue Kategorie, kein neuer Empfänger. Der Kunde ändert Daten, die bereits gespeichert sind. | Nein | |
+| DSGVO Art. 5/6/16/25/30/32 | ✓ | Art. 5 Abs. 1 lit. d (Richtigkeit) wird eher gestärkt: falsche Rechnungsdaten lassen sich schneller korrigieren. Art. 25: die Änderungsmöglichkeit ist auf das Nötige begrenzt, unbekannte Felder werden abgewiesen statt verworfen. Art. 32: Protokollierung mit Akteur, altem und neuem Wert über `trg_audit`, geprüft. | Nein | |
+| Verbraucherrecht | ✓ | Ausschließlich B2B. | Nein | |
+| Preisangaben (PAngV) | ✓ | Kein Preis berührt. | Nein | |
+| **Steuer & Buchführung (AO, GoBD, UStG)** | ✓ | Der kritische Punkt, und er ist entschärft: `invoices.billing_snapshot` hält die Rechnungsdaten im Zustand der Ausstellung fest. Eine spätere Änderung wirkt **nicht** auf ausgestellte Rechnungen zurück; die Unveränderbarkeit nach GoBD bleibt gewahrt. Genau deshalb bleiben Steuernummer und USt-IdNr. trotzdem außen vor: sie bestimmen, **wie** künftige Rechnungen ausgestellt werden (§ 14 UStG, Reverse Charge), und eine ungeprüfte Selbstauskunft dazu ist ein Fehler mit Folgen für den Aussteller. | Nein, aber die Abgrenzung ist tragend | |
+| Lebensmittelrecht | ✓ | Nicht berührt. | Nein | |
+| Jugendschutz | ✓ | Nicht berührt. | Nein | |
+| Verpackung & Pfand | ✓ | Nicht berührt. | Nein | |
+| Barrierefreiheit (BFSG, WCAG) | ✓ | Serverseitige Fehlermeldungen sind in verständlichem Deutsch formuliert und benennen das betroffene Feld — Voraussetzung für eine barrierefreie Fehlerbehandlung. Die Umsetzung im Formular prüft die Oberfläche. | In der Oberfläche | Lovable |
+| EU AI Act | ✓ | Kein KI-System, keine automatisierte Entscheidung. | Nein | |
+| UWG / Werbung | ✓ | Berührt, und das war der Grund für die engste Entscheidung dieser Änderung: die Firmierung erscheint über `kundenkarte_werbeplatz` als Name des Werbetreibenden in der Kunden-App. Eine frei änderbare Firmierung wäre eine ungeprüfte Identitätsangabe gegenüber Verbrauchern. Deshalb bleibt `name` bei der Verwaltung. | Nein, weil ausgeschlossen | |
+| Urheber-/Markenrecht | ✓ | Aus demselben Grund ausgeschlossen: eine frei änderbare Firmierung lädt zur Verwendung fremder Kennzeichen ein. | Nein, weil ausgeschlossen | |
+| Store-Regeln | ✓ | Nicht berührt, reine Webanwendung. | Nein | |
+
+### Anpassungskategorien
+
+* **Technisch** — erledigt: Feldbegrenzung, Abweisung unbekannter Felder
+  statt stillem Verwerfen, zweite unabhängige Prüfung im Trigger auf den
+  tatsächlichen Spaltenwerten, Protokollierung, `anon` ausgeschlossen,
+  Mitglieder ohne Adminrolle ausgeschlossen.
+* **Dokumentarisch** — nichts anzupassen.
+* **Organisatorisch** — der Prozess für Änderungen an Firmierung, Rechtsform
+  und Steuerangaben sollte benannt sein (wer prüft was, in welcher Frist).
+  Heute steht in der Fehlermeldung nur „wenden Sie sich an Ihren
+  Ansprechpartner".
+* **Vertraglich** — nichts anzupassen.
+
+### Status
+
+🟢 für das Backend — 21 Prüfungen grün, darunter die Kerngegenprobe, dass
+ein von Hand gesetztes Kennzeichen den Trigger nicht öffnet. Regression über
+zwölf Suiten ohne Befund.
+
+🟡 für die Funktion insgesamt, bis die Oberfläche im Firmenportal steht. Der
+Auftrag dazu liegt fertig in
+`docs/lovable/AUFTRAG-2026-09-FIRMENPORTAL-RECHNUNGSDATEN.md` und ist noch
+nicht gesendet: der Lovable-Workspace hat keine Credits mehr.

@@ -42,10 +42,11 @@ Selbstbedienungs-Werkzeug für Firmenkunden**, auch wenn ihr Name so klingt.
 Ausgeführte Gegenprobe: der Firmen-Admin `f1a00000-…-000000000001` erhält
 bei `business_update` `42501 Keine Berechtigung, Firmenkunden zu ändern`.
 
-Daraus folgt: **Stammdatenpflege und Standortpflege durch den Firmenkunden
-gibt es nicht.** Das ist keine Lücke im Frontend, sondern eine Entscheidung
-im Backend. Wer sie ändern will, baut eine eigene Selbstbedienungsfunktion
-mit eigener Rechteprüfung — nicht ein Frontend, das gegen eine Wand läuft.
+Daraus folgt: **Standortpflege durch den Firmenkunden gibt es nicht**, und
+Stammdatenpflege gibt es nur für den Teil, der seit dem 03.09.2026 eine
+eigene Selbstbedienungsfunktion hat (siehe unten). Alles andere bleibt bei
+der Verwaltung. Das ist keine Lücke im Frontend, sondern eine Entscheidung
+im Backend.
 
 `business_location_set` ist außerdem etwas anderes, als sein Name vermuten
 lässt: `(p_business, p_location, p_zuordnen boolean)` **verknüpft einen
@@ -153,11 +154,84 @@ Firmenkunde schreiben darf: `werbelogos` erlaubt Schreibzugriff nur
 `is_admin()` oder `advertising.manage`. Das ist eine offene Stelle im
 Backend, keine im Frontend.
 
+
+## Selbstbedienung: Rechnungsdaten (seit 03.09.2026)
+
+Zwei Funktionen, die ein Firmen-Admin für die **eigene** Firma aufrufen darf.
+
+### `business_rechnungsdaten(p_business uuid)` → Objekt
+
+```json
+{ "id", "name", "legal_form",
+  "billing_street", "billing_zip", "billing_city", "billing_country",
+  "billing_email", "tax_number", "vat_id", "updated_at",
+  "selbst_aenderbar": ["billing_street","billing_zip","billing_city",
+                       "billing_country","billing_email"] }
+```
+
+`selbst_aenderbar` steht bewusst in der Antwort: die Oberfläche soll nicht
+raten müssen, welche Felder sie schreibbar zeigt, und zieht automatisch
+nach, falls die Liste je wächst. Kein `sevdesk_contact_id` — die interne
+Buchhaltungsverknüpfung verlässt den Server nicht.
+
+### `business_rechnungsdaten_update(p_business uuid, p_werte jsonb)` → Objekt
+
+`p_werte` nimmt **ausschließlich** die fünf Felder aus `selbst_aenderbar`.
+Jedes andere Feld wird mit `42501` und einer verständlichen Meldung
+abgewiesen, nicht stillschweigend verworfen — stilles Verwerfen sieht für
+den Aufrufer aus wie Erfolg und ist der übliche Weg, auf dem sich Mass
+Assignment einschleicht.
+
+Zuschnitt und Prüfung: Straße 3–120 Zeichen, PLZ gegen ein Muster, Ort
+2–80 Zeichen, Land als zweibuchstabiges Kürzel (wird großgeschrieben),
+Rechnungs-E-Mail kleingeschrieben und auf Form geprüft. Die
+Rechnungs-E-Mail lässt sich **nicht leeren**: dorthin gehen die Rechnungen,
+und dieser Zustand sollte nicht ohne Mitwissen herstellbar sein.
+
+### Was bewusst nicht selbst änderbar ist
+
+| Feld | Grund |
+|---|---|
+| `name`, `legal_form` | Die Firmierung ist eine Identitätsangabe. Sie steht auf Rechnungen und erscheint über den Rückfall in `kundenkarte_werbeplatz` als Werbetreibender in der Kunden-App. Ohne Prüfung könnte sich ein Firmenkunde einen beliebigen Namen geben und ihn Kunden anzeigen lassen. |
+| `tax_number`, `vat_id` | Bestimmen, wie eine Rechnung ausgestellt wird. Eine falsche USt-IdNr. führt zu falsch ausgestellten Rechnungen, und die Folgen trägt nicht der, der sie eingetragen hat. |
+| `status` | Wer seinen eigenen Status setzen darf, hebt seine eigene Sperre auf. |
+| `sevdesk_contact_id` | Interne Verknüpfung zur Buchhaltung. |
+
+Für diese Felder bleibt der Weg über den Ansprechpartner. Die Fehlermeldung
+sagt das auch so.
+
+### Zwei unabhängige Prüfungen
+
+Die Funktion prüft Berechtigung und erlaubte Felder. Der Trigger
+`app.businesses_nur_verwaltung_aendert` prüft danach **noch einmal selbst**,
+welche Spalten sich tatsächlich bewegt haben. Er glaubt der Funktion nicht:
+das Kennzeichen, das sie setzt, öffnet nur den Weg — welche Spalten sich
+bewegen dürfen, entscheidet weiterhin der Trigger.
+
+Ausgeführte Kerngegenprobe (T16): mit von Hand gesetztem Kennzeichen bleibt
+ein direktes `update … set name = …` bei `42501`, und die Firmierung ist
+danach unverändert. Eine einzelne Sicherung wäre keine.
+
+### Keine Rückwirkung auf Rechnungen
+
+`invoices` trägt `billing_snapshot`, also die Rechnungsdaten in dem Zustand,
+in dem sie bei Ausstellung galten. Eine Änderung heute verändert keine
+ausgestellte Rechnung; die Unveränderbarkeit nach GoBD bleibt gewahrt. Die
+Änderung selbst protokolliert der vorhandene `trg_audit` mit Akteur, altem
+und neuem Wert — nachgewiesen in T20. Der Firmenkunde selbst kommt an das
+Protokoll nicht heran (T21).
+
+### Nachweise
+
+`scripts/pruefumgebung/101_firma_rechnungsdaten.sql`, 21 Prüfungen gegen die
+Replik, alle grün. Regression über zwölf Suiten ohne Befund.
+
 ## Offen beim Betreiber
 
-1. **Stammdaten- und Standortpflege:** intern lassen und im Portal nur
-   anzeigen, oder eine Selbstbedienungsfunktion mit eigener Rechteprüfung
-   bauen? Eine Entscheidung, keine Fleißaufgabe.
+1. ~~Stammdatenpflege~~ — entschieden und gebaut: Rechnungsanschrift und
+   Rechnungs-E-Mail sind Selbstbedienung, Identitäts- und Steuerangaben
+   bleiben bei der Verwaltung. **Standortpflege** bleibt offen; sie ist
+   heute nur eine Zuordnung vorhandener Standorte, keine Adresspflege.
 2. **Motiv-Upload:** ein Bucket, in den Firmenkunden schreiben dürfen, mit
    Größen- und Typgrenzen und einem Prüfschritt vor der Freigabe. Erst
    danach ergibt der Upload-Dialog im Portal Sinn.
