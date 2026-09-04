@@ -22,6 +22,43 @@ selbst registriert. Die Statusfreigabe von `invited` auf `active` verlangt
 `app.guard_profile_update` einen Administrator; sie ist deshalb in der Haut
 des vorhandenen `system_admin` erfolgt und im Protokoll auch so vermerkt.
 
+### Ein Fehler beim Anlegen, und woran er lag
+
+Die erste „Passwort vergessen"-Anfrage schlug fehl, ohne dass eine E-Mail
+ankam. Es lag **nicht** am Mailversand.
+
+GoTrue liest acht Spalten in `auth.users` als Text, nicht als „Text oder
+nichts". Beim Anlegen über SQL sind sie leer geblieben, und der Dienst
+brach beim Suchen des Kontos ab:
+
+```
+POST /recover
+error: error finding user: sql: Scan error on column index 3,
+       name "confirmation_token": converting NULL to string is unsupported
+error_code: unexpected_failure
+```
+
+Vier Versuche, viermal derselbe Abbruch — sichtbar nur im Auth-Protokoll des
+Projekts, nicht in der Oberfläche. Genau das macht den Fehler unangenehm:
+das Konto sieht in jeder SQL-Abfrage richtig aus — Rolle, Status, Rechte,
+alles stimmt — und `recovery_sent_at` bleibt leer, weil der Dienst gar nicht
+bis zum Versand kommt. Wer beim Mailversand sucht, sucht an der falschen
+Stelle.
+
+Betroffen waren `confirmation_token`, `recovery_token`,
+`email_change_token_new` und `email_change`; sie stehen jetzt auf `''`. Zum
+Vergleich geprüft: bei den über die Oberfläche entstandenen Konten ist keine
+dieser Spalten `NULL`. Alle sechs Konten des Projekts sind nachgeprüft.
+
+Damit sich das nicht wiederholt, liegt das korrigierte Muster als
+`scripts/betrieb/mitarbeiterkonto_anlegen.sql` bereit — mit der Gegenprobe
+am Ende, die nach jeder Anlage laufen sollte.
+
+**Nicht selbst nachgewiesen:** dass der Versand jetzt durchläuft. Der
+Egress-Proxy dieser Arbeitsumgebung blockt `supabase.co` mit 403, ich kann
+`/recover` von hier nicht aufrufen. Die Ursache ist belegt und beseitigt,
+die Wirkung zeigt sich beim nächsten Versuch.
+
 ### Ein Konto wurde korrigiert
 
 Pia war zunächst unter `pia.ps.schu@gmail.com` angelegt — die Adresse war
