@@ -159,9 +159,12 @@ select pruef.lies($$
 $$, 'f1a00000-0000-0000-0000-000000000001'::uuid) as t17_felderliste;
 
 \echo '=== T18 Gegenprobe: die Leseansicht gibt die interne Kennung nicht heraus ==='
+-- Polaritaet bewusst so gedreht, dass true das Bestehen bedeutet -- wie in
+-- allen anderen Pruefungen. Ein Ergebnis, das man erst gegen die Fragestellung
+-- lesen muss, wird beim Ueberfliegen falsch gelesen.
 select pruef.lies($$
-  select (public.business_rechnungsdaten('b1000000-0000-0000-0000-0000000000f1')
-          ? 'sevdesk_contact_id')::text
+  select (not (public.business_rechnungsdaten('b1000000-0000-0000-0000-0000000000f1')
+               ? 'sevdesk_contact_id'))::text
 $$, 'f1a00000-0000-0000-0000-000000000001'::uuid) as t18_kein_sevdesk;
 
 \echo '=== T19 Gegenprobe: die Leseansicht einer fremden Firma ist gesperrt ==='

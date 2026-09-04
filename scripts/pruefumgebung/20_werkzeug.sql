@@ -23,7 +23,15 @@ declare n int; begin
     else
       perform set_config('request.jwt.claims', '', true);
     end if;
-    execute 'select count(*) from (' || p_sql || ') t' into n;
+    -- WICHTIG: row_to_json erzwingt, dass die Spalten tatsaechlich berechnet
+    -- werden. Ohne das darf der Planer bei count(*) ueber einer STABLE-
+    -- Funktion den Aufruf ganz weglassen -- der Plan ist dann nur noch
+    -- "Aggregate -> Result", die Funktion laeuft nie, und eine Gegenprobe
+    -- auf fehlende Rechte meldet Erfolg statt Abweisung. Genau das ist am
+    -- 03.09.2026 passiert: bestandsluecken_offen war korrekt fuer anon
+    -- gesperrt, der Test hat es nur nicht gemerkt.
+    execute 'select count(*) from (select row_to_json(t.*) from ('
+            || p_sql || ') t) z' into n;
   exception when others then
     n := -1;
   end;
