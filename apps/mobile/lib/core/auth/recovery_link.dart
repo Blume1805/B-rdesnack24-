@@ -62,17 +62,24 @@ Map<String, String> authParameter(Uri url) {
   final werte = <String, String>{...url.queryParameters};
   final fragment = url.fragment;
   if (fragment.isEmpty) return werte;
-  if (fragment.startsWith('/')) {
-    werte.addAll(Uri.parse(fragment).queryParameters);
-  } else if (fragment.contains('=')) {
-    // Ohne "=" ist es ein Anker wie "#kapitel-3" und keine Parameterliste.
-    // Uri.splitQueryString wuerde daraus einen Schluessel mit leerem Wert
-    // machen und die Auswertung mit Muell fuellen.
-    try {
+
+  try {
+    final frage = fragment.indexOf('?');
+    if (frage >= 0) {
+      // Hash-Route mit eigener Abfrage. Bewusst nicht an einem fuehrenden
+      // "/" festgemacht: fehlt der in der E-Mail-Vorlage ("#passwort-neu"
+      // statt "#/passwort-neu"), waere der Link sonst tot. So greift die
+      // Weiche trotzdem und schickt auf die richtige Route.
+      werte.addAll(Uri.splitQueryString(fragment.substring(frage + 1)));
+    } else if (fragment.contains('=')) {
+      // Implizites Verfahren: "#access_token=…&type=recovery". Ohne "=" ist
+      // es ein Anker wie "#kapitel-3" und keine Parameterliste --
+      // Uri.splitQueryString wuerde daraus einen Schluessel mit leerem Wert
+      // machen und die Auswertung mit Muell fuellen.
       werte.addAll(Uri.splitQueryString(fragment));
-    } on FormatException {
-      // Kein Auth-Link.
     }
+  } on FormatException {
+    // Kein Auth-Link.
   }
   return werte;
 }

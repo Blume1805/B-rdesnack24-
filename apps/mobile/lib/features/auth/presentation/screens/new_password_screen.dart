@@ -89,6 +89,13 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
       try {
         await auth.verifyOTP(type: OtpType.recovery, tokenHash: token);
         if (!mounted) return;
+        // Den Token sofort aus der Adresse nehmen. Zwei Gruende, beide echt:
+        // er stuende sonst in der Adresszeile und im Verlauf des Browsers,
+        // und ein Neuladen der Seite wuerde ihn ein zweites Mal einloesen
+        // wollen -- was serverseitig mit "One-time token not found"
+        // scheitert und eine gueltige Sitzung als "Link verbraucht"
+        // aussehen liesse.
+        context.replace(AppRoutes.newPassword);
         setState(() => _lage = _Lage.bereit);
         return;
       } catch (e) {

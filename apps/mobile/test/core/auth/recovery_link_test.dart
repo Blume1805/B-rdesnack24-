@@ -115,4 +115,33 @@ void main() {
       );
     });
   });
+
+  group('Die Vorlage aus dem Supabase-Dashboard', () {
+    // Woertlich die Adresse, die in der E-Mail steht. Aendert jemand die
+    // Vorlage oder die Route, faellt es hier auf -- und nicht erst beim
+    // Nutzer im Posteingang.
+    const ausDerMail = 'https://blume1805.github.io/B-rdesnack24-/#/passwort-neu'
+        '?token_hash=pkce_9f2c1a7b3e&type=recovery';
+
+    test('wird als Einmal-Token erkannt', () {
+      final l = erkenneWiederherstellungslink(Uri.parse(ausDerMail));
+      expect(l?.art, Wiederherstellungsart.einmalToken);
+      expect(l?.tokenHash, 'pkce_9f2c1a7b3e');
+    });
+
+    test('die Route im Fragment ist die Passwortmaske', () {
+      final fragment = Uri.parse(Uri.parse(ausDerMail).fragment);
+      expect(fragment.path, '/passwort-neu');
+    });
+
+    test('ein fehlender Schraegstrich macht den Link nicht kaputt', () {
+      // Haeufigster Tippfehler beim Einpflegen: "#passwort-neu" statt
+      // "#/passwort-neu". Das Fragment ist dann keine gueltige Route mehr --
+      // der Token muss trotzdem gefunden werden, sonst waere die Mail tot.
+      final falsch = ausDerMail.replaceFirst('#/passwort-neu', '#passwort-neu');
+      final l = erkenneWiederherstellungslink(Uri.parse(falsch));
+      expect(l?.art, Wiederherstellungsart.einmalToken);
+      expect(l?.tokenHash, 'pkce_9f2c1a7b3e');
+    });
+  });
 }
