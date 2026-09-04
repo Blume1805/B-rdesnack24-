@@ -436,6 +436,16 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                             ),
                           ),
                           IconButton(
+                            tooltip: 'Sicherheit',
+                            icon: const Icon(
+                              Icons.shield_outlined,
+                              size: 22,
+                              color: AppColors.onDark,
+                            ),
+                            onPressed: () =>
+                                GoRouter.of(context).push(AppRoutes.security),
+                          ),
+                          IconButton(
                             tooltip: AppLocalizations.of(context).signOut,
                             icon: const Icon(
                               Icons.logout,

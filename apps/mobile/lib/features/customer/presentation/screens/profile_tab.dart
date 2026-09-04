@@ -20,6 +20,7 @@ import 'receipts_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
 import '../../../../core/auth/auth_redirect.dart';
+import '../../../auth/presentation/screens/security_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -108,6 +109,14 @@ class ProfileTab extends ConsumerWidget {
               icon: Icons.lock_outline,
               title: 'Passwort ändern',
               onTap: () => _changePassword(context, ref, repo),
+            ),
+            _ProfileRow(
+              icon: Icons.face_outlined,
+              title: 'Sicherheit',
+              subtitle: 'Anmeldung mit Face ID oder Fingerabdruck',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SecurityScreen()),
+              ),
             ),
             _ProfileRow(
               icon: Icons.workspace_premium_outlined,

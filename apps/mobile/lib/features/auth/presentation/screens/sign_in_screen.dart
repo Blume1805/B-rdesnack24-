@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/security/biometrie/biometrie_anmeldung.dart';
+import '../../../../core/security/biometrie/biometrie_dienst.dart';
+import '../../../../core/security/biometrie/biometrie_provider.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/validators.dart';
@@ -154,6 +157,7 @@ class _FormPanel extends StatelessWidget {
                       AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.s6),
+                const BiometrieAnmeldeKnopf(),
                 TextFormField(
                   controller: emailCtrl,
                   keyboardType: TextInputType.emailAddress,
@@ -413,6 +417,81 @@ class _DemoChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+/// „Mit Face ID anmelden" — erscheint nur, wenn auf diesem Gerät tatsächlich
+/// eine Freischaltung liegt.
+///
+/// Bewusst über den Eingabefeldern: wer eingerichtet hat, will nicht erst an
+/// zwei Feldern vorbeiscrollen, die er nicht ausfüllen möchte. Und bewusst
+/// nur bei vorhandener Bindung — ein Knopf, der bei jedem erscheint und dann
+/// „nicht eingerichtet" sagt, ist eine Sackgasse.
+class BiometrieAnmeldeKnopf extends ConsumerStatefulWidget {
+  const BiometrieAnmeldeKnopf({super.key});
+
+  @override
+  ConsumerState<BiometrieAnmeldeKnopf> createState() =>
+      _BiometrieAnmeldeKnopfState();
+}
+
+class _BiometrieAnmeldeKnopfState
+    extends ConsumerState<BiometrieAnmeldeKnopf> {
+  bool _busy = false;
+
+  Future<void> _anmelden() async {
+    setState(() => _busy = true);
+    try {
+      final fehler = await ref.read(biometrieControllerProvider).anmelden();
+      if (fehler == null || !mounted) return;
+      final text = switch (fehler) {
+        Entsperrfehler.biometrieAbgelehnt =>
+          'Nicht erkannt. Versuch es noch einmal oder melde dich mit '
+              'deinem Passwort an.',
+        Entsperrfehler.keineFreischaltung =>
+          'Auf diesem Gerät ist nichts freigeschaltet.',
+        Entsperrfehler.keineSitzung =>
+          'Die gespeicherte Anmeldung gilt nicht mehr. Bitte einmal mit '
+              'Passwort anmelden und neu einrichten.',
+        Entsperrfehler.fremdesKonto =>
+          'Die Freischaltung gehört zu einem anderen Konto und wurde '
+              'gelöscht.',
+      };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(text)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bindung = ref.watch(biometrieBindungProvider).valueOrNull;
+    if (bindung == null) return const SizedBox.shrink();
+
+    final art =
+        ref.watch(biometrieArtProvider).valueOrNull ?? BiometrieArt.andere;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton.icon(
+          onPressed: _busy ? null : _anmelden,
+          icon: Icon(
+            art == BiometrieArt.faceId ? Icons.face_outlined : Icons.fingerprint,
+          ),
+          label: Text('Mit ${art.bezeichnung} anmelden'),
+        ),
+        const SizedBox(height: AppSpacing.s2),
+        Text(
+          bindung.email,
+          textAlign: TextAlign.center,
+          style: AppTypography.body(size: 12, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.s5),
+      ],
     );
   }
 }

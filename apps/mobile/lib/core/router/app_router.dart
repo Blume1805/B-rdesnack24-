@@ -7,6 +7,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/management/presentation/screens/my_signature_tasks_screen.dart';
 import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
 import '../../features/auth/presentation/screens/new_password_screen.dart';
+import '../../features/auth/presentation/screens/security_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
@@ -21,6 +22,7 @@ abstract final class AppRoutes {
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
   static const newPassword = '/passwort-neu';
+  static const security = '/sicherheit';
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
   static const approvals = '/finance/approvals';
@@ -92,6 +94,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.newPassword,
         builder: (context, state) => const NewPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.security,
+        builder: (context, state) => const SecurityScreen(),
       ),
       GoRoute(
         path: AppRoutes.approvals,
