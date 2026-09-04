@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> _zeigen(WidgetTester tester) async {
   await tester.pumpWidget(
     const ProviderScope(
-      child: MaterialApp(home: NewPasswordScreen()),
+      child: MaterialApp(home: Scaffold(body: NewPasswordForm())),
     ),
   );
   await tester.pump();

@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'core/auth/recovery_link.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
 
@@ -35,6 +36,14 @@ Future<void> bootstrap() async {
     timeoutSeconds: 3,
   );
 
+  // Die Startadresse festhalten, BEVOR Supabase initialisiert wird: das SDK
+  // raeumt `code`, `access_token` und `type` unmittelbar nach dem Einloesen
+  // aus der Browser-Adresse (clearAuthUrlParameters). Wer erst danach
+  // nachsieht, kann einen gescheiterten Wiederherstellungslink nicht mehr von
+  // einem gewoehnlichen Seitenaufruf unterscheiden -- und schickt den Nutzer
+  // wortlos auf die Startseite. Genau das war der Fehler am 04.09.2026.
+  final startAdresse = Uri.base;
+
   final config = AppConfig.fromEnvironment();
   if (!config.isValid) {
     debugPrint('AppConfig ungültig — Supabase-URL/Key fehlen (--dart-define).');
@@ -54,7 +63,10 @@ Future<void> bootstrap() async {
 
   runApp(
     ProviderScope(
-      overrides: [appConfigProvider.overrideWithValue(config)],
+      overrides: [
+        appConfigProvider.overrideWithValue(config),
+        startAdresseProvider.overrideWithValue(startAdresse),
+      ],
       child: const BoerdesnackApp(),
     ),
   );
