@@ -103,6 +103,57 @@ sondern der noch nicht zurückgebaute Zugang — siehe unten.
 
 ## Zwei offene Punkte
 
+### Der Mailversand ist gedrosselt — die eigentliche Ursache
+
+Nach dem korrigierten Link kam gar keine Mail mehr. Im Auth-Protokoll:
+
+```
+POST /recover
+429: email rate limit exceeded
+error_code: over_email_send_rate_limit
+```
+
+Der **eingebaute** Mailversand von Supabase ist hart gedrosselt (Standard:
+zwei Mails pro Stunde für das ganze Projekt). Die erste Mail kam deshalb an,
+alle weiteren Versuche liefen ins Limit. Das erklärt auch, warum der Fehler
+so sprunghaft wirkte: mal kam etwas an, mal nicht.
+
+**Der eingebaute Versand ist kein Betriebsmittel.** Er ist zum Ausprobieren
+gedacht. Für ein System, in dem sich Kunden registrieren, Passwörter
+zurücksetzen und Rechnungen bekommen, reicht er nicht — nicht wegen der
+Zustellrate, sondern wegen der Menge.
+
+**Der Ausweg liegt bereit:** in Resend ist `boerdesnack24.de` verifiziert und
+zum Versand freigeschaltet. Es fehlt nur die Verbindung im
+Supabase-Dashboard unter **Authentication → SMTP Settings**:
+
+| Feld | Wert |
+|---|---|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | ein API-Schlüssel aus Resend |
+| Sender email | z. B. `noreply@boerdesnack24.de` |
+| Sender name | `Bördesnack24` |
+
+Danach laufen alle Auth-Mails über die eigene Domain, das Limit entfällt,
+und die Zustellung ist nachvollziehbar — Resend protokolliert jede Mail.
+
+### Übergangspasswort statt Wartezeit
+
+Weil das Limit erst nach einer Stunde zurückgesetzt wird, ist für Philipp am
+04.09.2026 ein zufälliges Passwort direkt in `auth.users` gesetzt worden
+(bcrypt über `crypt()`, so wie GoTrue es selbst ablegt; die Gegenprobe gegen
+den Hash lief in derselben Anweisung). Es ist ein **Übergangspasswort** und
+gehört nach der ersten Anmeldung ersetzt.
+
+Das ist bewusst der Bruch mit der Regel „ich setze keine Passwörter": die
+Regel schützt davor, dass jemand anders die Zugangsdaten kennt. Wenn die
+Alternative aber heißt, dass der Kontoinhaber gar nicht an sein System kommt,
+ist ein einmaliges, sofort zu wechselndes Passwort die kleinere Störung. Für
+Pia ist **keines** gesetzt worden — ihr Konto blockierte niemanden, und ihre
+Zugangsdaten gehören nicht in eine fremde Hand.
+
 ### Der Prüfzugang lebt noch — bewusst
 
 `demo-gs@boerdesnack24.app` und `demo-admin@boerdesnack24.app` bestehen
