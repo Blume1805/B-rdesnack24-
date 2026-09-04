@@ -19,6 +19,7 @@ import 'master_data_screen.dart';
 import 'receipts_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
+import '../../../../core/auth/auth_redirect.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -464,7 +465,10 @@ class ProfileTab extends ConsumerWidget {
     );
     if (ok != true) return;
     try {
-      await ref.read(supabaseClientProvider).auth.resetPasswordForEmail(email);
+      await ref.read(supabaseClientProvider).auth.resetPasswordForEmail(
+            email,
+            redirectTo: authRedirectUrl(),
+          );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Reset-Mail versendet.')),

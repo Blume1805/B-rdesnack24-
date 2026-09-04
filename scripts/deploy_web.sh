@@ -161,6 +161,12 @@ if [ -z "$SUBPATH" ]; then
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
+  # GitHub Pages liefert 404.html für jeden Pfad, den es nicht als Datei
+  # findet. Ohne sie sieht ein Aufruf wie /B-rdesnack24-/irgendwas nicht die
+  # App, sondern GitHubs Fehlerseite. Die Datei stand schon in der Stage-
+  # Liste weiter unten -- erzeugt hat sie nur niemand, der Deploy meldete
+  # jedes Mal "(skip: 404.html fehlt)".
+  cp "$ROOT/index.html" "$ROOT/404.html"
   # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
   # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
   # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.
