@@ -80,23 +80,70 @@ class AiInfoScreen extends StatelessWidget {
                 'gutgeschrieben bekommst\n'
                 '• Deine Abzeichen\n'
                 '• Punkte für das tägliche Einloggen und der Wochenbonus\n'
-                '• Der Geburtstagsgutschein\n\n'
+                '• Der Geburtstagsgutschein\n'
+                '• Die Werbelogos auf deiner Kundenkarte\n\n'
                 'All diese Berechnungen laufen nach festen Regeln auf unserem '
                 'Server. Es ist kein lernendes System beteiligt und es trifft '
                 'keine Einzelfallentscheidung über dich.',
           ),
           const _InfoBlock(
+            title: 'Werbelogos auf der Kundenkarte',
+            body: 'Auf der Kundenkarte kann das Logo eines Unternehmens '
+                'stehen, das bei uns digitale Werbung gebucht hat. Es ist '
+                'sichtbar als „Anzeige" gekennzeichnet, damit klar ist, dass '
+                'es Werbung ist und keine Partnerschaft, kein Zahlungsmittel '
+                'und keine Zugehörigkeit.\n\n'
+                'Welches Logo du siehst, hängt allein vom Kalendertag ab. '
+                'Alle Kundinnen und Kunden sehen an einem Tag dieselben '
+                'Logos in derselben Reihenfolge. Dein Konto, deine Käufe, '
+                'dein Standort und dein Punktestand fließen nicht ein — die '
+                'Funktion, die die Auswahl trifft, kann dich technisch gar '
+                'nicht erkennen.\n\n'
+                'Daraus folgt zweierlei: Der Werbetreibende erfährt nicht, '
+                'wer sein Logo gesehen hat, sondern nur, wie oft es insgesamt '
+                'erschienen ist — und auch das erst ab einer Mindestzahl, '
+                'unter der sich keine einzelne Person herausrechnen ließe. '
+                'Und ein Widerspruch gegen personalisierte Anzeige ändert an '
+                'dieser Fläche nichts, weil sie nie personalisiert war.',
+          ),
+          const _InfoBlock(
             title: 'Produktbilder',
-            body: 'Für die Bearbeitung eigener Produktaufnahmen setzen wir '
-                'generative KI-Werkzeuge ein — zum Freistellen, Zuschneiden '
-                'und Aufhellen. Das ist die einzige Stelle in dieser App, an '
-                'der ein KI-System im Sinne von Art. 3 EU AI Act arbeitet; '
-                'alles andere oben ist regel-basiert.\n\n'
-                'Wo dabei das Produkt selbst oder seine Umgebung verändert '
-                'wird, weisen wir das am jeweiligen Bild aus. Freistellen, '
-                'Zuschneiden und Helligkeit allein lösen keinen Hinweis aus, '
-                'weil das Bild den Gegenstand weiterhin so zeigt, wie er ist. '
-                'Maßgeblich ist immer die Ware am Automaten.',
+            body: 'Inwiefern KI hier angewandt wird: Ausgangspunkt ist immer '
+                'eine eigene Aufnahme des Produkts. Ein KI-Werkzeug stellt '
+                'sie frei, schneidet sie zu und hellt sie auf. Es erfindet '
+                'nichts hinzu.\n\n'
+                'Ein Hinweis erscheint deshalb nicht an jedem bearbeiteten '
+                'Bild, sondern nur dort, wo das Produkt selbst oder seine '
+                'Umgebung verändert wurde. Freistellen, Zuschneiden und '
+                'Helligkeit allein lösen keinen aus, weil das Bild den '
+                'Gegenstand weiterhin so zeigt, wie er ist. Ein Hinweis an '
+                'jedem Bild wäre nicht die vorsichtigere Wahl, sondern selbst '
+                'eine falsche Aussage — er behauptete eine Veränderung, die '
+                'es nicht gab. Maßgeblich ist immer die Ware am Automaten.\n\n'
+                'Wo der Hinweis fällig ist, trägt das Bild das Symbol '
+                '„AI MODIFIED" der Europäischen Kommission. Ein Tipp darauf '
+                'führt hierher zurück.',
+          ),
+          const _InfoBlock(
+            title: 'Die Symbole auf den Bildern',
+            body: 'Für Bilder verwenden wir die amtlichen Symbole der '
+                'Europäischen Kommission, damit die Kennzeichnung überall '
+                'gleich aussieht und nicht bei jedem Anbieter neu gelernt '
+                'werden muss:\n\n'
+                '• „AI GENERATED" heißt: das Bild ist vollständig von einem '
+                'KI-System erzeugt. Es gibt keine Aufnahme, die ihm zugrunde '
+                'liegt, und niemanden und nichts darauf, den oder das es '
+                'wirklich gibt.\n'
+                '• „AI MODIFIED" heißt: es gab eine echte Aufnahme, und ein '
+                'KI-System hat daran etwas verändert.\n'
+                '• Der schlichte Kreis mit „AI" steht für dasselbe, nur auf '
+                'Bildern, die zu klein für die beschriftete Form sind.\n\n'
+                'Die Beschriftung der Symbole ist englisch, weil es sie nur '
+                'so gibt. Der deutsche Wortlaut wird vorgelesen, wenn du '
+                'einen Screenreader verwendest, und steht auf dieser Seite.\n\n'
+                'Die Symbole sind freiwillig. Die Pflicht zur Offenlegung aus '
+                'Art. 50 EU AI Act besteht unabhängig davon, und ein Symbol '
+                'allein erfüllt sie nicht — deshalb diese Seite.',
           ),
           const _InfoBlock(
             title: 'Zweck',
@@ -125,11 +172,22 @@ class AiInfoScreen extends StatelessWidget {
           ),
           const _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',
-            body: 'Überall wo KI oder Algorithmen dir Inhalte vorschlagen, '
-                'siehst du in der oberen rechten Ecke der Section den '
-                'gold-schwarzen „KI"-Chip. Der Chat-Assistent trägt das '
-                'Label „Automatischer Chat-Assistent" damit du weißt, dass '
-                'du nicht mit einem Menschen sprichst.',
+            body: 'Es gibt zwei Kennzeichen, und sie sagen Verschiedenes. '
+                'Keines ersetzt das andere.\n\n'
+                'Der gold-schwarze „KI"-Chip am Kopf einer Section heißt: '
+                'die Auswahl ist automatisch entstanden. Welche Gutscheine, '
+                'welche Angebote, welche Reihenfolge — das entscheidet eine '
+                'Regel, keine Redaktion. Er sagt nichts darüber, wie der '
+                'Inhalt selbst entstanden ist.\n\n'
+                'Die schwarzen Symbole auf einem Bild heißen: dieses Bild '
+                'wurde von einem KI-System erzeugt oder verändert. Sie stehen '
+                'am Bild, nicht am Abschnitt, weil sich die Aussage auf genau '
+                'dieses Bild bezieht.\n\n'
+                'Der Chat-Assistent trägt weder das eine noch das andere. Er '
+                'heißt „Automatischer Chat-Assistent", damit du weißt, dass '
+                'du nicht mit einem Menschen sprichst — aber er ist kein '
+                'KI-System, sondern beantwortet feste Fragen nach festen '
+                'Regeln. Ihn als KI zu bezeichnen wäre bequem und falsch.',
           ),
           const _InfoBlock(
             title: 'Beschwerde',

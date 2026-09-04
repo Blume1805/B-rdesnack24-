@@ -180,3 +180,61 @@ Behoben — sie überspringt sich jetzt mit einem Hinweis, statt den ganzen
 Aufbau scheitern zu lassen. Das ist die Art Fehler, die nur ein
 Neuaufbau-Nachweis findet und die im laufenden Betrieb jahrelang unbemerkt
 bleibt.
+
+---
+
+## Legal Impact — Werbeplatz auf der Kundenkarte (03.09.2026)
+
+### Sachverhalt
+
+Unternehmen, die digitale Werbung gebucht haben, können ihr Logo auf der
+Kundenkarte platzieren. Die Auswahl trifft `public.kundenkarte_werbeplatz`
+nach dem Kalendertag; sie liest den Aufrufer nicht. Höchstens zwei Logos,
+mit Name des Werbetreibenden, Alternativtext, optionalem https-Ziel und dem
+Wort für die Werbekennzeichnung. Gezählt wird über die bestehende
+k-anonyme Auswertung.
+
+**Datenklasse:** keine. Die Auswahl verarbeitet keine personenbezogenen
+Daten. Die Zählung erzeugt Ereignisdaten ohne Personenbezug in der Ausgabe,
+für die bereits eine Löschregel besteht.
+
+### Rechtliche Würdigung
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | Kein neuer Diensteanbieter, keine neue Angabe. | Nein | |
+| AGB | ✓ | Kein Vertragsverhältnis zum Kunden berührt. Das Verhältnis zum Werbetreibenden regelt der Werbevertrag, nicht die Kunden-AGB. | Nein | |
+| Nutzungsbedingungen | ✓ | Keine neue Nutzungspflicht, keine neue Einschränkung. | Nein | |
+| Datenschutzerklärung | ✓ | Die Auswahl verarbeitet keine personenbezogenen Daten. Die Erklärung sagt bereits, dass Werbekampagnen anonym gezählt werden. Die bestehende Aussage bleibt richtig — **wichtig:** sie bleibt es nur, solange die Auswahl nicht personalisiert wird. | Nein, solange nicht personalisiert | Betreiber |
+| DSGVO Art. 5/6/13/17/22/28/30/32 | ✓ | Art. 6 wird nicht berührt, weil keine personenbezogenen Daten verarbeitet werden — nachgewiesen über den Funktionsrumpf, nicht nur über das Verhalten. Kein Profiling, keine Einzelfallentscheidung nach Art. 22. Art. 30 betrifft nur die Zählung, die im Verzeichnis bereits geführt werden muss. | Nur Art. 30 | Betreiber |
+| Verbraucherrecht (§§ 312i–312k BGB) | ✓ | Keine Bestellung, kein Vertragsschluss, kein Button. | Nein | |
+| Preisangaben (PAngV) | ✓ | Es wird kein Preis angezeigt. Ein Logo ist keine Preisangabe. | Nein | |
+| Steuer & Buchführung (AO, GoBD, UStG) | ✓ | Der Werbeumsatz ist buchführungsrelevant, aber er entsteht im Werbevertrag, nicht in dieser Anzeigefläche. Die Impressionszahlen sind **keine** Abrechnungsgrundlage, solange nicht nach Leistung abgerechnet wird. Wird das je umgestellt, werden die Zähldaten aufzeichnungspflichtig und unveränderbar zu führen — dann ist die Verfahrensdokumentation nachzuziehen. | Nein, aber Vorbehalt | Betreiber |
+| Lebensmittelrecht (LMIV) | ✓ | Kein Lebensmittel dargestellt. | Nein | |
+| Jugendschutz | ✓ | Die Kundenkarte ist allen Kontoinhabern zugänglich, auch Minderjährigen. **Offener Punkt:** es gibt heute keine inhaltliche Schranke, die altersbeschränkte Werbung von dieser Fläche fernhält. Solange keine Kampagne gebucht ist, ist das theoretisch; vor der ersten Buchung ist es zu entscheiden. | Ja | Betreiber, vor der ersten Buchung |
+| Verpackung & Pfand | ✓ | Nicht berührt. | Nein | |
+| Barrierefreiheit (BFSG, WCAG, EN 301 549) | ✓ | Der Alternativtext ist am Motiv durch CHECK erzwungen: ohne ihn lässt sich kein Kundenkarten-Logo speichern. Eine für Screenreader stumme Werbefläche wäre eine nicht gekennzeichnete Werbefläche. Kontrast und Tippfläche prüft die Oberfläche. | In der Oberfläche | Lovable/Flutter |
+| EU AI Act | ✓ | **Kein KI-System.** Die Auswahl ist eine Sortierung nach dem Kalendertag; nichts lernt, nichts entscheidet über einen Einzelnen. Art. 50 greift nicht. Ein EU-KI-Symbol an dieser Fläche wäre eine falsche Aussage über das System. | Nein | |
+| UWG / Werbung | ✓ | **§ 5a Abs. 4 UWG greift.** Der kommerzielle Zweck ergibt sich auf einer Kundenkarte gerade nicht aus den Umständen: ein fremdes Logo neben der eigenen Kundennummer kann als Partnerschaft, Zahlungsmittel oder Zugehörigkeit gelesen werden. Die Funktion liefert `kennzeichnung` mit; die Oberfläche muss es sichtbar ausgeben. | Ja, in der Oberfläche | Lovable/Flutter |
+| Urheber-/Markenrecht | ✓ | Die Logos sind fremde Marken. Sie werden mit Zustimmung des Rechteinhabers und im Rahmen des Werbevertrags gezeigt. **Der Werbevertrag muss die Nutzungsrechte am Logo ausdrücklich einräumen** — sonst zeigt die App eine fremde Marke ohne Erlaubnis. | Ja, im Vertragsmuster | Betreiber |
+| Store-Regeln (Apple/Google) | ✓ | Werbung in einer App ist zulässig; beide verlangen, dass sie als solche erkennbar ist und keine irreführende Systemoberfläche imitiert. Ein gekennzeichnetes Logo erfüllt das. **Zu beachten:** Apple verlangt bei Werbung, die auf Kinder zielen könnte, zusätzliche Zusagen — hängt an der Jugendschutzfrage oben. | Nein, aber verknüpft | Betreiber |
+
+### Anpassungskategorien
+
+* **Technisch** — erledigt: Auswahl ohne Aufruferbezug, Alternativtext
+  erzwungen, https erzwungen, Flächentrennung der Motivarten, kein SVG im
+  öffentlichen Bucket, `anon` ausgeschlossen. Offen: die sichtbare
+  Kennzeichnung in beiden Oberflächen.
+* **Dokumentarisch** — nichts anzupassen, solange nicht personalisiert wird.
+* **Organisatorisch** — Verzeichnis der Verarbeitungstätigkeiten für die
+  Zählung; Entscheidung zur altersbeschränkten Werbung vor der ersten
+  Buchung.
+* **Vertraglich** — Nutzungsrechte am Logo im Werbevertragsmuster.
+
+### Status
+
+🟡 — Backend geprüft und ausgerollt, 19 Prüfungen grün. Gelb, weil die
+sichtbare Kennzeichnung noch fehlt und drei Punkte beim Betreiber liegen:
+Jugendschutz, Logo-Nutzungsrechte, Verzeichniseintrag. Ohne die sichtbare
+Kennzeichnung darf keine Kampagne live gehen — eine ungekennzeichnete
+Werbefläche ist der Verstoß, nicht die fehlende Dokumentation dazu.

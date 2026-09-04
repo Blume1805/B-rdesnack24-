@@ -28,9 +28,15 @@ values
    'Der ganze Automat in Ihrem Design.', null, 'individuell', false, 20);
 
 \echo '=== T1  Katalog ist ohne Konto lesbar und enthält keine Datenbankkennung ==='
+-- Bewusst keine absolute Zahl: der Katalog traegt seit dem Startbestand
+-- echte Eintraege, und ein Test, der bei jedem neuen Katalogeintrag rot wird,
+-- misst den Katalogumfang statt der Sicherheitsaussage. Geprueft wird, dass
+-- die beiden Pruefeintraege ankommen und dass keine Datenbankkennung in der
+-- oeffentlichen Antwort steht.
 select pruef.wahrheit($$
-  select (select count(*) from jsonb_array_elements(public.advertising_catalog())) = 2
-     and not (public.advertising_catalog()::text like '%"id"%')
+  select ((select count(*) from jsonb_array_elements(public.advertising_catalog()) e
+            where e ->> 'schluessel' in ('pruef_flaeche','pruef_branding')) = 2
+     and not (public.advertising_catalog()::text like '%"id"%'))::text
 $$) as t1_katalog_ohne_id;
 
 \echo '=== T2  Anfrage ohne Konto wird angenommen ==='

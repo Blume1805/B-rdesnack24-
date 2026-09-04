@@ -142,3 +142,92 @@ Status: **🟢**. Was weiterhin **nicht** geprüft ist: wie der Statusbildschirm
 tatsächlich aussieht. Ein bestandener Analyselauf sagt, dass der Code
 übersetzt; er sagt nicht, dass der Chip an der richtigen Stelle sitzt und
 lesbar ist. Das bleibt ein Blick mit dem Auge.
+
+---
+
+# Nachtrag 03.09.2026 — Amtliche EU-Symbole und zwei neue Einträge
+
+## Das Register hat jetzt zehn Einträge
+
+Dazugekommen sind `marketingbild_ki` (vollständig erzeugte Motive, siehe
+`supabase/migrations/20260903144845…`) und `kundenkarte_werbeflaeche`
+(Werbelogos auf der Kundenkarte). Zwei davon stehen dauerhaft auf Gelb,
+und zwar aus verschiedenen Gründen — der Unterschied ist wichtiger als die
+Farbe.
+
+`marketingbild_ki` **kann nicht grün werden.** Der Versuch scheiterte am
+CHECK `ki_risiko_nicht_gruen`, der Einträgen mit Deepfake- oder
+Manipulationsrisiko die Ampel Grün verweigert. Der Constraint hat recht:
+ein Verfahren, das jederzeit das Bild eines Menschen erzeugen kann, den es
+nicht gibt, trägt ein Risiko, das kein erledigter Einzelfall beendet. Gelb
+heißt hier „umgesetzt und unter Aufsicht", nicht „offener Rest".
+
+`kundenkarte_werbeflaeche` ist gelb, **weil die Oberfläche noch fehlt.**
+Das Backend steht und ist geprüft; sobald beide Hinweise sichtbar
+ausgeliefert sind, geht der Eintrag auf Grün.
+
+## Zwei Kennzeichen, die Verschiedenes sagen
+
+Bis jetzt gab es einen Chip für alles. Das ging, solange die einzige
+KI-Funktion die Produktbildbearbeitung war. Mit einem vollständig erzeugten
+Motiv auf der Startseite geht es nicht mehr, weil zwei verschiedene
+Aussagen zu treffen sind:
+
+| | Aussage | Wo | Grundlage |
+|---|---|---|---|
+| Gold-schwarzer Chip | **Die Auswahl** ist automatisch entstanden | am Kopf einer Section | Hausregel `CLAUDE.md` |
+| Amtliches EU-Symbol | **Der Inhalt selbst** wurde von KI erzeugt oder verändert | am einzelnen Bild | Art. 50 KI-VO |
+
+Keiner ersetzt den anderen, und sie stehen an verschiedenen Orten, weil sie
+sich auf Verschiedenes beziehen: der Chip auf einen Abschnitt, das Symbol
+auf genau ein Bild.
+
+**Ein EU-Symbol gehört nicht an eine regelbasierte Fläche.** Gutscheine,
+Angebote, Bonusstufen, Abzeichen, Login-Punkte: dort behauptete das Symbol
+KI, wo keine ist. Das ist keine übervorsichtige Kennzeichnung, sondern eine
+falsche Aussage über das System — und sie entwertet das Symbol dort, wo es
+gebraucht wird.
+
+## Warum der deutsche Hinweistext am Hero-Bild weicht
+
+Der Betreiber hat entschieden, den Satz „Gestaltungsbeispiel, mit KI
+erzeugt…" durch das amtliche Symbol zu ersetzen, verlinkt auf die
+KI-Info-Seite. Drei Punkte aus dem Kommissionsdokument sprechen dagegen und
+sind hier festgehalten, damit die Entscheidung nachvollziehbar bleibt und
+nicht später als Versehen gelesen wird:
+
+1. Die Symbole sind **freiwillig**; die Pflicht aus Art. 50 KI-VO besteht
+   unabhängig davon. Wörtlich: „Die Verwendung dieser Icons stellt für sich
+   genommen keine Rechtskonformität dar."
+2. Der Nutzertest der Kommission ergab, dass die Wirkung sich „über alle
+   Maßnahmen hinweg verbessert, wenn das Basissymbol von einer
+   Textbeschriftung begleitet wurde".
+3. Die Motivbeschriftung ist **englisch**, die Oberfläche deutsch.
+
+Drei Maßnahmen halten den Tausch trotzdem tragfähig:
+
+* Verwendet wird nicht der nackte Kreis, sondern die **beschriftete Pille**
+  („AI GENERATED" / „AI MODIFIED"). Sie trägt ihre Textbeschriftung im
+  Motiv — das ist die Form, die im Nutzertest gut abgeschnitten hat.
+* Der deutsche Wortlaut lebt im **Alternativtext** weiter und wird
+  vorgelesen. Für Screenreader-Nutzer ändert sich dadurch nichts zum
+  Schlechteren; ohne ihn wäre die Offenlegung für sie ganz verschwunden.
+* Das Symbol ist ein **Link auf die zweite Ebene**, und diese Ebene
+  beschreibt ab jetzt je Fläche, *inwiefern* KI angewandt wurde — nicht nur
+  *dass*. Das ist mehr Information als der ersetzte Satz enthielt.
+
+Die Symbole liegen mit Herkunft und Lizenz unter
+`docs/assets/eu-ki-icons/`. Die offizielle weiße Variante fehlt (Egress
+blockt `ec.europa.eu`); bis dahin bekommt das schwarze Motiv auf dunklem
+Grund eine helle Unterlage, statt umgefärbt zu werden — eine Umfärbung wäre
+eine Veränderung am amtlichen Symbol, eine Unterlage ist keine.
+
+## Umsetzungsstand
+
+| Ort | Symbol | Stand |
+|---|---|---|
+| Flutter: `EuKiKennzeichen` + Regel + `ProductImage` | beide Pillen, Kreis kompakt | gebaut, 17 Tests grün |
+| Flutter: Produktbilder | „AI MODIFIED" | greift automatisch, sobald ein Bild mit veränderter Ware oder Umgebung vorliegt — heute gibt es keins |
+| Lovable: Hero-Bild | „AI GENERATED" | beauftragt, noch nicht geprüft |
+| Lovable: KI-Info-Seite | Legende + Beschreibung je Fläche | beauftragt, noch nicht geprüft |
+| Lovable: Kundenkarte | kein EU-Symbol, dafür „Anzeige" + Chip | beauftragt, noch nicht geprüft |
