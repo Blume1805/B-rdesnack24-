@@ -6,7 +6,7 @@ Stand 03.09.2026.
 
 | Person | Anmeldung | Rolle | Status |
 |---|---|---|---|
-| Philipp Blume | `philipp.blume93@gmail.com` | `shareholder` | `active` |
+| Philipp Blume | `philipp.blume93@gmail.com` | `system_admin` | `active` |
 | Pia Schu | `pia.schu.ps@gmail.com` | `shareholder` | `active` |
 
 **Beide Konten haben kein Passwort.** `encrypted_password` ist leer geblieben.
@@ -47,11 +47,15 @@ und `public.profiles` nicht mehr auffindbar.
 Ausgeführt in der Haut der beiden Konten gegen die Produktionsdatenbank,
 nur lesend:
 
-| | Finanzübersicht | Bestandsjournal | Offene Bestandslücken |
-|---|---|---|---|
-| Philipp | abrufbar | abrufbar | abrufbar |
-| Pia | abrufbar | abrufbar | abrufbar |
-| Kundenkonto (Gegenprobe) | **abgewiesen** `42501` | **abgewiesen** `P0001` | **abgewiesen** `42501` |
+| | Finanzen | Bestandsjournal | Bestandslücken | Anträge sichtbar | Darf entscheiden |
+|---|---|---|---|---|---|
+| Philipp (`system_admin`) | ja | ja | ja | 2 Zeilen | **ja** |
+| Pia (`shareholder`, noch nicht freigegeben) | ja | ja | ja | 1 Zeile (die eigene) | nein, `42501` |
+| Kundenkonto (Gegenprobe) | **nein** `42501` | **nein** `P0001` | **nein** `42501` | 0 Zeilen | nein, `42501` |
+
+Pias Zugriff auf Finanzen und Bestand hängt **nicht** an der Freigabe — er
+folgt aus Rolle und Berechtigung. Die Freigabe entscheidet nur darüber, ob
+sie ihrerseits andere freigeben und das E-Mail-Protokoll lesen darf.
 
 Die Zahlen sind überall null, weil noch kein Kauf existiert. Das ist der
 richtige Wert, nicht ein fehlender.
@@ -71,7 +75,48 @@ Passwort-Zurücksetzen etwas klemmt. Der Rückbau steht bereit unter
 `scripts/betrieb/pruefzugang_entfernen.sql` und sollte laufen, sobald sich
 beide einmal angemeldet haben.
 
-### Die Vier-Augen-Freigabe hat ein Henne-Ei-Problem
+### Die Vier-Augen-Freigabe — entschieden am 03.09.2026
+
+Der Betreiber hat Weg 2 gewählt: Philipp führt die Rolle `system_admin`.
+
+**Das ist kein Zusatz, sondern ein Wechsel.** `profiles.role` trägt genau
+eine Rolle; `system_admin` ersetzt `shareholder`. Geprüft wurde vorher, ob
+dabei etwas verlorengeht: jede Stelle, die Gesellschafterrechte verlangt,
+nennt entweder `system_admin` ausdrücklich oder geht über
+`is_shareholder()`, das `is_admin()` einschliesst. Auch
+`business_invoice_release`, das dem Namen nach nur Gesellschaftern gehört,
+lässt `is_admin()` zu. Es geht nichts verloren — nachgewiesen, siehe Tabelle
+unten.
+
+**Was sich rechtlich ändert, und zwar nicht nur technisch.** Als
+`system_admin` erfüllt Philipp `is_shareholder()`, **ohne** eine Freigabe zu
+brauchen. Die Vier-Augen-Prüfung greift für ihn also nicht mehr — nicht
+weil er sich selbst freigäbe, sondern weil er nie eine Freigabe benötigt.
+Der Datenbank-CHECK `chk_no_self_approval` bleibt zwar bestehen und
+verhindert weiterhin, dass jemand den eigenen Antrag entscheidet; er läuft
+für Philipp nur ins Leere, weil kein Antrag mehr nötig ist. Wer das später
+wieder enger haben will, nimmt ihm `system_admin` und lässt sich von Pia
+freigeben.
+
+**Pias Antrag steht, entschieden ist er nicht.** In
+`shareholder_approvals` liegt eine Zeile mit `status = 'pending'`,
+`requested_for = Pia`, `requested_by = Philipp`. Ich habe bewusst nur den
+**Antrag** angelegt und keine Entscheidung: `approved_by` und `decided_at`
+sind leer. Die Zeile soll Philipps Entscheidung festhalten, nicht meine.
+
+Zu entscheiden ist sie in der App unter **Finanzen → Freigaben**
+(`/finance/approvals`). Danach erfüllt auch Pia `is_shareholder()`.
+
+### Eine Lücke in der Oberfläche
+
+Der Freigabe-Bildschirm **entscheidet** bestehende Anträge, er **legt keine
+an**. Für ein bereits vorhandenes Profil gibt es in der App keinen Weg,
+einen Freigabeantrag zu stellen — deshalb musste Pias Antrag hier von Hand
+entstehen. Solange nur zwei Gesellschafter existieren, fällt das nicht ins
+Gewicht; für jede weitere Person fehlt der Einstieg. Nicht gebaut, weil es
+eine eigene Entscheidung über den Ablauf ist und nicht Teil dieses Auftrags.
+
+### Das ursprüngliche Henne-Ei-Problem
 
 `public.is_shareholder()` verlangt die Rolle **und** eine freigegebene Zeile
 in `shareholder_approvals`. Für beide neuen Konten ist sie derzeit `false`.
