@@ -7,7 +7,7 @@ Stand 03.09.2026.
 | Person | Anmeldung | Rolle | Status |
 |---|---|---|---|
 | Philipp Blume | `philipp.blume93@gmail.com` | `shareholder` | `active` |
-| Pia Schu | `pia.ps.schu@gmail.com` | `shareholder` | `active` |
+| Pia Schu | `pia.schu.ps@gmail.com` | `shareholder` | `active` |
 
 **Beide Konten haben kein Passwort.** `encrypted_password` ist leer geblieben.
 Das ist Absicht: so kennt niemand ausser der Person selbst je ein Passwort zu
@@ -22,6 +22,26 @@ selbst registriert. Die Statusfreigabe von `invited` auf `active` verlangt
 `app.guard_profile_update` einen Administrator; sie ist deshalb in der Haut
 des vorhandenen `system_admin` erfolgt und im Protokoll auch so vermerkt.
 
+### Ein Konto wurde korrigiert
+
+Pia war zunächst unter `pia.ps.schu@gmail.com` angelegt — die Adresse war
+falsch. Das Konto ist **vollständig gelöscht** und unter
+`pia.schu.ps@gmail.com` neu angelegt worden, nicht umbenannt: eine
+umgebogene Adresse hinterlässt eine halb korrigierte Identität in
+`auth.users`, `auth.identities` und `public.profiles`, und genau daraus
+entstehen später Anmeldungen, die niemand erklären kann.
+
+Vor dem Löschen wurde geprüft, dass es sich wirklich um ein unbenutztes
+Konto handelte: keine Anmeldung, keine Sitzung, kein Kundendatensatz, keine
+Käufe, keine Firmenmitgliedschaft, keine Freigabe. Wäre eines davon
+vorhanden gewesen, hätte die Prüfung abgebrochen — ein benutztes Konto
+gehört in den Löschprozess mit Aufbewahrungsprüfung, nicht in ein `DELETE`.
+Die beiden Protokollzeilen zur Anlage bleiben bestehen; sie halten fest,
+dass das Konto existiert hat und entfernt wurde.
+
+Nachgewiesen: die falsche Adresse ist in `auth.users`, `auth.identities`
+und `public.profiles` nicht mehr auffindbar.
+
 ## Was damit belegt funktioniert
 
 Ausgeführt in der Haut der beiden Konten gegen die Produktionsdatenbank,
@@ -35,6 +55,10 @@ nur lesend:
 
 Die Zahlen sind überall null, weil noch kein Kauf existiert. Das ist der
 richtige Wert, nicht ein fehlender.
+
+`profiles` zählt derzeit **drei** aktive Gesellschafter: Philipp, Pia und
+den Prüfzugang `demo-gs@boerdesnack24.app`. Die Drei ist also kein Fehler,
+sondern der noch nicht zurückgebaute Zugang — siehe unten.
 
 ## Zwei offene Punkte
 
