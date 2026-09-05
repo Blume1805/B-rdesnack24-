@@ -32,6 +32,11 @@ abstract interface class CustomerRepository {
   /// Setzt/aktualisiert das Geschlecht (m|w|d|null).
   Future<void> updateGender(String? gender);
 
+  /// Trägt ein fehlendes Geburtsdatum einmalig nach. Steht bereits eines
+  /// im Konto, bleibt es unverändert — die Datenbank lässt keine zweite
+  /// Setzung zu.
+  Future<void> setBirthDateOnce(DateTime birthDate);
+
   /// Coupon-Aktivierung — Kunde muss ein Angebot aktivieren, bevor der
   /// Automat es beim Einlösen akzeptiert.
   Future<void> activateWeeklyOffer(String offerId);

@@ -2,6 +2,7 @@
 library;
 
 export 'ai_badge.dart';
+export 'eu_ki_kennzeichen.dart';
 export 'app_card.dart';
 export 'brand_marks.dart';
 export 'eyebrow.dart';

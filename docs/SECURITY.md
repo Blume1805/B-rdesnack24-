@@ -1,0 +1,1228 @@
+# Sicherheitsnachweise Bördesnack24
+
+Ablage der ausgeführten Prüfprotokolle. Diese Datei berichtet über
+**durchgeführte** Prüfungen, nicht über Absichten. Was hier nicht mit
+Datum und Messwert steht, gilt als ungeprüft.
+
+Letzter vollständiger Durchlauf: **02.09.2026**, Prüfer: Claude Code
+(beauftragt durch Philipp Blume), Umfang: gesamter Code — Datenbank,
+Edge Functions, Flutter-App.
+
+**Die in Abschnitt 8 aufgeführten Befunde sind am 02.09.2026 behoben und
+ausgerollt.** Abschnitt 10 hält die Korrekturen und ihre Nachweise fest;
+Abschnitt 8 bleibt als Befundlage stehen, weil ein Bericht, der seine
+eigenen Feststellungen nachträglich glättet, als Nachweis nichts taugt.
+
+---
+
+## 1. Wie geprüft wurde
+
+Zwei Vorgaben stehen gegeneinander: Ein Nachweis ist etwas, das
+ausgeführt wurde — und Tests gegen die Produktionsdatenbank sind
+untersagt. Bis zum 01.09.2026 war deshalb kein einziger Schreib- oder
+Löschtest belegbar.
+
+Aufgelöst wurde das durch eine **lokale Nachbildung** aus den
+Migrationen dieses Repositories (`scripts/pruefumgebung/`). Ihre
+Gleichheit mit der Produktion wurde gemessen, nicht angenommen:
+
+| Merkmal | Produktion | lokal | Ergebnis |
+| --- | --- | --- | --- |
+| Tabellen in `public` | 111 | 111 | gleich |
+| RLS-Policies | 186 | 186 | MD5 `6d300aab…` **identisch** |
+| Tabellenrechte anon/authenticated/service_role | 1568 | 1568 | MD5 `d29b4dcc…` **identisch** |
+| Ausführungsrechte `anon` | 5 | 5 | MD5 `0a706e4f…` **identisch** |
+| Ausführungsrechte `authenticated` | 138 | 138 | MD5 `c5f00ccb…` **identisch** |
+| Ausführungsrechte `service_role` | 156 | 156 | MD5 `7056df4e…` **identisch** |
+
+Damit ist jede Zugriffsregel dieselbe. Ein Ergebnis von dort gilt hier.
+Aus der Produktion wurden ausschließlich **Metadaten** gelesen
+(Kataloge, Rechte, Zeilenzahlen) — keine Kundendaten, kein Schreibzugriff.
+
+Testkonten (lokal, keine echten Personen):
+
+| Rolle | Kennung |
+| --- | --- |
+| Kunde A | `kunde-a@test.invalid` |
+| Kunde B | `kunde-b@test.invalid` |
+| Gesellschafter | `gesellschafter@test.invalid` |
+| Minderjährig (geb. 05.05.2012) | `minderjaehrig@test.invalid` |
+
+Damit ist die bisher offene Zeile „Testkonten: TODO" in
+`projekt-konfig.md` für die Datenbankebene geschlossen. Für die
+Auth-Ebene (Passwort-Reset, Rate Limiting) bleibt sie offen — siehe 7.
+
+**Zwei Messfehler, die bewusst ausgeschlossen wurden.** Ein Fehler im
+Testkommando rollt die Untertransaktion zurück und mit ihr `set local
+role`; wer danach ohne `reset role` weitermisst, misst als falsche
+Rolle — genau daran waren die Läufe im August scheinbar alle grün.
+Und: RLS wirft keinen Fehler, sie liefert keine Zeilen; ein
+Statuscode beweist deshalb nichts. Gemessen wird die Zeilenzahl, und
+nach jedem Schreibversuch wird der **gespeicherte** Zustand erneut
+gelesen.
+
+**Zählstand des Laufs: 74 grün, 3 rot, 2 nicht aussagekräftig — 79 Tests.**
+Dazu drei Befunde aus dem Lesedurchlauf über alle 111 Tabellen.
+
+---
+
+## 2. Protokoll 1 — IDOR/BOLA (Kunde A gegen Kunde B)
+
+### T1 Lesen — alle 111 Tabellen, nicht nur die vermuteten
+
+Gemessen wurde die Zeilenzahl je Rolle gegen die Wahrheit. Auszug der
+Tabellen mit Personenbezug:
+
+| Tabelle | Wahrheit | anon | Kunde A | Kunde B | Gesellschafter | OK |
+| --- | --- | --- | --- | --- | --- | --- |
+| `profiles` | 4 | 0 | 1 | 1 | 4 | ✓ |
+| `customers` | 3 | 0 | 1 | 1 | 3 | ✓ |
+| `purchases` | 2 | 0 | 1 | 1 | 2 | ✓ |
+| `purchase_items` | 2 | 0 | 1 | 1 | 2 | ✓ |
+| `consents` | 4 | 0 | 2 | 2 | 0 | ✓ |
+| `customer_prices` | 2 | 0 | 1 | 1 | 2 | ✓ |
+| `device_tokens` | 2 | 0 | 1 | 1 | 0 | ✓ |
+| `notifications` | 4 | 0 | 2 | 2 | 0 | ✓ |
+| `contact_messages` | 2 | 0 | 1 | 1 | 2 | ✓ |
+| `account_deletion_requests` | 2 | 0 | 1 | 1 | 0 | ✓ |
+| `customer_notification_reads` | 2 | 0 | 1 | 1 | 0 | ✓ |
+| `recommendations` | 2 | 0 | 1 | 1 | 2 | ✓ |
+| `audit_log` | 703 | 0 | 0 | 0 | 0 | ✓ |
+| `product_ratings` | 2 | 0 | **2** | **2** | 2 | **✗ S-4** |
+| `machine_sales_daily` | 93 | 0 | **93** | **93** | 93 | **✗ S-3** |
+| `products` (Spalte `cost_price_net`) | 64 | 0 | **64** | **64** | 64 | **✗ S-2** |
+
+`customer_card`, `customer_login_days`, `customer_challenge_awards`,
+`donation_votes`, `payments`, `businesses`, `business_*`, `email_*`,
+`store_*` sind für anon **und** für angemeldete Kunden gar nicht
+erreichbar (kein `GRANT`) — Zugriff nur über geprüfte RPCs. Das ist der
+stärkste Schutz im System und ausdrücklich als solcher zu erhalten.
+
+### T2 ID-Tausch, T3 Ändern, T4 Löschen
+
+Jeweils mit anschließendem Lesen des gespeicherten Zustands:
+
+| Test | Ziel | Ergebnis | Gespeicherter Zustand | OK |
+| --- | --- | --- | --- | --- |
+| T3 | `profiles.full_name` von B | 0 Zeilen | unverändert „Kunde B" | ✓ |
+| T3 | `consents.granted` von B | 0 Zeilen | weiterhin `true` | ✓ |
+| T3 | `device_tokens.token` von B | 0 Zeilen | weiterhin `tok-b` | ✓ |
+| T3 | `product_ratings.rating` von B | 0 Zeilen | weiterhin 4 | ✓ |
+| T3 | `customer_prices.price_net` von B | 0 Zeilen | weiterhin 1,99 | ✓ |
+| T4 | `notifications` von B löschen | 0 Zeilen | 2 Zeilen bleiben | ✓ |
+| T4 | `device_tokens` von B löschen | 0 Zeilen | 1 Zeile bleibt | ✓ |
+| T4 | `account_deletion_requests` von B löschen | 0 Zeilen | 1 Zeile bleibt | ✓ |
+| T4 | `consents` von B löschen | 0 Zeilen | 2 Zeilen bleiben | ✓ |
+| T2 | Bewertung **unter B's ID** anlegen | `42501` | keine Zeile | ✓ |
+| T2 | **Einwilligung für B** eintragen | `42501` | keine Zeile | ✓ |
+| T2 | **Push-Token für B** unterschieben | `42501` | keine Zeile | ✓ |
+
+### Gegenprobe — eigene Daten dürfen
+
+Ein Test, der alles verbietet, ist ebenso falsch wie einer, der alles
+erlaubt.
+
+| Test | Ergebnis | OK |
+| --- | --- | --- |
+| A ändert den **eigenen** Namen | 1 Zeile, gespeichert | ✓ |
+| A ändert die **eigene** Bewertung | 1 Zeile, gespeichert | ✓ |
+| Gesellschafter liest den Kontenplan | 62 Zeilen | ✓ |
+
+**Horizontale Isolation der Kundendaten: bestanden.** Der Bruch liegt
+nicht bei „A gegen B", sondern bei Daten, die für *alle* Angemeldeten
+offen stehen (S-2 bis S-4).
+
+---
+
+## 3. Protokoll 3 — Vertikale Rechteausweitung
+
+| Test | Kunde A | Erwartet | OK |
+| --- | --- | --- | --- |
+| `finance_bookings` lesen | 0 Zeilen | 0 | ✓ |
+| `inventory_movements` lesen (EK je Bewegung) | 0 Zeilen | 0 | ✓ |
+| `pkw_kosten` lesen | 0 Zeilen | 0 | ✓ |
+| `audit_log` lesen | 0 Zeilen | 0 | ✓ |
+| `warehouse_stock` lesen | 0 Zeilen | 0 | ✓ |
+
+**Alle 48 Verwaltungs-RPCs**, die `authenticated` überhaupt aufrufen
+darf, wurden als Kunde A aufgerufen. 47 weisen ab:
+
+* `42501` (Berechtigung) — `finance_summary`, `finance_kpis`,
+  `finance_bookings_list`, `finance_balance_kpis`, **`upsert_finance_balance`**,
+  `business_create`, `business_update`, `business_invite`,
+  `business_member_set`, `business_budget_set`, `business_dashboard`,
+  `business_statement`, `business_locations_list`, `business_location_set`,
+  `business_invoice_release`, `business_invoice_request`,
+  `business_invoice_runs_list`, `leads_list`, `lead_create`,
+  `lead_status_set`, `lead_activity_add`, `advertising_overview`,
+  `advertising_campaign_set`, `advertising_campaign_status`,
+  `advertising_contract_set`, `advertising_contract_status`,
+  `advertising_space_set`, `advertising_space_remove`,
+  `advertising_creative_review`, `advertising_motif_approve`,
+  `advertising_coupon_sponsorship_set`, `advertising_coupon_sponsorship_status`
+* `P0001`/`P0002` (fachliche Abweisung) — `inventory_report`,
+  `inventory_summary_by_product`, `inventory_fifo_lots`,
+  `inventory_fifo_movements`, `business_customers_csv`,
+  `advertising_campaign_report`, `advertising_creative_upload`,
+  `business_invitation_accept`, `business_invitation_revoke`,
+  `invite_employee_signature`, `list_employees_for_signature`,
+  `submit_employee_signature`
+* leere Menge, Inhalt nachgelesen — `my_businesses`,
+  `my_advertising_campaigns`, `my_advertising_contracts` liefern `[]`
+
+**Eine weist nicht ab: `advertising_redirect_count` → Befund S-12.**
+
+---
+
+## 4. Protokoll 4 — Mass Assignment
+
+| Feld | Versuch von Kunde A auf dem eigenen Profil | Gespeicherter Zustand | OK |
+| --- | --- | --- | --- |
+| `role` → `system_admin` | `42501` | bleibt `customer` | ✓ |
+| `status`, `archived_at`, `deleted_at` | `42501` | unverändert | ✓ |
+| `id` (Identitätstausch) | `42501` | eigene Zeile bleibt | ✓ |
+| `price_cents` im Abo | `42501` | keine Zeile | ✓ |
+| Abo auf `lifetime` hochschreiben | 0 Zeilen | kein Lifetime | ✓ |
+| Punkte (`customer_challenge_awards`) | `42501` | keine Zeile | ✓ |
+| Bonusstufe (`loyalty_bonus_grants`) | `42501` | keine Zeile | ✓ |
+| Kauf selbst buchen (`purchases`) | `42501` | keine Zeile | ✓ |
+| **`email`** | **1 Zeile, übernommen** | **`opfer@example.invalid`** | **✗ S-5** |
+
+Der Schutz von `role`/`status`/`id` liegt im Trigger
+`app.guard_profile_update` — und er greift auch für den Tabelleneigentümer,
+nicht nur für RLS-gebundene Rollen. Das wurde beim Anlegen der Prüfdaten
+unfreiwillig bestätigt: selbst als `postgres` ließ sich der Status nicht
+setzen. Das ist gutes Verhalten, kein Fehler.
+
+---
+
+## 5. Finanzielle Integrität
+
+`choose_subscription_plan` holt Preis und Abrechnungsbezeichnung aus
+`app.subscription_plans` und die Identität aus `auth.uid()`. Der Client
+bestimmt **nicht**, was etwas kostet. Nachgewiesen durch den
+Manipulationsversuch oben.
+
+**Aber:** die Volljährigkeit bestimmt der Client — Befund S-6.
+
+---
+
+## 6. Speicher, Geheimnisse, Protokollierung
+
+* **Buckets:** alle fünf (`documents`, `employee-signatures`, `haccp`,
+  `partner-signatures`, `signed-documents`) sind **nicht öffentlich** und
+  tragen eigene Policies auf `storage.objects`, jeweils an `is_internal()`
+  bzw. an eine Rollenliste gebunden. Keiner setzt `file_size_limit` oder
+  `allowed_mime_types` → Befund S-10.
+* **Geheimnisse:** keine Service-Role-Schlüssel, keine JWTs, keine
+  API-Token im Repository oder im Client-Bundle. `.env.example` trennt
+  ausdrücklich zwischen Client- und Serverwerten. Der Flutter-Client zieht
+  URL und anon-Key aus `String.fromEnvironment`.
+* **Webhooks:** `nayax-webhook`, `iot-webhook` und `email-inbound` prüfen
+  jeweils eine HMAC-Signatur gegen ein Secret **ohne Rückfallwert**;
+  fehlt das Secret, antworten sie mit Fehler statt offen zu stehen.
+  `install-signature` — der Endpunkt, an dem genau das einmal schiefging —
+  ist stillgelegt und antwortet mit `410`.
+* **Änderungsprotokoll:** 36 Tabellen tragen `trg_audit`, darunter
+  `profiles`, `role_permissions`, `user_permissions`, `payments`,
+  `finance_bookings`, `customer_subscriptions`, `customer_prices`,
+  `products`, `documents`. Ohne Protokoll: `purchases`, `purchase_items`,
+  `invoices`, `business_invoice_runs`, `store_subscription` → Befund S-7.
+
+---
+
+## 7. Was **nicht** geprüft werden konnte
+
+Hier gibt es kein Gelb. Diese Punkte sind rot, mit benanntem fehlendem
+Mittel:
+
+| Punkt | Fehlendes Mittel |
+| --- | --- |
+| Passwort-Reset: Einmaligkeit, Ablauf, Session-Invalidierung | Zugriff auf `*.supabase.co/auth/v1` — der Egress-Proxy dieser Umgebung antwortet mit `CONNECT tunnel failed, 403` |
+| Benutzerenumeration über `/auth/v1/recover` | dito |
+| Rate Limiting `/auth/v1` | dito; die Werte stehen nur im Dashboard, nicht in `config.toml` |
+| Zustellung über Resend an ein Testpostfach | kein Testpostfach in `projekt-konfig.md` |
+| Firma A gegen Firma B über **alle** B2B-Funktionen | nur `business_locations_list` ist belegt (R-11); die übrigen 20 B2B-RPCs sind gegen einen zweiten Firmenkunden nicht durchgespielt |
+| Rechnungssicht von Kunde A auf fremde Rechnung | Prüfdaten enthielten keine Rechnung — Test lief, war aber nicht aussagekräftig |
+
+---
+
+## 8. Befunde
+
+Bewertung: **P0** Sicherheit/Recht/Datenverlust, **P1** Kernfunktion,
+**P2** Härtung/Technische Schuld, **P3** kosmetisch.
+
+| ID | P | Befund | Nachweis |
+| --- | --- | --- | --- |
+| **S-2** | P0 | `products.cost_price_net` ist für **jedes** angemeldete Konto lesbar. Policy `products_read` prüft nur `deleted_at is null`. 61 Einkaufspreise, Marge je Artikel unmittelbar ableitbar. | Als Kunde A gelesen: „Arizona Eistee Pfirsich = EK 0,87 / VK 1,8487; Ben & Jerry's = EK 3,73 / VK 5,4206" |
+| **S-6** | P0 | Die Altersprüfung beim kostenpflichtigen Abo ist ein vom Client gesendetes `p_age_consent`. Das gespeicherte `birth_date` wird nie gelesen. | Konto mit Geburtsdatum 05.05.2012 hat `monthly` zu 99 Cent abgeschlossen |
+| **S-3** | P1 | `machine_sales_daily` (Tagesumsatz je Automat) ist für jedes angemeldete Konto lesbar. Policy `msales_read` = `true`. | Als Kunde A: 93 Zeilen, Summe 2.945,23 €, Zeitraum 03.08.–02.09. |
+| **S-4** | P1 | `product_ratings` inklusive `customer_id` ist für jedes angemeldete Konto lesbar. Wer was bewertet hat, ist personenbezogen. Die Aggregatsicht `product_rating_summary` existiert bereits. | Als Kunde A gelesen: „<uid B> bewertete <Produkt> mit 4" |
+| **S-5** | P1 | `profiles.email` ist vom Kontoinhaber frei setzbar. Das umgeht die Bestätigung der Adressänderung aus `auth` (`double_confirm_changes = true`) und bestimmt zugleich den Empfänger: `email_enqueue` fällt auf `profiles.email` zurück. | Feld auf `opfer@example.invalid` gesetzt und gespeichert |
+| **S-12** | P1 | `advertising_redirect_count` erhöht den Klickzähler bei jedem Aufruf, unbegrenzt, für jedes angemeldete Konto und jede Kampagne. Restbefund aus R-2: `anon` wurde entzogen, die Frequenzbegrenzung fehlt weiterhin. Der Zähler ist Abrechnungs- und Berichtsgrundlage gegenüber Werbekunden. | RPC-Lauf: einziger der 48, der nicht abweist |
+| **S-7** | P2 | `purchases`, `purchase_items`, `invoices`, `business_invoice_runs`, `store_subscription` tragen kein Änderungsprotokoll. `purchases` ist zugleich über die `ALL`-Policy für `customers.manage` änder- und löschbar. Buchführungsrelevante Sätze dürfen nicht stillschweigend überschreibbar sein. | Trigger- und Policy-Auszug |
+| **S-1** | P2 | `email_report_share`: `token` hat keinen serverseitigen Default und keine Mindestlänge; `fetch_email_report_share` prüft die Länge nicht (`email_unsubscribe` tut es mit ≥ 20). Jedes angemeldete Konto darf Freigaben mit selbst gewähltem Token, beliebigem Inhalt und beliebiger Laufzeit anlegen — anonym abrufbar. Der Zugriffslog erfasst User-Agent, Referer und Client-Hint anonymer Besucher. Funktion ist gebaut, aber unbenutzt (0 Zeilen). | Migration `20260803050532`, Funktionsdefinition |
+| **S-9** | P2 | `inventory` (Bestand, Kapazität, MHD je Automatenfach) ist für jedes angemeldete Konto lesbar (`inventory_read` = `true`), während `warehouse_stock` mit denselben Daten auf `system_admin/shareholder/employee` beschränkt ist. Eine der beiden Regeln ist falsch. | Policy-Auszug |
+| **S-8** | P2 | `permissions`, `roles`, `role_permissions` sind für jedes angemeldete Konto lesbar (29 + 4 + 52 Zeilen). Das Berechtigungsmodell ist damit vollständig auslesbar. | T1-Durchlauf |
+| **S-11** | P2 | `auth_has_permission(perm, uid)` und `is_admin(uid)` nehmen eine **fremde** UID entgegen und sind für `authenticated` ausführbar. Damit lässt sich zu jeder bekannten UID abfragen, welche Rechte sie hat — eine Zielauswahlhilfe. | Als Kunde A: `auth_has_permission('finance.view', <uid Gesellschafter>)` → `true` |
+| **S-10** | P2 | Kein Bucket setzt `file_size_limit` oder `allowed_mime_types`. | `storage.buckets` |
+| **S-13** | P2 | Supabase-Advisor: Schutz vor kompromittierten Passwörtern (HaveIBeenPwned) ist aus; `pg_net` liegt im Schema `public`. Beides sind Dashboard-/Migrationsarbeiten von Minuten. | `get_advisors(security)` |
+| **S-14** | P3 | Sechs der 185 Migrationen laufen auf einer leeren Datenbank nicht durch. Das Verzeichnis ist ein Protokoll des Gewordenen, kein von Null reproduzierbarer Bauplan. Für die Verfahrensdokumentation ist das die relevantere Aussage. | Wiedereinspielung, 179/185 |
+
+### Kein meldepflichtiger Datenschutzvorfall
+
+S-4 ist ein möglicher Zugriff auf personenbezogene Daten Dritter und
+löst damit die Bewertung nach Art. 33/34 DSGVO aus. Bewertung:
+
+`public.product_ratings` enthält in der Produktion **0 Zeilen**; es gibt
+zwei Kundenkonten, beide aus dem eigenen Haus. Ein tatsächlicher Zugriff
+Dritter auf personenbezogene Daten hat daher **nicht stattfinden können**.
+Eine Meldung nach Art. 33 ist nicht veranlasst, eine Benachrichtigung
+nach Art. 34 ebenfalls nicht. Die Bewertung selbst wird hier
+dokumentiert — die Dokumentationspflicht besteht unabhängig vom Ergebnis.
+
+**Diese Bewertung hält nur so lange, wie die Tabelle leer ist.** Mit der
+ersten echten Bewertung eines echten Kunden wird S-4 zu einer laufenden
+Offenlegung. Die Korrektur gehört deshalb vor die Freischaltung der
+Bewertungsfunktion, nicht danach.
+
+---
+
+## 9. Security Green Gate
+
+Stand nach dem Ausrollen der Korrekturen (siehe Abschnitt 10):
+
+| Prüfpunkt | Stand |
+| --- | --- |
+| Authentication | ✓ Identität serverseitig aus `auth.uid()`, nie aus einem Client-Parameter |
+| Authorization | ✓ alle 48 Verwaltungs-RPCs weisen ein Kundenkonto ab; der Klickzähler ist begrenzt |
+| RLS / Storage-Policy | ✓ 186 Policies, alle Buckets privat, mit Policy und mit Größen- und Typgrenze |
+| User Isolation | ✓ horizontal belegt (T1–T4 + Gegenprobe) |
+| IDOR/BOLA (5 Tests) | ✓ T1–T4 ausgeführt; T5 (manipulierter HTTP-Request) nur auf SQL-Ebene, nicht über PostgREST — Egress gesperrt |
+| Negativtests N1–N12 | teilweise — ohne Token und mit fremder ID belegt; abgelaufener Token, Doppelabsendung, unzulässiger Statusübergang offen |
+| Abuse Cases | teilweise — Rechteausweitung, Mass Assignment, IDOR, Zählermanipulation belegt; Brute Force, Enumeration, Replay nicht erreichbar |
+| Rechteausweitung | ✓ vertikal und horizontal geprüft |
+| Mass Assignment | ✓ Rolle, Status, Identität, E-Mail, Preis, Punkte |
+| Finanzintegrität | ✓ Preis serverseitig, Altersschranke gegen gespeichertes Geburtsdatum |
+| Audit-Logging | ✓ 41 Tabellen, belegführende eingeschlossen |
+| Secrets | ✓ |
+| Datenminimierung | ✓ EK-Preise, Umsätze, Bestände, Bewertungen und Rechtekatalog geschlossen |
+| Security-Regression | ✓ Verfahren steht und ist wiederholbar (`scripts/pruefumgebung/`) |
+
+**Ergebnis: 🔴 ROT** — aber aus einem anderen Grund als am Morgen. Alle
+inhaltlichen Befunde sind geschlossen; offen sind ausschließlich
+Prüfungen, die aus dieser Umgebung **nicht durchführbar** sind
+(Abschnitt 7: Passwort-Reset, Enumeration, Rate Limiting, Resend-Zustellung,
+B2B-Vollmatrix) sowie eine Einstellung, die nur im Supabase-Dashboard
+gesetzt werden kann (Leaked-Password-Schutz). Nicht durchführbar heißt
+nach den Prüfregeln 🔴, nicht Gelb — auch wenn niemand mehr daran
+arbeiten kann, solange das Mittel fehlt.
+
+---
+
+## 10. Korrekturen vom 02.09.2026 und ihre Nachweise
+
+Neun Migrationen, ausgerollt nach vollständigem Durchlauf in der
+Prüfumgebung. Jede Korrektur hat eine **Gegenprobe**: eine Prüfung, dass
+die erlaubte Nutzung weiterhin funktioniert. Eine Sperre, die alles
+sperrt, wäre kein Erfolg.
+
+| Befund | Korrektur | Nachweis | Gegenprobe |
+| --- | --- | --- | --- |
+| S-2 | Tabellenrecht auf `products` entzogen, alle Spalten außer `cost_price_net` einzeln vergeben | Kunde A: `42501` beim Lesen des EK | Katalog weiter lesbar (64 Zeilen); `inventory_summary_by_product` liefert dem Gesellschafter weiter 64 Zeilen mit EK |
+| S-6 | `choose_subscription_plan` prüft `profiles.birth_date` | Konto Jg. 2012: `42501`, kein Abo. Konto ohne Datum: `P0001`, kein Abo | Konto Jg. 1990 schließt `monthly` ab |
+| S-3 | `machine_sales_daily` nur intern | Kunde A: 0 Zeilen | Gesellschafter: 93 Zeilen |
+| S-9 | `inventory` nur intern | Kunde A: 0 Zeilen | — |
+| S-8 | `permissions`, `roles`, `role_permissions` nur intern | Kunde A: je 0 Zeilen | Gesellschafter: 29 Zeilen; `my_permissions()` für den Kunden unverändert nutzbar |
+| S-4 | `product_ratings` nur eigene Zeile; Aggregatsicht auf Eigentümerrechte umgestellt | Kunde A sieht 0 fremde Bewertungen | eigene Bewertung sichtbar; `product_rating_summary` zählt weiter alle (2); `product_detail` liefert den fremden Schnitt 4,00 |
+| S-5 | `email` in die Profil-Schleuse aufgenommen, Nachlauf aus `auth.users` ergänzt | Selbst setzen: `42501`, Wert unverändert | Name weiter änderbar; Änderung in `auth.users` zieht ins Profil nach |
+| S-12 | Klicks je Konto und Tag auf drei begrenzt | 10 Klicks eines Kontos → berichtet: 3 | zweites Konto zählt weiter (4); alle 10 Aufrufe bleiben im Detailsatz sichtbar |
+| S-7 | Änderungsprotokoll für fünf belegführende Tabellen | 5 von 5 Triggern vorhanden | — |
+| S-11 | Auskunft über fremde Konten unterbunden | Kunde A → `auth_has_permission(..., fremd)` = false, `app_role(fremd)` = NULL | eigene Abfrage weiter true; interne Rolle darf über fremde Konten urteilen |
+| S-1 | Token serverseitig erzeugt, Mindestlänge 32, Laufzeit ≤ 90 Tage, Kurz-Token wird nicht protokolliert | Kurz-Token: `not_found` ohne Protokolleintrag; Anlage mit `"kurz"`: `23514` | gültige Freigabe entsteht mit 48-Zeichen-Token |
+| S-10 | Größen- und Typgrenzen für alle fünf Buckets | 0 Buckets ohne Grenze | Upload-Pfad der App auf den passenden Medientyp umgestellt |
+
+**34 Nachweise, alle grün.** Anschließende Regression über die
+ursprünglichen Prüfläufe: **77 grün, 0 rot.** Flutter: `analyze` ohne
+Befund, **100 Tests grün** (93 vorher, 7 neu).
+
+### Der Fund, den erst der Abgleich sichtbar gemacht hat
+
+Nach dem Ausrollen wichen die Rechte-Fingerabdrücke voneinander ab:
+1581 in der Produktion gegen 1573 in der Prüfumgebung. Ursache: Supabase
+vergibt einer neu angelegten Tabelle automatisch volle DML-Rechte an
+`anon` und `authenticated`. Die neue Tabelle
+`advertising_redirect_actors` hatte sie also, obwohl die Migration sie
+nirgends vergibt — in der Prüfumgebung, die diesen Automatismus nicht
+kennt, fehlten sie folgerichtig.
+
+Gefährlich war das nicht: RLS ist aktiv und die Tabelle hat keine Policy,
+der Zugriff wäre abgewiesen worden. Aber ein Recht, das nur deshalb
+wirkungslos ist, weil eine zweite Schranke hält, ist eine Falle für den,
+der später eine Policy ergänzt. Eine zehnte Migration hat es entzogen;
+danach stimmen alle sechs Fingerabdrücke wieder überein.
+
+Der eigentliche Punkt: Die Migration sah in beiden Umgebungen identisch
+aus. Sichtbar wurde der Unterschied allein im Vergleich der Wirkung.
+
+### Nachzug: zwei Meldungen, die erst die Korrektur erzeugt hat
+
+Der Supabase-Advisor zeigte nach dem Ausrollen zwei neue Punkte — beide
+aus den eigenen Änderungen. Eine Korrektur, die neue Befunde erzeugt, ist
+erst fertig, wenn auch die weg sind.
+
+* `app.klick_obergrenze_je_konto()` hatte keinen festen `search_path`.
+  Die Funktion ist eine Konstante, das Risiko gering — aber R-19 hat
+  genau diese Klasse im August bereinigt, und eine neue Funktion darf sie
+  nicht wieder aufmachen. Behoben mit leerem `search_path`.
+* `product_rating_summary` läuft jetzt mit Eigentümerrechten, was der
+  Advisor als **ERROR** meldet. **Diese eine Meldung bleibt bewusst
+  stehen.** Begründung: Die Sicht gibt ausschließlich `product_id`,
+  Durchschnitt und Anzahl heraus — kein personenbezogenes Feld, keine
+  Konto-ID. Genau deshalb *darf* sie über alle Zeilen rechnen. Liefe sie
+  mit Aufruferrechten, sähe jeder Kunde seine eigene Bewertung als
+  „Durchschnitt": eine falsche Zahl auf der Produktseite, ohne
+  Fehlermeldung. Das wiegt schwerer als die Warnung.
+  Entzogen wurden dafür die Schreibrechte, die Supabase einer Sicht
+  automatisch mitgibt — auf einer Sicht mit Eigentümerrechten wären sie
+  der gefährliche Teil.
+
+Verbleibende Advisor-Meldungen (141), alle geprüft und eingeordnet:
+
+| Meldung | Anzahl | Einordnung |
+| --- | --- | --- |
+| `authenticated_security_definer_function_executable` | 129 | Bauart des Systems: jede Verwaltungs-RPC ist SECURITY DEFINER mit eigener Berechtigungsprüfung. Alle 48 aufrufbaren wurden gegen ein Kundenkonto durchgespielt und weisen ab. |
+| `rls_enabled_no_policy` | 5 | Absicht: `customer_card`, `customer_login_days`, `customer_challenge_awards`, `email_unsubscribe_token`, `advertising_redirect_actors` sind ohne Policy und ohne Rechte — erreichbar nur über geprüfte RPCs. Der stärkste Schutz im System. |
+| `anon_security_definer_function_executable` | 4 | Die vier bewusst öffentlichen Endpunkte: Abmeldelink, Freigabelink (seit S-1 gehärtet), KI-Register, Preisliste. |
+| `security_definer_view` | 1 | Die begründete Ausnahme oben. |
+| `extension_in_public` | 1 | `pg_net`. Bemängelt wird der Registrierungseintrag; die zwölf Funktionen liegen längst im eigenen Schema `net`. Ein Verschieben bräche die Aufrufe in `legal_text_uebernahme_funktionen` und den Cron-Jobs — der Hinweis wiegt weniger als der Schaden. |
+| `auth_leaked_password_protection` | 1 | **Offen (S-13).** Nur im Dashboard setzbar, nicht per SQL. Verantwortlich: Philipp. |
+
+### Was die Korrekturen ausdrücklich **nicht** leisten
+
+* **Der Klickzähler kennt anonyme Aufrufe nicht.** Wer den
+  Weiterleitungslink ohne Anmeldung öffnet, wird gar nicht gezählt. Für
+  eine belastbare Reichweitenmessung braucht es eine Edge Function mit
+  eigener Frequenzbegrenzung — die steht in der Roadmap und wird hier
+  nicht behauptet.
+* **Das Geburtsdatum ist eine Selbstauskunft.** Ein Ausweis wird nicht
+  geprüft. Die Schranke steigt von „einmal tippen" auf „ein Datum
+  angeben, das danach feststeht und serverseitig geprüft wird". Für ein
+  Snack-Abo ist das das angemessene Mittel; die Einordnung gehört in die
+  Datenschutzdokumentation.
+* **Das Änderungsprotokoll ist keine Festschreibung.** Es macht
+  Änderungen an Belegen sichtbar, verhindert sie aber nicht. Storno statt
+  Änderung bleibt ein offener Punkt der Verfahrensdokumentation.
+* **`select=*` auf `products` ist keine gültige Abfrage mehr.** Das ist
+  der Preis der Spaltenrechte. Für die Flutter-App geprüft und in
+  Ordnung; für die Lovable-Oberflächen in
+  `docs/API-UNTERNEHMENSBEREICH.md` vermerkt.
+
+---
+
+## 11. Auth-Einstellungen: was der Screenshot vom 02.09.2026 zeigte
+
+S-13 ließ sich nicht schließen. Der Versuch, den Schalter zu setzen, hat
+aber vier weitere Punkte sichtbar gemacht — und einen Projektfakt
+widerlegt.
+
+### S-13 korrigiert: keine vergessene Einstellung, sondern der Tarif
+
+Der Schalter „Prevent use of leaked passwords" ist **nicht bedienbar**.
+Der Hinweistext daneben nennt den Grund: *„Only available on Pro plan and
+above."* Abfrage der Organisation bestätigt das:
+
+```
+Bördesnack24 GbR — plan: "free"
+```
+
+**Damit ist S-13 ohne Tarifwechsel nicht behebbar.** Die bisherige
+Beschreibung („zwei Minuten im Dashboard") war falsch und ist hiermit
+berichtigt.
+
+### S-18: `projekt-konfig.md` nennt einen Tarif, den es nicht gibt
+
+Die Projektkonfiguration führt unter „Systeme" den Eintrag
+**„Backend/Datenbank: Supabase Pro"**. Tatsächlich läuft die
+Organisation auf **Free**. Das ist keine Kleinigkeit, weil an dem Tarif
+mehr hängt als dieser eine Schalter — unter anderem Sicherungen und
+Point-in-Time-Recovery, die Aufbewahrungsdauer der Protokolle und eben
+der Abgleich gegen HaveIBeenPwned.
+
+Jede Aussage in diesem Bericht, die stillschweigend auf Pro-Eigenschaften
+beruht, ist damit neu zu prüfen. Zu korrigieren in
+`boerdesnack24-verify/references/projekt-konfig.md` — die Datei liegt
+außerhalb dieses Repositories.
+
+### Drei Einstellungen, die ohne Tarifwechsel sofort besser wären
+
+Alle drei waren auf demselben Bildschirm sichtbar und sind im Free-Tarif
+verfügbar:
+
+| ID | Einstellung | Live | Repo (`config.toml`) | Wirkung |
+| --- | --- | --- | --- | --- |
+| **S-15** | Minimum password length | **6** | `minimum_password_length = 10` | Sechs Zeichen sind bei offener Selbstregistrierung und ohne Abgleich gegen geleakte Passwörter die schwächste Stelle der Anmeldung. Repo und Wirklichkeit widersprechen sich. |
+| **S-16** | Secure password change | **aus** | — | Ein Passwortwechsel ist ohne kürzliche Anmeldung möglich. Wer eine fremde Sitzung in die Hand bekommt, kann das Passwort ändern und das Konto übernehmen, ohne das alte zu kennen. |
+| **S-17** | Require current password when updating | **aus** | — | Dasselbe aus der anderen Richtung: Das bisherige Passwort wird beim Ändern nicht verlangt. |
+
+S-16 und S-17 wirken zusammen: Beide aus heißt, eine übernommene Sitzung
+genügt für die vollständige Kontoübernahme. Das ist der einzige
+Punkt dieser Liste, der ohne Tarifwechsel und ohne Codeänderung sofort
+zu schließen ist.
+
+### Korrektur zu S-5
+
+Die Migration `20260902052115` begründet den Nachlauf der E-Mail-Adresse
+unter anderem damit, dass Supabase eine Adressänderung doppelt bestätigt
+(`double_confirm_changes = true`). Diese Angabe stammt aus
+`supabase/config.toml` — und `config.toml` beschreibt den **lokalen**
+Stack, nicht das gehostete Projekt. Für das gehostete Projekt ist die
+Einstellung **nicht verifiziert**; der betreffende Schalter war auf dem
+Bildschirm nach oben weggescrollt.
+
+Die Korrektur selbst hängt nicht daran: Sie sperrt den direkten
+Schreibzugriff auf `profiles.email` unabhängig davon, wie `auth` die
+Adressänderung bestätigt. Die *Begründung* im Migrationskommentar ist
+aber weiter, als der Nachweis trägt, und wird hiermit eingeschränkt.
+
+### Die allgemeine Lehre
+
+`supabase/config.toml` ist im Repository die einzige Beschreibung der
+Auth-Einstellungen — und sie gilt für das gehostete Projekt **nicht**.
+Mindestpasswortlänge 10 gegen tatsächlich 6 ist der Beleg. Solange die
+Einstellungen nur im Dashboard leben, beschreibt das Repository ein
+System, das es nicht gibt. Das ist derselbe Befund wie S-14, nur an
+einer anderen Stelle.
+
+---
+
+## 12. Protokoll — Firma A gegen Firma B (API-002), 02.09.2026
+
+Die letzte rote Zeile ohne fehlendes Mittel. Zwei Firmenkunden mit
+spiegelbildlichem Bestand in der Prüfumgebung: **Firma Eins GmbH** mit
+Admin und einfachem Mitglied, **Firma Zwei GmbH** mit Admin, dazu je
+Standort, Kampagne, Werbemittel, Werbevertrag, Abrechnungslauf, Budget,
+Einladung und Lead. Der Admin von Firma Eins ist der Angreifer.
+
+**33 Prüfungen, alle grün.** Jeder Schreibversuch mit anschließendem
+Lesen des gespeicherten Zustands.
+
+### Lesen mit fremder Firmen-ID
+
+| Funktion | Ergebnis |
+| --- | --- |
+| `business_dashboard` | `42501` |
+| `business_locations_list` | `42501` |
+| `business_statement` | `42501` |
+| `business_invoice_runs_list` | `42501` |
+| `advertising_campaign_report` | `42501` |
+
+### Schreiben mit fremder ID — Zustand danach geprüft
+
+| Angriff | Ergebnis | Gespeicherter Zustand |
+| --- | --- | --- |
+| Firmennamen überschreiben | `42501` | „Firma Zwei GmbH" |
+| Fremde Firma einladen lassen | `42501` | 1 Einladung, unverändert |
+| **Fremden Admin absetzen** (`business_member_set` → `removed`) | `42501` | weiterhin `admin/active` |
+| Fremdes Budget auf 999.999 setzen | `42501` | weiterhin 200,00 |
+| Fremder Firma den Standort entziehen | `42501` | Zuordnung bleibt |
+| Fremde Einladung widerrufen | `42501` | bleibt offen |
+| Abrechnung für fremde Firma anfordern | `42501` | — |
+| **Fremden Abrechnungslauf freigeben** | `42501` | Status `angefordert` |
+| Kampagne unter fremder Firma anlegen | `42501` | 1 Kampagne bleibt |
+| **Fremde Kampagne stoppen** | `42501` | bleibt `active` |
+| Werbemittel in fremde Kampagne laden | `42501` | 1 Werbemittel bleibt |
+| **Eigenes Werbemittel selbst freigeben** | `42501` | bleibt `pending_review` |
+| **Fremden Werbevertrag kündigen** | `42501` | bleibt `aktiv` |
+| Fremdes Motiv freigeben | `42501` | — |
+| Coupon-Sponsoring an fremder Kampagne | `42501` | — |
+
+### Zwei Angriffe, die über die Firmengrenze hinausgehen
+
+| Angriff | Ergebnis |
+| --- | --- |
+| **Fremde Einladung mit dem Rohtoken annehmen** (`business_invitation_accept('geheim-f2')`, Einladung war an `neu@firma-zwei.invalid` adressiert) | `42501`, keine Mitgliedschaft entstanden |
+| **Einfaches Mitglied macht sich selbst zum Admin** der eigenen Firma | `42501`, bleibt `member` |
+| Einfaches Mitglied lädt jemanden ein | `42501` |
+
+Der zweite Fall ist der, den man leicht übersieht: Rechteausweitung
+findet nicht nur zwischen Mandanten statt, sondern auch **innerhalb**
+eines Mandanten.
+
+### Sichtbarkeit
+
+`my_businesses()`, `my_advertising_campaigns()` und
+`my_advertising_contracts()` liefern dem Admin von Firma Eins
+ausschließlich Firma Eins — der Werbevertrag von Firma Zwei taucht nicht
+auf, obwohl er an einer Fläche hängt, die im Bestand von Firma Eins
+sichtbar ist.
+
+### Das Rollenmodell, das die Gegenprobe sichtbar gemacht hat
+
+Zwei meiner Gegenproben schlugen zunächst fehl: Der Admin von Firma Eins
+konnte weder die eigenen Stammdaten ändern noch die eigene Kampagne
+pausieren. **Nicht die Funktionen waren falsch, sondern meine
+Erwartung.** Der Unternehmensbereich hat zwei Stufen:
+
+| Stufe | Funktionen | Prüfung |
+| --- | --- | --- |
+| **mitgliedschaftsgebunden** — der Firmen-Admin darf | `business_dashboard`, `business_locations_list`, `business_statement`, `business_invoice_runs_list`, `business_invoice_request`, `business_invite`, `business_member_set`, `business_budget_set`, `business_location_set` | `app.is_business_member(…, 'admin')` oder intern |
+| **rein intern** — nur Bördesnack24 | `business_update`, `advertising_campaign_set/_status`, `advertising_contract_set/_status`, `advertising_creative_review`, `advertising_motif_approve` | `is_admin()` oder `businesses.manage` / `advertising.manage` |
+
+Beide Stufen sind mit Gegenprobe belegt: Der Firmen-Admin kann auf der
+eigenen Firma einladen und Budgets setzen; der Gesellschafter kann
+Stammdaten ändern und Kampagnen pausieren; der Firmen-Admin kann es
+nicht — und das ist Absicht, kein Fehler.
+
+### Eine Beobachtung ohne Sicherheitsbezug
+
+Weil `business_update` rein intern ist, kann ein Firmenkunde **seine
+eigene Rechnungsanschrift nicht korrigieren**. Auf einer Rechnung ist die
+vollständige Anschrift des Leistungsempfängers eine Pflichtangabe
+(§ 14 Abs. 4 UStG); ist sie falsch, kostet das den Kunden den
+Vorsteuerabzug. Das ist kein Sicherheitsbefund und wird hier nicht als
+solcher geführt — aber es ist eine Entscheidung, die bewusst getroffen
+sein sollte: entweder ein Selbstpflege-Weg für Anschriftsfelder, oder
+ein dokumentierter Prozess, über den der Kunde eine Änderung meldet.
+
+---
+
+## 13. S-14 geschlossen: das Verzeichnis ist ein Bauplan (02.09.2026)
+
+Bis heute liefen 179 von 185 Migrationen auf einer leeren Datenbank; sechs
+setzten einen Zwischenzustand voraus, den keine Migration herstellt.
+Jetzt laufen **197 von 197** durch — und das Ergebnis ist mit der
+Produktion in **allen neun gemessenen Merkmalen identisch**:
+
+| Merkmal | Produktion | Neuaufbau aus dem Repository |
+| --- | --- | --- |
+| Tabellen / Views / Funktionen | 112 / 2 / 156 | 112 / 2 / 156 |
+| RLS-Policies | 186 · `c8fbc1d9…` | 186 · `c8fbc1d9…` |
+| Tabellenrechte | 1561 · `da069539…` | 1561 · `da069539…` |
+| Ausführungsrechte `anon` | 4 · `bdc07832…` | 4 · `bdc07832…` |
+| Ausführungsrechte `authenticated` | 138 · `c5f00ccb…` | 138 · `c5f00ccb…` |
+| Ausführungsrechte `service_role` | 156 · `7056df4e…` | 156 · `7056df4e…` |
+| Funktionen mit PUBLIC-Ausführungsrecht | 0 | 0 |
+
+### Was die sechs Migrationen brauchten
+
+| Migration | Ursache | Behebung |
+| --- | --- | --- |
+| `…_inventory_at_cost_v2` | `inventory_summary_by_product()` ändert den Rückgabetyp; `create or replace` kann das nicht | `drop function if exists` davor |
+| `…_spendenvorschlaege_nicht_oeffentlich` | dasselbe für `donation_causes_list()` | dito |
+| `…_security_hardening` | `comment on` auf `app._sig_upload` / `_pia_sig` | in eine Existenzprüfung gefasst |
+| `…_revoke_anon_on_signature_scratch` | `revoke` auf dieselben Tabellen | dito |
+| `…_donation_causes_stammdaten` | Prüfregel setzt einen Datenstand voraus | der fehlende Schritt wird nachgetragen |
+| `…_konten_kommen_aus_sevdesk` | prüft Rechte, die Supabase automatisch vergibt | Standardrechte im Nachbau ergänzt |
+
+### Drei Eingriffe an der Produktion, die nie eine Migration hatten
+
+Die Reparatur hat sichtbar gemacht, dass an drei Stellen von Hand am
+Produktionsstand gearbeitet wurde, ohne dass es im Verzeichnis steht:
+
+1. **Die Arbeitstabellen `_sig_upload` und `_pia_sig`** wurden auf dem
+   Server angelegt — dieselbe Herkunft wie die stillgelegte Function
+   `install-signature`.
+2. **Die drei Spendenzwecke** aus dem Juli wurden zurückgezogen
+   (`deleted_at` gesetzt). Ohne diesen Schritt greift die Prüfregel vom
+   03.08. nicht. Er ist jetzt in der Migration nachgetragen.
+3. **PUBLIC wurde bei drei Finanz- und Produktfunktionen entzogen** —
+   siehe unten.
+
+Für die Verfahrensdokumentation ist das der eigentliche Ertrag: Nicht die
+sechs Fehler, sondern die Erkenntnis, dass Handbetrieb an der Produktion
+stattgefunden hat und im Verzeichnis nicht auftaucht.
+
+### S-19 — was der Neuaufbau als Erstes gefunden hat
+
+Der erste vollständige Lauf ergab: **`anon` durfte 8 Funktionen
+ausführen, die Produktion erlaubt 5.** Die drei zusätzlichen waren
+`product_detail`, `finance_balance_kpis` und **`upsert_finance_balance`**
+— letztere schreibt Bilanzzahlen.
+
+Ursache: Migration 0046 vom 18.07. hatte das Problem schon einmal gelöst
+(„Funktionen erben execute über PUBLIC"), aber ihre **Standardregel hält
+nicht**. In PostgreSQL bleibt der eingebaute Vorgabewert — PUBLIC darf
+ausführen — wirksam, wenn das gespeicherte Standardrecht den Eigentümer
+nicht mitführt. Jede seit dem 19.07. angelegte Funktion trug PUBLIC
+wieder. In der Produktion waren es zuletzt elf, darunter drei aus den
+Sicherheitskorrekturen von heute früh.
+
+Über die API erreichbar waren die `app`-Funktionen nicht — PostgREST
+veröffentlicht nur `public`. Aber im Repository stand ein anonym
+aufrufbarer Schreibzugriff auf Finanzdaten, und jeder Neuaufbau hätte ihn
+hergestellt. Migration `20260902060051` entzieht PUBLIC und setzt die
+Standardregel in der Form, die tatsächlich greift.
+
+### S-20 — der Fehler, den diese Korrektur selbst erzeugt hat
+
+Der erste Anlauf von `20260902060051` übernahm aus 0046 die Zeile
+
+```sql
+grant execute on all functions in schema public to authenticated;
+```
+
+Damit bekam **jedes angemeldete Konto** Ausführungsrechte auf 18
+Funktionen, die vorher bewusst zu waren:
+
+* `email_enqueue` — Post an eine beliebige Adresse einstellen
+* `next_invoice_number` — Rechnungsnummern verbrauchen; jede Lücke in der
+  Nummernfolge ist ein GoBD-Problem
+* `create_invoice_for_purchase`, `store_notification_apply`,
+  `upsert_finance_balance_synced`
+* `grant_birthday_offer`, `grant_anniversary_offer` — Rabatte an eine
+  beliebige Kunden-ID
+* `email_unsubscribe_token_for` — Abmeldetoken eines fremden Profils
+* dazu `card_entitlements`, `email_has_consent`, `email_outbox_claim`,
+  `email_outbox_mark`, `generate_daily_offers`, `generate_weekly_offers`,
+  `has_paid_subscription`, `legal_text_abrufen`, `legal_text_uebernehmen`,
+  `run_daily_special_offers`
+
+**Der Regressionslauf blieb dabei grün.** Er prüft die 48 Verwaltungs-RPCs,
+die `authenticated` vorher aufrufen durfte — diese 18 waren nie darunter.
+Gesehen wurde der Fehler allein daran, dass der Fingerabdruck von
+`authenticated` nach dem Ausrollen von 138 auf 156 sprang. Migration
+`20260902060345` nimmt die 18 Rechte einzeln zurück; die Ursache ist in
+`20260902060051` entfernt.
+
+Das ist die Lehre dieses Abschnitts, und sie geht über die Befunde hinaus:
+**Eine Testsuite prüft, was sie kennt. Der Fingerabdruck prüft, was sich
+geändert hat.** Ohne den Vergleich wäre diese Ausweitung durchgegangen —
+mit grüner Regression.
+
+### Zwei bewusste Abweichungen der Prüfumgebung
+
+* **PostgreSQL 16 gegen 17.6** in der Produktion. Für die
+  Autorisierungsfläche ohne Wirkung — alle neun Merkmale stimmen überein.
+  Für Fragen, die an der Serverversion hängen, ist die Umgebung nicht
+  aussagekräftig.
+* **pgTAP** liegt im eigenen Schema `tap`, damit es die über tausend
+  eigenen Funktionen nicht in `public` mitzählt.
+
+---
+
+## 14. CUST-008 — Löschung gegen Aufbewahrung, gemessen (02.09.2026)
+
+Ein Konto wurde in der Prüfumgebung auf gelöscht gesetzt und danach
+geprüft, was das System noch mit ihm tut. Gemessen, nicht gelesen.
+
+| Prüfung | Ergebnis | |
+| --- | --- | --- |
+| Kennzeichen `deleted_at` wird gesetzt | ja | ✓ |
+| Werbung an ein gelöschtes Konto | `suppressed / konto_geloescht` | ✓ |
+| Vertragsnachricht an ein gelöschtes Konto | geht hinaus | ✓ |
+| Geburtstagsgutschein für ein gelöschtes Konto | kein Angebot | ✓ |
+| Gegenprobe: Werbung/Gutschein an ein aktives Konto | 1 / 1 | ✓ |
+| **Gelöschtes Konto liest sein Profil** | **1 Zeile** | ✗ |
+| **Gelöschtes Konto liest seine Kaufhistorie** | **1 Zeile** | ✗ |
+| **Funktion, die den Löschantrag ausführt** | **0** | ✗ |
+| **Aufbewahrungsfrist für Käufe und Rechnungen** | **0** | ✗ |
+
+Zwei dieser Prüfungen waren im ersten Anlauf ungültig: Der Mailtest
+scheiterte an einer Vorlage, die es gar nicht gibt, der Gutscheintest am
+Geburtsdatum des Testkontos — beide also **nicht** an der Löschung. Beide
+wurden neu aufgesetzt. Und eine Erwartung war schlicht falsch: Ich hatte
+angenommen, an ein gelöschtes Konto dürfe gar keine Post mehr gehen.
+Art. 18 DSGVO schränkt die Verarbeitung ein, er verbietet sie nicht — über
+das Ergebnis seines Löschverlangens ist der Betroffene gerade zu
+informieren. Gesperrt gehört Werbung, nicht die Nachricht.
+
+### Was geschlossen wurde
+
+* Werbung an ein gelöschtes Konto wird unterdrückt, mit Grund im Datensatz
+* Geburtstags- und Jubiläumsgutscheine entstehen nicht mehr für gelöschte
+  Konten
+
+### Was offen bleibt — und warum ich es nicht gebaut habe
+
+**Es gibt keinen Löschprozess.** `request_account_deletion` legt eine
+Zeile in `account_deletion_requests` an, ein Administrator kann deren
+Status ändern — und damit endet es. Keine Funktion löscht, sperrt oder
+anonymisiert etwas. Ein Löschverlangen nach Art. 17 DSGVO wird also
+entgegengenommen und nicht ausgeführt.
+
+Was dazu fehlt, ist keine Programmierarbeit, sondern eine **Entscheidung**:
+Welcher Datensatz wird gelöscht, welcher nur gesperrt, und wie lange?
+Die Fristen unterscheiden sich je Dokumentart, und sie aus dem Gedächtnis
+zu setzen wäre genau der Fehler, den die Prüfregeln verbieten. Eine
+Löschfunktion, die den Aufbewahrungsfall nicht abbildet, ist nicht
+„teilweise fertig" — sie ist falsch, weil sie entweder zu viel löscht
+(Beleg weg, Betriebsprüfung offen) oder zu wenig (Löschverlangen nicht
+erfüllt).
+
+Deshalb: Der Befund bleibt 🔴 mit Verantwortlichem und Frist, und der
+Vorschlag steht in `docs/audit/AUDIT-2026-08-GESAMTSYSTEM.md`,
+Kapitel 32.
+
+**Ebenfalls offen:** `export_my_data()` existiert in der Datenbank, wird
+aber von keiner Oberfläche aufgerufen — die Auskunft nach Art. 15 DSGVO
+ist damit technisch vorbereitet und praktisch nicht erreichbar.
+
+### S-21 — ein Fund am Rande, der schwerer wiegt als die Löschung
+
+Beim Aufsetzen der Gutschein-Gegenprobe stellte sich heraus: **Der
+Geburtstagsgutschein konnte überhaupt nicht erzeugt werden.**
+
+`app.wildcard_product()` legt das Platzhalterprodukt „Produkt deiner
+Wahl" mit `category = 'Aktion'` an. Am 28.07.2026 kam die Regel
+`products_category_check` dazu, die genau vier Kategorien erlaubt —
+Getränke, Süßwaren, Snacks, Eis. Seither scheitert jeder Aufruf von
+`grant_birthday_offer` und `grant_anniversary_offer` an dieser Regel.
+
+Nie aufgefallen, weil bis heute kein einziges Profil ein Geburtsdatum
+trägt und der Pfad nie erreicht wurde. **Das ändert sich gerade:** Seit
+S-6 verlangt das kostenpflichtige Abo ein hinterlegtes Geburtsdatum. Der
+Fehler wäre exakt dann sichtbar geworden, wenn der erste zahlende Kunde
+Geburtstag hat.
+
+Dass das kein reiner Programmfehler ist, steht auf der Stammdatenseite:
+„Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl." Der
+Abo-Vergleich führt den Geburtstagsgutschein als Leistung des
+kostenpflichtigen Abos. Ein zugesagter Vorteil, der technisch nicht
+entstehen kann, ist eine Angabe über das eigene Angebot, die nicht
+stimmt — und damit kein Randthema.
+
+Behoben mit dem kleinstmöglichen Eingriff: Das Platzhalterprodukt bekommt
+keine Kategorie. Es ist kein Sortimentsartikel. Nachgewiesen mit
+Gegenprobe: aktives Konto mit Geburtstag heute → ein Gutschein;
+gelöschtes Konto mit Geburtstag heute → keiner.
+
+---
+
+## 15. R-13 / CUST-017 — Die Auskunft nach Art. 15 DSGVO (02.09.2026)
+
+`export_my_data()` gab es seit Wochen in der Datenbank. Zwei Dinge fehlten,
+und das zweite war das größere.
+
+### Sie deckte 9 von 35 Bereichen ab
+
+Ein Abgleich aller Tabellen mit Personenbezug auf ein Konto ergab **35**.
+Die Auskunft enthielt **9**. Nicht enthalten waren unter anderem:
+Rechnungen, Zahlungen, die Positionen der Käufe, der Abo-Verlauf,
+persönliche Angebote, Bewertungen, Loyalty-Gutschriften,
+Benachrichtigungen, der Einwilligungsverlauf, versandte E-Mails,
+Reklamationen, Empfehlungen, Spendenstimmen, Anmeldetage — und der
+Löschantrag selbst.
+
+Art. 15 Abs. 3 DSGVO verlangt eine Kopie **der** verarbeiteten
+personenbezogenen Daten, nicht eine Auswahl. Jetzt sind es **38 Bereiche**,
+gemessen am Aufruf, nicht am Quelltext.
+
+**Zwei Dinge bleiben bewusst draußen.** `customer_card.token` und
+`email_unsubscribe_token.token` sind Geheimnisse, mit denen sich Karte und
+Abmeldung eines Kontos bedienen lassen. Dass sie zu dieser Person gehören,
+macht sie nicht zu Auskunftsinhalt: Ein Auskunftsdokument wandert per Mail,
+liegt im Download-Ordner und wird weitergeleitet. Ausgewiesen wird, **dass**
+es sie gibt und seit wann. Die Migration prüft das selbst nach — sie
+schlägt fehl, wenn der Kartentoken im Ergebnis auftaucht.
+
+### Sie war von nirgends erreichbar
+
+Kein Bildschirm, kein Knopf, keine Edge Function rief sie auf. Eine
+Auskunft, die berechenbar wäre, aber nicht abrufbar ist, erfüllt Art. 15
+nicht — die Vorschrift verlangt, dass der Betroffene sie **bekommt**.
+
+Neu: `data_export_screen.dart`, erreichbar über Profil → Rechtliches →
+„Meine Daten". Der Bildschirm zeigt zuerst Bereich für Bereich, was
+gespeichert ist und wie viel — wer eine Auskunft anfordert, will wissen,
+*was* über ihn gespeichert ist, und nicht 4000 Zeilen JSON deuten. Die
+Datei gibt es zusätzlich (Web: Download, sonst Zwischenablage — dieselbe
+Bauart wie beim Belegexport).
+
+Zwei Entscheidungen im Detail, die leicht falsch herum ausgehen:
+
+* Leere Bereiche stehen als **„nichts gespeichert"** da, nicht als „0
+  Einträge". Eine Null liest sich wie ein Messwert.
+* Bereiche, die die App **nicht kennt**, erscheinen trotzdem — mit ihrem
+  Rohnamen. Käme in der Datenbank ein Bereich dazu und die Liste würde ihn
+  stillschweigend weglassen, wäre die Auskunft unvollständig, ohne dass es
+  jemand merkt. Ein Test prüft genau diesen Fall.
+
+### Ein Fehler auf dem Weg, der Erwähnung verdient
+
+Der erste Anlauf der Migration trug eine Zusicherung, die **nichts
+prüfte** — ein Platzhalter, der eine `1` zählte. Die Funktion war dabei
+kaputt: Sie sortierte `email_consent_event` nach einer Spalte, die es nicht
+gibt, und schlug bei jedem Aufruf fehl. Aufgefallen ist es erst beim
+Ausprobieren.
+
+Eine Zusicherung, die nichts prüft, ist schlechter als keine: Sie
+signalisiert Sicherheit, die nicht da ist. Die jetzige ruft die Funktion
+tatsächlich auf — in der Haut eines echten Kontos — und zählt die
+Bereiche.
+
+**10 neue Tests** (110 gesamt), `flutter analyze` ohne Befund.
+
+---
+
+## 16. Der Löschprozess (CUST-016), 02.09.2026
+
+Freigabe von Philipp Blume auf Kapitel 32. Seither gibt es einen Ablauf,
+und er ist mit **13 Prüfungen** belegt, jede mit Gegenprobe.
+
+### Wer darf löschen
+
+| Rolle | Ergebnis |
+| --- | --- |
+| Kunde, fremdes Konto | `42501` |
+| Kunde, **eigenes** Konto | `42501` — den Antrag stellt er selbst, die Ausführung nicht |
+| **Gesellschafter** | `42501` — `users.manage` trägt nur `system_admin` |
+| Systemadministrator | führt aus, gibt einen Bericht zurück |
+
+Dass der Gesellschafter es nicht darf, war kein Versehen der Prüfung,
+sondern ein Ergebnis: Eine Kontolöschung ist im Rechtemodell dieses
+Systems kein Tagesgeschäft. In der Produktion gibt es genau ein aktives
+`system_admin`-Konto — der Prozess hat also einen Bediener.
+
+### Was der Lauf tut
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Daten ohne Aufbewahrungspflicht (Bewertungen, Hinweise, Geräte) | 0 Zeilen übrig |
+| Belege und Einwilligungen | bleiben erhalten |
+| Profil anonymisiert | „Gelöschtes Konto", Adresse auf `…@invalid` |
+| Anmeldung gesperrt | `banned_until = infinity` |
+| Vorgang festgehalten | Antrag steht auf `ausgefuehrt` |
+| Offene Tabellen benannt | 15 im Bericht |
+| **Unbeteiligtes Konto** | 3 Zeilen, Name unverändert |
+
+Die Sperrung der Anmeldung ist der Punkt, an dem der Entwurf vom
+02.09.2026 vormittags noch scheiterte: Gemessen war, dass ein Konto mit
+gesetztem `deleted_at` sich weiter anmelden und seine
+aufbewahrungspflichtigen Daten lesen konnte. Zwanzig Policies zu ändern
+wäre der umständliche Weg gewesen; die Anmeldung zu sperren ist der
+richtige. Ohne Sitzung kein Zugriff.
+
+### Die Fristen stehen in einer Tabelle, nicht im Code
+
+`public.loeschregeln` — 35 Zeilen, je Tabelle eine Behandlung
+(`loeschen` / `aufbewahren` / `anonymisieren` / `offen`), eine Frist und
+eine Begründung. Das ist Absicht: Fristen sind eine
+kaufmännisch-rechtliche Festlegung, keine Programmiereigenschaft. Wer sie
+ändert, soll das ohne Migration können; wer sie prüft, soll sie lesen
+können, ohne PL/pgSQL zu kennen.
+
+Der Fristlauf `app.purge_nach_frist()` läuft täglich um 03:40 und
+entfernt je Dokumentart, was seine Frist hinter sich hat. **Heute ist er
+folgenlos** — die ältesten Daten stammen aus 2026, er wird 2032 zum
+ersten Mal etwas tun. Genau deshalb gehört er jetzt eingerichtet.
+
+### Die Ablaufhemmung
+
+§ 147 Abs. 3 Satz 5 AO: Die Frist läuft nicht, solange die Unterlagen für
+eine offene Steuerfestsetzung von Bedeutung sind. `aufbewahrung_hemmung`
+ist ein Schalter, der alle Fristläufe anhält — nachgewiesen: mit Hemmung
+meldet der Lauf `uebersprungen: true`, ohne Hemmung läuft er und löscht
+heute nichts.
+
+Ohne diesen Schalter würde der Job in dem Moment aufräumen, in dem eine
+Außenprüfung die Unterlagen sehen will.
+
+### Was offen bleibt: 15 Tabellen ohne Festlegung
+
+Kapitel 32 nannte 20 Tabellen. Das System hat **35** mit Personenbezug.
+Für die übrigen 15 — darunter `customer_subscriptions`,
+`cancellation_requests`, `purchase_complaints`, `referral_codes`,
+`business_members` — steht in den Regeln `offen`. Der Löschlauf **fasst
+sie nicht an** und nennt sie in seinem Bericht.
+
+Das ist die ehrliche Zwischenlösung: Sie stillschweigend mitzulöschen
+wäre eine erfundene Rechtsauffassung, sie stillschweigend zu behalten
+eine unsichtbare Lücke. So bleibt beides sichtbar (CUST-018).
+
+### Zwei Fehler auf dem Weg
+
+* Die Anonymisierung castete auf `citext` — ein Typ, der im Schema
+  `extensions` liegt, das der `search_path` der Funktion nicht kennt.
+  Der Cast ist raus; die Zuweisung castet ohnehin selbst. Aufgefallen
+  beim Ausführen, nicht beim Lesen.
+* Zwei Zusicherungen der Regressionssuite verglichen gegen **feste
+  Zahlen** („64 Produkte", „2 Bewertungen") und schlugen an, als
+  Testdaten dazukamen — obwohl nichts kaputt war. Sie vergleichen jetzt
+  gegen die Wahrheit. Eine Zusicherung, die bei jeder neuen Zeile bricht,
+  wird irgendwann ignoriert statt geglaubt, und dann fängt sie nichts
+  mehr.
+
+Der Löschtest ist außerdem **wiederholbar** gemacht: Er räumt zuerst auf,
+statt beim zweiten Lauf an einem Unique-Index zu scheitern. Zweimal
+hintereinander ausgeführt, zweimal 13 grün.
+
+---
+
+## 17. Auth-Einstellungen: der Nachweis (02.09.2026, 13:39/13:40)
+
+Philipp hat die drei Einstellungen gesetzt und den Zustand per Screenshot
+belegt. Aus dieser Umgebung ist die Auth-Konfiguration nicht messbar —
+der Screenshot ist damit der einzige mögliche Nachweis und wird als
+solcher geführt.
+
+| Einstellung | Stand | Befund |
+| --- | --- | --- |
+| Minimum password length | **10** | S-15 behoben |
+| Secure password change | **an** | S-16 behoben |
+| Require current password when updating | **an** | S-17 behoben |
+| Secure email change | **an** | siehe unten |
+
+### Nebenbei bestätigt: die Annahme aus S-5
+
+Die Migration `20260902052115` begründete den E-Mail-Nachlauf damit, dass
+Supabase eine Adressänderung doppelt bestätigt. Diese Angabe stammte aus
+`config.toml`, und `config.toml` beschreibt den lokalen Stack — für das
+gehostete Projekt war sie **unbestätigt**, was in Abschnitt 11
+ausdrücklich als Einschränkung vermerkt wurde.
+
+Der Screenshot zeigt „Secure email change: an". Die Einschränkung ist
+damit aufgehoben: Die Begründung trägt.
+
+### Neu gesehen: S-22
+
+Auf demselben Bildschirm steht **„Password requirements: Select an
+option"** — es ist also keine Zeichenklassen-Anforderung gesetzt. Der
+Client verlangt Groß- und Kleinbuchstabe plus Ziffer oder Sonderzeichen
+(`validators.dart`); die API verlangt nur die zehn Zeichen.
+
+Das ist dieselbe Bauart wie S-15 vor der Korrektur: eine Regel, die nur
+im Client steht. Wer sich direkt gegen die API registriert, umgeht sie.
+Zu setzen im selben Bildschirm, ein Feld.
+
+Ebenfalls abgelesen, ohne Befund: „Email OTP expiration 3600 s",
+„Email OTP length 8 Ziffern".
+
+---
+
+## 18. S-23 und S-24 — was das Ausrollen der letzten Löschregeln zutage förderte
+
+Der Auftrag war eng: Die 15 Tabellen, die bei der Freigabe des
+Löschkonzepts noch ohne Regel dastanden, sollten ihre Einordnung
+bekommen (CUST-018). Die Einordnung selbst war unstrittig — sie lag dem
+Verantwortlichen vor und wurde am 02.09.2026 freigegeben. Beim Ausrollen
+fielen zwei Fehler auf, die mit der Einordnung nichts zu tun hatten,
+sondern mit dem Prozess, in den sie hineinlief.
+
+Beide sind **gemessen**, nicht vermutet. Beide sind behoben, mit
+Gegenprobe.
+
+| ID | P | Befund | Nachweis |
+| --- | --- | --- | --- |
+| **S-23** | P1 | Der Löschvorgang schrieb die gelöschten Daten ins Änderungsprotokoll zurück. `public.audit_log` protokolliert 40 Tabellen, darunter `profiles` und `customers`. Jede Anonymisierung und jedes `DELETE` legt dort eine Zeile mit dem **vollständigen alten Datensatz** an. `audit_log` stand in keiner der 35 Löschregeln — die Tabelle war in der Aufstellung gar nicht vorgekommen. | Nach `execute_account_deletion` in der Prüfumgebung gezählt: **4 Zeilen mit Klarnamen und E-Mail** des gelöschten Kontos, 31 weitere mit Inhalten aus gelöschten Tabellen. Beispielzeile: `{"email": "loeschkandidat@test.invalid", "full_name": "Zu Loeschen", …}` |
+| **S-24** | P1 | Die Aufbewahrungsfrist lief ab **Anlage** des Datensatzes, auch wenn der Vorgang noch läuft. Bis CUST-018 war das folgenlos: Alle acht Fristtabellen waren abgeschlossene Vorgänge — ein Kauf, eine Rechnung, eine Zahlung. Mit den zehn neuen kamen erstmals *laufende* Sachverhalte hinzu. `purge_nach_frist` hätte ein seit neun Jahren laufendes Abo gelöscht: den Vertrag selbst, nicht seinen Beleg. Dasselbe galt bereits für `consents` — die geltende Einwilligung wäre nach acht Jahren gefallen, während die Verarbeitung weiterläuft. | In der Prüfumgebung nachgestellt: zwei gleich alte Datensätze, einer abgelöst, einer laufend. Vor der Korrektur fielen beide. |
+
+### S-23 — warum die Tabelle unsichtbar war
+
+`audit_log` trägt den Personenbezug nicht in einer Spalte, sondern in
+`old_data`/`new_data` als JSON. Eine Aufstellung, die Tabellen nach
+Fremdschlüsseln auf `profiles` sucht, findet sie deshalb nicht. Genau
+darum stand sie nicht in den 35.
+
+Die Behandlung ist `anonymisieren`, nicht `loeschen`. Wer wann welchen
+Datensatz geändert hat, ist die Protokollierung, die die GoBD für
+nachträgliche Änderungen an buchführungsrelevanten Daten verlangen —
+diese Angabe bleibt. Entfernt wird der **Inhalt** der Änderung, und zwar
+nur dort, wo er zu einer Tabelle gehört, die gelöscht oder anonymisiert
+wurde: Kontaktnachrichten, Gerätetoken, persönliche Angebote, Profil,
+Kundenstammdaten. Nichts davon ist buchführungsrelevant. Protokollzeilen
+über aufbewahrungspflichtige Tabellen behalten ihren Inhalt und teilen
+dessen Frist.
+
+Die Bereinigung läuft als **letzter** Schritt von
+`execute_account_deletion` — sie muss die Zeilen erfassen, die die
+Anonymisierung von `profiles` selbst gerade erzeugt hat.
+
+### S-24 — wann eine Frist beginnt
+
+§ 147 Abs. 4 AO lässt die Frist mit dem Schluss des Kalenderjahres
+beginnen, in dem der Vorgang endet. Für einen Kauf ist das der Kauf
+selbst; für einen laufenden Vertrag hat sie **noch nicht begonnen**.
+
+`loeschregeln` hat dafür eine neue Spalte `frist_ab`: ein SQL-Ausdruck,
+der den Zeitpunkt liefert, ab dem gerechnet wird. Liefert er `NULL`, ist
+der Vorgang nicht beendet und die Zeile wird nie gelöscht. Sieben Regeln
+tragen ihn:
+
+| Tabelle | Der Vorgang endet … |
+| --- | --- |
+| `customer_subscriptions` | wenn eine neuere Wahl desselben Kunden vorliegt |
+| `store_subscription` | mit Widerruf, Kündigung oder Ablauf der Periode |
+| `business_members` | wenn die Mitgliedschaft auf `removed` steht (`suspended` ist ausgesetzt, nicht beendet) |
+| `referral_codes` | mit der Löschung des Inhaberkontos |
+| `customer_prices` | mit Ablauf von `valid_to` |
+| `business_budgets` | mit Aufhebung oder Ablauf der Gültigkeit |
+| `consents` | wenn eine neuere Erklärung für denselben Zweck vorliegt |
+
+Ein Ausdruck, der erst 2034 zum ersten Mal ausgeführt wird, ist bis
+dahin ungeprüft. Die Migration führt deshalb **jeden** von ihnen beim
+Ausrollen einmal aus und bricht ab, wenn einer nicht läuft.
+
+### Die Gegenproben
+
+Der entscheidende Test ist nicht, dass etwas gelöscht wird, sondern dass
+das Richtige stehen bleibt. Aufbau: zwei gleich alte Datensätze,
+neun Jahre, Frist acht — einer abgelöst, einer laufend.
+
+| Prüfung | Erwartet | Gemessen |
+| --- | --- | --- |
+| Klarname im Änderungsprotokoll nach der Löschung | 0 Zeilen | **0** |
+| Protokollzeile bleibt bestehen, nur ihr Inhalt geht | > 0 bereinigt | **9** |
+| Gegenprobe: Protokoll über einen Kaufbeleg behält seinen Betrag | > 0 | **4** |
+| Gegenprobe: Protokoll eines unbeteiligten Kontos unberührt | > 0 mit Namen | **5** |
+| Abgelöste Einwilligung nach Fristablauf | 0 Zeilen | **0** |
+| Gegenprobe: geltende Einwilligung, gleich alt | bleibt | **1** |
+| Abgelöstes Abo nach Fristablauf | 0 Zeilen | **0** |
+| Gegenprobe: laufendes Abo, gleich alt | bleibt | **1** |
+| Der Fristlauf benennt, was er gelöscht hat | beide Tabellen | `{"consents": 1, "customer_subscriptions": 1}` |
+| Keine Tabelle mehr ohne Entscheidung | 0 | **0** |
+| Beschäftigtendaten als eigener Vorgang ausgewiesen | 2 | `employee_trainings, ifsg_briefings` |
+
+`scripts/pruefumgebung/96_loeschprozess.sql`, 25 Prüfungen, dreimal
+hintereinander mit identischem Ergebnis.
+
+### Was dabei noch aufgefallen ist — die Prüfskripte selbst
+
+Ein Regressionstest, der nur beim ersten Lauf stimmt, ist keiner. Fünf
+Skripte maßen Reste des Vorlaufs statt der Sache:
+
+* `93` verglich die Zahl der Einladungen mit einer festen `1` — jeder
+  Lauf legt eine weitere an. Gemessen wird jetzt die **Veränderung**.
+* `94` prüfte die Aufbewahrungsfrist, indem es die Tabellennamen im
+  **Quelltext** der purge-Funktion suchte. Seit CUST-018 stehen die
+  Fristen als Daten in `loeschregeln`, die Funktion nennt keine Tabelle
+  mehr — der Test wäre rot geworden, obwohl die Fristen stehen. Er misst
+  jetzt die Regel und führt den Fristlauf aus.
+* `94` ließ Kunde B dauerhaft als gelöscht zurück und verfälschte damit
+  jeden späteren Lauf. Es räumt jetzt auf.
+* `95` zählte die Warteschlange kumulativ und maß beim dritten Lauf `3`
+  statt `1`.
+* `50` baute für einen Negativtest auf eine Zeile, die ein anderes
+  Skript hinterlassen hatte. Es stellt seine Voraussetzung jetzt selbst
+  her.
+
+Zwei Erwartungen waren zudem inhaltlich falsch:
+
+* `95` verlangte, an ein gelöschtes Konto dürfe **gar keine** Post mehr
+  gehen. Art. 18 DSGVO schränkt die Verarbeitung ein, er verbietet sie
+  nicht — über das Ergebnis seines Löschverlangens ist der Betroffene
+  gerade zu informieren. Diese Einsicht stand seit dem 02.09.2026 im
+  Text dieses Dokuments, aber nicht im Skript. Jetzt misst es beides:
+  die Vertragsnachricht geht hinaus, die Werbung wird mit
+  `suppressed/konto_geloescht` unterdrückt.
+* `80` wertete vier Verwaltungs-RPCs als Treffer, weil sie *eine Zeile*
+  zurückgaben — nämlich ein leeres `jsonb`-Array. Die Zusicherung las
+  die Zeilenzahl, obwohl ihr eigener Erwartungstext „oder leere Menge"
+  sagte. Sie liest jetzt den **Inhalt** nach. `advertising_redirect_count`
+  gehört nicht in diese Liste: Der Klickzähler ist bewusst für jedes
+  Kundenkonto aufrufbar; geprüft wird er in `90` (S-12, Frequenzgrenze
+  mit Gegenprobe).
+
+### Stand des Regressionslaufs
+
+Elf Skripte, jedes für sich zurückgesetzt, **dreimal** hintereinander:
+
+```
+gruen=187   rot=0   Messung ohne Wertung=118
+```
+
+Die 118 ohne Wertung sind die Tabellensicht aus `40_lese_isolation.sql`:
+Zeilenzahl je Tabelle und Rolle gegen die Wahrheit. Sie ist eine
+Aufnahme, kein Urteil — bewertet wird sie in Abschnitt 4.
+
+### Gleichheit mit der Produktion — nach dem Ausrollen erneut gemessen
+
+Ein Testergebnis von hier gilt dort nur, solange die Umgebungen gleich
+sind. Nach dem Ausrollen der beiden Migrationen wurde die Prüfumgebung
+**von Null** aus den 202 Migrationen des Repositories neu gebaut und
+gegen die Produktion gestellt:
+
+| Merkmal | Produktion | Neubau aus dem Repository |
+| --- | --- | --- |
+| RLS-Policies | 189 · `a44cb08bf9c4dcb3de3a8224dbed366b` | 189 · **identisch** |
+| Tabellenrechte anon/authenticated/service_role | 1575 · `98a96151ba93bfcea06773c6cad5bec8` | 1575 · **identisch** |
+| Ausführungsrechte `anon` | 4 · `fd7d91d85d4bb23c8e786fc430e772bf` | 4 · **identisch** |
+| Ausführungsrechte `authenticated` | 139 · `de2ba940c1690120d4bd7d11ebf0f3b3` | 139 · **identisch** |
+| Ausführungsrechte `service_role` | 157 · `9d6a87944be388aad57f7eaed6372385` | 157 · **identisch** |
+| Löschregeln | 36, davon 0 offen | 36, davon 0 offen |
+| `execute_account_deletion` | `e52044e1ce790c9b22c23a2f1ef7048a` | **identisch** |
+| `app.purge_nach_frist` | `94c52c5d176ff7f3bc6dbd1ce24a1980` | **identisch** |
+
+202 von 202 Migrationen laufen auf einer leeren Datenbank durch. Die
+beiden Funktionen, gegen die oben gemessen wurde, sind **byteweise**
+dieselben, die jetzt in der Produktion stehen — nicht bloß gleichwertig.
+
+### Was das über die Arbeitsweise sagt
+
+S-23 wurde nicht von einer Testsuite gefunden. Alle 13 Prüfungen des
+Löschprozesses waren grün, während das Änderungsprotokoll den Klarnamen
+weiterhin trug — sie fragten es schlicht nicht ab. Gefunden wurde es
+beim Lesen der Trigger auf den zehn neu eingeordneten Tabellen, mit der
+Frage: *Was passiert eigentlich, wenn hier gelöscht wird?*
+
+Das ist dasselbe Muster wie bei S-20: Was die Tests nicht abfragen,
+melden sie nicht als fehlend. Die Vollständigkeit einer Aufstellung ist
+keine Eigenschaft, die eine Suite prüfen kann — sie muss von außen
+angezweifelt werden.
+
+---
+
+## 19. Nachtrag: 32 Verwaltungsfunktionen, die nie geprüft worden waren
+
+Beim Zusammenstellen des RPC-Vertrags für den Lovable-Auftrag fiel auf, dass
+die Liste in `80_verwaltungs_rpc.sql` **von Hand** entstanden war. Sie deckte
+48 Funktionen ab. Tatsächlich darf `authenticated` deutlich mehr aufrufen —
+darunter Dinge, bei denen man es nicht vermutet:
+
+`datev_export_rows` · `finance_balance_kpis` · `upsert_finance_balance` ·
+`business_customers_csv` · `email_template_save` · `set_machine_slot` ·
+`rotate_provider_secret` · `register_telemetry_provider` ·
+`approve_shareholder` · `email_log_list` · `email_log_detail` ·
+`list_documents` · `request_document_approval` · `decide_document_approval`
+und weitere.
+
+Keine davon war je gegen ein Kundenkonto gelaufen. Der Grund ist derselbe wie
+bei S-23: **Was eine Liste nicht enthält, meldet keine Suite als fehlend.**
+
+### Das Ergebnis
+
+Alle 32 wurden nachgeprüft. **Kein Befund** — jede weist ab oder liefert
+nachweislich nichts. Das neue Skript `81_weitere_rpc.sql` hält den Stand fest;
+zweimal hintereinander 34 grün, 0 rot.
+
+Ein Fall war zunächst rot und lohnt die Erwähnung, weil er zeigt, wie leicht
+man sich selbst täuscht:
+
+**`email_log_stats` gab dem Kundenkonto eine Zeile zurück** — `(0,0,0,0,0,)`.
+Die Zeilenzahl allein liest sich wie ein Treffer. Zwei Fragen waren zu klären:
+
+1. *Sind die Nullen echt oder ist die Tabelle leer?* Sie war leer. Damit war
+   die Messung wertlos. Also erst eine Zeile ins Maillog gelegt, dann erneut
+   gemessen: Wahrheit 1 Zeile, Kunde sieht weiterhin lauter Nullen.
+2. *Woran liegt es?* Die Funktion ist **SECURITY INVOKER**, die Absicherung
+   liegt in der Policy `email_log_read_leitung`
+   (`is_admin() OR is_shareholder()`). Die Bauart ist damit richtig: keine
+   Prüfung im Funktionsrumpf nötig, weil die Zeilen gar nicht erst sichtbar
+   werden.
+
+Die Gegenprobe mit vorhandener Zeile steht jetzt dauerhaft im Skript. Eine
+Null, die niemand gegen eine Wahrheit gehalten hat, ist kein Nachweis.
+
+### Nebenbefund: `is_shareholder()` ist strenger als die Rolle
+
+Das Gesellschafter-Testkonto trägt `profiles.role = 'shareholder'`, aber
+`is_shareholder()` liefert `false`. Der Grund steht in der Funktion: Sie
+verlangt zusätzlich einen **freigegebenen** Eintrag in
+`shareholder_approvals`. Das ist Absicht und die sichere Richtung — die Rolle
+allein öffnet nichts. Drei Policies hängen daran.
+
+Für die Prüfumgebung heißt es allerdings, dass das Konto `G` schwächer ist als
+gedacht: Es prüft die Kundensicht zuverlässig, die Gesellschaftersicht auf
+diesen drei Policies nicht. Wer dort etwas nachweisen will, muss dem Konto
+erst eine Freigabe anlegen.
+
+### Was im Auftrag falsch stand
+
+Der Lovable-Auftrag nannte in § 2.1 eine „vollständige" Liste der für Kunden
+aufrufbaren RPCs. Sie war es nicht — sie entstand aus einer Namenssuche nach
+`my_…` und übersah unter anderem `list_news`, den gesamten Spendenbereich
+(`donation_causes_list`, `vote_donation_cause`, `suggest_donation_cause`,
+`donation_pool_summary`, `donation_rate`, `purchase_donation`),
+`search_products`, `catalog_facts`, `subscription_plans`, die
+Einwilligungsverwaltung und `ki_funktion_freigegeben`. Korrigiert und nach
+Themen geordnet.

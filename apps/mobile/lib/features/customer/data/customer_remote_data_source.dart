@@ -338,6 +338,23 @@ class CustomerRemoteDataSource {
     await _client.from('profiles').update({'gender': gender}).eq('id', _uid!);
   }
 
+  /// Trägt ein fehlendes Geburtsdatum nach.
+  ///
+  /// Nur möglich, solange keines hinterlegt ist: Der Trigger
+  /// `trg_profiles_birth_date_immutable` weist jede spätere Änderung ab.
+  /// Genau darauf beruht die Altersschranke des kostenpflichtigen Abos
+  /// (`choose_subscription_plan` prüft gegen dieses Feld), deshalb wird
+  /// hier nichts überschrieben, was schon steht.
+  Future<void> setBirthDateOnce(DateTime birthDate) async {
+    if (_uid == null) return;
+    final iso = birthDate.toIso8601String().substring(0, 10);
+    await _client
+        .from('profiles')
+        .update({'birth_date': iso})
+        .eq('id', _uid!)
+        .isFilter('birth_date', null);
+  }
+
   Future<void> updateProfileName(String fullName, String? phone) async {
     await _client
         .from('profiles')

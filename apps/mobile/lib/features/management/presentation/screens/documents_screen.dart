@@ -316,6 +316,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             bucket: 'documents',
             filename: file.name,
             bytes: file.bytes!,
+            contentType: mimeTypFuerDokument(file.name),
           );
       await ref.read(supabaseClientProvider).rpc(
         'add_document_version',
@@ -1137,4 +1138,30 @@ class _ExpiryBadge extends StatelessWidget {
         return const SizedBox.shrink();
     }
   }
+}
+
+/// Ordnet einer hochzuladenden Datei ihren Medientyp zu.
+///
+/// Der Bucket `documents` lässt seit der Härtung vom 02.09.2026 nur noch
+/// PDF, Word und Bilder zu (S-10). Ohne diese Zuordnung ginge jeder
+/// Upload als `application/octet-stream` hinaus — der Standardwert des
+/// Upload-Dienstes — und der Bucket würde ihn abweisen. Typgrenze und
+/// Standardwert hätten dann gegeneinander gearbeitet, und zwar erst zur
+/// Laufzeit.
+///
+/// Diese Zuordnung steht deshalb auf Dateiebene und nicht als private
+/// Methode im Bildschirm: Sie ist die Bedingung dafür, dass Hochladen
+/// überhaupt funktioniert, und gehört geprüft.
+///
+/// Die Auswahlliste des Dateidialogs lässt genau pdf, docx, doc, jpg,
+/// jpeg und png zu; der Rückfall auf JPEG deckt damit jpg/jpeg ab.
+String mimeTypFuerDokument(String dateiname) {
+  final name = dateiname.toLowerCase();
+  if (name.endsWith('.pdf')) return 'application/pdf';
+  if (name.endsWith('.docx')) {
+    return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  }
+  if (name.endsWith('.doc')) return 'application/msword';
+  if (name.endsWith('.png')) return 'image/png';
+  return 'image/jpeg';
 }

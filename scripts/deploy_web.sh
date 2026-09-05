@@ -22,7 +22,23 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MOBILE="$ROOT/apps/mobile"
-ENV_FILE="${ENV_FILE:-$MOBILE/env/demo.json}"
+# ENV_FILE ist Pflicht, ohne Standardwert.
+#
+# Hier stand "${ENV_FILE:-$MOBILE/env/demo.json}". Diese Datei existiert
+# nicht (vorhanden sind dev.example.json und prod.json), der Standardaufruf
+# brach also mit einer Meldung des Flutter-Werkzeugs ab. Das war im Ergebnis
+# glimpflich, aber aus dem falschen Grund: Legt jemand eine demo.json an,
+# deployt derselbe Aufruf ab sofort lautlos die Demo-Konfiguration nach
+# Produktion. Audit 05.09.2026, M-4.
+if [ -z "${ENV_FILE:-}" ]; then
+  echo "✗ ENV_FILE ist nicht gesetzt." >&2
+  echo "  Produktiv:  ENV_FILE=$MOBILE/env/prod.json bash scripts/deploy_web.sh" >&2
+  exit 1
+fi
+if [ ! -f "$ENV_FILE" ]; then
+  echo "✗ ENV_FILE zeigt auf eine Datei, die es nicht gibt: $ENV_FILE" >&2
+  exit 1
+fi
 # GitHub-Pages-Repo-Präfix. Repo liegt unter https://<user>.github.io/<REPO>/.
 REPO="${REPO:-B-rdesnack24-}"
 # Wenn SUBPATH leer/unset → App liegt am Root des Repos (empfohlen):
@@ -41,6 +57,20 @@ echo "▶︎ Flutter Web-Build ($ENV_FILE, base=$BASE_HREF)"
     --dart-define-from-file="$ENV_FILE" )
 
 BUILD_DIR="$MOBILE/build/web"
+
+# Nachweis statt Vertrauen: Steht die Supabase-Adresse aus ENV_FILE auch
+# wirklich im gebauten Bundle? Ohne diese Probe kann niemand nachtraeglich
+# sagen, mit welcher Konfiguration ein Deploy entstanden ist.
+ERWARTETE_URL="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('SUPABASE_URL',''))" "$ENV_FILE")"
+if [ -n "$ERWARTETE_URL" ]; then
+  if grep -qF "$ERWARTETE_URL" "$BUILD_DIR/main.dart.js"; then
+    echo "  ✓ Bundle traegt die Adresse aus $(basename "$ENV_FILE")"
+  else
+    echo "✗ Das gebaute Bundle enthaelt NICHT die Adresse aus $ENV_FILE." >&2
+    echo "  Deploy abgebrochen -- sonst ginge eine unbekannte Konfiguration live." >&2
+    exit 1
+  fi
+fi
 BOOT="$BUILD_DIR/flutter_bootstrap.js"
 
 echo "▶︎ Post-Build-Patch: lokales CanvasKit + Service-Worker deaktivieren"
@@ -161,6 +191,12 @@ if [ -z "$SUBPATH" ]; then
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
+  # GitHub Pages liefert 404.html für jeden Pfad, den es nicht als Datei
+  # findet. Ohne sie sieht ein Aufruf wie /B-rdesnack24-/irgendwas nicht die
+  # App, sondern GitHubs Fehlerseite. Die Datei stand schon in der Stage-
+  # Liste weiter unten -- erzeugt hat sie nur niemand, der Deploy meldete
+  # jedes Mal "(skip: 404.html fehlt)".
+  cp "$ROOT/index.html" "$ROOT/404.html"
   # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
   # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
   # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.

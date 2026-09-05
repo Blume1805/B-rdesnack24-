@@ -6,11 +6,14 @@ import '../../features/approvals/presentation/screens/approvals_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/management/presentation/screens/my_signature_tasks_screen.dart';
 import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
+import '../../features/auth/presentation/screens/new_password_screen.dart';
+import '../../features/auth/presentation/screens/security_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../features/home/presentation/home_shell.dart';
 import '../../features/legal/presentation/cancellation_screen.dart';
 import '../../features/legal/presentation/legal_screens.dart';
+import '../auth/recovery_state.dart';
 import '../di/providers.dart';
 
 /// Routenpfade als Konstanten (vermeidet Tippfehler/Magic-Strings).
@@ -18,6 +21,8 @@ abstract final class AppRoutes {
   static const signIn = '/signin';
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
+  static const newPassword = '/passwort-neu';
+  static const security = '/sicherheit';
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
   static const approvals = '/finance/approvals';
@@ -44,25 +49,27 @@ const _openRoutes = {
   AppRoutes.privacy,
   AppRoutes.terms,
   AppRoutes.cancellation,
+  // Muss in BEIDEN Zustaenden erreichbar sein. Ein Wiederherstellungslink
+  // legt beim Oeffnen eine Sitzung an -- der Nutzer ist also angemeldet,
+  // wenn er hier ankommt. Stuende die Route unter _authRoutes, wuerde ihn
+  // die Weiche sofort auf die Startseite schicken, und er saesse wieder
+  // ohne Passwort da. Genau so war es bis zum 04.09.2026.
+  AppRoutes.newPassword,
 };
 
 /// go_router mit Auth-Guard: nicht angemeldete Nutzer landen auf /signin.
 final routerProvider = Provider<GoRouter>((ref) {
+  final weiche = ref.watch(wiederherstellungProvider);
+  final auffrischung = _AuthAenderungen(ref);
+  ref.onDispose(auffrischung.dispose);
   return GoRouter(
     initialLocation: AppRoutes.home,
-    refreshListenable: _AuthRefresh(ref),
-    redirect: (context, state) {
-      final session = ref.read(currentSessionProvider);
-      final loggedIn = session != null;
-      final loc = state.matchedLocation;
-
-      if (_openRoutes.contains(loc)) return null;
-      if (!loggedIn) {
-        return _authRoutes.contains(loc) ? null : AppRoutes.signIn;
-      }
-      if (_authRoutes.contains(loc)) return AppRoutes.home;
-      return null;
-    },
+    refreshListenable: Listenable.merge([weiche, auffrischung]),
+    redirect: (context, state) => authUmleitung(
+      ort: state.matchedLocation,
+      angemeldet: ref.read(currentSessionProvider) != null,
+      wiederherstellung: weiche.aktiv,
+    ),
     routes: [
       GoRoute(
         path: AppRoutes.signIn,
@@ -83,6 +90,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.mfaEnroll,
         builder: (context, state) => const MfaEnrollScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.newPassword,
+        builder: (context, state) => const NewPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.security,
+        builder: (context, state) => const SecurityScreen(),
       ),
       GoRoute(
         path: AppRoutes.approvals,
@@ -112,9 +127,47 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Bindeglied: lässt go_router bei Auth-Änderungen neu evaluieren.
-class _AuthRefresh extends ChangeNotifier {
-  _AuthRefresh(Ref ref) {
+/// Bindeglied: laesst go_router bei jeder Auth-Aenderung neu auswerten.
+///
+/// Die Wiederherstellung selbst haengt nicht mehr hier, sondern in
+/// [Wiederherstellungsweiche] -- ein Ereignis allein ist zu wenig, wenn das
+/// Einloesen des Links scheitern kann.
+class _AuthAenderungen extends ChangeNotifier {
+  _AuthAenderungen(Ref ref) {
     ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
   }
+}
+
+/// Die Weichenregel als reine Funktion — damit sie ohne laufende App prüfbar
+/// ist und nicht erst im Browser auffällt, wenn sie falsch steht.
+///
+/// Gibt das Ziel zurück, auf das umgeleitet werden soll, oder `null`, wenn der
+/// Aufruf bleiben darf.
+@visibleForTesting
+String? authUmleitung({
+  required String ort,
+  required bool angemeldet,
+  required bool wiederherstellung,
+}) {
+  // Aus der Wiederherstellungs-E-Mail gekommen: erst das Passwort, dann alles
+  // andere. Ausgenommen sind die Auth-Routen selbst — sonst säße jemand,
+  // dessen Link verbraucht ist, auf der Maske fest und käme nicht einmal an
+  // „Passwort vergessen".
+  if (wiederherstellung &&
+      ort != AppRoutes.newPassword &&
+      !_authRoutes.contains(ort)) {
+    return AppRoutes.newPassword;
+  }
+
+  if (_openRoutes.contains(ort)) return null;
+  if (!angemeldet) {
+    return _authRoutes.contains(ort) ? null : AppRoutes.signIn;
+  }
+  if (_authRoutes.contains(ort)) {
+    // Während einer Wiederherstellung ist der Rückweg zu „Passwort vergessen"
+    // gewollt: der Link kann verbraucht sein, und mit einer Sitzung ohne
+    // brauchbares Passwort ist niemandem geholfen.
+    return wiederherstellung ? null : AppRoutes.home;
+  }
+  return null;
 }

@@ -23,3 +23,19 @@ Der regelbasierte Chatbot bleibt bewusst als „Automatischer
 Chat-Assistent" gekennzeichnet — nicht als „KI", weil er kein
 AI-System i. S. v. Art. 3 EU AI Act ist. Für zukünftige LLM-Backends
 das gleiche Prinzip anwenden.
+
+## Automaten in Betrieb nehmen — Auslöser für eine Pflichtliste
+
+**Stand 05.09.2026: Es gibt noch keine Automaten.** Deshalb werden noch
+keine Automatenumsätze erfasst, und deshalb ist der Webhook `nayax-webhook`
+absichtlich nicht ausgerollt.
+
+Sobald der **erste Automat gekauft** ist, ist Philipp an
+`docs/betrieb/AUTOMAT-INBETRIEBNAHME.md` zu erinnern — **ungefragt und beim
+ersten Anlass**, an dem Automaten, Standorte, Nayax, Bestand oder Umsätze
+zur Sprache kommen. Die Liste dort ist keine Empfehlung: ohne sie fehlen ab
+dem ersten Verkauf die Aufzeichnungen, die §§ 145–147 AO verlangen, und das
+lässt sich nachträglich nicht herstellen.
+
+Diese Regel gilt so lange, bis in der Tabelle `machines` mindestens ein
+aktiver Automat steht.

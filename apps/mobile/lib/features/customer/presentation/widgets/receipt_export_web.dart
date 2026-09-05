@@ -3,16 +3,19 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-/// Web: CSV als echten Datei-Download auslösen (Blob → Object-URL →
+/// Web: Inhalt als echten Datei-Download auslösen (Blob → Object-URL →
 /// Anchor-Klick). Gibt 'downloaded' zurück.
-Future<String> shareCsv(String content, String filename) async {
-  // UTF-8-BOM voranstellen, damit Excel Umlaute korrekt liest.
-  final bytes = utf8.encode('﻿$content');
+Future<String> shareCsv(
+  String content,
+  String filename, {
+  String mimeType = 'text/csv;charset=utf-8',
+}) async {
+  // Das BOM ist eine Excel-Krücke und gehört nur vor CSV. In eine
+  // JSON-Datei geschrieben macht es sie für jeden Parser unlesbar.
+  final istCsv = mimeType.startsWith('text/csv');
+  final bytes = utf8.encode(istCsv ? '\u{FEFF}$content' : content);
   final blobParts = [bytes.toJS].toJS;
-  final blob = web.Blob(
-    blobParts,
-    web.BlobPropertyBag(type: 'text/csv;charset=utf-8'),
-  );
+  final blob = web.Blob(blobParts, web.BlobPropertyBag(type: mimeType));
   final url = web.URL.createObjectURL(blob);
   final a = web.HTMLAnchorElement()
     ..href = url

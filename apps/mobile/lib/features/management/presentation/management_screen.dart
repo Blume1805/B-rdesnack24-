@@ -5,6 +5,11 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
+import '../../admin/presentation/screens/advertising_screen.dart';
+import '../../admin/presentation/screens/businesses_admin_screen.dart';
+import '../../admin/presentation/screens/campaigns_screen.dart';
+import '../../admin/presentation/screens/email_admin_screen.dart';
+import '../../admin/presentation/screens/leads_screen.dart';
 import '../../finance/presentation/screens/datev_export_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
@@ -172,6 +177,53 @@ class ManagementScreen extends ConsumerWidget {
         'Kundenmeldungen je Kauf',
         Icons.flag_outlined,
         const ComplaintsScreen(),
+        visible: p.contains('customers.manage'),
+      ),
+      // ── Werbegeschäft und B2B (Audit R-12) ─────────────────────────
+      // Diese vier Bereiche waren vollständig gebaut, aber ausschließlich
+      // per SQL bedienbar: rund 45 RPCs ohne jede Oberfläche. Ohne sie ist
+      // das Werbegeschäft nicht betreibbar.
+      _Module(
+        'Werbeflächen',
+        'Belegung & Motivfreigabe',
+        Icons.storefront_outlined,
+        const AdvertisingScreen(),
+        // Flächen und Verträge hängen serverseitig an locations.manage,
+        // die Kampagnenwelt an advertising.manage. Beide Rechte haben
+        // Gesellschafter und Systemverwaltung.
+        visible:
+            p.contains('locations.manage') || p.contains('advertising.manage'),
+      ),
+      _Module(
+        'Kampagnen',
+        'Werbemittel prüfen',
+        Icons.campaign_outlined,
+        const CampaignsScreen(),
+        visible:
+            p.contains('advertising.manage') || p.contains('creatives.approve'),
+      ),
+      _Module(
+        'Anfragen',
+        'Werbung & Sponsoring',
+        Icons.contact_mail_outlined,
+        const LeadsScreen(),
+        visible: p.contains('leads.manage'),
+      ),
+      _Module(
+        'Firmenkunden',
+        'Mitglieder & Abrechnung',
+        Icons.apartment_outlined,
+        const BusinessesAdminScreen(),
+        visible: p.contains('businesses.manage'),
+      ),
+      _Module(
+        'E-Mail',
+        'Vorlagen & Protokoll',
+        Icons.mark_email_read_outlined,
+        const EmailAdminScreen(),
+        // Das Protokoll ist nur für Gesellschafter und Systemverwaltung
+        // lesbar (Migration 0124). customers.manage ist im Haus der
+        // eingeführte Stellvertreter für genau diesen Kreis.
         visible: p.contains('customers.manage'),
       ),
       const _Module(

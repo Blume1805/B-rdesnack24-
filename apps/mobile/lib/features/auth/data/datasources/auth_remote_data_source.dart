@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/auth/auth_redirect.dart';
 import '../dtos/profile_dto.dart';
 
 /// Kapselt alle Supabase-Aufrufe der Authentifizierung.
@@ -59,7 +60,9 @@ class AuthRemoteDataSource {
   }
 
   Future<void> resetPassword(String email) {
-    return _auth.resetPasswordForEmail(email);
+    // Ziel ausdruecklich mitgeben, statt es der Site URL im Dashboard zu
+    // ueberlassen. Siehe core/auth/auth_redirect.dart.
+    return _auth.resetPasswordForEmail(email, redirectTo: authRedirectUrl());
   }
 
   Future<void> signOut() => _auth.signOut();

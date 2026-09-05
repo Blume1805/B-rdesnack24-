@@ -55,6 +55,23 @@ Impressum).
      Zweck: Registrierung, Authentifizierung, Zugriffssteuerung.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertrag/vorvertragliche Maßnahmen).
 
+  a1) Anmeldung mit Face ID, Touch ID oder Fingerabdruck (freiwillig, nur in der
+      installierten App)
+      Wir verarbeiten KEINE biometrischen Daten. Gesicht und Fingerabdruck werden
+      ausschließlich von deinem Endgerät geprüft; die App erhält vom Betriebssystem
+      nur die Rückmeldung „bestanden" oder „nicht bestanden". Es werden keine
+      biometrischen Merkmale erhoben, übertragen oder gespeichert — Art. 9 DSGVO
+      ist für uns deshalb nicht einschlägig. Für die Biometrie selbst ist der
+      Hersteller deines Geräts verantwortlich.
+      Auf dem Gerät gespeichert werden bei eingeschalteter Funktion: dein
+      Anmeldenachweis (Sitzung) sowie deine Nutzerkennung und E-Mail-Adresse, damit
+      die Freischaltung genau einem Konto zugeordnet bleibt. Diese Daten liegen im
+      geschützten Speicher des Betriebssystems (Schlüsselbund bzw. Keystore),
+      verlassen das Gerät nicht und werden gelöscht, sobald du die Funktion
+      abschaltest, dich abmeldest oder dich mit einem anderen Konto anmeldest.
+      Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung durch Einschalten),
+      Widerruf jederzeit über den Schalter unter „Sicherheit".
+
   b) Kundenprofil, individuelle Preise, Kaufhistorie, Empfehlungen
      Zweck: Vertragsdurchführung, individuelle Angebote.
      Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.

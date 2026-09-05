@@ -46,6 +46,16 @@ dependencies:
   # QR-Code für die Kundenkarte (Automaten-Verifizierung)
   qr_flutter: ^4.1.0
 
+  # Anmeldung mit Face ID / Touch ID / Android-Biometrie.
+  # NUR nativ: local_auth hat keine Web-Implementierung. Jeder Aufruf ist
+  # deshalb hinter kIsWeb abgeschirmt (core/security/biometrie/).
+  local_auth: ^2.3.0
+
+  # Ablage der Sitzung im Keychain (iOS) bzw. Keystore/EncryptedSharedPrefs
+  # (Android), wenn die biometrische Anmeldung eingeschaltet ist. Ohne das
+  # läge die Sitzung wie bisher unverschlüsselt in den SharedPreferences.
+  flutter_secure_storage: ^9.2.2
+
   # Diagramme im Finanzdashboard (KPI-Trend, Cashflow, Vergleich Vorjahr).
   fl_chart: ^0.68.0
 
@@ -87,3 +97,4 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/ki/

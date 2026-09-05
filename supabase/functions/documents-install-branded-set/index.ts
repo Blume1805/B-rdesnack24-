@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { istBerechtigt, NUR_GESELLSCHAFTER } from "../_shared/auth.ts";
 import { Ctx } from "./helpers.ts";
 import { buildBelehrungPdf } from "./belehrung.ts";
 import { buildNdaPdf } from "./nda.ts";
@@ -42,9 +43,9 @@ Deno.serve(async (req) => {
     if (!isServiceRole) {
       const uid = (await caller.auth.getUser()).data.user?.id;
       if (!uid) return jsonResponse({ error: "Nicht angemeldet" }, 401);
-      const { data: prof } = await admin.from("profiles").select("role").eq("id", uid).maybeSingle();
-      const role = (prof as { role?: string } | null)?.role;
-      if (role !== "system_admin" && role !== "shareholder") {
+      // Rolle allein genuegt nicht: sie stammt bei Selbstregistrierung aus
+      // clientseitigen Metadaten. Siehe _shared/auth.ts.
+      if (!await istBerechtigt(admin, NUR_GESELLSCHAFTER, uid)) {
         return jsonResponse({ error: "Nicht autorisiert" }, 403);
       }
     }

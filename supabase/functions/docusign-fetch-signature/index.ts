@@ -24,6 +24,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { create as jwtCreate, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { istBerechtigt, NUR_GESELLSCHAFTER } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -40,8 +41,9 @@ Deno.serve(async (req) => {
   const admin = createClient(supabaseUrl, serviceKey);
 
   // Nur Admin/Gesellschafter dürfen Signaturen kapern.
-  const { data: profile } = await caller.from("profiles").select("role").maybeSingle();
-  if (!profile || !["system_admin", "shareholder"].includes(profile.role)) {
+  // Rolle allein genuegt nicht: sie stammt bei Selbstregistrierung aus
+  // clientseitigen Metadaten. Siehe _shared/auth.ts.
+  if (!await istBerechtigt(caller, NUR_GESELLSCHAFTER)) {
     return jsonResponse({ error: "Nicht autorisiert" }, 403);
   }
 

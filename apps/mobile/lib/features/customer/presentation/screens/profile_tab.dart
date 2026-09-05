@@ -14,10 +14,13 @@ import '../../domain/repositories/customer_repository.dart';
 import '../controllers/customer_providers.dart';
 import '../widgets/customer_anchors.dart';
 import 'consent_screen.dart';
+import 'data_export_screen.dart';
 import 'master_data_screen.dart';
 import 'receipts_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
+import '../../../../core/auth/auth_redirect.dart';
+import '../../../auth/presentation/screens/security_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -108,6 +111,14 @@ class ProfileTab extends ConsumerWidget {
               onTap: () => _changePassword(context, ref, repo),
             ),
             _ProfileRow(
+              icon: Icons.face_outlined,
+              title: 'Sicherheit',
+              subtitle: 'Anmeldung mit Face ID oder Fingerabdruck',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SecurityScreen()),
+              ),
+            ),
+            _ProfileRow(
               icon: Icons.workspace_premium_outlined,
               title: 'Mein Abo',
               subtitle: 'Monats- oder Jahres-Abo wählen',
@@ -169,6 +180,14 @@ class ProfileTab extends ConsumerWidget {
               subtitle: 'Analyse, Marketing, Karten',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ConsentScreen()),
+              ),
+            ),
+            _ProfileRow(
+              icon: Icons.download_outlined,
+              title: 'Meine Daten',
+              subtitle: 'Auskunft nach Art. 15 DSGVO — sofort abrufbar',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DataExportScreen()),
               ),
             ),
             _ProfileRow(
@@ -455,7 +474,10 @@ class ProfileTab extends ConsumerWidget {
     );
     if (ok != true) return;
     try {
-      await ref.read(supabaseClientProvider).auth.resetPasswordForEmail(email);
+      await ref.read(supabaseClientProvider).auth.resetPasswordForEmail(
+            email,
+            redirectTo: authRedirectUrl(),
+          );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Reset-Mail versendet.')),

@@ -21,6 +21,14 @@ void main() {
     'documents.edit',
     'employees.manage',
     'customers.manage',
+    // Werbegeschäft und B2B (Audit R-12). Ohne diese Rechte blieben die
+    // vier neuen Kacheln ungebaut — das Sicherheitsnetz dieses Tests hätte
+    // dort ein Loch.
+    'locations.manage',
+    'advertising.manage',
+    'creatives.approve',
+    'leads.manage',
+    'businesses.manage',
   };
 
   testWidgets('ManagementScreen rendert alle Modul-Kacheln ohne Fehler',
@@ -43,5 +51,12 @@ void main() {
     expect(find.text('Kündigungen'), findsOneWidget);
     expect(find.text('Dokumente'), findsOneWidget);
     expect(find.text('Zu signieren'), findsOneWidget);
+
+    // Werbegeschäft und B2B (Audit R-12).
+    expect(find.text('Werbeflächen'), findsOneWidget);
+    expect(find.text('Kampagnen'), findsOneWidget);
+    expect(find.text('Anfragen'), findsOneWidget);
+    expect(find.text('Firmenkunden'), findsOneWidget);
+    expect(find.text('E-Mail'), findsOneWidget);
   });
 }

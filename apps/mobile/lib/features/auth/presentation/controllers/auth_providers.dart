@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/security/biometrie/biometrie_provider.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/app_user.dart';
@@ -53,6 +54,11 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     );
     if (!state.hasError) {
       _ref.invalidate(currentUserProvider);
+      // Ein Geraet, ein Konto: meldet sich hier jemand anderes an, wird eine
+      // biometrische Freischaltung fuer das vorherige Konto geloescht.
+      // Andernfalls oeffnete ein Gesicht spaeter ein Konto, zu dem es nie
+      // gehoert hat.
+      await _ref.read(biometrieControllerProvider).pruefeNachAnmeldung();
       return true;
     }
     return false;
