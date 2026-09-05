@@ -23,6 +23,74 @@ DATEV-/Sevdesk-Abgleich, Race Conditions unter Last. Wer diesen Bericht als
 
 ---
 
+## 0a. NACHTRAG — drei Befunde nach Rückmeldung herabgestuft
+
+Nach dem Bericht hat der Auftraggeber drei offene Verifikationen beantwortet.
+Sie ändern die Einstufung erheblich. Die ursprünglichen Abschnitte bleiben
+unverändert stehen; ein Audit, der seine eigenen Fehleinschätzungen
+überschreibt, ist keiner mehr.
+
+### V-1 beantwortet: `app` ist NICHT exponiert
+
+Dashboard → Project Settings → API → Exposed schemas zeigt
+**„2 of 3 schemas exposed"**: `graphql_public` ✓ und `public` ✓.
+**`app` ist nicht angehakt.** `net` steht nicht einmal zur Auswahl.
+
+| Befund | vorher | jetzt | Begründung |
+|---|---|---|---|
+| **H-1** `net.http_*` für anon/authenticated | HIGH | **LOW** | Schema über die Data API nicht erreichbar |
+| **H-2** `app.purge_nach_frist()` ausführbar | HIGH | **LOW** | `app` nicht exponiert — kein Kunde kommt heran |
+
+Beide bleiben als Hygiene bestehen: Die Grants gehören entzogen, weil ein
+späteres Anhaken von `app` sie augenblicklich scharf machen würde, ohne dass
+jemand den Zusammenhang sähe. Sie sind aber **kein Go-Live-Blocker**.
+
+### V-3 beantwortet: Es gibt noch keine Automaten
+
+Auskunft des Auftraggebers vom 05.09.2026: Automatenumsätze werden nicht
+erfasst, **weil noch kein Automat gekauft ist**.
+
+Damit ist **H-4 kein Aufzeichnungsmangel.** Es fehlen keine Umsätze; es gibt
+keine. Der nicht ausgerollte `nayax-webhook` ist derzeit sogar der richtige
+Zustand — das Secret `NAYAX_WEBHOOK_SECRET` existiert ebenfalls nicht
+(vom Auftraggeber geprüft), und die Function würde ohne es korrekt mit `500`
+antworten, statt ungeprüfte Daten anzunehmen.
+
+| Befund | vorher | jetzt |
+|---|---|---|
+| **H-4** `nayax-webhook` nicht ausgerollt | HIGH | **INFORMATIONAL, terminiert** |
+| **H-4b** `send-push` nicht ausgerollt | HIGH | **MEDIUM** — die App registriert bereits Gerätekennungen in `device_tokens`, es geht nur nichts hinaus |
+
+H-4 wandert damit aus dem Audit in eine Pflichtliste mit Auslöser:
+`docs/betrieb/AUTOMAT-INBETRIEBNAHME.md`, verankert als Dauerregel in
+`CLAUDE.md`. Der Grund für die Verankerung: Der Fehler meldet sich nicht von
+selbst. Nach dem ersten Verkauf gibt es keine Fehlermeldung, es kommen nur
+keine Umsätze — und Aufzeichnungen nach §§ 145–147 AO lassen sich
+nachträglich nicht herstellen.
+
+Zweiter, unabhängiger Beleg für H-4 aus der Rückmeldung: In der
+alphabetischen Function-Liste des Dashboards fehlt zwischen
+`merge-employee-signature` und `protocol-export-pdf` genau `nayax-webhook`,
+und zwischen `receipt-pdf` und `sevdesk-invoice` genau `send-push`.
+
+### Stand nach dem Nachtrag
+
+Von vier HIGH-Befunden bleibt **einer**: **H-3** (15 von 26 Functions nicht
+aus dem Repository ausgerollt). Das ist kein Sicherheitsbefund, sondern ein
+Nachweisbefund — und damit derjenige, der vor dem ersten steuerlich
+relevanten Geschäftsvorfall erledigt sein muss.
+
+**Erster Abgleich zu H-3, exemplarisch an `receipt-pdf`:** Die deployte
+Fassung bettet `_shared/cors.ts` ein, statt es zu importieren, und trägt
+einen kürzeren Kopfkommentar; die fachlichen Marker (§ 15 UStG, USt-Ausweis
+7 %/19 %, Zahlungsarten) sind in beiden identisch. Das ist die Signatur
+eines Dashboard-Deploys — der Editor dort kann `../_shared/` nicht auflösen.
+Das Repository ist hier **neuer** als die laufende Fassung. Ein Neu-Ausrollen
+wäre demnach ein Upgrade und kein Verlust. Ein Datenpunkt ist allerdings
+keine Aussage über die übrigen 14; der Abgleich läuft.
+
+---
+
 ## 1. GESAMTURTEIL
 
 Das Sicherheitsfundament ist **überdurchschnittlich solide gebaut** — und das
@@ -51,7 +119,8 @@ GoBD-Pflichten ist das der teuerste Befund dieses Berichts — er entwertet
 jede Aussage, die man über den Quelltext dieser Funktionen trifft.
 
 **Go-Live-Empfehlung: bedingt freigegeben.** Der Kundenbetrieb kann starten,
-sobald H-1 bis H-4 abgearbeitet sind. Keiner davon erfordert einen Umbau; alle
+sobald H-1 bis H-4 abgearbeitet sind. *(Nach dem Nachtrag in Abschnitt 0a
+reduziert sich das auf H-3.)* Keiner davon erfordert einen Umbau; alle
 vier sind kleine, gezielte Eingriffe.
 
 ---
