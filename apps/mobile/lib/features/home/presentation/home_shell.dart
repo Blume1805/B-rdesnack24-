@@ -557,9 +557,12 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Slogan zweizeilig, ohne Punkt-Präfix.
+                        // Claim zweizeilig. Der frühere Hunger-Slogan ist
+                        // abgeloest und laut Wahrheitsschicht (scrollcraft,
+                        // references/truth.md) verboten -- auch nach
+                        // Inbetriebnahme nicht wieder verwendbar.
                         Text(
-                          'immer da, wenn der',
+                          'Genießen. Geben.',
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w700,
@@ -569,7 +572,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Hunger kommt',
+                          'Gutes tun.',
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w700,

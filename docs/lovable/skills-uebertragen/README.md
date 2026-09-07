@@ -9,6 +9,7 @@
 | `frontend-taste` | 7,0 KB | vollständig, um Verweise auf `frontend-design` bereinigt (den Skill gibt es dort nicht) |
 | `humanizer` | 23,1 KB | vollständig, ergänzt um deutsche Entsprechungen der Werbefloskeln und einen Abschnitt über Oberflächentexte |
 | `impeccable` | 32,6 KB | **komprimiert** — siehe unten |
+| `scrollcraft` | 40 KB | **komprimiert** — siehe unten, übertragen 05.09.2026 |
 
 ## Warum `impeccable` komprimiert werden musste
 
@@ -40,3 +41,30 @@ Alle Verweise auf nicht mitgelieferte Dateien, auf Hilfsskripte und auf
 entfernt — dieser Workspace baut Web. Geprüft: **0 tote Verweise**.
 
 `impeccable-SKILL.md` in diesem Verzeichnis ist die übertragene Fassung.
+
+
+## Warum `scrollcraft` komprimiert werden musste
+
+Dasselbe Problem wie bei `impeccable`, nur mit schwererer Folge. Das Original
+besteht aus einer `SKILL.md` und elf Begleitdateien. Der Kern des Skills ist
+die **Wahrheitsschicht** in `references/truth.md`: die einzige zulässige
+Quelle für Aussagen auf der Landingpage.
+
+Ein Skill, dessen Faktenquelle als Verweis auf eine Datei endet, die im
+Zielsystem nicht existiert, prüft nichts — er behauptet nur, zu prüfen. Das
+wäre schlimmer als kein Skill, weil es Sicherheit vortäuscht.
+
+In `scrollcraft-SKILL.md` sind deshalb **alle inhaltlich tragenden Dateien
+vollständig eingebettet** (Anhänge A–I): Wahrheitsschicht, Zielgruppen,
+Storyboard, Pattern-Kanon, Technik, Assets und die drei Checklisten.
+Inhaltlich ist nichts gekürzt.
+
+Nicht übertragen:
+
+* `references/musterbibliothek.html` — 53 KB Demoseite, im Repository unter
+  `docs/scrollcraft/references/` einsehbar.
+* `scripts/audit_static.py`, `build_spin.py`, `snapshot.py` — laufen lokal,
+  nicht im Lovable-Sandkasten. Was sie prüfen, steht als Checkliste in
+  Anhang I.
+
+Das Original liegt vollständig unter `docs/scrollcraft/`.

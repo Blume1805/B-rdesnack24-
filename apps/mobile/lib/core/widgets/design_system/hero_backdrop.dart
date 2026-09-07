@@ -8,9 +8,10 @@ import '../../theme/app_typography.dart';
 /// `assets/images/brand_hero_wide.webp`. Der Container wächst mit der
 /// Bildschirmbreite und rendert das Motiv immer vollständig (BoxFit.contain).
 ///
-/// [showTaglineOverlay] blendet den Slogan noch einmal als eigene Text-Zeile
-/// unter dem Bild ein (nützlich für den Login, wo der Slogan „Immer da, wenn
-/// der Hunger kommt." ergänzend zum Bild erscheinen soll).
+/// [showTaglineOverlay] blendet den Claim noch einmal als eigene Text-Zeile
+/// unter dem Bild ein (nützlich für den Login, wo „Genießen. Geben. Gutes
+/// tun." ergänzend zum Bild erscheinen soll). Der frühere Hunger-Slogan ist
+/// abgelöst und laut Wahrheitsschicht verboten.
 class HeroBackdrop extends StatelessWidget {
   const HeroBackdrop({
     super.key,

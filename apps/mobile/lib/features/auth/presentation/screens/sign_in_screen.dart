@@ -71,7 +71,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const HeroBackdrop(
-                      tagline: 'Immer da, wenn der Hunger kommt.',
+                      // Der frühere Hunger-Claim ist abgelöst und laut
+                      // Wahrheitsschicht (scrollcraft, references/truth.md)
+                      // verboten — auch nach Inbetriebnahme nicht wieder
+                      // verwendbar. Verbindlich ist der Claim unten.
+                      tagline: 'Genießen. Geben. Gutes tun.',
                     ),
                     _FormPanel(
                       formKey: _formKey,

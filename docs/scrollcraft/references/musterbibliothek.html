@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="de" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>scrollcraft — Musterbibliothek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,700;10..48,800&family=Hanken+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#FDC102;--ink:#202321;--cream:#FBF8F4;--grey:#DCD8D3;--green:#5C9A3F;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --text:"Hanken Grotesk",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--text);-webkit-font-smoothing:antialiased;overflow-x:clip}
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0}
+p{margin:0;line-height:1.55}
+.wrap{width:min(1080px,92vw);margin-inline:auto}
+
+/* ---- Kopf ---- */
+.top{background:var(--ink);color:var(--cream);padding:clamp(3rem,8vw,5.5rem) 0 3rem}
+.top h1{font-size:clamp(2rem,5.5vw,3.6rem);max-width:20ch}
+.top p{margin-top:1rem;max-width:62ch;color:#C9C5BF}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;color:var(--brand);font-weight:700;margin-bottom:.8rem}
+.index{margin-top:2.4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.4rem 1.5rem}
+.index a{color:#C9C5BF;text-decoration:none;font-size:.9rem;padding:.35rem 0;border-bottom:1px solid #353936;display:flex;gap:.7rem}
+.index a:hover{color:var(--brand)}
+.index a b{color:var(--brand);font-variant-numeric:tabular-nums;font-weight:700}
+
+/* ---- Steuerleiste ---- */
+.bar{position:fixed;z-index:90;left:50%;bottom:14px;transform:translateX(-50%);
+  display:flex;gap:.4rem;background:rgba(32,35,33,.94);padding:.4rem;border-radius:999px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.bar button{border:0;cursor:pointer;font-family:var(--text);font-weight:700;font-size:.78rem;
+  padding:.6rem 1rem;border-radius:999px;background:transparent;color:#C9C5BF}
+.bar button[aria-pressed="true"]{background:var(--brand);color:var(--ink)}
+.bar button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* ---- Musterrahmen ---- */
+.pattern{border-top:1px solid var(--grey)}
+.pattern__head{padding:2.6rem 0 1.4rem}
+.pattern__head h2{font-size:clamp(1.4rem,3vw,2.1rem);display:flex;gap:.8rem;align-items:baseline}
+.pattern__head h2 b{color:var(--brand);font-size:.85em;font-variant-numeric:tabular-nums}
+.pattern__head>p{margin-top:.7rem;max-width:62ch;color:#4A4E4B}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1rem}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.03em;padding:.3rem .65rem;border-radius:999px;
+  background:#EDE9E3;color:#4A4E4B}
+.chip--ok{background:#E4EFDC;color:#3C6A26}
+.chip--warn{background:#FCEFCB;color:#8A6400}
+.chip--risk{background:#FADCDC;color:#A32B2F}
+.demo{background:var(--ink);color:var(--cream);border-radius:18px;overflow:hidden;margin-bottom:3rem}
+.demo--light{background:#EFEBE5;color:var(--ink)}
+.pad{padding:clamp(1.6rem,4vw,3rem)}
+.hint{font-size:.78rem;color:#8E8A84;padding:0 0 2.6rem;margin-top:-2rem}
+
+/* ---- gemeinsame Bausteine ---- */
+.driver{position:relative}
+.stage{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
+.stagelabel{position:absolute;top:1rem;left:1rem;font-size:.7rem;letter-spacing:.1em;color:#6C706D}
+.big{font-size:clamp(1.8rem,4.6vw,3.4rem);max-width:16ch;text-align:center}
+.mini{font-size:.85rem;color:#8E8A84;margin-top:.9rem;text-align:center}
+.autom{width:120px;height:190px;border-radius:10px;background:#161917;border:1.5px solid #3A3E3B;position:relative;flex:0 0 auto}
+.autom::before{content:"";position:absolute;left:9px;top:10px;width:74px;height:140px;border-radius:5px;background:#0C0E0D;border:1px solid #434744}
+.autom::after{content:"PUSH";position:absolute;left:9px;bottom:10px;width:100px;height:18px;border-radius:4px;background:#0C0E0D;border:1px solid #434744;font-size:.5rem;letter-spacing:.15em;color:#6C706D;display:grid;place-items:center}
+
+/* 01 Reveal */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1)}
+.rv.in{opacity:1;transform:none}
+/* 02 Stagger */
+.stack{display:grid;gap:1rem}
+.row{display:flex;gap:1rem;align-items:center;background:#262A27;border-radius:12px;padding:1rem 1.2rem}
+.row i{width:34px;height:34px;border-radius:8px;background:var(--brand);flex:0 0 auto}
+.st{opacity:0;transform:translateY(13px);transition:opacity .45s ease,transform .45s cubic-bezier(.16,1,.3,1)}
+.st.in{opacity:1;transform:none}
+/* 03 Zähler */
+.counters{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;text-align:center}
+.num{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,7vw,4.6rem);color:var(--brand);font-variant-numeric:tabular-nums;line-height:1}
+.numlabel{font-size:.85rem;color:#A6A29C;margin-top:.4rem}
+/* 04 Fortschritt */
+.prog{position:sticky;top:0;z-index:5;height:4px;background:#353936}
+.prog i{display:block;height:100%;width:0;background:var(--brand);transition:width .1s linear}
+.dots{position:absolute;right:1.4rem;top:50%;transform:translateY(-50%);display:grid;gap:.7rem}
+.dots b{width:9px;height:9px;border-radius:50%;background:#434744;display:block;transition:background .3s,transform .3s}
+.dots b.on{background:var(--brand);transform:scale(1.5)}
+/* 05 Maske */
+.maskwrap{width:min(560px,80vw);aspect-ratio:16/10;border-radius:14px;overflow:hidden;position:relative;background:#0C0E0D;display:grid;place-items:center}
+.maskimg{position:absolute;inset:0;background:
+  repeating-linear-gradient(135deg,#2B2F2C 0 22px,#232725 22px 44px);
+  clip-path:inset(0 0 100% 0);transition:clip-path .8s cubic-bezier(.16,1,.3,1)}
+.maskwrap.in .maskimg{clip-path:inset(0 0 0 0)}
+.maskwrap span{position:relative;z-index:2;color:#6C706D;font-size:.8rem}
+/* 06 Zoomfahrt */
+.zoomer{will-change:transform}
+/* 07 Ebenen */
+.layers{position:relative;display:grid;place-items:center}
+.lay{transition:opacity .5s ease,transform .5s cubic-bezier(.16,1,.3,1)}
+.lay-2,.lay-3{position:absolute;opacity:0}
+.lay-2{transform:translateY(-118px) scale(.9)}
+.lay-3{transform:translateY(120px) scale(.9)}
+.on .lay-2,.on .lay-3{opacity:1;transform:none}
+.badge{background:var(--brand);color:var(--ink);font-weight:700;font-size:.8rem;padding:.5rem .9rem;border-radius:8px}
+.badge--ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}
+/* 08 Horizontal */
+.htrack{display:flex;gap:1.2rem;padding-inline:6vw;will-change:transform}
+.hcard{flex:0 0 min(360px,80vw);background:#262A27;border-radius:14px;padding:1.8rem;min-height:250px;display:grid;align-content:space-between}
+.hcard h3{font-size:1.25rem}
+.hcard p{font-size:.9rem;color:#A6A29C;margin-top:.5rem}
+.hcard b{color:var(--brand);font-size:.75rem;letter-spacing:.08em}
+/* 09 Produktwechsel */
+.pstage{display:grid;place-items:center;position:relative;width:100%}
+.pitem{position:absolute;opacity:0;transform:translateY(24px) scale(.96);transition:opacity .6s ease,transform .6s cubic-bezier(.16,1,.3,1);text-align:center}
+.pitem.on{opacity:1;transform:none}
+.pbox{width:110px;height:150px;border-radius:10px;margin:0 auto 1rem}
+.ptabs{display:flex;gap:.5rem;justify-content:center;margin-top:1.2rem;position:absolute;bottom:8%;left:0;right:0}
+.ptabs b{font-size:.75rem;padding:.35rem .8rem;border-radius:999px;background:#262A27;color:#8E8A84}
+.ptabs b.on{background:var(--brand);color:var(--ink)}
+/* 10 Farbwechsel */
+.shift{transition:background-color .1s linear,color .1s linear}
+/* 11 Text-Highlight */
+.hl{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4.4vw,3rem);line-height:1.25;max-width:20ch;text-align:center}
+.hl w{color:#4A4E4B;transition:color .25s ease;display:inline-block}
+.demo--light .hl w{color:#BDB8B1}
+.hl w.on{color:var(--ink)}
+.demo:not(.demo--light) .hl w.on{color:var(--cream)}
+/* 12 Parallax */
+.plx{position:relative;width:min(620px,86vw);height:min(58svh,420px);display:grid;place-items:center}
+.plx>*{position:absolute;will-change:transform}
+.blob{width:230px;height:230px;border-radius:50%;background:#2B2F2C}
+.blob2{width:130px;height:130px;border-radius:26px;background:var(--brand);opacity:.9;left:8%;top:14%}
+.blob3{width:88px;height:88px;border-radius:50%;border:2px solid var(--green);right:10%;bottom:16%}
+/* 13 Kartenstapel */
+.deck{display:block;padding-bottom:16vh;overflow:visible}
+.card{position:sticky;background:#262A27;border-radius:18px;padding:clamp(1.6rem,4vw,2.6rem);
+  min-height:50svh;margin-bottom:1.2vh;display:grid;align-content:center;border:1px solid #353936;
+  box-shadow:0 -14px 34px rgba(0,0,0,.28)}
+.card h3{font-size:clamp(1.3rem,3vw,2rem)}
+.card p{color:#A6A29C;margin-top:.7rem;max-width:44ch}
+.card:nth-child(1){top:5vh}.card:nth-child(2){top:7.5vh;background:#2E332F}
+.card:nth-child(3){top:10vh;background:#383E39}.card:nth-child(4){top:12.5vh;background:var(--brand);color:var(--ink)}
+.card:nth-child(4) p{color:#3A3327}
+/* 14 Mikro */
+.micro{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+.mbtn{min-height:52px;border-radius:999px;background:var(--brand);color:var(--ink);font-weight:700;
+  border:0;font-family:var(--text);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease}
+.mbtn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.3)}
+.mcard{background:#262A27;border-radius:14px;padding:1.2rem;transition:transform .2s ease,background .2s ease}
+.mcard:hover{transform:translateY(-4px);background:#2E332F}
+.mline{position:relative;display:inline-block;color:var(--brand);text-decoration:none;font-weight:700}
+.mline::after{content:"";position:absolute;left:0;bottom:-3px;height:2px;width:100%;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.mline:hover::after{transform:scaleX(1);transform-origin:left}
+
+/* ---- Nicht empfohlen ---- */
+.no{background:var(--ink);color:var(--cream);padding:clamp(3rem,8vw,5rem) 0}
+.no ul{margin:1.4rem 0 0;padding:0;list-style:none;display:grid;gap:.8rem;max-width:70ch}
+.no li{padding-left:1.6rem;position:relative;color:#C9C5BF;font-size:.95rem}
+.no li::before{content:"×";position:absolute;left:0;color:#E5484D;font-weight:700}
+
+/* ---- Reduced Motion: echt und simuliert ---- */
+body.rm .rv,body.rm .st{opacity:1!important;transform:none!important}
+body.rm .maskimg{clip-path:inset(0 0 0 0)!important}
+body.rm .stage{position:static;height:auto;padding:3rem 0}
+body.rm .driver{height:auto!important}
+body.rm .lay-2,body.rm .lay-3{position:static;opacity:1;transform:none;margin:.8rem 0}
+body.rm .layers{display:grid;gap:.6rem}
+body.rm .htrack{flex-wrap:wrap;transform:none!important;padding:1.5rem}
+body.rm .pitem{position:static;opacity:1;transform:none;margin-bottom:1.5rem}
+body.rm .ptabs{position:static}
+body.rm .card{position:static;margin-bottom:1rem}
+body.rm .zoomer{transform:none!important}
+body.rm .plx>*{transform:none!important}
+body.rm .hl w{color:inherit!important}
+body.rm *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){
+  .rv,.st{opacity:1!important;transform:none!important}
+  .maskimg{clip-path:inset(0 0 0 0)!important}
+  .stage{position:static;height:auto;padding:3rem 0}
+  .driver{height:auto!important}
+  .lay-2,.lay-3{position:static;opacity:1;transform:none;margin:.8rem 0}
+  .htrack{flex-wrap:wrap;transform:none!important}
+  .pitem{position:static;opacity:1;transform:none;margin-bottom:1.5rem}
+  .card{position:static;margin-bottom:1rem}
+  *{animation:none!important;transition:none!important}
+}
+
+/* 15 Produkt in 3D */
+.tiltgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:clamp(1.2rem,3vw,2.4rem)}
+.tilt{position:relative}
+.tilt__inner{position:relative;border-radius:16px}
+/* Weiße Kachel steht still — nur die Dose darin rollt */
+.tilt__img{aspect-ratio:3/4;border-radius:16px;position:relative;overflow:hidden;background:#fff;
+  display:grid;place-items:center;box-shadow:0 22px 44px rgba(0,0,0,.42);perspective:1100px}
+.tilt__can{width:100%;height:100%;transform-origin:50% 50%;backface-visibility:hidden;
+  will-change:transform,background-position;
+  transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.tilt.live .tilt__can{transition:transform .07s linear}
+/* Sequenzmodus: 36 Einzelbilder in einem 6x6-Blatt, kein Transform nötig */
+.tilt.spin .tilt__can{background-repeat:no-repeat;background-size:600% 600%;transform:none!important}
+.tilt.spin .tilt__cyl,.tilt.spin .tilt__spec{display:none}
+/* Zylinderschattierung: dunkelt nur den Bereich ab, in dem die Dose steht */
+.tilt__cyl{position:absolute;left:24%;right:24%;top:5%;bottom:5%;pointer-events:none;
+  mix-blend-mode:multiply;
+  background:linear-gradient(90deg,rgba(0,0,0,.34),rgba(0,0,0,.10) 20%,rgba(0,0,0,0) 50%,
+    rgba(0,0,0,.10) 80%,rgba(0,0,0,.34))}
+/* Mitlaufender Lichtreflex */
+.tilt__spec{position:absolute;left:24%;right:24%;top:5%;bottom:5%;pointer-events:none;overflow:hidden}
+.tilt__spec i{position:absolute;top:0;bottom:0;left:0;width:26%;mix-blend-mode:screen;
+  will-change:transform;transform:translateX(142%);
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));
+  transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.tilt.live .tilt__spec i{transition:transform .07s linear}
+.tilt__cap{margin-top:.9rem;text-align:center;font-size:.88rem;color:#A6A29C}
+.tilt__cap b{display:block;color:var(--cream);font-weight:700}
+body.rm .tilt__can{transform:none!important;background-position:0% 0%!important}
+body.rm .tilt__spec i{transform:translateX(142%)!important}
+@media(prefers-reduced-motion:reduce){.tilt__can{transform:none!important}}
+
+
+/* Neue Muster 15-18 */
+body.rm #obj15,body.rm #lab15,body.rm #ph17,body.rm #sun16,body.rm #bar18{transform:none!important}
+body.rm #ph17{opacity:1!important}
+body.rm #lab15{opacity:1!important}
+body.rm #beam17{display:none}
+body.rm #lbl18{opacity:1!important}
+@media(max-width:760px){
+  #give18 .pad{grid-template-columns:1fr!important}
+  #lab15 b{font-size:.75rem}
+}
+
+/* ---- Auslösezone sichtbar machen (Prüfhilfe) ---- */
+.tz{position:fixed;left:0;right:0;top:96svh;z-index:80;pointer-events:none;display:none;
+  border-top:1.5px dashed #E5484D}
+.tz b{position:absolute;right:10px;top:4px;font-size:.68rem;font-weight:700;color:#fff;
+  background:#E5484D;padding:.15rem .45rem;border-radius:5px}
+body.showtz .tz{display:block}
+
+/* ---- Geräteklassen ---- */
+/* Tablet hoch/quer */
+@media(min-width:761px) and (max-width:1100px){
+  .hcard{flex:0 0 min(300px,46vw)}
+  .autom{width:104px;height:166px}
+  .card{min-height:46svh}
+}
+/* Telefon */
+@media(max-width:760px){
+  .htrack{padding-inline:5vw;gap:.9rem}
+  .hcard{min-height:200px;padding:1.3rem}
+  .autom{width:96px;height:154px}
+  .autom::before{width:58px;height:112px}
+  .autom::after{width:78px;font-size:.45rem}
+  .dots{right:.8rem}
+  .card{min-height:auto;padding:1.4rem}
+  .card:nth-child(1){top:6vh}.card:nth-child(2){top:9vh}
+  .card:nth-child(3){top:12vh}.card:nth-child(4){top:15vh}
+  .bar button{padding:.65rem .85rem}
+}
+/* flache Viewports, v. a. Telefon im Querformat */
+@media(max-height:560px){
+  .stage{height:100svh}
+  .big{font-size:clamp(1.3rem,4vw,2rem)}
+  .num{font-size:clamp(1.8rem,6vw,2.6rem)}
+  .autom{width:84px;height:132px}
+  .autom::before{width:50px;height:94px}
+  .autom::after{width:66px;height:14px}
+  .hl{font-size:clamp(1.1rem,3.4vw,1.7rem)}
+  .stagelabel{display:none}
+  .mini{font-size:.75rem}
+}
+.bar button{min-height:44px}
+.no-js .rv,.no-js .st{opacity:1;transform:none}
+@media(max-width:760px){
+  .counters{grid-template-columns:1fr;gap:1.8rem}
+  .index{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">scrollcraft — motion-patterns.</p>
+    <h1>Achtzehn Bewegungsmuster, einmal ausprobiert.</h1>
+    <p>Der vollständige Kanon des Skills. Jedes Muster ist lauffähig gebaut, ohne externe Bibliothek. Unten links kannst du
+      „Bewegung reduziert“ einschalten — dann siehst du genau das, was Nutzer mit
+      aktivierter Systemeinstellung bekommen. Alle Inhalte sind Platzhalter.</p>
+    <nav class="index">
+      <a href="#p01"><b>01</b> Reveal beim Hereinscrollen</a>
+      <a href="#p02"><b>02</b> Gestaffelte Sequenz</a>
+      <a href="#p03"><b>03</b> Zählanimation</a>
+      <a href="#p04"><b>04</b> Text-Highlight</a>
+      <a href="#p05"><b>05</b> Mikrointeraktionen</a>
+      <a href="#p06"><b>06</b> Sticky-Bühne mit Zuständen</a>
+      <a href="#p06x"><b>06b</b> — Fortschritt und Kapitel</a>
+      <a href="#p07"><b>07</b> Horizontale Sequenz</a>
+      <a href="#p08"><b>08</b> Kartenstapel</a>
+      <a href="#p09"><b>09</b> Szenen-Farbwechsel</a>
+      <a href="#p10"><b>10</b> Zoomfahrt (Kamera)</a>
+      <a href="#p11"><b>11</b> Parallax-Tiefe</a>
+      <a href="#p12"><b>12</b> Bild-Freilegung per Maske</a>
+      <a href="#p13"><b>13</b> Produktwechsel</a>
+      <a href="#p14"><b>14</b> Produkt 360°</a>
+      <a href="#p15"><b>15</b> Objekt-Label</a>
+      <a href="#p16"><b>16</b> Tageszeit-Erzählung</a>
+      <a href="#p17"><b>17</b> Physisch → digital</a>
+      <a href="#p18"><b>18</b> Anteilsdarstellung</a>
+    </nav>
+  </div>
+</header>
+
+<!-- 01 -->
+<section class="pattern" id="p01"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>01</b> Reveal beim Hereinscrollen</h2>
+    <p>Der Grundbaustein: Inhalt steigt beim Eintreten leicht auf. Ersetzt das harte
+      „ist plötzlich da“ und führt das Auge. Kostet nichts, wirkt überall.</p>
+    <div class="chips"><span class="chip chip--ok">Basis, überall einsetzbar</span><span class="chip chip--ok">Mobile identisch</span><span class="chip">4 Zeilen JS</span></div>
+  </div>
+  <div class="demo"><div class="pad" style="min-height:60svh;display:grid;align-content:center;gap:1.2rem">
+    <h3 class="rv big" style="text-align:left;max-width:20ch">Ein Automat verkauft. Und kann mehr.</h3>
+    <p class="rv" style="max-width:52ch;color:#A6A29C;transition-delay:.08s">Beispieltext. Die Bewegung ist so klein, dass niemand sie bewusst wahrnimmt — sie sorgt nur dafür, dass der Blick dem Text folgt.</p>
+  </div></div>
+</div></section>
+<!-- 02 -->
+<section class="pattern" id="p02"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>02</b> Gestaffelte Sequenz</h2>
+    <p>Mehrere Elemente erscheinen kurz nacheinander statt gleichzeitig. Erzeugt Rhythmus
+      und macht Listen lesbar, statt sie als Block zu präsentieren.</p>
+    <div class="chips"><span class="chip chip--ok">gut für Aufzählungen</span><span class="chip chip--warn">max. 5 Elemente, sonst wirkt es langsam</span></div>
+  </div>
+  <div class="demo"><div class="pad stack" style="min-height:60svh;align-content:center">
+    <div class="row st" style="transition-delay:0s"><i></i><div><b>Snacks &amp; Getränke</b><br><span style="color:#8E8A84;font-size:.88rem">Warenverkauf am Automaten</span></div></div>
+    <div class="row st" style="transition-delay:.06s"><i></i><div><b>App-Abo</b><br><span style="color:#8E8A84;font-size:.88rem">wiederkehrende Erlöse</span></div></div>
+    <div class="row st" style="transition-delay:.12s"><i></i><div><b>Werbeflächen</b><br><span style="color:#8E8A84;font-size:.88rem">analog und digital</span></div></div>
+    <div class="row st" style="transition-delay:.18s"><i></i><div><b>Sponsoring</b><br><span style="color:#8E8A84;font-size:.88rem">regionale Partner</span></div></div>
+  </div></div>
+</div></section>
+<!-- 03 -->
+<section class="pattern" id="p03"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>03</b> Zählanimation</h2>
+    <p>Zahlen laufen von null auf ihren Wert. Zieht Aufmerksamkeit auf Kennzahlen — und ist
+      genau deshalb heikel: Bewegung verleiht einer Zahl Autorität, die sie belegen muss.</p>
+    <div class="chips"><span class="chip chip--ok">starker Blickfang</span><span class="chip chip--risk">nur für belegte Zahlen</span><span class="chip chip--warn">Endwert muss auch ohne JS im HTML stehen</span></div>
+  </div>
+  <div class="demo"><div class="pad counters" style="min-height:52svh;align-content:center">
+    <div><div class="num" data-count="5" data-suffix=" %">5 %</div><div class="numlabel">jedes Warenverkaufs für die Region</div></div>
+    <div><div class="num" data-count="62">62</div><div class="numlabel">Produkte im geplanten Sortiment</div></div>
+    <div><div class="num" data-count="24" data-suffix="/7">24/7</div><div class="numlabel">geplante Verfügbarkeit</div></div>
+  </div></div>
+  <p class="hint">Hinweis: Die Beschriftungen stehen hier bewusst im Futur („geplant“) — so muss es bis zum ersten laufenden Automaten heißen.</p>
+</div></section>
+<!-- 04 -->
+<section class="pattern" id="p04"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>04</b> Text-Highlight</h2>
+    <p>Ein Satz färbt sich Wort für Wort ein, während man liest. Für den einen Satz, der
+      hängenbleiben soll — den Claim oder das Spendenversprechen.</p>
+    <div class="chips"><span class="chip chip--ok">sehr wirksam für einen Kernsatz</span><span class="chip chip--risk">genau 1× pro Seite</span><span class="chip chip--warn">Text muss vollständig im HTML stehen</span></div>
+  </div>
+</div>
+<div class="demo demo--light" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d11" style="height:155svh">
+    <div class="stage">
+      <span class="stagelabel" style="color:#8E8A84">11 — DEMO</span>
+      <p class="hl" id="hl11"><w>Fünf</w> <w>Prozent</w> <w>jedes</w> <w>Verkaufs</w> <w>bleiben</w> <w>im</w> <w>Sülzetal.</w></p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 05 -->
+<section class="pattern" id="p05"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>05</b> Mikrointeraktionen</h2>
+    <p>Die kleinen Reaktionen auf Berührung. Sie entscheiden mehr über den Qualitätseindruck
+      als jede große Szene — und niemand bemerkt sie bewusst.</p>
+    <div class="chips"><span class="chip chip--ok">Pflicht, überall</span><span class="chip chip--ok">reines CSS</span></div>
+  </div>
+  <div class="demo"><div class="pad micro" style="align-items:center">
+    <button class="mbtn">App vormerken</button>
+    <div class="mcard"><b>Karte</b><p style="color:#8E8A84;font-size:.88rem;margin-top:.3rem">hebt sich beim Berühren</p></div>
+    <div style="text-align:center"><a class="mline" href="#p14">Unterstrich läuft ein</a></div>
+  </div></div>
+</div></section>
+<!-- 06 -->
+<section class="pattern" id="p06"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>06</b> Sticky-Bühne mit Zuständen</h2>
+    <p>Das Motiv bleibt stehen, die Erzählung baut Ebenen darauf auf. Das Muster aus dem
+      ersten Prototyp — es trägt die Geschäftsmodell-Erzählung.</p>
+    <div class="chips"><span class="chip chip--ok">Kernmuster der Seite</span><span class="chip chip--risk">max. 2× pro Seite</span><span class="chip chip--warn">braucht eine Fallback-Variante</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d7" style="height:200svh">
+    <div class="stage">
+      <span class="stagelabel">06 — DEMO</span>
+      <div class="layers" id="l7">
+        <div class="lay-2"><span class="badge">DEINE WERBUNG</span></div>
+        <div class="lay lay-1"><div class="autom"></div></div>
+        <div class="lay-3"><span class="badge badge--ghost">APP · ABO</span></div>
+      </div>
+      <p class="mini" style="position:absolute;bottom:10%">Ebene 1 Verkauf → Ebene 2 Werbung → Ebene 3 Digital</p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 06b -->
+<section class="pattern" id="p06x"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>06b</b> Sticky-Bühne — Fortschritt und Kapitelmarken</h2>
+    <p>Eine dünne Leiste zeigt, wie weit die Geschichte fortgeschritten ist; Punkte am Rand
+      markieren die Kapitel. Nimmt langen Seiten die Orientierungslosigkeit.</p>
+    <div class="chips"><span class="chip chip--ok">Pflicht bei langen Scroll-Storys</span><span class="chip chip--ok">sehr günstig</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="prog"><i id="pr4"></i></div>
+  <div class="driver" id="d4" style="height:190svh">
+    <div class="stage">
+      <span class="stagelabel">06b — DEMO</span>
+      <div style="text-align:center">
+        <p class="eyebrow">kapitel <span id="ch4">1</span> von 3</p>
+        <p class="big" id="txt4">Verkaufen.</p>
+        <p class="mini">Leiste oben, Punkte rechts — beides folgt dem Scrollen.</p>
+      </div>
+      <div class="dots"><b class="on"></b><b></b><b></b></div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 07 -->
+<section class="pattern" id="p07"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>07</b> Horizontale Sequenz</h2>
+    <p>Vertikales Scrollen bewegt einen horizontalen Streifen. Passt für Reihen mit
+      natürlicher Ordnung — Standorte, Zeitachse, Ausbauplan.</p>
+    <div class="chips"><span class="chip chip--ok">gut für Standort-/Zeitreihen</span><span class="chip chip--risk">höchstens 1× pro Seite</span><span class="chip chip--warn">auf Mobile besser als normale Liste</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d8" style="height:225svh">
+    <div class="stage" style="place-items:center start">
+      <span class="stagelabel">07 — DEMO</span>
+      <div class="htrack" id="t8">
+        <div class="hcard"><b>2027</b><h3>Bahnhof Osterweddingen</h3><p>Heißgetränke- und Mixautomat. Pendlerfrequenz, kein Kühlbedarf.</p></div>
+        <div class="hcard"><b>2028</b><h3>Freibad Langenweddingen</h3><p>Kombiautomat. Stark saisonal, Mai bis September.</p></div>
+        <div class="hcard"><b>2029</b><h3>Sporthalle Langenweddingen</h3><p>Kombiautomat. Trainings- und Spielbetrieb.</p></div>
+        <div class="hcard"><b>ab 2030</b><h3>Weitere Standorte</h3><p>Ein zusätzlicher Automat pro Jahr, Flächen noch offen.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 08 -->
+<section class="pattern" id="p08"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>08</b> Kartenstapel</h2>
+    <p>Karten bleiben stehen und werden von der nächsten überlagert. Gut für vier Schritte,
+      die aufeinander aufbauen — ohne dass man je vier Kacheln nebeneinander sieht.</p>
+    <div class="chips"><span class="chip chip--ok">Alternative zum Card-Raster</span><span class="chip chip--ok">funktioniert rein in CSS</span><span class="chip chip--warn">max. 4 Karten</span></div>
+  </div>
+  <div class="deck" style="margin-bottom:3rem">
+    <div class="card"><h3>1 — Standort sichern</h3><p>Fläche, Strom, Zugang. Der Automat steht dort, wo abends nichts mehr offen hat.</p></div>
+    <div class="card"><h3>2 — Sortiment füllen</h3><p>Snacks, Getränke, Eis, Heißgetränke — abgestimmt auf den jeweiligen Standort.</p></div>
+    <div class="card"><h3>3 — App verbinden</h3><p>Kundenkonto, Vorteile, Mitbestimmung beim Spendenempfänger.</p></div>
+    <div class="card"><h3>4 — Region beteiligen</h3><p>Fünf Prozent jedes Warenverkaufs gehen an eine gemeinnützige Organisation im Sülzetal.</p></div>
+  </div>
+</div></section>
+<!-- 09 -->
+<section class="pattern" id="p09"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>09</b> Szenen-Farbwechsel</h2>
+    <p>Die Seite wechselt beim Scrollen ihre Grundstimmung — dunkel für Nacht und Technik,
+      hell für Region und Gemeinschaft. Kapitelgrenzen werden spürbar statt nur sichtbar.</p>
+    <div class="chips"><span class="chip chip--ok">gliedert lange Seiten</span><span class="chip chip--warn">Kontrast muss in jeder Zwischenstufe stimmen</span></div>
+  </div>
+</div>
+<div class="demo shift" id="sh10" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d10" style="height:165svh">
+    <div class="stage">
+      <span class="stagelabel">09 — DEMO</span>
+      <p class="big" id="t10">Vom Automaten zur Region.</p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 10 -->
+<section class="pattern" id="p10"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>10</b> Zoomfahrt (Kamera)</h2>
+    <p>Das Motiv wächst beim Scrollen, als führe eine Kamera heran. Der Übergang von
+      „Automat als Objekt“ zu „Produkte im Detail“ wird dadurch erzählt statt geschnitten.</p>
+    <div class="chips"><span class="chip chip--ok">starkes Story-Mittel</span><span class="chip chip--warn">auf Mobile schwächer dosieren</span><span class="chip chip--warn">nur GPU-Eigenschaften animieren</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d6" style="height:175svh">
+    <div class="stage">
+      <span class="stagelabel">10 — DEMO</span>
+      <div class="zoomer" id="z6"><div class="autom"></div></div>
+      <p class="mini" style="position:absolute;bottom:12%">scrollen — die Kamera fährt heran</p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 11 -->
+<section class="pattern" id="p11"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>11</b> Parallax-Tiefe</h2>
+    <p>Ebenen bewegen sich unterschiedlich schnell und erzeugen Raumtiefe. Sparsam dosiert
+      edel, übertrieben das sicherste Kennzeichen einer Baukastenseite.</p>
+    <div class="chips"><span class="chip chip--warn">nur dezent (unter 40 px Versatz)</span><span class="chip chip--risk">auf Mobile abschalten</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d12" style="height:145svh">
+    <div class="stage">
+      <span class="stagelabel">11 — DEMO</span>
+      <div class="plx" id="x12">
+        <div class="blob" data-depth="0.18"></div>
+        <div class="blob2" data-depth="0.62"></div>
+        <div class="blob3" data-depth="0.40"></div>
+        <div class="autom" data-depth="0.06" style="position:relative"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 12 -->
+<section class="pattern" id="p12"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>12</b> Bild-Freilegung per Maske</h2>
+    <p>Statt einzublenden wird das Bild aufgedeckt — als würde ein Vorhang aufgehen.
+      Wirkt hochwertiger als ein Fade und kostet dieselbe Rechenleistung.</p>
+    <div class="chips"><span class="chip chip--ok">ideal für das erste Automatenfoto</span><span class="chip chip--warn">braucht ein gutes Bild, sonst verstärkt es die Schwäche</span></div>
+  </div>
+  <div class="demo"><div class="pad" style="min-height:70svh;display:grid;place-items:center">
+    <div class="maskwrap" id="mask5"><div class="maskimg"></div><span>Beispielfläche für ein echtes Automatenfoto</span></div>
+  </div></div>
+</div></section>
+<!-- 13 -->
+<section class="pattern" id="p13"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>13</b> Produktwechsel</h2>
+    <p>Beim Scrollen wechseln einzelne Produkte im Fokus, statt alle gleichzeitig in einem
+      Raster zu zeigen. Jedes Produkt bekommt einen Moment für sich.</p>
+    <div class="chips"><span class="chip chip--ok">ersetzt das Produktraster</span><span class="chip chip--warn">Sortimentsliste zusätzlich textlich anbieten</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d9" style="height:285svh">
+    <div class="stage">
+      <span class="stagelabel">13 — DEMO</span>
+      <div class="pstage" id="p9s" style="height:60%">
+        <div class="pitem on"><div class="pbox" style="background:#3E7FD1"></div><b>Getränke</b><p class="mini">gekühlt, rund um die Uhr</p></div>
+        <div class="pitem"><div class="pbox" style="background:#E8552F"></div><b>Herzhafte Snacks</b><p class="mini">für zwischendurch</p></div>
+        <div class="pitem"><div class="pbox" style="background:#8A5FBF"></div><b>Süßes</b><p class="mini">Klassiker und Riegel</p></div>
+        <div class="pitem"><div class="pbox" style="background:#5C9A3F"></div><b>Eis</b><p class="mini">saisonal am Freibad</p></div>
+      </div>
+      <div class="ptabs" id="tabs9"><b class="on">Getränke</b><b>Herzhaft</b><b>Süßes</b><b>Eis</b></div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 14 -->
+<section class="pattern" id="p14"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>14</b> Produkt 360°</h2>
+    <p>Die weiße Kachel steht still, nur das Produkt dreht sich — als volle Umdrehung aus
+      36 Einzelaufnahmen im 10-Grad-Raster. Beim Scrollen läuft die Sequenz von links nach
+      rechts durch, auf dem Desktop übernimmt der Mauszeiger. Liegt für ein Produkt keine
+      Sequenz vor, fällt dasselbe Muster automatisch auf die Zylindersimulation aus einem
+      einzigen Foto zurück.</p>
+    <div class="chips"><span class="chip chip--ok">für alle Produkte einsetzbar</span><span class="chip chip--ok">berührungsfähig ohne Zeiger</span><span class="chip chip--warn">36 Aufnahmen je Produkt</span><span class="chip chip--warn">max. 6 gleichzeitig sichtbar</span></div>
+  </div>
+  <div class="demo" id="d15"><div class="pad">
+    <div class="tiltgrid">
+      <div class="tilt" data-i="0"><div class="tilt__inner">
+        <div class="tilt__img"><div class="tilt__can" role="img" aria-label="Produktansicht, beim Scrollen drehbar"></div><i class="tilt__cyl"></i><i class="tilt__spec"><i></i></i></div></div>
+        <p class="tilt__cap"><b>Getränke</b>gekühlt, rund um die Uhr</p></div>
+      <div class="tilt" data-i="1"><div class="tilt__inner">
+        <div class="tilt__img"><div class="tilt__can" role="img" aria-label="Produktansicht, beim Scrollen drehbar"></div><i class="tilt__cyl"></i><i class="tilt__spec"><i></i></i></div></div>
+        <p class="tilt__cap"><b>Snacks</b>für zwischendurch</p></div>
+      <div class="tilt" data-i="2"><div class="tilt__inner">
+        <div class="tilt__img"><div class="tilt__can" role="img" aria-label="Produktansicht, beim Scrollen drehbar"></div><i class="tilt__cyl"></i><i class="tilt__spec"><i></i></i></div></div>
+        <p class="tilt__cap"><b>Eis</b>saisonal am Freibad</p></div>
+    </div>
+  </div></div>
+  <p class="hint">Temporäres Testbild einer fremden Marke, ausschließlich zur Prüfung dieses Musters. Vor jeder Veröffentlichung und vor Freigabe des Skills zu entfernen — die Bilddaten stehen dafür in einer einzigen markierten Zeile im Skript.</p>
+</div></section>
+<!-- 15 -->
+<section class="pattern" id="p15"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>15</b> Objekt-Label</h2>
+    <p>Ein Text folgt einem bewegten Objekt. Das Produkt löst sich aus dem Automaten,
+      seine Bezeichnung wandert mit — statt in einer Bildunterschrift stehen zu bleiben.
+      So bleibt die Zuordnung eindeutig, auch wenn sich mehrere Dinge bewegen.</p>
+    <div class="chips"><span class="chip chip--ok">macht Bewegung erklärbar</span><span class="chip chip--warn">Zuordnung muss auch ohne Bewegung stimmen</span><span class="chip">aria-describedby</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d20" style="height:220svh">
+    <div class="stage">
+      <span class="stagelabel">15 — DEMO</span>
+      <div style="position:relative;width:min(620px,86vw);height:min(60svh,440px)">
+        <div class="autom" style="position:absolute;left:0;top:50%;transform:translateY(-50%)"></div>
+        <div id="obj15" style="position:absolute;left:130px;top:50%;width:56px;height:76px;
+             border-radius:8px;background:#E8552F;will-change:transform"></div>
+        <div id="lab15" style="position:absolute;left:130px;top:50%;will-change:transform;
+             display:flex;align-items:center;gap:.6rem">
+          <span style="display:block;width:34px;height:1px;background:#FDC102"></span>
+          <b style="font-size:.85rem;color:#FDC102;white-space:nowrap">Snack, 1,80 €</b>
+        </div>
+      </div>
+      <p class="mini" style="position:absolute;bottom:9%">Das Label folgt dem Produkt mit leichter Verzögerung</p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 16 -->
+<section class="pattern" id="p16"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>16</b> Tageszeit-Erzählung</h2>
+    <p>Himmel, Licht und Uhrzeit verändern sich beim Scrollen. Erzählt Verfügbarkeit,
+      ohne sie als Zahl zu behaupten. <b>Gesperrt, solange kein Automat in Betrieb ist</b> —
+      die Aussage, die dieses Muster transportiert, ist eine Tatsachenbehauptung.</p>
+    <div class="chips"><span class="chip chip--risk">gesperrt bis Inbetriebnahme</span><span class="chip chip--ok">starke Stimmung</span><span class="chip chip--warn">Kontrast in jeder Stufe prüfen</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem;position:relative;overflow:hidden">
+  <div class="driver" id="d21" style="height:200svh">
+    <div class="stage">
+      <div id="sky16" style="position:absolute;inset:0;transition:background 1s linear"></div>
+      <div id="sun16" style="position:absolute;width:70px;height:70px;border-radius:50%;
+           background:#FDC102;box-shadow:0 0 60px 20px rgba(253,193,2,.32);will-change:transform"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:30%;background:#101312"></div>
+      <div style="position:relative;text-align:center;color:#fff">
+        <span class="stagelabel">16 — DEMO</span>
+        <p class="eyebrow">geplant ab 2027.</p>
+        <p style="font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,10vw,6rem);line-height:1" id="clock16">03:00</p>
+        <p class="mini" style="color:rgba(255,255,255,.8)">Nachtschicht, Frühzug, Sonntagnachmittag</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 17 -->
+<section class="pattern" id="p17"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>17</b> Physisch → digital</h2>
+    <p>Die digitale Ebene entsteht <em>aus</em> dem Automaten, statt als Telefon daneben
+      zu schweben. Der Übergang trägt die Aussage: Der Automat und die App sind dasselbe
+      System, nicht zwei Angebote.</p>
+    <div class="chips"><span class="chip chip--ok">Kernmuster für die App-Szene</span><span class="chip chip--warn">Startpunkt muss am Objekt liegen</span></div>
+  </div>
+</div>
+<div class="demo" style="border-radius:0;margin-bottom:3rem">
+  <div class="driver" id="d22" style="height:230svh">
+    <div class="stage">
+      <span class="stagelabel">17 — DEMO</span>
+      <div style="position:relative;width:min(560px,88vw);height:min(58svh,420px);display:grid;place-items:center">
+        <div class="autom" id="aut17" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)"></div>
+        <div id="beam17" style="position:absolute;left:50%;top:50%;width:2px;height:0;
+             background:linear-gradient(#FDC102,transparent);transform-origin:top;opacity:0"></div>
+        <div id="ph17" style="position:absolute;left:50%;top:50%;width:92px;height:170px;border-radius:14px;
+             background:#202321;border:1.5px solid #FDC102;will-change:transform,opacity;opacity:0;
+             display:grid;align-content:start;gap:6px;padding:14px 10px">
+          <span style="height:6px;border-radius:3px;background:#FDC102;width:70%"></span>
+          <span style="height:6px;border-radius:3px;background:#434744;width:50%"></span>
+          <span style="height:6px;border-radius:3px;background:#434744;width:62%"></span>
+        </div>
+      </div>
+      <p class="mini" style="position:absolute;bottom:9%">Die Oberfläche löst sich aus dem Gerät</p>
+    </div>
+  </div>
+</div>
+</section>
+<!-- 18 -->
+<section class="pattern" id="p18"><div class="wrap">
+  <div class="pattern__head">
+    <h2><b>18</b> Anteilsdarstellung</h2>
+    <p>Fünf Prozent lösen sich aus dem Ganzen und wandern zur Region. Höhepunkt der
+      Seite, längste Haltezeit. Die Grafik muss die wirtschaftliche Aussage korrekt
+      abbilden — Bezugsgröße sichtbar, sobald sie bestätigt ist.</p>
+    <div class="chips"><span class="chip chip--ok">stärkstes Argument der Marke</span><span class="chip chip--risk">Bezugsgröße noch offen</span><span class="chip chip--warn">keine Zahl ohne Beleg</span></div>
+  </div>
+  <div class="demo demo--light" id="give18"><div class="pad" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;min-height:62svh">
+    <div style="justify-self:center;position:relative;width:min(220px,52vw);height:min(320px,44svh);
+         border-radius:18px;background:#DCD8D3;overflow:hidden;border:1px solid #cfcac4">
+      <div style="position:absolute;inset:0;top:5%;background:#EDE9E3"></div>
+      <div id="bar18" style="position:absolute;left:0;right:0;top:0;height:5%;background:#FDC102;
+           transition:transform .9s cubic-bezier(.16,1,.3,1),border-radius .9s ease"></div>
+      <span id="lbl18" style="position:absolute;left:.8rem;top:5%;transform:translateY(-150%);opacity:0;
+            transition:opacity .6s .3s;font-size:.75rem;font-weight:700;letter-spacing:.05em">5 % → Region</span>
+    </div>
+    <div>
+      <p class="eyebrow" style="color:#8A6400">geben.</p>
+      <h3 style="font-size:clamp(1.4rem,3.4vw,2.2rem);max-width:16ch">Fünf Prozent bleiben im Sülzetal.</h3>
+      <p style="margin-top:.9rem;color:#4A4E4B;max-width:40ch;font-size:.95rem">Von jedem Warenverkauf.
+        Kein Rundungs-Trinkgeld an der Kasse, kein Extra-Klick — eingebaut.</p>
+    </div>
+  </div></div>
+</div></section>
+
+<section class="no">
+  <div class="wrap">
+    <p class="eyebrow">bewusst nicht enthalten.</p>
+    <h2 style="font-size:clamp(1.5rem,3.4vw,2.2rem);max-width:22ch">Diese Muster gehören nicht auf die Seite.</h2>
+    <ul>
+      <li><b>Scroll-Hijacking</b> — eigene Scrollgeschwindigkeit oder erzwungenes Einrasten. Hauptgrund, warum solche Seiten billig wirken.</li>
+      <li><b>Ladebildschirm mit Prozentanzeige</b> — verzögert den Inhalt, um Aufwand zu behaupten.</li>
+      <li><b>Cursor-Effekte und Maus-Verfolger</b> — auf Mobile wirkungslos, auf Desktop ablenkend.</li>
+      <li><b>Automatisch startende Videos mit Ton</b> — Abbruchgrund Nummer eins.</li>
+      <li><b>3D/WebGL-Automat</b> — Rechenlast und Wartungsaufwand ohne erzählerischen Gewinn.</li>
+      <li><b>Text, der erst durch Bewegung lesbar wird</b> — schließt Nutzer aus und schadet der Auffindbarkeit.</li>
+      <li><b>Endlos-Scrollen ohne Ende</b> — bei einer Seite mit Impressumspflicht schlicht unpraktisch.</li>
+    </ul>
+  </div>
+</section>
+
+<footer style="background:#161917;color:#6C706D;padding:2.5rem 0;font-size:.85rem">
+  <div class="wrap">Musterbibliothek für den Skill „scrollcraft“. Alle Inhalte und Zahlen sind Platzhalter und stehen unter Freigabevorbehalt.</div>
+</footer>
+
+<div class="tz" aria-hidden="true"><b>Auslösezone</b></div>
+
+<div class="bar">
+  <button id="btnRM" aria-pressed="false">Bewegung reduziert</button>
+  <button id="btnTZ" aria-pressed="false">Auslösezone</button>
+  <button id="btnTop" aria-pressed="false">nach oben</button>
+</div>
+
+<script>
+document.documentElement.classList.remove('no-js');
+
+/* Testbilder entfernt. Liegt kein Bilderblatt vor, laeuft Muster 15
+   automatisch in der Zylindersimulation. Fuer den Sequenzmodus hier
+   const SPINSHEET = 'data:image/webp;base64,...' (6x6-Blatt, 36 Bilder) setzen. */
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const clamp=v=>Math.min(1,Math.max(0,v));
+let RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(RM) document.body.classList.add('rm');
+
+/* --- Reveal + Stagger + Maske ---
+   Auslösung an fester Zone bei 86 % Viewporthöhe, unabhängig von der Elementhöhe. */
+const IO_OPTS={threshold:0.01,rootMargin:'0px 0px -4% 0px'};
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+}),IO_OPTS);
+$$('.rv,.st,#mask5').forEach(el=>io.observe(el));
+
+/* --- 03 Zähler --- */
+const cio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting||e.target.dataset.done)return;
+  e.target.dataset.done='1';
+  const end=+e.target.dataset.count, suf=e.target.dataset.suffix||'';
+  if(RM){e.target.textContent=end+suf;return;}
+  const t0=performance.now(), dur=900;
+  const step=t=>{const k=clamp((t-t0)/dur); const eased=1-Math.pow(1-k,3);
+    e.target.textContent=Math.round(end*eased)+suf;
+    if(k<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}),{threshold:0.01,rootMargin:'0px 0px -6% 0px'});
+$$('.num').forEach(el=>cio.observe(el));
+
+/* --- Fortschritt eines Drivers ---
+   ENTRY: Der Fortschritt startet bereits, während die Szene hereinkommt —
+          nicht erst, wenn sie oben andockt. Das war die Ursache für „setzt zu spät ein".
+   TAIL:  Der Endzustand ist früh erreicht und bleibt danach stehen. */
+const ENTRY=.62, TAIL=.26;
+function prog(id){const el=$('#'+id); if(!el)return 0;
+  const r=el.getBoundingClientRect();
+  const lead=innerHeight*ENTRY;
+  const travel=Math.max(1,(r.height-innerHeight)+lead);
+  const raw=clamp((-r.top+lead)/travel);
+  return clamp(raw/(1-TAIL));}
+/* Zustandsindex: n Zustände auf die ersten 70 % verteilt, Rest ist Haltezeit */
+function phase(p,n,spread){return Math.min(n-1,Math.floor(clamp(p/(spread||0.70))*n));}
+
+const chapters4=['Verkaufen.','Werben.','Wiederkommen.'];
+const skies10=[[22,25,23],[253,193,2],[251,248,244]];
+const items9=$$('#p9s .pitem'), tabs9=$$('#tabs9 b');
+
+var frame=function(){
+  if(RM){ticking=false;return;}
+
+  /* 04 Fortschritt + Kapitel */
+  const p4=prog('d4'); $('#pr4').style.width=(Math.min(1,p4/0.70)*100)+'%';
+  const i4=phase(p4,3); $('#ch4').textContent=i4+1;
+  $('#txt4').textContent=chapters4[i4];
+  $$('.dots b').forEach((b,i)=>b.classList.toggle('on',i<=i4));
+
+  /* 06 Zoom — beginnt beim Hereinkommen */
+  const p6=prog('d6'); const mob=innerWidth<760;
+  $('#z6').style.transform='scale('+(1+Math.min(1,p6/0.80)*(mob?1.3:2.4))+')';
+
+  /* 07 Ebenen */
+  const p7=prog('d7'); const i7=phase(p7,3);
+  $('#l7').classList.toggle('on',i7>=1);
+
+  /* 08 Horizontal */
+  const t8=$('#t8'); const p8=prog('d8');
+  const vis=t8.parentElement.clientWidth;
+  const dist=Math.max(0,t8.scrollWidth-vis);
+  t8.style.transform='translateX('+(-Math.min(1,p8/0.90)*dist)+'px)';
+
+  /* 09 Produktwechsel */
+  const p9=prog('d9'); const i9=phase(p9,items9.length,0.56);
+  items9.forEach((el,i)=>el.classList.toggle('on',i===i9));
+  tabs9.forEach((el,i)=>el.classList.toggle('on',i===i9));
+
+  /* 10 Farbwechsel */
+  const p10=Math.min(1,prog('d10')/0.78);
+  const seg=p10<.5?[skies10[0],skies10[1],p10/.5]:[skies10[1],skies10[2],(p10-.5)/.5];
+  const mix=(a,b,k)=>a.map((v,i)=>Math.round(v+(b[i]-v)*k));
+  const c=mix(seg[0],seg[1],clamp(seg[2]));
+  const sh=$('#sh10'); sh.style.backgroundColor='rgb('+c.join(',')+')';
+  const lum=(c[0]*299+c[1]*587+c[2]*114)/1000;
+  sh.style.color=lum>140?'#202321':'#FBF8F4';
+
+  /* 11 Text-Highlight — letztes Wort bei 60 % der Strecke */
+  const p11=prog('d11'); const ws=$$('#hl11 w');
+  const n=Math.round(clamp(p11/0.60)*ws.length);
+  ws.forEach((w,i)=>w.classList.toggle('on',i<n));
+
+  /* 12 Parallax */
+  const r12=$('#d12').getBoundingClientRect();
+  if(r12.top<innerHeight&&r12.bottom>0){
+    const q=(innerHeight/2-(r12.top+r12.height/2))/innerHeight;   /* -1 .. +1 */
+    const amp=innerWidth>760?420:210;
+    $$('#x12 [data-depth]').forEach(el=>{
+      const d=+el.dataset.depth; if(!d)return;
+      el.style.transform='translateY('+(q*d*amp)+'px)';
+    });
+  }
+  ticking=false;
+}
+let ticking=false;
+
+/* 08: Scrollstrecke aus der tatsächlichen Streifenbreite ableiten,
+   damit das Tempo unabhängig von Fenstergröße und Kartenzahl lesbar bleibt. */
+function layout(){
+  const t8=$('#t8'); if(!t8)return;
+  const dist=Math.max(0,t8.scrollWidth-t8.parentElement.clientWidth);
+  $('#d8').style.height=(innerHeight + dist*1.45 + innerHeight*0.3)+'px';
+}
+
+/* 15: Neigung zum Zeiger, auf Touchgeräten scrollgesteuert */
+const tilts=$$('.tilt');
+/* Rollbewegung: rotateY dreht das Etikett, scaleX(1/cos) hält die Silhouette gleich breit —
+   so kippt die Kachel nicht, sondern die Dose rollt um ihre Hochachse. */
+const ROLLMAX=22, SPINFRAMES=36;
+/* Sequenzmodus aktivieren, sobald ein Bilderblatt vorliegt */
+const HASSPIN = (typeof SPINSHEET!=='undefined');
+if(HASSPIN){$$('.tilt').forEach(t=>{
+  t.classList.add('spin');
+  t.querySelector('.tilt__can').style.backgroundImage='url('+SPINSHEET+')';
+});}
+function showFrame(t,f){
+  const i=((f%SPINFRAMES)+SPINFRAMES)%SPINFRAMES;
+  const c=i%6, r=Math.floor(i/6);
+  t.querySelector('.tilt__can').style.backgroundPosition=(c*20)+'% '+(r*20)+'%';
+}
+function roll(t,deg){
+  if(HASSPIN){showFrame(t,Math.round(deg/10));return;}
+  const a=Math.max(-ROLLMAX,Math.min(ROLLMAX,deg));
+  const can=t.querySelector('.tilt__can');
+  const sp=t.querySelector('.tilt__spec i');
+  if(can) can.style.transform='rotateY('+a.toFixed(2)+'deg) scaleX('+(1/Math.cos(a*Math.PI/180)).toFixed(4)+')';
+  if(sp)  sp.style.transform='translateX('+(142-(a/ROLLMAX)*88).toFixed(1)+'%)';
+}
+tilts.forEach(t=>{
+  t.addEventListener('pointermove',e=>{
+    if(RM||e.pointerType==='touch')return;
+    const r=t.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    t.classList.add('live');
+    roll(t,HASSPIN?x*360:x*2*ROLLMAX);
+  });
+  t.addEventListener('pointerleave',()=>{t.classList.remove('live');});
+});
+function tiltScroll(){
+  const box=$('#d15'); if(!box||RM)return;
+  const r=box.getBoundingClientRect();
+  if(r.bottom<0||r.top>innerHeight)return;
+  const q=clamp((innerHeight-r.top)/(innerHeight+r.height));
+  tilts.forEach(t=>{
+    if(t.classList.contains('live'))return;
+    const i=+t.dataset.i||0;
+    /* links nach rechts über den Sichtbereich, je Dose leicht versetzt */
+    if(HASSPIN){ roll(t, clamp((q-0.05)/0.80)*360 + i*40); }
+    else       { roll(t,-ROLLMAX+2*ROLLMAX*clamp((q-0.05)/0.80)+i*4); }
+  });
+}
+/* TEMP: Testbild zuweisen — mit dem Testbild gemeinsam entfernen */
+if(HASSPIN){$$('.tilt').forEach(t=>showFrame(t,0));}
+const _frame=frame;
+frame=function(){_frame();tiltScroll();};
+
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(frame);}},{passive:true});
+addEventListener('resize',()=>{layout();frame();});
+layout();frame();
+
+/* --- Steuerung --- */
+const btn=$('#btnRM');
+btn.setAttribute('aria-pressed',String(RM));
+btn.addEventListener('click',()=>{
+  RM=!RM; document.body.classList.toggle('rm',RM); btn.setAttribute('aria-pressed',String(RM));
+  if(RM){
+    $$('[style*="transform"]').forEach(el=>el.style.transform='');
+    $('#sh10').style.backgroundColor=''; $('#sh10').style.color='';
+    $$('.num').forEach(el=>{el.textContent=el.dataset.count+(el.dataset.suffix||'');});
+    $$('#hl11 w').forEach(w=>w.classList.remove('on'));
+  } else { frame(); }
+});
+
+/* ---- 15 Objekt-Label ---- */
+function objLabel(){
+  const d=$('#d20'); if(!d)return;
+  const p=prog('d20'), o=$('#obj15'), l=$('#lab15');
+  if(!o)return;
+  const x=p*Math.min(300,innerWidth*0.28), y=-Math.sin(p*Math.PI)*70;
+  o.style.transform='translate('+x+'px,'+(y-38)+'px) rotate('+(p*14)+'deg)';
+  const lp=clamp((p-0.06)/0.94);                       /* Label folgt verzögert */
+  const lx=lp*Math.min(300,innerWidth*0.28), ly=-Math.sin(lp*Math.PI)*70;
+  l.style.transform='translate('+(lx+62)+'px,'+(ly-14)+'px)';
+  l.style.opacity=p>0.04?1:0;
+}
+
+/* ---- 16 Tageszeit ---- */
+const HIMMEL=[['03:00','linear-gradient(#05070C,#141C2B)'],['07:00','linear-gradient(#243447,#C98B4B)'],
+  ['13:00','linear-gradient(#3E7FD1,#BBD6F2)'],['19:00','linear-gradient(#2B2C40,#E4813C)'],
+  ['23:00','linear-gradient(#05070C,#141C2B)']];
+function tageszeit(){
+  const d=$('#d21'); if(!d)return;
+  const q=prog('d21'), i=Math.min(HIMMEL.length-1,Math.floor(q*(HIMMEL.length-1)));
+  $('#sky16').style.background=HIMMEL[i][1];
+  $('#clock16').textContent=HIMMEL[i][0];
+  const s=$('#sun16');
+  s.style.transform='translate('+(-42+q*84)+'vw,'+(16-Math.sin(Math.PI*q)*30)+'vh)';
+  s.style.opacity=(q>0.08&&q<0.84)?1:0.15;
+}
+
+/* ---- 17 Physisch → digital ---- */
+function physDigital(){
+  const d=$('#d22'); if(!d)return;
+  const p=prog('d22'), ph=$('#ph17'), bm=$('#beam17');
+  const k=clamp((p-0.10)/0.55);
+  ph.style.opacity=k;
+  ph.style.transform='translate(-50%,-50%) translate('+(k*150)+'px,'+(-k*24)+'px) scale('+(0.35+k*0.65)+')';
+  bm.style.opacity=k>0.05?0.7*(1-k*0.5):0;
+  bm.style.height=(k*120)+'px';
+  bm.style.transform='translate(-50%,-50%) rotate('+(58-k*10)+'deg)';
+}
+
+/* ---- 18 Anteil ---- */
+const give18=$('#give18');
+if(give18){
+  new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting||RM)return;
+    $('#bar18').style.transform='translate(14%,-46px) rotate(-3deg)';
+    $('#bar18').style.borderRadius='12px';
+    $('#lbl18').style.opacity='1';
+  }),{threshold:0.01,rootMargin:'0px 0px -12% 0px'}).observe(give18);
+}
+
+const _f2=frame;
+frame=function(){_f2(); if(!RM){objLabel();tageszeit();physDigital();}};
+
+$('#btnTop').addEventListener('click',()=>scrollTo({top:0}));
+const btz=$('#btnTZ');
+btz.addEventListener('click',()=>{
+  const on=document.body.classList.toggle('showtz');
+  btz.setAttribute('aria-pressed',String(on));
+});
+addEventListener('orientationchange',()=>setTimeout(frame,250));
+</script>
+</body>
+</html>
