@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import '../entities/finance_kpis.dart';
-import '../entities/finance_period.dart';
-import '../entities/finance_summary.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_kpis.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_summary.dart';
 
 /// Vertrag des Finanzdashboards. Wirft bei Fehlern eine [Failure].
 abstract interface class FinanceRepository {

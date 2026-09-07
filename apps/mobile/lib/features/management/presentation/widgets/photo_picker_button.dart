@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/services/storage_service.dart';
+import 'package:boerdesnack24/core/services/storage_service.dart';
 
 /// Nimmt ein Foto auf (Kamera), lädt es in den 'haccp'-Bucket und meldet den
 /// Storage-Pfad über [onUploaded]. Für Foto-Dokumentation (HACCP).

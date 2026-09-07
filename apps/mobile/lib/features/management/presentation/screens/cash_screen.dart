@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../widgets/machine_dropdown.dart';
-import '../widgets/protocol_scaffold.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/machine_dropdown.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/protocol_scaffold.dart';
 
 /// Geldentnahmeprotokoll (Anlage G, § 146 AO).
 class CashScreen extends StatelessWidget {

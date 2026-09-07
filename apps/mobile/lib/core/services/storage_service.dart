@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../di/providers.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
 
 /// Sichere Uploads in private Storage-Buckets (haccp/documents).
 /// Pfadkonvention: `<uid>/<timestamp>_<name>`.

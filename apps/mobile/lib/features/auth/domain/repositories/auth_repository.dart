@@ -1,5 +1,5 @@
-import '../entities/app_user.dart';
-import '../entities/mfa_enrollment.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/mfa_enrollment.dart';
 
 /// Vertrag der Authentifizierung. Implementierung in der Data-Schicht.
 /// Wirft bei Fehlern eine [Failure] (siehe core/error/failures.dart).

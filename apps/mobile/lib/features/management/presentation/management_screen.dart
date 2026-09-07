@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../auth/presentation/controllers/auth_providers.dart';
-import '../../admin/presentation/screens/advertising_screen.dart';
-import '../../admin/presentation/screens/businesses_admin_screen.dart';
-import '../../admin/presentation/screens/campaigns_screen.dart';
-import '../../admin/presentation/screens/email_admin_screen.dart';
-import '../../admin/presentation/screens/leads_screen.dart';
-import '../../finance/presentation/screens/datev_export_screen.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/features/admin/presentation/screens/advertising_screen.dart';
+import 'package:boerdesnack24/features/admin/presentation/screens/businesses_admin_screen.dart';
+import 'package:boerdesnack24/features/admin/presentation/screens/campaigns_screen.dart';
+import 'package:boerdesnack24/features/admin/presentation/screens/email_admin_screen.dart';
+import 'package:boerdesnack24/features/admin/presentation/screens/leads_screen.dart';
+import 'package:boerdesnack24/features/finance/presentation/screens/datev_export_screen.dart';
 import 'screens/b2b_customers_screen.dart';
 import 'screens/cancellations_screen.dart';
 import 'screens/complaints_screen.dart';

@@ -6,14 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/services/storage_service.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../auth/presentation/controllers/auth_providers.dart';
-import '../widgets/pdf_inline_stub.dart'
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/services/storage_service.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/pdf_inline_stub.dart'
     if (dart.library.js_interop) '../widgets/pdf_inline_web.dart';
 
 /// Feste Ordnerstruktur der Dokumente. Jeder Ordner hat oben eine

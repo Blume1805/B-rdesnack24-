@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
-import '../../theme/app_typography.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
 
 /// Metallische Status-Kacheln (Bronze · Silber · Gold) für den lebenslangen
 /// Dauerrabatt. Wird sowohl im Status-/Belohnungen-Screen als auch im

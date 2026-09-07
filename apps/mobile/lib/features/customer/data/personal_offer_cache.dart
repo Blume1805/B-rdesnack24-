@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../domain/entities/offer.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
 
 /// Offline-Cache für persönliche Angebote/Coupons.
 ///

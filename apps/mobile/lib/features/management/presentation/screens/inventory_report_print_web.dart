@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 
-import '../../../../core/utils/formatters.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
 
 /// Öffnet die FIFO-Inventur als druckbare HTML-Seite (A4 Querformat) in
 /// einem neuen Tab und ruft direkt window.print() auf.  Struktur:

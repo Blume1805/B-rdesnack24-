@@ -7,11 +7,11 @@ import 'package:signature/signature.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// „Zu signieren"-Übersicht für Mitarbeiter: Belehrungen und andere
 /// Dokumente, für die sie eine Unterschrift leisten müssen.

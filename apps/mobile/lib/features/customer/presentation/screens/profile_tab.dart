@@ -3,24 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/router/app_router.dart';
-import '../../../../core/security/pwned_password_checker.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../auth/presentation/controllers/auth_providers.dart';
-import '../../domain/repositories/customer_repository.dart';
-import '../controllers/customer_providers.dart';
-import '../widgets/customer_anchors.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/security/pwned_password_checker.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/features/customer/domain/repositories/customer_repository.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/widgets/customer_anchors.dart';
 import 'consent_screen.dart';
 import 'data_export_screen.dart';
 import 'master_data_screen.dart';
 import 'receipts_screen.dart';
 import 'rewards_screen.dart';
 import 'subscription_screen.dart';
-import '../../../../core/auth/auth_redirect.dart';
-import '../../../auth/presentation/screens/security_screen.dart';
+import 'package:boerdesnack24/core/auth/auth_redirect.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/security_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});

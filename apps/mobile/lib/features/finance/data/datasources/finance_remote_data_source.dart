@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
 
 /// Kapselt Supabase-Aufrufe des Finanzdashboards (RPC + Edge Functions).
 class FinanceRemoteDataSource {

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../di/providers.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
 import 'biometrie_anmeldung.dart';
 import 'biometrie_dienst.dart';
 import 'sitzungstresor.dart';

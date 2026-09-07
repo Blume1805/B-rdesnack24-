@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'legal_texts.dart';
-import '../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Wiederverwendbarer Text-Screen für Impressum/Datenschutz/AGB. Bewusst
 /// einfach und barrierefrei (Textgröße respektiert System-Einstellung).

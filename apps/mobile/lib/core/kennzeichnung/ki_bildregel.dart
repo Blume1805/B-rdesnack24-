@@ -1,4 +1,4 @@
-import '../widgets/design_system/eu_ki_kennzeichen.dart';
+import 'package:boerdesnack24/core/widgets/design_system/eu_ki_kennzeichen.dart';
 
 /// Entscheidet, ob ein Produktbild ein KI-Kennzeichen trägt.
 ///

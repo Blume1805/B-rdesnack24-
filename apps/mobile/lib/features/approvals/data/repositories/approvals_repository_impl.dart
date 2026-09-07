@@ -1,9 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/shareholder_approval.dart';
-import '../../domain/repositories/approvals_repository.dart';
-import '../datasources/approvals_remote_data_source.dart';
+import 'package:boerdesnack24/core/error/failures.dart';
+import 'package:boerdesnack24/features/approvals/domain/entities/shareholder_approval.dart';
+import 'package:boerdesnack24/features/approvals/domain/repositories/approvals_repository.dart';
+import 'package:boerdesnack24/features/approvals/data/datasources/approvals_remote_data_source.dart';
 
 class ApprovalsRepositoryImpl implements ApprovalsRepository {
   ApprovalsRepositoryImpl(this._remote);

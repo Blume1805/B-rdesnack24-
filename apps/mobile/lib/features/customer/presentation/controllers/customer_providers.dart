@@ -1,19 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/pricing/pricing.dart';
-import '../../data/customer_remote_data_source.dart';
-import '../../data/personal_offer_cache.dart';
-import '../../data/customer_repository_impl.dart';
-import '../../domain/entities/customer_models.dart';
-import '../../domain/entities/donations_news.dart';
-import '../../domain/entities/invoice.dart';
-import '../../domain/entities/notification.dart';
-import '../../domain/entities/loyalty_status.dart';
-import '../../domain/entities/offer.dart';
-import '../../domain/entities/product_detail.dart';
-import '../../domain/entities/receipt.dart';
-import '../../domain/repositories/customer_repository.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/pricing/pricing.dart';
+import 'package:boerdesnack24/features/customer/data/customer_remote_data_source.dart';
+import 'package:boerdesnack24/features/customer/data/personal_offer_cache.dart';
+import 'package:boerdesnack24/features/customer/data/customer_repository_impl.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/customer_models.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/donations_news.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/notification.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/loyalty_status.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/product_detail.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/receipt.dart';
+import 'package:boerdesnack24/features/customer/domain/repositories/customer_repository.dart';
 
 final customerRepositoryProvider = Provider<CustomerRepository>(
   (ref) => CustomerRepositoryImpl(

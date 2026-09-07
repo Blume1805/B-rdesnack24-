@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
 import 'screens/customer_qr_screen.dart';
 import 'screens/finder_tab.dart';
 import 'screens/history_tab.dart';

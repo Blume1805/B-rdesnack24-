@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../domain/entities/invoice.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
 import 'invoice_print.dart' if (dart.library.html) 'invoice_print_web.dart';
 
 /// Rechnungsvorschau im Layout einer § 14 UStG-Rechnung. Der Kunde kann

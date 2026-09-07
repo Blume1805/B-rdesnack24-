@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/formatters.dart';
-import '../controllers/approvals_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/features/approvals/presentation/controllers/approvals_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Gesellschafter-Freigaben (Dual-Control). Ein aktiver Gesellschafter gibt
 /// neue Gesellschafter frei oder lehnt sie ab. Selbstfreigabe ist serverseitig

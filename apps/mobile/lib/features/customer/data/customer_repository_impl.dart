@@ -1,14 +1,14 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/error/failures.dart';
-import '../domain/entities/customer_models.dart';
-import '../domain/entities/donations_news.dart';
-import '../domain/entities/invoice.dart';
-import '../domain/entities/notification.dart';
-import '../domain/entities/loyalty_status.dart';
-import '../domain/entities/offer.dart';
-import '../domain/entities/product_detail.dart';
-import '../domain/repositories/customer_repository.dart';
+import 'package:boerdesnack24/core/error/failures.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/customer_models.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/donations_news.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/notification.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/loyalty_status.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/product_detail.dart';
+import 'package:boerdesnack24/features/customer/domain/repositories/customer_repository.dart';
 import 'customer_remote_data_source.dart';
 
 class CustomerRepositoryImpl implements CustomerRepository {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_typography.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
 import 'eyebrow.dart';
 
 /// Section-Header: Eyebrow + Titel (+ optionaler Action-Button).

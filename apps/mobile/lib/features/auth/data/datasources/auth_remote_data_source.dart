@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/auth/auth_redirect.dart';
-import '../dtos/profile_dto.dart';
+import 'package:boerdesnack24/core/auth/auth_redirect.dart';
+import 'package:boerdesnack24/features/auth/data/dtos/profile_dto.dart';
 
 /// Kapselt alle Supabase-Aufrufe der Authentifizierung.
 class AuthRemoteDataSource {

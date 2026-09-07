@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/management_providers.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
 import 'machine_stock_screen.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Inventur — Übersicht der Automaten; Auswahl führt zum Echtzeit-Bestand.
 class InventoryScreen extends ConsumerWidget {

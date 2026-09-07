@@ -5,15 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../controllers/customer_providers.dart';
-import '../screens/ai_info_screen.dart';
-import '../screens/customer_qr_screen.dart';
-import '../screens/subscription_screen.dart';
-import '../screens/subscription_value_screen.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/ai_info_screen.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/customer_qr_screen.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/subscription_screen.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/subscription_value_screen.dart';
 import 'customer_anchors.dart';
 
 /// Callback vom CustomerScreen, mit dem der Chatbot in einen bestimmten

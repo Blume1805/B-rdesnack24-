@@ -1,4 +1,4 @@
-import '../../domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
 
 /// Data Transfer Object für die Tabelle public.profiles.
 class ProfileDto {

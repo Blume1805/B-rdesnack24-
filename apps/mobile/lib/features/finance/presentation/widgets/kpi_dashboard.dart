@@ -5,13 +5,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../domain/entities/finance_kpis.dart';
-import '../controllers/finance_providers.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_kpis.dart';
+import 'package:boerdesnack24/features/finance/presentation/controllers/finance_providers.dart';
 
 /// KPI-Dashboard-Block: KPI-Kacheln mit Trend-Sparkline, Vergleich Vorjahr/
 /// Vormonat, Cashflow-Chart und Automaten-Balken. Wird auf dem

@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/data/approvals_remote_data_source.dart';
-import '../../domain/entities/finance_period.dart';
-import '../../domain/entities/finance_summary.dart';
-import '../controllers/finance_providers.dart';
-import '../widgets/kpi_dashboard.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/management/data/approvals_remote_data_source.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_summary.dart';
+import 'package:boerdesnack24/features/finance/presentation/controllers/finance_providers.dart';
+import 'package:boerdesnack24/features/finance/presentation/widgets/kpi_dashboard.dart';
 import 'datev_export_screen.dart';
 
 /// Kategorie 1 — Finanzdashboard (nur Gesellschafter/Admin).

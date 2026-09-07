@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
-import '../../theme/app_typography.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
 import 'app_card.dart';
 
 /// Modulkachel für die Verwaltungs- und Kunden-Übersicht.

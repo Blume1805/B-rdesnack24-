@@ -1,4 +1,4 @@
-import '../entities/shareholder_approval.dart';
+import 'package:boerdesnack24/features/approvals/domain/entities/shareholder_approval.dart';
 
 /// Vertrag für die Gesellschafter-Freigabe (Dual-Control).
 abstract interface class ApprovalsRepository {

@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/approvals/presentation/screens/approvals_screen.dart';
-import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/management/presentation/screens/my_signature_tasks_screen.dart';
-import '../../features/auth/presentation/screens/mfa_enroll_screen.dart';
-import '../../features/auth/presentation/screens/new_password_screen.dart';
-import '../../features/auth/presentation/screens/security_screen.dart';
-import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/auth/presentation/screens/sign_in_screen.dart';
-import '../../features/home/presentation/home_shell.dart';
-import '../../features/legal/presentation/cancellation_screen.dart';
-import '../../features/legal/presentation/legal_screens.dart';
-import '../auth/recovery_state.dart';
-import '../di/providers.dart';
+import 'package:boerdesnack24/features/approvals/presentation/screens/approvals_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:boerdesnack24/features/management/presentation/screens/my_signature_tasks_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/mfa_enroll_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/new_password_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/security_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/register_screen.dart';
+import 'package:boerdesnack24/features/auth/presentation/screens/sign_in_screen.dart';
+import 'package:boerdesnack24/features/home/presentation/home_shell.dart';
+import 'package:boerdesnack24/features/legal/presentation/cancellation_screen.dart';
+import 'package:boerdesnack24/features/legal/presentation/legal_screens.dart';
+import 'package:boerdesnack24/core/auth/recovery_state.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
 
 /// Routenpfade als Konstanten (vermeidet Tippfehler/Magic-Strings).
 abstract final class AppRoutes {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
-import '../../theme/app_typography.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
 
 /// Sichtbare Kennzeichnung für KI-generierte oder algorithmisch
 /// erstellte Inhalte im Kundenbereich. Erfüllt die Transparenz-Pflicht

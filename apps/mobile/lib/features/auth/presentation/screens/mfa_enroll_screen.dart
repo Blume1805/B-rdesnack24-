@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../l10n/generated/app_localizations.dart';
-import '../../domain/entities/mfa_enrollment.dart';
-import '../controllers/auth_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/l10n/generated/app_localizations.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/mfa_enrollment.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Startet eine TOTP-Einrichtung beim Öffnen des Screens.
 final _enrollmentProvider = FutureProvider.autoDispose<MfaEnrollment>((ref) {

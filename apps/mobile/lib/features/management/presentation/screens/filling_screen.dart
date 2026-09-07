@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/management_providers.dart';
-import '../widgets/machine_dropdown.dart';
-import '../widgets/protocol_scaffold.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/machine_dropdown.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/protocol_scaffold.dart';
 
 /// Befüllungsprotokoll (Anlage D). Schreibt automatisch eine Inventur-Bewegung (+).
 class FillingScreen extends StatelessWidget {

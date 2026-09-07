@@ -2,13 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/services/outbox_service.dart';
-import '../../data/management_remote_data_source.dart';
-import '../../data/management_repository_impl.dart';
-import '../../domain/entities/machine.dart';
-import '../../domain/entities/stock_item.dart';
-import '../../domain/repositories/management_repository.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/services/outbox_service.dart';
+import 'package:boerdesnack24/features/management/data/management_remote_data_source.dart';
+import 'package:boerdesnack24/features/management/data/management_repository_impl.dart';
+import 'package:boerdesnack24/features/management/domain/entities/machine.dart';
+import 'package:boerdesnack24/features/management/domain/entities/stock_item.dart';
+import 'package:boerdesnack24/features/management/domain/repositories/management_repository.dart';
 
 final managementRepositoryProvider = Provider<ManagementRepository>(
   (ref) => ManagementRepositoryImpl(

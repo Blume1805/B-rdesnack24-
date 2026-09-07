@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
-import '../../../../core/security/biometrie/biometrie_dienst.dart';
-import '../../../../core/security/biometrie/biometrie_provider.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../domain/entities/app_user.dart';
-import '../controllers/auth_providers.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/security/biometrie/biometrie_dienst.dart';
+import 'package:boerdesnack24/core/security/biometrie/biometrie_provider.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
 
 /// Sicherheitseinstellungen — für Kunden wie für Gesellschafter dieselbe
 /// Seite.

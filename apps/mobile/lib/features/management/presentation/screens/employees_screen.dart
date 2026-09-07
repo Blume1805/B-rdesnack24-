@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Verfügbare Einzelberechtigungen (ABAC) für Mitarbeiter.
 const _assignablePermissions = <String, String>{

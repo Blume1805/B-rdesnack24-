@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/brand_marks.dart';
-import '../../../../l10n/generated/app_localizations.dart';
-import '../../auth/domain/entities/app_user.dart';
-import '../../auth/presentation/controllers/auth_providers.dart';
-import '../../customer/presentation/controllers/customer_providers.dart';
-import '../../customer/presentation/customer_screen.dart';
-import '../../customer/presentation/screens/notifications_screen.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/brand_marks.dart';
+import 'package:boerdesnack24/l10n/generated/app_localizations.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/customer_screen.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/notifications_screen.dart';
 // Deferred: Finanz- und Verwaltungsbereich werden erst geladen, wenn ein
 // interner Nutzer sie öffnet. dart2js legt sie dadurch in separate
 // .part.js-Dateien — Kunden (die große Mehrheit) laden nur den
 // Kunden-Code und starten entsprechend schneller.
-import '../../finance/presentation/screens/finance_screen.dart'
+import 'package:boerdesnack24/features/finance/presentation/screens/finance_screen.dart'
     deferred as finance;
-import '../../management/presentation/management_screen.dart'
+import 'package:boerdesnack24/features/management/presentation/management_screen.dart'
     deferred as management;
 
 /// Rollenabhängige Hauptnavigation. Sichtbarkeit der Bereiche richtet sich

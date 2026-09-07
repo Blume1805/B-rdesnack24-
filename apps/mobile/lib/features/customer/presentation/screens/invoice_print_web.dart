@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 
-import '../../../../core/utils/formatters.dart';
-import '../../domain/entities/invoice.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
 
 /// Öffnet ein neues Browser-Fenster mit der Rechnung als HTML und ruft den
 /// System-Print-Dialog auf — der Kunde kann so als PDF speichern oder

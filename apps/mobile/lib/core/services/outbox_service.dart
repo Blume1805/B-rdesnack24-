@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../di/providers.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
 
 /// Offline-Outbox für Protokoll-Schreibvorgänge (Feldarbeit ohne Verbindung).
 /// Einträge werden lokal persistiert und bei Verbindung synchronisiert.

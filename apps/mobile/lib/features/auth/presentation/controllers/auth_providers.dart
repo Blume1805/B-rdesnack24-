@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/security/biometrie/biometrie_provider.dart';
-import '../../data/datasources/auth_remote_data_source.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../domain/entities/app_user.dart';
-import '../../domain/repositories/auth_repository.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/security/biometrie/biometrie_provider.dart';
+import 'package:boerdesnack24/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:boerdesnack24/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/domain/repositories/auth_repository.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>(
   (ref) => AuthRemoteDataSource(ref.watch(supabaseClientProvider)),

@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../config/app_config.dart';
-import '../services/push_service.dart';
+import 'package:boerdesnack24/core/config/app_config.dart';
+import 'package:boerdesnack24/core/services/push_service.dart';
 
 /// Globale Konfiguration. Wird in main() via overrideWithValue gesetzt.
 final appConfigProvider = Provider<AppConfig>(

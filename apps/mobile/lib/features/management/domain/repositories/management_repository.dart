@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import '../entities/machine.dart';
-import '../entities/stock_item.dart';
+import 'package:boerdesnack24/features/management/domain/entities/machine.dart';
+import 'package:boerdesnack24/features/management/domain/entities/stock_item.dart';
 
 /// Vertrag der Unternehmensverwaltung (Kategorie 2).
 abstract interface class ManagementRepository {

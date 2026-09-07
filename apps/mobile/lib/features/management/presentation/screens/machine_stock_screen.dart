@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../domain/entities/stock_item.dart';
-import '../controllers/management_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/features/management/domain/entities/stock_item.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Echtzeit-Bestand eines Automaten. Abonniert Änderungen der Tabelle
 /// `inventory` (Realtime) und aktualisiert die Liste automatisch.

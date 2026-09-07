@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
-import '../../theme/app_typography.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
 
 /// Ink-farbener „Hero"-Bereich mit Marken-Foto (Automat + leuchtender
 /// Bördekreis-Umriss + Wortmarke + Slogan). Das Foto liegt als Asset unter

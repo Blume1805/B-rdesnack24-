@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/pricing/pricing.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/domain/entities/stock_item.dart';
-import '../../../management/presentation/controllers/management_providers.dart';
-import '../controllers/customer_providers.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/pricing/pricing.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/management/domain/entities/stock_item.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
 
 /// Echtzeit-Produktverfügbarkeit für Kunden (read-only). Abonniert die
 /// Inventur-Tabelle und zeigt jeden Artikel mit konkreter Stückzahl und

@@ -1,10 +1,10 @@
-import '../entities/customer_models.dart';
-import '../entities/donations_news.dart';
-import '../entities/invoice.dart';
-import '../entities/notification.dart';
-import '../entities/loyalty_status.dart';
-import '../entities/offer.dart';
-import '../entities/product_detail.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/customer_models.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/donations_news.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/notification.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/loyalty_status.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/product_detail.dart';
 
 abstract interface class CustomerRepository {
   Future<List<Offer>> offers();

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/domain/entities/machine.dart';
-import '../../../management/presentation/controllers/management_providers.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/management/domain/entities/machine.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
 import 'availability_screen.dart';
 
 /// Automatenfinder: Liste aller Automaten, Navigation (Google Maps) und

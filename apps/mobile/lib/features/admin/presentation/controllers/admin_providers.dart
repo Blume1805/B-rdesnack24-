@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../data/admin_remote_data_source.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/features/admin/data/admin_remote_data_source.dart';
 
 /// Datenzugriff der Verwaltungsmodule.
 final adminDataSourceProvider = Provider<AdminRemoteDataSource>(

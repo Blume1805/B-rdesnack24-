@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/presentation/widgets/pdf_inline_stub.dart'
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/pdf_inline_stub.dart'
     if (dart.library.js_interop) '../../../management/presentation/widgets/pdf_inline_web.dart';
-import '../../domain/entities/receipt.dart';
-import '../controllers/customer_providers.dart';
-import '../widgets/receipt_export_stub.dart'
+import 'package:boerdesnack24/features/customer/domain/entities/receipt.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/widgets/receipt_export_stub.dart'
     if (dart.library.js_interop) '../widgets/receipt_export_web.dart';
 
 /// Belegarchiv: strukturierte, durchsuchbare Übersicht aller Käufe. Freitext-

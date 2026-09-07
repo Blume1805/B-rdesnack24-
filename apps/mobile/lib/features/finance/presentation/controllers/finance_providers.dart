@@ -2,13 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../data/datasources/finance_remote_data_source.dart';
-import '../../data/repositories/finance_repository_impl.dart';
-import '../../domain/entities/finance_kpis.dart';
-import '../../domain/entities/finance_period.dart';
-import '../../domain/entities/finance_summary.dart';
-import '../../domain/repositories/finance_repository.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/features/finance/data/datasources/finance_remote_data_source.dart';
+import 'package:boerdesnack24/features/finance/data/repositories/finance_repository_impl.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_kpis.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_summary.dart';
+import 'package:boerdesnack24/features/finance/domain/repositories/finance_repository.dart';
 
 final financeRemoteDataSourceProvider = Provider<FinanceRemoteDataSource>(
   (ref) => FinanceRemoteDataSource(ref.watch(supabaseClientProvider)),

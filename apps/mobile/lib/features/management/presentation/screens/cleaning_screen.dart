@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../widgets/machine_dropdown.dart';
-import '../widgets/photo_picker_button.dart';
-import '../widgets/protocol_scaffold.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/machine_dropdown.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/photo_picker_button.dart';
+import 'package:boerdesnack24/features/management/presentation/widgets/protocol_scaffold.dart';
 
 /// Reinigungsprotokoll (Anlage E).
 class CleaningScreen extends StatelessWidget {

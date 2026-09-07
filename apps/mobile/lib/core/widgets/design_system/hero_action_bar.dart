@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
 
 /// Beschreibung einer Seiten-Aktion (PDF-Export, Freigabe, ZIP-Export …)
 /// für die [HeroActionBar].

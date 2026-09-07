@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../data/datasources/approvals_remote_data_source.dart';
-import '../../data/repositories/approvals_repository_impl.dart';
-import '../../domain/entities/shareholder_approval.dart';
-import '../../domain/repositories/approvals_repository.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/features/approvals/data/datasources/approvals_remote_data_source.dart';
+import 'package:boerdesnack24/features/approvals/data/repositories/approvals_repository_impl.dart';
+import 'package:boerdesnack24/features/approvals/domain/entities/shareholder_approval.dart';
+import 'package:boerdesnack24/features/approvals/domain/repositories/approvals_repository.dart';
 
 final approvalsRepositoryProvider = Provider<ApprovalsRepository>(
   (ref) => ApprovalsRepositoryImpl(

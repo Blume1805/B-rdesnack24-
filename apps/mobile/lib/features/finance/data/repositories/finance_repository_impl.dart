@@ -3,12 +3,12 @@ import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/finance_kpis.dart';
-import '../../domain/entities/finance_period.dart';
-import '../../domain/entities/finance_summary.dart';
-import '../../domain/repositories/finance_repository.dart';
-import '../datasources/finance_remote_data_source.dart';
+import 'package:boerdesnack24/core/error/failures.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_kpis.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_summary.dart';
+import 'package:boerdesnack24/features/finance/domain/repositories/finance_repository.dart';
+import 'package:boerdesnack24/features/finance/data/datasources/finance_remote_data_source.dart';
 
 class FinanceRepositoryImpl implements FinanceRepository {
   FinanceRepositoryImpl(this._remote);

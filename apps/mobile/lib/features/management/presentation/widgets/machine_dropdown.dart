@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/machine.dart';
-import '../controllers/management_providers.dart';
+import 'package:boerdesnack24/features/management/domain/entities/machine.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
 
 /// Wiederverwendbare Automaten-Auswahl (lädt machinesProvider).
 class MachineDropdown extends ConsumerWidget {

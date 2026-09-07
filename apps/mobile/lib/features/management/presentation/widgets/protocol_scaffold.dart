@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../finance/domain/entities/finance_period.dart';
-import '../../data/approvals_remote_data_source.dart';
-import '../controllers/management_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
+import 'package:boerdesnack24/features/management/data/approvals_remote_data_source.dart';
+import 'package:boerdesnack24/features/management/presentation/controllers/management_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 // Web-sichere PDF-Ausgabe: auf iOS-Web/In-App-Browser öffnet der native
 // Viewer in neuem Tab; auf Mobile/Desktop das System-Teilen-Sheet.
 import 'pdf_inline_stub.dart'

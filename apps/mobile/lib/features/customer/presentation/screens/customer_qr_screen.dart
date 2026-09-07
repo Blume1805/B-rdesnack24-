@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../auth/presentation/controllers/auth_providers.dart';
-import '../controllers/customer_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Kundenkarte mit QR-Code (Kd.-Nr. + Name). Wird am Automaten gescannt zur
 /// Verifizierung des Kunden (zukünftige Nayax-Integration).

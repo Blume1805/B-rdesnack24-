@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/services/datev.dart';
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/services/datev.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
 // Web: echter Browser-Download; Native: no-op-Stub.
-import '../../../../core/utils/text_file_download_stub.dart'
+import 'package:boerdesnack24/core/utils/text_file_download_stub.dart'
     if (dart.library.js_interop) '../../../../core/utils/text_file_download_web.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../../domain/entities/finance_period.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/finance/domain/entities/finance_period.dart';
 
 /// DATEV-Schnittstelle: exportiert die Tageslosungen der App-Verkäufe als
 /// EXTF-Buchungsstapel (CSV) für die Buchhaltung. Buchhaltung und

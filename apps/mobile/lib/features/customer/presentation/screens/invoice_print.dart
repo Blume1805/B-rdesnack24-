@@ -1,4 +1,4 @@
-import '../../domain/entities/invoice.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/invoice.dart';
 
 /// Non-web-Fallback: Print-Aktion ist auf Native aktuell nicht implementiert.
 /// In der Web-Demo wird `invoice_print_web.dart` durch conditional import

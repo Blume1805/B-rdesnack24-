@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_tokens.dart';
-import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
-import '../controllers/admin_providers.dart';
-import '../widgets/admin_shell.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/features/admin/presentation/controllers/admin_providers.dart';
+import 'package:boerdesnack24/features/admin/presentation/widgets/admin_shell.dart';
 
 /// Anfragen aus Werbung, Sponsoring, Partnerschaft, Recruiting und Events.
 ///

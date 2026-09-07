@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
 
 /// Bördesnack24-Karte — Cream-Surface mit subtiler 1 px-Border, 16 px-Radius,
 /// keine Elevation. Optional klickbar mit dezenter Ripple-Animation.

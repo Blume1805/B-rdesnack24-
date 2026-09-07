@@ -1,10 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/app_user.dart';
-import '../../domain/entities/mfa_enrollment.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
+import 'package:boerdesnack24/core/error/failures.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/app_user.dart';
+import 'package:boerdesnack24/features/auth/domain/entities/mfa_enrollment.dart';
+import 'package:boerdesnack24/features/auth/domain/repositories/auth_repository.dart';
+import 'package:boerdesnack24/features/auth/data/datasources/auth_remote_data_source.dart';
 
 /// Supabase-Implementierung von [AuthRepository].
 /// Mappt Infrastruktur-Exceptions auf domänenspezifische [Failure]s.

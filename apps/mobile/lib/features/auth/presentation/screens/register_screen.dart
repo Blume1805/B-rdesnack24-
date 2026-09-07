@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/router/app_router.dart';
-import '../../../../core/security/pwned_password_checker.dart';
-import '../../../../core/utils/validators.dart';
-import '../../../../l10n/generated/app_localizations.dart';
-import '../controllers/auth_providers.dart';
-import '../../../../core/widgets/design_system/design_system.dart';
+import 'package:boerdesnack24/core/di/providers.dart';
+import 'package:boerdesnack24/core/router/app_router.dart';
+import 'package:boerdesnack24/core/security/pwned_password_checker.dart';
+import 'package:boerdesnack24/core/utils/validators.dart';
+import 'package:boerdesnack24/l10n/generated/app_localizations.dart';
+import 'package:boerdesnack24/features/auth/presentation/controllers/auth_providers.dart';
+import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 
 /// Self-Signup ausschließlich für Kunden. Interne Nutzer werden eingeladen.
 /// Registrierung verlangt eine ausdrückliche Zustimmung zu Datenschutz- und

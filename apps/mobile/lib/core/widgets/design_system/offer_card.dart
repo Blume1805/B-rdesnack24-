@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_tokens.dart';
-import '../../theme/app_typography.dart';
-import '../../utils/formatters.dart';
+import 'package:boerdesnack24/core/theme/app_tokens.dart';
+import 'package:boerdesnack24/core/theme/app_typography.dart';
+import 'package:boerdesnack24/core/utils/formatters.dart';
 import 'brand_marks.dart';
 import 'product_image.dart';
 import 'rating_stars.dart';
