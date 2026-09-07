@@ -153,8 +153,9 @@ final biometrieControllerProvider = Provider<BiometrieController>(
 /// Web-Implementierung, also gibt es dort keine Biometrie — und ohne
 /// Freischaltung verhält sich [BiometrieSpeicher] wie die gewöhnliche
 /// Ablage.
-({BiometrieSpeicher speicher, BiometrieAnmeldung anmeldung}) biometrieAufbauen(
-    {required LocalStorage offen}) {
+({BiometrieSpeicher speicher, BiometrieAnmeldung anmeldung}) biometrieAufbauen({
+  required LocalStorage offen,
+}) {
   final Tresor tresor = kIsWeb ? SpeicherImArbeitsspeicher() : GeraeteTresor();
   final BiometrieDienst dienst =
       kIsWeb ? const KeineBiometrie() : GeraeteBiometrie();

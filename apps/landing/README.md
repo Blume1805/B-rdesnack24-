@@ -89,79 +89,53 @@ Reichweite, keine Kundenstimme, keine Zahl von Erloesquellen, kein
 Partnername. Der alte Hunger-Claim ist endgueltig abgeloest und auch nach
 Inbetriebnahme nicht wieder verwendbar.
 
-An drei Stellen weicht die Seite von der Wahrheitsschicht ab. Jedes Mal,
-weil der laufende Code etwas anderes sagt als das Dokument — und der Code
-ist das, was Kunden tatsaechlich bekommen:
+An drei Stellen widersprach die Wahrheitsschicht dem laufenden Code.
+Philipp hat am 07.09.2026 entschieden; die Wahrheitsschicht ist entsprechend
+korrigiert (`docs/scrollcraft/references/truth.md`).
 
-### 1. Die Bezugsgroesse der 5 % ist nicht offen, sie steht im Backend
+### 1. Bezugsgroesse der 5 % — entschieden: Nettopreis je Produkt
 
-Die Wahrheitsschicht fuehrt „brutto/netto, Waren- oder Gesamtumsatz" als
-OFFEN und verbietet die Zahl deshalb auf der Seite. Die Datenbank
-entscheidet die Frage aber seit dem 10.07.2026:
+Die Wahrheitsschicht fuehrte „brutto/netto, Waren- oder Gesamtumsatz" als
+OFFEN. Die Datenbank rechnete seit dem 10.07.2026 so:
 
 ```sql
-donation_rate()            -> 0.05
 purchase_net(p_gross)      -> round(p_gross / 1.07, 2)
-purchase_donation(p_gross) -> round(purchase_net(p_gross) * donation_rate(), 2)
+purchase_donation(p_gross) -> round(purchase_net(p_gross) * 0.05, 2)
 ```
 
-(`supabase/migrations/20260710104458_donations_news.sql`)
+Das war auf zwei Arten nicht das, was zugesagt war: Bezugsgroesse war der
+Bruttobetrag des **ganzen Kaufs**, und der Steuersatz war fest 7 % — auch
+fuer Getraenke mit 19 %.
 
-Also: **5 % vom Nettobetrag jedes Kaufs.** Genau so steht es auch in der
-Kunden-App („5 % jedes Netto-Umsatzes", `onboarding_stories.dart`,
-`history_tab.dart`). Die Seite nennt die Zahl deshalb mit Bezugsgroesse.
+Seit `20260907110000_spende_je_produkt_netto.sql` gilt:
 
-→ **Philipp bestaetigt oder korrigiert das.** Wird es korrigiert, aendert
-sich nicht nur die Seite, sondern auch die Berechnung im Backend und die
-Anzeige in der App.
-
-### 2. Der Empfaengerkreis ist nicht „aus dem Suelzetal"
-
-Die Wahrheitsschicht sagt „gemeinnuetzige Organisationen aus dem
-Suelzetal — IST". Die angelegten Zwecke sind:
-
-| Zweck | aus dem Suelzetal? |
-|---|---|
-| Tafel Magdeburg | nein |
-| Kinderhospiz Magdeburger Elbland | nein |
-| Feuerwehr Suelzetal | ja |
-
-(`supabase/migrations/20260710104458_donations_news.sql`)
-
-Zwei von drei liegen ausserhalb. „Aus dem Suelzetal" waere damit eine
-Aussage, die die eigene Datenbank widerlegt. Die Seite schreibt deshalb
-**„aus der Region"**.
-
-→ **Zu entscheiden:** entweder der Empfaengerkreis wird enger gefasst und
-die beiden Magdeburger Zwecke fliegen raus, oder die Formulierung bleibt
-„aus der Region". Beides ist vertretbar, eines muss gelten.
-
-### 3. Die Abstimmung haengt nicht am kostenpflichtigen Abo
-
-Die Wahrheitsschicht sagt: „Zugang zur Abstimmung — **nur ueber das
-kostenpflichtige App-Abo** — IST", und leitet daraus eine
-Transparenzpflicht ab. Der Code kennt diese Schranke nicht:
-
-```sql
-create or replace function public.vote_donation_cause(p_cause_id uuid) ...
-  v_uid uuid := auth.uid();
-  if v_uid is null then raise exception 'Nicht angemeldet'; end if;
-  -- danach: keine Abo-Pruefung
+```
+Nettopreis der Position = round(menge * bruttoeinzelpreis / (1 + satz/100), 2)
+Spende des Kaufs        = round(summe der Nettopreise * 5 %, 2)
 ```
 
-(`supabase/migrations/20260804120315_spendenvorschlaege_nicht_oeffentlich.sql`;
-`suggest_donation_cause` genauso)
+Ein Kauf aus 2,00 EUR Snack (7 %) und 2,50 EUR Getraenk (19 %) ergibt jetzt
+0,20 EUR statt 0,21 EUR. Nachweis mit Gegenproben:
+`scripts/pruefumgebung/104_spende_je_produkt.sql` (T1–T6).
 
-Jedes angemeldete Konto darf vorschlagen und abstimmen, kostenlos. Die
-Seite sagt das so — und das ist auch die unproblematischere Variante:
-eine Mitbestimmung, die nur gegen Geld zu haben ist, muesste an derselben
-Stelle offengelegt werden und beruehrt bei Minderjaehrigen zusaetzlich
-§§ 104–110 BGB.
+### 2. Empfaengerkreis — entschieden: die drei Seed-Zwecke sind raus
 
-→ **Zu entscheiden:** bleibt die Abstimmung frei (dann ist die
-Wahrheitsschicht zu korrigieren), oder soll die Abo-Schranke tatsaechlich
-gebaut werden (dann aendert sich der Satz auf der Seite und es braucht die
-Offenlegung)?
+Tafel Magdeburg, Kinderhospiz Magdeburger Elbland und Feuerwehr Suelzetal
+sind archiviert (`status = 'archived'`, `deleted_at` gesetzt — nicht
+geloescht, damit sie sich zurueckholen lassen). Der Empfaengerkreis heisst
+auf der Seite „gemeinnuetzige Organisationen aus der Region".
+
+**Offen:** Philipp hatte einmal eine Liste mit ueber 60 Organisationen
+bereitgestellt. Sie liegt **nicht** im Repo und nicht in den Migrationen —
+gesucht wurde in `docs/`, `supabase/` und `scripts/`. Ohne diese Liste
+bleibt `donation_causes` leer; erfunden wird hier nichts.
+
+### 3. Abstimmung — entschieden: bleibt frei
+
+`vote_donation_cause` und `suggest_donation_cause` verlangen nur eine
+Anmeldung, keine Abo-Schranke. Das bleibt so. Damit entfaellt auch die
+Offenlegungspflicht, die die Wahrheitsschicht aus der gegenteiligen Annahme
+abgeleitet hatte.
 
 ## Offene Punkte vor dem Livegang
 
@@ -182,9 +156,9 @@ erreichbar sein.
       zeichengenau mit der Produktionsdatenbank abgeglichen und wird
       deshalb nicht nebenbei geaendert — das braucht eine eigene Migration
       und Philipps Freigabe.
-- [ ] Bezugsgroesse der 5 % bestaetigen (siehe oben, Punkt 1)
-- [ ] Empfaengerkreis „Region" oder „Suelzetal" (Punkt 2)
-- [ ] Abstimmung frei oder abopflichtig (Punkt 3)
+- [ ] **Liste der moeglichen Spendenempfaenger.** Die 60+ Organisationen
+      liegen nicht im Repo; ohne sie hat die Abstimmung nichts zur Auswahl.
+- [ ] Nachweisform der Spende gegenueber Kunden
 - [ ] Markenschriften self-hosted uebernehmen
 - [ ] Automatendarstellung: Herstellerbild, eigene Illustration oder die
       jetzige Zeichnung behalten

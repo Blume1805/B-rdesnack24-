@@ -19,7 +19,8 @@ void main() {
       // token_hash, muss die Maske erscheinen, noch bevor irgendetwas
       // eingeloest wurde -- sie loest ihn ja selbst ein.
       final w = _weiche(
-          'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery');
+        'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery',
+      );
       expect(w.aktiv, isTrue);
       expect(w.tokenHash, 't1');
       expect(w.fehler, isNull);
@@ -70,8 +71,11 @@ void main() {
       // Startseite.
       final w = _weiche('https://x.invalid/app/?code=c1');
       w.verarbeiteAuthZustand(
-        _fehler(const AuthException(
-            'Code verifier could not be found in local storage.')),
+        _fehler(
+          const AuthException(
+            'Code verifier could not be found in local storage.',
+          ),
+        ),
       );
       expect(w.aktiv, isTrue);
       expect(w.fehler, 'Code verifier could not be found in local storage.');

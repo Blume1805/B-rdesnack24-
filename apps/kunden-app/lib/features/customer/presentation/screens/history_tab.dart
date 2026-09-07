@@ -84,7 +84,7 @@ class HistoryTab extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '5 % Netto-Umsatz für den guten Zweck',
+                                '5 % vom Nettopreis für den guten Zweck',
                                 style: AppTypography.body(
                                   size: 12,
                                   weight: FontWeight.w700,

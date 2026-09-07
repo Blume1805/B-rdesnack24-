@@ -117,7 +117,8 @@ void main() {
       final roh = <String, dynamic>{for (final k in schluessel) k: <dynamic>[]};
       final b = bereicheAusAuskunft(roh);
       final unuebersetzt = b.where(
-          (e) => e.titel == e.titel.toLowerCase() && e.titel.contains('_'));
+        (e) => e.titel == e.titel.toLowerCase() && e.titel.contains('_'),
+      );
       expect(
         unuebersetzt.map((e) => e.titel),
         isEmpty,

@@ -63,9 +63,9 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       icon: Icons.volunteer_activism,
       eyebrow: '5 % für den guten Zweck',
       title: 'Deine Spende zählt',
-      body: '5 % jedes Netto-Umsatzes wandern in einen Spendentopf. Du '
-          'entscheidest über die Empfänger — Vorschlagen, Abstimmen, '
-          'nachlesen wohin es geht.',
+      body: '5 % vom Nettopreis jedes Produkts wandern in einen '
+          'Spendentopf. Du entscheidest über die Empfänger — Vorschlagen, '
+          'Abstimmen, nachlesen wohin es geht.',
     ),
   ];
 

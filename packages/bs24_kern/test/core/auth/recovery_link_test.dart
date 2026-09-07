@@ -14,7 +14,8 @@ void main() {
       // So sieht der Link aus, den unsere E-Mail-Vorlage baut.
       final p = authParameter(
         Uri.parse(
-            'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery'),
+          'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery',
+        ),
       );
       expect(p['token_hash'], 't1');
       expect(p['type'], 'recovery');
@@ -30,14 +31,18 @@ void main() {
 
     test('gewoehnliche Hash-Route liefert nichts', () {
       expect(
-          authParameter(Uri.parse('https://x.invalid/app/#/profil')), isEmpty);
+        authParameter(Uri.parse('https://x.invalid/app/#/profil')),
+        isEmpty,
+      );
     });
 
     test('ein Anker ist keine Parameterliste', () {
       // Ohne diese Unterscheidung wuerde aus "#kapitel-3" ein Schluessel mit
       // leerem Wert, und die Auswertung liefe auf Muell.
-      expect(authParameter(Uri.parse('https://x.invalid/app/#kapitel-3')),
-          isEmpty);
+      expect(
+        authParameter(Uri.parse('https://x.invalid/app/#kapitel-3')),
+        isEmpty,
+      );
     });
   });
 
@@ -45,7 +50,8 @@ void main() {
     test('Einmal-Token mit type=recovery', () {
       final l = erkenneWiederherstellungslink(
         Uri.parse(
-            'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery'),
+          'https://x.invalid/app/#/passwort-neu?token_hash=t1&type=recovery',
+        ),
       );
       expect(l?.art, Wiederherstellungsart.einmalToken);
       expect(l?.tokenHash, 't1');
@@ -110,7 +116,8 @@ void main() {
     test('leere Werte zaehlen nicht als Link', () {
       expect(
         erkenneWiederherstellungslink(
-            Uri.parse('https://x.invalid/app/?code=')),
+          Uri.parse('https://x.invalid/app/?code='),
+        ),
         isNull,
       );
       expect(

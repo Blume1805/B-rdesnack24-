@@ -56,7 +56,9 @@ abstract interface class CustomerRepository {
   /// Bewertung des aktuellen Kunden.
   Future<void> rateProduct(String productId, int rating);
 
-  /// 5 % Netto-Umsatz wandern in einen Spendentopf. Diese Methoden geben die
+  /// 5 % vom Nettopreis jedes Produkts wandern in einen Spendentopf --
+  /// je Position mit dem Steuersatz des Produkts gerechnet
+  /// (purchase_donation_for, 07.09.2026). Diese Methoden geben die
   /// kumulierte Spende des Kunden und die Aufschlüsselung je Kauf zurück.
   Future<DonationSummary> myDonationSummary();
   Future<List<PurchaseDonation>> myDonationsByPurchase();

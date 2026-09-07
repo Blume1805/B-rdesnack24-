@@ -256,7 +256,7 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 | „62 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
 | „App herunterladen" | NEIN, nur „App vormerken" | Store-Freigabe |
 | „Ab 2027 in Osterweddingen" | JA, als Plan gekennzeichnet | — |
-| „5 % gehen an eine gemeinnützige Organisation aus dem Sülzetal" | JA, mit Bezugsgröße | — |
+| „5 % vom Nettopreis jedes Produkts gehen an gemeinnützige Organisationen aus der Region" | JA | — |
 | Foto eines Automaten an einem Standort | NEIN | echte Aufnahme vorhanden |
 | Nennung eines Standortpartners | NEIN | schriftliche Zusage |
 
@@ -287,18 +287,36 @@ Abschnitt 3. Sämtliche Werte sind **Planannahmen, keine Messungen**.
 
 | Feld | Wert | Status |
 |---|---|---|
-| Quote | 5 % jedes Warenverkaufs | IST |
-| Empfängerkreis | gemeinnützige Organisationen aus dem Sülzetal | IST |
+| Quote | 5 % | IST |
+| Bezugsgröße | **Nettopreis des jeweiligen Produkts** | IST (Philipp, 07.09.2026) |
+| Empfängerkreis | gemeinnützige Organisationen aus der Region | IST |
 | Auswahl des Empfängers | Vorschlag und Abstimmung durch die Community | IST |
-| Zugang zur Abstimmung | **nur über das kostenpflichtige App-Abo** | IST |
-| Bezugsgröße (brutto/netto, Waren- oder Gesamtumsatz) | — | **OFFEN** |
+| Zugang zur Abstimmung | **jedes angemeldete Konto, auch kostenlos** | IST (Philipp, 07.09.2026) |
 | Nachweisform gegenüber Kunden | — | **OFFEN** |
 | Konkreter Empfänger | — | **OFFEN** |
+| Liste möglicher Empfänger (60+) | — | **OFFEN**, liegt nicht im Repo |
 
-**Transparenzpflicht:** Wird mit der Mitbestimmung geworben, muss an derselben
-Stelle erkennbar sein, dass die Abstimmung an das Bezahl-Abo gekoppelt ist —
-nicht erst in den AGB. „Die Community entscheidet" ohne diesen Zusatz ist
-unzulässig. Vor Veröffentlichung: `boerdesnack24-legal-impact`.
+**Berechnung, wie sie in der Datenbank steht** (Migration
+`20260907110000_spende_je_produkt_netto.sql`, Nachweis in
+`scripts/pruefumgebung/104_spende_je_produkt.sql`):
+
+```
+Nettopreis der Position = round(menge * bruttoeinzelpreis / (1 + satz/100), 2)
+Spende des Kaufs        = round(summe der Nettopreise * 5 %, 2)
+```
+
+Der Steuersatz kommt aus `products.tax_rate` (Prozentwert). Bis zum
+07.09.2026 rechnete die Datenbank aus dem Bruttobetrag des ganzen Kaufs mit
+fest unterstellten 7 % — bei Getränken (19 %) fiel die Spende dadurch zu
+hoch aus.
+
+**Zur Mitbestimmung:** Sie hängt **nicht** am kostenpflichtigen Abo.
+`vote_donation_cause` und `suggest_donation_cause` prüfen nur, ob jemand
+angemeldet ist. Eine frühere Fassung dieser Tabelle behauptete das
+Gegenteil und leitete daraus eine Offenlegungspflicht ab; die entfällt
+damit. Wird die Schranke später doch gebaut, muss der Hinweis an derselben
+Stelle stehen wie die Werbung mit der Mitbestimmung — nicht erst in den
+AGB. Vor jeder Änderung daran: `boerdesnack24-legal-impact`.
 
 ---
 
@@ -331,7 +349,8 @@ Bestand. Kein Partnername ohne schriftliche Zusage.
 
 ## 7 Offene Punkte
 
-- [ ] Bezugsgröße und Nachweisform der 5 %
+- [ ] Nachweisform der 5 % gegenüber Kunden (Bezugsgröße ist seit 07.09.2026 entschieden)
+- [ ] Die Liste mit 60+ Organisationen liegt nicht im Repo — Philipp muss sie erneut bereitstellen
 - [ ] Erste Standortzusage
 - [ ] Store-Termin der App und ausgelieferter Funktionsumfang
 - [ ] Werbeflächen: was ohne Reichweitenangabe zusagbar ist
