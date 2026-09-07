@@ -1,0 +1,58 @@
+name: bs24_kern
+description: >-
+  Gemeinsamer Kern beider Bördesnack24-Apps: Anmeldung, Sicherheit,
+  Design-System, Rechtstexte, Lokalisierung und die wenigen Lesezugriffe,
+  die Kunden- und Gesellschafter-App gemeinsam brauchen.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.6.2
+  supabase_flutter: ^2.8.0
+
+  # Passwort-Leak-Prüfung (HaveIBeenPwned, k-Anonymity) — clientseitig,
+  # weil die Supabase-Variante Pro-Plan-Feature ist.
+  crypto: ^3.0.3
+  http: ^1.2.0
+
+  google_fonts: ^6.2.1
+
+  # Anmeldung mit Face ID / Touch ID / Android-Biometrie. NUR nativ;
+  # jeder Aufruf ist hinter kIsWeb abgeschirmt (core/security/biometrie/).
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.2
+
+  connectivity_plus: ^6.1.0
+  shared_preferences: ^2.3.3
+
+  # PDF anzeigen/teilen — die Stub-/Web-Variante teilen sich beide Apps.
+  printing: ^5.13.4
+  url_launcher: ^6.3.1
+
+  equatable: ^2.0.7
+  intl: ^0.20.2
+  web: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/images/ki/

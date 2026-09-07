@@ -115,7 +115,7 @@ Alles, was ohne Gerät prüfbar ist, ist geprüft; der Dialog selbst ist es nich
 ## Was du zum Ausprobieren brauchst
 
 1. Einen Mac mit Xcode und einen Apple-Developer-Zugang.
-2. `cd apps/mobile && flutter build ios` bzw. `flutter run` auf einem
+2. `cd apps/kunden-app && flutter build ios` (bzw. `apps/gesellschafter-app`) bzw. `flutter run` auf einem
    angeschlossenen iPhone.
 3. Anmelden mit E-Mail und Passwort → Profil → **Sicherheit** → Schalter „Mit
    Face ID anmelden".

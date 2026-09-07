@@ -14,26 +14,31 @@ jobs:
   flutter:
     name: Flutter (analyze · format · test)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Drei Pakete: der gemeinsame Kern und die beiden Apps. Der Kern
+        # laeuft zuerst -- faellt er, faellt ohnehin alles.
+        paket:
+          - packages/bs24_kern
+          - apps/kunden-app
+          - apps/gesellschafter-app
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: ${{ matrix.paket }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      # Der Kern erzeugt die Lokalisierung; beide Apps greifen darauf zu und
+      # brauchen sie deshalb auch dann, wenn sie selbst kein l10n.yaml haben.
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
       - name: Dependencies
         run: flutter pub get
-      - name: Lokalisierung generieren
-        run: flutter gen-l10n
-      - name: Codegen (build_runner, sofern konfiguriert)
-        run: |
-          if grep -q build_runner pubspec.yaml; then
-            dart run build_runner build --delete-conflicting-outputs
-          else
-            echo "Keine Codegen-Abhängigkeit – übersprungen."
-          fi
       - name: Format-Check
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
@@ -43,9 +48,46 @@ jobs:
       - name: Coverage-Artefakt
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
-          path: apps/mobile/coverage/lcov.info
+          name: coverage-${{ hashFiles(format('{0}/pubspec.yaml', matrix.paket)) }}
+          path: ${{ matrix.paket }}/coverage/lcov.info
           if-no-files-found: ignore
+
+  trennung:
+    name: Kunden-Bundle ohne interne Pfade
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
+      - name: Kunden-Web-Bundle bauen
+        working-directory: apps/kunden-app
+        run: |
+          flutter pub get
+          flutter build web --release \
+            --dart-define=SUPABASE_URL=https://example.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=ci \
+            --dart-define=APP_ENV=dev
+      # Gegenprobe zur App-Trennung: Kunden sollen nicht sehen, dass es einen
+      # zweiten Zugang gibt. Vor der Trennung standen genau diese Begriffe im
+      # ausgelieferten Bundle (gemessen am 07.09.2026).
+      - name: Interne Pfade/Beschriftungen suchen
+        working-directory: apps/kunden-app/build/web
+        run: |
+          fehler=0
+          for muster in /finance/approvals /management/my-signatures \
+              Gesellschafter-Freigaben Betriebsprotokolle unit_cost \
+              inventory_fifo_movements business_customers_csv; do
+            if grep -qF -- "$muster" ./*.js; then
+              echo "::error::Interner Begriff im Kunden-Bundle: $muster"
+              fehler=1
+            fi
+          done
+          exit $fehler
 
   edge-functions:
     name: Edge Functions (Deno lint · test)

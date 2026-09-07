@@ -1,0 +1,51 @@
+name: bs24_gesellschafter
+description: >-
+  Bördesnack24 — Gesellschafter-App (Finanzen, Verwaltung, Freigaben).
+  Wird nicht über die Stores verteilt, sondern direkt auf die Geräte der
+  Gesellschafter installiert.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  bs24_kern:
+    path: ../../packages/bs24_kern
+
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.6.2
+  supabase_flutter: ^2.8.0
+
+  # Diagramme im Finanzdashboard (KPI-Trend, Cashflow, Vergleich Vorjahr).
+  fl_chart: ^0.68.0
+
+  # PDF teilen/drucken (Export Finanzauswertung)
+  printing: ^5.13.4
+
+  # Signatur-Draw-Pad (IfSG-Belehrung, Mitarbeiter-Signatur)
+  signature: ^5.5.0
+
+  # Medien/Dateien (Foto-/Signatur-/Dokument-Upload)
+  image_picker: ^1.1.2
+  file_picker: ^8.1.6
+
+  url_launcher: ^6.3.1
+  equatable: ^2.0.7
+  intl: ^0.20.2
+  web: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true

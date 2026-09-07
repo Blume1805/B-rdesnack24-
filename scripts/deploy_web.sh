@@ -21,7 +21,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MOBILE="$ROOT/apps/mobile"
+APP="$ROOT/apps/kunden-app"
 # ENV_FILE ist Pflicht, ohne Standardwert.
 #
 # Hier stand "${ENV_FILE:-$MOBILE/env/demo.json}". Diese Datei existiert
@@ -32,7 +32,7 @@ MOBILE="$ROOT/apps/mobile"
 # Produktion. Audit 05.09.2026, M-4.
 if [ -z "${ENV_FILE:-}" ]; then
   echo "✗ ENV_FILE ist nicht gesetzt." >&2
-  echo "  Produktiv:  ENV_FILE=$MOBILE/env/prod.json bash scripts/deploy_web.sh" >&2
+  echo "  Produktiv:  ENV_FILE=$APP/env/prod.json bash scripts/deploy_web.sh" >&2
   exit 1
 fi
 if [ ! -f "$ENV_FILE" ]; then
@@ -52,11 +52,11 @@ else
 fi
 
 echo "▶︎ Flutter Web-Build ($ENV_FILE, base=$BASE_HREF)"
-( cd "$MOBILE" && flutter build web --release \
+( cd "$APP" && flutter build web --release \
     --base-href="$BASE_HREF" \
     --dart-define-from-file="$ENV_FILE" )
 
-BUILD_DIR="$MOBILE/build/web"
+BUILD_DIR="$APP/build/web"
 
 # Nachweis statt Vertrauen: Steht die Supabase-Adresse aus ENV_FILE auch
 # wirklich im gebauten Bundle? Ohne diese Probe kann niemand nachtraeglich
@@ -71,6 +71,35 @@ if [ -n "$ERWARTETE_URL" ]; then
     exit 1
   fi
 fi
+
+# Gegenprobe zur App-Trennung: im Kunden-Bundle darf kein interner Pfad und
+# keine interne Beschriftung stehen. Kunden sollen nicht sehen, dass es einen
+# zweiten Zugang gibt -- vor der Trennung standen `/finance/approvals` und
+# `/management/my-signatures` in der Routentabelle der ausgelieferten
+# main.dart.js, die Gesellschafter-Oberflaeche komplett in den
+# .part.js-Dateien. Wer das rueckgaengig macht, faellt hier auf.
+VERBOTEN=(
+  "/finance/approvals"
+  "/management/my-signatures"
+  "Gesellschafter-Freigaben"
+  "Betriebsprotokolle"
+  "unit_cost"
+  "inventory_fifo_movements"
+  "business_customers_csv"
+)
+GEFUNDEN=0
+for muster in "${VERBOTEN[@]}"; do
+  if grep -qF -- "$muster" "$BUILD_DIR"/*.js; then
+    echo "✗ Interner Begriff im Kunden-Bundle: $muster" >&2
+    GEFUNDEN=1
+  fi
+done
+if [ "$GEFUNDEN" -ne 0 ]; then
+  echo "  Deploy abgebrochen -- die Trennung Kunden-/Gesellschafter-App ist verletzt." >&2
+  exit 1
+fi
+echo "  ✓ keine internen Pfade/Beschriftungen im Bundle"
+
 BOOT="$BUILD_DIR/flutter_bootstrap.js"
 
 echo "▶︎ Post-Build-Patch: lokales CanvasKit + Service-Worker deaktivieren"

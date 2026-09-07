@@ -2,10 +2,29 @@
 
 Stand 03.09.2026.
 
+> **Nachtrag 07.09.2026 — der erste Absatz stimmt so nicht mehr.**
+>
+> Seit dem 07.09.2026 gibt es tatsächlich **zwei** Anwendungen:
+> `apps/kunden-app` und `apps/gesellschafter-app`, dazu den gemeinsamen Kern
+> `packages/bs24_kern`. Der Grund ist nicht technisch, sondern eine
+> Geschäftsentscheidung: Kunden sollen nicht erkennen können, dass es einen
+> zweiten Zugang für die Gesellschafter gibt. Vor der Trennung stand in der
+> ausgelieferten `main.dart.js` die vollständige Routentabelle mit
+> `/finance/approvals` und `/management/my-signatures`, und die
+> nachgeladenen `.part.js`-Dateien enthielten die interne Oberfläche im
+> Klartext (gemessen am 07.09.2026).
+>
+> **Was der Rest dieses Dokuments beschreibt, gilt unverändert:** Es gibt
+> weiterhin keine Schnittstelle zwischen zwei Systemen und keinen Abgleich.
+> Beide Apps sprechen mit **derselben** Supabase-Datenbank
+> (`nnfsyuglkqycwenwxmuw`); ein Kauf in der Kunden-App steht der
+> Gesellschafter-App unmittelbar zur Verfügung. Getrennt sind die
+> Auslieferung und die Oberfläche — nicht die Daten.
+
 ## Die Frage war falsch gestellt, und das ist eine gute Nachricht
 
 „Sind die beiden Apps gekoppelt?" setzt voraus, dass es zwei Systeme gibt.
-Gibt es nicht. `apps/mobile` ist **eine** Flutter-Anwendung mit
+Gibt es nicht. `apps/mobile` war **eine** Flutter-Anwendung mit
 `features/customer`, `features/management` und `features/finance`
 nebeneinander, und alle drei sprechen mit **derselben** Supabase-Datenbank
 (`nnfsyuglkqycwenwxmuw`).

@@ -12,15 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: apps/kunden-app
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
       - run: flutter pub get
-      - run: flutter gen-l10n
       # Plattform-Ordner erzeugen, falls nicht eingecheckt.
       - run: flutter create --platforms=android .
       # Keystore + key.properties aus Secrets bereitstellen.
@@ -47,7 +49,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: app-release-aab
-          path: apps/mobile/build/app/outputs/bundle/release/*.aab
+          path: apps/kunden-app/build/app/outputs/bundle/release/*.aab
           if-no-files-found: warn
 
   ios:
@@ -55,15 +57,17 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: apps/kunden-app
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
       - run: flutter pub get
-      - run: flutter gen-l10n
       - run: flutter create --platforms=ios .
       # Signierung erfordert Apple-Zertifikate/Provisioning (Secrets/Fastlane match).
       # Ohne Secrets: nur No-Codesign-Build zur Verifikation.
@@ -76,3 +80,38 @@ jobs:
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
             --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
             --dart-define=APP_ENV=prod
+
+  gesellschafter-android:
+    name: Gesellschafter-App (APK zum Direktinstallieren)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/gesellschafter-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
+      - run: flutter pub get
+      # Bewusst kein App Bundle und kein Store-Upload: die Gesellschafter-App
+      # wird nicht veroeffentlicht, sondern direkt auf die Geraete der
+      # Gesellschafter installiert. Ein Store-Eintrag wuerde ausserdem genau
+      # das offenlegen, was die Trennung verbergen soll.
+      - name: Build APK
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=APP_ENV=prod
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gesellschafter-app-apk
+          path: apps/gesellschafter-app/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: warn

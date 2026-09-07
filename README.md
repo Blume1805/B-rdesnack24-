@@ -29,11 +29,14 @@ Clean Architecture + Feature-First + DDD. Siehe [`docs/ARCHITECTURE.md`](docs/AR
 Architecture Decision Records unter [`docs/adr/`](docs/adr/).
 
 ```
-apps/mobile/      Flutter-App (domain / data / presentation je Feature)
-supabase/         Migrationen, Edge Functions, Seeds
-packages/         geteilte Dart-Packages
-docs/             Architektur, ADRs, Berechtigungskonzept, Deployment
-.github/          CI/CD-Workflows, PR-Template
+apps/kunden-app/          Kunden-App (Store-App; domain / data / presentation je Feature)
+apps/gesellschafter-app/  Gesellschafter-App (nicht im Store, Direktinstallation)
+packages/bs24_kern/       Gemeinsamer Kern: Anmeldung, Sicherheit, Design-System,
+                          Rechtstexte, Lokalisierung
+supabase/                 Migrationen, Edge Functions, Seeds
+packages/                 weitere geteilte Pakete
+docs/                     Architektur, ADRs, Berechtigungskonzept, Deployment
+.github/                  CI/CD-Workflows, PR-Template
 ```
 
 ## Entwicklung
@@ -41,10 +44,17 @@ docs/             Architektur, ADRs, Berechtigungskonzept, Deployment
 Voraussetzungen: Flutter (stable), Dart, Supabase CLI, Deno, Node ≥ 20.
 
 ```bash
-# Flutter-App
-cd apps/mobile
+# Gemeinsamer Kern zuerst (erzeugt die Lokalisierung, die beide Apps nutzen)
+cd packages/bs24_kern && flutter pub get && flutter gen-l10n && cd -
+
+# Kunden-App
+cd apps/kunden-app
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+flutter run
+
+# Gesellschafter-App
+cd ../gesellschafter-app
+flutter pub get
 flutter run
 
 # Supabase (lokaler Stack)

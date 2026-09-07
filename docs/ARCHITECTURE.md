@@ -24,11 +24,19 @@ noch Data; Data implementiert Domain-Interfaces; Presentation nutzt UseCases.
 ## Monorepo-Layout
 
 ```
-apps/mobile/                Flutter-App (Android/iOS/Web)
-  lib/
-    core/                   config · di · error · network · theme · l10n · security · widgets · router
-    features/<feature>/     domain · data · presentation
-packages/                   geteilte Dart-Packages (design_system, validators, …)
+apps/kunden-app/            Kunden-App (Android/iOS/Web) — Store-App
+  lib/features/customer/    domain · data · presentation
+  lib/features/home/        Kunden-Shell
+apps/gesellschafter-app/    Gesellschafter-App (Android/iOS) — Direktinstallation, kein Store
+  lib/features/{management,finance,admin,approvals}/
+  lib/features/home/        interne Shell
+packages/bs24_kern/         Gemeinsamer Kern beider Apps
+  lib/core/                 config · di · error · theme · security · widgets · router (Regeln)
+  lib/features/auth/        Anmeldung, MFA, Passwort
+  lib/features/legal/       Impressum, Datenschutz, AGB, Kündigung
+  lib/features/geteilt/     die wenigen Lesezugriffe, die beide Apps brauchen
+  lib/l10n/                 Lokalisierung (Quelle für beide Apps)
+packages/                   weitere geteilte Dart-Packages
 supabase/
   migrations/               versionierte SQL (Schema, RLS, Trigger, Funktionen)
   functions/                Edge Functions (Deno/TS): sevdesk-sync, nayax-webhook, pdf-export …

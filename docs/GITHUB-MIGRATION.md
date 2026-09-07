@@ -12,7 +12,7 @@ getrennte Quellen zusammensuchen zu müssen.
 
 | Teil | Wo er heute liegt |
 |---|---|
-| Backend, Flutter-App, Migrationen, Prüfumgebung, Dokumentation | `github.com/Blume1805/B-rdesnack24-` — **öffentlich**, Monorepo-Aufbau (`apps/mobile`, `packages/api-types`, `supabase/`, `scripts/`, `docs/`), vier GitHub-Workflows |
+| Backend, Flutter-App, Migrationen, Prüfumgebung, Dokumentation | `github.com/Blume1805/B-rdesnack24-` — **öffentlich**, Monorepo-Aufbau (`apps/kunden-app`, `apps/gesellschafter-app`, `packages/bs24_kern`, `packages/api-types`, `supabase/`, `scripts/`, `docs/`), vier GitHub-Workflows |
 | Kunden-App (Lovable A) | nur in Lovable |
 | Gesellschafter-App (Lovable B) | nur in Lovable |
 

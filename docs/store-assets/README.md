@@ -4,7 +4,7 @@ Grundausstattung für App Store / Google Play Listings.
 
 | Datei | Zweck |
 |---|---|
-| `app-icon-1024.png` | App-Icon 1024×1024 (Apple App Store Pflichtformat; Play Store nutzt 512×512 → `apps/mobile/web/icons/Icon-512.png`) |
+| `app-icon-1024.png` | App-Icon 1024×1024 (Apple App Store Pflichtformat; Play Store nutzt 512×512 → `apps/kunden-app/web/icons/Icon-512.png`) |
 | `store-listing.md` | Listing-Texte: Name, Untertitel, Beschreibung, Keywords, Datenschutz-Angaben, Review-Hinweise |
 | `screenshots/iphone_*.png` | 4 Motive im iPhone-6,7"-Format (1290×2796): Login, Kundenbereich, Finanzen, Verwaltung |
 | `screenshots/ipad_*.png` | dieselben Motive im iPad-12,9"-Format (2048×2732) |

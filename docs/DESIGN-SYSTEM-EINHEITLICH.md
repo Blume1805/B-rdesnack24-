@@ -8,7 +8,7 @@ gemeinsamen Vertrag fest.
 
 | Oberfläche | Technik | Inhalt |
 |---|---|---|
-| **Gesellschafter-App** | Flutter, `apps/mobile` | Verwaltung (19 Screens), Administration (5), Finanzen (2), Freigaben (1), Recht (1), Anmeldung (4) — **plus ein Kundenbereich mit 18 Screens** |
+| **Gesellschafter-App** | Flutter, `apps/gesellschafter-app` | Verwaltung (19 Screens), Administration (5), Finanzen (2), Freigaben (1) — Recht (1) und Anmeldung (4) kommen aus `packages/bs24_kern`. Der Kundenbereich ist seit 07.09.2026 eine eigene App (`apps/kunden-app`). |
 | **Kunden-App** | Lovable A, „BÖRDESNACK Hub" | Privatpersonen-Bereich + Unternehmensbereich (`/app/unternehmen/*`) |
 | **Partner-Portal** | Lovable B | Firmenkunden: Dashboard, Firma, Kampagnen, Kontoauszug, Verträge |
 
