@@ -206,15 +206,21 @@ grant execute on function public.purchase_donation_for(uuid, numeric) to authent
 -- Wirkung ist dieselbe -- die Leseregel filtert auf `deleted_at is null`,
 -- und vote_donation_cause verlangt `status = 'active'`.
 
+-- Bewusst OHNE `deleted_at is null` in der Bedingung: in der Produktion
+-- sind die drei bereits weggeraeumt, tragen aber weiterhin
+-- `status = 'active'`. Sichtbar sind sie dadurch nicht (jede Leseregel
+-- filtert auf `deleted_at is null`), aber der Halbzustand faellt frueher
+-- oder spaeter jemandem auf die Fuesse. So endet die Migration ueberall
+-- im selben Zustand und laesst sich beliebig oft anwenden.
 update public.donation_causes
    set status = 'archived',
        deleted_at = coalesce(deleted_at, now())
- where deleted_at is null
-   and title in (
+ where title in (
      'Tafel Magdeburg',
      'Kinderhospiz Magdeburger Elbland',
      'Feuerwehr Sülzetal'
-   );
+   )
+   and (status is distinct from 'archived' or deleted_at is null);
 
 -- ── 5) Drei Demo-Nachrichten, die einen Betrieb behaupten ────────────
 --

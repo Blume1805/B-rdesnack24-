@@ -23,6 +23,11 @@ Die Anwendung gliedert sich in drei logisch getrennte Bereiche mit eigenen Rolle
 | CI/CD          | GitHub Actions |
 | Hosting        | Supabase (EU), Hostinger (Domain/Web) |
 
+## Offene Punkte
+
+Was noch zu tun ist und bei wem es liegt:
+[`docs/betrieb/AUFGABEN-PHILIPP.md`](docs/betrieb/AUFGABEN-PHILIPP.md).
+
 ## Architektur
 
 Clean Architecture + Feature-First + DDD. Siehe [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) und die

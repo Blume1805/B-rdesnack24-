@@ -139,6 +139,9 @@ abgeleitet hatte.
 
 ## Offene Punkte vor dem Livegang
 
+Sie stehen zusammen mit allem anderen in
+[`docs/betrieb/AUFGABEN-PHILIPP.md`](../../docs/betrieb/AUFGABEN-PHILIPP.md).
+
 Die ersten beiden sind **blockierend** — ohne sie darf die Seite nicht
 erreichbar sein.
 
