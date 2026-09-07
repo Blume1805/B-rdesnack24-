@@ -118,3 +118,25 @@ jobs:
       - name: RLS-/Permission-Tests (pgTAP)
         # Vorerst nicht-blockierend, bis gegen ein Live-Projekt verifiziert.
         run: supabase test db || true
+
+  landing:
+    name: Landingpage (Kontrast · Rechtstexte)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kontrastprobe (WCAG 2.1 AA)
+        run: python3 scripts/landing_kontrast.py
+      # Die Rechtsseiten sind erzeugt, nicht gepflegt. Weicht die Ausgabe von
+      # dem ab, was im Repo liegt, hat jemand entweder den Quelltext
+      # geaendert ohne neu zu erzeugen, oder die HTML-Datei von Hand
+      # angefasst. Beides fuehrt zu zwei Staenden eines Rechtstextes.
+      - name: Rechtsseiten neu erzeugen
+        run: python3 scripts/rechtstexte_zu_html.py
+      - name: Abweichung melden
+        run: |
+          if ! git diff --quiet -- apps/landing; then
+            echo "::error::Die erzeugten Rechtsseiten weichen von docs/rechtstexte/ ab."
+            git diff --stat -- apps/landing
+            exit 1
+          fi
+          echo "Rechtsseiten sind auf dem Stand von docs/rechtstexte/."

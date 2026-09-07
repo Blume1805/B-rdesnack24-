@@ -30,6 +30,7 @@ apps/kunden-app/            Kunden-App (Android/iOS/Web) — Store-App
 apps/gesellschafter-app/    Gesellschafter-App (Android/iOS) — Direktinstallation, kein Store
   lib/features/{management,finance,admin,approvals}/
   lib/features/home/        interne Shell
+apps/landing/               Landingpage boerdesnack24.de (statisch, ohne Bauwerkzeug)
 packages/bs24_kern/         Gemeinsamer Kern beider Apps
   lib/core/                 config · di · error · theme · security · widgets · router (Regeln)
   lib/features/auth/        Anmeldung, MFA, Passwort

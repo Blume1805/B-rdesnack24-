@@ -31,6 +31,7 @@ Architecture Decision Records unter [`docs/adr/`](docs/adr/).
 ```
 apps/kunden-app/          Kunden-App (Store-App; domain / data / presentation je Feature)
 apps/gesellschafter-app/  Gesellschafter-App (nicht im Store, Direktinstallation)
+apps/landing/             Landingpage boerdesnack24.de (statisch, ohne Bauwerkzeug)
 packages/bs24_kern/       Gemeinsamer Kern: Anmeldung, Sicherheit, Design-System,
                           Rechtstexte, Lokalisierung
 supabase/                 Migrationen, Edge Functions, Seeds
