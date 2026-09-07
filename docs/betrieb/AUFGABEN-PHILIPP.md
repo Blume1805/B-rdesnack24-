@@ -38,18 +38,31 @@ ob sie im Suelzetal sitzt oder in der weiteren Region. Format egal
 
 Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
-### 1.2 Hosting der Landingpage und die Datenschutzerklaerung
+### 1.2 Domain verbinden und die Datenschutzerklaerung nachziehen
 
-- [ ] Auftragsverarbeitungsvertrag nach Art. 28 DSGVO mit Hostinger schliessen
-- [ ] Im Hostinger-Konto einen EU-Serverstandort waehlen
-- [ ] Datenschutzerklaerung um den Hoster und die Serverprotokolle ergaenzen
-- [ ] Verzeichnis der Verarbeitungstaetigkeiten nachziehen
+**Entscheidung 07.09.2026:** Die Landingpage entsteht und laeuft in
+**Lovable**. Hostinger liefert nur die **Domain** — nicht das Hosting. Das
+ist der einfachste Weg fuer dich: Aenderungen sagst du Lovable oder mir,
+danach veroeffentlichen. Kein Hochladen, kein Bauwerkzeug, keine Handarbeit.
 
-Die Datenschutzerklaerung v6 nennt in Abschnitt 4 und 5 ausdruecklich
-**GitHub Pages** als Ausliefernden und begruendet damit den
-Drittlandtransfer. Laeuft `boerdesnack24.de` bei Hostinger, ist das
-falsch. Die Aenderung am Rechtstext braucht eine eigene Migration mit
-geprueften Ankertexten — das mache ich, sobald der Hoster feststeht.
+- [ ] **In Lovable veroeffentlichen** und die Domain `boerdesnack24.de`
+      im Projekt verbinden (Projekt → Settings → Domains). Lovable nennt
+      dir dort die DNS-Eintraege.
+- [ ] **Bei Hostinger** genau diese DNS-Eintraege setzen. Nur DNS — kein
+      Webhosting-Paket noetig.
+- [ ] **Datenschutzerklaerung ergaenzen:** Sie nennt in Abschnitt 4 und 5
+      ausdruecklich **GitHub Pages** als Ausliefernden und begruendet damit
+      den Drittlandtransfer. Fuer die Landingpage stimmt das nicht mehr —
+      dort liefert Lovable aus. Das ist eine Aenderung an einem Rechtstext
+      und braucht eine eigene Migration mit geprueften Ankertexten; die
+      mache ich, sobald die Domain verbunden ist und feststeht, wer
+      tatsaechlich ausliefert.
+- [ ] **Auftragsverarbeitungsvertrag** nach Art. 28 DSGVO mit dem
+      Ausliefernden (Lovable) schliessen.
+- [ ] Verzeichnis der Verarbeitungstaetigkeiten nachziehen.
+
+Die Web-Demo der Kunden-App bleibt davon unberuehrt — die laeuft weiter
+ueber GitHub Pages, und dafuer stimmt der Text.
 
 Quelle: `apps/landing/README.md`, `docs/rechtstexte/datenschutz.md`
 
@@ -153,4 +166,6 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 07.09.2026 | Drei Demo-Nachrichten, die einen laufenden Betrieb behaupteten, auf unveroeffentlicht gesetzt |
 | 07.09.2026 | Abstimmung bleibt fuer jedes angemeldete Konto offen (Wahrheitsschicht korrigiert) |
 | 07.09.2026 | Trennung in Kunden- und Gesellschafter-App; keine internen Pfade mehr im Kunden-Bundle |
-| 07.09.2026 | Landingpage `apps/landing/` angelegt |
+| 07.09.2026 | Landingpage `apps/landing/` angelegt — jetzt Inhalts- und Pruefvorlage, nicht die ausgelieferte Seite |
+| 07.09.2026 | Skill `scrollcraft` in den Lovable-Workspace uebertragen |
+| 07.09.2026 | Eigenes Lovable-Projekt fuer die Landingpage angelegt und beauftragt |

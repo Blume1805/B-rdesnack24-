@@ -1,9 +1,21 @@
 ---
 name: scrollcraft
-description: Konzipiert, baut und prüft Scroll-Storytelling für die Landingpage von Bördesnack24 — Szenenmodell, Wahrheitsschicht, Bewegungsableitung, Fallbacks und Release-Audit. Immer verwenden, wenn an der Landingpage etwas entsteht oder geändert wird: neue Abschnitte, Animationen, Scroll-Effekte, Produktdarstellung, Geschäftsmodell-Visualisierung, Hero, CTA, Storyboard, Redesign oder Performance-Arbeit. Auch dann verwenden, wenn nur ein Text, eine Zahl oder ein Bild geändert wird, weil jede Aussage gegen die Wahrheitsschicht und die Zeitform zu prüfen ist. Trigger zusätzlich bei "Landingpage", "Scrollytelling", "Scroll-Animation", "Storyboard", "Szene", "wirkt nach KI", "hochwertiger machen".
+description: >-
+  Konzipiert, baut und prueft Scroll-Storytelling fuer die Landingpage von
+  Boerdesnack24 — Szenenmodell, Wahrheitsschicht, Bewegungsableitung,
+  Fallbacks und Release-Audit. Immer verwenden, wenn an der Landingpage
+  etwas entsteht oder geaendert wird, also bei neuen Abschnitten,
+  Animationen, Scroll-Effekten, Produktdarstellung,
+  Geschaeftsmodell-Visualisierung, Hero, CTA, Storyboard, Redesign oder
+  Performance-Arbeit. Auch dann verwenden, wenn nur ein Text, eine Zahl
+  oder ein Bild geaendert wird, weil jede Aussage gegen die
+  Wahrheitsschicht und die Zeitform zu pruefen ist. Trigger zusaetzlich bei
+  Landingpage, Scrollytelling, Scroll-Animation, Storyboard, Szene, wirkt
+  nach KI, hochwertiger machen.
 ---
 
-> **FASSUNG FÜR DEN LOVABLE-WORKSPACE — komprimiert am 05.09.2026.**
+> **FASSUNG FÜR DEN LOVABLE-WORKSPACE — komprimiert am 05.09.2026,
+> aktualisiert am 07.09.2026.**
 >
 > Das Original besteht aus einer `SKILL.md` und elf Begleitdateien
 > (`references/`, `checklists/`, `scripts/`). Lovables
@@ -31,7 +43,7 @@ description: Konzipiert, baut und prüft Scroll-Storytelling für die Landingpag
 
 # scrollcraft
 
-Version 1.0 — 06.09.2026. Installation: `INSTALL.md`. Änderungen: `CHANGELOG.md`.
+Version 1.0 — 06.09.2026. Zielumgebung aktualisiert am 07.09.2026.
 
 Erzählt die Geschichte von Bördesnack24 im Scrollverhalten der Landingpage —
 und verhindert dabei, dass etwas behauptet wird, das nicht stimmt.
@@ -132,9 +144,22 @@ nicht, wird sie nicht geschrieben — sie wird erfragt.
 ## 6 Harte Regeln
 
 **Technik**
-- Statischer Onepager auf Hostinger, **kein Build-System**. Kein npm, kein
-  Bundler, keine Animationsbibliothek. GSAP, Lenis, Framer Motion,
-  Locomotive scheiden aus — nicht als Policy, sondern mangels Build-Schritt.
+
+> **Zielumgebung, Stand 07.09.2026:** Die Landingpage entsteht und wird
+> gepflegt in **Lovable** und laeuft unter der bei Hostinger erworbenen
+> Domain `boerdesnack24.de`. Ein Build-Schritt existiert damit. **Alle
+> technischen Regeln unten gelten trotzdem unveraendert** — sie stehen
+> nicht wegen des fehlenden Bundlers da, sondern wegen des Zielgeraets:
+> ein Telefon am Bahnhof Osterweddingen im gedrosselten Mobilnetz.
+> Die Referenzfassung der Seite liegt im Repository unter `apps/landing/`
+> (Inhalt, Rechtstexte, Kontrastwerte); sie ist die Vorlage, nicht eine
+> zweite Website.
+
+- Keine Animationsbibliothek. GSAP, Lenis, Framer Motion, Locomotive
+  scheiden aus — sie kosten Datenbudget und loesen ein Problem, das CSS
+  bereits loest. Erlaubt: `position: sticky`, `clip-path`, `mask`, Custom
+  Properties, `IntersectionObserver`, `animation-timeline: view()` als
+  Progressive Enhancement.
 - **Genau ein** globaler Scroll-Handler, rAF-gedrosselt, passiv. Nicht keiner.
 - `overflow-x: clip`, niemals `hidden` — letzteres bricht `position: sticky`.
 - `will-change` nur während der Animation, nie dauerhaft.
@@ -397,8 +422,9 @@ Betreiber von Bahnhöfen, Freibädern, Sporthallen, Firmengeländen, Campingplä
 
 ### 2 Privatkunde / Community
 - **Ihre Frage:** Wo, wann, was — und was passiert mit meinem Geld?
-- **Ihr Nutzen:** Versorgung außerhalb der Öffnungszeiten, 5 % für die Region,
-  Mitbestimmung beim Empfänger.
+- **Ihr Nutzen:** Versorgung außerhalb der Öffnungszeiten, 5 % vom Nettopreis
+  jedes Produkts für die Region, Mitbestimmung beim Empfänger (kostenloses
+  Konto genügt).
 - **Nicht sagen:** vorhandene Verfügbarkeit, Sortiment im Präsens.
 - **CTA:** „App vormerken" — bis zur Store-Freigabe kein Download.
 
@@ -410,8 +436,10 @@ Regionale Betriebe: Handwerk, Gastronomie, Autohaus, Physiotherapie.
 - **CTA:** „Werbefläche anfragen" — Konditionen auf Anfrage.
 
 ### 4 Abonnent
-- **Ihr Nutzen:** Vorteile, Punkte, Mitbestimmung beim Spendenempfänger.
-- **Pflicht:** Kopplung der Abstimmung an das kostenpflichtige Abo transparent machen.
+- **Ihr Nutzen:** Vorteile und Punkte. **Nicht** die Mitbestimmung beim
+  Spendenempfänger — die gibt es seit 07.09.2026 für jedes angemeldete
+  Konto, auch kostenlos (siehe Anhang A, Abschnitt 4). Sie als Abo-Vorteil
+  zu verkaufen wäre falsch.
 - **Nicht sagen:** Funktionen, die nicht ausgeliefert sind.
 - **CTA:** ergibt sich aus 2, kein eigener Strang.
 
@@ -466,8 +494,8 @@ Aufhänger: der Claim liefert die Dreiteilung.
 | 01 | Ankunft | alle | Genießen. Geben. Gutes tun. | Claim + Bördeumriss | 01 Reveal |
 | 02 | Der Automat | 2 | Dort versorgen, wo abends nichts offen hat | Automat | 12 Maskenreveal / 10 Zoom |
 | 03 | Genießen | 2 | Snacks, Getränke, Eis, Heißgetränke — geplantes Sortiment | Produkte | 13 Produktwechsel, später 14 360° |
-| 04 | Geben | 2 | 5 % jedes Warenverkaufs bleiben im Sülzetal | Anteilsbalken | 18 Anteil + 04 Text-Highlight |
-| 05 | Gutes tun | 2 → 4 | Wer mitmacht, entscheidet mit — Abstimmung im Abo | App + Region | 17 physisch → digital |
+| 04 | Geben | 2 | 5 % vom Nettopreis jedes Produkts bleiben in der Region | Anteilsbalken | 18 Anteil + 04 Text-Highlight |
+| 05 | Gutes tun | 2 | Wer mitmacht, entscheidet mit — kostenloses Konto genügt | App + Region | 17 physisch → digital |
 | 06 | Ein Automat kann mehr | 1 + 3 | Fläche wird Versorgung und Sichtbarkeit | Automat mit Ebenen | 06 Sticky-Bühne |
 | 07 | Ihre Fläche | **1** | Versorgung ohne eigenes Personal | Standortkarte | 07 Horizontale Sequenz |
 | 08 | Abschluss | 1 + 2 | zwei klare Wege | Automat + CTA | 05 Mikrointeraktion |
@@ -625,8 +653,9 @@ FLIP-artige Übergabe.
 
 **18 Anteilsdarstellung** — 5 % lösen sich aus 100 % und wandern zur Region.
 Höhepunkt der Seite, längste Haltezeit.
-Die Grafik muss die wirtschaftliche Aussage korrekt abbilden: Bezugsgröße
-sichtbar, sobald sie in `truth.md` bestätigt ist.
+Die Grafik muss die wirtschaftliche Aussage korrekt abbilden. Die
+Bezugsgröße steht seit 07.09.2026 fest und gehört sichtbar dazu:
+**Nettopreis des jeweiligen Produkts**, nicht der Bruttobetrag des Kaufs.
 
 ---
 
@@ -661,15 +690,27 @@ Mehr als acht aktive Muster auf einer Seite gelten als Befund im AI-Look-Audit.
 
 ## Zielumgebung
 
-Statischer Onepager, Upload nach `public_html` bei Hostinger, Formular über
-PHPMailer. **Kein Build-System, kein npm, kein Bundler.**
+**Stand 07.09.2026:** Die Seite entsteht und wird gepflegt in **Lovable**
+und läuft unter der bei Hostinger erworbenen Domain `boerdesnack24.de`.
+Ein Build-Schritt existiert damit — die frühere Annahme („statischer
+Onepager, Upload nach `public_html`, Formular über PHPMailer, kein
+Bundler") gilt nicht mehr.
 
-Daraus folgt zwingend:
+**Das Formular geht nicht über PHPMailer**, sondern auf die vorhandene
+Supabase-Funktion `advertising_inquiry_submit` (Honigtopf, Drossel je
+Anschluss, Pflichtangaben und Einwilligung serverseitig geprüft). Der
+`anon`-Schlüssel darf im Browser stehen, der `service_role`-Schlüssel
+niemals.
+
+Die Referenzfassung liegt im Repository unter `apps/landing/` — Inhalt,
+Rechtstexte, Kontrastwerte. Sie ist die Vorlage, nicht eine zweite Website.
+
+Alles Folgende gilt unverändert weiter. Es steht nicht wegen des fehlenden
+Bundlers da, sondern wegen des Zielgeräts:
 
 - Keine Animationsbibliothek. GSAP, ScrollTrigger, Lenis, Framer Motion,
-  Locomotive Scroll scheiden aus — nicht als Geschmacksfrage, sondern weil
-  kein Build-Schritt existiert und CDN-Einbindung das Datenbudget im
-  ländlichen Mobilfunk sprengt.
+  Locomotive Scroll scheiden aus — sie kosten Datenbudget im ländlichen
+  Mobilfunk und lösen ein Problem, das CSS bereits löst.
 - Erlaubt: CSS `position: sticky`, `clip-path`, `mask`, Custom Properties,
   IntersectionObserver, `scroll-timeline` als Progressive Enhancement.
 - **Genau ein** globaler Scroll-Handler, rAF-gedrosselt, `{passive:true}`.
@@ -944,7 +985,7 @@ sondern beendet die Arbeit an der Szene.
 
 - [ ] Die **riskanteste** Szene gebaut, nicht die attraktivste
   (höchste technische Unsicherheit × höchste inhaltliche Wichtigkeit)
-- [ ] Isoliert gebaut, nicht in `public_html`
+- [ ] Isoliert gebaut, nicht in der veröffentlichten Fassung
 - [ ] Baseline der bestehenden Seite gemessen und abgelegt
 - [ ] Prototyp gegen Baseline gemessen
 - [ ] Alle sieben Varianten geprüft
@@ -1088,7 +1129,10 @@ maschinell prüfbar ist; der Rest von Hand.
 - [ ] Claim korrekt: Genießen. Geben. Gutes tun.
 - [ ] Voice nach `boerdesnack24-design`
 - [ ] Keine erfundene Leistung, kein erfundener Partner
-- [ ] Spendenmodell: Kopplung der Abstimmung ans Bezahl-Abo transparent
+- [ ] Spendenmodell: 5 % vom **Nettopreis des jeweiligen Produkts**, nicht
+      vom Bruttobetrag des Kaufs; Empfängerkreis „aus der Region", nicht
+      „aus dem Sülzetal"; die Abstimmung ist **nicht** an das Bezahl-Abo
+      gekoppelt
 - [ ] Bildsprache authentisch, KI-Anteil dokumentiert
 
 ## AI-Look-Audit

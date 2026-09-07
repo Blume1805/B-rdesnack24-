@@ -1,5 +1,30 @@
 # Auftrag: Landingpage als Scroll-Erzählung
 
+> **Erledigt und überholt — 07.09.2026.**
+>
+> Dieser Auftrag wurde **nie an Projekt A geschickt**. Abschnitt 1 stellt die
+> Frage nach der Zielumgebung und verbietet, sie selbst zu entscheiden.
+> Philipp hat sie am 07.09.2026 beantwortet:
+>
+> * **Domain** `boerdesnack24.de` bei Hostinger
+> * **Frontend** entsteht und wird gepflegt in **Lovable**
+> * **Backend** über Claude Code und Supabase
+> * spätere Änderungen ebenfalls über Claude bzw. Lovable
+>
+> Daraus folgte: ein **eigenes** Lovable-Projekt nur für die Landingpage
+> (`0c068d85-ef58-4450-a511-3e7ac1d0446d`), nicht Projekt A — das ist die
+> App und enthält den Gesellschafterbereich, der seit der Trennung in zwei
+> Apps ohnehin nicht mehr dorthin gehört.
+>
+> Der Skill `scrollcraft` liegt seit dem 07.09.2026 im Workspace
+> (`skills/scrollcraft/SKILL.md`, 43,7 KB). Der Auftrag an den Agenten ist
+> in der Projekterstellung aufgegangen; die inhaltlichen Vorgaben stehen
+> jetzt im Skill selbst, nicht mehr in diesem Dokument.
+>
+> **Was hier steht, bleibt als Herleitung lesenswert** — insbesondere
+> Abschnitt 0 mit den acht Abweichungen zwischen Masterprompt und Skill.
+> Als Arbeitsanweisung ist es abgelöst.
+
 An den Lovable-Agenten, Projekt A. Stand 05.09.2026.
 **Ersetzt** `AUFTRAG-2026-09-LANDINGPAGE-BEWEGUNG.md` und
 `NACHTRAG-2026-09-LANDINGPAGE-SECHS-PUNKTE.md` — was dort steht, ist in

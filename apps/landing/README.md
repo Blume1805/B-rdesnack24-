@@ -1,4 +1,21 @@
-# apps/landing — die Seite unter boerdesnack24.de
+# apps/landing — die Referenzfassung der Seite boerdesnack24.de
+
+> **Rollenwechsel am 07.09.2026.** Diese Seite ist **nicht mehr** die
+> ausgelieferte Website. Philipp hat entschieden: das Frontend entsteht und
+> wird gepflegt in **Lovable** (eigenes Projekt
+> `0c068d85-ef58-4450-a511-3e7ac1d0446d`), die Domain `boerdesnack24.de`
+> zeigt per DNS dorthin, Hostinger liefert nur die Domain.
+>
+> Was hier liegt, bleibt trotzdem wichtig — als **Vorlage und Pruefstelle**:
+>
+> * der geprueste Wortlaut aller acht Szenen (Wahrheitsschicht, Zeitform)
+> * Impressum und Datenschutz, erzeugt aus `docs/rechtstexte/` — eine
+>   Quelle, kein zweiter Stand
+> * die Kontrastprobe (`scripts/landing_kontrast.py`, laeuft im CI)
+> * eine lauffaehige Notfallfassung, falls Lovable einmal nicht verfuegbar
+>   ist
+>
+> **Sie ist keine zweite Website.** Sie wird nirgends veroeffentlicht.
 
 Statischer Onepager. Kein Bauwerkzeug, kein Framework, keine
 Animationsbibliothek: drei Dateien plus zwei erzeugte Rechtsseiten. Was im
