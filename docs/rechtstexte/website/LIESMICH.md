@@ -61,9 +61,11 @@ vorliegen hat.
 Ausserdem muss gelten:
 
 1. **Der Auftragsverarbeitungsvertrag mit Hostinger ist geschlossen.**
-   Der Text behauptet ihn. Ohne ihn ist das eine unrichtige Angabe
-   gegenüber jedem Besucher — und der Grund, aus dem Lovable als Hoster
-   ausgeschieden ist, gilt dann genauso hier.
+   Dass Hostinger einen anbietet, steht in deren AGB (von Philipp am
+   08.09.2026 nachgelesen). Zu klären bleibt, ob er automatisch mit den
+   AGB zustande kommt oder gesondert angefordert werden muss. Der Text
+   der Erklärung behauptet ihn — solange er nicht besteht, ist das eine
+   unrichtige Angabe gegenüber jedem Besucher.
 2. **Das Rechenzentrum steht in der EU.** Sonst fehlt dem Text der
    Abschnitt zum Drittlandtransfer.
 3. **Auf der ausgelieferten Seite ist kein Formular.** Steht doch eines

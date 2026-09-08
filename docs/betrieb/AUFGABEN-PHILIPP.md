@@ -77,14 +77,17 @@ App an.
       keinen laufenden Server. Fuer die beiden Apps wird bei
       Hostinger gar nichts gebraucht.
       Begruendung und Vergleich: `docs/betrieb/HOSTING-WAS-WIRD-GEBRAUCHT.md`
-- [ ] **Vor dem Kauf pruefen:** Gibt es bei Hostinger einen
-      Auftragsverarbeitungsvertrag nach Art. 28 DSGVO? Wenn nein,
-      gilt derselbe Einwand wie bei Lovable und wir brauchen einen
-      anderen Anbieter.
+- [x] ~~Gibt es bei Hostinger einen AVV nach Art. 28 DSGVO?~~
+      **Ja** — laut AGB, von dir am 08.09.2026 nachgelesen. Damit
+      faellt der Einwand weg, an dem Lovable gescheitert ist.
+- [ ] **Klaeren, ob der AVV automatisch mit den AGB zustande kommt**
+      oder gesondert angefordert werden muss. Beides ist ueblich;
+      im zweiten Fall ist er ohne die Anforderung nicht geschlossen.
+- [ ] **Datierte Kopie des AVV sichern** (die Fassung, die beim
+      Vertragsschluss galt). AGB aendern sich — fuer den Nachweis
+      zaehlt das Dokument, nicht der Link (Art. 5 Abs. 2 DSGVO).
 - [ ] **Sind Postfaecher im Premium-Tarif enthalten?** Nur wichtig,
       falls du `info@boerdesnack24.de` willst.
-- [ ] **Auftragsverarbeitungsvertrag mit Hostinger** schliessen. Ohne ihn
-      gilt genau der Einwand, an dem Lovable gescheitert ist.
 - [ ] **Rechenzentrum in der EU** waehlen bzw. pruefen, welches dein
       Tarif nutzt.
 - [ ] **Drei Angaben aus dem Hostinger-Vertrag** an mich: die Firmierung,

@@ -88,19 +88,37 @@ Falls links von Premium noch ein kleinerer Tarif steht (ein Tarif für
 eine einzelne Website), tut der es genauso, sofern er Postfächer
 enthält.
 
-### Drei Punkte vor dem Klick auf „Plan wählen"
+### Vor dem Klick auf „Plan wählen"
 
-1. **Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.** Das ist der
-   Grund, aus dem Lovable als Hoster ausgeschieden ist. Gibt es bei
-   Hostinger keinen, ist auch Hostinger keine Lösung — dann lieber vor
-   dem Kauf beim Support nachfragen als danach.
-2. **Rechenzentrum in der EU.** Der Standort wird bei der Einrichtung
-   gewählt. Steht der Server ausserhalb, braucht die
-   Datenschutzerklärung einen Abschnitt zum Drittlandtransfer, den sie
-   derzeit nicht hat.
-3. **Sind im Premium-Tarif Postfächer enthalten?** Auf dem Screenshot
-   ist die Zeile nicht zu sehen. Falls `info@boerdesnack24.de` gewünscht
-   ist, vorher prüfen.
+**Der Auftragsverarbeitungsvertrag ist geklärt.** Philipp hat am
+08.09.2026 die AGB gelesen: Hostinger sieht darin eine Auftragsver-
+arbeitung nach Art. 28 DSGVO vor. Damit fällt der Einwand weg, an dem
+Lovable gescheitert ist. Ich konnte das nicht selbst nachlesen —
+hostinger.com ist aus meiner Umgebung gesperrt —, die Feststellung
+stammt aus der Primärquelle und von demjenigen, der den Vertrag
+schliesst.
+
+Zwei Dinge gehören trotzdem noch dazu:
+
+1. **Kommt der Vertrag automatisch mit den AGB zustande, oder muss er
+   gesondert angefordert werden?** Beides ist üblich. Ein AVV in den AGB
+   ist wirksam — Art. 28 Abs. 9 DSGVO lässt elektronische Form zu —,
+   aber wenn Hostinger eine gesonderte Erklärung verlangt, ist er ohne
+   sie eben nicht geschlossen.
+2. **Eine datierte Kopie sichern**, in der Fassung, die beim
+   Vertragsschluss galt. AGB ändern sich. Wer später nachweisen muss,
+   was vereinbart war, braucht das Dokument, nicht den Link
+   (Rechenschaftspflicht, Art. 5 Abs. 2 DSGVO).
+
+Offen bleibt unabhängig davon:
+
+3. **Rechenzentrum in der EU.** Der AVV sagt nichts darüber, wo die
+   Server stehen — das wird bei der Einrichtung gewählt. Steht der
+   Server ausserhalb, braucht die Datenschutzerklärung einen Abschnitt
+   zum Drittlandtransfer, den sie nicht hat.
+4. **Sind im Premium-Tarif Postfächer enthalten?** Auf dem Screenshot
+   ist die Zeile nicht zu sehen. Nur wichtig, falls
+   `info@boerdesnack24.de` gewünscht ist.
 
 Nicht ausschlaggebend: „Domain – 1 Jahr kostenlos". `boerdesnack24.de`
 ist bereits gekauft.
