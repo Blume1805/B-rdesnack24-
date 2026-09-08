@@ -271,6 +271,10 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 | Bestätigte Standorte | **0** |
 | App im App Store / Play Store | **nein** |
 | Echte Fotos von Automat oder Standort | **nein** |
+| Produkte in der Planungsliste | **62** (Getränke 26, Eis 20, Süßwaren 13, Snacks 3) |
+| Davon mit Nährwerten oder Allergenen | **0** |
+| Heißgetränke-Produkte | **0** (Automat geplant, Sortiment offen) |
+| Abo-Modelle | **zwei**: 0,99 EUR/Monat, 9,99 EUR/Jahr — **kein Lifetime** |
 
 ### Was heute erlaubt ist
 
@@ -279,6 +283,9 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 | „Genießen. Geben. Gutes tun." | JA, Haltungsversprechen | — |
 | „24/7 verfügbar" | NEIN | erster Automat in Betrieb |
 | „62 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
+| Namen von Herstellern oder Marken | NEIN | schriftliche Liefervereinbarung |
+| „Lifetime-Abo" in jeder Form | NEIN | Entscheidung Philipp, derzeit nicht angeboten |
+| „Nährwerte zu jedem Produkt" | NEIN | Angaben sind erfasst |
 | „App herunterladen" | NEIN, nur „App vormerken" | Store-Freigabe |
 | „Ab 2027 in Osterweddingen" | JA, als Plan gekennzeichnet | — |
 | „5 % vom Nettopreis jedes Produkts gehen an gemeinnützige Organisationen aus der Region" | JA | — |
@@ -493,9 +500,10 @@ Aufhänger: der Claim liefert die Dreiteilung.
 |---|---|---|---|---|---|
 | 01 | Ankunft | alle | Genießen. Geben. Gutes tun. | Claim + Bördeumriss | 01 Reveal |
 | 02 | Der Automat | 2 | Dort versorgen, wo abends nichts offen hat | Automat | 12 Maskenreveal / 10 Zoom |
-| 03 | Genießen | 2 | Snacks, Getränke, Eis, Heißgetränke — geplantes Sortiment | Produkte | 13 Produktwechsel, später 14 360° |
+| 03 | Genießen | 2 | Getränke 26, Eis 20, Süßwaren 13, Snacks 3 — geplantes Sortiment | Produkte | 13 Produktwechsel, später 14 360° |
 | 04 | Geben | 2 | 5 % vom Nettopreis jedes Produkts bleiben in der Region | Anteilsbalken | 18 Anteil + 04 Text-Highlight |
 | 05 | Gutes tun | 2 | Wer mitmacht, entscheidet mit — kostenloses Konto genügt | App + Region | 17 physisch → digital |
+| 05a | Kostenlos gegen Abo | 4 | Kostenlos reicht, das Abo spart | Vergleichstabelle | 01 Reveal, sonst nichts |
 | 06 | Ein Automat kann mehr | 1 + 3 | Fläche wird Versorgung und Sichtbarkeit | Automat mit Ebenen | 06 Sticky-Bühne |
 | 07 | Ihre Fläche | **1** | Versorgung ohne eigenes Personal | Standortkarte | 07 Horizontale Sequenz |
 | 08 | Abschluss | 1 + 2 | zwei klare Wege | Automat + CTA | 05 Mikrointeraktion |
