@@ -62,7 +62,16 @@ class WillkommenHeader extends StatelessWidget {
             children: [
               const _BoerdeMitAutomat(groesse: 132),
               const SizedBox(height: AppSpacing.s4),
-              const WordmarkLarge(size: 22),
+              // Die Wortmarke ist eine Row mit fester Schriftgroesse und
+              // laeuft unter 320 Punkten Breite rechts heraus. Das ist
+              // kein Randfall: wer unter Android "Anzeigegroesse: sehr
+              // gross" stellt, landet auf einem 360-Punkte-Geraet bei
+              // rund 300. scaleDown verkleinert nur, wenn der Platz
+              // fehlt, und laesst den Normalfall unveraendert.
+              const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: WordmarkLarge(size: 22),
+              ),
               const SizedBox(height: AppSpacing.s2),
               // Der Claim. Gold auf #0C0A07 sind 12,1:1 — deutlich über den
               // 4,5:1, die WCAG 1.4.3 verlangt.

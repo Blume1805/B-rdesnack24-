@@ -64,6 +64,16 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('sehr schmal: 280 Punkte', (tester) async {
+      // Kein theoretischer Fall: unter Android "Anzeigegröße: sehr groß"
+      // schrumpft ein 360-Punkte-Gerät auf rund 300 Punkte. Die Wortmarke
+      // ist eine Row mit fester Schriftgröße und lief hier rechts heraus.
+      viewport(tester, const Size(280, 2400));
+      await tester.pumpWidget(maske());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('Telefon im Querformat', (tester) async {
       // Querformat wird fast immer vergessen und bricht zuerst.
       viewport(tester, const Size(740, 360));
