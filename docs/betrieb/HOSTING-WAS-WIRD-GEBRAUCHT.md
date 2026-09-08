@@ -50,29 +50,76 @@ und würde die Datenschutzerklärung erneut ändern.
 
 ## Welches Paket für die Landingpage
 
-Die Seite ist **reiner Inhalt**: sechs Seiten, kein Formular, keine
-Anmeldung, keine Datenbank. Ausgeliefert werden fertige HTML-Dateien.
+**Empfehlung: Webhosting → Premium, 2,99 EUR/Monat.**
 
-**Nicht nötig ist „Webanwendungs-Hosting".** Das ist für Anwendungen
-gedacht, die auf dem Server laufen (Node, PHP, Python). Unsere Seite
-läuft im Browser des Besuchers, nicht auf dem Server. Wer das bucht,
-bezahlt eine Laufzeitumgebung, die absichtlich nicht benutzt wird.
+Stand 08.09.2026, aus den Screenshots der deutschen Preisseite. Preise
+sind Aktionspreise mit 48 Monaten Vorauszahlung.
 
-Das billigste gewöhnliche Webhosting genügt — **wenn** es diese vier
-Punkte erfüllt:
+| | Premium | Unlimited |
+|---|---|---|
+| Aktionspreis | 2,99 EUR/Mon | 3,99 EUR/Mon |
+| 48 Monate im Voraus | 143,52 EUR | 191,52 EUR |
+| **Verlängerung danach** | **9,99 EUR/Mon** | **16,99 EUR/Mon** |
+| Websites | 3 | unbegrenzt |
+| Speicher | 20 GB SSD | 50 GB NVMe |
+| Backups | wöchentlich | täglich |
+| CDN, E-Commerce, KI-Tools | nein | ja |
+
+Gebraucht wird **eine** Website von wenigen hundert Kilobyte. Premium
+ist damit bereits um Größenordnungen überdimensioniert; Unlimited löst
+kein Problem, das wir haben.
+
+Was in Unlimited zusätzlich steckt, brauchen wir nicht:
+
+- **Tägliche statt wöchentliche Backups.** Die Seite liegt vollständig
+  im Git-Repository. Geht auf dem Server etwas kaputt, wird sie neu
+  hochgeladen — das Backup des Hosters ist nicht die Sicherung, auf die
+  es ankommt.
+- **CDN.** Sinnvoll bei weltweitem Publikum. Unseres wohnt im Sülzetal.
+- **E-Commerce.** Es wird nichts über die Website verkauft.
+- **KI-Tools / AI Builder.** Gebaut wird in Lovable und hier.
+- **Unbegrenzte Postfächer.** Zwei Adressen genügen.
+
+**Der eigentliche Unterschied ist nicht der Aktionspreis, sondern die
+Verlängerung.** Heute trennt beide 1 EUR im Monat, ab Jahr fünf sind es
+7 EUR — rund 84 EUR im Jahr für Funktionen, die ungenutzt bleiben.
+
+Falls links von Premium noch ein kleinerer Tarif steht (ein Tarif für
+eine einzelne Website), tut der es genauso, sofern er Postfächer
+enthält.
+
+### Drei Punkte vor dem Klick auf „Plan wählen"
 
 1. **Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.** Das ist der
-   Grund, aus dem Lovable als Hoster ausgeschieden ist. Vor dem Kauf
-   prüfen, nicht danach.
-2. **Rechenzentrum in der EU** — und zwar auswählbar. Steht der Server
-   ausserhalb, braucht die Datenschutzerklärung einen ganzen Abschnitt
-   zum Drittlandtransfer.
-3. **Eigene Domain und kostenloses SSL-Zertifikat.** Ohne HTTPS zeigt
-   jeder Browser eine Warnung.
-4. **Eine Website reicht.** Mehr wird nicht gebraucht.
+   Grund, aus dem Lovable als Hoster ausgeschieden ist. Gibt es bei
+   Hostinger keinen, ist auch Hostinger keine Lösung — dann lieber vor
+   dem Kauf beim Support nachfragen als danach.
+2. **Rechenzentrum in der EU.** Der Standort wird bei der Einrichtung
+   gewählt. Steht der Server ausserhalb, braucht die
+   Datenschutzerklärung einen Abschnitt zum Drittlandtransfer, den sie
+   derzeit nicht hat.
+3. **Sind im Premium-Tarif Postfächer enthalten?** Auf dem Screenshot
+   ist die Zeile nicht zu sehen. Falls `info@boerdesnack24.de` gewünscht
+   ist, vorher prüfen.
 
-Speicherplatz, Besucherzahlen und Arbeitsspeicher sind bei dieser Seite
-kein Kriterium: Sie ist wenige hundert Kilobyte gross.
+Nicht ausschlaggebend: „Domain – 1 Jahr kostenlos". `boerdesnack24.de`
+ist bereits gekauft.
+
+### Warum nicht „Web-App Hosting"
+
+Der Menüpunkt heisst dort „Web-App Hosting" und stellt Node.js-
+Anwendungen aus GitHub bereit. Er **würde** funktionieren: das
+Lovable-Projekt ist eine Node-Anwendung, sie liesse sich direkt so
+betreiben.
+
+Trotzdem ist gewöhnliches Webhosting die bessere Wahl. Eine Seite aus
+sechs Textseiten braucht keinen laufenden Server. Was nicht läuft, kann
+nicht abstürzen, muss nicht aktualisiert werden und bietet keine
+Angriffsfläche. Statische Dateien sind ausserdem schneller als jede
+serverseitige Erzeugung.
+
+Ebenfalls nicht nötig: VPS, Cloud Hosting, WooCommerce, Managed
+WordPress. Kein WordPress im Spiel, kein Shop, kein Root-Zugriff nötig.
 
 ## Sicherheitsnetz, falls der statische Build klemmt
 

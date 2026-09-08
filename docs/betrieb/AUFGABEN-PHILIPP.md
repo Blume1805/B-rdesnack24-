@@ -69,11 +69,20 @@ Das ist sauber begruendet und macht die Seite rechtlich einfacher: Die
 Website nimmt nichts mehr entgegen, der Kunde gibt seine Daten erst in der
 App an.
 
-- [ ] **Das richtige Paket buchen.** Es genuegt das einfachste
-      gewoehnliche Webhosting — **nicht** "Webanwendungs-Hosting".
-      Fuer die beiden Apps wird bei Hostinger gar nichts gebraucht.
-      Was das Paket koennen muss, steht in
-      `docs/betrieb/HOSTING-WAS-WIRD-GEBRAUCHT.md`.
+- [ ] **Webhosting "Premium" buchen (2,99 EUR/Mon).** Nicht
+      "Unlimited": der Unterschied sind nicht die 1 EUR heute,
+      sondern 9,99 gegen 16,99 EUR bei der Verlaengerung — fuer CDN,
+      Shop-Funktion und KI-Tools, die diese Seite nicht braucht.
+      Nicht "Web-App Hosting": die Seite ist statisch und braucht
+      keinen laufenden Server. Fuer die beiden Apps wird bei
+      Hostinger gar nichts gebraucht.
+      Begruendung und Vergleich: `docs/betrieb/HOSTING-WAS-WIRD-GEBRAUCHT.md`
+- [ ] **Vor dem Kauf pruefen:** Gibt es bei Hostinger einen
+      Auftragsverarbeitungsvertrag nach Art. 28 DSGVO? Wenn nein,
+      gilt derselbe Einwand wie bei Lovable und wir brauchen einen
+      anderen Anbieter.
+- [ ] **Sind Postfaecher im Premium-Tarif enthalten?** Nur wichtig,
+      falls du `info@boerdesnack24.de` willst.
 - [ ] **Auftragsverarbeitungsvertrag mit Hostinger** schliessen. Ohne ihn
       gilt genau der Einwand, an dem Lovable gescheitert ist.
 - [ ] **Rechenzentrum in der EU** waehlen bzw. pruefen, welches dein
