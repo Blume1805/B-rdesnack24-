@@ -102,6 +102,18 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
       Quelle: `docs/COMPLIANCE.md`, Zeile 219
 - [ ] **Katalogpreise** final festlegen (die im Katalog stehen, sind
       Planwerte).
+- [ ] **Gibt es das Lifetime-Abo noch?** Auf der Landingpage taucht es
+      nicht auf, so wie du es gesagt hast, und `lifetimePubliclyOffered`
+      steht auf `false`. Im Backend ist es aber weiter vollstaendig
+      angelegt: eigener Plan, 20 Founders-Plaetze, eigene Pruefung beim
+      Abschluss — und die **App**-Fassungen von Widerrufsbelehrung und
+      Nutzungsbedingungen beschreiben es weiter (79,99 EUR einmalig).
+      Zwei Moeglichkeiten, beide sauber, aber es muss eine sein:
+      (a) das Modell bleibt in der Schublade fuer eine spaetere Aktion —
+      dann bleiben die App-Rechtstexte, wie sie sind;
+      (b) es entfaellt ganz — dann nehme ich es aus den App-Rechtstexten
+      und aus dem Backend heraus.
+      Sag mir nur (a) oder (b), den Rest mache ich.
 - [ ] **M-3 Spaltenrechte `unit_cost`.** Erst nachweisen, dass jeder
       interne Lesepfad ueber eine RPC laeuft, dann die Spalte schliessen.
       Bewusst zurueckgestellt, nicht vergessen.
@@ -143,6 +155,37 @@ Ohne die Liste fehlen ab dem ersten Verkauf die Aufzeichnungen, die
 
 ---
 
+## 4b. Zwei Funde vom 08.09.2026, die keiner Entscheidung beduerfen
+
+**Die Tabelle `machines` enthaelt vier Demo-Automaten.** „Automat 1",
+„Automat 2", „Automat 3" (alle vom 29.06.) und „Heissgetraenkeautomat"
+(18.07.), alle mit Status `active`. Es sind Seed-Daten, kein gekaufter
+Automat.
+
+Das hat zwei Folgen. Erstens wuerde die Kunden-App einem Kunden vier
+Automaten anzeigen, die es nicht gibt — dieselbe Sorte Aussage wie die
+drei Demo-Nachrichten, die am 07.09. auf unveroeffentlicht gesetzt
+wurden (§ 5 UWG). Zweitens haengt die Erinnerungsregel in `CLAUDE.md`
+genau an dieser Tabelle: sie gilt, „bis in der Tabelle `machines`
+mindestens ein aktiver Automat steht". Durch die Seed-Zeilen ist die
+Bedingung formal erfuellt, obwohl kein Automat gekauft ist — die
+Erinnerung an `AUTOMAT-INBETRIEBNAHME.md` wuerde also ausgerechnet dann
+ausbleiben, wenn sie faellig wird.
+
+Ich raeume das auf (Seed-Automaten stilllegen, Regel an ein Merkmal
+haengen, das Demo-Daten nicht ausloesen). Du musst nichts tun.
+
+**Kein einziges Produkt hat Naehrwerte oder Allergene.** Bei allen 62
+aktiven Produkten sind `energy_kcal` und `allergens` leer. Die App
+zeigt beides als Funktion, und die Nutzungsbedingungen fuehren es auf.
+Solange nichts verkauft wird, ist das folgenlos; **vor dem ersten
+Verkauf** ist es das nicht mehr (Kennzeichnungspflichten nach der LMIV,
+bei Fernabsatz vor Abschluss). Die Angaben stehen auf der Verpackung
+und muessen einmal erfasst werden — das ist Fleissarbeit, keine
+Entscheidung. Ich sage rechtzeitig Bescheid, wenn es soweit ist.
+
+---
+
 ## 5. Bei mir, nicht bei dir
 
 Damit klar ist, was du **nicht** anfassen musst:
@@ -160,6 +203,10 @@ Damit klar ist, was du **nicht** anfassen musst:
   Hanken Grotesk. Beide stehen unter der SIL Open Font License 1.1,
   Mitliefern ist also erlaubt. Rein optisch, nichts Blockierendes.
 - Landingpage nach Hostinger ausrollen, sobald 1.2 geklaert ist.
+- Seed-Automaten stilllegen und die Erinnerungsregel aus CLAUDE.md an
+  ein Merkmal haengen, das Demo-Daten nicht ausloest (siehe 4b).
+- Kuendigungsformular der Landingpage ans Backend anschliessen; die
+  Seite steht vorerst als Textseite mit E-Mail- und Postweg.
 
 ---
 
