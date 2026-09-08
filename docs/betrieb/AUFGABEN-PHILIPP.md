@@ -69,6 +69,11 @@ Das ist sauber begruendet und macht die Seite rechtlich einfacher: Die
 Website nimmt nichts mehr entgegen, der Kunde gibt seine Daten erst in der
 App an.
 
+- [ ] **Das richtige Paket buchen.** Es genuegt das einfachste
+      gewoehnliche Webhosting — **nicht** "Webanwendungs-Hosting".
+      Fuer die beiden Apps wird bei Hostinger gar nichts gebraucht.
+      Was das Paket koennen muss, steht in
+      `docs/betrieb/HOSTING-WAS-WIRD-GEBRAUCHT.md`.
 - [ ] **Auftragsverarbeitungsvertrag mit Hostinger** schliessen. Ohne ihn
       gilt genau der Einwand, an dem Lovable gescheitert ist.
 - [ ] **Rechenzentrum in der EU** waehlen bzw. pruefen, welches dein
