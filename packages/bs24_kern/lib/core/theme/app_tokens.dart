@@ -35,6 +35,11 @@ abstract final class AppColors {
   static const Color statusInfo = Color(0xFF0066CC);
 
   static const Color onDark = Colors.white;
+
+  /// Grundfläche der Hero-Bereiche (Kunden-Header, interner Header,
+  /// Anmelde- und Registrierungsseite). Stand bislang als roher Hex-Wert in
+  /// vier Dateien; wer ihn dort änderte, änderte ihn nur an einer Stelle.
+  static const Color heroInk = Color(0xFF0C0A07);
 }
 
 /// Spacing-Tokens auf 8-px-Grid.

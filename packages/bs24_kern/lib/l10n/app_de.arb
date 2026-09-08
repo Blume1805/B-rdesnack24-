@@ -18,7 +18,7 @@
   "emailInvalid": "Bitte eine gültige E-Mail eingeben.",
   "passwordTooShort": "Mindestens 10 Zeichen.",
   "passwordComplexity": "Mindestens ein Groß-, ein Kleinbuchstabe und eine Ziffer oder ein Sonderzeichen.",
-  "welcome": "Willkommen bei Bördesnack24",
+  "welcome": "Herzlich willkommen",
   "registerTitle": "Kundenkonto erstellen",
   "fullName": "Name",
   "confirmPassword": "Passwort bestätigen",
