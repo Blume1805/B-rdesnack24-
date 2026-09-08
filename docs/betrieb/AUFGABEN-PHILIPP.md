@@ -152,7 +152,13 @@ Damit klar ist, was du **nicht** anfassen musst:
   wuerde eine Sicherheitspruefung entfernen.
 - Zweiter Pruefdurchgang: Finanzlogik, FIFO/MHD, Art.-15-Export,
   KI-Register, DATEV, Wettlaufsituationen.
-- Markenschriften auf der Landingpage selbst hosten.
+- Markenschriften selbst hosten — an zwei Stellen: auf der Landingpage
+  und in den beiden Apps. In den Apps ist das Nachladen von Google seit
+  08.09.2026 abgeschaltet (es ging die IP-Adresse jedes Nutzers beim
+  Start an Google in die USA); bis die Dateien mitgeliefert werden,
+  zeigen die Apps die System-Schrift statt Bricolage Grotesque und
+  Hanken Grotesk. Beide stehen unter der SIL Open Font License 1.1,
+  Mitliefern ist also erlaubt. Rein optisch, nichts Blockierendes.
 - Landingpage nach Hostinger ausrollen, sobald 1.2 geklaert ist.
 
 ---

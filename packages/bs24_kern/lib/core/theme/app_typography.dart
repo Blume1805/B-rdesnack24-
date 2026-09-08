@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_tokens.dart';
 
@@ -8,14 +6,22 @@ import 'app_tokens.dart';
 ///
 /// Display = Bricolage Grotesque (700/800, -0.02em); Body = Hanken Grotesk.
 ///
-/// **Web-Demo:** GoogleFonts sind zur Start-Zeit deaktiviert (siehe
-/// `bootstrap.dart`, `allowRuntimeFetching = false`), weil das Nachladen
-/// der Font-Dateien den ersten Frame ~10–20 s verzögern kann. Wir liefern
-/// stattdessen eine System-Sans (SF Pro / Segoe / Roboto) als visuell
-/// nahestehende Fallback-Familie aus — dieselbe, die auch der HTML-Loader
-/// verwendet, sodass es beim App-Start keinen Schriftsprung gibt.
-/// Für native Builds (Android/iOS) läuft GoogleFonts normal und cached
-/// die Dateien einmalig auf das Gerät.
+/// **Beide Schriften werden zur Laufzeit NICHT nachgeladen.** Das Paket
+/// `google_fonts` holt eine nicht mitgelieferte Schrift beim ersten Start
+/// von `fonts.gstatic.com`. Dabei geht die IP-Adresse des Nutzers an
+/// Google in die USA — vor jedem Einwilligungsdialog, ohne Rechtsgrundlage
+/// nach Art. 6 DSGVO und ohne dass Google in der Datenschutzerklärung als
+/// Empfänger steht. Für Webseiten hat das LG München I am 20.01.2022
+/// (3 O 17493/20) genau so entschieden; eine App, die es beim Start tut,
+/// steht nicht besser da.
+///
+/// Bis die Schriftdateien mitgeliefert werden (beide stehen unter der SIL
+/// Open Font License 1.1, das Mitliefern ist also erlaubt — siehe
+/// `docs/betrieb/AUFGABEN-PHILIPP.md`), rendern **alle** Plattformen die
+/// System-Sans aus [_sansFallback]. Das ist dieselbe Schrift, die der
+/// HTML-Loader der Web-App zeigt, und dieselbe, die das Web schon vorher
+/// bekommen hat — es gibt also keinen Schriftsprung und keinen Unterschied
+/// mehr zwischen Web und Telefon.
 abstract final class AppTypography {
   static const List<String> _sansFallback = [
     'SF Pro Display',
@@ -38,8 +44,7 @@ abstract final class AppTypography {
       color: color,
       fontFamilyFallback: _sansFallback,
     );
-    if (kIsWeb) return base;
-    return GoogleFonts.bricolageGrotesque(textStyle: base);
+    return base;
   }
 
   static TextStyle body({
@@ -55,8 +60,7 @@ abstract final class AppTypography {
       color: color,
       fontFamilyFallback: _sansFallback,
     );
-    if (kIsWeb) return base;
-    return GoogleFonts.hankenGrotesk(textStyle: base);
+    return base;
   }
 
   /// Text-Theme für Material 3.

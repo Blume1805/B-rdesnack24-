@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,11 +31,21 @@ Future<void> bootstrap({
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Runtime-Fetching der Google-Fonts im Web unterdrücken (System-Fallback
-  // rendert sofort; siehe app_typography.dart).
-  if (kIsWeb) {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  }
+  // Kein Nachladen von Schriften zur Laufzeit -- auf KEINER Plattform.
+  //
+  // Bis 08.09.2026 stand hier `if (kIsWeb)`. Auf Android und iOS blieb das
+  // Nachladen damit aktiv: `google_fonts` holte Bricolage Grotesque und
+  // Hanken Grotesk beim ersten Start von fonts.gstatic.com und uebermittelte
+  // dabei die IP-Adresse des Nutzers an Google in die USA -- vor jedem
+  // Einwilligungsdialog, ohne Rechtsgrundlage nach Art. 6 DSGVO, ohne
+  // Empfaengerangabe nach Art. 13 und ohne Grundlage fuer den Drittlands-
+  // transfer (Art. 44 ff.). Fuer Webseiten hat das LG Muenchen I am
+  // 20.01.2022 (3 O 17493/20) so entschieden.
+  //
+  // app_typography.dart ruft `google_fonts` seit demselben Tag gar nicht
+  // mehr auf. Diese Zeile ist der zweite Riegel: sie wirkt auch dann, wenn
+  // jemand spaeter wieder einen GoogleFonts-Aufruf einbaut.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   await _safe(
     () => initializeDateFormatting('de_DE'),
