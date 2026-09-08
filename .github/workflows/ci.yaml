@@ -81,8 +81,9 @@ jobs:
           fehler=0
           for muster in /finance/approvals /management/my-signatures \
               Gesellschafter-Freigaben Betriebsprotokolle unit_cost \
-              inventory_fifo_movements business_customers_csv; do
-            if grep -qF -- "$muster" ./*.js; then
+              inventory_fifo_movements business_customers_csv \
+              "Hunger kommt"; do
+            if grep -qF -- "$muster" ./*.js index.html; then
               echo "::error::Interner Begriff im Kunden-Bundle: $muster"
               fehler=1
             fi

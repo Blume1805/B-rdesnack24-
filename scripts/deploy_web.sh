@@ -86,11 +86,18 @@ VERBOTEN=(
   "unit_cost"
   "inventory_fifo_movements"
   "business_customers_csv"
+  # Der abgeloeste Claim. Er stand bis zum 08.09.2026 im Ladebildschirm der
+  # index.html und war damit das Erste, was jeder Besucher der Web-Fassung
+  # zu sehen bekam. Laut Wahrheitsschicht ist er endgueltig abgeloest und
+  # auch nach Inbetriebnahme nicht wieder verwendbar.
+  "Hunger kommt"
 )
 GEFUNDEN=0
 for muster in "${VERBOTEN[@]}"; do
-  if grep -qF -- "$muster" "$BUILD_DIR"/*.js; then
-    echo "✗ Interner Begriff im Kunden-Bundle: $muster" >&2
+  # index.html mitpruefen: der Ladebildschirm ist Text, den Besucher lesen,
+  # bevor ueberhaupt JavaScript laeuft.
+  if grep -qF -- "$muster" "$BUILD_DIR"/*.js "$BUILD_DIR/index.html"; then
+    echo "✗ Verbotener Begriff im Kunden-Bundle: $muster" >&2
     GEFUNDEN=1
   fi
 done
