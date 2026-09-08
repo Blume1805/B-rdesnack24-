@@ -38,6 +38,25 @@ ob sie im Suelzetal sitzt oder in der weiteren Region. Format egal
 
 Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
+### 1.1b Lovable-Credits sind aufgebraucht
+
+- [ ] Credits aufladen oder Tarif anpassen:
+      https://lovable.dev/settings/billing
+
+Der erste Auftrag fuer die Rechtstexte ist durchgelaufen: die fuenf
+Seiten stehen. Der Nachfassauftrag wurde abgewiesen — kein Guthaben mehr.
+
+Solange das so ist, sind die drei neuen Seiten (AGB, Widerruf, Abo
+kuendigen) **von der Website aus nicht erreichbar**: im Fussbereich
+fehlen die Links. Ebenso fehlen die Sortimentszahlen, die Abo-Tabelle
+auf der Startseite und das Entfernen von "GbR" aus der Kopfzeile.
+
+Der fertige Nachfasstext liegt in
+`docs/lovable/landingpage-nachfassen.md` und geht unveraendert raus,
+sobald wieder Guthaben da ist. Es geht nichts verloren.
+
+---
+
 ### 1.2 Domain verbinden und die Datenschutzerklaerung nachziehen
 
 **Entscheidung 07.09.2026:** Die Landingpage entsteht und laeuft in

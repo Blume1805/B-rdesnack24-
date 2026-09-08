@@ -29,13 +29,12 @@ lesen wir das, aber die Kündigung hängt nicht daran.
 
 **WAS DANN PASSIERT**
 
-Nach dem Absenden zeigen wir dir sofort eine Bestätigung mit **Datum und
-Uhrzeit des Eingangs** an. Diese Seite kannst du speichern oder ausdrucken.
-Zusätzlich schicken wir dir die Bestätigung per E-Mail, ebenfalls mit Eingangs-
-zeitpunkt und dem Termin, zu dem der Vertrag endet.
+Den Zugang deiner Kündigung bestätigen wir dir per E-Mail — mit **Datum und
+Uhrzeit des Eingangs** und dem Termin, zu dem der Vertrag endet. Heb die
+Bestätigung auf.
 
-Kommt die E-Mail nicht an, prüfe bitte den Spam-Ordner. Deine Kündigung ist
-trotzdem wirksam — massgeblich ist der Eingang bei uns, nicht der Empfang der
+Kommt sie nicht an, prüfe bitte den Spam-Ordner. Deine Kündigung ist trotzdem
+wirksam — massgeblich ist der Eingang bei uns, nicht der Empfang der
 Bestätigung bei dir.
 
 
