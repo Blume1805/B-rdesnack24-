@@ -63,13 +63,20 @@ der sichere und störungsfreie Betrieb.
 Diese Daten führen wir **nicht** mit anderen Daten zusammen und ziehen daraus
 keine Rückschlüsse auf einzelne Personen.
 
-**Hoster.** Diese Website wird ausgeliefert von
+**Hoster.** Diese Website wird ausgeliefert von der
 
-    [[HOSTER-FIRMA]]
-    [[HOSTER-ANSCHRIFT]]
+    HOSTINGER INTERNATIONAL LIMITED
+    61 Lordou Vironos str.
+    6023 Larnaca
+    Zypern
 
 Mit dem Anbieter besteht ein Vertrag zur Auftragsverarbeitung nach
-Art. 28 DSGVO. Die Server stehen in [[SERVERSTANDORT]].
+Art. 28 DSGVO. Er ist als „Data Processing Addendum" Bestandteil der
+Nutzungsbedingungen und kommt mit deren Annahme zustande.
+
+Zypern ist Mitgliedstaat der Europäischen Union. Eine Übermittlung in
+ein Drittland findet auf dieser Ebene nicht statt. Die Server stehen in
+[[SERVERSTANDORT]].
 
 Die Domain boerdesnack24.de ist beim selben Anbieter registriert.
 

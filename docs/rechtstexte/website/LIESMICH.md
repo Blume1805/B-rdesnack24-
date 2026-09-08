@@ -44,32 +44,52 @@ eine reine Informationsseite. Kein Formular, kein Konto, kein Kauf.
 Personenbezogene Daten gibt der Kunde erst in der App an — die hat ihre
 eigene, ausführlichere Erklärung.
 
-Drei Angaben stehen noch als Platzhalter in `datenschutz.md` und müssen
-vor dem Online-Gang ersetzt werden:
+Firmierung und Anschrift des Hosters stehen inzwischen fest. Sie stammen
+aus den Nutzungsbedingungen von Hostinger (Screenshots vom 08.09.2026):
+Für alle Länder ausserhalb der dort genannten Gruppen — „einschliesslich
+aller EU-Länder" — ist Vertragspartner die **HOSTINGER INTERNATIONAL
+LIMITED**, 61 Lordou Vironos str., 6023 Larnaca, Zypern.
+
+Zypern ist EU-Mitgliedstaat. Auf Ebene des Vertragspartners besteht
+deshalb kein Drittlandproblem, und die Erklärung braucht dafür keinen
+eigenen Abschnitt.
+
+**Ein Platzhalter ist noch offen:**
 
 | Platzhalter | Was einzutragen ist |
 |---|---|
-| `[[HOSTER-FIRMA]]` | die Firmierung, die im Hostinger-Vertrag steht |
-| `[[HOSTER-ANSCHRIFT]]` | deren Anschrift aus demselben Dokument |
 | `[[SERVERSTANDORT]]` | das Land des Rechenzentrums laut Tarif |
 
-Ich habe sie **nicht** aus dem Gedächtnis gefüllt. Hostinger ist von hier
-aus nicht abrufbar, und bei Supabase hat mich das Raten schon einmal eine
-falsche Firmierung gekostet. Die Angaben stehen im Vertrag, den Philipp
-vorliegen hat.
+Er wird nicht aus dem Gedächtnis gefüllt. Hostinger ist von hier aus
+nicht abrufbar, und bei Supabase hat das Raten schon einmal eine falsche
+Firmierung erzeugt.
 
-Ausserdem muss gelten:
+## Fünf Punkte, die vor dem Online-Gang stimmen müssen
 
-1. **Der Auftragsverarbeitungsvertrag mit Hostinger ist geschlossen.**
-   Dass Hostinger einen anbietet, steht in deren AGB (von Philipp am
-   08.09.2026 nachgelesen). Zu klären bleibt, ob er automatisch mit den
-   AGB zustande kommt oder gesondert angefordert werden muss. Der Text
-   der Erklärung behauptet ihn — solange er nicht besteht, ist das eine
-   unrichtige Angabe gegenüber jedem Besucher.
-2. **Das Rechenzentrum steht in der EU.** Sonst fehlt dem Text der
-   Abschnitt zum Drittlandtransfer.
-3. **Auf der ausgelieferten Seite ist kein Formular.** Steht doch eines
+1. **Der Auftragsverarbeitungsvertrag ist geklärt.** Das „Data
+   Processing Addendum" ist durch Verweis Bestandteil der
+   Nutzungsbedingungen; die elektronische Annahme bindet daran. Eine
+   gesonderte Unterschrift ist nicht nötig. Er entsteht damit mit der
+   Buchung — vorher nicht.
+2. **Die Ländergruppe ist bestätigt.** Die AGB nennen daneben die
+   HOSTINGER Global S.à r.l. (Luxemburg) für eine „Gruppe 2". Nach dem
+   Wortlaut fallen EU-Länder nicht darunter; die in den AGB verlinkte
+   Liste sollte das einmal bestätigen. Ergibt sie etwas anderes, ändert
+   sich die Firmierung — und dann auch hier.
+3. **Das Rechenzentrum steht in der EU.** Der Sitz des Vertragspartners
+   sagt nichts über den Serverstandort; der wird bei der Einrichtung
+   gewählt.
+4. **Auf der ausgelieferten Seite ist kein Formular.** Steht doch eines
    drauf, fehlt der Erklärung ein ganzer Abschnitt (siehe unten).
+5. **Eine datierte Kopie der Nutzungsbedingungen samt DPA liegt ab.**
+   Hostinger darf sie jederzeit ändern und kündigt wesentliche
+   Änderungen per E-Mail an, mit 30 Tagen Kündigungsrecht. Für den
+   Nachweis zählt die Fassung, die beim Vertragsschluss galt
+   (Art. 5 Abs. 2 DSGVO).
+
+Eine Datenschutzerklärung, die den falschen Hoster oder einen nicht
+bestehenden Vertrag nennt, ist schlechter als keine: sie behauptet eine
+Prüfung, die nicht stattgefunden hat.
 
 ## Falls das Kontaktformular doch bleibt
 

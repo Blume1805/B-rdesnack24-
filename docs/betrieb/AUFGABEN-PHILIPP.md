@@ -80,9 +80,20 @@ App an.
 - [x] ~~Gibt es bei Hostinger einen AVV nach Art. 28 DSGVO?~~
       **Ja** — laut AGB, von dir am 08.09.2026 nachgelesen. Damit
       faellt der Einwand weg, an dem Lovable gescheitert ist.
-- [ ] **Klaeren, ob der AVV automatisch mit den AGB zustande kommt**
-      oder gesondert angefordert werden muss. Beides ist ueblich;
-      im zweiten Fall ist er ohne die Anforderung nicht geschlossen.
+- [x] ~~Kommt der AVV automatisch mit den AGB zustande?~~ **Ja.**
+      Das "Data Processing Addendum" ist durch Verweis Bestandteil
+      der Nutzungsbedingungen, und deren elektronische Annahme
+      bindet daran. Keine gesonderte Unterschrift noetig.
+- [ ] **Pruefen, zu welcher Laendergruppe Deutschland gehoert.**
+      Die AGB nennen zwei Vertragspartner: HOSTINGER Global S.a r.l.
+      (Luxemburg) fuer Gruppe 2, und HOSTINGER INTERNATIONAL LIMITED
+      (Larnaca, Zypern) fuer alle uebrigen Laender "einschliesslich
+      aller EU-Laender". Nach dem Wortlaut ist es fuer uns die
+      zypriotische Gesellschaft — das steht so schon in der
+      Datenschutzerklaerung. Ein Klick auf die verlinkte Liste in den
+      AGB bestaetigt oder widerlegt das. Beide sitzen in der EU, es
+      geht also nur um die richtige Firmierung, nicht um ein
+      Drittlandproblem.
 - [ ] **Datierte Kopie des AVV sichern** (die Fassung, die beim
       Vertragsschluss galt). AGB aendern sich — fuer den Nachweis
       zaehlt das Dokument, nicht der Link (Art. 5 Abs. 2 DSGVO).
@@ -90,11 +101,14 @@ App an.
       falls du `info@boerdesnack24.de` willst.
 - [ ] **Rechenzentrum in der EU** waehlen bzw. pruefen, welches dein
       Tarif nutzt.
-- [ ] **Drei Angaben aus dem Hostinger-Vertrag** an mich: die Firmierung,
-      die Anschrift und das Land des Rechenzentrums. Sie stehen als
-      Platzhalter in der Datenschutzerklaerung; ich fuelle sie ein.
-      Raten kommt nicht in Frage — bei Supabase hat mich das schon eine
-      falsche Firmierung gekostet.
+- [ ] **Eine Angabe fehlt mir noch: das Land des Rechenzentrums.**
+      Firmierung und Anschrift stehen jetzt in der
+      Datenschutzerklaerung (aus den AGB). Der Serverstandort wird
+      bei der Einrichtung gewaehlt und ist der letzte Platzhalter.
+- [ ] **E-Mails von Hostinger zu AGB-Aenderungen nicht wegklicken.**
+      Bei wesentlichen Aenderungen zu deinem Nachteil hast du laut
+      AGB **30 Kalendertage** ab der Benachrichtigung, um zu
+      kuendigen. Danach gilt die neue Fassung.
 - [ ] **Verzeichnis der Verarbeitungstaetigkeiten** nachziehen.
 
 Technisch offen und bei mir: Das Lovable-Projekt baut derzeit fuer
