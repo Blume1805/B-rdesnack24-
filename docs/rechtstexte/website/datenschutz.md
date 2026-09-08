@@ -1,8 +1,14 @@
 **Datenschutzerklärung für die Website boerdesnack24.de**
 
-Diese Erklärung gilt für **diese Website**. Für die Bördesnack24-App gilt eine
-eigene, ausführlichere Datenschutzerklärung — die App verarbeitet deutlich mehr
-(Konto, Käufe, Belege, Coupons). Du findest sie in der App unter „Rechtliches".
+Diese Erklärung gilt für **diese Website**. Sie ist eine reine
+Informationsseite: Du kannst hier nichts kaufen, kein Konto anlegen und kein
+Abonnement abschliessen. Es gibt kein Formular und keine Anmeldung.
+
+Für die Bördesnack24-App gilt eine eigene, deutlich ausführlichere
+Datenschutzerklärung. Erst dort gibst du Daten an — Name, E-Mail-Adresse,
+Geburtsdatum — und entscheidest, ob du die kostenlose oder die
+kostenpflichtige Variante nutzt. Du findest sie in der App unter
+„Rechtliches" und im jeweiligen Store.
 
 
 **1) VERANTWORTLICHE STELLE**
@@ -27,9 +33,11 @@ Einen Datenschutzbeauftragten haben wir nicht bestellt; die Voraussetzungen des
     fragt diese Seite auch nicht nach einer Cookie-Einwilligung.
   • Wir binden **keine Schriften, Karten, Videos oder Skripte von fremden
     Servern** ein. Insbesondere werden keine Google Fonts nachgeladen. Alles,
-    was die Seite braucht, kommt vom eigenen Server.
+    was die Seite braucht, kommt vom selben Server wie die Seite.
   • Es gibt **keine Social-Media-Plugins** und keine Weitergabe an
     Werbenetzwerke.
+  • Es gibt **kein Kontaktformular**. Wer uns schreiben will, nutzt die
+    angegebene E-Mail-Adresse oder Telefonnummer — dann gilt Nummer 4.
   • Ohne dein Zutun verlässt diese Seite nur das, was jeder Server beim Abruf
     ohnehin sieht (Nummer 3).
 
@@ -55,68 +63,51 @@ der sichere und störungsfreie Betrieb.
 Diese Daten führen wir **nicht** mit anderen Daten zusammen und ziehen daraus
 keine Rückschlüsse auf einzelne Personen.
 
-**Hoster.** Diese Website wird ausgeliefert von der **Lovable Labs
-Incorporated** (Vereinigte Staaten). Vertreter in der Europäischen Union ist die
-Lovable Labs AB, Regeringsgatan 25, 111 53 Stockholm, Schweden;
-Datenschutzbeauftragter: dpo@lovable.dev. Mit dem Anbieter besteht ein Vertrag
-zur Auftragsverarbeitung nach Art. 28 DSGVO.
+**Hoster.** Diese Website wird ausgeliefert von
 
-Weil der Anbieter seinen Sitz in den USA hat, kann es zu einer Übermittlung in
-ein Drittland kommen. Grundlage dafür sind die Standardvertragsklauseln der
-EU-Kommission (Art. 46 Abs. 2 lit. c DSGVO), die Bestandteil des Vertrags mit
-dem Anbieter sind.
+    [[HOSTER-FIRMA]]
+    [[HOSTER-ANSCHRIFT]]
 
-Die Domain boerdesnack24.de haben wir bei der Hostinger International Ltd.
-registriert. Hostinger liefert die Seite **nicht** aus und erhält die Daten aus
-dieser Nummer 3 nicht; dort läuft ausschliesslich die Namensauflösung (DNS).
+Mit dem Anbieter besteht ein Vertrag zur Auftragsverarbeitung nach
+Art. 28 DSGVO. Die Server stehen in [[SERVERSTANDORT]].
+
+Die Domain boerdesnack24.de ist beim selben Anbieter registriert.
 
 
-**4) KONTAKTFORMULAR „FLÄCHE ODER WERBEFLÄCHE ANBIETEN"**
+**4) KONTAKT PER E-MAIL ODER TELEFON**
 
-Verarbeitet werden: Firma, Ansprechpartner, E-Mail-Adresse, freiwillig die
-Telefonnummer, deine Nachricht sowie der Zeitpunkt der Absendung.
+Schreibst oder rufst du uns an, verarbeiten wir die Angaben, die du dabei
+machst — Name, E-Mail-Adresse oder Telefonnummer und den Inhalt deiner
+Nachricht —, um deine Anfrage zu beantworten.
 
-Zweck: Bearbeitung deiner Anfrage und die Rückmeldung darauf.
-Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO, soweit es um die Anbahnung eines
-Vertrags geht, im Übrigen Art. 6 Abs. 1 lit. f DSGVO (Bearbeitung einer an uns
-gerichteten Anfrage). Die Angabe ist freiwillig — ohne sie können wir aber
-nicht antworten.
-
-Das Formular enthält ein für dich unsichtbares Feld gegen automatisierte
-Einsendungen („Honigtopf"). Es wird nicht ausgewertet und speichert nichts über
-dich; ausgefüllte Einsendungen verwerfen wir.
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO, soweit es um die Anbahnung oder
+Durchführung eines Vertrags geht, sonst Art. 6 Abs. 1 lit. f DSGVO
+(Bearbeitung einer an uns gerichteten Anfrage).
 
 Speicherdauer: bis die Anfrage abschliessend bearbeitet ist, danach längstens
-sechs Monate für Rückfragen. Entsteht daraus eine Geschäftsbeziehung, gelten die
-handels- und steuerrechtlichen Aufbewahrungsfristen (Nummer 7).
+sechs Monate für Rückfragen. Entsteht daraus eine Geschäftsbeziehung, gelten
+die handels- und steuerrechtlichen Aufbewahrungsfristen (Nummer 6).
 
-**Empfänger:** Die Eingaben werden in unserer Datenbank bei der Supabase Pte. Ltd.
-gespeichert (siehe Nummer 6). Ein Versand an weitere Dritte findet nicht statt.
+**Zum Anbieter deines E-Mail-Wegs:** Unser Postfach liegt bei einem
+Drittanbieter. E-Mail ist kein sicherer Übertragungsweg — sende uns bitte
+keine besonders schützenswerten Angaben unverschlüsselt zu.
 
 
-**5) EINSTELLUNG „BEWEGUNG AUS"**
+**5) EINSTELLUNG „BEWEGUNG AUS" UND LINKS ZU DEN STORES**
 
 Schaltest du die Bewegungen der Seite ab, merkt sich dein Browser diese
 Entscheidung lokal auf deinem Gerät. Der Wert enthält keine personenbezogenen
 Daten, wird nicht an uns übertragen und dient allein der von dir gewünschten
-Anzeige (§ 25 Abs. 2 Nr. 2 TDDDG). Löschst du die Websitedaten deines Browsers,
-ist die Einstellung weg.
+Anzeige (§ 25 Abs. 2 Nr. 2 TDDDG). Löschst du die Websitedaten deines
+Browsers, ist die Einstellung weg.
+
+Folgst du einem Link zum App Store oder zu Google Play, verlässt du diese
+Website. Ab dort gelten die Datenschutzhinweise von Apple beziehungsweise
+Google. Wir binden von dort nichts ein und erfahren nicht, ob du dem Link
+gefolgt bist.
 
 
-**6) AUFTRAGSVERARBEITER**
-
-**Supabase Pte. Ltd.**, 65 Chulia Street #38-02/03, OCBC Centre, Singapur 049513 —
-Datenbank und Schnittstelle für das Kontaktformular. Die Daten liegen in der Region **eu-central-1
-(Frankfurt am Main, Deutschland)**. Mit Supabase besteht ein Vertrag zur
-Auftragsverarbeitung nach Art. 28 DSGVO (Data Processing Addendum, wirksam mit
-Annahme der Nutzungsbedingungen). Für Zugriffe aus Drittländern durch
-den Anbieter gelten die Standardvertragsklauseln der EU-Kommission
-(Art. 46 Abs. 2 lit. c DSGVO).
-
-Weitere Auftragsverarbeiter setzen wir für diese Website nicht ein.
-
-
-**7) SPEICHERDAUER**
+**6) SPEICHERDAUER**
 
 Wir löschen personenbezogene Daten, sobald der Zweck entfallen ist und keine
 gesetzliche Aufbewahrungspflicht entgegensteht. Server-Protokolle werden
@@ -129,7 +120,7 @@ Aufbewahrungspflicht widersprechen sich also nicht — die Einschränkung der
 Verarbeitung nach Art. 18 DSGVO löst das auf.
 
 
-**8) DEINE RECHTE**
+**7) DEINE RECHTE**
 
 Du hast das Recht auf
 
@@ -145,11 +136,11 @@ Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für die Zukunft
 widerrufen; die Rechtmässigkeit der bis dahin erfolgten Verarbeitung bleibt
 unberührt.
 
-Wende dich dafür formlos an boerdesnack24@gmail.com. Wir antworten unverzüglich,
-spätestens innerhalb eines Monats.
+Wende dich dafür formlos an boerdesnack24@gmail.com. Wir antworten
+unverzüglich, spätestens innerhalb eines Monats.
 
 
-**9) BESCHWERDERECHT**
+**8) BESCHWERDERECHT**
 
 Du kannst dich bei einer Datenschutz-Aufsichtsbehörde beschweren. Für uns
 zuständig ist:
@@ -163,22 +154,21 @@ poststelle@lfd.sachsen-anhalt.de
 Du kannst dich auch an die Aufsichtsbehörde deines Wohnorts wenden.
 
 
-**10) KEINE AUTOMATISIERTE ENTSCHEIDUNG, KEIN PROFILING**
+**9) KEINE AUTOMATISIERTE ENTSCHEIDUNG, KEIN PROFILING**
 
 Auf dieser Website findet **keine** automatisierte Entscheidung im Einzelfall
-und **kein** Profiling im Sinne von Art. 22 DSGVO statt. In der App gibt es eine
-regelbasierte Auswahl von Angeboten; sie ist dort gekennzeichnet und in der
-App-Datenschutzerklärung beschrieben.
+und **kein** Profiling im Sinne von Art. 22 DSGVO statt. In der App gibt es
+eine regelbasierte Auswahl von Angeboten; sie ist dort gekennzeichnet und in
+der App-Datenschutzerklärung beschrieben.
 
 
-**11) KEINE PFLICHT ZUR BEREITSTELLUNG**
+**10) KEINE PFLICHT ZUR BEREITSTELLUNG**
 
-Du musst uns keine Daten geben. Ohne die Angaben im Kontaktformular können wir
-eine Anfrage allerdings nicht bearbeiten. Nachteile entstehen dir daraus sonst
-nicht.
+Du musst uns keine Daten geben. Diese Website lässt sich vollständig lesen,
+ohne dass du irgendetwas eingibst.
 
 
-**12) ÄNDERUNGEN**
+**11) ÄNDERUNGEN**
 
 Ändert sich der Inhalt dieser Website oder die eingesetzte Technik, passen wir
 diese Erklärung an. Es gilt die jeweils hier veröffentlichte Fassung.

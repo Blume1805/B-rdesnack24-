@@ -698,17 +698,28 @@ Mehr als acht aktive Muster auf einer Seite gelten als Befund im AI-Look-Audit.
 
 ## Zielumgebung
 
-**Stand 07.09.2026:** Die Seite entsteht und wird gepflegt in **Lovable**
-und läuft unter der bei Hostinger erworbenen Domain `boerdesnack24.de`.
-Ein Build-Schritt existiert damit — die frühere Annahme („statischer
-Onepager, Upload nach `public_html`, Formular über PHPMailer, kein
-Bundler") gilt nicht mehr.
+**Stand 08.09.2026:** Die Seite entsteht und wird gepflegt in **Lovable**,
+**ausgeliefert wird sie aber von Hostinger** unter der Domain
+`boerdesnack24.de`. Lovable ist Bauwerkzeug, nicht Hoster — im Pro-Tarif
+gibt es keinen Auftragsverarbeitungsvertrag nach Art. 28 DSGVO.
 
-**Das Formular geht nicht über PHPMailer**, sondern auf die vorhandene
-Supabase-Funktion `advertising_inquiry_submit` (Honigtopf, Drossel je
-Anschluss, Pflichtangaben und Einwilligung serverseitig geprüft). Der
-`anon`-Schlüssel darf im Browser stehen, der `service_role`-Schlüssel
-niemals.
+**Was daraus folgt:**
+
+- Der Build muss **statisch** sein. Nitro baut voreingestellt für
+  Cloudflare; normales Webhosting kann damit nichts anfangen. Die Seite
+  ist reiner Inhalt, also wird sie vorgerendert und als Dateien
+  ausgeliefert. Keine Serverfunktionen, keine Laufzeitumgebung.
+- **Kein Formular auf der Seite.** Die frühere Anbindung an die
+  Supabase-Funktion `advertising_inquiry_submit` entfällt. Wer eine
+  Fläche anbieten will, schreibt eine E-Mail oder ruft an — die Karte
+  dafür steht schon im Code (`DirectContact`).
+- Damit liegt **kein Schlüssel im ausgelieferten Code**, auch kein
+  `anon`-Schlüssel. Die Frage, welcher Schlüssel im Browser stehen darf,
+  stellt sich für diese Seite nicht mehr.
+- Der Kunde gibt seine Daten **erst in der App** an. Die Website
+  informiert und verweist auf App Store und Google Play. Diese Trennung
+  ist der Grund für den ganzen Zuschnitt — sie darf nicht durch ein
+  nachträglich eingebautes Eingabefeld aufgeweicht werden.
 
 Die Referenzfassung liegt im Repository unter `apps/landing/` — Inhalt,
 Rechtstexte, Kontrastwerte. Sie ist die Vorlage, nicht eine zweite Website.

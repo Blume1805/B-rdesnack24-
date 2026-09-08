@@ -32,27 +32,51 @@ vorhanden. Ob Lifetime ganz entfällt, ist offen (siehe AUFGABEN-PHILIPP).
 Impressum und Nutzungsbedingungen. Auf einer Website ist die
 App-Formulierung schief.
 
-## Vor der Veröffentlichung — drei Dinge müssen erledigt sein
+## Vor der Veröffentlichung — was noch fehlt
 
-Der Hoster-Abschnitt in `datenschutz.md` (Nummer 3) benennt bereits
-**Lovable Labs Incorporated** als Ausliefernde und Hostinger als reine
-Registrarin der Domain. Das entspricht der Entscheidung vom 07.09.2026
-(Lovable hostet, Hostinger liefert nur die Domain).
+**Entscheidung Philipp, 08.09.2026: gehostet wird bei Hostinger, nicht
+bei Lovable.** Grund: Im Pro-Tarif von Lovable gibt es keinen
+Auftragsverarbeitungsvertrag nach Art. 28 DSGVO. Lovable ist damit reines
+Bauwerkzeug; ausgeliefert wird die Seite von Hostinger.
 
-Damit diese Angaben stimmen, muss vor dem Online-Gang gelten:
+Daraus folgt der Zuschnitt dieser Datenschutzerklärung: Die Website ist
+eine reine Informationsseite. Kein Formular, kein Konto, kein Kauf.
+Personenbezogene Daten gibt der Kunde erst in der App an — die hat ihre
+eigene, ausführlichere Erklärung.
 
-1. **Die Domain ist tatsächlich mit dem Lovable-Projekt verbunden.**
-   Steht die Seite woanders, ist der ganze Abschnitt falsch.
-2. **Der Auftragsverarbeitungsvertrag mit Lovable ist geschlossen.**
-   Der Text behauptet ihn. Solange er nicht besteht, ist das eine
-   unrichtige Angabe gegenüber jedem Besucher — siehe AUFGABEN-PHILIPP
-   Abschnitt 1.2.
-3. **Die Firmenanschrift von Lovable ist gegen deren eigenes
-   Auftragsverarbeitungs-Dokument geprüft.** Die öffentlich
-   auffindbaren Quellen nennen zwei verschiedene US-Anschriften
-   (Boston und Dover). Massgeblich ist, was im Vertrag steht — das
-   liegt Philipp vor, mir nicht.
+Drei Angaben stehen noch als Platzhalter in `datenschutz.md` und müssen
+vor dem Online-Gang ersetzt werden:
 
-Eine Datenschutzerklärung, die den falschen Hoster oder einen nicht
-bestehenden Vertrag nennt, ist schlechter als keine: sie behauptet eine
-Prüfung, die nicht stattgefunden hat.
+| Platzhalter | Was einzutragen ist |
+|---|---|
+| `[[HOSTER-FIRMA]]` | die Firmierung, die im Hostinger-Vertrag steht |
+| `[[HOSTER-ANSCHRIFT]]` | deren Anschrift aus demselben Dokument |
+| `[[SERVERSTANDORT]]` | das Land des Rechenzentrums laut Tarif |
+
+Ich habe sie **nicht** aus dem Gedächtnis gefüllt. Hostinger ist von hier
+aus nicht abrufbar, und bei Supabase hat mich das Raten schon einmal eine
+falsche Firmierung gekostet. Die Angaben stehen im Vertrag, den Philipp
+vorliegen hat.
+
+Ausserdem muss gelten:
+
+1. **Der Auftragsverarbeitungsvertrag mit Hostinger ist geschlossen.**
+   Der Text behauptet ihn. Ohne ihn ist das eine unrichtige Angabe
+   gegenüber jedem Besucher — und der Grund, aus dem Lovable als Hoster
+   ausgeschieden ist, gilt dann genauso hier.
+2. **Das Rechenzentrum steht in der EU.** Sonst fehlt dem Text der
+   Abschnitt zum Drittlandtransfer.
+3. **Auf der ausgelieferten Seite ist kein Formular.** Steht doch eines
+   drauf, fehlt der Erklärung ein ganzer Abschnitt (siehe unten).
+
+## Falls das Kontaktformular doch bleibt
+
+Die frühere Fassung hatte einen Abschnitt zum Formular „Fläche oder
+Werbefläche anbieten", das an die Supabase-Funktion
+`advertising_inquiry_submit` sendet. Er ist entfernt, weil die Seite
+nichts mehr entgegennimmt.
+
+Soll das Formular zurück, gehören zwei Dinge wieder hinein: der Abschnitt
+zur Verarbeitung der Formulardaten und Supabase als Auftragsverarbeiter.
+Beides steht in der Fassung vom 08.09.2026 in der Git-Historie und lässt
+sich zurückholen. Ohne diese Abschnitte darf kein Formular online gehen.

@@ -57,33 +57,37 @@ sobald wieder Guthaben da ist. Es geht nichts verloren.
 
 ---
 
-### 1.2 Domain verbinden und die Datenschutzerklaerung nachziehen
+### 1.2 Landingpage nach Hostinger ausrollen
 
-**Entscheidung 07.09.2026:** Die Landingpage entsteht und laeuft in
-**Lovable**. Hostinger liefert nur die **Domain** — nicht das Hosting. Das
-ist der einfachste Weg fuer dich: Aenderungen sagst du Lovable oder mir,
-danach veroeffentlichen. Kein Hochladen, kein Bauwerkzeug, keine Handarbeit.
+**Entscheidung 08.09.2026, ersetzt die vom 07.09.:** Gehostet wird bei
+**Hostinger**, nicht bei Lovable. Grund: Im Pro-Tarif von Lovable gibt es
+keinen Auftragsverarbeitungsvertrag nach Art. 28 DSGVO. Lovable bleibt
+reines Bauwerkzeug — dort entsteht der Code, ausgeliefert wird er von
+Hostinger.
 
-- [ ] **In Lovable veroeffentlichen** und die Domain `boerdesnack24.de`
-      im Projekt verbinden (Projekt → Settings → Domains). Lovable nennt
-      dir dort die DNS-Eintraege.
-- [ ] **Bei Hostinger** genau diese DNS-Eintraege setzen. Nur DNS — kein
-      Webhosting-Paket noetig.
-- [ ] **Datenschutzerklaerung ergaenzen:** Sie nennt in Abschnitt 4 und 5
-      ausdruecklich **GitHub Pages** als Ausliefernden und begruendet damit
-      den Drittlandtransfer. Fuer die Landingpage stimmt das nicht mehr —
-      dort liefert Lovable aus. Das ist eine Aenderung an einem Rechtstext
-      und braucht eine eigene Migration mit geprueften Ankertexten; die
-      mache ich, sobald die Domain verbunden ist und feststeht, wer
-      tatsaechlich ausliefert.
-- [ ] **Auftragsverarbeitungsvertrag** nach Art. 28 DSGVO mit dem
-      Ausliefernden (Lovable) schliessen.
-- [ ] Verzeichnis der Verarbeitungstaetigkeiten nachziehen.
+Das ist sauber begruendet und macht die Seite rechtlich einfacher: Die
+Website nimmt nichts mehr entgegen, der Kunde gibt seine Daten erst in der
+App an.
+
+- [ ] **Auftragsverarbeitungsvertrag mit Hostinger** schliessen. Ohne ihn
+      gilt genau der Einwand, an dem Lovable gescheitert ist.
+- [ ] **Rechenzentrum in der EU** waehlen bzw. pruefen, welches dein
+      Tarif nutzt.
+- [ ] **Drei Angaben aus dem Hostinger-Vertrag** an mich: die Firmierung,
+      die Anschrift und das Land des Rechenzentrums. Sie stehen als
+      Platzhalter in der Datenschutzerklaerung; ich fuelle sie ein.
+      Raten kommt nicht in Frage — bei Supabase hat mich das schon eine
+      falsche Firmierung gekostet.
+- [ ] **Verzeichnis der Verarbeitungstaetigkeiten** nachziehen.
+
+Technisch offen und bei mir: Das Lovable-Projekt baut derzeit fuer
+Cloudflare, nicht fuer normales Webhosting. Fuer Hostinger braucht es
+einen statischen Build. Steht in Abschnitt 5.
 
 Die Web-Demo der Kunden-App bleibt davon unberuehrt — die laeuft weiter
 ueber GitHub Pages, und dafuer stimmt der Text.
 
-Quelle: `apps/landing/README.md`, `docs/rechtstexte/datenschutz.md`
+---
 
 ### 1.3 Impressum spricht von „dieser App"
 
@@ -224,8 +228,18 @@ Damit klar ist, was du **nicht** anfassen musst:
 - Landingpage nach Hostinger ausrollen, sobald 1.2 geklaert ist.
 - Seed-Automaten stilllegen und die Erinnerungsregel aus CLAUDE.md an
   ein Merkmal haengen, das Demo-Daten nicht ausloest (siehe 4b).
-- Kuendigungsformular der Landingpage ans Backend anschliessen; die
-  Seite steht vorerst als Textseite mit E-Mail- und Postweg.
+- Statischen Build fuer Hostinger einrichten. Das Lovable-Projekt baut
+  ueber Nitro fuer Cloudflare; normales Webhosting kann damit nichts
+  anfangen. Die Seite ist reiner Inhalt, laesst sich also vorrendern.
+- Supabase-Anbindung aus der Landingpage nehmen (Formular wird zum
+  E-Mail- und Telefonweg). Damit landet auch kein Schluessel mehr im
+  ausgelieferten Code.
+- Kuendigungsseite bleibt eine Textseite mit E-Mail- und Postweg. Ein
+  Formular kommt dort nicht mehr hin: die Seite soll nichts
+  entgegennehmen. Der Kuendigungsknopf nach § 312k BGB gehoert
+  ohnehin dorthin, wo der Vertrag geschlossen wird — das ist die App,
+  und dort gibt es ihn. Die Seite auf der Website ist freiwillige
+  Transparenz, keine Pflichterfuellung.
 
 ---
 

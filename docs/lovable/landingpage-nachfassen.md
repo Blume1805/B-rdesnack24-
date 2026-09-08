@@ -23,6 +23,17 @@ Der erste Auftrag ist zur Hälfte umgesetzt:
 Die drei neuen Rechtstextseiten sind dadurch **von der Website aus nicht
 erreichbar**. Sie existieren, aber kein Link führt hin.
 
+## Dazugekommen am 08.09.2026
+
+Philipp hat entschieden, **nicht bei Lovable zu hosten** — im Pro-Tarif
+gibt es keinen Auftragsverarbeitungsvertrag nach Art. 28 DSGVO. Lovable
+ist Bauwerkzeug, ausgeliefert wird von Hostinger.
+
+Das ändert zwei Dinge am Auftrag, die unten als Punkte 6 und 7 stehen:
+statischer Build statt Cloudflare, und kein Formular mehr auf der Seite.
+Beides gehört in denselben Durchlauf — ein Formular, das im nächsten
+Schritt wieder herausfliegt, ist verschwendete Arbeit.
+
 ---
 
 ## Der Nachfasstext
@@ -119,5 +130,42 @@ gibt. Ersetze den ganzen Abschnitt (beide Absätze) durch:
 
 „Datum und Uhrzeit des Eingangs" bleibt fett.
 
-Melde zurück, wenn die vier Punkte stehen — und ob die Vergleichstabelle
+**6. Statischer Build statt Cloudflare.**
+
+Die Seite wird künftig von Hostinger ausgeliefert, also von gewöhnlichem
+Webhosting. Nitro baut derzeit für Cloudflare — damit kann Hostinger
+nichts anfangen.
+
+Stell den Build so um, dass alle sechs Routen (`/`, `/impressum`,
+`/datenschutz`, `/agb`, `/widerruf`, `/kuendigung`) **vorgerendert** als
+fertige HTML-Dateien herausfallen und sich ohne Laufzeitumgebung
+ausliefern lassen. Keine Serverfunktionen, kein Node auf dem Zielserver.
+
+Der Inhalt ist vollständig statisch, es geht also nichts verloren.
+
+Sag mir am Ende, welcher Ordner hochgeladen werden muss und ob die
+Adressen ohne `.html`-Endung funktionieren.
+
+**7. Das Kontaktformular fliegt raus.**
+
+`InquiryForm` sendet an die Supabase-Funktion
+`advertising_inquiry_submit`. Die Website soll aber nichts mehr
+entgegennehmen — der Kunde gibt seine Daten erst in der App an.
+
+In Szene 08 wird die Fallunterscheidung `inquiryConfigured()` entfernt
+und **immer `DirectContact`** gezeigt (E-Mail und Telefon). Die
+Komponente steht bereits im Code und braucht nur den Text „Das Formular
+ist noch nicht angeschlossen." — der stimmt dann nicht mehr. Ersetze
+diesen Satz durch:
+
+    Flächen und Werbeflächen besprechen wir lieber persönlich als über ein
+    Formular. Schreiben Sie uns oder rufen Sie an.
+
+Danach dürfen `InquiryForm`, der Supabase-Aufruf und die beiden
+Umgebungsvariablen `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY`
+nirgends mehr im Code stehen. Prüf das bitte ausdrücklich: In einer
+statisch ausgelieferten Seite landet jede solche Variable im Klartext im
+Bundle.
+
+Melde zurück, wenn die sechs Punkte stehen — und ob die Vergleichstabelle
 bei 360 Punkten Breite ohne waagerechtes Scrollen auskommt.

@@ -1,11 +1,12 @@
 **Abo kündigen**
 
 
-**HIER KÜNDIGEN**
+**SO KÜNDIGST DU**
 
-Auf dieser Seite kannst du ein laufendes Abonnement kündigen — **ohne
-Anmeldung, ohne Begründung und ohne Umweg über den Kundendienst**. Das schreibt
-§ 312k BGB so vor, und wir halten uns daran.
+Ein laufendes Abonnement kannst du **ohne Anmeldung, ohne Begründung und ohne
+Umweg über den Kundendienst** kündigen — per E-Mail oder per Brief, beides
+steht unten. In der App findest du dafür zusätzlich die Schaltfläche
+„Verträge hier kündigen" (§ 312k BGB).
 
 Die Kündigung wird zum **Ende des laufenden Abrechnungszeitraums** wirksam. Bis
 dahin behältst du alle Vorteile, die du bezahlt hast. Willst du sofort und
