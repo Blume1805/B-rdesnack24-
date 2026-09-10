@@ -226,3 +226,18 @@ final adminActionsProvider =
     StateNotifierProvider<AdminActionsController, AsyncValue<void>>(
   AdminActionsController.new,
 );
+
+// ── Kombiangebote ────────────────────────────────────────────────────
+
+final bundlesAdminProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>(
+  (ref) => ref.watch(adminDataSourceProvider).bundles(),
+);
+
+/// Produkte, die in ein Kombiangebot koennen. Enthaelt bewusst auch die
+/// mit `coupon_eligibility = bundle_only` — fuer die ist das Bundle der
+/// vorgesehene Weg.
+final bundleProductsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>(
+  (ref) => ref.watch(adminDataSourceProvider).bundleProducts(),
+);

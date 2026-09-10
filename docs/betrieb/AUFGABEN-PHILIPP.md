@@ -201,30 +201,18 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
       `20260910190000_popcorn_zutaten_naehrwerte_ek.sql`,
       `20260910200000_popcorn_verkaufspreis.sql`
 
-- [ ] **Kombiangebote sind gebaut -- anlegen kannst du sie noch nicht
-      selbst.** Tabellen, Preisaufteilung, Kundenansicht und Coupon-Karte
-      stehen. Was fehlt, ist die Eingabemaske in der
-      Gesellschafter-App: heute entsteht ein Bundle nur per SQL. Sag
-      Bescheid, wenn ich die Maske bauen soll.
-      Bis dahin legt dieser Befehl das erste Bundle an (sobald die
-      Supabase-Verbindung wieder offen ist):
+- [x] **Kombiangebote sind gebaut, Maske inklusive.** In der
+      Gesellschafter-App unter *Unternehmensverwaltung > Kombiangebote*.
+      Du waehlst Produkte, setzt die Reihenfolge (die ist zugleich die
+      Reihenfolge der Bilder beim Kunden), gibst den Kombipreis ein und
+      siehst sofort die Ersparnis. Die Kachel sieht nur, wer
+      `offers.manage` hat -- Gesellschafter also.
 
-      ```sql
-      with b as (
-        insert into public.bundles (code, title, description, price_gross)
-        values ('KINO', 'Cola + Popcorn',
-                'Der Feierabend-Klassiker.', 6.00)
-        returning id
-      )
-      insert into public.bundle_items (bundle_id, product_id, position)
-      select b.id, p.id,
-             case p.sku when 'BS-001' then 1 else 2 end
-      from b, public.products p
-      where p.sku in ('BS-001', 'BS-064');
-      ```
-
-      Danach `select * from public.bundle_split(<id>);` -- die Summe der
-      Positionen muss 6,00 EUR ergeben.
+      Die Maske weist zwei Sachen ab, und der Server noch einmal
+      unabhaengig davon: weniger als zwei Produkte, und einen Kombipreis,
+      der nicht unter der Summe der Einzelpreise liegt. Das zweite ist
+      der wichtigere Riegel -- sonst zeigt die Kunden-App einen
+      durchgestrichenen Preis ohne Anlass.
 
 - [ ] **Am Automaten ist ein Bundle zwei Kaeufe.** Solange das Geraet
       kein Bundle kennt, kauft der Kunde zweimal einzeln. Wie der

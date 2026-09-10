@@ -483,4 +483,51 @@ class AdminRemoteDataSource {
     );
     return _rows(res);
   }
+  // ── Kombiangebote ──────────────────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> bundles() async {
+    final rows = await _client.rpc('bundles_admin');
+    if (rows is! List) return const [];
+    return rows.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> bundleProducts() async {
+    final rows = await _client.rpc('bundle_products');
+    if (rows is! List) return const [];
+    return rows.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  }
+
+  /// Kopf und Positionen in einem Aufruf. [items] ist die Reihenfolge, in
+  /// der die Produkte beim Kunden erscheinen.
+  Future<String> saveBundle({
+    required String title,
+    required double priceGross,
+    required List<Map<String, Object>> items,
+    String? id,
+    String? code,
+    String? description,
+    DateTime? validFrom,
+    DateTime? validTo,
+    String status = 'active',
+  }) async {
+    String? tag(DateTime? d) => d?.toIso8601String().substring(0, 10);
+    final res = await _client.rpc(
+      'bundle_save',
+      params: {
+        'p_title': title,
+        'p_price_gross': priceGross,
+        'p_items': items,
+        'p_id': id,
+        'p_code': code,
+        'p_description': description,
+        'p_valid_from': tag(validFrom),
+        'p_valid_to': tag(validTo),
+        'p_status': status,
+      },
+    );
+    return res.toString();
+  }
+
+  Future<void> deleteBundle(String id) =>
+      _client.rpc('bundle_delete', params: {'p_id': id});
 }

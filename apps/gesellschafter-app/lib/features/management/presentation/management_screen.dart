@@ -6,6 +6,7 @@ import 'package:bs24_kern/core/theme/app_typography.dart';
 import 'package:bs24_kern/core/widgets/design_system/design_system.dart';
 import 'package:bs24_kern/features/auth/presentation/controllers/auth_providers.dart';
 import 'package:bs24_gesellschafter/features/admin/presentation/screens/advertising_screen.dart';
+import 'package:bs24_gesellschafter/features/admin/presentation/screens/bundles_screen.dart';
 import 'package:bs24_gesellschafter/features/admin/presentation/screens/businesses_admin_screen.dart';
 import 'package:bs24_gesellschafter/features/admin/presentation/screens/campaigns_screen.dart';
 import 'package:bs24_gesellschafter/features/admin/presentation/screens/email_admin_screen.dart';
@@ -121,6 +122,13 @@ class ManagementScreen extends ConsumerWidget {
         Icons.group_outlined,
         const EmployeesScreen(),
         visible: p.contains('employees.manage'),
+      ),
+      _Module(
+        'Kombiangebote',
+        'Zwei Produkte, ein Preis',
+        Icons.local_offer_outlined,
+        const BundlesScreen(),
+        visible: p.contains('offers.manage'),
       ),
       _Module(
         'B2B-Kunden',

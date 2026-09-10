@@ -592,3 +592,38 @@ Offen: **Die drei Migrationen sind nicht angewandt** (Supabase-Verbindung
 mit abgelaufenem Token ausgestiegen), es gibt keine Eingabemaske für
 Bundles in der Gesellschafter-App, und wie ein Bundle am Automaten
 tatsächlich eingelöst wird, ist eine Vorfrage vor dem ersten Gerät.
+
+### Nachtrag: die Pflegemaske (10.09.2026)
+
+Vier RPCs (`bundle_products`, `bundles_admin`, `bundle_save`,
+`bundle_delete`) und der Bildschirm *Kombiangebote* in der
+Gesellschafter-App, sichtbar mit `offers.manage`.
+
+**Geschrieben wird über Funktionen, nicht über die Tabelle.** Ein
+direkter Tabellenzugriff nimmt entgegen, was der Client schickt; eine
+Funktion nimmt entgegen, was sie als Parameter kennt. `bundle_save`
+schreibt Kopf und Positionen in einem Vorgang — zwei Aufrufe könnten auf
+halbem Weg abbrechen und ein Kombiangebot mit einer einzigen Position
+hinterlassen.
+
+**Zwei Regeln stehen serverseitig, nicht nur im Formular:** mindestens
+zwei verschiedene Produkte, und der Kombipreis muss unter der Summe der
+Einzelpreise liegen. Die zweite ist der § 5 UWG-Riegel — ohne sie
+entsteht in der Kunden-App ein durchgestrichener Preis ohne Anlass. Sieben
+Tests halten die Regel fest; das Formular zeigt sie vorher an, statt den
+Fehler erst beim Speichern zu melden.
+
+`bundle_delete` ist ein Soft-Delete. Ein Bundle, unter dem gekauft wurde,
+wird über `purchase_items.bundle_id` gebraucht, um den abweichenden Preis
+zu erklären — ein echtes `DELETE` nähme der Buchung ihre Begründung
+(§§ 145–147 AO).
+
+Alle vier Funktionen sind `security definer`, prüfen die Berechtigung
+selbst und werden `public` und `anon` ausdrücklich entzogen.
+`bundle_products` gibt ohne Berechtigung eine leere Liste zurück statt
+einer Fehlermeldung mit Inhalt.
+
+**Status weiterhin 🟡** — die Migrationen sind nicht angewandt
+(Supabase-Verbindung mit abgelaufenem Token ausgestiegen). Nachweise bis
+dahin: `flutter analyze` ohne Befund in beiden Apps, 34 Tests in der
+Kunden-App und 41 in der Gesellschafter-App grün.
