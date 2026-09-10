@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bs24_kern/core/theme/app_tokens.dart';
+import 'package:bs24_kern/features/geteilt/betriebszustand.dart';
 import 'screens/customer_qr_screen.dart';
 import 'screens/finder_tab.dart';
 import 'screens/history_tab.dart';
@@ -20,11 +21,21 @@ class CustomerScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomerScreenState extends ConsumerState<CustomerScreen> {
+  /// Einstieg ist die Automatenliste, immer.
+  ///
+  /// Sie beantwortet die einzige Frage, die ohne Vorgeschichte
+  /// funktioniert: lohnt der Weg? „Vorteile" ist ein Nachschlage-
+  /// bildschirm — man sucht ihn auf, wenn man etwas wissen will. Vor dem
+  /// ersten Kauf zeigt er ausserdem nur Nullen.
+  ///
+  /// Bewusst kein Einstieg, der sich mit der Kaufhistorie aendert: Wer
+  /// dieselbe App oeffnet und etwas anderes vorfindet, ohne zu wissen
+  /// warum, verliert die Orientierung.
   int _index = 0;
 
   static const _tabs = [
-    OffersTab(),
     FinderTab(),
+    OffersTab(),
     HistoryTab(),
     ProfileTab(),
   ];
@@ -46,6 +57,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final vorStart = ref.watch(istVorStartProvider);
     return Scaffold(
       body: Stack(
         children: [
@@ -66,15 +78,21 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openQr,
-        backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.ink,
-        elevation: 4,
-        shape: const CircleBorder(),
-        tooltip: 'Kundenkarte',
-        child: const Icon(Icons.qr_code_2, size: 30),
-      ),
+      // Die Kundenkarte ist die hervorgehobene Handlung — aber nur,
+      // wenn es einen Automaten gibt, an dem man sie vorzeigen kann.
+      // Vor dem Start waere sie ein Knopf ins Leere an der
+      // prominentesten Stelle der App.
+      floatingActionButton: vorStart
+          ? null
+          : FloatingActionButton(
+              onPressed: _openQr,
+              backgroundColor: AppColors.brand,
+              foregroundColor: AppColors.ink,
+              elevation: 4,
+              shape: const CircleBorder(),
+              tooltip: 'Kundenkarte',
+              child: const Icon(Icons.qr_code_2, size: 30),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: AppColors.surfaceCard,
@@ -88,24 +106,35 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _NavItem(
-                icon: Icons.local_offer_outlined,
-                selectedIcon: Icons.local_offer,
-                label: 'Angebote',
-                selected: _index == 0,
-                onTap: () => setState(() => _index = 0),
-              ),
-              _NavItem(
                 icon: Icons.place_outlined,
                 selectedIcon: Icons.place,
                 label: 'Automaten',
+                selected: _index == 0,
+                onTap: () => setState(() => _index = 0),
+              ),
+              // „Vorteile" statt „Angebote": Der Bildschirm enthaelt vier
+              // verschiedene Dinge — Wochenangebote, persoenliches
+              // Angebot, Status und Abo. Nur eines davon ist ein
+              // Angebot.
+              _NavItem(
+                icon: Icons.local_offer_outlined,
+                selectedIcon: Icons.local_offer,
+                label: 'Vorteile',
                 selected: _index == 1,
                 onTap: () => setState(() => _index = 1),
               ),
-              const SizedBox(width: 56), // Platz für den FAB
+              // Platz für den FAB. Ohne ihn bliebe sonst eine Lücke
+              // zwischen den Reitern.
+              if (!vorStart) const SizedBox(width: 56),
               _NavItem(
                 icon: Icons.volunteer_activism_outlined,
                 selectedIcon: Icons.volunteer_activism,
-                label: 'Meine Spenden',
+                // „Für die Region" statt „Meine Spenden": Der Kunde
+                // spendet nicht, er kauft — Bördesnack24 gibt 5 % vom
+                // Nettopreis weiter. „Meine Spenden" legt eine eigene
+                // Zuwendung nahe, mit der Erwartung einer
+                // Spendenbescheinigung, die es nicht geben kann.
+                label: 'Für die Region',
                 selected: _index == 2,
                 onTap: () => setState(() => _index = 2),
               ),

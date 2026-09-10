@@ -8,8 +8,21 @@ import 'package:bs24_kern/features/auth/presentation/controllers/auth_providers.
 import 'package:bs24_kunden/features/customer/presentation/controllers/customer_providers.dart';
 import 'package:bs24_kern/core/widgets/design_system/design_system.dart';
 
-/// Kundenkarte mit QR-Code (Kd.-Nr. + Name). Wird am Automaten gescannt zur
-/// Verifizierung des Kunden (zukünftige Nayax-Integration).
+/// Kundenkarte mit QR-Code (Kd.-Nr. + Name).
+///
+/// **Der Scanvorgang am Automaten existiert noch nicht.** Es gibt keinen
+/// Automaten, keinen Scanner und keine Anbindung; der Code enthält einen
+/// Bezeichner, mehr nicht. Der Bildschirm hat das bis zum 10.09.2026 im
+/// Präsens versprochen („Rabatte und Rechnung werden automatisch
+/// verknüpft") — eine Aussage über einen Betriebszustand, den es nicht
+/// gibt, an der prominentesten Stelle der App.
+///
+/// **Offen vor der Anbindung:** Der QR trägt `BS24:<Kd.-Nr.>:<Konto-ID>`
+/// — einen Bezeichner ohne Nachweis. Wer ihn abfotografiert, könnte
+/// fremde Rabatte einlösen und fremde Käufe zuordnen lassen. Ein
+/// Bezeichner darf kein Ausweis sein; die spätere Anbindung braucht
+/// einen Nachweis, der nicht abfotografierbar ist (etwa ein kurzlebiges
+/// Einmalkennzeichen).
 class CustomerQrScreen extends ConsumerWidget {
   const CustomerQrScreen({super.key});
 
@@ -31,7 +44,7 @@ class CustomerQrScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Am Automaten scannen',
+                'Meine Kundenkarte',
                 style: AppTypography.body(
                   size: 13,
                   weight: FontWeight.w800,
@@ -81,8 +94,9 @@ class CustomerQrScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s6),
               Text(
-                'Halte den QR-Code an den Scanner des Automaten. '
-                'Rabatte und Rechnung werden automatisch verknüpft.',
+                'Diese Karte weist dich als Kunde aus. Sobald der erste '
+                'Automat steht, ordnet sie deine Käufe und Rabatte '
+                'automatisch zu.',
                 textAlign: TextAlign.center,
                 style: AppTypography.body(
                   size: 12,

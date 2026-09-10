@@ -5,10 +5,12 @@ import 'package:bs24_kern/core/billing/subscription_billing.dart';
 import 'package:bs24_kern/core/di/providers.dart';
 import 'package:bs24_kern/core/pricing/pricing.dart';
 import 'package:bs24_kern/core/theme/app_tokens.dart';
+import 'package:bs24_kern/features/geteilt/betriebszustand.dart';
 import 'package:bs24_kern/core/theme/app_typography.dart';
 import 'package:bs24_kern/core/widgets/design_system/design_system.dart';
 import 'package:bs24_kern/features/legal/presentation/cancellation_screen.dart';
 import 'package:bs24_kunden/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:bs24_kunden/features/customer/presentation/widgets/abo_rechner.dart';
 import 'app_benefits_compare_screen.dart';
 import 'employer_benefit_screen.dart';
 import 'subscription_value_screen.dart';
@@ -420,6 +422,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Vor dem ersten Automaten wird kein Abo verkauft. Man kann nicht
+    // auf Kaeufe sparen, die man nicht taetigen kann -- eine Zahlung
+    // ohne moegliche Gegenleistung, die beim ersten Blick auf die
+    // Abrechnung zur Kuendigung wird.
+    if (ref.watch(istVorStartProvider)) return const _AboVorStart();
+
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: const HeroAppBar(title: Text('Mein Abo')),
@@ -430,6 +438,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.s4),
               children: [
+                // Der Rechner steht vor den Preisen, nicht dahinter.
+                // Reihenfolge: dein Verhalten -> dein Vorteil -> die
+                // Rechnung -> der Preis. Wer zuerst den Preis sieht,
+                // vergleicht ihn mit nichts.
+                const AboRechner(),
+                const SizedBox(height: AppSpacing.s4),
                 const Eyebrow('Abo-Modelle'),
                 const SizedBox(height: 2),
                 Text(
@@ -836,6 +850,62 @@ class _PlanCard extends StatelessWidget {
                         : 'Auswählen',
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Abo-Bildschirm vor dem ersten Automaten.
+///
+/// Erklaert, was das Abo einmal bringt, und verkauft es nicht. Kein
+/// „jetzt schon sichern", kein Vorverkauf, keine Preisnennung als
+/// Angebot — die Preise stehen als Auskunft da, damit niemand sich
+/// spaeter ueberrascht fuehlt.
+class _AboVorStart extends StatelessWidget {
+  const _AboVorStart();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.surfaceAlt,
+      appBar: const HeroAppBar(title: Text('Mein Abo')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.s4),
+        children: [
+          const Eyebrow('Noch nicht verfügbar'),
+          const SizedBox(height: 2),
+          Text(
+            'Das Abo gibt es, sobald der erste Automat steht.',
+            style: AppTypography.display(
+              size: 22,
+              weight: FontWeight.w800,
+              color: AppColors.ink,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Text(
+            'Ein Abo spart dir Geld bei deinen Käufen. Solange es nichts '
+            'zu kaufen gibt, würdest du für nichts zahlen — deshalb '
+            'bieten wir es noch nicht an.',
+            style: AppTypography.body(size: 14),
+          ),
+          const SizedBox(height: AppSpacing.s4),
+          const Eyebrow('Was es später kostet'),
+          const SizedBox(height: AppSpacing.s2),
+          Text(
+            '0,99 € im Monat oder 9,99 € im Jahr, jeweils inklusive '
+            'Umsatzsteuer. Dafür zahlst du dauerhaft 5 % weniger als am '
+            'Automaten, dazu kommen Status-Rabatt und Angebote.',
+            style: AppTypography.body(size: 14),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          Text(
+            'Ob sich das für dich rechnet, hängt davon ab, wie oft du '
+            'kaufst. Sobald du erste Käufe hast, rechnen wir es dir hier '
+            'vor — und sagen dir auch, wenn es sich nicht lohnt.',
+            style: AppTypography.body(size: 13, color: AppColors.textMuted),
           ),
         ],
       ),
