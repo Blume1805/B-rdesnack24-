@@ -394,3 +394,64 @@ Automaten** an und ist damit weiterhin nicht ausgelöst.
 🟡 für die Landingpage, bis die beiden Vorteilsangaben dort korrigiert
 sind. Blockiert allein am Lovable-Guthaben, nicht an einer offenen
 Frage.
+
+---
+
+## Legal Impact — Sortiment um drei Popcorn-Sorten erweitert (10.09.2026)
+
+### Sachverhalt
+
+Migration `20260910180000_sortiment_popcorn.sql`: BS-063 „Popcrn Caramel
+Biscuit", BS-064 „Popcrn Caramel & Seasalt", BS-065 „Popcrn Cookies &
+Cream", Kategorie Snacks, Steuersatz 7 %, `status = 'active'`. Aktive
+Produkte damit 65 (Getränke 26, Eis 20, Süßwaren 13, Snacks 6).
+
+Verkaufspreis, Einkaufspreis, Gewicht, Nährwerte und Allergene sind
+**leer**. Quelle der Sortennamen sind zwei Bildschirmfotos von
+kreutzers.eu; die dort sichtbaren Preise und Gewichte wurden bewusst
+nicht übernommen (fremder Ladenpreis; 100 g und 80 g stehen beide bei
+11,96 €/kg, was sich nicht ausgeht).
+
+**Datenklasse:** Stammdaten, kein Personenbezug.
+
+### Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum / AGB / Nutzungsbedingungen | ✓ | Nicht berührt. Kein Vertragsinhalt, keine neue Leistung. | Nein | |
+| Datenschutzerklärung, DSGVO | ✓ | Kein Personenbezug, keine neue Verarbeitung. | Nein | |
+| Verbraucherrecht | ✓ | Nichts verkäuflich: kein Automat, kein Bestand. | Nein | |
+| **Preisangaben (PAngV)** | ✓ | `list_price_net` ist leer, die App zeigt deshalb keinen Preis (`grossPrice` gibt null zurück, `product_detail.dart`). Ein leerer Preis ist kein Verstoß; ein **falscher** wäre einer. Sobald ein Preis gesetzt wird, gilt Bruttoangabe inkl. USt wie bei den übrigen 62. | Nein, aber vor Preissetzung beachten | Philipp |
+| **Steuer (UStG)** | ✓ | 7 % nach Anlage 2 Nr. 32 UStG — Zubereitungen aus Getreide (Kapitel 19). Gleiche Einstufung wie die übrigen Snacks. Ohne `cost_price_net` fehlen für diese drei Positionen Wareneinsatzquote und Rohertragsmarge; das ist eine Kennzahlenlücke, keine Aufzeichnungspflichtverletzung, weil kein Geschäftsvorfall vorliegt. | Nein | |
+| **Lebensmittelrecht (LMIV)** | ✓ | Der bestehende offene Punkt wächst von 62 auf 65 Produkte ohne Nährwerte und Allergene. **Bewusst nicht geschätzt:** eine erfundene Allergenangabe ist gefährlicher als keine — „Cookies & Cream" und „Caramel Biscuit" lassen Gluten und Milch vermuten, Vermutung ist aber keine Kennzeichnung. Die Angaben kommen von der Verpackung. | **Ja — offener Punkt, unverändert vor dem ersten Verkauf fällig** | Philipp |
+| Jugendschutz, Verpackung/Pfand | ✓ | Keine altersbeschränkte Ware, keine Pfandverpackung. | Nein | |
+| Barrierefreiheit, EU AI Act | ✓ | Nicht berührt. | Nein | |
+| **UWG / Werbung** | ✓ | Die Landingpage nennt „62 Produkte" und „Snacks 3". Beides ist ab heute falsch. Zahlen in Repo-Dokumenten und in der Wahrheitsschicht des Skills korrigiert; die Seite selbst zieht mit dem wartenden Lovable-Auftrag nach (Punkt 6 in `AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md`). | **Ja — offen auf der Seite** | Lovable (Auftrag liegt) |
+| **Urheber-/Markenrecht** | ✓ | „Popcrn" ist eine fremde Marke. In der Datenbank steht sie zur Kalkulation, nicht zur Werbung — wie die übrigen Herstellernamen im Sortiment. **Auf die Landingpage gehört sie nicht**, weil ohne Liefervereinbarung eine Geschäftsbeziehung behauptet würde; die Seite nennt ohnehin nur Warengruppen und Zahlen. | Nein, weil ausgeschlossen | |
+| Store-Regeln | ✓ | Nicht berührt. | Nein | |
+
+### Anpassungskategorien
+
+* **Technisch** — erledigt: Migration angewandt und nachgezählt.
+* **Dokumentarisch** — Zahlen in `landingpage-inhalte.md`, im
+  scrollcraft-Skill (beide Fassungen) und in der Aufgabenliste
+  nachgezogen; die Landingpage selbst steht im wartenden Auftrag.
+* **Organisatorisch** — Nährwerte und Allergene für drei weitere
+  Produkte zu erfassen.
+* **Vertraglich** — nichts anzupassen. Es gibt keine Liefervereinbarung
+  für diese Ware, und die Aufnahme ins Sortiment begründet keine.
+
+### Zur Pflichtliste Automaten
+
+Erneut geprüft: kein aktiver Automat in `machines`. Die Erinnerung an
+`docs/betrieb/AUTOMAT-INBETRIEBNAHME.md` knüpft an den Kauf des ersten
+Automaten an und ist weiterhin nicht ausgelöst — auch nicht dadurch,
+dass hier Sortiment und Bestand zur Sprache kommen.
+
+### Status
+
+🟢 für die Datenbankänderung.
+
+🟡 für die Funktion insgesamt: die Landingpage nennt bis auf Weiteres
+eine falsche Produktzahl, und drei Angaben je Sorte (VK, EK, Gewicht)
+fehlen. Beides ist zugeordnet und offen geführt.

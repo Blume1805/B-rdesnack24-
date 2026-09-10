@@ -72,7 +72,7 @@ Für Muster 14. Werkzeug: `scripts/build_spin.py`.
 fällt nur beim sehr langsamen Scrollen auf und spart ein Drittel Gewicht und
 Arbeitszeit. 36 nur für zwei bis drei Heldenprodukte.
 
-Bei 62 Produkten sind das rund 1.500 statt 2.200 Aufnahmen.
+Bei 65 Produkten sind das rund 1.560 statt 2.290 Aufnahmen.
 
 **Aufbau:** Kamera auf Stativ, Höhe halbe Produkthöhe, Abstand fix. Produkt
 mittig auf einem Drehteller mit Gradmarkierung. Weißer Hintergrund, zwei weiche

@@ -18,11 +18,15 @@ group by 1 order by 2 desc;
 | Getränke | 26 |
 | Eis | 20 |
 | Süßwaren | 13 |
-| Snacks | 3 |
-| **Summe** | **62** |
+| Snacks | 6 |
+| **Summe** | **65** |
+
+Stand 10.09.2026. Drei Popcorn-Sorten sind an diesem Tag dazugekommen
+(BS-063 bis BS-065, Kategorie Snacks) — ohne Verkaufspreis,
+Einkaufspreis und Gewicht, weil diese Angaben noch nicht feststehen.
 
 Dazu ein weiteres Produkt ohne Kategorie, das auf `inactive` steht und
-deshalb nicht mitzählt (63 Zeilen insgesamt).
+deshalb nicht mitzählt (66 Zeilen insgesamt).
 
 **Heißgetränke fehlen in dieser Liste.** Es gibt einen geplanten
 Heißgetränkeautomaten, aber noch kein einziges Produkt in der Kategorie.
@@ -30,16 +34,16 @@ Sie darf deshalb nicht mit einer Zahl auftreten.
 
 ### Wie darüber geschrieben werden darf
 
-Diese 62 Produkte sind eine **Planungsliste**. Nichts davon ist gekauft,
+Diese 65 Produkte sind eine **Planungsliste**. Nichts davon ist gekauft,
 nichts liegt in einem Automaten, kein Lieferantenvertrag steht.
 
 Zulässig ist der Zeitbezug der Planung:
 
-> „62 Produkte sind für den Start vorgesehen, verteilt auf vier
+> „65 Produkte sind für den Start vorgesehen, verteilt auf vier
 > Warengruppen."
 
 Unzulässig ist jede Gegenwartsform, die einen Bestand behauptet — „wir
-führen 62 Produkte", „unser Sortiment umfasst", „62 Produkte
+führen 65 Produkte", „unser Sortiment umfasst", „65 Produkte
 verfügbar". Das wäre eine Angabe über einen Betriebszustand, den es
 nicht gibt (§ 5 UWG).
 
@@ -49,7 +53,7 @@ Markennennungen eine Behauptung über eine Geschäftsbeziehung, die nicht
 besteht, und berühren fremde Kennzeichenrechte. Nur Warengruppen und
 Zahlen.
 
-**Keine Nährwerte, keine Allergene.** Von den 62 Produkten trägt
+**Keine Nährwerte, keine Allergene.** Von den 65 Produkten trägt
 **keines** Nährwerte oder Allergene in der Datenbank (`energy_kcal` und
 `allergens` sind durchgehend leer). Die Seite darf beides deshalb nicht
 als vorhandene Funktion darstellen.
