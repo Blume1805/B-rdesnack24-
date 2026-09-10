@@ -54,15 +54,12 @@ Zypern ist EU-Mitgliedstaat. Auf Ebene des Vertragspartners besteht
 deshalb kein Drittlandproblem, und die Erklärung braucht dafür keinen
 eigenen Abschnitt.
 
-**Ein Platzhalter ist noch offen:**
+**Alle Platzhalter sind gefüllt.** Der Serverstandort lautet seit
+10.09.2026 „Deutschland (Frankfurt am Main)" — Angabe von Philipp.
 
-| Platzhalter | Was einzutragen ist |
-|---|---|
-| `[[SERVERSTANDORT]]` | das Land des Rechenzentrums laut Tarif |
-
-Er wird nicht aus dem Gedächtnis gefüllt. Hostinger ist von hier aus
-nicht abrufbar, und bei Supabase hat das Raten schon einmal eine falsche
-Firmierung erzeugt.
+Er stammt aus einer Recherche, nicht aus dem eingerichteten Konto. Beim
+Anlegen des Tarifs wird der Standort gewählt; die Erklärung behauptet
+ihn als Tatsache. **Nach der Einrichtung im hPanel gegenprüfen.**
 
 ## Fünf Punkte, die vor dem Online-Gang stimmen müssen
 

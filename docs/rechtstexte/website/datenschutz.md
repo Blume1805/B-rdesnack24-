@@ -76,7 +76,7 @@ Nutzungsbedingungen und kommt mit deren Annahme zustande.
 
 Zypern ist Mitgliedstaat der Europäischen Union. Eine Übermittlung in
 ein Drittland findet auf dieser Ebene nicht statt. Die Server stehen in
-[[SERVERSTANDORT]].
+Deutschland (Frankfurt am Main).
 
 Die Domain boerdesnack24.de ist beim selben Anbieter registriert.
 

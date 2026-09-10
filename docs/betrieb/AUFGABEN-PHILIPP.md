@@ -137,18 +137,12 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
       Quelle: `docs/COMPLIANCE.md`, Zeile 219
 - [ ] **Katalogpreise** final festlegen (die im Katalog stehen, sind
       Planwerte).
-- [ ] **Gibt es das Lifetime-Abo noch?** Auf der Landingpage taucht es
-      nicht auf, so wie du es gesagt hast, und `lifetimePubliclyOffered`
-      steht auf `false`. Im Backend ist es aber weiter vollstaendig
-      angelegt: eigener Plan, 20 Founders-Plaetze, eigene Pruefung beim
-      Abschluss — und die **App**-Fassungen von Widerrufsbelehrung und
-      Nutzungsbedingungen beschreiben es weiter (79,99 EUR einmalig).
-      Zwei Moeglichkeiten, beide sauber, aber es muss eine sein:
-      (a) das Modell bleibt in der Schublade fuer eine spaetere Aktion —
-      dann bleiben die App-Rechtstexte, wie sie sind;
-      (b) es entfaellt ganz — dann nehme ich es aus den App-Rechtstexten
-      und aus dem Backend heraus.
-      Sag mir nur (a) oder (b), den Rest mache ich.
+- [x] ~~Gibt es das Lifetime-Abo noch?~~ **Entschieden 10.09.2026:**
+      Es bleibt in der Schublade und wird spaeter fuer begrenzte
+      Zeitraeume genutzt. Damit bleibt alles, wie es ist: Plan und
+      Founders-Kontingent im Backend, Beschreibung in den
+      App-Rechtstexten, `lifetimePubliclyOffered = false`. Auf der
+      Landingpage kommt es nicht vor. Kein Handlungsbedarf.
 - [ ] **M-3 Spaltenrechte `unit_cost`.** Erst nachweisen, dass jeder
       interne Lesepfad ueber eine RPC laeuft, dann die Spalte schliessen.
       Bewusst zurueckgestellt, nicht vergessen.
