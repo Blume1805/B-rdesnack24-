@@ -160,33 +160,47 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
 
 ## 2. Entscheidungen, die noch anstehen
 
-- [ ] **Popcorn: Der Einkaufspreis von 2,99 EUR traegt keine Marge.**
-      Netto sind das 2,79 EUR. Damit die Wareneinsatzquote im Zielband
-      von 30 bis 40 % laege, muesste der Automatenpreis bei rund
-      8,50 EUR brutto stehen. Selbst beim hoechsten Preis im heutigen
-      Sortiment (3,50 EUR) waere die Quote 85 % -- es blieben 15 %
-      Rohertrag statt der angestrebten 50 bis 70 %. Zum Vergleich: die
-      teuerste Position im Sortiment kostet uns 1,79 EUR im Einkauf.
-      2,99 EUR ist ein Endkundenpreis. Fuer den Automaten braucht es
-      einen Grosshandelspreis oder eine andere Sorte.
+- [ ] **Popcorn: Duerfen Coupons und Deals darauf gelten?** Das ist die
+      Frage, die der Preis von 4,00 EUR offen laesst. Bei Abo, Status
+      und Deal traegt die Rechnung noch -- im schlechtesten Fall bleiben
+      8 Cent. Faellt aber ein Meilenstein-Coupon von 25 % darauf, kippt
+      sie: auf den Abo-Preis gerechnet liegt der Verkauf dann unter dem
+      Einkauf, und die Spende faellt trotzdem an. Macht **minus 26 Cent
+      je Packung**. Die Rechnung steht im Kopf der Migration
+      `20260910200000_popcorn_verkaufspreis.sql`.
+      Zu entscheiden: Popcorn von Coupons und Deals ausnehmen, den
+      Couponsatz begrenzen, oder den Verlust als Werbekosten hinnehmen.
+      Technisch ist heute **keine** dieser Ausnahmen gebaut.
 
-- [ ] **Popcorn: Verkaufspreis und Gewicht.** Beides fehlt weiterhin.
-      Die Gewichtsangaben im Shop widersprechen sich (100 g und 80 g
-      stehen beide bei 11,96 EUR/kg; 2,99 EUR bei 11,96 EUR/kg waeren
-      250 g). Ohne Verkaufspreis zeigt die App keinen Preis an.
+- [ ] **Popcorn: Zutaten und Allergene nachtragen** (du traegst nach).
+      Fuer alle vier Sorten von der Packung: Zutatenverzeichnis im
+      Wortlaut und Naehrwerttabelle. Eingetragen ist bisher nur Caramel
+      & Seasalt, weil die Shop-Seiten sich widersprechen -- Einzelheiten
+      in Abschnitt 4c. Die Allergene stehen bei allen vier, sind aber
+      aus der Zutatenliste abgeleitet und gehoeren mit der Packung
+      gegengeprueft.
+      Sobald du sie hast, trage ich sie ein.
 
-- [ ] **Popcorn: Naehrwerte und Zutaten fuer drei der vier Sorten.**
-      Die vier Produktseiten zeigen nur ZWEI verschiedene Datensaetze,
-      jeder auf zwei Produkten -- Einzelheiten unten unter „Was ich
-      dabei gefunden habe". Uebernommen habe ich nur den Datensatz, der
-      eindeutig zuzuordnen ist (Caramel & Seasalt). Fuer Caramel
-      Biscuit, Cookies & Cream und Premium Caramel brauche ich die
-      Angaben von der Packung. **Die Allergene sind fuer alle vier
-      gesetzt** -- die sind gegen die Verwechslung robust.
+- [ ] **Popcorn: Gewicht je Sorte.** Fehlt weiterhin. Die Angaben im
+      Shop widersprechen sich (100 g und 80 g stehen beide bei
+      11,96 EUR/kg; 2,99 EUR bei 11,96 EUR/kg waeren 250 g). Es gehoert
+      in den Produktnamen, wie bei „Kinderriegel 4 Stk.".
 
       Quellen: `supabase/migrations/20260910180000_sortiment_popcorn.sql`,
       `20260910183000_sortiment_popcorn_premium_caramel.sql`,
-      `20260910190000_popcorn_zutaten_naehrwerte_ek.sql`
+      `20260910190000_popcorn_zutaten_naehrwerte_ek.sql`,
+      `20260910200000_popcorn_verkaufspreis.sql`
+
+- [ ] **Kombiangebote gibt es technisch noch nicht.** Die Idee „Cola +
+      Popcorn fuer 6 EUR" laesst sich heute nicht abbilden: `offers`
+      kennt genau **ein** Produkt je Angebot (`offers.product_id`), es
+      gibt keine Bundle-Tabelle und keinen Bundle-Preis. Dazu kaeme die
+      Aufteilung des Bundle-Preises auf die beiden Steuersaetze (Cola
+      19 %, Popcorn 7 %) und die Spende je Position -- beides
+      buchungsrelevant. Und am Geraet selbst sind es zwei Kaeufe, solange
+      der Automat kein Bundle kennt; der Nachlass muesste also anders
+      gewaehrt werden.
+      Sag Bescheid, wenn ich das bauen soll; es ist keine Kleinigkeit.
 
 - [ ] **Supabase-Verbindung neu freigeben.** Die dritte Migration
       (Zutaten, Naehrwerte, Einkaufspreis) ist geschrieben, aber **noch
@@ -350,6 +364,48 @@ keines enthalten" nicht unterschied. Ist behoben; die App kennt jetzt
 drei Zustaende und sagt bei fehlenden Angaben: „Das heisst nicht, dass
 keine Allergene enthalten sind. Massgeblich ist die Verpackung." Sechs
 Tests halten den Unterschied fest. Du musst nichts tun.
+
+---
+
+**Was 4,00 EUR bedeuten, in Zahlen.** Damit du die Kombi-Idee darauf
+aufbauen kannst:
+
+| Fall | Kundenpreis | Wareneinsatz | bleibt nach Spende |
+|---|---|---|---|
+| Listenpreis | 4,00 | 74,8 % | 0,76 EUR |
+| mit Abo | 3,80 | 78,7 % | 0,58 EUR |
+| Abo + Gold | 3,60 | 83,1 % | 0,40 EUR |
+| Abo + Gold + Deal | 3,24 | 92,3 % | 0,08 EUR |
+| **Coupon 25 % auf Abo-Preis** | **2,85** | **104,9 %** | **−0,26 EUR** |
+
+**Die Kombi rechnet sich, und zwar wegen der Cola.** Coca-Cola 0,5 l
+(BS-001) kostet uns 0,89 EUR netto bei 2,605 EUR Listenpreis netto --
+Wareneinsatz 34 %. Das ist die gesunde Haelfte des Bundles.
+
+    Einzeln zusammen        7,10 EUR brutto
+    Kombipreis              6,00 EUR       (Nachlass 1,10 EUR = 15,5 %)
+
+    Aufteilung nach Anteilen: Cola 2,62 brutto, Popcorn 3,38 brutto
+    Nettoerloes             5,36 EUR
+    Wareneinsatz            3,68 EUR  =  68,7 %
+    abzueglich Spende       0,27 EUR
+    bleibt                  1,41 EUR
+
+Zum Vergleich: einzeln zum Listenpreis blieben 2,34 EUR. Die Kombi
+kostet dich also rund 0,93 EUR Deckungsbeitrag -- lohnend, wenn sie
+Kaeufe ausloest, die sonst nicht stattfaenden, und teuer, wenn sie nur
+den Einzelkauf ersetzt.
+
+Fuer eine Wareneinsatzquote von 40 % muesste die Kombi bei rund
+10,40 EUR liegen. Das ist keine Empfehlung, sondern der Massstab, gegen
+den du die 6,00 EUR bewusst setzt.
+
+**Zum Kinovergleich:** als Positionierung fuer dich taugt er. Auf die
+Landingpage oder in die App gehoert er nicht als Preisaussage -- eine
+Werbung mit einem Preisvergleich muss stimmen und belegbar sein, und wir
+haben weder eine Quelle fuer die Kinopreise noch die Fuellmengen, auf
+die du hochrechnest. Die Gewichte der eigenen Packungen kennen wir ja
+selbst noch nicht.
 
 ---
 
