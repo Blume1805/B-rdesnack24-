@@ -61,10 +61,24 @@ stimmen — „Digitale Belege" als Abo-Vorteil (die gibt es kostenlos) und
 sind beide Saetze heute korrigiert worden; die Seite zieht nach, sobald
 Guthaben da ist.
 
-Die beiden fertigen Auftragstexte liegen in
-`docs/lovable/landingpage-nachfassen.md` (technisch, zuerst) und
-`docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md`
-(inhaltlich, danach).
+Dazu kommt die Kunden-App. Lovable kann sie nicht selbst bearbeiten -
+sie ist in Flutter geschrieben, Lovable schreibt React. Entscheidung vom
+10.09.: **Lovable entwirft, die Umsetzung nach Flutter mache ich.** Das
+Projekt "BOERDESNACK Hub" ist dafuer vom Produkt zur Entwurfsmappe
+umgewidmet; sein Projektwissen habe ich neu geschrieben, weil die alte
+Fassung vom 30.07. Dunkelblau, "Platin", ein Lifetime-Abo und einen
+Live-Zaehler der Spendensumme vorgab - alles ueberholt.
+
+**Vier fertige Auftraege warten auf Guthaben, in dieser Reihenfolge:**
+
+1. `docs/lovable/landingpage-nachfassen.md` - Landingpage, technisch
+2. `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md` -
+   Landingpage, inhaltlich
+3. `docs/lovable/AUFTRAG-2026-09-KUNDEN-APP-ENTWUERFE.md`, Lieferung 1 -
+   Registrierung, Vorteile, Fuer die Region
+4. derselbe Auftrag, Lieferung 2 - Automaten, Abo, Kundenkarte, Profil
+
+Lieferung 2 erst beauftragen, wenn Lieferung 1 abgenommen ist.
 
 ---
 
