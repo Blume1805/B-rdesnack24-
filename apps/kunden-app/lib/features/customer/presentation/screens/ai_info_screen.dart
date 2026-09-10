@@ -67,7 +67,15 @@ class AiInfoScreen extends StatelessWidget {
                 'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
                 'den Feierabend-Deal je eine Getränk-/Snack-Paarung '
                 'aus dem Produktkatalog aus. '
-                '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
+                '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}'
+                '\n\nDazu kommt der Abo-Rechner auf der Abo-Seite. Er '
+                'vergleicht deine Käufe der letzten 90 Tage mit dem, was '
+                'ein Abo im selben Zeitraum kostet, und sagt dir das '
+                'Ergebnis — auch dann, wenn es gegen das Abo spricht. '
+                'Er ist ebenfalls als „Automatisch" gekennzeichnet und '
+                'nicht als KI: gerechnet wird auf deinem Gerät, mit deinen '
+                'tatsächlichen Käufen und einer festen Formel. Kein '
+                'Modell, keine Schätzung, keine Annahme über dich.',
           ),
           const _InfoBlock(
             title: 'Welche Bereiche das im Einzelnen sind',
@@ -81,9 +89,12 @@ class AiInfoScreen extends StatelessWidget {
                 '• Deine Abzeichen\n'
                 '• Punkte für das tägliche Einloggen und der Wochenbonus\n'
                 '• Der Geburtstagsgutschein\n'
-                '• Die Werbelogos auf deiner Kundenkarte\n\n'
-                'All diese Berechnungen laufen nach festen Regeln auf unserem '
-                'Server. Es ist kein lernendes System beteiligt und es trifft '
+                '• Die Werbelogos auf deiner Kundenkarte\n'
+                '• Der Abo-Rechner, der aus deinen Käufen ausrechnet, ob '
+                'sich ein Abo für dich lohnt\n\n'
+                'All diese Berechnungen laufen nach festen Regeln auf '
+                'unserem Server — nur der Abo-Rechner rechnet auf deinem '
+                'Gerät. Es ist kein lernendes System beteiligt und es trifft '
                 'keine Einzelfallentscheidung über dich.',
           ),
           const _InfoBlock(

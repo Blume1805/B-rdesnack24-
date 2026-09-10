@@ -7,6 +7,7 @@ import 'package:bs24_kern/core/theme/app_typography.dart';
 import 'package:bs24_kern/core/utils/formatters.dart';
 import 'package:bs24_kern/core/widgets/design_system/design_system.dart';
 import 'package:bs24_kunden/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:bs24_kunden/features/customer/presentation/screens/ai_info_screen.dart';
 
 /// Rechnet dem Kunden vor, ob sich das Abo **für ihn** lohnt — und sagt
 /// es ihm auch, wenn nicht.
@@ -22,6 +23,13 @@ import 'package:bs24_kunden/features/customer/presentation/controllers/customer_
 /// für Coupons, keine hochgerechneten Warenkörbe. Der Zeitraum sind die
 /// letzten 90 Tage; das ist lang genug, um Ausreißer zu glätten, und
 /// kurz genug, um das aktuelle Verhalten abzubilden.
+///
+/// **Kennzeichnung.** Das Ergebnis ist eine auf den einzelnen Kunden
+/// zugeschnittene Aussage, die eine Regel erzeugt — damit fällt sie
+/// unter die Kennzeichnungspflicht der Projektregeln. Der Chip trägt
+/// bewusst „Automatisch" und nicht „KI": hier rechnet eine Subtraktion
+/// auf dem Gerät, kein AI-System i. S. v. Art. 3 EU AI Act. Dieselbe
+/// Unterscheidung wie beim regelbasierten Chat-Assistenten.
 class AboRechner extends ConsumerWidget {
   const AboRechner({super.key, this.zeitraumTage = 90});
 
@@ -61,7 +69,7 @@ class AboRechner extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Eyebrow('Deine Rechnung'),
+              const _RechnerKopf(),
               const SizedBox(height: AppSpacing.s2),
               _Zeile(
                 'Deine Käufe ($zeitraumTage Tage)',
@@ -85,6 +93,31 @@ class AboRechner extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Kopfzeile des Rechners: Überschrift plus Kennzeichnung.
+///
+/// Die Kennzeichnung steht neben der Überschrift und nicht unter dem
+/// Ergebnis, damit sie vor der Aussage gelesen wird und nicht danach.
+class _RechnerKopf extends StatelessWidget {
+  const _RechnerKopf();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Eyebrow('Deine Rechnung')),
+        const SizedBox(width: AppSpacing.s2),
+        AiBadge(
+          label: 'Automatisch',
+          dense: true,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AiInfoScreen()),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -130,7 +163,7 @@ class _NochKeineKaeufe extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Eyebrow('Deine Rechnung'),
+          const _RechnerKopf(),
           const SizedBox(height: AppSpacing.s2),
           Text(
             'Sobald du das erste Mal gekauft hast, rechnen wir dir hier '
