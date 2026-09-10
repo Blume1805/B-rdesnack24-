@@ -230,34 +230,7 @@ class _BundleKarte extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.s3),
-          for (final e in positionen)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 14,
-                    color: AppColors.brand,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      '${(e as Map)['quantity']} × ${e['name']}',
-                      style: AppTypography.body(size: 13),
-                    ),
-                  ),
-                  Text(
-                    '${Formatters.euro(_zahl(e['regular_gross']))}'
-                    ' → ${Formatters.euro(_zahl(e['bundle_gross']))}',
-                    style: AppTypography.body(
-                      size: 12,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _Aufteilung(positionen: positionen, einzelSumme: regulaer),
           const Divider(height: AppSpacing.s5),
           AdminValueRow(
             label: 'Einzeln zusammen',
@@ -849,6 +822,146 @@ class _ProduktListe extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Die Aufteilung des Kombipreises, offen ausgewiesen.
+///
+/// Vorgabe Philipp vom 10.09.2026: Bei jedem Kombiangebot ist sofort
+/// sichtbar, wie sich die Umsatzsteuer ergibt. Der Weg dorthin steht
+/// deshalb vollständig da — Verhältnis, Bruttoanteil, Netto, Steuer — und
+/// nicht nur das Ergebnis.
+///
+/// **Der Prozentsatz hier ist der, mit dem tatsächlich gerechnet wurde.**
+/// `bundle_split()` rundet ihn auf zwei Nachkommastellen und multipliziert
+/// erst dann. Eine Aufteilung, die anders rechnet als sie ausweist, wäre
+/// nicht prüfbar — und geprüft wird sie irgendwann, von jemandem, der
+/// Belege nachrechnet.
+class _Aufteilung extends StatelessWidget {
+  const _Aufteilung({required this.positionen, required this.einzelSumme});
+
+  final List<dynamic> positionen;
+  final double einzelSumme;
+
+  double _zahl(dynamic v) => v == null ? 0 : double.tryParse('$v') ?? 0;
+
+  String _prozent(dynamic v) =>
+      '${_zahl(v).toStringAsFixed(2).replaceAll('.', ',')} %';
+
+  @override
+  Widget build(BuildContext context) {
+    if (positionen.isEmpty) return const SizedBox.shrink();
+
+    final kopf = AppTypography.body(
+      size: 11,
+      weight: FontWeight.w800,
+      color: AppColors.textMuted,
+    );
+    final zelle = AppTypography.body(size: 12, color: AppColors.textDefault);
+    final zelleStark = AppTypography.body(
+      size: 12,
+      weight: FontWeight.w800,
+      color: AppColors.ink,
+    );
+
+    var summeNetto = 0.0;
+    var summeSteuer = 0.0;
+    for (final e in positionen) {
+      summeNetto += _zahl((e as Map)['bundle_net']);
+      summeSteuer += _zahl(e['bundle_vat']);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Eyebrow('Aufteilung und Umsatzsteuer'),
+        const SizedBox(height: AppSpacing.s2),
+        Text(
+          'Verhältnis der Einzelpreise zur Summe von '
+          '${Formatters.euro(einzelSumme)}, auf zwei Nachkommastellen. '
+          'Mit diesem Satz wird gerechnet.',
+          style: AppTypography.body(size: 11, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: AppSpacing.s2),
+        // Eigener Scrollbereich: fünf Spalten passen auf einem Telefon
+        // nicht nebeneinander, und der Seitenkörper soll nicht waagerecht
+        // scrollen.
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            headingRowHeight: 32,
+            dataRowMinHeight: 30,
+            dataRowMaxHeight: 40,
+            columnSpacing: AppSpacing.s4,
+            horizontalMargin: 0,
+            columns: [
+              DataColumn(label: Text('Produkt', style: kopf)),
+              DataColumn(label: Text('Einzeln', style: kopf), numeric: true),
+              DataColumn(label: Text('Anteil', style: kopf), numeric: true),
+              DataColumn(label: Text('Brutto', style: kopf), numeric: true),
+              DataColumn(label: Text('USt-Satz', style: kopf), numeric: true),
+              DataColumn(label: Text('Netto', style: kopf), numeric: true),
+              DataColumn(label: Text('USt', style: kopf), numeric: true),
+            ],
+            rows: [
+              for (final e in positionen)
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Text(
+                        '${(e as Map)['quantity']} × ${e['name']}',
+                        style: zelle,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        Formatters.euro(_zahl(e['regular_gross'])),
+                        style: zelle,
+                      ),
+                    ),
+                    DataCell(
+                      Text(_prozent(e['share_percent']), style: zelleStark),
+                    ),
+                    DataCell(
+                      Text(
+                        Formatters.euro(_zahl(e['bundle_gross'])),
+                        style: zelleStark,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '${_zahl(e['tax_rate']).toStringAsFixed(0)} %',
+                        style: zelle,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        Formatters.euro(_zahl(e['bundle_net'])),
+                        style: zelle,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        Formatters.euro(_zahl(e['bundle_vat'])),
+                        style: zelleStark,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.s2),
+        AdminValueRow(
+          label: 'Netto zusammen',
+          value: Formatters.euro(summeNetto),
+        ),
+        AdminValueRow(
+          label: 'Umsatzsteuer zusammen',
+          value: Formatters.euro(summeSteuer),
+        ),
+      ],
     );
   }
 }

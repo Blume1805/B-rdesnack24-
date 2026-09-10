@@ -83,9 +83,13 @@ as $$
                    'name',          s.product_name,
                    'image_url',     s.image_url,
                    'quantity',      s.quantity,
+                   'tax_rate',      s.tax_rate,
                    'regular_gross', s.regular_line_gross,
-                   'bundle_gross',  s.bundle_line_gross
-                 ) order by s.position), '[]'::jsonb)
+                   'share_percent', s.share_percent,
+                   'bundle_gross',  s.bundle_line_gross,
+                   'bundle_net',    s.bundle_line_net,
+                   'bundle_vat',    s.bundle_line_vat
+                 ) order by s.sort_order), '[]'::jsonb)
             from public.bundle_split(b.id) s)
     from public.bundles b
    where b.deleted_at is null
@@ -205,7 +209,7 @@ begin
     order by t.ord
   loop
     v_pos := v_pos + 1;
-    insert into public.bundle_items(bundle_id, product_id, quantity, position)
+    insert into public.bundle_items(bundle_id, product_id, quantity, sort_order)
     values (v_id, rec.pid, rec.menge, v_pos);
   end loop;
 

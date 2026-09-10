@@ -85,12 +85,12 @@ create table if not exists public.bundle_items (
   bundle_id  uuid not null references public.bundles(id) on delete cascade,
   product_id uuid not null references public.products(id) on delete restrict,
   quantity   integer not null default 1 check (quantity > 0),
-  position   smallint not null default 1,
+  sort_order   smallint not null default 1,
   unique (bundle_id, product_id)
 );
 
 create index if not exists idx_bundle_items_bundle
-  on public.bundle_items(bundle_id, position);
+  on public.bundle_items(bundle_id, sort_order);
 create index if not exists idx_bundles_gueltig
   on public.bundles(valid_from, valid_to) where deleted_at is null;
 
@@ -98,7 +98,7 @@ comment on table public.bundles is
   'Kombiangebot mit einem Bruttopreis fuer mehrere Produkte. Der Preis ist '
   'brutto, weil ein Bundle ueber zwei Steuersaetze keinen einen Nettopreis '
   'hat; die Aufteilung macht public.bundle_split().';
-comment on column public.bundle_items.position is
+comment on column public.bundle_items.sort_order is
   'Reihenfolge in der Darstellung. Die Kundenansicht zeigt die Produktbilder '
   'in dieser Reihenfolge mit einem Pluszeichen dazwischen.';
 comment on column public.bundle_items.quantity is
@@ -147,18 +147,40 @@ create policy bundle_items_write on public.bundle_items for all to authenticated
   with check (public.is_admin() or public.auth_has_permission('offers.manage'));
 
 -- ── Die Aufteilung ─────────────────────────────────────────────────────
+--
+-- Verfahren, festgelegt von Philipp am 10.09.2026:
+--
+--   1. Verhaeltnis der Einzelpreise ermitteln, **auf zwei Nachkommastellen
+--      als Prozentsatz** (Cola 3,10 / 7,10 = 43,66 %).
+--   2. Den Bundlepreis mit diesem Prozentsatz multiplizieren und auf den
+--      Cent runden (6,00 x 43,66 % = 2,62).
+--   3. Aus dem Bruttoanteil je Position Netto und Umsatzsteuer mit dem
+--      Steuersatz DIESES Produkts herausrechnen.
+--
+-- Der Prozentsatz wird gerundet, BEVOR er angewandt wird, und nicht erst
+-- danach. Das ist der Unterschied, auf den es ankommt: Nur so ist die Zahl,
+-- die in der Gesellschafter-App steht, dieselbe, mit der gerechnet wurde.
+-- Eine Aufteilung, die anders rechnet als sie ausweist, ist nicht pruefbar.
+--
+-- Der Rundungsrest liegt auf der letzten Position, damit die Summe den
+-- Bundlepreis auf den Cent trifft. Ohne diese Korrektur weicht die Summe um
+-- bis zu einen Cent je Position ab -- und eine Buchung, deren Positionen
+-- nicht auf den Rechnungsbetrag aufgehen, ist keine.
 create or replace function public.bundle_split(p_bundle uuid)
 returns table(
   product_id          uuid,
   product_name        text,
   image_url           text,
-  position            smallint,
+  sort_order            smallint,
   quantity            integer,
   tax_rate            numeric,
   regular_unit_gross  numeric,
   regular_line_gross  numeric,
+  share_percent       numeric,
   bundle_line_gross   numeric,
-  bundle_unit_gross   numeric
+  bundle_unit_gross   numeric,
+  bundle_line_net     numeric,
+  bundle_line_vat     numeric
 )
 language sql
 stable
@@ -173,7 +195,7 @@ as $$
     select bi.product_id,
            p.name  as product_name,
            p.image_url,
-           bi.position,
+           bi.sort_order,
            bi.quantity,
            p.tax_rate,
            round(p.list_price_net * (1 + p.tax_rate / 100), 2) as unit_gross
@@ -189,42 +211,53 @@ as $$
   verteilt as (
     select s.*,
            b.price_gross,
-           round(b.price_gross * s.line_gross
-                 / nullif(sum(s.line_gross) over (), 0), 2) as anteil,
-           row_number() over (order by s.position, s.product_id) as rn,
+           -- Schritt 1: Prozentsatz auf zwei Nachkommastellen.
+           round(s.line_gross * 100
+                 / nullif(sum(s.line_gross) over (), 0), 2) as prozent,
+           row_number() over (order by s.sort_order, s.product_id) as rn,
            count(*) over () as n
       from summiert s cross join b
   ),
+  angewandt as (
+    -- Schritt 2: mit genau diesem Prozentsatz multiplizieren.
+    select v.*, round(v.price_gross * v.prozent / 100, 2) as anteil
+      from verteilt v
+  ),
   korrigiert as (
-    select v.*,
+    select a.*,
            case
-             when v.rn < v.n then v.anteil
-             -- Rundungsrest auf die letzte Position, damit die Summe der
-             -- Positionen den Bundlepreis genau trifft.
-             else v.price_gross - coalesce(
-                    sum(v.anteil) over (
-                      order by v.rn
+             when a.rn < a.n then a.anteil
+             else a.price_gross - coalesce(
+                    sum(a.anteil) over (
+                      order by a.rn
                       rows between unbounded preceding and 1 preceding
                     ), 0)
            end as line_bundle
-      from verteilt v
+      from angewandt a
   )
-  select k.product_id, k.product_name, k.image_url, k.position, k.quantity,
+  -- Schritt 3: Netto und Umsatzsteuer je Position, mit dem Steuersatz
+  -- dieses Produkts.
+  select k.product_id, k.product_name, k.image_url, k.sort_order, k.quantity,
          k.tax_rate,
-         k.unit_gross                            as regular_unit_gross,
-         k.line_gross                            as regular_line_gross,
-         k.line_bundle::numeric(12,2)            as bundle_line_gross,
-         round(k.line_bundle / k.quantity, 2)    as bundle_unit_gross
+         k.unit_gross                         as regular_unit_gross,
+         k.line_gross                         as regular_line_gross,
+         k.prozent                            as share_percent,
+         k.line_bundle::numeric(12,2)         as bundle_line_gross,
+         round(k.line_bundle / k.quantity, 2) as bundle_unit_gross,
+         round(k.line_bundle / (1 + k.tax_rate / 100), 2)
+           as bundle_line_net,
+         (k.line_bundle - round(k.line_bundle / (1 + k.tax_rate / 100), 2))
+           ::numeric(12,2) as bundle_line_vat
     from korrigiert k
-   order by k.position, k.product_id;
+   order by k.sort_order, k.product_id;
 $$;
 
 comment on function public.bundle_split(uuid) is
-  'Teilt den Bruttopreis eines Bundles anteilig am regulaeren Bruttowert '
-  'auf die Positionen auf. Der Rundungsrest liegt auf der letzten Position, '
-  'damit die Summe den Bundlepreis auf den Cent trifft. Einzige Quelle der '
-  'Aufteilung -- Umsatzsteuer je Position und der Spendenanteil (5 % vom '
-  'Nettowert des jeweiligen Produkts) rechnen darauf auf.';
+  'Teilt den Bruttopreis eines Bundles auf die Positionen auf: Verhaeltnis '
+  'der Einzelpreise als Prozentsatz auf zwei Nachkommastellen, damit gerechnet, '
+  'Rundungsrest auf die letzte Position. Liefert je Position auch Netto und '
+  'Umsatzsteuer mit dem Steuersatz dieses Produkts. Einzige Quelle der '
+  'Aufteilung -- der Spendenanteil (5 % vom Nettowert) rechnet darauf auf.';
 
 -- ── Was die Kunden-App liest ───────────────────────────────────────────
 create or replace function public.active_bundles()
@@ -254,7 +287,7 @@ as $$
                    'quantity',     s.quantity,
                    'regular_gross', s.regular_line_gross,
                    'bundle_gross',  s.bundle_line_gross
-                 ) order by s.position), '[]'::jsonb)
+                 ) order by s.sort_order), '[]'::jsonb)
             from public.bundle_split(b.id) s) as items
     from public.bundles b
    where b.deleted_at is null

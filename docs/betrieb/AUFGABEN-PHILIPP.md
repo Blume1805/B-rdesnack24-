@@ -214,6 +214,18 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
       der wichtigere Riegel -- sonst zeigt die Kunden-App einen
       durchgestrichenen Preis ohne Anlass.
 
+      Bei jedem Kombiangebot steht die vollstaendige Steuerrechnung
+      dabei: je Produkt Einzelpreis, Anteil in Prozent, Bruttoanteil,
+      Steuersatz, Netto und Umsatzsteuer, dazu die Summen. Ohne
+      Aufklappen. Die Regel steht in `CLAUDE.md` und gilt fuer jede
+      kuenftige Maske mit.
+
+      Nachgerechnet am 10.09. auf einer lokalen Datenbank, aufgebaut aus
+      allen Migrationen: Cola 3,10 und Popcorn 4,00 bei 6,00 Kombipreis
+      ergeben 43,66 % / 56,34 %, brutto 2,62 / 3,38, netto 2,20 / 3,16,
+      Steuer 0,42 / 0,22. Summe 6,00 auf den Cent -- dieselben Zahlen wie
+      in deinem Rechenbeispiel.
+
 - [ ] **Am Automaten ist ein Bundle zwei Kaeufe.** Solange das Geraet
       kein Bundle kennt, kauft der Kunde zweimal einzeln. Wie der
       Nachlass dann tatsaechlich beim Kunden ankommt -- als

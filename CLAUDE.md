@@ -39,3 +39,31 @@ lässt sich nachträglich nicht herstellen.
 
 Diese Regel gilt so lange, bis in der Tabelle `machines` mindestens ein
 aktiver Automat steht.
+
+## Kombiangebote: die Umsatzsteuer wird immer offen ausgewiesen
+
+Ein Bundlepreis über mehrere Steuersätze ist keine buchbare Zahl. Die
+Aufteilung läuft **immer** so, und zwar in dieser Reihenfolge:
+
+1. Verhältnis des Einzelpreises zur Summe der Einzelpreise, **als
+   Prozentsatz auf zwei Nachkommastellen** (3,10 / 7,10 = 43,66 %).
+2. Bundlepreis mit genau diesem Prozentsatz multiplizieren, auf den Cent
+   runden (6,00 € × 43,66 % = 2,62 €).
+3. Netto und Umsatzsteuer je Position mit dem Steuersatz **dieses**
+   Produkts herausrechnen.
+
+Der Rundungsrest liegt auf der letzten Position, damit die Summe den
+Bundlepreis auf den Cent trifft.
+
+**Der Prozentsatz wird gerundet, bevor er angewandt wird.** Nur so ist die
+Zahl, die angezeigt wird, dieselbe, mit der gerechnet wurde. Eine
+Aufteilung, die anders rechnet als sie ausweist, ist nicht prüfbar.
+
+Einzige Quelle: `public.bundle_split()`. Nirgendwo sonst wird ein
+Bundlepreis aufgeteilt — nicht im Client, nicht in einer zweiten Funktion.
+
+**Jede Oberfläche, auf der ein Bundle angelegt oder angesehen wird, zeigt
+diese Rechnung vollständig**: je Position Einzelpreis, Anteil in Prozent,
+Bruttoanteil, Steuersatz, Netto und Umsatzsteuer, dazu die Summen. Ohne
+Nachfragen, ohne Aufklappen. Gilt für neue Masken genauso wie für
+bestehende.
