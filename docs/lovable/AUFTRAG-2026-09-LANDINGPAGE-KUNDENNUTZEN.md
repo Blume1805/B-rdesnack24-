@@ -168,12 +168,12 @@ einen Bereich der App benennt, bitte diese Wörter verwenden — und
 „Spenden" nur dort, wo es um den Vorgang geht, nicht als Name eines
 Bildschirms.
 
-**6) Das Sortiment ist gewachsen: 65 statt 62.**
+**6) Das Sortiment ist gewachsen: 66 statt 62.**
 
-Drei Popcorn-Sorten sind am 10.09. dazugekommen. In `index.tsx` bitte:
+Vier Popcorn-Sorten sind am 10.09. dazugekommen. In `index.tsx` bitte:
 
-- „62 Produkte sind für den Start vorgesehen" → **65**
-- in `SORTIMENT` bei Snacks `n: 3` → **`n: 6`**, und die Beschreibung
+- „62 Produkte sind für den Start vorgesehen" → **66**
+- in `SORTIMENT` bei Snacks `n: 3` → **`n: 7`**, und die Beschreibung
   von „Herzhaftes für zwischendurch." auf **„Herzhaftes und Popcorn für
   zwischendurch."**
 

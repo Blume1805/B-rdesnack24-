@@ -47,7 +47,7 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 |---|---|---|
 | „Genießen. Geben. Gutes tun." | JA, Haltungsversprechen | — |
 | „24/7 verfügbar" | NEIN | erster Automat in Betrieb |
-| „65 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
+| „66 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
 | „App herunterladen" | NEIN, nur „App vormerken" | Store-Freigabe |
 | „Ab 2027 in Osterweddingen" | JA, als Plan gekennzeichnet | — |
 | „5 % vom Nettopreis jedes Produkts gehen an gemeinnützige Organisationen aus der Region" | JA | — |

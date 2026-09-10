@@ -455,3 +455,22 @@ dass hier Sortiment und Bestand zur Sprache kommen.
 🟡 für die Funktion insgesamt: die Landingpage nennt bis auf Weiteres
 eine falsche Produktzahl, und drei Angaben je Sorte (VK, EK, Gewicht)
 fehlen. Beides ist zugeordnet und offen geführt.
+
+### Nachtrag vom selben Tag: vierte Sorte
+
+Migration `20260910183000_sortiment_popcorn_premium_caramel.sql`:
+BS-066 „Popcrn Premium Caramel", gleiche Behandlung wie BS-063 bis
+BS-065. Auf dieser Produktseite stand weder ein Preis noch ein Gewicht,
+es gab also auch nichts zu verwerfen.
+
+Aktive Produkte damit **66** (Getränke 26, Eis 20, Süßwaren 13,
+Snacks 7). Die Bewertung oben gilt unverändert; die Zahlen in der
+Matrix und in den nachgezogenen Dokumenten lauten 66 statt 65 und
+Snacks 7 statt 6.
+
+**Einschränkung des Nachweises:** Die Migration hat `success`
+zurückgemeldet, die Kontrollabfrage danach nicht mehr — die
+Supabase-Verbindung dieser Sitzung ist mit abgelaufenem Token
+ausgestiegen. Die Zahl 66 ist deshalb gerechnet (65 nachgezählt plus
+eine erfolgreiche Einfügung), nicht erneut abgefragt. Beim nächsten
+Zugriff nachzählen.

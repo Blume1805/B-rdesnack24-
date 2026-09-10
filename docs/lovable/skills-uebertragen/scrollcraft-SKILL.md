@@ -271,7 +271,7 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 | Bestätigte Standorte | **0** |
 | App im App Store / Play Store | **nein** |
 | Echte Fotos von Automat oder Standort | **nein** |
-| Produkte in der Planungsliste | **65** (Getränke 26, Eis 20, Süßwaren 13, Snacks 6) |
+| Produkte in der Planungsliste | **66** (Getränke 26, Eis 20, Süßwaren 13, Snacks 7) |
 | Davon mit Nährwerten oder Allergenen | **0** |
 | Heißgetränke-Produkte | **0** (Automat geplant, Sortiment offen) |
 | Abo-Modelle | **zwei**: 0,99 EUR/Monat, 9,99 EUR/Jahr — **kein Lifetime** |
@@ -282,7 +282,7 @@ verwendbar. Er steht noch in `boerdesnack24-design`; dort zu korrigieren.
 |---|---|---|
 | „Genießen. Geben. Gutes tun." | JA, Haltungsversprechen | — |
 | „24/7 verfügbar" | NEIN | erster Automat in Betrieb |
-| „65 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
+| „66 Produkte im Sortiment" | NEIN, nur „geplantes Sortiment" | erster Automat bestückt |
 | Namen von Herstellern oder Marken | NEIN | schriftliche Liefervereinbarung |
 | „Lifetime-Abo" in jeder Form | NEIN | Entscheidung Philipp, derzeit nicht angeboten |
 | „Nährwerte zu jedem Produkt" | NEIN | Angaben sind erfasst |
@@ -500,7 +500,7 @@ Aufhänger: der Claim liefert die Dreiteilung.
 |---|---|---|---|---|---|
 | 01 | Ankunft | alle | Genießen. Geben. Gutes tun. | Claim + Bördeumriss | 01 Reveal |
 | 02 | Der Automat | 2 | Dort versorgen, wo abends nichts offen hat | Automat | 12 Maskenreveal / 10 Zoom |
-| 03 | Genießen | 2 | Getränke 26, Eis 20, Süßwaren 13, Snacks 6 — geplantes Sortiment | Produkte | 13 Produktwechsel, später 14 360° |
+| 03 | Genießen | 2 | Getränke 26, Eis 20, Süßwaren 13, Snacks 7 — geplantes Sortiment | Produkte | 13 Produktwechsel, später 14 360° |
 | 04 | Geben | 2 | 5 % vom Nettopreis jedes Produkts bleiben in der Region | Anteilsbalken | 18 Anteil + 04 Text-Highlight |
 | 05 | Gutes tun | 2 | Wer mitmacht, entscheidet mit — kostenloses Konto genügt | App + Region | 17 physisch → digital |
 | 05a | Kostenlos gegen Abo | 4 | Kostenlos reicht, das Abo spart | Vergleichstabelle | 01 Reveal, sonst nichts |
@@ -935,7 +935,7 @@ Für Muster 14. Werkzeug: `scripts/build_spin.py`.
 fällt nur beim sehr langsamen Scrollen auf und spart ein Drittel Gewicht und
 Arbeitszeit. 36 nur für zwei bis drei Heldenprodukte.
 
-Bei 65 Produkten sind das rund 1.560 statt 2.290 Aufnahmen.
+Bei 66 Produkten sind das rund 1.580 statt 2.320 Aufnahmen.
 
 **Aufbau:** Kamera auf Stativ, Höhe halbe Produkthöhe, Abstand fix. Produkt
 mittig auf einem Drehteller mit Gradmarkierung. Weißer Hintergrund, zwei weiche

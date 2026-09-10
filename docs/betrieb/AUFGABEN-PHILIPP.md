@@ -160,17 +160,18 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
 
 ## 2. Entscheidungen, die noch anstehen
 
-- [ ] **Popcorn: Verkaufspreis, Einkaufspreis und Gewicht.** Die drei
-      Sorten stehen seit dem 10.09. im Sortiment (BS-063 bis BS-065),
+- [ ] **Popcorn: Verkaufspreis, Einkaufspreis und Gewicht.** Die vier
+      Sorten stehen seit dem 10.09. im Sortiment (BS-063 bis BS-066),
       aber ohne diese drei Angaben. Die Bildschirmfotos liefern sie
       nicht: 2,99 EUR ist der Ladenpreis von kreutzers.eu, nicht unser
       Automatenpreis, und die Gewichtsangaben dort widersprechen sich
       (100 g und 80 g stehen beide bei 11,96 EUR/kg; 2,99 EUR bei
       11,96 EUR/kg waeren 250 g). Ohne Einkaufspreis fehlen
-      Wareneinsatzquote und Rohertragsmarge fuer diese drei Positionen;
+      Wareneinsatzquote und Rohertragsmarge fuer diese vier Positionen;
       ohne Verkaufspreis zeigt die App keinen Preis an. Geschaetzt wird
       nichts.
       Quelle: `supabase/migrations/20260910180000_sortiment_popcorn.sql`
+      und `20260910183000_sortiment_popcorn_premium_caramel.sql`
 
 - [ ] **Nachweisform der Spende gegenueber Kunden.** Wie wird belegt, dass
       der Anteil tatsaechlich geflossen ist? (Quartalsbericht in der App,
@@ -260,8 +261,8 @@ ausbleiben, wenn sie faellig wird.
 Ich raeume das auf (Seed-Automaten stilllegen, Regel an ein Merkmal
 haengen, das Demo-Daten nicht ausloesen). Du musst nichts tun.
 
-**Kein einziges Produkt hat Naehrwerte oder Allergene.** Bei allen 65
-aktiven Produkten sind `energy_kcal` und `allergens` leer (die drei
+**Kein einziges Produkt hat Naehrwerte oder Allergene.** Bei allen 66
+aktiven Produkten sind `energy_kcal` und `allergens` leer (die vier
 Popcorn-Sorten vom 10.09. eingeschlossen). Die App
 zeigt beides als Funktion, und die Nutzungsbedingungen fuehren es auf.
 Solange nichts verkauft wird, ist das folgenlos; **vor dem ersten
