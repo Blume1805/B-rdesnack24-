@@ -12,6 +12,7 @@ import 'package:bs24_kunden/features/customer/domain/entities/loyalty_status.dar
 import 'package:bs24_kunden/features/customer/domain/entities/offer.dart';
 import 'package:bs24_kunden/features/customer/domain/entities/product_detail.dart';
 import 'package:bs24_kunden/features/customer/presentation/controllers/customer_providers.dart';
+import 'package:bs24_kunden/features/customer/presentation/widgets/bundle_coupon_card.dart';
 import 'package:bs24_kunden/features/customer/presentation/widgets/customer_anchors.dart';
 import 'ai_info_screen.dart';
 import 'donations_screen.dart';
@@ -26,6 +27,7 @@ class OffersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final offers = ref.watch(offersProvider);
+    final bundles = ref.watch(bundlesProvider);
     final personals = ref.watch(myPersonalOffersProvider);
     final loyalty = ref.watch(myLoyaltyStatusProvider);
     // Abo-Gating: Basis frei, Vorteile im Abo. Während des Ladens wird
@@ -187,6 +189,28 @@ class OffersTab extends ConsumerWidget {
                   ],
                 );
               },
+            ),
+
+            // 2b. ── Kombiangebote ──────────────────────────────────────
+            // Fällt ganz weg, wenn es keine gibt. Eine leere Karte mit
+            // „Aktuell keine Kombiangebote" wäre eine Zeile, die nichts
+            // sagt, und der Vorteile-Bildschirm hat davon genug.
+            ...bundles.maybeWhen(
+              data: (list) => list.isEmpty
+                  ? const <Widget>[]
+                  : <Widget>[
+                      const SectionHeader(
+                        eyebrow: 'Zusammen günstiger',
+                        title: 'Kombi\u00adangebote',
+                      ),
+                      const SizedBox(height: AppSpacing.s4),
+                      for (final b in list) ...[
+                        BundleCouponCard(bundle: b),
+                        const SizedBox(height: AppSpacing.s3),
+                      ],
+                      const SizedBox(height: AppSpacing.s2),
+                    ],
+              orElse: () => const <Widget>[],
             ),
 
             // 3. ── Wochenangebote als horizontale Scroll-Karten ────────

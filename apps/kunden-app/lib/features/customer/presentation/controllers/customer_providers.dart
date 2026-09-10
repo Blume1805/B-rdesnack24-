@@ -5,6 +5,7 @@ import 'package:bs24_kern/core/pricing/pricing.dart';
 import 'package:bs24_kunden/features/customer/data/customer_remote_data_source.dart';
 import 'package:bs24_kunden/features/customer/data/personal_offer_cache.dart';
 import 'package:bs24_kunden/features/customer/data/customer_repository_impl.dart';
+import 'package:bs24_kunden/features/customer/domain/entities/bundle.dart';
 import 'package:bs24_kunden/features/customer/domain/entities/customer_models.dart';
 import 'package:bs24_kunden/features/customer/domain/entities/donations_news.dart';
 import 'package:bs24_kunden/features/customer/domain/entities/invoice.dart';
@@ -32,6 +33,18 @@ final hasSubscriptionProvider = FutureProvider.autoDispose<bool>((ref) async {
   final res = await ref.watch(supabaseClientProvider).rpc('my_subscription');
   final map = Map<String, dynamic>.from(res as Map);
   return map['plan'] != null;
+});
+
+/// Kombiangebote (RPC active_bundles). Der Server liefert den Bundlepreis,
+/// die Summe der Einzelpreise und die Positionen samt Aufteilung — der
+/// Client rechnet nichts nach, weil die Aufteilung über zwei Steuersätze
+/// buchungsrelevant ist und nur an einer Stelle stehen darf.
+final bundlesProvider = FutureProvider.autoDispose<List<Bundle>>((ref) async {
+  final rows = await ref.watch(supabaseClientProvider).rpc('active_bundles');
+  if (rows is! List) return const [];
+  return rows
+      .map((e) => Bundle.fromJson(Map<String, dynamic>.from(e as Map)))
+      .toList();
 });
 
 final myPricesProvider = FutureProvider.autoDispose<List<CustomerPrice>>(

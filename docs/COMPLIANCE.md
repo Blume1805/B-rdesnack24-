@@ -539,3 +539,56 @@ Sorten, und **die Migration ist noch nicht angewandt** — die
 Supabase-Verbindung dieser Sitzung ist mit abgelaufenem Token
 ausgestiegen. Bis dahin wirkt allein die App-Korrektur, die den
 fehlenden Angaben den richtigen Text gibt.
+
+---
+
+## Legal Impact — Kombiangebote (Bundles) (10.09.2026)
+
+### Sachverhalt
+
+Auftrag Philipp: Kombiangebote bauen, als Coupon mit den Produktbildern
+und einem Pluszeichen dazwischen, durchgestrichenem Einzelpreis und
+Bundlepreis. Dazu: Popcorn soll nur noch im Bundle rabattiert werden.
+
+Umgesetzt: Tabellen `bundles` und `bundle_items`, die Aufteilungsfunktion
+`bundle_split()`, die Leseschnittstelle `active_bundles()`, die Spalte
+`products.coupon_eligibility`, ein Verweis `purchase_items.bundle_id`,
+sowie die Kundenansicht `BundleCouponCard`.
+
+### Rechtliche Würdigung
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| **Steuer & Buchführung (UStG, AO, GoBD)** | ✓ | **Der tragende Bereich.** Ein Bundlepreis über zwei Steuersätze (Cola 19 %, Popcorn 7 %) ist keine buchbare Zahl — er muss auf die Positionen aufgeteilt werden, bevor Umsatzsteuer entsteht (§ 14 UStG verlangt die Aufschlüsselung nach Steuersätzen). Das Verfahren steht in **einer** Funktion: anteilig am regulären Bruttowert, Rundungsrest auf die letzte Position, damit die Summe den Bundlepreis auf den Cent trifft. Eine Buchung, deren Positionen nicht auf den Gesamtbetrag aufgehen, wäre keine. `purchase_items.bundle_id` hält fest, **warum** ein Stückpreis vom Listenpreis abweicht — ohne diesen Verweis sähe eine Bundle-Buchung wie ein willkürlicher Preis aus. | **Ja — erledigt; die Verfahrensdokumentation ist nachzuziehen, sobald der erste Verkauf möglich ist** | Philipp |
+| **Preisangaben (PAngV)** | ✓ | Der Bundlepreis ist der Gesamtpreis brutto inkl. USt und wird als solcher angezeigt. Die Einzelpreise erscheinen daneben als Vergleichspreis. | Nein | |
+| **UWG** | ✓ | Ein durchgestrichener Preis ist eine Werbung mit einem Vergleichspreis; er muss echt sein. Die Karte lässt ihn deshalb **weg**, sobald der Bundlepreis nicht unter der Summe der Einzelpreise liegt — ein Fall, der durch Handpflege entstehen kann. Vier Tests halten das fest. Der Vergleichspreis ist der eigene Listenpreis, nicht der eines Wettbewerbers; § 6 UWG ist damit nicht berührt. | Nein | |
+| **Verbraucherrecht** | ✓ | Kein Vertragsschluss in der App; der Kauf findet am Automaten statt. Was am Gerät passiert, wenn ein Bundle aus zwei Einzelkäufen besteht, ist offen und in der Aufgabenliste geführt. | Nein, Vorfrage offen | Philipp |
+| **Spendenversprechen** | ✓ | Die zugesagten 5 % beziehen sich auf den Nettopreis des jeweiligen Produkts. Weil die Aufteilung je Position erfolgt und `purchase_items` die tatsächlich berechneten Preise trägt, rechnet die bestehende Spendenlogik unverändert weiter. Die Zusage bleibt eingehalten, auch wenn im Bundle weniger Netto anfällt — der Kunde bekommt nicht weniger versprochen, sondern zahlt weniger. | Nein | |
+| DSGVO | ✓ | Keine personenbezogene Verarbeitung. Bundles sind Stammdaten. | Nein | |
+| Sicherheit / RLS | ✓ | Lesen für angemeldete Nutzer nur bei `status = 'active'` und nicht gelöscht; Schreiben nur `is_admin()` oder `offers.manage`. Beide Funktionen sind `security definer` und werden `public` und `anon` ausdrücklich entzogen — sonst erbte PUBLIC das Ausführungsrecht (der Fall aus Migration 20260902060051). Audit auf beiden Tabellen. | Nein | |
+| Lebensmittelrecht | ✓ | Nicht berührt; ein Bundle bündelt Produkte, es verändert keines. | Nein | |
+| Barrierefreiheit | ✓ | Der durchgestrichene Preis trägt ein `Semantics`-Label, weil eine Durchstreichung für einen Screenreader sonst nur ein zweiter Preis ist. Die Produktreihe bricht bei schmalen Geräten um, statt die Kacheln zu stauchen. | Nein | |
+| EU AI Act / Projektregel | ✓ | Bundles werden von Hand angelegt, nicht algorithmisch ausgewählt. Kein Kennzeichnungschip. **Das ändert sich**, sobald ein Bundle personalisiert vorgeschlagen wird — dann greift die Regel wie bei den übrigen Angeboten. | Nein, solange von Hand gepflegt | |
+| Store-Regeln | ✓ | Nicht berührt. | Nein | |
+
+### Der Rabattdeckel
+
+`coupon_eligibility` kennt `normal`, `bundle_only` und `never`; die vier
+Angebotsgeneratoren prüfen das Feld, ein Bundle nicht — es ist der Weg,
+den `bundle_only` offenlässt. Das Popcorn steht auf `bundle_only`.
+
+**Nebenwirkung, benannt und weitergegeben:** `generate_weekly_offers` ist
+zugleich die MHD-Abschrift. Ein Produkt auf `bundle_only` wird damit
+auch dann nicht mehr automatisch heruntergesetzt, wenn sein
+Mindesthaltbarkeitsdatum näher rückt. Das ist kein Rechtsproblem, aber
+ein Schwundrisiko, und es steht in der Aufgabenliste.
+
+### Status
+
+🟡 — Backend und Kundenansicht stehen und sind geprüft (`flutter analyze`
+ohne Befund, 34 Tests grün, davon 6 neue für die Bundle-Anzeige).
+
+Offen: **Die drei Migrationen sind nicht angewandt** (Supabase-Verbindung
+mit abgelaufenem Token ausgestiegen), es gibt keine Eingabemaske für
+Bundles in der Gesellschafter-App, und wie ein Bundle am Automaten
+tatsächlich eingelöst wird, ist eine Vorfrage vor dem ersten Gerät.

@@ -160,8 +160,18 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
 
 ## 2. Entscheidungen, die noch anstehen
 
-- [ ] **Popcorn: Duerfen Coupons und Deals darauf gelten?** Das ist die
-      Frage, die der Preis von 4,00 EUR offen laesst. Bei Abo, Status
+- [x] **Popcorn: Duerfen Coupons und Deals darauf gelten?** Entschieden
+      am 10.09.: nur im Bundle. Umgesetzt ueber
+      `products.coupon_eligibility = 'bundle_only'`; die vier
+      Angebotsgeneratoren (Tages-Deal, Wochenangebote, Meilenstein-
+      Coupons, persoenliches Angebot) ueberspringen das Popcorn jetzt.
+      **Eine Folge davon musst du kennen:** `generate_weekly_offers` ist
+      zugleich die MHD-Abschrift. Popcorn, dessen Mindesthaltbarkeit
+      naeher rueckt, wird also nicht mehr automatisch heruntergesetzt --
+      es muss von Hand in ein Bundle oder ein Einzelangebot, sonst wird
+      es Schwund.
+
+      Die urspruengliche Frage, zur Erinnerung: Bei Abo, Status
       und Deal traegt die Rechnung noch -- im schlechtesten Fall bleiben
       8 Cent. Faellt aber ein Meilenstein-Coupon von 25 % darauf, kippt
       sie: auf den Abo-Preis gerechnet liegt der Verkauf dann unter dem
@@ -191,16 +201,36 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
       `20260910190000_popcorn_zutaten_naehrwerte_ek.sql`,
       `20260910200000_popcorn_verkaufspreis.sql`
 
-- [ ] **Kombiangebote gibt es technisch noch nicht.** Die Idee „Cola +
-      Popcorn fuer 6 EUR" laesst sich heute nicht abbilden: `offers`
-      kennt genau **ein** Produkt je Angebot (`offers.product_id`), es
-      gibt keine Bundle-Tabelle und keinen Bundle-Preis. Dazu kaeme die
-      Aufteilung des Bundle-Preises auf die beiden Steuersaetze (Cola
-      19 %, Popcorn 7 %) und die Spende je Position -- beides
-      buchungsrelevant. Und am Geraet selbst sind es zwei Kaeufe, solange
-      der Automat kein Bundle kennt; der Nachlass muesste also anders
-      gewaehrt werden.
-      Sag Bescheid, wenn ich das bauen soll; es ist keine Kleinigkeit.
+- [ ] **Kombiangebote sind gebaut -- anlegen kannst du sie noch nicht
+      selbst.** Tabellen, Preisaufteilung, Kundenansicht und Coupon-Karte
+      stehen. Was fehlt, ist die Eingabemaske in der
+      Gesellschafter-App: heute entsteht ein Bundle nur per SQL. Sag
+      Bescheid, wenn ich die Maske bauen soll.
+      Bis dahin legt dieser Befehl das erste Bundle an (sobald die
+      Supabase-Verbindung wieder offen ist):
+
+      ```sql
+      with b as (
+        insert into public.bundles (code, title, description, price_gross)
+        values ('KINO', 'Cola + Popcorn',
+                'Der Feierabend-Klassiker.', 6.00)
+        returning id
+      )
+      insert into public.bundle_items (bundle_id, product_id, position)
+      select b.id, p.id,
+             case p.sku when 'BS-001' then 1 else 2 end
+      from b, public.products p
+      where p.sku in ('BS-001', 'BS-064');
+      ```
+
+      Danach `select * from public.bundle_split(<id>);` -- die Summe der
+      Positionen muss 6,00 EUR ergeben.
+
+- [ ] **Am Automaten ist ein Bundle zwei Kaeufe.** Solange das Geraet
+      kein Bundle kennt, kauft der Kunde zweimal einzeln. Wie der
+      Nachlass dann tatsaechlich beim Kunden ankommt -- als
+      Einloese-Code, als Gutschrift, als Vorgang am Geraet --, ist offen
+      und gehoert geklaert, bevor der erste Automat steht.
 
 - [ ] **Supabase-Verbindung neu freigeben.** Die dritte Migration
       (Zutaten, Naehrwerte, Einkaufspreis) ist geschrieben, aber **noch
