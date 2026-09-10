@@ -31,7 +31,7 @@ Spendensumme, Konfetti und Lottie sowie eine fünfteilige Navigation mit
 3. dieser Auftrag, **Lieferung 1**
 4. dieser Auftrag, **Lieferung 2**
 
-Lieferung 1 sind drei Bildschirme. Erst ansehen, dann Lieferung 2 —
+Lieferung 1 sind drei Bildschirme und eine Karte. Erst ansehen, dann Lieferung 2 —
 nicht alles auf einmal beauftragen.
 
 ---
@@ -109,9 +109,9 @@ Dinge.
 **Neu: vier Blöcke, feste Reihenfolge, von konkret nach abstrakt.**
 
 **A · Jetzt günstiger** — was heute konkret weniger kostet.
-Wochenangebote und das persönliche Angebot. Gibt es keine Angebote,
-**entfällt der Block ganz**. Keine leere Karte, kein „Aktuell keine
-Angebote".
+Wochenangebote, das persönliche Angebot und die **Kombiangebote**
+(Bildschirm 4). Gibt es keine Angebote, **entfällt der Block ganz**.
+Keine leere Karte, kein „Aktuell keine Angebote".
 
 **B · Dein Vorteil** — der Rabattsatz als **ein Satz**, kein Balken,
 keine Stufen: „Du zahlst dauerhaft 5 % weniger als am Automaten." Ohne
@@ -162,18 +162,71 @@ nach einer Werbeaussage: feste Schrittweite, die Beträge untereinander,
 das Ergebnis hervorgehoben. Er ist das inhaltliche Signature-Element
 dieses Bildschirms; sonst bleibt die Seite ruhig.
 
+## Bildschirm 4 — Die Kombiangebot-Karte
+
+Das ist keine ganze Seite, sondern eine Karte — sie steht in Block A des
+Vorteile-Bildschirms und später auch auf dem Automaten-Bildschirm.
+Trotzdem gehört sie in Lieferung 1: Sie ist das Sichtbarste, was in den
+nächsten Monaten dazukommt, und sie trägt eine Preisaussage.
+
+Ein Kombiangebot fasst zwei oder mehr Produkte zu einem Preis zusammen,
+zum Beispiel Cola und Popcorn für 6,00 € statt 7,10 € einzeln.
+
+**Die Bauform ist vorgegeben** (Philipp, 10.09.2026):
+
+- die Produktbilder nebeneinander, mit einem **Pluszeichen** dazwischen
+- der Einzelpreis **durchgestrichen**
+- daneben der Kombipreis, deutlich größer
+- die Ersparnis ausgeschrieben
+
+Der Sinn: Der Kunde soll den Unterschied **sehen**, nicht ausrechnen.
+Deshalb stehen beide Zahlen nebeneinander und nicht nacheinander.
+
+**Was die Karte können muss:**
+
+- **Mehr als zwei Produkte.** Zwei ist der Regelfall, drei muss gehen.
+  Bei 400 px Breite umbrechen, nicht stauchen.
+- **Mengen.** „2 × Popcorn" muss lesbar sein.
+- **Kein Produktfoto.** Es gibt keine. Getönte Kachel mit „BILD", wie
+  überall im Katalog.
+- **Der durchgestrichene Preis verschwindet**, wenn das Bundle nicht
+  günstiger ist als der Einzelkauf. Ein durchgestrichener Preis, der
+  nicht höher ist als der verlangte, ist eine irreführende Angabe
+  (§ 5 UWG). Der Fall kann durch Handpflege entstehen; entwirf ihn mit.
+- Für den Screenreader ist eine Durchstreichung nur ein zweiter Preis.
+  Der durchgestrichene Betrag braucht eine eigene Beschriftung.
+
+**Dazu ein zweiter Entwurf: die Detailansicht** (Tippen auf die Karte).
+Dort steht die vollständige Rechnung, wie sie auch in der Verwaltung
+steht: je Produkt Einzelpreis, Anteil in Prozent, Bruttoanteil,
+Steuersatz, Netto und Umsatzsteuer, dazu die Summen.
+
+    Cola     19 %   3,10 €   43,66 %   2,62 €   2,20 €   0,42 €
+    Popcorn   7 %   4,00 €   56,34 %   3,38 €   3,16 €   0,22 €
+                    7,10 €  100,00 %   6,00 €   5,36 €   0,64 €
+
+Das wirkt für eine Verkaufsfläche ungewohnt, ist aber Absicht: Ein
+Kombipreis über zwei Steuersätze wird beim Kauf auf die Positionen
+verteilt, und der Spendenanteil von 5 % hängt am Nettowert **je
+Produkt**. Wer wissen will, wie viel bei seinem Kauf in der Region
+bleibt, findet es nur hier. Die Karte selbst bleibt eine Karte — die
+Tabelle liegt eine Ebene tiefer.
+
+**Kein Chip für automatische Inhalte.** Kombiangebote werden von Hand
+angelegt, nicht algorithmisch ausgewählt.
+
 ---
 
 # Lieferung 2
 
 Erst beauftragen, wenn Lieferung 1 abgenommen ist.
 
-**Bildschirm 4 — Automaten.** Der Einstieg der App, immer. Vor dem Start
+**Bildschirm 5 — Automaten.** Der Einstieg der App, immer. Vor dem Start
 gibt es keine Automaten: kein leerer Listenzustand, sondern eine Seite,
 die sagt, was geplant ist und wann. Im Betrieb Liste und Karte,
 Verfügbarkeit, Entfernung.
 
-**Bildschirm 5 — Abo.** Reihenfolge: Verhalten → Vorteil → Rechnung →
+**Bildschirm 6 — Abo.** Reihenfolge: Verhalten → Vorteil → Rechnung →
 Preis → Entscheidung. Der Rechner steht **vor** den Preisen und sieht so
 aus:
 
@@ -190,14 +243,14 @@ Das zweite ist der wichtigere Entwurf. Es darf nicht wie eine Absage
 aussehen und nicht wie ein verstecktes Verkaufsargument. Vor dem Start
 wird das Abo gar nicht angeboten; auch dieser Zustand gehört dazu.
 
-**Bildschirm 6 — Kundenkarte.** Eine Karte mit QR-Code, Name und
+**Bildschirm 7 — Kundenkarte.** Eine Karte mit QR-Code, Name und
 Kundennummer. Der Scanvorgang am Automaten existiert nicht. Der Text
 lautet: „Diese Karte weist dich als Kunde aus. Sobald der erste Automat
 steht, ordnet sie deine Käufe und Rabatte automatisch zu." Nicht
 anzeigen: Punktestand, Meilensteine, Werbung. Der Kunde steht vor einem
 Gerät und will scannen.
 
-**Bildschirm 7 — Profil.** Konto, Verträge, Rechtliches. Der
+**Bildschirm 8 — Profil.** Konto, Verträge, Rechtliches. Der
 Kündigungsweg muss ohne Suchen zu finden sein — er ist Pflicht nach
 § 312k BGB und wird nicht versteckt und nicht optisch abgewertet.
 

@@ -75,8 +75,14 @@ Live-Zaehler der Spendensumme vorgab - alles ueberholt.
 2. `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md` -
    Landingpage, inhaltlich
 3. `docs/lovable/AUFTRAG-2026-09-KUNDEN-APP-ENTWUERFE.md`, Lieferung 1 -
-   Registrierung, Vorteile, Fuer die Region
+   Registrierung, Vorteile, Fuer die Region, Kombiangebot-Karte
 4. derselbe Auftrag, Lieferung 2 - Automaten, Abo, Kundenkarte, Profil
+
+Die Coupon-Karte fuer Kombiangebote steht in Lieferung 1. Sie ist zwar
+schon in Flutter gebaut und funktioniert, aber sie traegt eine
+Preisaussage und ist das Sichtbarste, was in den naechsten Monaten
+dazukommt - da lohnt ein zweiter Blick von aussen. Der Entwurf ersetzt
+die bestehende Karte nicht automatisch; ich uebertrage, was besser ist.
 
 Lieferung 2 erst beauftragen, wenn Lieferung 1 abgenommen ist.
 
