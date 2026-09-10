@@ -139,18 +139,17 @@ serverseitige Erzeugung.
 Ebenfalls nicht nötig: VPS, Cloud Hosting, WooCommerce, Managed
 WordPress. Kein WordPress im Spiel, kein Shop, kein Root-Zugriff nötig.
 
-## Sicherheitsnetz, falls der statische Build klemmt
+## Der statische Build steht
 
-Das Lovable-Projekt baut derzeit über Nitro für Cloudflare. Für
-Hostinger muss daraus ein statischer Build werden — das steht noch aus.
+Seit 10.09.2026 rendert das Lovable-Projekt alle sechs Seiten vor. Der
+Ordner, der zu Hostinger hochgeladen wird, heisst **`dist/client`**.
+Keine Laufzeitumgebung, kein Node auf dem Zielserver — genau das, wofuer
+gewoehnliches Webhosting gedacht ist.
 
-Falls das nicht auf Anhieb klappt, gibt es bereits eine fertige
-statische Fassung im Repository unter `apps/landing/` (index.html,
+Falls beim Hochladen doch etwas klemmt, liegt im Repository unter
+`apps/landing/` eine fertige statische Fassung (index.html,
 impressum.html, datenschutz.html, CSS, JavaScript). Sie war als
-Referenzfassung gedacht und lässt sich unverändert hochladen.
-
-Ein einfaches Webhosting-Paket ist also in keinem Fall die falsche
-Entscheidung.
+Referenzfassung gedacht und laesst sich unveraendert hochladen.
 
 ## Was sonst noch Geld kostet (nicht bei Hostinger)
 
