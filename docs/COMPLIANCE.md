@@ -474,3 +474,68 @@ Supabase-Verbindung dieser Sitzung ist mit abgelaufenem Token
 ausgestiegen. Die Zahl 66 ist deshalb gerechnet (65 nachgezählt plus
 eine erfolgreiche Einfügung), nicht erneut abgefragt. Beim nächsten
 Zugriff nachzählen.
+
+---
+
+## Legal Impact — Allergene, Zutaten und Nährwerte beim Popcorn (10.09.2026)
+
+### Sachverhalt
+
+Philipp hat für die vier Popcorn-Sorten Zutatenlisten und Nährwerte
+geliefert (vier Bildschirmfotos von kreutzers.eu) und den Einkaufspreis
+mit 2,99 € angegeben. Beim Zuordnen sind zwei Befunde entstanden.
+
+**Befund 1 — die Quelle ist in sich widersprüchlich.** Die vier
+Produktseiten zeigen nur **zwei** Datensätze, jeden auf zwei Produkten:
+
+| Datensatz | Kennzeichen | Steht auf |
+|---|---|---|
+| A | 1738 kJ / 412 kcal, Salz 2,0 g, Meersalz in der Zutatenliste | Caramel & Seasalt und Premium Caramel |
+| B | 1933 kJ / 461 kcal, Kakaomasse + Kakaopulver + 13 % Vollmilchpulver **und zugleich** Weizenmehl + Kandisirup + Zimt | Cookies & Cream und Caramel Biscuit, dort wortgleich |
+
+Datensatz B trägt beide Geschmacks-Signaturen zugleich und kann deshalb
+für keines der beiden Produkte ein zutreffendes Zutatenverzeichnis sein.
+
+**Befund 2 — die App gab Entwarnung, die niemand gegeben hatte.**
+`product_detail_screen.dart` unterschied nicht zwischen „nicht erfasst"
+und „geprüft, keines enthalten": `ProductDetail.fromJson` las
+`allergens` mit `?? const []`, NULL und leere Liste kamen als dasselbe
+an, und der Bildschirm zeigte daraufhin einen grünen Haken mit
+„Keine deklarationspflichtigen Allergene enthalten." sowie den Chip
+„Ohne Allergene" direkt unter dem Produktnamen. Kein einziges der
+66 Produkte trug geprüfte Angaben — die Aussage stand also bei jedem
+Produkt, auch bei denen mit Milch, Gluten und Schalenfrüchten.
+
+### Rechtliche Würdigung
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| **Lebensmittelrecht (LMIV)** | ✓ | **Der tragende Bereich, zwei getrennte Punkte.** (1) Die Falsch-Entwarnung war eine unzutreffende Information über eine Zutat nach Art. 7 Abs. 1 lit. a LMIV und betraf gerade die Angabe, an der Gesundheit hängt (Anhang II). Behoben. (2) Für drei Sorten fehlen Nährwerttabelle und Zutatenverzeichnis weiterhin; ein aus der Nachbarsorte übernommenes Verzeichnis wäre eine Falschangabe und wurde deshalb nicht gesetzt. Die Allergene sind für alle vier gesetzt, weil sie gegen die Verwechslung robust sind: beide Datensätze führen Sojaöl und Butter, Datensatz B zusätzlich Weizenmehl. | **Ja — (1) erledigt, (2) offen** | Philipp (Packungen abschreiben) |
+| Verbraucherrecht, UWG | ✓ | Die Falsch-Entwarnung wäre auch eine irreführende Angabe über eine wesentliche Produkteigenschaft gewesen. Mit derselben Änderung beseitigt. | Erledigt | |
+| **Steuer & Buchführung** | ✓ | `cost_price_net` wird als `2,99 / 1,07` gesetzt: 2,99 € ist ein Bruttopreis, das Feld führt netto. Damit sind Wareneinsatzquote und Rohertragsmarge für diese vier Positionen erstmals rechenbar — und sie fallen durch: netto 2,79 € Einkauf verlangt für 30–40 % Wareneinsatz rund 8,50 € brutto im Verkauf. Das ist eine betriebswirtschaftliche Feststellung, keine Rechtsfrage, gehört aber in die Kalkulationsgrundlage. | Nein | |
+| Preisangaben (PAngV) | ✓ | Verkaufspreis weiterhin leer, die App zeigt keinen. Unverändert. | Nein | |
+| DSGVO, Jugendschutz, Verpackung, EU AI Act, Store-Regeln | ✓ | Nicht berührt. | Nein | |
+| Barrierefreiheit | ✓ | Der neue Hinweiszustand ist als Text ausgeführt, nicht nur über Farbe — die Unterscheidung bleibt ohne Farbwahrnehmung erkennbar (WCAG 1.4.1). | Nein | |
+
+### Anpassungskategorien
+
+* **Technisch** — erledigt: `allergens` ist im Client nullbar,
+  `product_detail_screen.dart` kennt drei Zustände, neue Spalte
+  `products.ingredients`, `product_detail` liefert sie mit (Rechte nach
+  dem drop+create ausdrücklich neu gesetzt, damit PUBLIC nicht wieder
+  ausführen darf). Sechs Tests halten die Unterscheidung fest.
+* **Dokumentarisch** — Fund und offener Rest in der Aufgabenliste,
+  Abschnitt 4c.
+* **Organisatorisch** — Nährwerte und Zutaten für drei Sorten von der
+  Packung erfassen. Für die übrigen 62 Produkte bleibt der Punkt
+  unverändert offen.
+* **Vertraglich** — nichts anzupassen.
+
+### Status
+
+🟡 — die gefährliche Falschaussage ist beseitigt und die Allergene der
+vier Popcorn-Sorten stehen. Offen: Nährwerte und Zutaten für drei
+Sorten, und **die Migration ist noch nicht angewandt** — die
+Supabase-Verbindung dieser Sitzung ist mit abgelaufenem Token
+ausgestiegen. Bis dahin wirkt allein die App-Korrektur, die den
+fehlenden Angaben den richtigen Text gibt.

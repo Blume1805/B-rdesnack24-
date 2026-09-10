@@ -64,7 +64,8 @@ class ProductDetail extends Equatable {
     this.sugarsG,
     this.proteinG,
     this.saltG,
-    this.allergens = const [],
+    this.allergens,
+    this.ingredients,
     this.myRating,
   });
 
@@ -90,7 +91,19 @@ class ProductDetail extends Equatable {
   final double? sugarsG;
   final double? proteinG;
   final double? saltG;
-  final List<String> allergens;
+
+  /// `null` heißt **nicht geprüft**, eine leere Liste heißt **geprüft und
+  /// keine enthalten**. Die Unterscheidung ist der ganze Zweck des
+  /// nullbaren Typs: Bis zum 10.09.2026 wurde beides als leere Liste
+  /// geführt, und der Bildschirm meldete daraufhin für jedes Produkt
+  /// grün „Ohne Allergene" — für alle 66, von denen keines geprüfte
+  /// Angaben trug.
+  final List<String>? allergens;
+
+  /// Zutatenverzeichnis im Wortlaut der Verpackung, samt freiwilligem
+  /// Spurenhinweis. `null` heißt: liegt nicht vor.
+  final String? ingredients;
+
   final double avgRating;
   final int reviewCount;
   final int? myRating;
@@ -109,9 +122,8 @@ class ProductDetail extends Equatable {
         sugarsG: (j['sugars_g'] as num?)?.toDouble(),
         proteinG: (j['protein_g'] as num?)?.toDouble(),
         saltG: (j['salt_g'] as num?)?.toDouble(),
-        allergens: ((j['allergens'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
+        allergens: (j['allergens'] as List?)?.map((e) => e.toString()).toList(),
+        ingredients: j['ingredients'] as String?,
         avgRating: (j['avg_rating'] as num?)?.toDouble() ?? 0,
         reviewCount: (j['review_count'] as num?)?.toInt() ?? 0,
         myRating: (j['my_rating'] as num?)?.toInt(),

@@ -160,18 +160,40 @@ Quelle: `docs/rechtstexte/impressum.md`, `apps/landing/README.md`
 
 ## 2. Entscheidungen, die noch anstehen
 
-- [ ] **Popcorn: Verkaufspreis, Einkaufspreis und Gewicht.** Die vier
-      Sorten stehen seit dem 10.09. im Sortiment (BS-063 bis BS-066),
-      aber ohne diese drei Angaben. Die Bildschirmfotos liefern sie
-      nicht: 2,99 EUR ist der Ladenpreis von kreutzers.eu, nicht unser
-      Automatenpreis, und die Gewichtsangaben dort widersprechen sich
-      (100 g und 80 g stehen beide bei 11,96 EUR/kg; 2,99 EUR bei
-      11,96 EUR/kg waeren 250 g). Ohne Einkaufspreis fehlen
-      Wareneinsatzquote und Rohertragsmarge fuer diese vier Positionen;
-      ohne Verkaufspreis zeigt die App keinen Preis an. Geschaetzt wird
-      nichts.
-      Quelle: `supabase/migrations/20260910180000_sortiment_popcorn.sql`
-      und `20260910183000_sortiment_popcorn_premium_caramel.sql`
+- [ ] **Popcorn: Der Einkaufspreis von 2,99 EUR traegt keine Marge.**
+      Netto sind das 2,79 EUR. Damit die Wareneinsatzquote im Zielband
+      von 30 bis 40 % laege, muesste der Automatenpreis bei rund
+      8,50 EUR brutto stehen. Selbst beim hoechsten Preis im heutigen
+      Sortiment (3,50 EUR) waere die Quote 85 % -- es blieben 15 %
+      Rohertrag statt der angestrebten 50 bis 70 %. Zum Vergleich: die
+      teuerste Position im Sortiment kostet uns 1,79 EUR im Einkauf.
+      2,99 EUR ist ein Endkundenpreis. Fuer den Automaten braucht es
+      einen Grosshandelspreis oder eine andere Sorte.
+
+- [ ] **Popcorn: Verkaufspreis und Gewicht.** Beides fehlt weiterhin.
+      Die Gewichtsangaben im Shop widersprechen sich (100 g und 80 g
+      stehen beide bei 11,96 EUR/kg; 2,99 EUR bei 11,96 EUR/kg waeren
+      250 g). Ohne Verkaufspreis zeigt die App keinen Preis an.
+
+- [ ] **Popcorn: Naehrwerte und Zutaten fuer drei der vier Sorten.**
+      Die vier Produktseiten zeigen nur ZWEI verschiedene Datensaetze,
+      jeder auf zwei Produkten -- Einzelheiten unten unter „Was ich
+      dabei gefunden habe". Uebernommen habe ich nur den Datensatz, der
+      eindeutig zuzuordnen ist (Caramel & Seasalt). Fuer Caramel
+      Biscuit, Cookies & Cream und Premium Caramel brauche ich die
+      Angaben von der Packung. **Die Allergene sind fuer alle vier
+      gesetzt** -- die sind gegen die Verwechslung robust.
+
+      Quellen: `supabase/migrations/20260910180000_sortiment_popcorn.sql`,
+      `20260910183000_sortiment_popcorn_premium_caramel.sql`,
+      `20260910190000_popcorn_zutaten_naehrwerte_ek.sql`
+
+- [ ] **Supabase-Verbindung neu freigeben.** Die dritte Migration
+      (Zutaten, Naehrwerte, Einkaufspreis) ist geschrieben, aber **noch
+      nicht angewandt** -- der Zugang dieser Sitzung ist mit abgelaufenem
+      Token ausgestiegen. Freigabe in den claude.ai-Connector-
+      Einstellungen; danach ziehe ich sie nach und zaehle die
+      Produktzahl gegen.
 
 - [ ] **Nachweisform der Spende gegenueber Kunden.** Wie wird belegt, dass
       der Anteil tatsaechlich geflossen ist? (Quartalsbericht in der App,
@@ -270,6 +292,64 @@ Verkauf** ist es das nicht mehr (Kennzeichnungspflichten nach der LMIV,
 bei Fernabsatz vor Abschluss). Die Angaben stehen auf der Verpackung
 und muessen einmal erfasst werden — das ist Fleissarbeit, keine
 Entscheidung. Ich sage rechtzeitig Bescheid, wenn es soweit ist.
+
+---
+
+## 4c. Was ich beim Popcorn gefunden habe (10.09.2026)
+
+**Die vier Produktseiten zeigen nur zwei Datensaetze.**
+
+| Datensatz | Kennzeichen | Steht auf |
+|---|---|---|
+| A | 1738 kJ / 412 kcal, Salz 2,0 g, Meersalz in der Zutatenliste | Caramel & Seasalt **und** Premium Caramel |
+| B | 1933 kJ / 461 kcal, Kakaomasse + Weizenmehl + Zimt | Cookies & Cream **und** Caramel Biscuit |
+
+Bei B sind die beiden Listen Wort fuer Wort gleich. Zwei Produkte tragen
+also die Angaben ihres Nachbarn, und aus den Fotos laesst sich nicht
+entscheiden, welches jeweils das richtige ist:
+
+* Datensatz A nennt Meersalz und weist 2,0 g Salz je 100 g aus. Das passt
+  zu **Caramel & Seasalt**. Fuer ein ungesalzenes Premium Caramel waeren
+  2,0 g sehr viel.
+* Datensatz B enthaelt **gleichzeitig** Kakaomasse, Kakaopulver und 13 %
+  Vollmilchpulver (das waere Cookies & Cream) **und** Weizenmehl,
+  Kandisirup und Zimt (das waere Caramel Biscuit). Beide Handschriften in
+  einer Liste ergeben fuer keines der beiden Produkte ein stimmiges
+  Zutatenverzeichnis.
+
+Deshalb habe ich Naehrwerte und Zutaten nur bei Caramel & Seasalt
+eingetragen. Ein fehlendes Zutatenverzeichnis ist eine Luecke, ein
+falsches ist eine Falschangabe nach LMIV -- und bei Allergien ist das
+der Unterschied, auf den es ankommt.
+
+**Die Allergene habe ich fuer alle vier gesetzt.** Sie sind gegen die
+Verwechslung robust: In beiden Datensaetzen stehen Sojaoel und Butter,
+in Datensatz B zusaetzlich Weizenmehl. Egal wie herum die Datensaetze
+gehoeren -- die beiden Karamell-Sorten tragen Milch und Soja, die beiden
+Keks-Sorten zusaetzlich Gluten.
+
+**Was zu tun ist:** einmal die vier Packungen in die Hand nehmen und
+Naehrwerttabelle und Zutatenliste abschreiben. Dann stimmt es.
+
+---
+
+**Der zweite Fund, und der ist ernster.** Beim Zuordnen ist mir
+aufgefallen, was die App bisher anzeigte, wenn keine Allergene erfasst
+sind: einen gruenen Haken und den Satz **„Keine deklarationspflichtigen
+Allergene enthalten."** Dazu oben am Produkt einen gruenen Chip **„Ohne
+Allergene"**.
+
+Kein einziges der 66 Produkte trug gepruefte Angaben. Die App hat also
+fuer jedes Produkt Entwarnung gegeben -- auch fuer die mit Milch, Gluten
+und Nuessen. Fuer jemanden mit einer Milchallergie ist das die
+gefaehrlichste Art von Falschangabe: eine Entwarnung, die niemand
+gegeben hat.
+
+Ursache war eine Zeile, die zwischen „nicht erfasst" und „geprueft,
+keines enthalten" nicht unterschied. Ist behoben; die App kennt jetzt
+drei Zustaende und sagt bei fehlenden Angaben: „Das heisst nicht, dass
+keine Allergene enthalten sind. Massgeblich ist die Verpackung." Sechs
+Tests halten den Unterschied fest. Du musst nichts tun.
 
 ---
 

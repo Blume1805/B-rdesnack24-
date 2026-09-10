@@ -103,35 +103,24 @@ class ProductDetailScreen extends ConsumerWidget {
               // Allergene
               const Eyebrow('Hinweise für Allergiker'),
               const SizedBox(height: AppSpacing.s3),
-              if (p.allergens.isEmpty)
+              _AllergenBlock(allergens: p.allergens),
+
+              // Zutatenverzeichnis, sofern erfasst
+              if (p.ingredients != null) ...[
+                const SizedBox(height: AppSpacing.s5),
+                const Eyebrow('Zutaten'),
+                const SizedBox(height: AppSpacing.s3),
                 AppCard(
                   color: AppColors.surfaceAlt,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle_outline,
-                        color: AppColors.statusPositive,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppSpacing.s2),
-                      Expanded(
-                        child: Text(
-                          'Keine deklarationspflichtigen Allergene enthalten.',
-                          style: AppTypography.body(
-                            size: 13,
-                            color: AppColors.textDefault,
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    p.ingredients!,
+                    style: AppTypography.body(
+                      size: 13,
+                      color: AppColors.textDefault,
+                    ).copyWith(height: 1.45),
                   ),
-                )
-              else
-                Wrap(
-                  spacing: AppSpacing.s2,
-                  runSpacing: AppSpacing.s2,
-                  children: [for (final a in p.allergens) _AllergenChip(a)],
                 ),
+              ],
               const SizedBox(height: AppSpacing.s6),
 
               // Eigene Bewertung
@@ -272,17 +261,22 @@ class _KeyFactChips extends StatelessWidget {
           '${g(detail.sugarsG!)} Zucker',
           AppColors.ink,
         ),
-      (
-        detail.allergens.isEmpty
-            ? Icons.check_circle_outline
-            : Icons.info_outline,
-        detail.allergens.isEmpty
-            ? 'Ohne Allergene'
-            : '${detail.allergens.length} Allergene',
-        detail.allergens.isEmpty
-            ? AppColors.statusPositive
-            : AppColors.brandDark,
-      ),
+      // Drei Zustände, nicht zwei: nicht erfasst (grau), geprüft und keines
+      // enthalten (grün), enthält welche (gold).
+      if (detail.allergens == null)
+        (Icons.help_outline, 'Allergene offen', AppColors.textMuted)
+      else if (detail.allergens!.isEmpty)
+        (
+          Icons.check_circle_outline,
+          'Ohne Allergene',
+          AppColors.statusPositive,
+        )
+      else
+        (
+          Icons.info_outline,
+          '${detail.allergens!.length} Allergene',
+          AppColors.brandDark,
+        ),
     ];
     if (facts.isEmpty) return const SizedBox.shrink();
 
@@ -440,6 +434,87 @@ class _NutritionRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Allergenangaben in drei Zuständen.
+///
+/// Der Unterschied zwischen „nicht erfasst" und „geprüft, keines
+/// enthalten" ist der ganze Punkt dieses Widgets. Bis zum 10.09.2026 gab
+/// es ihn nicht: `allergens` kam als leere Liste an, wenn die Datenbank
+/// NULL lieferte, und der Bildschirm meldete daraufhin mit grünem Haken
+/// „Keine deklarationspflichtigen Allergene enthalten." — für alle 66
+/// Produkte, von denen kein einziges geprüfte Angaben trägt. Für jemanden
+/// mit einer Milchallergie ist das die gefährlichste Art von Falschangabe:
+/// eine Entwarnung, die niemand gegeben hat.
+class _AllergenBlock extends StatelessWidget {
+  const _AllergenBlock({required this.allergens});
+
+  /// `null` = nicht erfasst, leer = geprüft und keines enthalten.
+  final List<String>? allergens;
+
+  @override
+  Widget build(BuildContext context) {
+    final werte = allergens;
+
+    if (werte == null) {
+      return AppCard(
+        color: AppColors.surfaceAlt,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.help_outline,
+              color: AppColors.textMuted,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.s2),
+            Expanded(
+              child: Text(
+                'Für dieses Produkt haben wir die Angaben noch nicht '
+                'erfasst. Das heißt nicht, dass keine Allergene enthalten '
+                'sind. Maßgeblich ist die Verpackung.',
+                style: AppTypography.body(
+                  size: 13,
+                  color: AppColors.textDefault,
+                ).copyWith(height: 1.4),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (werte.isEmpty) {
+      return AppCard(
+        color: AppColors.surfaceAlt,
+        child: Row(
+          children: [
+            const Icon(
+              Icons.check_circle_outline,
+              color: AppColors.statusPositive,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.s2),
+            Expanded(
+              child: Text(
+                'Keine deklarationspflichtigen Allergene enthalten.',
+                style: AppTypography.body(
+                  size: 13,
+                  color: AppColors.textDefault,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: AppSpacing.s2,
+      runSpacing: AppSpacing.s2,
+      children: [for (final a in werte) _AllergenChip(a)],
     );
   }
 }
