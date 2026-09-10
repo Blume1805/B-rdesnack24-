@@ -47,6 +47,16 @@ final bundlesProvider = FutureProvider.autoDispose<List<Bundle>>((ref) async {
       .toList();
 });
 
+/// Werbelogo für Coupons (RPC coupon_werbeplatz). Tagesbezogen und für
+/// alle Kunden gleich — die Auswahl kennt weder Konto noch Kaufhistorie.
+/// Leere Liste heißt: niemand hat die Fläche gebucht.
+final couponWerbeplatzProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final rows = await ref.watch(supabaseClientProvider).rpc('coupon_werbeplatz');
+  if (rows is! List) return const [];
+  return rows.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
 final myPricesProvider = FutureProvider.autoDispose<List<CustomerPrice>>(
   (ref) => ref.watch(customerRepositoryProvider).myPrices(),
 );

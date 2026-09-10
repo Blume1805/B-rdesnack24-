@@ -627,3 +627,28 @@ einer Fehlermeldung mit Inhalt.
 (Supabase-Verbindung mit abgelaufenem Token ausgestiegen). Nachweise bis
 dahin: `flutter analyze` ohne Befund in beiden Apps, 34 Tests in der
 Kunden-App und 41 in der Gesellschafter-App grün.
+
+### Nachtrag: Coupon-Vorlage, Abo-Preise und Werbefläche (10.09.2026)
+
+Philipp legt die Gestaltung fest: für **alle** Bundles identisch, mit
+vier Preisen (einzeln und im Bundle, jeweils mit und ohne Dauerrabatt),
+der Laufzeit und einer Werbefläche.
+
+| Bereich | Ergebnis | Anpassung |
+|---|---|---|
+| **PAngV** | Vier Preise auf einer Karte sind zulässig, solange erkennbar ist, welcher für wen gilt. Die Abo-Zeile trägt deshalb ein sichtbares „Mit Abo" und steht unter der normalen Zeile — die meisten Kunden haben kein Abo und sollen ihren eigenen Preis zuerst finden. Alle Beträge brutto inkl. USt. | Erledigt |
+| **UWG § 5** | Der durchgestrichene Preis entfällt automatisch, sobald er nicht höher ist als der geltende — in beiden Zeilen getrennt geprüft. Tests halten das fest. | Erledigt |
+| **UWG § 5a Abs. 4** | Die Werbefläche trägt die Kennzeichnung aus dem Datensatz (Vorgabe „Anzeige"), nicht eine im Client erfundene. Ohne gebuchte Fläche entfällt sie ganz. Das Logo ist für Screenreader beschriftet; lädt es nicht, bleibt der Name des Werbetreibenden stehen. | Erledigt |
+| **DSGVO** | Die Auswahl des Logos hängt allein vom Kalendertag ab (`md5(datum ‖ id)`), kennt weder Konto noch Kaufhistorie und liefert allen Angemeldeten dasselbe. Übernommen aus `kundenkarte_werbeplatz`; kein Profiling, keine Einwilligung nötig. | Nein |
+| **EU AI Act / Projektregel** | Kein Kennzeichnungschip: Bundles werden von Hand angelegt, und die Werbeauswahl entscheidet nichts über den einzelnen Nutzer. | Nein |
+| **Freigaben** | Eigene Motivart `coupon_logo`, getrennt von `kundenkarte_logo`. Ein für die Kundenkarte freigegebenes Logo erscheint **nicht** ungeprüft auf einem Coupon — Freigaben bleiben flächenbezogen. | Erledigt |
+| **Preisberechnung** | Der Dauerrabatt steht jetzt in `app.dauerrabatt_prozent()`; `my_subscription_benefits` und `active_bundles` lesen ihn dort. Der Client rechnet nicht nach: `7,10 × 0,95` ergibt in Fließkomma 6,74, in `numeric` 6,75. Lokal nachgemessen. | Erledigt |
+
+Zur Kalkulation: Mit Dauerrabatt kostet das Bundle 5,70 € statt 6,00 €.
+Wareneinsatz 72,4 % statt 68,7 %, nach Spende bleiben 1,15 € statt
+1,41 €. Trägt weiterhin.
+
+**Status 🟡** — sieben Migrationen warten weiterhin auf die
+Supabase-Freigabe. Nachweise: alle Migrationen von Null lokal
+durchgelaufen, `flutter analyze` ohne Befund in allen drei Paketen,
+161 + 39 + 41 Tests grün.

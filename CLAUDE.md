@@ -67,3 +67,34 @@ diese Rechnung vollständig**: je Position Einzelpreis, Anteil in Prozent,
 Bruttoanteil, Steuersatz, Netto und Umsatzsteuer, dazu die Summen. Ohne
 Nachfragen, ohne Aufklappen. Gilt für neue Masken genauso wie für
 bestehende.
+
+## Kombiangebote: eine Gestaltung für alle
+
+Der Coupon eines Kombiangebots sieht **immer gleich** aus. Er trägt:
+
+* die Produktbilder nebeneinander, mit einem `+` dazwischen
+* die Summe der Einzelpreise, durchgestrichen — **mit und ohne**
+  Dauerrabatt
+* den Bundlepreis — ebenfalls mit und ohne Dauerrabatt
+* die Ersparnis
+* kleiner darunter die Laufzeit
+* eine Fläche für ein gebuchtes Werbelogo, sichtbar als „Anzeige"
+  gekennzeichnet (§ 5a Abs. 4 UWG)
+
+Daraus folgt der Ablauf: **Ein neues Kombiangebot entsteht allein durch
+Anlegen in der Gesellschafter-App.** Kein Entwurf, kein Lovable-Auftrag,
+keine neue Programmfassung, kein Store-Durchlauf. Die Vorlage wird
+einmal gebaut, danach füllt sie sich aus der Datenbank.
+
+Wer die Vorlage ändert, ändert sie für alle bestehenden Angebote — das
+ist der Preis dafür und ausdrücklich gewollt.
+
+**Alle vier Preise kommen vom Server** (`active_bundles`). Der Client
+rechnet den Dauerrabatt nicht nach: `7,10 × 0,95` ergibt je nach
+Rundungsregel 6,74 oder 6,75, und ein Preis, der sich je nach Plattform
+um einen Cent unterscheidet, ist keiner. Quelle des Satzes ist
+`app.dauerrabatt_prozent()`.
+
+**Der durchgestrichene Preis entfällt**, sobald er nicht höher ist als
+der geltende. Er behauptet sonst eine Ersparnis, die es nicht gibt
+(§ 5 UWG).

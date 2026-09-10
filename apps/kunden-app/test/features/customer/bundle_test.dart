@@ -17,7 +17,10 @@ void main() {
         'title': 'Cola + Popcorn',
         'description': 'Der Feierabend-Klassiker.',
         'price_gross': preis,
+        'price_gross_abo': (preis * 0.95 * 100).roundToDouble() / 100,
         'regular_gross': regulaer,
+        'regular_gross_abo': (regulaer * 0.95 * 100).roundToDouble() / 100,
+        'discount_percent': 5,
         'valid_to': '2026-12-31',
         'items': [
           {
@@ -90,5 +93,48 @@ void main() {
     (j['items'] as List)[1]['quantity'] = 2;
     final b = Bundle.fromJson(j);
     expect(b.items[1].quantity, 2);
+  });
+
+  group('Abo-Preise', () {
+    test('kommen vom Server und werden nicht nachgerechnet', () {
+      final b = Bundle.fromJson({
+        ...beispiel(),
+        // Absichtlich krumm: der Client darf daraus nichts ableiten.
+        'price_gross_abo': 5.55,
+        'regular_gross_abo': 6.66,
+      });
+      expect(b.priceGrossAbo, 5.55);
+      expect(b.regularGrossAbo, 6.66);
+      expect(b.savingsAbo, closeTo(1.11, 0.001));
+    });
+
+    test('fehlende Abo-Felder fallen auf den normalen Preis zurueck', () {
+      final j = beispiel()
+        ..remove('price_gross_abo')
+        ..remove('regular_gross_abo')
+        ..remove('discount_percent');
+      final b = Bundle.fromJson(j);
+      expect(b.priceGrossAbo, b.priceGross);
+      expect(b.regularGrossAbo, b.regularGross);
+      expect(b.discountPercent, 0);
+    });
+
+    test('ohne Dauerrabatt entfaellt die Abo-Zeile', () {
+      final j = beispiel()
+        ..['discount_percent'] = 0
+        ..['price_gross_abo'] = 6.00;
+      expect(Bundle.fromJson(j).hasAboRow, isFalse);
+    });
+
+    test('mit Dauerrabatt erscheint die Abo-Zeile', () {
+      expect(Bundle.fromJson(beispiel()).hasAboRow, isTrue);
+    });
+
+    test('Laufzeit kommt an', () {
+      final j = beispiel()..['valid_from'] = '2026-09-10';
+      final b = Bundle.fromJson(j);
+      expect(b.validFrom?.month, 9);
+      expect(b.validTo?.year, 2026);
+    });
   });
 }

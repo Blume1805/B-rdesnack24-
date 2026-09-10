@@ -162,58 +162,70 @@ nach einer Werbeaussage: feste Schrittweite, die Beträge untereinander,
 das Ergebnis hervorgehoben. Er ist das inhaltliche Signature-Element
 dieses Bildschirms; sonst bleibt die Seite ruhig.
 
-## Bildschirm 4 — Die Kombiangebot-Karte
+## Bildschirm 4 — Der Kombiangebot-Coupon
 
-Das ist keine ganze Seite, sondern eine Karte — sie steht in Block A des
-Vorteile-Bildschirms und später auch auf dem Automaten-Bildschirm.
-Trotzdem gehört sie in Lieferung 1: Sie ist das Sichtbarste, was in den
-nächsten Monaten dazukommt, und sie trägt eine Preisaussage.
+Das ist keine Seite, sondern eine Karte — und die wichtigste Lieferung
+dieses Auftrags.
 
-Ein Kombiangebot fasst zwei oder mehr Produkte zu einem Preis zusammen,
-zum Beispiel Cola und Popcorn für 6,00 € statt 7,10 € einzeln.
+**Warum sie besonders ist:** Die Gestaltung ist für **alle** Bundles
+identisch. Was du hier entwirfst, wird einmal gebaut und danach von jedem
+Kombiangebot gefüllt, das Bördesnack24 anlegt. Es gibt keinen zweiten
+Entwurf je Angebot. Entwirf also keine Karte für „Cola + Popcorn",
+sondern eine Vorlage, die zwei genauso trägt wie vier.
 
-**Die Bauform ist vorgegeben** (Philipp, 10.09.2026):
+### Was auf der Karte steht — verbindlich, nicht als Vorschlag
 
-- die Produktbilder nebeneinander, mit einem **Pluszeichen** dazwischen
-- der Einzelpreis **durchgestrichen**
-- daneben der Kombipreis, deutlich größer
-- die Ersparnis ausgeschrieben
+1. **Die Produktbilder nebeneinander, mit einem `+` dazwischen.**
+2. **Vier Preise, in zwei Zeilen:**
 
-Der Sinn: Der Kunde soll den Unterschied **sehen**, nicht ausrechnen.
-Deshalb stehen beide Zahlen nebeneinander und nicht nacheinander.
+       ohne Abo:   ~~7,10 €~~     6,00 €
+       mit Abo:    ~~6,75 €~~     5,70 €
 
-**Was die Karte können muss:**
+   Der jeweils höhere Betrag ist durchgestrichen, der geltende steht
+   daneben. Abonnenten bekommen 5 % Dauerrabatt, auch auf ein
+   Kombiangebot.
+3. **Die Ersparnis**, ausgeschrieben.
+4. **Kleiner darunter: die Laufzeit** („Gültig bis 10.10.2026").
+5. **Eine Fläche für ein Werbelogo**, wie sie jeder Coupon hat. Wenn ein
+   Unternehmen sie gebucht hat, steht dort sein Logo — daneben, sichtbar
+   und nicht wegzudenken, das Wort **„Anzeige"**. Ist nichts gebucht,
+   entfällt die Fläche ganz; kein freigehaltener Kasten.
 
-- **Mehr als zwei Produkte.** Zwei ist der Regelfall, drei muss gehen.
-  Bei 400 px Breite umbrechen, nicht stauchen.
-- **Mengen.** „2 × Popcorn" muss lesbar sein.
-- **Kein Produktfoto.** Es gibt keine. Getönte Kachel mit „BILD", wie
-  überall im Katalog.
-- **Der durchgestrichene Preis verschwindet**, wenn das Bundle nicht
-  günstiger ist als der Einzelkauf. Ein durchgestrichener Preis, der
-  nicht höher ist als der verlangte, ist eine irreführende Angabe
-  (§ 5 UWG). Der Fall kann durch Handpflege entstehen; entwirf ihn mit.
-- Für den Screenreader ist eine Durchstreichung nur ein zweiter Preis.
-  Der durchgestrichene Betrag braucht eine eigene Beschriftung.
+### Die Fälle, an denen eine Vorlage scheitert
 
-**Dazu ein zweiter Entwurf: die Detailansicht** (Tippen auf die Karte).
-Dort steht die vollständige Rechnung, wie sie auch in der Verwaltung
-steht: je Produkt Einzelpreis, Anteil in Prozent, Bruttoanteil,
-Steuersatz, Netto und Umsatzsteuer, dazu die Summen.
+- **Zwei ist der Regelfall, drei muss gehen.** Bei 400 px umbrechen,
+  nicht stauchen.
+- **Mengen:** „2 × Popcorn" muss lesbar sein.
+- **Keine Produktfotos.** Es gibt noch keine. Getönte Kachel mit „BILD",
+  wie überall im Katalog. Die Vorlage muss mit und ohne Bild gut aussehen.
+- **Kein Dauerrabatt sichtbar?** Ohne Abo-Zeile darf die Karte nicht
+  halbleer wirken.
+- **Kein Preisvorteil.** Liegt der Kombipreis nicht unter der Summe der
+  Einzelpreise, **verschwindet der durchgestrichene Preis**. Ein
+  durchgestrichener Preis behauptet eine Ersparnis; gibt es sie nicht,
+  ist die Behauptung falsch (§ 5 UWG). Entwirf diesen Zustand mit.
+- **Screenreader:** Eine Durchstreichung ist für ihn nur ein zweiter
+  Preis. Der durchgestrichene Betrag braucht eine eigene Beschriftung.
+
+### Und ein zweiter Entwurf: die Detailansicht
+
+Tippen auf die Karte. Dort steht die vollständige Rechnung: je Produkt
+Einzelpreis, Anteil in Prozent, Bruttoanteil, Steuersatz, Netto und
+Umsatzsteuer, dazu die Summen.
 
     Cola     19 %   3,10 €   43,66 %   2,62 €   2,20 €   0,42 €
     Popcorn   7 %   4,00 €   56,34 %   3,38 €   3,16 €   0,22 €
                     7,10 €  100,00 %   6,00 €   5,36 €   0,64 €
 
-Das wirkt für eine Verkaufsfläche ungewohnt, ist aber Absicht: Ein
-Kombipreis über zwei Steuersätze wird beim Kauf auf die Positionen
-verteilt, und der Spendenanteil von 5 % hängt am Nettowert **je
-Produkt**. Wer wissen will, wie viel bei seinem Kauf in der Region
-bleibt, findet es nur hier. Die Karte selbst bleibt eine Karte — die
-Tabelle liegt eine Ebene tiefer.
+Für eine Verkaufsfläche ungewohnt, aber Absicht: Ein Kombipreis über
+zwei Steuersätze wird beim Kauf auf die Positionen verteilt, und der
+Spendenanteil von 5 % hängt am Nettowert **je Produkt**. Wer wissen will,
+wie viel bei seinem Kauf in der Region bleibt, findet es nur hier. Die
+Karte selbst bleibt eine Karte; die Tabelle liegt eine Ebene tiefer.
 
-**Kein Chip für automatische Inhalte.** Kombiangebote werden von Hand
-angelegt, nicht algorithmisch ausgewählt.
+**Kein Kennzeichnungschip für automatische Inhalte.** Kombiangebote
+werden von Hand angelegt. Auch das Werbelogo bekommt keinen: welches
+erscheint, hängt allein vom Kalendertag ab und nicht vom Konto.
 
 ---
 
