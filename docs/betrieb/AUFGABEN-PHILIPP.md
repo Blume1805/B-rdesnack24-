@@ -53,8 +53,18 @@ dabei aufgefallen sind: die Seite meldet dem Browser Englisch als
 Sprache, und im Seitenkopf steht auf jeder Seite noch
 "author: Lovable".
 
-Der fertige Auftragstext liegt in
-`docs/lovable/landingpage-nachfassen.md`.
+Dazu kommt seit dem 10.09. ein zweiter, inhaltlicher Auftrag: Auf der
+Seite fehlt die Antwort auf die Frage, was ein Privatkunde von der App
+hat. Ausserdem stehen in der Vergleichstabelle zwei Angaben, die nicht
+stimmen — „Digitale Belege" als Abo-Vorteil (die gibt es kostenlos) und
+„Status-Rabatt bis 10 %" (die Stufe gibt hoechstens +5 %). In der App
+sind beide Saetze heute korrigiert worden; die Seite zieht nach, sobald
+Guthaben da ist.
+
+Die beiden fertigen Auftragstexte liegen in
+`docs/lovable/landingpage-nachfassen.md` (technisch, zuerst) und
+`docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md`
+(inhaltlich, danach).
 
 ---
 

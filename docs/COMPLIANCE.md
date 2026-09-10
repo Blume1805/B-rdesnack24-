@@ -296,3 +296,101 @@ zwölf Suiten ohne Befund.
 Auftrag dazu liegt fertig in
 `docs/lovable/AUFTRAG-2026-09-FIRMENPORTAL-RECHNUNGSDATEN.md` und ist noch
 nicht gesendet: der Lovable-Workspace hat keine Credits mehr.
+
+---
+
+## Legal Impact — Kunden-App nach dem Zielkonzept 2027 (10.09.2026)
+
+### Sachverhalt
+
+Die Kunden-App ist nach `docs/analyse/ZIELKONZEPT-KUNDEN-APP-2027.md`
+überarbeitet worden. Fünf Änderungen mit rechtlichem Bezug:
+
+1. **Vor-Start-Zustand.** Migration
+   `20260910120000_seeddaten_aus_der_kundenansicht.sql`: vier Seed-Automaten
+   archiviert, 90 Angebote archiviert, vier Challenges deaktiviert,
+   Cron-Job 2 (`generate_daily_offers`) angehalten. Nachgezählt in der
+   Produktivdatenbank: sichtbare Automaten 0, aktive Angebote 0, aktive
+   Challenges 0, Bestandszeilen 0.
+2. **Die Kundenkarte verspricht nichts mehr im Präsens.** Bis heute stand
+   dort, Rabatte und Rechnung würden „automatisch verknüpft". Es gibt
+   keinen Automaten, keinen Scanner und keine Anbindung.
+3. **Das Abo wird vor dem Start nicht mehr angeboten** (`_AboVorStart`).
+4. **Neu: Abo-Rechner** — vergleicht die Käufe der letzten 90 Tage mit
+   den Abo-Kosten desselben Zeitraums und sagt dem Kunden auch, wenn
+   sich das Abo für ihn *nicht* lohnt.
+5. **Zwei Angaben über Abo-Vorteile korrigiert** (siehe unten).
+
+**Datenklasse:** keine neue Verarbeitung. Der Abo-Rechner rechnet auf dem
+Gerät mit Daten, die der Kunde ohnehin sieht (`myPurchasesProvider`).
+Kein neuer Empfänger, keine neue Kategorie, kein Drittland.
+
+### Der Befund, der die Korrektur ausgelöst hat
+
+Zwei Angaben in der Vorteils-Gegenüberstellung waren falsch — in der App
+(`app_benefits_compare_screen.dart`, `subscription_value_screen.dart`,
+`customer_chatbot.dart`) und wortgleich auf der Landingpage
+(`Plans.tsx`):
+
+* **„Digitale Belege" stand als Abo-Vorteil.** `public.my_receipts()`
+  (Migration `20260726114602_0062_receipt_archive.sql`) prüft nichts als
+  `auth.uid()` und ist an `authenticated` vergeben; die App verlinkt das
+  Belegarchiv aus `HistoryTab` ohne Bedingung. Jeder angemeldete Kunde
+  hat die Belege, auch ohne Abo.
+* **„Status-Rabatt bis 10 %"** — `Pricing.statusBonusRate` gibt für Gold
+  `0.05` zurück, also **+5 %**. Die 10 % sind die Summe aus Abo-Rabatt
+  (5 %) und Statusstufe.
+
+Beide Angaben standen in der Spalte, mit der zum Abschluss aufgefordert
+wird. Das ist der Fall des § 5 Abs. 1, Abs. 2 Nr. 1 UWG: eine
+irreführende Angabe über die Vorteile einer entgeltlichen Leistung, an
+der Stelle der geschäftlichen Entscheidung. Neu: „Belege als PDF" in der
+kostenlosen Spalte, „Status: bis +5 % obendrauf".
+
+### Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | Nicht berührt. Der offene Punkt „Impressum spricht von dieser App" (Aufgabenliste 1.3) bleibt davon unberührt bestehen. | Nein | |
+| AGB | ✓ | Kein Vertragsinhalt geändert. Das Abo wird vor dem Start nicht mehr angeboten — damit entsteht kein Vertrag, dessen Bedingungen zu ändern wären. | Nein | |
+| Nutzungsbedingungen | ✓ | Nicht berührt. | Nein | |
+| Datenschutzerklärung | ✓ | Keine neue Verarbeitung, kein neuer Empfänger, keine neue Kategorie. Der Abo-Rechner nutzt Daten, die der Kunde ohnehin angezeigt bekommt, und rechnet auf dem Gerät. | Nein | |
+| DSGVO Art. 5/6/13/22 | ✓ | Art. 5 Abs. 1 lit. a (Transparenz) wird gestärkt: die Kundenkarte behauptet keinen Betriebszustand mehr, den es nicht gibt. Art. 22 nicht einschlägig — der Abo-Rechner trifft keine Entscheidung über den Kunden, er zeigt ihm eine Rechnung und überlässt ihm die Entscheidung. | Nein | |
+| Verbraucherrecht (§§ 312i–312k BGB) | ✓ | Der Kündigungsweg bleibt unverändert und ohne Anmeldung erreichbar. Dass vor dem Start kein Abo abgeschlossen werden kann, verkürzt keine Verbraucherrechte, sondern verhindert Verträge über eine Leistung, die noch nicht erbracht werden kann. | Nein | |
+| **Preisangaben (PAngV)** | ✓ | Vor dem Start zeigt die Abo-Seite gar keine Preise mehr, danach unverändert brutto inkl. USt. Der Abo-Rechner nennt keine Preise, sondern Beträge aus den Käufen des Kunden. | Nein | |
+| **UWG / Werbung** | ✓ | **Der tragende Bereich.** Drei irreführende Angaben beseitigt: die Belege als vermeintlicher Abo-Vorteil, der zu hoch angesetzte Statusrabatt und das Präsens-Versprechen auf der Kundenkarte. Der Abo-Rechner wirkt in dieselbe Richtung: er sagt dem Kunden, wenn sich das Abo für ihn nicht rechnet. | **Ja — erledigt in der App, offen auf der Landingpage** | Lovable (Auftrag liegt) |
+| Steuer & Buchführung (§§ 145–147 AO, GoBD) | ✓ | Die Migration löscht nichts: `status = 'archived'` plus `deleted_at`, kein `delete`. Buchungsrelevant war ohnehin nichts — es gibt keinen Verkauf, die Automaten waren Seed-Daten. Der angehaltene Cron-Job erzeugte Angebote, keine Buchungen. | Nein | |
+| Lebensmittelrecht (LMIV) | ✓ | Nicht berührt. Der offene Punkt bleibt: für die 62 geplanten Produkte fehlen Nährwerte und Allergene (Aufgabenliste). | Nein, aber Vorpunkt bleibt offen | Philipp |
+| Jugendschutz | ✓ | Die serverseitige Altersschranke am Abo ist unverändert. Dass die Abo-Seite vor dem Start nichts anbietet, ist eine zusätzliche Hürde, keine Ersetzung. | Nein | |
+| Verpackung & Pfand | ✓ | Nicht berührt. | Nein | |
+| Barrierefreiheit (BFSG, WCAG) | ✓ | Der Chip am Abo-Rechner ist tap-bar mit ausreichender Zielgröße und steht **vor** der Aussage, nicht dahinter. Die geänderten Texte bleiben in der bestehenden Typografie. | Nein | |
+| **EU AI Act / Projektregel Art. 50** | ✓ | Der Abo-Rechner erzeugt eine auf den einzelnen Kunden zugeschnittene Aussage nach einer Regel und löst damit die Kennzeichnungspflicht aus den Projektregeln aus. Umgesetzt: `AiBadge` am Kopf des Rechners, Ziel `AiInfoScreen`; dort im Abschnitt „Was wird eingesetzt?" und in der Bereichsliste ergänzt. **Label „Automatisch", nicht „KI"** — es rechnet eine Subtraktion auf dem Gerät, kein AI-System i. S. v. Art. 3 EU AI Act; dieselbe Unterscheidung wie beim regelbasierten Chat-Assistenten. Ein Chip mit „KI" wäre selbst eine falsche Angabe. | **Ja — erledigt** | |
+| Urheber-/Markenrecht | ✓ | Nicht berührt. | Nein | |
+| Store-Regeln (Apple/Google) | ✓ | Die App ist in keinem Store. Dass vor dem Start kein Abo angeboten wird, entschärft die offene Frage der Vertragspartnerstellung vorerst — sie bleibt zu klären, bevor eingereicht wird. | Nein, Vorfrage bleibt offen | Philipp |
+
+### Anpassungskategorien
+
+* **Technisch** — erledigt: Vor-Start-Zustand über `betriebszustand.dart`,
+  Kundenkarten-Text, `_AboVorStart`, Abo-Rechner mit Kennzeichnung,
+  drei korrigierte Vorteilsangaben, ergänzter `AiInfoScreen`.
+* **Dokumentarisch** — offen auf der Landingpage: dieselben zwei
+  Vorteilsangaben stehen dort noch falsch. Auftragstext liegt in
+  `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md` und ist
+  **nicht gesendet** — der Lovable-Workspace hat kein Guthaben.
+* **Organisatorisch** — nichts anzupassen.
+* **Vertraglich** — nichts anzupassen.
+
+### Zur Pflichtliste Automaten
+
+Geprüft: In `machines` steht kein aktiver Automat (0 sichtbar nach der
+Migration). Die Erinnerungspflicht aus den Projektregeln zu
+`docs/betrieb/AUTOMAT-INBETRIEBNAHME.md` knüpft an den **Kauf des ersten
+Automaten** an und ist damit weiterhin nicht ausgelöst.
+
+### Status
+
+🟢 für die App — `flutter analyze` ohne Befund, 22 Tests grün.
+
+🟡 für die Landingpage, bis die beiden Vorteilsangaben dort korrigiert
+sind. Blockiert allein am Lovable-Guthaben, nicht an einer offenen
+Frage.
