@@ -158,9 +158,10 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Was kann ich ohne Abo nutzen?',
       'Kostenlos bleiben: Automatenfinder, Bestände in Echtzeit, Produkt-'
-          'infos mit Nährwerten, Kaufhistorie, News und Favoriten. Die '
-          'Rabatt-Vorteile (App-Preis −5 %, Status-Rabatt bis 10 %, Deals, '
-          'Coupons, Treuepunkte) gibt es mit Abo ab 0,99 € im Monat.',
+          'infos mit Nährwerten, Kaufhistorie, deine Belege als PDF, News '
+          'und Favoriten. Die Rabatt-Vorteile (App-Preis −5 %, Status bis '
+          '+5 % obendrauf, Deals, Coupons, Treuepunkte) gibt es mit Abo ab '
+          '0,99 € im Monat.',
       deepLink: 'abo',
     ),
     _FaqEntry(

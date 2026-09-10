@@ -17,6 +17,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
     'Echtzeit-Bestand',
     'Nährwerte & Allergene',
     'Kundenkarte & Kaufhistorie',
+    'Belege als PDF',
     'News & Favoriten',
     'Kontakt & Reklamation',
   ];
@@ -25,11 +26,10 @@ class AppBenefitsCompareCard extends StatelessWidget {
   // damit keine Waisen-Umbrüche entstehen (Zahl + Zeichen bleiben zusammen).
   static const _appOnly = <String>[
     '5 % Dauerrabatt',
-    'Status-Rabatt bis 10 %',
+    'Status: bis +5 % obendrauf',
     'Deals & Angebote −10 %',
     'Bonuspunkte & Coupons 5–25 %',
     'Geburtstagsgutschein',
-    'Digitale Belege',
   ];
 
   @override

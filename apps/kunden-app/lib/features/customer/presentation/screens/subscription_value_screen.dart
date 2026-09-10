@@ -73,7 +73,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.workspace_premium_outlined,
-                  text: 'Status-Rabatt bis 10 % — lebenslang',
+                  text: 'Status: bis +5 % obendrauf (zusammen bis 10 %)',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
