@@ -38,6 +38,26 @@ ob sie im Suelzetal sitzt oder in der weiteren Region. Format egal
 
 Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
+### 1.1b Lovable-Guthaben ist wieder leer
+
+- [ ] Credits aufladen: https://lovable.dev/settings/billing
+
+Zwei Auftraege sind an diesem Tag durchgelaufen (die sieben Punkte vom
+08.09. und die neue Datenschutzerklaerung, beide nachgeprueft). Der
+dritte wurde abgewiesen.
+
+Er ist nicht dringend: Es geht um die Markenschriften, die zwar im
+Projekt liegen, aber nirgends eingebunden sind und deshalb keine Wirkung
+haben. Die Seite sieht aus wie vorher. Dazu zwei Kleinigkeiten, die mir
+dabei aufgefallen sind: die Seite meldet dem Browser Englisch als
+Sprache, und im Seitenkopf steht auf jeder Seite noch
+"author: Lovable".
+
+Der fertige Auftragstext liegt in
+`docs/lovable/landingpage-nachfassen.md`.
+
+---
+
 ### 1.2 Landingpage nach Hostinger ausrollen
 
 **Entscheidung 08.09.2026, ersetzt die vom 07.09.:** Gehostet wird bei
