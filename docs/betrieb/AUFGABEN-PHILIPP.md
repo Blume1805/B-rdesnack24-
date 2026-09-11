@@ -60,6 +60,15 @@ teils in zwei Zustaenden) rechne mit **6 bis 8 Credits fuer Lieferung 1**.
 Mit weniger anzufangen lohnt nicht: Es entstehen halbe Entwuerfe, und der
 naechste Durchgang muss sich erst wieder einlesen.
 
+**Es warten jetzt drei Auftraege, in dieser Reihenfolge:**
+
+1. `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-BEWEGUNG-2.md` -- die
+   fehlenden Scroll-Muster. Sechs von achtzehn sind gebaut; drei kommen
+   dazu, zwei werden ausgebaut, drei bleiben gesperrt. Rechne mit
+   3 bis 4 Credits.
+2. `AUFTRAG-2026-09-KUNDEN-APP-ENTWUERFE.md`, Lieferung 1 -- 6 bis 8
+3. dieselbe Datei, Lieferung 2
+
 Zwei Auftraege sind an diesem Tag durchgelaufen (die sieben Punkte vom
 08.09. und die neue Datenschutzerklaerung, beide nachgeprueft). Der
 dritte wurde abgewiesen.
