@@ -42,6 +42,24 @@ Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
 - [ ] Credits aufladen: https://lovable.dev/settings/billing
 
+**Stand 11.09.2026:** Die fuenf Credits sind aufgebraucht. Damit sind
+die **beiden Landingpage-Auftraege erledigt** -- die Seite ist inhaltlich
+fertig. Was jetzt noch wartet, sind die App-Entwuerfe.
+
+Erfahrungswert aus diesem Lauf, damit du besser planen kannst:
+
+| Auftrag | Umfang | Verbrauch |
+|---|---|---|
+| Landingpage technisch (5 Punkte) | Schriften, Sprache, Seitenkopf | rund 1 Credit |
+| Landingpage inhaltlich (5 Punkte) | inkl. neuer Szene | rund 3 Credits |
+| Kleine Korrektur (1 Absatz) | | 0,3 Credits |
+
+Der Agent hat beide grossen Auftraege in **je einem Durchgang**
+abgearbeitet, ohne Rueckfrage. Fuer die App-Entwuerfe (vier Bildschirme,
+teils in zwei Zustaenden) rechne mit **6 bis 8 Credits fuer Lieferung 1**.
+Mit weniger anzufangen lohnt nicht: Es entstehen halbe Entwuerfe, und der
+naechste Durchgang muss sich erst wieder einlesen.
+
 Zwei Auftraege sind an diesem Tag durchgelaufen (die sieben Punkte vom
 08.09. und die neue Datenschutzerklaerung, beide nachgeprueft). Der
 dritte wurde abgewiesen.

@@ -1,9 +1,34 @@
 # Auftrag an Lovable: der fehlende Kundennutzen (10.09.2026)
 
-**Status: nicht abgesendet — der Workspace hat kein Guthaben.**
-Sobald aufgeladen ist, geht der Text im Abschnitt „Der Auftragstext"
-unverändert an das Projekt `Bördesnack24 Landingpage`
-(`0c068d85-ef58-4450-a511-3e7ac1d0446d`).
+**Status: erledigt.** Gesendet am 11.09.2026 um 04:45 UTC, der Agent war
+um 04:51 fertig — alles in einem Durchgang.
+
+Gesendet wurde in geänderter Reihenfolge: die kleinen Korrekturen zuerst,
+die neue Szene zuletzt. Grund war das knappe Guthaben — wäre es
+mittendrin geendet, wäre die Seite trotzdem in sich stimmig geblieben.
+
+Am Code nachgeprüft, nicht an der Meldung:
+
+| Punkt | Befund |
+|---|---|
+| Belege | `"Belege als PDF"` steht in `SHARED`, aus `PAID` entfernt |
+| Statusrabatt | `"Status: bis +5 % obendrauf"` |
+| Sortiment | 66 Produkte, Snacks `n: 7`, „Herzhaftes und Popcorn für zwischendurch." |
+| Break-even | Absatz mit 17 €/20 € steht unter der Tabelle, vor dem Preishinweis |
+| Rechenweg | Tabelle in `ShareBar.tsx` mit `tabular-nums`, Ergebnis in Gold hervorgehoben |
+| Neue Szene | `03b` zwischen Genießen und Geben, Reveal-Szene, drei Karten, kein CTA, `caveat` in Zukunftsform |
+| Sticky-Budget | weiterhin zwei (`Stage`, `Sequence`) |
+
+**Ein Fehler lag in meiner Vorgabe.** Ich hatte einen Satz zum
+19-%-Steuersatz bestellt, den der bestehende `lead`-Absatz der Szene
+schon trug. Das ergab zwei Absätze direkt untereinander, die fast
+dasselbe sagten — unter dem Höhepunkt der Seite. Mit einer
+Nachricht (0,3 Credits) aufgelöst: der graue Zusatzabsatz ist weg, der
+19-%-Hinweis steht jetzt im vorhandenen Absatz.
+
+**Nicht mehr geändert, weil es sich nicht lohnt:** Szene 03b hat keinen
+Cremegrund und steht damit zwischen zwei hellen Szenen. Kein Fehler, nur
+eine Kleinigkeit im Rhythmus — beim nächsten Guthaben mitnehmen.
 
 Reihenfolge: **zuerst** `landingpage-nachfassen.md` (Schriften, Sprache,
 Lovable-Reste im Seitenkopf), **danach** dieser Auftrag. Der erste ist
