@@ -1,7 +1,32 @@
 # Offener Auftrag an Lovable (10.09.2026)
 
-**Status: gesendet am 11.09.2026, 04:42 UTC** an das Projekt
-`Bördesnack24 Landingpage` (0c068d85-ef58-4450-a511-3e7ac1d0446d).
+**Status: erledigt.** Gesendet am 11.09.2026 um 04:42 UTC, der Agent war
+um 04:43 fertig — alles in einem Durchgang. Am Code nachgeprüft, nicht
+an der Meldung:
+
+| Punkt | Befund |
+|---|---|
+| 1 Schriften eingebunden | `styles.css` trägt vier `@font-face`-Blöcke, `public/fonts/fonts.css` ist gelöscht |
+| 2 Gewichte | Bereiche statt Einzelwerte: Bricolage `200 800`, Hanken `100 900`. Keine erfundenen Gewichte mehr |
+| 3 Lizenz | `OFL-Bricolage-Grotesque.txt` und `OFL-Hanken-Grotesk.txt` liegen im Projekt |
+| 4 Sprache | `<html lang="de">` |
+| 5 Seitenkopf | `author` = Bördesnack24 GbR, `twitter:site` entfernt, Titel und Beschreibung auf Bördesnack24-Texte |
+
+Zwei Abweichungen von der Vorgabe, beide besser als das Verlangte:
+
+* Die Einbindung steht in `src/styles.css` statt in einer eigenen
+  `public/fonts/fonts.css`. Ein Abruf weniger im kritischen Pfad.
+* `format("woff2")` statt `format("woff2-variations")`. Richtig so —
+  die Variations-Schreibweise ist veraltet, moderne Browser erkennen
+  variable Schriften an der Datei.
+
+**Offen geblieben:** Die vier variablen Dateien wiegen zusammen 234 KB,
+davon werden bei deutschem Text zunächst 162 KB geladen (latin; latin-ext
+holt der Browser nur bei Bedarf). Der Skill setzt für Schriften keine
+Kilobyte-Grenze, aber das Zielgerät ist ein Telefon am Bahnhof
+Osterweddingen im gedrosselten Netz, und das LCP-Ziel liegt bei 2,5 s.
+`font-display: swap` fängt es ab — der Text steht sofort in der
+System-Schrift. Beobachten, nicht sofort ändern.
 
 Mit dem Hinweis vorweg, dass nur noch fünf Credits da sind: alles in
 einem Durchgang, keine Rückfragen, keine Build-Läufe. Der Punkt „im
