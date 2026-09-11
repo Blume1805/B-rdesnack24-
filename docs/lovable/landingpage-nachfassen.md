@@ -1,8 +1,13 @@
 # Offener Auftrag an Lovable (10.09.2026)
 
-**Status: nicht abgesendet — der Workspace hat kein Guthaben mehr.**
-Sobald aufgeladen ist, geht der Text unten unverändert an das Projekt
+**Status: gesendet am 11.09.2026, 04:42 UTC** an das Projekt
 `Bördesnack24 Landingpage` (0c068d85-ef58-4450-a511-3e7ac1d0446d).
+
+Mit dem Hinweis vorweg, dass nur noch fünf Credits da sind: alles in
+einem Durchgang, keine Rückfragen, keine Build-Läufe. Der Punkt „im
+gebauten Ergebnis prüfen" ist deshalb auf eine Quelltextprüfung
+zurückgenommen worden — ein Build hätte Credits gekostet, die für die
+übrigen Aufträge fehlen.
 
 ## Was an diesem Tag erledigt wurde
 
