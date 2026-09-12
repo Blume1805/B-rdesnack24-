@@ -25,9 +25,16 @@ double contrast(Color fg, Color bg) {
 
 void main() {
   group('WCAG-Kontraste (>= 4,5:1 für Fließtext)', () {
-    test('Text-Gold (Eyebrow) auf Weiß', () {
+    // Gold-Text muss BEIDE hellen Flächen tragen. Bis 12.09.2026 wurde hier
+    // nur Weiß geprüft; #8A6E00 kam damit durch, obwohl er auf der Creme-
+    // fläche nur 4,47:1 erreicht — und dort liegen die Karten.
+    test('Text-Gold (Eyebrow) auf Weiß und auf Creme', () {
       expect(
         contrast(AppColors.brandText, AppColors.surfaceCard),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        contrast(AppColors.brandText, AppColors.surfaceAlt),
         greaterThanOrEqualTo(4.5),
       );
     });

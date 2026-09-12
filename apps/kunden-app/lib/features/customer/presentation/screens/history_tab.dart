@@ -10,7 +10,7 @@ import 'package:bs24_kunden/features/customer/presentation/controllers/customer_
 import 'donations_screen.dart';
 import 'receipts_screen.dart';
 
-/// „Meine Spenden": Spenden-Übersicht + Spendenanteil je Kauf. Käufe,
+/// „Für die Region“: Übersicht des weitergegebenen Anteils je Kauf. Käufe,
 /// Belege (PDF), Reklamation und Demo-Testkäufe liegen im Belegarchiv.
 class HistoryTab extends ConsumerWidget {
   const HistoryTab({super.key});
@@ -37,13 +37,13 @@ class HistoryTab extends ConsumerWidget {
         children: [
           const SectionHeader(
             eyebrow: 'Mein Konto',
-            title: 'Meine Spenden',
+            title: 'Für die Region',
           ),
           const SizedBox(height: AppSpacing.s5),
 
           // Spenden-Übersicht mit Klick auf Detail-Screen
           const _SectionEyebrow(
-            eyebrow: 'Deine Spende',
+            eyebrow: 'Dein Anteil',
             icon: Icons.volunteer_activism,
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -113,7 +113,7 @@ class HistoryTab extends ConsumerWidget {
 
           const SizedBox(height: AppSpacing.s5),
           const _SectionEyebrow(
-            eyebrow: 'Deine Spende je Kauf',
+            eyebrow: 'Dein Anteil je Kauf',
             icon: Icons.volunteer_activism_outlined,
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -291,7 +291,7 @@ class _PurchaseDonationRow extends StatelessWidget {
                   ),
                   Text(
                     '${purchase.sharePct.toStringAsFixed(1).replaceAll('.', ',')} % '
-                    'deiner Spende',
+                    'deines Anteils',
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w700,

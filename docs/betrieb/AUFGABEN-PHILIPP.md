@@ -52,6 +52,19 @@ Rueckfragen“ einen Plan zur Freigabe vorgelegt und angehalten. In jeden
 kuenftigen Auftrag gehoert deshalb zusaetzlich der Satz: **„Kein
 Plan-Schritt, keine Freigabe abwarten -- direkt umsetzen.“**
 
+**Die Auftraege sind am 12.09. ueberarbeitet worden.** Grund: Sie waren
+nach Anlaessen gegliedert, nicht nach Bildschirmen und Uebergaengen.
+Dadurch fehlten Dinge, nach denen nie jemand gefragt hatte -- der
+Ladescreen zum Beispiel, der bis heute der weisse Flutter-Standard ist.
+Neu dazu:
+
+| Datei | Was drinsteht |
+|---|---|
+| `docs/lovable/LANDINGPAGE-SZENENBUCH.md` | zwoelf Pflichtfelder je Szene, Stand der fuenf Uebergaenge |
+| `docs/lovable/KUNDEN-APP-BILDSCHIRMBUCH.md` | dreizehn Pflichtfelder je Bildschirm, Ladescreen und Struktur nachgetragen |
+| `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-RESTARBEITEN.md` | fertiger Auftrag, drei Teile, einzeln absendbar |
+| `AUFTRAG-2026-09-KUNDEN-APP-ENTWUERFE.md` | neue **Lieferung 0**: Ladescreen und Struktur, rund 2 Credits |
+
 Drei Punkte zur Landingpage sind offen und in
 `docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-BEWEGUNG-2.md` beschrieben:
 der Bewegungsschalter (meine Fehldiagnose, jetzt schlechter als vorher),
@@ -532,3 +545,6 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 07.09.2026 | Skill `scrollcraft` in den Lovable-Workspace uebertragen |
 | 07.09.2026 | Eigenes Lovable-Projekt fuer die Landingpage angelegt und beauftragt |
 | 12.09.2026 | Bewegungsauftrag an Lovable: Mikrointeraktionen, Farbwechsel, Zoomfahrt, Produktwechsel, physisch/digital gebaut |
+| 12.09.2026 | Szenenbuch und Bildschirmbuch angelegt; alle Lovable-Auftraege danach ueberarbeitet |
+| 12.09.2026 | Gold-Textfarbe auf #856A00 korrigiert (fiel auf der Cremeflaeche durch), Kontrasttest erweitert |
+| 12.09.2026 | Umbenennung „Meine Spenden“ auf „Fuer die Region“ in der App zu Ende gefuehrt |

@@ -13,10 +13,15 @@ abstract final class AppColors {
 
   /// Gold als *Textfarbe* auf hellen Flächen. Das Marken-Gold (#FDC102)
   /// erreicht auf Weiß nur ~1,6:1 Kontrast — für Fließ-/Labeltext ist nach
-  /// WCAG 1.4.3 (BFSG) mindestens 4,5:1 nötig. Dieser abgedunkelte Goldton
-  /// liegt bei ~4,9:1 und bleibt in der Markenwelt. Auf dunklen Flächen
+  /// WCAG 1.4.3 (BFSG) mindestens 4,5:1 nötig. Auf dunklen Flächen
   /// weiterhin [brand] verwenden.
-  static const Color brandText = Color(0xFF8A6E00);
+  ///
+  /// Bis 12.09.2026 stand hier #8A6E00. Der Ton trägt Weiß (4,87:1), fällt
+  /// auf [surfaceAlt] (#F7F5F1) aber mit **4,47:1** durch — und genau dort
+  /// liegen die Karten. Der Kontrasttest prüfte ihn nur gegen Weiß, deshalb
+  /// blieb es unbemerkt. #856A00 trägt beides: 5,17:1 auf Weiß, 4,75:1 auf
+  /// Creme. Die Landingpage verwendet diesen Wert seit dem ersten Tag.
+  static const Color brandText = Color(0xFF856A00);
 
   static const Color ink = Color(0xFF202321); // Ink — Headlines/Dark
   static const Color textDefault = Color(0xFF4A4844);

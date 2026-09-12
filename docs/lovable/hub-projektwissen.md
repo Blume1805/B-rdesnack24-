@@ -51,7 +51,7 @@ Nie neue Töne erfinden, nie rohes Hex in Komponenten, immer Variablen.
 ```css
 --brand:            #FDC102; /* Gold. Flächen, Ränder, Symbole, CTA */
 --brand-light:      #FEE7A0;
---brand-text:       #8A6E00; /* Gold ALS SCHRIFT auf hellem Grund, 4,9:1 */
+--brand-text:       #856A00; /* Gold ALS SCHRIFT auf hellem Grund */
 --ink:              #202321; /* Headlines, dunkle Flächen */
 --hero-ink:         #0C0A07; /* dunkler Kopfbereich */
 --text-default:     #4A4844;
@@ -69,6 +69,12 @@ Nie neue Töne erfinden, nie rohes Hex in Komponenten, immer Variablen.
 --status-warning-text:  #8C6104;
 --status-info-text:     #0062C4;
 ```
+
+**`--brand-text` muss BEIDE hellen Flächen tragen**, Weiß und Creme
+(`--surface-alt`, #F7F5F1) — auf Creme liegen die Karten. #856A00
+schafft 5,17:1 auf Weiß und 4,75:1 auf Creme. Der früher hier genannte
+Ton #8A6E00 trägt nur Weiß (4,87:1) und fällt auf Creme mit 4,47:1
+durch; korrigiert am 12.09.2026.
 
 **Der wichtigste Fallstrick:** Marken-Gold auf Weiß erreicht nur 1,6:1
 und ist als Schriftfarbe unbrauchbar. Für Text `--brand-text`, für

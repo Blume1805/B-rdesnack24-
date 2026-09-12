@@ -1,6 +1,25 @@
 # Auftrag an Lovable: Bildschirmentwürfe für die Kunden-App (10.09.2026)
 
-**Status: nicht abgesendet — der Workspace hat kein Guthaben.**
+**Status: nicht abgesendet. Überarbeitet am 12.09.2026.**
+
+**Was sich am 12.09. geändert hat:** Der Auftrag hatte drei Lücken, die
+erst aufgefallen sind, als die Landingpage dasselbe Problem gezeigt hat
+— Aufträge, die nach Anlässen gegliedert sind, lassen aus, wonach nie
+jemand gefragt hat.
+
+1. **Der Ladescreen fehlte vollständig.** Er ist bis heute der
+   Flutter-Standard: eine weiße Fläche ohne Inhalt. Jetzt **Lieferung 0**.
+2. **Die Struktur der App fehlte.** Vier Reiter, zwei schwebende Knöpfe,
+   zwei Zustände — begründet, aber nur in Code-Kommentaren. Ebenfalls
+   Lieferung 0.
+3. **Die Bildschirme waren nicht durchentschieden.** Von dreizehn
+   Pflichtfeldern je Bildschirm waren bei den meisten drei bis fünf
+   gefüllt. Die Felder stehen jetzt in
+   `docs/lovable/KUNDEN-APP-BILDSCHIRMBUCH.md`; dieser Auftrag verweist
+   darauf, statt sie zu wiederholen.
+
+Dazu eine **Korrektur an den Tokens**, die vor dem Absenden wirksam sein
+muss — siehe Abschnitt „Eine Farbe stimmt nicht“ weiter unten.
 Ziel ist das Projekt **BÖRDESNACK Hub** (`snack-aid-app`,
 `d5033021-6dce-4044-8bf6-bb50d80aa8ff`).
 
@@ -26,10 +45,18 @@ Spendensumme, Konfetti und Lottie sowie eine fünfteilige Navigation mit
 
 ## Reihenfolge
 
-1. `landingpage-nachfassen.md` (technisch, klein)
-2. `AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md` (inhaltlich)
-3. dieser Auftrag, **Lieferung 1**
-4. dieser Auftrag, **Lieferung 2**
+1. ~~`landingpage-nachfassen.md`~~ — erledigt 11.09.
+2. ~~`AUFTRAG-2026-09-LANDINGPAGE-KUNDENNUTZEN.md`~~ — erledigt 11.09.
+3. ~~`AUFTRAG-2026-09-LANDINGPAGE-BEWEGUNG-2.md`~~ — erledigt 12.09.
+4. dieser Auftrag, **Lieferung 0** — Ladescreen und Struktur, rund 2 Credits
+5. dieser Auftrag, **Lieferung 1** — rund 6 bis 8 Credits
+6. `AUFTRAG-2026-09-LANDINGPAGE-RESTARBEITEN.md` — die offenen Punkte der Seite
+7. dieser Auftrag, **Lieferung 2**
+
+**Lieferung 0 kommt zuerst**, und zwar aus einem Grund, der nichts mit
+Reihenfolge zu tun hat: Ladescreen und Struktur legen fest, worin die
+anderen Bildschirme stehen. Wer den Rahmen nach den Bildern entwirft,
+entwirft ihn zweimal.
 
 Lieferung 1 sind drei Bildschirme und eine Karte. Erst ansehen, dann Lieferung 2 —
 nicht alles auf einmal beauftragen.
@@ -56,6 +83,133 @@ Beschriftungen und Fehlermeldungen eingeschlossen.
 3. Die Ansicht bei **400 px Breite** — das ist der Regelfall, nicht der
    Sonderfall. Ein Entwurf, der nur am Desktop überzeugt, ist unbrauchbar.
 4. Eine kurze Liste, welche Tokens der Bildschirm benutzt.
+
+---
+
+## Eine Farbe stimmt nicht — vor dem Absenden zu korrigieren
+
+Das Projektwissen des Hubs nennt `--brand-text: #8A6E00` als „Gold ALS
+SCHRIFT auf hellem Grund, 4,9:1“. Nachgerechnet:
+
+| Farbe | auf Weiß | auf Creme `#F7F5F1` |
+|---|---|---|
+| `#8A6E00` | 4,87:1 ✓ | **4,47:1 ✗** |
+| `#856A00` | 5,17:1 ✓ | 4,75:1 ✓ |
+
+Die 4,9:1 gelten nur auf Weiß. Die App legt Karten aber auf
+`surfaceAlt` (#F7F5F1) — dort fällt der Ton durch. Die Landingpage
+verwendet aus genau diesem Grund seit Anfang an `#856A00`; die App und
+das Hub-Projektwissen sind ihr nie gefolgt.
+
+Der Kontrasttest im Repository prüft `brandText` **nur gegen Weiß**
+(`packages/bs24_kern/test/core/theme/contrast_test.dart`), während er
+`textMuted` gegen Weiß **und** Creme prüft. Deshalb ist es nie
+aufgefallen.
+
+Zu tun, bevor Lieferung 0 rausgeht, sonst wird mit dem falschen Ton
+entworfen: Token in der App auf `#856A00`, Test um die Cremefläche
+erweitern, Hub-Projektwissen nachziehen.
+
+---
+
+# Lieferung 0 — Ladescreen und Struktur
+
+Rund 2 Credits. Kommt vor Lieferung 1, weil beides den Rahmen festlegt,
+in dem die übrigen Bildschirme stehen.
+
+## Bildschirm 0 — Der Ladescreen
+
+Der erste Eindruck der Marke, und er ist nie entworfen worden. Heute ist
+es der Flutter-Standard: eine **weiße Fläche ohne jeden Inhalt**, danach
+springt die App auf den dunklen Kopfbereich (#0C0A07). Weiß auf
+Fast-Schwarz, ohne Übergang.
+
+**Bevor du etwas entwirfst, zwei technische Grenzen — sie sind der
+häufigste Grund, warum Splash-Entwürfe unbrauchbar sind:**
+
+* Der Ladescreen wird vom **Betriebssystem** gezeichnet, bevor die App
+  läuft. Er kann **nicht animieren**, nichts nachladen, keinen Text
+  zeigen, der sich ändert, und keinen Fortschritt anzeigen. Ein
+  Fortschrittsbalken, ein laufender Zähler oder ein sich aufbauender
+  Schriftzug sind an dieser Stelle nicht umsetzbar.
+* Er dauert **Bruchteile einer Sekunde**. Alles, was man lesen müsste,
+  ist verschwendet.
+
+**Was zu entwerfen ist:**
+
+1. **Die statische Fläche.** Grundfarbe `#0C0A07` (`heroInk`), nicht
+   weiß — dann gibt es keinen Sprung auf den ersten Bildschirm, und der
+   Dunkelmodus ist dieselbe Gestaltung statt einer zweiten. Darauf die
+   Wortmarke. Sonst nichts. Kein Slogan, keine Jahreszahl, keine
+   Ortsangabe.
+2. **Vier Zuschnitte:** Telefon hoch (400 × 860), Telefon quer, Tablet,
+   und das Android-12-Format — dort zeichnet das Betriebssystem nur das
+   **App-Symbol auf einer Fläche**, die Wortmarke fällt weg. Der Entwurf
+   muss auch auf das Symbol allein heruntergebrochen funktionieren.
+3. **Den Übergang danach**, und das ist der eigentliche Entwurf: Was
+   sieht man in der ersten halben Sekunde, in der die App läuft, aber
+   noch keine Daten hat? Heute ist das ein goldener Fortschrittsbalken je
+   Widget. Entwirf stattdessen einen ruhigen Ladezustand für die
+   Automatenliste — Platzhalterkarten in der Form der späteren Karten,
+   ohne Zappeln, ohne Spinner in der Bildschirmmitte. **Dieser** Teil
+   darf animieren.
+
+**Was der Ladescreen nicht darf:** eine Aussage über den Betrieb machen.
+Kein „immer für dich da“, kein „24/7“, kein „Dein Automat in der
+Börde“. Es steht kein Automat (§ 5 UWG), und der Satz wäre auf dem
+allerersten Bildschirm besonders sichtbar falsch.
+
+## Bildschirm S — Die Struktur
+
+Die App hat vier Reiter und zwei schwebende Knöpfe. Die Aufteilung ist
+entschieden und wird **nicht** neu erfunden — entworfen wird, wie sie
+aussieht.
+
+**Die Aufteilung, verbindlich:**
+
+| Position | Reiter | Inhalt |
+|---|---|---|
+| 1 | **Automaten** | Einstieg, immer |
+| 2 | **Vorteile** | Angebote, Status, Abo |
+| — | *(schwebender Knopf)* | **Kundenkarte**, nur im Betrieb |
+| 3 | **Für die Region** | Spendenanteil, Abstimmung, Belegarchiv |
+| 4 | **Profil** | Konto, Verträge, Rechtliches |
+
+**Warum der Einstieg die Automatenliste ist** und nicht „Vorteile“: Sie
+beantwortet die einzige Frage, die ohne Vorgeschichte funktioniert —
+lohnt der Weg? „Vorteile“ ist ein Nachschlagebildschirm und zeigt vor
+dem ersten Kauf nur Nullen. Der Einstieg ändert sich auch **nicht** mit
+der Kaufhistorie: Wer dieselbe App öffnet und etwas anderes vorfindet,
+ohne zu wissen warum, verliert die Orientierung.
+
+**Zwei Zustände, beide entwerfen:**
+
+* **Vor dem Start** — der Kundenkarten-Knopf entfällt, samt seiner Mulde
+  in der Leiste. Es gibt keinen Automaten, an dem man die Karte vorzeigen
+  könnte; ein Knopf ins Leere an der auffälligsten Stelle der App wäre
+  schlimmer als keiner. Die Leiste muss ohne Mulde genauso ruhig
+  aussehen wie mit.
+* **Im Betrieb** — mit Knopf und Mulde.
+
+**Die Frage, die du beantworten sollst:** Im Betrieb liegen **zwei**
+schwebende Knöpfe auf derselben Fläche — die Kundenkarte in der Mitte
+(gold, groß) und der Chat-Assistent unten rechts. Das ist die
+auffälligste Stelle der App, doppelt belegt. Zeig zwei Fassungen: eine
+mit beiden Knöpfen und eine, in der der Chat-Assistent im Kopfbereich
+sitzt. Empfiehl eine, mit Begründung.
+
+**Was noch dazugehört:**
+
+* Der aktive Reiter ist heute eine goldene Kachel mit Symbol und Label
+  darunter. Prüfe, ob der Zustand „aktiv“ ohne Farbe erkennbar bleibt —
+  Farbe allein reicht nicht (WCAG 1.4.1).
+* Beschriftungen bleiben wie sie sind. **„Für die Region“ heißt nicht
+  „Meine Spenden“**: Der Kunde spendet nicht, Bördesnack24 gibt einen
+  Anteil des eigenen Umsatzes ab. „Meine Spenden“ weckt die Erwartung
+  einer Spendenbescheinigung, die es nicht geben kann.
+* Der Kündigungsweg liegt unter Profil und muss dort **ohne Suchen** zu
+  finden sein (§ 312k BGB). Er wird nicht kleiner, grauer oder tiefer
+  gelegt als der Rest.
 
 ---
 
@@ -96,6 +250,29 @@ Zwei Dinge, die dabei nicht verloren gehen dürfen:
 **Was der Bildschirm nicht darf:** dem Kunden erzählen, was er gleich
 alles kann. Er hat noch nichts erlebt, und es gibt noch keinen
 Automaten. Ein Satz genügt.
+
+**Nachgetragen am 12.09. — sechs Zustände, nicht einer.** Der Auftrag
+beschrieb bisher nur das leere Formular. Entworfen werden **alle sechs**:
+
+| Zustand | Worauf es ankommt |
+|---|---|
+| leer | die sechs Felder, nichts sonst |
+| teilweise ausgefüllt | die Unternehmerfelder klappen auf, ohne dass die Seite springt |
+| Feldfehler | am Feld, mit dem Feld verknüpft — nicht als Meldung unten |
+| **sendet** | der Knopf bleibt an seiner Stelle und ändert nur den Zustand; kein Vollbild-Spinner |
+| **Serverfehler** | der wichtigste: alle Eingaben bleiben stehen, die Meldung sagt, was zu tun ist, nicht was schiefging |
+| erfolgreich | wohin es weitergeht |
+
+Die beiden fett gesetzten sind nie entworfen worden. Beim
+Registrierungsformular ist der Moment nach dem Tippen auf „Konto
+anlegen“ der, an dem ein Kunde abspringt — ein Formular, das seine
+Eingaben bei einem Fehler verliert, verliert den Kunden gleich mit.
+
+**Zwei Angaben brauchen einen Satz, der sagt warum**, sonst wirken sie
+wie Neugier: das **Geburtsdatum** (das Abo darf nur an Volljährige
+verkauft werden, die Prüfung läuft serverseitig gegen dieses Feld) und
+bei Unternehmern die **Steuernummer**. Der Satz steht am Feld, bevor man
+es ausfüllt, nicht hinterher.
 
 ## Bildschirm 2 — Vorteile
 
