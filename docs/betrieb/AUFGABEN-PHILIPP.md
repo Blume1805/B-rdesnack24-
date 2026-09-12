@@ -42,9 +42,22 @@ Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
 - [ ] Credits aufladen: https://lovable.dev/settings/billing
 
-**Stand 11.09.2026:** Die fuenf Credits sind aufgebraucht. Damit sind
-die **beiden Landingpage-Auftraege erledigt** -- die Seite ist inhaltlich
-fertig. Was jetzt noch wartet, sind die App-Entwuerfe.
+**Stand 12.09.2026:** Die naechsten fuenf Credits sind in den
+Bewegungsauftrag geflossen (Scrolling-Funktionen). Alle sechs Punkte
+sind gebaut. Was jetzt noch wartet, sind die App-Entwuerfe.
+
+**Achtung beim naechsten Auftrag:** Der Agent hat 1,8 Credits verbraucht,
+bevor er die erste Zeile geaendert hat -- er hat trotz „keine
+Rueckfragen“ einen Plan zur Freigabe vorgelegt und angehalten. In jeden
+kuenftigen Auftrag gehoert deshalb zusaetzlich der Satz: **„Kein
+Plan-Schritt, keine Freigabe abwarten -- direkt umsetzen.“**
+
+Drei Punkte zur Landingpage sind offen und in
+`docs/lovable/AUFTRAG-2026-09-LANDINGPAGE-BEWEGUNG-2.md` beschrieben:
+der Bewegungsschalter (meine Fehldiagnose, jetzt schlechter als vorher),
+das 62 svh hohe leere Uebergangsband und die Frage, ob zwei Muster
+weichen sollen -- aktiv sind zehn, der Kanon nennt mehr als acht einen
+Befund im AI-Look-Audit.
 
 Erfahrungswert aus diesem Lauf, damit du besser planen kannst:
 
@@ -518,3 +531,4 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 07.09.2026 | Landingpage `apps/landing/` angelegt — jetzt Inhalts- und Pruefvorlage, nicht die ausgelieferte Seite |
 | 07.09.2026 | Skill `scrollcraft` in den Lovable-Workspace uebertragen |
 | 07.09.2026 | Eigenes Lovable-Projekt fuer die Landingpage angelegt und beauftragt |
+| 12.09.2026 | Bewegungsauftrag an Lovable: Mikrointeraktionen, Farbwechsel, Zoomfahrt, Produktwechsel, physisch/digital gebaut |
