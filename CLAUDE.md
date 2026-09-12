@@ -129,3 +129,56 @@ Ein Inhaltsdokument ist kein Gestaltungsauftrag. Wird eine Tabelle nur
 geschrieben, damit Zahlen gegen die Datenbank prüfbar sind, ist
 dazuzuschreiben, dass die Form der Prüfung dient und nicht die Form der
 Seite ist.
+
+## Der Weg einer Änderung: drei Spuren, nicht eine
+
+Entscheidung Philipps vom 10.09.2026: **Lovable entwirft, Claude setzt
+um.** Das gilt aber nicht überall gleich, und das Vermischen der drei
+Spuren war die Ursache für Rückfragen. Deshalb hier verbindlich:
+
+**Spur 1 — Kunden-App und Gesellschafter-App: Lovable entwirft.**
+
+    Auftrag → Lovable (Hub, Entwurfsmappe) → Entwurf ansehen
+            → Claude überträgt nach Flutter → Supabase-Migration,
+              wo Daten dazugehören → Test, Analyse, Commit
+
+Lovable schreibt TypeScript und kann keine `.dart`-Datei öffnen. Der Hub
+(`d5033021-6dce-4044-8bf6-bb50d80aa8ff`) ist **kein Produkt**, sondern
+die Entwurfsmappe. Was dort entsteht, geht nie in einen Store.
+**Kein Bildschirm der App wird ohne Entwurf umgebaut.** Auch der
+Ladescreen nicht — Lovable zeichnet, wie er aussieht, umgesetzt wird er
+danach in den nativen Dateien (Android-XML, iOS-Storyboard), weil er
+vor Flutter läuft.
+
+**Spur 2 — Landingpage: Lovable baut das Endprodukt.**
+
+    Auftrag → Lovable (Landingpage-Projekt) → ausrollen nach Hostinger
+
+Hier gibt es keine Übertragung. Das Lovable-Projekt **ist** die Seite.
+Deshalb enthalten Landingpage-Aufträge Struktur, Inhalt und Auflagen —
+aber keine fertige Gestaltung. Wer die Gestaltung vorgibt, bezahlt
+Credits dafür, dass jemand abtippt.
+
+**Spur 3 — Datenbank, Rechnen, Rechtstexte: nie über Lovable.**
+
+Migrationen, RPC-Funktionen, Preis- und Steuerlogik, Rechtstexte und
+Verfahrensdokumentation entstehen direkt im Repository. Ein Entwurf
+hilft dort nicht, und ein Agent, der Beträge erfindet, richtet Schaden
+an.
+
+### Was **ohne** Entwurf geändert werden darf
+
+Genau drei Fälle, alles andere geht den Weg über die Spur:
+
+1. **Messbare Fehler gegen eine bereits geltende Regel** — ein
+   Kontrastwert unter 4,5:1, eine falsche Zahl, eine Aussage im Präsens
+   über einen Betriebszustand. Das ist eine Korrektur, keine Gestaltung.
+2. **Tokens** (Farben, Abstände, Radien). Sie sind die *Eingabe* jedes
+   Entwurfs; sie erst zu entwerfen wäre verkehrt herum.
+3. **Technische Korrekturen ohne sichtbare Folge** — Tests, Typen,
+   Sicherheitslücken.
+
+**Sichtbarer Text gehört ausdrücklich nicht dazu.** Beschriftungen,
+Überschriften und Fehlermeldungen sind Entscheidungen Philipps. Wird
+eine Formulierung geändert, weil sie sachlich falsch ist, wird der neue
+Wortlaut **vorgelegt**, nicht gesetzt.
