@@ -98,3 +98,34 @@ um einen Cent unterscheidet, ist keiner. Quelle des Satzes ist
 **Der durchgestrichene Preis entfällt**, sobald er nicht höher ist als
 der geltende. Er behauptet sonst eine Ersparnis, die es nicht gibt
 (§ 5 UWG).
+
+## Landingpage: kein Auftrag ohne Abgleich mit dem Szenenbuch
+
+Die Aufträge an Lovable waren bisher danach gegliedert, was gerade
+aufgefallen ist — ein Fehler, ein fehlendes Muster, eine falsche Zahl.
+Dadurch sind zwei Szenen in die Seite gekommen, für die nie jemand
+entschieden hat, wie sie aussehen (der Abo-Vergleich ist deshalb eine
+rohe HTML-Tabelle), und drei der fünf Übergänge aus dem Storyboard sind
+nie beauftragt worden.
+
+Deshalb gilt ab sofort: **Jeder Auftrag für die Landingpage wird vor dem
+Absenden gegen `docs/lovable/LANDINGPAGE-SZENENBUCH.md` geprüft.** Die
+Prüfliste steht dort am Ende. Eine Szene, deren zwölf Pflichtfelder aus
+`docs/scrollcraft/references/storyboard.md` nicht gefüllt sind, wird
+nicht beauftragt, sondern zuerst entschieden — mit Vorschlag an Philipp,
+nicht stillschweigend.
+
+Zwei Dinge gehören zusätzlich in jeden Auftragstext, beide aus Schaden
+gelernt:
+
+* **„Kein Plan-Schritt, keine Freigabe abwarten — direkt umsetzen."**
+  Der Satz „keine Rückfragen" allein genügt nicht; der Agent hat am
+  12.09.2026 trotzdem 1,8 Credits für einen Plan verbraucht.
+* **Die Übergangsbeziehung, nicht nur das Mittel.** „Farbwechsel hell →
+  dunkel" ist ein Mittel. „Kundensicht wird Systemsicht" ist die
+  Aussage, die der Übergang tragen muss.
+
+Ein Inhaltsdokument ist kein Gestaltungsauftrag. Wird eine Tabelle nur
+geschrieben, damit Zahlen gegen die Datenbank prüfbar sind, ist
+dazuzuschreiben, dass die Form der Prüfung dient und nicht die Form der
+Seite ist.
