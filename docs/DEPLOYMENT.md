@@ -38,7 +38,7 @@ supabase secrets set SEVDESK_API_TOKEN=... NAYAX_API_KEY=...
 ## Flutter-App
 
 ```bash
-cd apps/mobile
+cd apps/kunden-app
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter run                              # Entwicklung

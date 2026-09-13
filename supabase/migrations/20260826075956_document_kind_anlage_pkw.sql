@@ -1,0 +1,14 @@
+-- 0136a — `anlage_pkw` fehlte im Enum app.document_kind.
+--
+-- Nachtrag zu 0135: Der Bildschirm ruft `requestApproval` mit
+-- documentKind = 'anlage_pkw' auf, und `document_kind` ist ein Enum, kein
+-- freier Text. Die Schaltfläche „Freigabe anfordern" hätte zur Laufzeit mit
+-- 22P02 abgebrochen. Aufgefallen erst beim Bauen der Änderungssperre, die
+-- denselben Wert vergleicht — ein Aufruf des Ablaufs hätte es sofort
+-- gezeigt.
+--
+-- Eigener Wert und nicht `finance_period`: Die Anlage ist ein eigenes
+-- Dokument mit eigenem Zeitraum und eigener Sperre. Zwei verschiedene
+-- Dokumente unter einem Kennzeichen hätten die Sperre auf die
+-- Finanzperiode mit ausgedehnt.
+alter type app.document_kind add value if not exists 'anlage_pkw';

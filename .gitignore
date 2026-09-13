@@ -18,16 +18,18 @@ config.*.php
 key.properties
 
 # Flutter dart-define Umgebungsdateien (Beispiele bleiben)
-apps/mobile/env/*.json
-!apps/mobile/env/*.example.json
+apps/*/env/*.json
+!apps/*/env/*.example.json
 
-# Flutter / Dart
-apps/mobile/.dart_tool/
-apps/mobile/.flutter-plugins
-apps/mobile/.flutter-plugins-dependencies
-apps/mobile/build/
-apps/mobile/.packages
-apps/mobile/pubspec.lock
+# Flutter / Dart (gilt fuer beide Apps und das gemeinsame Paket)
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+apps/*/build/
+packages/*/build/
+**/.packages
+apps/*/pubspec.lock
+packages/*/pubspec.lock
 **/*.g.dart
 **/*.freezed.dart
 **/*.config.dart
@@ -36,17 +38,17 @@ coverage/
 *.lcov
 
 # Android
-apps/mobile/android/.gradle/
-apps/mobile/android/app/debug/
-apps/mobile/android/app/profile/
-apps/mobile/android/app/release/
-apps/mobile/android/local.properties
+apps/*/android/.gradle/
+apps/*/android/app/debug/
+apps/*/android/app/profile/
+apps/*/android/app/release/
+apps/*/android/local.properties
 
 # iOS
-apps/mobile/ios/Pods/
-apps/mobile/ios/.symlinks/
-apps/mobile/ios/Flutter/Flutter.framework
-apps/mobile/ios/Flutter/Flutter.podspec
+apps/*/ios/Pods/
+apps/*/ios/.symlinks/
+apps/*/ios/Flutter/Flutter.framework
+apps/*/ios/Flutter/Flutter.podspec
 **/*.xcworkspace/xcuserdata/
 **/xcuserdata/
 
@@ -71,6 +73,6 @@ Thumbs.db
 # Claude Code local settings
 .claude/settings.local.json
 
-# Generierte Lokalisierung (via flutter gen-l10n)
-apps/mobile/lib/l10n/generated/
+# Generierte Lokalisierung (via flutter gen-l10n im gemeinsamen Paket)
+packages/bs24_kern/lib/l10n/generated/
 /assets/
