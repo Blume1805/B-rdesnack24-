@@ -79,6 +79,14 @@ Erfahrungswert aus diesem Lauf, damit du besser planen kannst:
 | Landingpage technisch (5 Punkte) | Schriften, Sprache, Seitenkopf | rund 1 Credit |
 | Landingpage inhaltlich (5 Punkte) | inkl. neuer Szene | rund 3 Credits |
 | Kleine Korrektur (1 Absatz) | | 0,3 Credits |
+| Landingpage Restarbeiten (4 Kleinigkeiten + Abo-Vergleich) | 13.09. | rund 4,4 Credits |
+| Hub: nur das Einlesen, ohne Ergebnis | 13.09. | 0,6 Credits |
+
+**Neu gelernt am 13.09.:** Beim **Hub** kostet allein das Einlesen rund
+0,6 Credits, und der Agent liefert im selben Durchgang nichts -- er
+bittet um ein „Weiter“. Ein Hub-Auftrag braucht deshalb zwei Nachrichten
+und mindestens 2,5 Credits Reserve. Beim Landingpage-Projekt ist das
+nicht so; dort wird sofort gebaut.
 
 Der Agent hat beide grossen Auftraege in **je einem Durchgang**
 abgearbeitet, ohne Rueckfrage. Fuer die App-Entwuerfe (vier Bildschirme,
@@ -548,3 +556,4 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 12.09.2026 | Szenenbuch und Bildschirmbuch angelegt; alle Lovable-Auftraege danach ueberarbeitet |
 | 12.09.2026 | Gold-Textfarbe auf #856A00 korrigiert (fiel auf der Cremeflaeche durch), Kontrasttest erweitert |
 | 12.09.2026 | Umbenennung „Meine Spenden“ auf „Fuer die Region“ in der App zu Ende gefuehrt |
+| 13.09.2026 | Landingpage: Bewegungsschalter, KI-Hinweise, Geraeteschwellen 600/900 und der neue Abo-Vergleich umgesetzt |

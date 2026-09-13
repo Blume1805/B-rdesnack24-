@@ -114,6 +114,20 @@ erweitern, Hub-Projektwissen nachziehen.
 
 # Lieferung 0 — Ladescreen und Struktur
 
+**Stand 13.09.2026: abgesendet, aber nicht geliefert.** Der Agent hat das
+Projekt geprüft (Dateien, Komponenten, Skills), **0,6 Credits**
+verbraucht und dann geschrieben: „Die Prüfung ist abgeschlossen, aber
+die beiden Bildschirme konnten in diesem Durchlauf nicht umgesetzt
+werden. Bitte sende ‚Weiter‘, dann baue ich sie ohne erneute Planung.“
+Die Antwort „Weiter“ ließ sich nicht mehr senden — das Guthaben war
+aufgebraucht.
+
+**Daraus die dritte Erfahrungsregel:** Beim Hub kostet allein das
+Einlesen rund 0,6 Credits, und der Agent liefert im selben Durchgang
+nichts. Ein Auftrag an den Hub braucht deshalb **zwei** Nachrichten und
+mindestens **2,5 Credits** Reserve. Beim nächsten Guthaben genügt
+„Weiter“ — der Auftragstext liegt dem Agenten bereits vor.
+
 Rund 2 Credits. Kommt vor Lieferung 1, weil beides den Rahmen festlegt,
 in dem die übrigen Bildschirme stehen.
 

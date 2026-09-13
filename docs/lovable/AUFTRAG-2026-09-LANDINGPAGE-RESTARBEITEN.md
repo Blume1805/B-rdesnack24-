@@ -1,6 +1,7 @@
 # Auftrag an Lovable: die Restarbeiten an der Landingpage (12.09.2026)
 
-**Status: nicht abgesendet.**
+**Status: Teil A und Teil B abgesendet und umgesetzt am 13.09.2026.**
+Teil C wartet auf Philipps Entscheidung (siehe dort). Ergebnis unten.
 Ziel: `Bördesnack24 Landingpage` (`0c068d85-ef58-4450-a511-3e7ac1d0446d`).
 Grundlage: `docs/lovable/LANDINGPAGE-SZENENBUCH.md`.
 
@@ -179,3 +180,63 @@ schlechtesten Wert nennen.
    Möglichkeiten du für richtig hältst — **entschieden wird das hier,
    nicht von dir.**
 4. Ob die horizontale Sequenz bei 900 px noch trägt.
+
+
+---
+
+## Was daraus wurde (13.09.2026)
+
+Teil A und Teil B in **einer** Nachricht abgesendet, in **einem**
+Durchgang umgesetzt, **kein Plan-Schritt** — der Satz „Kein Plan-Schritt,
+keine Freigabe abwarten“ hat gewirkt. Verbrauch: rund **4,4 Credits**.
+
+Alle sechs Punkte am Quelltext nachgeprüft, nicht nur der Rückmeldung
+geglaubt:
+
+| Punkt | Stand | Beleg |
+|---|---|---|
+| Bewegungsschalter | erledigt | `MotionToggle.tsx`: Text fest „Bewegung“, `aria-pressed={on}`, `aria-label` gesetzt |
+| Szene 03b Cremegrund | erledigt | `index.tsx`: `scene scene--cream` — **aber siehe Befund unten** |
+| KI-Hinweis an allen drei Zeichnungen | erledigt | `.ai-label` in `PhysicalDigital` und als `figcaption` in `Stage`, hell- und dunkelvariante in `styles.css` |
+| Schwellen 600 / 900 | erledigt | `ProductFocus`: `innerWidth >= 600`, `Sequence`: `innerWidth >= 900` |
+| Sequenz trägt bei 900 px | geprüft | der Agent hat es im Browser gemessen (Karte 320 px, rund 2,6 Karten sichtbar, kein Seitenüberlauf) |
+| Abo-Vergleich | erledigt | `Plans.tsx` zwei Blöcke, `.plans` / `.plan-panel` in `styles.css`, ab 700 px einspaltig |
+
+Der Abo-Vergleich ist wirklich gestaltet worden und nicht nur umgebaut:
+zwei Karten mit Häkchenlisten, Preis unten bündig (`margin-top: auto`),
+der Abo-Block mit goldener Oberkante abgesetzt.
+
+### Ein Befund, und er geht auf meine Vorgabe zurück
+
+**Ich habe zweimal Cremegrund bestellt, wo schon Creme war.**
+
+Szene 03 (Sortiment) ist Creme, und ich habe für 03b Creme verlangt.
+Szene 05 (Gutes tun) ist Creme, und ich habe für 05b Creme verlangt.
+Ergebnis: zweimal zwei Cremeflächen hintereinander. Der Rhythmus lautet
+jetzt
+
+    02 hell · 03 creme · 03b creme · 04 hell · 05 creme · 05b creme
+
+Beide Paare verschmelzen optisch zu einer langen Cremefläche, und die
+Überschrift „Was du davon hast.“ sieht aus wie ein Unterabschnitt von
+„Das geplante Sortiment“. Die Szenengrenze ist weg.
+
+Richtig wäre: **Creme nur auf 03, 05 und 08** — so steht es im
+Projektwissen. 03b und 05b gehören auf Weiß. Das ist der Zustand vor
+diesem Auftrag für 03b; für 05b eine Rücknahme von Punkt 5 des Teils B.
+
+Kosten der Korrektur: eine Nachricht, geschätzt 0,3 Credits. **Nicht
+ungefragt ausgeführt** — es ist eine Gestaltungsfrage, und ich habe sie
+schon einmal falsch beantwortet.
+
+### Zwei Kleinigkeiten, die dabei aufgefallen sind
+
+* `MachineZoom` schaltet die Zoomstärke weiterhin bei **760 px** um
+  (1,3× statt 2,4×), während der Produktwechsel jetzt bei 600 px
+  schaltet. Zwei verschiedene Gerätegrenzen auf derselben Seite.
+  Kosmetisch, nicht dringend.
+* Das Wischband steht unverändert bei **62 svh**. Es gehört zu Teil C
+  und wartet mit den Übergängen.
+
+Aktiv bleiben **zehn** Bewegungsmuster — der Kanon nennt mehr als acht
+einen Befund im AI-Look-Audit. Unverändert offen.
