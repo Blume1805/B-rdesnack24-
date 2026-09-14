@@ -114,6 +114,11 @@ erweitern, Hub-Projektwissen nachziehen.
 
 # Lieferung 0 — Ladescreen und Struktur
 
+**Stand 14.09.2026: geliefert.** Nach dem „Weiter“ hat der Agent beide
+Bildschirme gebaut — `src/routes/entwurf.ladescreen.tsx` und
+`src/routes/entwurf.struktur.tsx`, dazu Ergänzungen in `styles.css`.
+Prüfung und offene Punkte stehen unten unter „Was geliefert wurde“.
+
 **Stand 13.09.2026: abgesendet, aber nicht geliefert.** Der Agent hat das
 Projekt geprüft (Dateien, Komponenten, Skills), **0,6 Credits**
 verbraucht und dann geschrieben: „Die Prüfung ist abgeschlossen, aber
@@ -465,3 +470,62 @@ Kündigungsweg muss ohne Suchen zu finden sein — er ist Pflicht nach
 2. Welches Element du je Bildschirm als Signature gesetzt hast.
 3. Wo du eine Aussage gebraucht hättest, die im Projektwissen nicht
    steht — und was du stattdessen getan hast. Nicht erfinden, fragen.
+
+
+---
+
+## Was geliefert wurde (14.09.2026)
+
+Zwei Entwurfsseiten im Hub, am Quelltext geprüft:
+
+* `/entwurf/ladescreen` — vier Zuschnitte (Telefon hoch, Telefon quer,
+  Tablet, Android-12-Fassung nur mit Symbol) auf `--hero-ink`, dazu
+  getrennt der Ladezustand der Automatenliste: drei Platzhalterkarten in
+  der Form der späteren Karten, **70 ms Versatz**, `aria-busy`, danach
+  still. Genau wie Abschnitt 8 des Projektwissens es verlangt — Skelette
+  statt Spinner.
+* `/entwurf/struktur` — drei Fassungen nebeneinander: vor dem Start
+  (ohne Kundenkarte und ohne Mulde), im Betrieb mit beiden schwebenden
+  Knöpfen, im Betrieb mit dem Chat im Kopfbereich.
+
+### Die Frage nach den zwei Knöpfen ist beantwortet
+
+Empfehlung des Agenten: **Chat-Assistent in den Kopfbereich.** Begründung
+— unten bleibt die Kundenkarte die eindeutige Hauptaktion; der Chat bleibt
+sichtbar und erreichbar, konkurriert aber weder mit der Karte noch mit den
+vier Reitern. Das deckt sich mit dem Befund aus dem Bildschirmbuch und ist
+übernahmefertig.
+
+### Was der Entwurf richtig macht
+
+* **Der aktive Reiter ist ohne Farbe erkennbar** (WCAG 1.4.1): Fläche,
+  oberer Marker, stärkere Schrift und dickere Strichstärke am Symbol.
+  Ausdrücklich beauftragt, ausdrücklich geliefert.
+* **„Abo kündigen“** steht auf derselben Ebene und mit demselben Gewicht
+  wie Konto, Verträge und Rechtliches (§ 312k BGB).
+* **Keine Präsens-Aussage über den Betrieb**: „Sobald der erste Automat
+  bereitsteht …“, Beispieldaten als „Beispiel“ gekennzeichnet, Adressen
+  bewusst ohne Ortsbezug.
+* Beschriftungen stimmen: „Für die Region“, „Automatischer
+  Chat-Assistent“ — nicht „KI“.
+
+### Drei Punkte vor der Übertragung nach Flutter
+
+1. **Die Wortmarke ist gesetzt, nicht das Logo.** Der Entwurf schreibt
+   „BÖRDESNACK24“ als Text mit goldener 24. Die echte Wortmarke liegt als
+   Datei vor (Landingpage-Projekt) und gehört auf den Ladescreen.
+2. **Das App-Symbol „B24“ ist erfunden.** Für die Android-12-Fassung hat
+   der Agent ein eigenes Zeichen gebaut. Das echte Symbol ist der goldene
+   Ring mit dem Automaten darin. Nicht übernehmen.
+3. **Die untere Leiste ist im Entwurf dunkel** (`--ink`), in der Flutter-App
+   ist sie weiß (`surfaceCard`). Das ist eine Gestaltungsänderung, keine
+   Übertragung — Entscheidung Philipps, bevor ich sie umsetze.
+
+### Nicht geprüft
+
+Die Ergänzungen in `styles.css` (unter anderem die Klasse
+`prototype-skeleton`) habe ich nicht gelesen. Fällt sie aus, stehen die
+Platzhalterkarten still statt einzulaufen — sichtbar, aber harmlos. Die
+Vorschau ist aus meiner Umgebung nicht erreichbar (Netzrichtlinie),
+deshalb ist der optische Eindruck ungeprüft. Ansehen: der Agent nennt
+Bildschirm 0 bei 400 px geprüft, Bildschirm S nicht.

@@ -557,3 +557,4 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 12.09.2026 | Gold-Textfarbe auf #856A00 korrigiert (fiel auf der Cremeflaeche durch), Kontrasttest erweitert |
 | 12.09.2026 | Umbenennung „Meine Spenden“ auf „Fuer die Region“ in der App zu Ende gefuehrt |
 | 13.09.2026 | Landingpage: Bewegungsschalter, KI-Hinweise, Geraeteschwellen 600/900 und der neue Abo-Vergleich umgesetzt |
+| 14.09.2026 | Hub: Ladescreen und App-Struktur entworfen; Empfehlung Chat-Assistent in den Kopfbereich |
