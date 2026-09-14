@@ -521,11 +521,78 @@ vier Reitern. Das deckt sich mit dem Befund aus dem Bildschirmbuch und ist
    ist sie weiß (`surfaceCard`). Das ist eine Gestaltungsänderung, keine
    Übertragung — Entscheidung Philipps, bevor ich sie umsetze.
 
-### Nicht geprüft
+### Nachgeprüft am 14.09.2026 — vollständig
 
-Die Ergänzungen in `styles.css` (unter anderem die Klasse
-`prototype-skeleton`) habe ich nicht gelesen. Fällt sie aus, stehen die
-Platzhalterkarten still statt einzulaufen — sichtbar, aber harmlos. Die
-Vorschau ist aus meiner Umgebung nicht erreichbar (Netzrichtlinie),
-deshalb ist der optische Eindruck ungeprüft. Ansehen: der Agent nennt
-Bildschirm 0 bei 400 px geprüft, Bildschirm S nicht.
+Die Lücken aus der ersten Durchsicht sind geschlossen.
+
+**Die Seiten sind erreichbar.** `routeTree.gen.ts` ist neu erzeugt worden
+und führt `/entwurf/ladescreen` und `/entwurf/struktur` als Kinder der
+Wurzelroute. Kein 404.
+
+**Die Skelett-Animation gibt es wirklich.** `.prototype-skeleton` in
+`styles.css`: 350 ms, Hauskurve, `both`, **keine Endlosschleife**, dazu
+eine eigene Abschaltung unter `prefers-reduced-motion`. Der 70-ms-Versatz
+kommt aus dem `animationDelay` je Karte.
+
+**Alle Utility-Klassen lösen auf.** `band-ink`, `type-eyebrow`,
+`type-display-lg/md`, `type-body`, `type-support`, `text-gold-ink`,
+`bg-hero-ink`, `border-border-strong`, `bg-brand-light`, `shadow-lift`
+— sämtlich in `@theme inline` oder als `@utility` vorhanden.
+
+**Eine Befürchtung hat sich nicht bestätigt.** Im Hub ist
+`--primary-foreground` **Cream (#fbf8f4)**, nicht Ink. Die Wortmarke auf
+`hero-ink` steht damit bei 18,68:1, nicht unsichtbar dunkel auf dunkel.
+
+**Kontraste nachgerechnet:**
+
+| Stelle | Wert | |
+|---|---|---|
+| Wortmarke auf hero-ink | 18,68:1 | OK |
+| Kopftext (80 %) auf hero-ink | 11,87:1 | OK |
+| Reiter aktiv auf ink | 14,98:1 | OK |
+| Reiter inaktiv (70 %) auf ink | 8,00:1 | OK |
+| Gold-Symbol auf hero-ink | 12,06:1 | OK |
+| text-muted auf Creme | 5,06:1 | OK |
+| brand-text auf Creme | 4,89:1 | OK |
+| Ink auf Gold (Kundenkarte) | 9,67:1 | OK |
+| Bedienkante border-strong auf Weiß | 3,51:1 | OK (Soll 3,0) |
+| **„Empfehlung“-Chip: brand-text auf brand-light** | **4,23:1** | **durchgefallen** |
+
+**Touch-Ziele:** Reiter 64 px, Chat-Knopf 48 px, Chat im Kopfbereich
+44 px, Kundenkarte 56 px — alle ≥ 44 px.
+
+`--brand-text` steht im Hub bereits auf **#856a00**; die Korrektur vom
+12.09. ist dort angekommen.
+
+### Zwei Befunde am Entwurf
+
+**1. Der „Empfehlung“-Chip fällt durch: 4,23:1** statt der geforderten
+4,5:1 (goldener Text auf goldheller Fläche, 12 px fett — die
+Ausnahme für große Schrift greift nicht). Die Lösung steht im eigenen
+Regelwerk: *„Auf Gold-dunkel steht Ink, niemals Weiß.“* Dasselbe gilt
+hier — **Ink auf Gold-hell ergibt 12,96:1**.
+
+Das muss **kein** Credit kosten: Der Bildschirm wird ohnehin von mir nach
+Flutter übertragen, und dort setze ich Ink. Nur wenn der Entwurf selbst
+zur Ansicht stimmen soll, lohnt eine Nachricht (rund 0,3 Credits).
+
+**2. Die Reiterbeschriftung ist 11 px groß** (`text-[11px]`). Das
+Regelwerk des Projekts sagt zu `type-support` (13 px): *„Untergrenze des
+Systems — darunter wird nichts kleiner.“* Und es verbietet freihändige
+Werte ausdrücklich. Zwei Regelverstöße in einer Klasse. Bei der
+Übertragung nach Flutter auf 13 px setzen — die Leiste ist 64 px hoch,
+der Platz ist da.
+
+### Ein dritter Punkt, inhaltlich
+
+Im Zustand **„vor dem Start“** fehlt der Chat-Assistent ganz. Er ist
+regelbasiert und schon heute nutzbar — gerade dann, wenn es sonst nichts
+zu sehen gibt, ist er der einzige Weg zu einer Antwort. Er gehört auch in
+diesen Zustand, nach der Empfehlung des Agenten in den Kopfbereich.
+
+### Nicht prüfbar
+
+Der **optische Eindruck**. Die Vorschau ist aus meiner Umgebung nicht
+erreichbar (Netzrichtlinie, 403 am Proxy), geprüft ist also der Bau, nicht
+das Bild. Ob die Flächenaufteilung trägt, muss Philipp selbst ansehen —
+der Agent nennt Bildschirm 0 bei 400 px geprüft, Bildschirm S nicht.
