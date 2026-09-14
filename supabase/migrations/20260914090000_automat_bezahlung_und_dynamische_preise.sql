@@ -32,7 +32,12 @@
 create table if not exists public.terminals (
   id              uuid primary key default gen_random_uuid(),
   machine_id      uuid not null references public.machines(id) on delete restrict,
-  hersteller      text not null check (hersteller in ('ccv', 'nayax', 'sonstige')),
+  -- Das GERÄT ist ein CCV IM30. Der GESPRÄCHSPARTNER ist ein anderer:
+  -- Automatenland liefert das Terminal mit CleverMetrics aus, und dort
+  -- laufen Kartenzahlung, Telemetrie und Automatenverwaltung zusammen
+  -- ('Ohne App ist das IM30 ein leeres Terminal'). Wer Daten schickt, ist
+  -- deshalb CleverMetrics — der Gerätehersteller steht daneben in `modell`.
+  hersteller      text not null check (hersteller in ('clevermetrics', 'ccv', 'nayax', 'sonstige')),
   modell          text,
   seriennummer    text not null,
   -- Die Kennung, unter der der Hersteller das Gerät in seinen Nachrichten
@@ -566,6 +571,86 @@ comment on function app.vend_freigabe_einloesen(text, uuid, bigint) is
   'abgelaufen, fremder Automat oder bereits eingelöst.';
 
 -- ----------------------------------------------------------------------------
+-- 6b. Auszahlungen — Umsatz ist nicht Auszahlung
+-- ----------------------------------------------------------------------------
+-- Der Zahlungsdienstleister zahlt den Umsatz nicht in voller Höhe aus: Es
+-- gehen Disagio und Transaktionsgebühren ab. Bei CleverPay kommt das Geld
+-- laut Produktseite **täglich**.
+--
+-- Damit stehen drei Zahlen nebeneinander, die nicht gleich sind:
+--   * die Summe der Verkäufe eines Tages (das ist der Umsatz, § 22 UStG)
+--   * der Betrag auf dem Konto (das ist die Auszahlung)
+--   * die Differenz (das ist Aufwand und braucht eine eigene Buchung)
+--
+-- Wer nur die Auszahlung bucht, verkürzt den Umsatz und zieht die Gebühr
+-- nicht als Betriebsausgabe. Beides ist falsch, und beides fällt erst bei
+-- der Betriebsprüfung auf. Diese Tabelle hält die Abstimmung fest.
+create table if not exists public.terminal_auszahlungen (
+  id                 uuid primary key default gen_random_uuid(),
+  hersteller         text not null,
+  auszahlungsreferenz text not null,
+  zeitraum_von       date not null,
+  zeitraum_bis       date not null,
+  umsatz_brutto      numeric(12,2) not null,
+  gebuehren          numeric(12,2) not null default 0,
+  auszahlung_betrag  numeric(12,2) not null,
+  gutgeschrieben_am  date,
+  erfasst_am         timestamptz not null default now(),
+  unique (hersteller, auszahlungsreferenz),
+  -- Die Rechnung muss aufgehen, sonst ist der Satz nicht buchbar.
+  constraint auszahlung_stimmt
+    check (round(umsatz_brutto - gebuehren, 2) = auszahlung_betrag)
+);
+
+comment on table public.terminal_auszahlungen is
+  'Abstimmung zwischen Umsatz und Auszahlung. Die Differenz ist Aufwand '
+  'und braucht eine eigene Buchung — sie verschwindet nicht.';
+
+-- Gegenüberstellung: was haben die Terminals gemeldet, was wurde ausgezahlt?
+-- Eine Abweichung heißt entweder fehlende Verkäufe oder eine fehlende
+-- Auszahlung. Beides will man sehen, bevor es der Steuerberater sieht.
+create or replace function public.auszahlungen_abgleich(p_tage integer default 60)
+returns table (
+  tag              date,
+  umsatz_gemeldet  numeric,
+  umsatz_ausgewiesen numeric,
+  abweichung       numeric
+)
+language sql
+stable
+security definer
+set search_path = public, app
+as $$
+  with gemeldet as (
+    select (e.eingegangen_am at time zone 'Europe/Berlin')::date as tag,
+           sum((e.nutzlast->>'betrag')::numeric) as summe
+      from public.terminal_ereignisse e
+     where e.art = 'verkauf'
+       and e.eingegangen_am >= now() - make_interval(days => p_tage)
+       and jsonb_typeof(e.nutzlast->'betrag') = 'number'
+     group by 1
+  ),
+  ausgewiesen as (
+    select a.zeitraum_von as tag, sum(a.umsatz_brutto) as summe
+      from public.terminal_auszahlungen a
+     where a.zeitraum_von >= current_date - p_tage
+     group by 1
+  )
+  select coalesce(g.tag, w.tag),
+         coalesce(g.summe, 0),
+         coalesce(w.summe, 0),
+         coalesce(g.summe, 0) - coalesce(w.summe, 0)
+    from gemeldet g
+    full outer join ausgewiesen w on w.tag = g.tag
+   where public.auth_has_permission('payments.view')
+     and coalesce(g.summe, 0) <> coalesce(w.summe, 0)
+   order by 1 desc;
+$$;
+
+comment on function public.auszahlungen_abgleich(integer) is
+  'Tage, an denen gemeldeter Umsatz und ausgewiesener Umsatz auseinandergehen.';
+
+-- ----------------------------------------------------------------------------
 -- 7. Vollständigkeit nachweisen
 -- ----------------------------------------------------------------------------
 create or replace function public.terminal_ereignisse_offen()
@@ -685,6 +770,11 @@ alter table public.terminals           enable row level security;
 alter table public.terminal_ereignisse enable row level security;
 alter table public.mhd_preisstufen     enable row level security;
 alter table public.vend_freigaben      enable row level security;
+alter table public.terminal_auszahlungen enable row level security;
+
+drop policy if exists ta_kein_zugriff on public.terminal_auszahlungen;
+create policy ta_kein_zugriff on public.terminal_auszahlungen
+  for select to authenticated using (false);
 
 -- Terminals: Personal liest, Verwaltung schreibt.
 drop policy if exists terminals_ro on public.terminals;
@@ -738,6 +828,7 @@ revoke all on public.terminals           from public, anon;
 revoke all on public.terminal_ereignisse from public, anon;
 revoke all on public.mhd_preisstufen     from public, anon;
 revoke all on public.vend_freigaben      from public, anon;
+revoke all on public.terminal_auszahlungen from public, anon;
 
 grant select on public.terminals       to authenticated;
 grant select on public.mhd_preisstufen to authenticated;
@@ -750,6 +841,7 @@ revoke all on function app.vend_freigabe_einloesen(text, uuid, bigint)  from pub
 revoke all on function public.terminal_ereignisse_offen()               from public, anon;
 revoke all on function public.terminal_luecken(integer)                 from public, anon;
 revoke all on function public.ereigniskette_pruefen()                   from public, anon;
+revoke all on function public.auszahlungen_abgleich(integer)           from public, anon;
 revoke all on function app.terminal_ereignis_verketten()                from public, anon;
 
 grant execute on function public.automatenpreis(uuid, uuid)              to authenticated;
@@ -758,6 +850,7 @@ grant execute on function public.vend_freigabe_anlegen(uuid, uuid, text) to auth
 grant execute on function public.terminal_ereignisse_offen()             to authenticated;
 grant execute on function public.terminal_luecken(integer)               to authenticated;
 grant execute on function public.ereigniskette_pruefen()                 to authenticated;
+grant execute on function public.auszahlungen_abgleich(integer)          to authenticated;
 -- vend_freigabe_einloesen bleibt ohne Grant: nur der Dienstschlüssel.
 
 -- ----------------------------------------------------------------------------

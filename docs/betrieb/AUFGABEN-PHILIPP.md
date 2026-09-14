@@ -38,22 +38,42 @@ ob sie im Suelzetal sitzt oder in der weiteren Region. Format egal
 
 Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
-### 1.0 Bezahlterminal CCV IM30 — vier Fragen an CCV/Automatenland
+### 1.0 Bezahlterminal CCV IM30 — sechs Fragen an **Automatenland**
 
 **Neu am 14.09.2026.** Die Datenbank- und Sicherheitsschicht fuer die
 Automatenbezahlung steht und ist nachgewiesen. Ausrollen laesst sie sich
 noch nicht, weil die Feldbenennung des Geraets nicht belegt ist.
 
-- [ ] **Integrationsdokumentation des IM30 anfordern**: Nachrichtenformat,
-      Feldnamen, Betraege in Cent oder Euro, laufende Nummer
-- [ ] **Sendet das Terminal ueberhaupt Webhooks?** Oder kommen die Daten
-      ueber den Automatenrechner (MDB) oder ein CCV-Portal? Davon haengt
-      ab, ob der gebaute Weg der richtige ist.
-- [ ] **Laesst sich ein Referenzfeld vom Automaten zum Terminal
-      durchreichen?** Ohne dieses Feld gibt es **keinen Dauerrabatt und
-      keine Coupons am Automaten** — siehe unten.
-- [ ] **Zahlarten:** nur Karte, oder steht daneben eine Bargeldannahme?
-      Das entscheidet die Frage nach § 146a AO.
+**Nach deinen Bildschirmfotos vom 14.09. sind zwei Fragen erledigt:** Das
+Geraet nimmt **nur Karte** (kein Bargeld), und es ist PCI PTS 6.x
+zertifiziert. Der Gespraechspartner ist aber nicht CCV, sondern
+**Automatenland** — das Terminal kommt mit deren App *CleverMetrics*, und
+„ohne App ist das IM30 ein leeres Terminal".
+
+**Die wichtigste Frage, und sie gehoert VOR die Bestellung:**
+- [ ] **Gibt es eine Schnittstelle fuer Dritte?** Es gibt ein
+      CleverMetrics-Cloud-Dashboard mit Echtzeitdaten. Kommt man an diese
+      Daten auch **programmatisch** heran (Webhook, API, Export)?
+      **Ohne sie sehen unsere Apps keine Verkaeufe.** Dann bleibt nur ein
+      manueller Export, und „Echtzeit in die App" faellt aus.
+
+**Danach:**
+- [ ] **Nachrichtenformat**: Feldnamen, Betraege in Cent oder Euro,
+      laufende Nummer je Terminal
+- [ ] **Laesst sich ein Referenzfeld durchreichen** (Kuponcode, QR am
+      Display)? Das Terminal ist Android-basiert, technisch waere es
+      moeglich — aber es ist CleverMetrics' App, nicht unsere. Ohne dieses
+      Feld gibt es **keinen Dauerrabatt und keine Coupons am Automaten**.
+- [ ] **Wie kommen Preise in den Automaten?** Kann CleverMetrics die
+      Preisliste setzen, oder geht das nur am Geraet? Davon haengt ab, ob
+      der MHD-Abschlag automatisch laeuft oder von Hand nachgezogen wird.
+- [ ] **CleverPay:** welche Gebuehren, welches Abrechnungsformat, gibt es
+      einen maschinenlesbaren Auszahlungsbeleg?
+- [ ] **Wer ist Vertragspartner** fuer die Zahlungsabwicklung —
+      Automatenland, CCV oder ein dritter Zahlungsdienstleister? Davon
+      haengen Auftragsverarbeitung und Datenschutzerklaerung ab.
+- [ ] **Nimmt der Automat selbst Bargeld an?** (§ 146a AO). Das Terminal
+      tut es nicht; die Frage geht an den Automaten, nicht an das Terminal.
 
 **Die Entscheidung, die dir gehoert:** Ein Kartenterminal weiss nicht, wer
 davorsteht, und darf es auch nicht wissen (das waere PCI DSS). Der
@@ -62,6 +82,14 @@ Dauerrabatt von 5 % und Coupons funktionieren dort **nicht** — sie haengen
 am Konto. Wer sie am Automaten haben will, braucht den app-gefuehrten
 Kauf: in der App waehlen, Einmalcode am Automaten einloesen. Das ist eine
 Entscheidung ueber die Kaufmechanik, nicht ueber Technik.
+
+**Neu aufgefallen durch die Bildschirmfotos:** CleverPay zahlt **taeglich**
+aus — aber nicht den vollen Umsatz, sondern abzueglich Gebuehren. Damit
+stehen drei Zahlen nebeneinander, die nicht gleich sind: der Umsatz, der
+Betrag auf dem Konto und die Differenz. Wer nur die Auszahlung bucht,
+verkuerzt den Umsatz **und** zieht die Gebuehr nicht als Betriebsausgabe.
+Die Abstimmung dafuer ist gebaut (`terminal_auszahlungen`), das
+Gebuehrenkonto muss noch angelegt werden.
 
 Alles dazu in `docs/architektur/AUTOMAT-BEZAHLUNG-UND-PREISE.md`.
 

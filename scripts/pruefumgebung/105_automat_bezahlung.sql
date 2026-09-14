@@ -7,6 +7,7 @@
 --   C  die Hashkette erkennt eine trotzdem erzwungene Änderung
 --   D  eine Freigabe lässt sich genau einmal einlösen
 --   E  eine Lücke in der Herstellernummer wird sichtbar
+--   F  eine Auszahlung, deren Rechnung nicht aufgeht, wird abgewiesen
 --
 -- Läuft gegen die lokale Prüfumgebung, nie gegen die Produktion.
 --
@@ -106,12 +107,12 @@ select 'A4 2 Tage' as fall,
 \echo '=== B  Rohereignis ist unveraenderbar ==='
 
 insert into public.terminals (machine_id, hersteller, modell, seriennummer, terminal_kennung)
-values (:maschine, 'ccv', 'IM30', 'PRUEF-0001', 'PRUEF-0001')
+values (:maschine, 'clevermetrics', 'IM30', 'PRUEF-0001', 'PRUEF-0001')
 on conflict (hersteller, terminal_kennung) do nothing;
 
 insert into public.terminal_ereignisse
   (terminal_id, hersteller, terminal_kennung, idempotenz_schluessel, anbieter_lfd_nr, art, nutzlast)
-select t.id, 'ccv', 'PRUEF-0001', 'pruef-1', 1, 'verkauf', '{"betrag": 2.50}'::jsonb
+select t.id, 'clevermetrics', 'PRUEF-0001', 'pruef-1', 1, 'verkauf', '{"betrag": 2.50}'::jsonb
   from public.terminals t where t.terminal_kennung = 'PRUEF-0001';
 
 -- B1 Nutzlast aendern muss scheitern
@@ -157,7 +158,7 @@ do $$
 begin
   insert into public.terminal_ereignisse
     (hersteller, terminal_kennung, idempotenz_schluessel, art, nutzlast)
-  values ('ccv', 'PRUEF-0001', 'pruef-1', 'verkauf', '{"betrag": 2.50}'::jsonb);
+  values ('clevermetrics', 'PRUEF-0001', 'pruef-1', 'verkauf', '{"betrag": 2.50}'::jsonb);
   raise exception 'FEHLER B4: Doppelte Zustellung wurde angenommen';
 exception
   when unique_violation then
@@ -169,8 +170,8 @@ $$;
 
 insert into public.terminal_ereignisse
   (hersteller, terminal_kennung, idempotenz_schluessel, anbieter_lfd_nr, art, nutzlast)
-values ('ccv', 'PRUEF-0001', 'pruef-2', 2, 'verkauf', '{"betrag": 1.50}'::jsonb),
-       ('ccv', 'PRUEF-0001', 'pruef-3', 3, 'verkauf', '{"betrag": 3.00}'::jsonb);
+values ('clevermetrics', 'PRUEF-0001', 'pruef-2', 2, 'verkauf', '{"betrag": 1.50}'::jsonb),
+       ('clevermetrics', 'PRUEF-0001', 'pruef-3', 3, 'verkauf', '{"betrag": 3.00}'::jsonb);
 
 -- Die Prüffunktionen verlangen 'payments.view'. Ohne Anmeldung geben sie
 -- nichts heraus — das ist gewollt und wird hier mitbewiesen.
@@ -267,9 +268,38 @@ select 'D4 fremder Automat' as fall,
 -- deren Nachricht nie angekommen ist.
 insert into public.terminal_ereignisse
   (hersteller, terminal_kennung, idempotenz_schluessel, anbieter_lfd_nr, art, nutzlast)
-values ('ccv', 'PRUEF-0001', 'pruef-6', 6, 'verkauf', '{"betrag": 2.00}'::jsonb);
+values ('clevermetrics', 'PRUEF-0001', 'pruef-6', 6, 'verkauf', '{"betrag": 2.00}'::jsonb);
 
 select 'E1 Luecke' as fall, fehlt_ab, fehlt_bis,
        case when fehlt_ab = 4 and fehlt_bis = 5 then 'OK' else 'FEHLER' end as urteil
   from public.terminal_luecken(30)
  where terminal_kennung = 'PRUEF-0001';
+
+\echo '=== F  Auszahlung muss aufgehen ==='
+
+-- F1 Umsatz minus Gebuehren muss den Auszahlungsbetrag ergeben. Sonst ist
+-- der Satz nicht buchbar, und die Datenbank nimmt ihn gar nicht erst an.
+insert into public.terminal_auszahlungen
+  (hersteller, auszahlungsreferenz, zeitraum_von, zeitraum_bis,
+   umsatz_brutto, gebuehren, auszahlung_betrag)
+values ('clevermetrics', 'PRUEF-A1', current_date, current_date, 100.00, 1.90, 98.10);
+\echo 'F1 stimmige Auszahlung angenommen: OK'
+
+do $$
+begin
+  insert into public.terminal_auszahlungen
+    (hersteller, auszahlungsreferenz, zeitraum_von, zeitraum_bis,
+     umsatz_brutto, gebuehren, auszahlung_betrag)
+  values ('clevermetrics', 'PRUEF-A2', current_date, current_date, 100.00, 1.90, 100.00);
+  raise exception 'FEHLER F2: unstimmige Auszahlung wurde angenommen';
+exception
+  when check_violation then
+    raise notice 'F2 unstimmige Auszahlung abgewiesen: OK';
+end;
+$$;
+
+-- F3 Abweichung zwischen gemeldetem und ausgewiesenem Umsatz wird sichtbar.
+select 'F3 Abgleich' as fall, tag, umsatz_gemeldet, umsatz_ausgewiesen, abweichung,
+       case when abweichung is not null then 'OK — Abweichung benannt' else 'FEHLER' end as urteil
+  from public.auszahlungen_abgleich(60)
+ limit 1;

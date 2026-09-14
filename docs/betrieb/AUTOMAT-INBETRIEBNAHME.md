@@ -38,10 +38,10 @@ danach.
       **nicht** als bloßen Bestandswert. Ohne Bewegung fehlt der FIFO-Lauf
       die Grundlage.
 
-### 2. Terminal-Anbindung scharfstellen (CCV IM30)
+### 2. Terminal-Anbindung scharfstellen (CCV IM30 mit CleverMetrics)
 
 **Zuerst, sonst ist alles Weitere geraten:**
-- [ ] Integrationsdokumentation des IM30 bei CCV oder Automatenland
+- [ ] Schnittstelle von CleverMetrics bei Automatenland
       anfordern: Nachrichtenformat, Feldnamen, Cent oder Euro, laufende
       Nummer
 - [ ] Klären, ob das Terminal **überhaupt Webhooks sendet** — oder ob die

@@ -143,32 +143,95 @@ spricht mit genau einer Edge Function, sonst mit nichts.
 
 ---
 
-## Was noch fehlt — und warum
+## Was die Produktseite klärt (Nachtrag 14.09.2026)
 
-**Die Feldbenennung des CCV IM30 ist nicht belegt.** Die verlinkte
-Produktseite war aus der Entwicklungsumgebung nicht abrufbar
-(Netzrichtlinie), und eine Integrationsdokumentation liegt nicht vor. Der
-Adapter in `supabase/functions/terminal-webhook/adapter.ts` akzeptiert
-deshalb mehrere gebräuchliche Schreibweisen und **erfindet im Zweifel
-keinen Verkauf**, sondern stuft das Ereignis als Lebenszeichen ein.
+Philipp hat Bildschirmfotos der Seite geschickt. Damit sind zwei der vier
+Fragen beantwortet, eine hat einen anderen Adressaten bekommen, und ein
+Punkt ist neu dazugekommen.
 
-**Was Philipp bei CCV oder Automatenland besorgen muss:**
+### Der Gesprächspartner heißt CleverMetrics, nicht CCV
 
-1. Die **Integrationsdokumentation** des IM30: Nachrichtenformat,
-   Feldnamen, ob Beträge in Cent oder Euro kommen, ob eine laufende
-   Nummer mitgeschickt wird.
-2. Die Antwort auf die Frage, ob das Terminal **überhaupt Webhooks
-   sendet** — oder ob die Verkaufsdaten über den Automatenrechner (MDB)
-   oder eine Portalschnittstelle von CCV kommen. Davon hängt ab, ob die
-   Edge Function der richtige Weg ist.
-3. Ob ein **Referenzfeld** vom Automaten an das Terminal durchgereicht
-   werden kann. Ohne dieses Feld gibt es Weg B nicht, und damit keinen
-   Dauerrabatt am Automaten.
-4. Die **Zahlarten**: Nimmt das Gerät nur Karte, oder steht daneben eine
-   Bargeldannahme? Das entscheidet die Frage nach § 146a AO (siehe unten).
+> „Das CCV IM30 ist ein Android-basiertes Kartenterminal, das bei uns mit
+> **CleverMetrics** vorinstalliert ausgeliefert wird — unserer App für
+> Kartenzahlung, Telemetrie, Altersverifizierung und
+> Automaten-Management. **Ohne App ist das IM30 ein leeres Terminal.**"
 
-Bis dahin ist die Anbindung **nicht ausrollbar**. Alles darunter —
-Preise, Buchungen, Bestände, Sicherheit — steht und ist geprüft.
+Das Gerät kommt von CCV, die Software von Automatenland. Wer uns Daten
+schicken würde, ist **CleverMetrics** — dort liegt auch das Dashboard mit
+den Umsätzen. Der Adapter heißt deshalb jetzt `ausCleverMetrics`, und die
+Tabelle `terminals` kennt den Hersteller `clevermetrics`; das Gerät steht
+daneben in `modell`.
+
+### Die Zahlarten sind geklärt: nur Karte
+
+NFC, Chip (EMV), Magnetstreifen, Apple Pay, Google Pay, Girocard, Visa,
+Mastercard. **Kein Bargeld.** Dazu **PCI PTS 6.x zertifiziert** — die
+Kartendaten bleiben im Gerät, was unseren Grundsatz bestätigt.
+
+**Für § 146a AO heißt das:** Das Terminal löst die Pflicht nicht aus. Die
+Frage verschiebt sich auf den **Automaten selbst** — hat der einen
+Münz- oder Scheinprüfer? Ein Warenautomat steht zwar auf der
+Negativliste des § 1 KassenSichV, aber die Prüfung gehört an den
+konkreten Sachverhalt, nicht an eine Faustregel.
+
+### MDB/DEX bestätigt die Preisarchitektur
+
+Schnittstellen: **USB, RS232, Ethernet, MDB/DEX (je nach Konfiguration)**.
+
+MDB ist der Bus zwischen Automatenrechner und Peripherie. Über ihn
+verlangt **der Automat** einen Betrag, und das Terminal zieht ihn ein.
+Das heißt: **Der MHD-Abschlag muss im Automaten gesetzt werden**, nicht
+im Terminal — genau die Trennung, die oben als „Automatenpreis" steht.
+Wie der neue Preis dorthin kommt, ist die verbliebene Frage: über die
+Automaten-Management-Funktion von CleverMetrics oder von Hand am Gerät.
+
+### Neu und vorher übersehen: Umsatz ist nicht Auszahlung
+
+> „dein Geld kommt per **täglicher Auszahlung** statt Wochen später"
+> (CleverPay)
+
+Ein Zahlungsdienstleister zahlt nicht den vollen Umsatz aus — Disagio und
+Transaktionsgebühren gehen ab. Damit stehen drei Zahlen nebeneinander,
+die nicht gleich sind: die Summe der Verkäufe (Umsatz, § 22 UStG), der
+Betrag auf dem Konto (Auszahlung) und die Differenz (Aufwand, eigene
+Buchung).
+
+**Wer nur die Auszahlung bucht, verkürzt den Umsatz und zieht die Gebühr
+nicht als Betriebsausgabe.** Beides ist falsch, und beides fällt erst bei
+der Betriebsprüfung auf. Dafür gibt es jetzt `terminal_auszahlungen` mit
+einer Bedingung, die den Satz gar nicht erst annimmt, wenn die Rechnung
+nicht aufgeht, dazu `auszahlungen_abgleich()` für die Tage, an denen
+gemeldeter und ausgewiesener Umsatz auseinandergehen.
+
+### Was Philipp bei **Automatenland** klären muss
+
+Alle verbliebenen Fragen gehen an Automatenland, nicht an CCV — die
+Software ist deren Werk.
+
+1. **Gibt es eine Schnittstelle für Dritte?** Bekannt ist, dass es ein
+   Cloud-Dashboard mit Echtzeitdaten gibt. Nicht bekannt ist, ob man an
+   diese Daten **programmatisch** herankommt (Webhook, API, Export).
+   **Ohne sie sehen unsere Apps keine Verkäufe** — dann bleibt nur ein
+   manueller Export, und „Echtzeit in die App" fällt aus. Das ist die
+   Frage, die vor der Bestellung gestellt gehört, nicht danach.
+2. **Nachrichtenformat**, falls es eine Schnittstelle gibt: Feldnamen,
+   Cent oder Euro, laufende Nummer je Terminal.
+3. **Lässt sich ein Referenzfeld durchreichen** (Kuponcode, QR am
+   Terminaldisplay)? Das Terminal ist Android-basiert, technisch wäre es
+   möglich — aber es ist CleverMetrics' App, nicht unsere. Ohne dieses
+   Feld gibt es Weg B nicht und damit **keinen Dauerrabatt am Automaten**.
+4. **Wie kommen Preise in den Automaten?** Kann CleverMetrics die
+   Preisliste setzen, oder geht das nur am Gerät? Davon hängt ab, ob der
+   MHD-Abschlag automatisch läuft oder von Hand nachgezogen werden muss.
+5. **CleverPay:** Welche Gebühren, welches Abrechnungsformat, gibt es
+   einen maschinenlesbaren Auszahlungsbeleg?
+6. **Wer ist Vertragspartner** für die Zahlungsabwicklung — Automatenland,
+   CCV oder ein dritter Zahlungsdienstleister? Davon hängen
+   Auftragsverarbeitung und Datenschutzerklärung ab.
+
+Bis zu Punkt 1 und 2 ist die Anbindung **nicht ausrollbar**. Alles
+darunter — Preise, Buchungen, Bestände, Auszahlungsabstimmung,
+Sicherheit — steht und ist geprüft.
 
 ---
 
@@ -185,13 +248,14 @@ nach Restlaufzeit des Produkts und nach Kundenmerkmalen.
 | Bereich | Geprüft | Ergebnis | Anpassung nötig |
 |---|---|---|---|
 | Steuer und Buchführung (§§ 145–147 AO, GoBD) | ✓ | Aufzeichnungs- und Aufbewahrungspflicht greift ab dem ersten Verkauf. Unveränderbarkeit über Hashkette, Vollständigkeit über Lückenprüfung. | **Ja** — Verfahrensdokumentation fortschreiben |
-| § 146a AO / KassenSichV | ✓ | Waren- und Dienstleistungsautomaten stehen auf der Negativliste des § 1 KassenSichV. Die Pflicht entsteht **nicht aus dem Automaten selbst**. Zu prüfen ist, ob **daneben** ein Kassensystem Barzahlungen erfasst. | **Offen** — hängt an der Zahlart (Punkt 4 oben) |
+| § 146a AO / KassenSichV | ✓ | **Das Terminal nimmt nur Karte** (Produktseite 14.09.2026), löst die Pflicht also nicht aus. Warenautomaten stehen zudem auf der Negativliste des § 1 KassenSichV. Offen bleibt allein, ob der **Automat selbst** Bargeld annimmt. | **Teilweise geklärt** — Rest hängt am Automaten, nicht am Terminal |
 | Umsatzsteuer (§ 22 UStG, § 14 UStG, § 33 UStDV) | ✓ | Je Position mit dem Steuersatz des Produkts. Kleinbetragsregel greift bei Automatenverkäufen regelmäßig. | Nein — Rechenweg steht |
 | Preisangaben (PAngV) | ✓ | Der ausgewiesene Preis muss der geforderte sein. Deshalb kommen alle Preise vom Server, und der Prozentsatz wird vor der Anwendung gerundet. | Nein |
 | UWG (§ 5) | ✓ | Ein durchgestrichener Preis ohne echte Ersparnis wäre irreführend. Der MHD-Abschlag ist eine echte Reduzierung. | Nein |
 | DSGVO | ✓ | Weg A erzeugt **keine** personenbezogenen Daten — das ist ein Vorzug, kein Mangel. Weg B verknüpft Kauf und Konto; Rechtsgrundlage ist die Vertragserfüllung (Art. 6 Abs. 1 lit. b). | **Ja** — Datenschutzerklärung um die Terminalverarbeitung ergänzen |
 | Auftragsverarbeitung (Art. 28) | ✓ | CCV verarbeitet Zahlungsdaten. Ob Auftragsverarbeitung oder eigene Verantwortlichkeit, hängt am Vertrag. | **Ja** — Vertrag prüfen, Register ergänzen |
-| PCI DSS | ✓ | Wir speichern keine Kartendaten. Die Verantwortung liegt beim Terminalbetreiber. | Nein — solange der Grundsatz hält |
+| PCI DSS | ✓ | Wir speichern keine Kartendaten. Das Terminal ist **PCI PTS 6.x zertifiziert**; die Kartendaten bleiben darin. | Nein — solange der Grundsatz hält |
+| Zahlungsdiensteaufsicht / Abrechnung | ✓ | CleverPay zahlt täglich aus, abzüglich Gebühren. Umsatz und Auszahlung sind getrennt zu buchen. | **Ja** — Gebührenkonto und Abstimmung einrichten |
 | Lebensmittelrecht (LMIV) | ✓ | Der MHD-Abschlag ändert nichts an der Kennzeichnung. **Abgelaufene Ware darf nicht verkauft werden** — der Abschlag ist kein Ersatz für Aussortieren. | Nein, aber betrieblich zu regeln |
 | Jugendschutz | ✓ | Im Sortiment sind keine altersbeschränkten Waren. | Nein |
 | Verpackung und Pfand | ✓ | Unberührt. | Nein |
@@ -202,9 +266,11 @@ nach Restlaufzeit des Produkts und nach Kundenmerkmalen.
 ### Handlungsbedarf
 
 - [ ] **Verfahrensdokumentation** fortschreiben — Philipp, vor dem ersten Verkauf
-- [ ] **Zahlart klären** (§ 146a AO) — Philipp, mit der Bestellung
+- [ ] **Nimmt der Automat selbst Bargeld?** (§ 146a AO) — Philipp, mit der Bestellung des Automaten. Das Terminal tut es nicht.
+- [ ] **Schnittstelle von CleverMetrics klären** — vor der Bestellung, nicht danach
+- [ ] **Gebührenkonto** für die CleverPay-Abzüge anlegen und Abstimmung einrichten
 - [ ] **Datenschutzerklärung** um Terminal und Zahlungsdienstleister ergänzen
-- [ ] **Vertrag mit CCV** auf Auftragsverarbeitung prüfen, Register ergänzen
+- [ ] **Vertrag prüfen** — und zuerst klären, mit wem: Automatenland, CCV oder ein dritter Zahlungsdienstleister
 - [ ] **Chip „Automatisch"** an die Preisanzeige, sobald sie in der App steht
 - [ ] Betrieblich: **abgelaufene Ware aussortieren**, nicht bepreisen
 

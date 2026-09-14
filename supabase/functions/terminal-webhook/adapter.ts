@@ -16,7 +16,7 @@
 export type Ereignisart = "verkauf" | "storno" | "ausfall" | "lebenszeichen";
 
 export interface Terminalereignis {
-  hersteller: "ccv" | "nayax" | "sonstige";
+  hersteller: "clevermetrics" | "ccv" | "nayax" | "sonstige";
   terminal_kennung: string;
   idempotenz_schluessel: string;
   anbieter_lfd_nr: number | null;
@@ -112,19 +112,27 @@ function zahl(v: unknown): number | null {
 }
 
 /**
- * CCV-Adapter.
+ * Adapter für CleverMetrics — die App auf dem CCV IM30.
  *
- * ACHTUNG — hier steht eine ANNAHME, keine geprüfte Tatsache. Die
- * Feldbenennung des CCV IM30 ist am 14.09.2026 nicht belegt: Die
- * Produktseite war aus der Entwicklungsumgebung nicht abrufbar, und eine
- * Integrationsdokumentation liegt nicht vor. Deshalb werden mehrere
+ * Wer hier spricht, ist nicht CCV. Automatenland liefert das IM30 mit
+ * CleverMetrics aus; dort laufen Kartenzahlung, Telemetrie und
+ * Automatenverwaltung zusammen, und dort liegt das Cloud-Dashboard mit den
+ * Umsätzen. Das Terminal selbst ist nach Angabe des Händlers „ohne App ein
+ * leeres Terminal".
+ *
+ * ACHTUNG — die Feldbenennung ist weiterhin eine ANNAHME. Bekannt ist
+ * (Produktseite Automatenland, 14.09.2026), DASS es ein Cloud-Dashboard mit
+ * Echtzeitdaten gibt. Nicht bekannt ist, ob es eine Schnittstelle für Dritte
+ * gibt und wie deren Nachrichten aussehen. Deshalb werden mehrere
  * gebräuchliche Schreibweisen akzeptiert, und `art` fällt auf
  * `lebenszeichen` zurück, statt einen Verkauf zu erfinden.
  *
  * Sobald die echte Dokumentation vorliegt: NUR DIESE FUNKTION anpassen,
  * dazu den Test in `adapter_test.ts`. Alles andere bleibt, wie es ist.
  */
-export function ausCcv(roh: Record<string, unknown>): Terminalereignis | null {
+export function ausCleverMetrics(
+  roh: Record<string, unknown>,
+): Terminalereignis | null {
   const kennung = String(
     roh.terminalId ?? roh.TerminalId ?? roh.terminal_id ??
       roh.deviceId ?? roh.serialNumber ?? "",
@@ -159,9 +167,9 @@ export function ausCcv(roh: Record<string, unknown>): Terminalereignis | null {
     : roherBetrag;
 
   return {
-    hersteller: "ccv",
+    hersteller: "clevermetrics",
     terminal_kennung: kennung,
-    idempotenz_schluessel: `ccv:${kennung}:${referenz}`,
+    idempotenz_schluessel: `clevermetrics:${kennung}:${referenz}`,
     anbieter_lfd_nr: zahl(roh.sequenceNumber ?? roh.seq ?? roh.trace) ?? null,
     art,
     betrag_brutto: betrag,
@@ -182,8 +190,9 @@ export function normalisiere(
   roh: Record<string, unknown>,
 ): Terminalereignis | null {
   switch (hersteller) {
-    case "ccv":
-      return ausCcv(roh);
+    case "clevermetrics":
+    case "ccv": // Altbezeichnung, bevor klar war, wer tatsächlich sendet
+      return ausCleverMetrics(roh);
     default:
       return null;
   }

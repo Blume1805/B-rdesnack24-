@@ -3,7 +3,7 @@
 // Ausführen: deno test supabase/functions/terminal-webhook/adapter_test.ts
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  ausCcv,
+  ausCleverMetrics,
   entferneKartendaten,
   normalisiere,
   signaturGueltig,
@@ -38,38 +38,38 @@ Deno.test("eine Belegnummer gleicher Länge bleibt stehen", () => {
   assert(sauber.includes("1234567890123456"), "Belegnummer wurde verworfen");
 });
 
-Deno.test("CCV: Cent werden nicht mit Euro verwechselt", () => {
-  const mitExponent = ausCcv({
+Deno.test("CleverMetrics: Cent werden nicht mit Euro verwechselt", () => {
+  const mitExponent = ausCleverMetrics({
     terminalId: "T1", transactionId: "A1", type: "SALE",
     amount: 250, currencyExponent: 2,
   });
   assertEquals(mitExponent?.betrag_brutto, 2.5);
 
-  const ohneExponent = ausCcv({
+  const ohneExponent = ausCleverMetrics({
     terminalId: "T1", transactionId: "A2", type: "SALE", amount: 250,
   });
   assertEquals(ohneExponent?.betrag_brutto, 2.5);
 
-  const schonEuro = ausCcv({
+  const schonEuro = ausCleverMetrics({
     terminalId: "T1", transactionId: "A3", type: "SALE", amount: 2.5,
   });
   assertEquals(schonEuro?.betrag_brutto, 2.5);
 });
 
-Deno.test("CCV: unbekannte Art wird nicht zum Verkauf erfunden", () => {
-  const e = ausCcv({ terminalId: "T1", transactionId: "B1", type: "WASAUCHIMMER" });
+Deno.test("CleverMetrics: unbekannte Art wird nicht zum Verkauf erfunden", () => {
+  const e = ausCleverMetrics({ terminalId: "T1", transactionId: "B1", type: "WASAUCHIMMER" });
   assertEquals(e?.art, "lebenszeichen");
 });
 
-Deno.test("CCV: ohne Terminal oder Referenz kein Ereignis", () => {
-  assertEquals(ausCcv({ transactionId: "C1" }), null);
-  assertEquals(ausCcv({ terminalId: "T1" }), null);
+Deno.test("CleverMetrics: ohne Terminal oder Referenz kein Ereignis", () => {
+  assertEquals(ausCleverMetrics({ transactionId: "C1" }), null);
+  assertEquals(ausCleverMetrics({ terminalId: "T1" }), null);
 });
 
 Deno.test("Idempotenzschlüssel ist stabil und gerätebezogen", () => {
-  const a = ausCcv({ terminalId: "T1", transactionId: "X", type: "SALE" });
-  const b = ausCcv({ terminalId: "T1", transactionId: "X", type: "SALE" });
-  const c = ausCcv({ terminalId: "T2", transactionId: "X", type: "SALE" });
+  const a = ausCleverMetrics({ terminalId: "T1", transactionId: "X", type: "SALE" });
+  const b = ausCleverMetrics({ terminalId: "T1", transactionId: "X", type: "SALE" });
+  const c = ausCleverMetrics({ terminalId: "T2", transactionId: "X", type: "SALE" });
 
   assertEquals(a?.idempotenz_schluessel, b?.idempotenz_schluessel);
   assert(a?.idempotenz_schluessel !== c?.idempotenz_schluessel);
