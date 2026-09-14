@@ -98,10 +98,10 @@ dieselben Regeln gelten" — und nur die zweite Variante findet Fehler.
 
 ### Der vollständige Durchlauf — und was er am 14.09.2026 zutage brachte
 
-Der Neuaufbau ergibt inzwischen **232 von 232** Migrationen. Am
-14.09.2026 sind zum ersten Mal seit Längerem **alle 23 Prüfskripte
+Der Neuaufbau ergibt inzwischen **233 von 233** Migrationen. Am
+14.09.2026 sind zum ersten Mal seit Längerem **alle 24 Prüfskripte
 nacheinander** gegen einen solchen Neubau gelaufen. Ergebnis: **0
-psql-Fehler in 23 von 23 Skripten.**
+psql-Fehler in 24 von 24 Skripten.**
 
 Dass dieser Satz jetzt dasteht, ist der eigentliche Ertrag — denn beim
 ersten Versuch stimmte er nicht:
@@ -132,13 +132,13 @@ Der Durchlauf in der Reihenfolge, in der er gemeint ist:
 
 ```bash
 for f in 40 50 60 70 80 81 90 91 92 93 94 95 96 97 98 99 \
-         100 101 102 103 104 105 106; do
+         100 101 102 103 104 105 106 107; do
   d=$(ls ${f}_*.sql | head -1)
   psql -h $BASE/run -p 55432 -U postgres -d bs24 -q -f "$d"
 done
 ```
 
-`105` und `106` sind **absichtlich nicht wiederholbar**: Sie schreiben
+`105`, `106` und `107` sind **absichtlich nicht wiederholbar**: Sie schreiben
 Ereignisse in eine Kette, die sich nicht zurücksetzen lässt, ohne genau
 das kaputtzumachen, was sie beweisen sollen. Sie gehören ans Ende und
 brauchen davor einen Neubau.
@@ -159,6 +159,7 @@ brauchen davor einen Neubau.
 | `94_loeschung.sql` | was mit einem gelöschten Konto noch geschieht |
 | `95_loeschung_gegenprobe.sql` | dieselben Prüfungen gegen ein aktives Konto |
 | `81_weitere_rpc.sql` | die 32 Verwaltungsfunktionen, die in `80` fehlten — DATEV-Export, Finanzbilanz, Dokumentenfreigaben, Maillog, Telemetrie-Schlüssel — samt Gegenprobe mit vorhandener Maillog-Zeile |
+| `107_abo_angebotszeitraum.sql` | Ob ein kostenpflichtiges Abo gewählt werden kann, entscheidet der Server: offener, abgelaufener und künftiger Zeitraum, Gegenprobe auf Dauerangebot und Altersschranke, Zeiträume für Kunden nicht lesbar. 10 Urteile, **nicht wiederholbar**. Hat den Befund S-28 nachgewiesen |
 | `105_automat_bezahlung.sql` | MHD-Preisstufen, Unveränderbarkeit und Hashkette der Terminal-Ereignisse, Einmaligkeit der Freigabecodes, Lückenerkennung, Auszahlungsabgleich, Kassensturz bar, Preisausspielung — 28 Urteile, **nicht wiederholbar** |
 | `106_automat_isolation.sql` | IDOR/BOLA über die fünf neuen Tabellen mit zwei echten Kundenkonten: Lesen, ID-Tausch, Ändern, Löschen, direkter Zugriff — plus Gegenprobe auf eigene Daten. 22 Urteile. Hat den Befund S-25 erzeugt (Supabase-Standardrechte für `authenticated`) |
 | `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt, dass ein unbeteiligtes Konto unberührt bleibt — und seit S-23/S-24, dass das Änderungsprotokoll die Löschung nicht zurückträgt und die Frist erst mit dem Ende des Vorgangs beginnt |

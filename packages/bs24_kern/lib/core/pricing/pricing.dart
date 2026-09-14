@@ -49,10 +49,21 @@ abstract final class Pricing {
   /// siehe app.lifetime_founders_limit()).
   static const lifetimeFoundersLimit = 20;
 
-  /// Steuert, ob das Lifetime-Abo im Kundenbereich sichtbar angeboten wird.
-  /// Aktuell `false`: Plan, Server-RPC und Founders-Kontingent bleiben voll
-  /// im Code, die Kunden-UI blendet Lifetime aber aus. Für spätere Aktionen
-  /// einfach auf `true` setzen — dann erscheint die Karte wieder überall.
+  /// Rückfallwert für die Anzeige, wenn der Server nicht antwortet.
+  ///
+  /// **Das hier entscheidet nichts.** Ob ein Modell gewählt werden kann,
+  /// steht in `app.abo_angebotszeitraeume` und wird in
+  /// `choose_subscription_plan` durchgesetzt; die App fragt über
+  /// `abo_angebote()` nach.
+  ///
+  /// Bis zum 14.09.2026 war dieser Schalter das Einzige, was Lifetime
+  /// zurückhielt — und er hielt nur die Karte zurück, nicht das Abo: Ein
+  /// direkter Aufruf der RPC schloss es trotzdem ab (Befund S-28). Eine
+  /// ausgeblendete Karte ist kein geschlossenes Angebot.
+  ///
+  /// Lifetime bleibt vollständig im Code, samt Founders-Kontingent. Eine
+  /// Freischaltung ist jetzt ein Zeitraum in der Datenbank — sie braucht
+  /// keine neue Programmfassung und läuft von selbst wieder ab.
   static const lifetimePubliclyOffered = false;
 
   /// Frühstücks-/Feierabend-Deals sowie Tages- und Wochenangebote geben

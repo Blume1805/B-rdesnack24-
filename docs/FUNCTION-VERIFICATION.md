@@ -209,6 +209,57 @@ Skripten** bei 232 von 232 eingespielten Migrationen. Dass das Werkzeug
 selbst verfallen kann, ohne dass es jemandem auffällt, ist der eigentlich
 wichtige Befund.
 
+## 8. Angebotszeiträume für Abo-Modelle (14.09.2026)
+
+Nachweis: `scripts/pruefumgebung/107_abo_angebotszeitraum.sql`, 10 Urteile,
+alle OK, gegen einen Neubau von Null über 233 Migrationen.
+
+### Der Befund (S-28)
+
+`Pricing.lifetimePubliclyOffered = false` blendete die Lifetime-Karte in
+der Kunden-App aus. **Das war alles, was es tat.**
+`choose_subscription_plan` kannte den Schalter nicht: geprüft wurden
+Alter, Einwilligungen, Kontingent und Wechselverbot — nicht, ob das
+Modell überhaupt angeboten wird. In der Replik reproduziert: Kunde A ruft
+`choose_subscription_plan('lifetime', true, true)` auf, bekommt
+`{"plan": "lifetime", "price_cents": 7999, …}` zurück, und danach steht
+das Lifetime-Abo in `customer_subscriptions`.
+
+Aufgefallen ist das nicht bei der Sicherheitsprüfung, sondern beim
+Nachlesen für einen Rechtstext-Entwurf. Der Skill nennt genau diesen Fall:
+*„Der Client darf niemals verbindlich bestimmen, … ob ein Abo aktiv ist."*
+Eine ausgeblendete Karte ist kein geschlossenes Angebot.
+
+### Die Korrektur
+
+Wählbarkeit steht jetzt als **Zeitraum** in `app.abo_angebotszeitraeume`;
+kein Zeitraum heißt nicht wählbar. Das ist zugleich der Mechanismus, den
+Philipp am 14.09.2026 vorgegeben hat: Lifetime bleibt vollständig im Code
+und wird zeitweise freigeschaltet. Ein Zeitraum läuft von selbst ab — ein
+Schalter, den jemand zurückstellen muss, tut das nicht.
+
+| ID | Funktion | Datenklasse | Test | Negativ | Regression | Security | DB/RLS | Legal | Doku | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ABO-010 | `app.abo_wird_angeboten()` — Zeitraum offen, abgelaufen, künftig | D5 | ✓ L1, L6–L8 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
+| ABO-011 | `choose_subscription_plan` weist nicht angebotene Modelle ab | D5 | ✓ L1 | ✓ L7, L8 | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
+| ABO-012 | Gegenprobe: Dauerangebot und Altersschranke unverändert | D5 | ✓ L2, L3 | ✓ L9 | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
+| ABO-013 | `abo_angebote()` für die App; Zeiträume selbst nicht lesbar | D5 | ✓ L4 | ✓ L5 (`-1`) | ✓ | ✓ | ✓ | ✓ | ✓ | 🟢 |
+| ABO-014 | Kunden-App liest die Verfügbarkeit vom Server statt aus der Konstante | D5 | ✓ 39 Tests grün, `flutter analyze` sauber | ✓ Rückfall auf den vorsichtigen Wert bei ausbleibender Antwort | ✓ | ✓ | — | ✓ | ✓ | 🟢 |
+
+**Warum diese fünf grün sind und die AUT-Zeilen nicht:** Hier ist der
+Rechtsteil abgeschlossen. Der Zustand, den die Texte beschreiben — das
+Lifetime-Abo besteht, ist aber nicht dauerhaft wählbar —, ist jetzt der
+Zustand, den das System tatsächlich herstellt. Der vorgeschlagene
+Wortlaut steht in `docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md`,
+Abschnitt A1; er ergänzt zwei Texte um einen Zusatz und streicht nichts.
+Die Freigabe gehört Philipp.
+
+**Eine Einschränkung, die bleibt:** Die Migration ist nicht ausgerollt.
+In der Produktion steht die Lücke offen, bis die Supabase-Verbindung
+autorisiert ist. Das ist die einzige rote Stelle an diesem Befund — und
+sie ist für ein Konto, das ein 79,99-€-Abo ohne Anzeige abschließen kann,
+keine Kleinigkeit.
+
 ---
 
 ## Zählstand
@@ -216,7 +267,7 @@ wichtige Befund.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 19   🟡 GELB: 0   🟢 GRÜN: 54
+🔴 ROT: 20   🟡 GELB: 0   🟢 GRÜN: 59
 ```
 
 Stand am 14.09.2026: acht rote Zeilen aus dem Bestand, elf neue aus
@@ -248,6 +299,7 @@ Sicherheitsbefund im Code.
 | AUT-001 bis AUT-009, AUT-011 | Technisch nachgewiesen; **Legal offen** — elf Anpassungen in `docs/COMPLIANCE.md`, davon die Rolle des Zahlungsdienstes (Art. 28 DSGVO oder eigener Verantwortlicher) ohne Vertrag nicht entscheidbar | Vertrag mit Automatenland, dann Freigabe der Rechtstexte aus `docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md` | Philipp |
 | AUT-010 | Die zehn Einheitstests laufen jetzt und sind grün. Offen bleibt der Lauf **gegen die ausgerollte Funktion** — die Negativmatrix N1–N12 auf HTTP-Ebene (ohne Token, veraltete Signatur, doppelte Zustellung am echten Endpunkt) | Ausrollen der Edge Function und ein erreichbarer Endpunkt | Philipp |
 | alle AUT-* | Migrationen nicht ausgerollt | Autorisierung der Supabase-Verbindung | Philipp |
+| S-28 | Die Lücke ist im Repository geschlossen und nachgewiesen, **in der Produktion aber offen** — dort kann ein angemeldetes Konto weiterhin ein Lifetime-Abo zu 79,99 € abschließen, ohne dass es angeboten wird | Ausrollen der Migration `20260914170000_abo_angebotszeitraeume.sql` | Philipp, vorrangig |
 
 Kein Eintrag steht auf 🟡: Wo ein Nachweis fehlt, steht ROT mit
 benanntem fehlendem Mittel und Verantwortlichem — nicht Gelb.

@@ -767,3 +767,54 @@ Vorfall), aber **elf Anpassungen offen**, davon eine sofort wirksam
 (§ 146a AO).
 
 GELB ist Zwischenstatus, nicht Abschluss. Der Auftrag bleibt offen.
+
+---
+
+## Nachtrag 14.09.2026 — Lifetime-Abo: Befund S-28 und was daraus folgt
+
+**Sachverhalt.** Beim Schreiben des Rechtstext-Entwurfs zur
+Automatenzahlung ist aufgefallen, dass `Pricing.lifetimePubliclyOffered
+= false` nur die Anzeige steuerte. `choose_subscription_plan` prüfte
+Alter, Einwilligungen, Kontingent und Wechselverbot — nicht, ob das
+Modell angeboten wird. Ein angemeldetes Kundenkonto konnte das
+Lifetime-Abo zu 79,99 € per direktem Aufruf abschließen. In der lokalen
+Replik reproduziert.
+
+**Rechtliche Würdigung.**
+
+* **UWG / Preisangaben.** Der erste Entwurf ging davon aus, die
+  Rechtstexte seien falsch, weil sie ein nicht angebotenes Modell
+  bewerben. Das war eine Fehleinschätzung: Das Angebot bestand
+  serverseitig. Die Texte beschrieben den Zustand richtiger als die
+  Oberfläche. Eine Irreführung über die Verfügbarkeit (§ 5 Abs. 2 Nr. 1
+  UWG) lag damit nicht vor — wohl aber eine Abweichung zwischen dem, was
+  angezeigt, und dem, was tatsächlich möglich war.
+* **Verbraucherrecht.** § 356 Abs. 5 BGB bleibt einschlägig, solange
+  Lifetime wählbar ist. Die Zustimmung wird weiterhin erzwungen
+  (`p_withdrawal_consent`). Der im ersten Entwurf offengelassene Punkt,
+  ob die Norm auch Monats- und Jahres-Abo erfasst, stellt sich nicht
+  mehr: Der Abschnitt in `widerruf.md` bleibt stehen.
+* **Jugendschutz.** Unberührt. Die Altersschranke greift weiterhin und
+  vor jeder Buchung; als Gegenprobe geprüft (L9).
+* **DSGVO.** Keine neue Verarbeitung. `app.abo_angebotszeitraeume`
+  enthält keine personenbezogenen Daten.
+* **Buchführung.** Keine Änderung an `customer_subscriptions`; die
+  Aufzeichnung bleibt, wie sie war.
+
+**Ergebnis / Handlungsbedarf.**
+
+| Kategorie | Anpassung | Verantwortlich | Frist |
+| --- | --- | --- | --- |
+| Technisch | Zeitraumtabelle, Tor in der RPC, App liest `abo_angebote()` | erledigt 14.09.2026, nachgewiesen in `107_abo_angebotszeitraum.sql` | — |
+| Technisch | **Migration ausrollen** — in der Produktion ist die Lücke offen | Philipp | vorrangig |
+| Dokumentarisch | Zusatz „nur zeitweise verfügbar" in `zahlung.md` und `nutzungsbedingungen.md`; Wortlaut in `docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md` A1 | Philipp | mit dem nächsten Rechtstext-Durchgang |
+| Fachlich | Ob ein Aktionszeitraum in der App beworben wird („nur noch bis …") — dann muss das Datum stimmen und eingehalten werden | Philipp | vor der ersten Aktion |
+
+**Optimierungsvorschlag.** Der Zeitraum läuft von selbst ab; ein Schalter
+tut das nicht. Wer eine Aktion öffnet, sollte deshalb immer ein `bis`
+setzen und nicht `null` — ein offenes Ende ist wieder ein Schalter, nur
+an anderer Stelle.
+
+**Status 🟢 GRÜN für den Befund selbst**, mit der ausdrücklichen
+Einschränkung, dass das Ausrollen aussteht. Der Eintrag oben zur
+Automatenzahlung bleibt davon unberührt auf 🟡.

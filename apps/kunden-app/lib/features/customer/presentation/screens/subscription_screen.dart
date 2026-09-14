@@ -77,11 +77,31 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     ),
   ];
 
-  /// Im Kundenbereich sichtbare Modelle: Lifetime bleibt im Code, wird aber
-  /// nur angeboten, wenn Pricing.lifetimePubliclyOffered aktiv ist.
-  List<_Plan> get _visiblePlans => _plans
-      .where((p) => p.key != 'lifetime' || Pricing.lifetimePubliclyOffered)
-      .toList();
+  /// Welche Modelle der Server gerade anbietet (`abo_angebote()`).
+  /// `null`, solange die Antwort aussteht oder ausgeblieben ist — dann
+  /// gilt der eingebaute Rückfallwert.
+  Set<String>? _waehlbarLautServer;
+
+  /// Im Kundenbereich sichtbare Modelle.
+  ///
+  /// Die Wahrheit steht auf dem Server: `abo_angebote()` liefert je Modell,
+  /// ob es jetzt wählbar ist — als Zeitraum in der Datenbank, nicht als
+  /// Konstante in dieser App. Nur so lässt sich ein Aktionszeitraum öffnen,
+  /// ohne dass eine neue Fassung durch beide Stores muss.
+  ///
+  /// Bleibt die Antwort aus (offline, Fehler), fällt die Anzeige auf
+  /// `Pricing.lifetimePubliclyOffered` zurück. Das ist der vorsichtige Weg:
+  /// im Zweifel wird weniger angeboten, nicht mehr. Die verbindliche
+  /// Prüfung liegt ohnehin in `choose_subscription_plan` — diese Liste
+  /// bestimmt, was zu sehen ist, nie, was erlaubt ist (Befund S-28).
+  List<_Plan> get _visiblePlans {
+    final waehlbar = _waehlbarLautServer;
+    return _plans.where((p) {
+      if (p.key == _currentPlan) return true;
+      if (waehlbar != null) return waehlbar.contains(p.key);
+      return p.key != 'lifetime' || Pricing.lifetimePubliclyOffered;
+    }).toList();
+  }
 
   String? _currentPlan;
   bool _locked = false;
@@ -116,10 +136,21 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       } catch (_) {
         founders = null;
       }
+      Set<String>? angebote;
+      try {
+        final a = await client.rpc('abo_angebote');
+        angebote = {
+          for (final row in (a as List))
+            if ((row as Map)['waehlbar'] == true) row['plan'] as String,
+        };
+      } catch (_) {
+        angebote = null;
+      }
       if (!mounted) return;
       setState(() {
         _currentPlan = map['plan'] as String?;
         _locked = map['locked'] == true;
+        _waehlbarLautServer = angebote;
         if (founders != null) {
           _foundersLimit = (founders['limit'] as num?)?.toInt() ?? 20;
           _foundersRemaining = (founders['remaining'] as num?)?.toInt() ?? 20;

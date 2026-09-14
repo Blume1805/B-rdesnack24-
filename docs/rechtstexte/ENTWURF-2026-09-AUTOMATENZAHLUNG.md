@@ -27,78 +27,106 @@ und dynamische Preise").
 
 ## Teil A — sofort, unabhängig vom Automaten
 
-### A1 · Das Lifetime-Abo wird in drei Texten angeboten, in der App aber nicht
+### A1 · Das Lifetime-Abo — überarbeitet am 14.09.2026
 
-**Befund.** `Pricing.lifetimePubliclyOffered = false`
-(`packages/bs24_kern/lib/core/pricing/pricing.dart:56`). Die App blendet
-das Modell aus — `subscription_screen.dart:83` filtert es heraus,
-`subscription_value_screen.dart:190` zeigt es nur bei gesetztem Flag, und
-der Test `subscription_value_screen_test.dart:35` hält diesen Zustand
-sogar fest.
+**Der erste Entwurf lag falsch.** Er schlug vor, das Lifetime-Abo
+ersatzlos aus `zahlung.md`, `nutzungsbedingungen.md` und `widerruf.md` zu
+streichen, weil `Pricing.lifetimePubliclyOffered = false` ist und die App
+es ausblendet. Zwei Dinge stimmten daran nicht:
 
-Die Rechtstexte behaupten das Gegenteil:
+1. **Philipps Entscheidung:** Das Modell bleibt im Code und wird
+   voraussichtlich für einzelne Zeiträume freigeschaltet. Ein gestrichener
+   Text müsste dann jedes Mal zurückgeschrieben werden — und zwar vor der
+   Freischaltung, nicht danach.
+2. **Der Sachverhalt:** Die Texte waren gar nicht der Ausreißer. Der
+   Schalter blendete nur die Karte in der App aus; die Server-Funktion
+   `choose_subscription_plan` kannte ihn nicht. Ein angemeldeter Kunde
+   konnte das Lifetime-Abo per direktem Aufruf abschließen und hatte es
+   danach zu 79,99 € stehen (Befund S-28, in der Replik reproduziert).
+   Das Angebot **bestand** also — es war nur nicht sichtbar. Die
+   Rechtstexte beschrieben die Wirklichkeit besser als die Oberfläche.
 
-| Datei | Zeile | Aussage |
-| --- | --- | --- |
-| `zahlung.md` | 34 | „Lifetime-Abo **79,99 € einmalig**" |
-| `nutzungsbedingungen.md` | 106 | dieselbe Zeile |
-| `nutzungsbedingungen.md` | 110 | „Das Lifetime-Abo ist eine Einmalzahlung ohne Verlängerung." |
-| `nutzungsbedingungen.md` | 112–115 | Kontingent „Founders Edition", 20 Konten, „Die Zahl der freien Plätze zeigen wir in der App an." |
-| `nutzungsbedingungen.md` | 118–119 | Wechselausschluss nach Abschluss |
-| `widerruf.md` | 55–61 | Erlöschen des Widerrufsrechts beim Lifetime-Abo |
+**Technisch ist das seit dem 14.09.2026 geschlossen.** Ob ein Modell
+wählbar ist, steht jetzt als Zeitraum in `app.abo_angebotszeitraeume` und
+wird in `choose_subscription_plan` durchgesetzt; Lifetime hat derzeit
+keinen Zeitraum. Die App fragt über `abo_angebote()` nach, statt es selbst
+zu wissen — sonst bräuchte jede Aktion einen Store-Durchlauf.
 
-**Würdigung.** Das ist keine Formulierungsfrage, sondern eine Angabe über
-ein Angebot, das nicht besteht. Besonders deutlich bei
-`nutzungsbedingungen.md:115`: Der Satz verweist auf eine Anzeige in der
-App, die es nicht gibt. Eine Preisangabe für ein nicht wählbares Modell
-ist zudem keine Preisangabe im Sinne der PAngV, sondern eine irreführende
-Angabe über die Verfügbarkeit (§ 5 Abs. 2 Nr. 1 UWG).
+#### Was daraus für die Texte folgt
 
-**Vorschlag: ersatzlos streichen**, nicht umformulieren. Das Modell
-existiert im Code, aber es wird nicht angeboten; ein Text, der es
-„derzeit nicht verfügbar" nennt, hält die Frage offen, die gerade
-geschlossen werden soll.
+Die Frage ist jetzt eine andere: Wie beschreibt man ein Modell, das es
+gibt, das aber nur zeitweise wählbar ist? Zwei Wege, und ich halte den
+zweiten für richtig:
 
-Konkret vorgeschlagen:
+**Weg 1 — Text folgt dem Zeitraum.** Bei jeder Öffnung wird der Absatz
+eingefügt, bei jedem Ablauf entfernt. Rechtlich sauber, praktisch eine
+Falle: Die Rechtstexte liegen in der Datenbank und werden über Migrationen
+gepflegt (`app.rechtstext_pruefsummen()`), der Zeitraum ist eine Zeile in
+einer Tabelle. Zwei Dinge, die zusammengehören und getrennt gepflegt
+werden, laufen auseinander — genau so ist der jetzige Zustand entstanden.
 
-> **`zahlung.md`, Abschnitt ABONNEMENTS** — die Liste wird zu:
+**Weg 2 — Text beschreibt die Regel, die App den Zustand.** Der Absatz
+bleibt dauerhaft stehen und sagt, was zutrifft: dass das Modell zeitweise
+angeboten wird und ob es gerade wählbar ist, in der App steht. Das ist
+keine Ausflucht, sondern die genauere Aussage: Ein Preis, der nur während
+einer Aktion gilt, ist in der Preisangabe zulässig, solange die
+Verfügbarkeit nicht behauptet wird (§ 5 Abs. 2 Nr. 1 UWG betrifft
+Angaben über die Verfügbarkeit, nicht das Bestehen eines Modells).
+
+**Vorgeschlagener Wortlaut nach Weg 2:**
+
+> **`zahlung.md`, Abschnitt ABONNEMENTS** — die Liste bleibt dreizeilig,
+> die dritte Zeile bekommt einen Zusatz:
 >
 >       • Monats-Abo    **0,99 € pro Monat**
 >       • Jahres-Abo    **9,99 € pro Jahr**
+>       • Lifetime-Abo  **79,99 € einmalig** — nur zeitweise verfügbar
 >
-> Der Folgesatz „Das Jahres-Abo entspricht rechnerisch zehn
-> Monatsbeiträgen; zwei Monate sind darin geschenkt." bleibt unverändert
-> — er stimmt weiterhin.
-
-> **`nutzungsbedingungen.md`** — dieselbe Kürzung der Liste; die Zeilen
-> 110 und 112–115 (Einmalzahlung, Kontingent, Founders Edition) sowie in
-> Zeile 118–119 der Halbsatz zum Wechselausschluss entfallen. Der
-> verbleibende Wechselsatz lautet dann:
+> und darunter:
 >
-> > Wechsel: Zwischen Monats- und Jahres-Abo kannst du jederzeit
-> > wechseln, wirksam zum nächsten Abrechnungszeitraum.
+> > Das Lifetime-Abo bieten wir nicht dauerhaft an, sondern in einzelnen
+> > Zeiträumen. Ob es gerade abgeschlossen werden kann, siehst du in der
+> > App: Steht es dort nicht zur Auswahl, ist es zurzeit nicht verfügbar.
 
-> **`widerruf.md`** — der Abschnitt „Erlöschen beim Lifetime-Abo"
-> (Zeilen 55–61) entfällt vollständig.
+> **`nutzungsbedingungen.md`** — derselbe Zusatz in der Liste; die Zeilen
+> 110 und 117–119 (Einmalzahlung, Wechselausschluss) bleiben, sie sind
+> richtig. Der Absatz zum Kontingent (112–115) bekommt einen Satz:
 >
-> **Achtung, das ist der Punkt mit Folgen:** § 356 Abs. 5 BGB ist ohne
-> Lifetime-Abo *nicht* gegenstandslos. Er greift bei jedem digitalen
-> Inhalt, der vor Ablauf der Widerrufsfrist vollständig bereitgestellt
-> wird. Ob Monats- und Jahres-Abo darunterfallen, hängt daran, ob die
-> Freischaltung als „vollständige Bereitstellung" gilt oder als
-> laufende Dienstleistung über den Abrechnungszeitraum — das ist für
-> laufzeitgebundene Freischaltungen nicht einheitlich beantwortet.
-> **Ich kläre das nicht durch Streichen.** Vorschlag: Der Abschnitt wird
-> gestrichen *und* die Frage als eigener offener Punkt geführt, statt
-> stillschweigend zu unterstellen, dass sie sich mit dem Lifetime-Abo
-> erledigt hat.
+> > Kontingent Lifetime („Founders Edition"): Dieses Modell ist auf
+> > insgesamt 20 Konten begrenzt. Ist das Kontingent ausgeschöpft, steht
+> > es nicht mehr zur Auswahl; einen Anspruch auf Abschluss gibt es
+> > nicht. Unabhängig davon bieten wir es nur in einzelnen Zeiträumen an.
+> > Ist es gerade verfügbar, zeigen wir die Zahl der freien Plätze in der
+> > App an.
+>
+> Der letzte Halbsatz ist die Korrektur: Bisher stand dort, dass wir die
+> freien Plätze anzeigen — das tun wir (`lifetime_founders_status`), aber
+> nur, wenn die Karte überhaupt sichtbar ist.
 
-**Wenn das Lifetime-Abo später doch angeboten wird**, sind alle drei
-Texte wieder zu ergänzen — vor der Freischaltung des Flags, nicht danach.
-Das gehört in `docs/betrieb/AUFGABEN-PHILIPP.md`, damit die Reihenfolge
-nicht verlorengeht.
+> **`widerruf.md`, Abschnitt „Erlöschen beim Lifetime-Abo"** — **bleibt
+> unverändert.** Der erste Entwurf wollte ihn streichen und musste dann
+> die Frage offenlassen, ob § 356 Abs. 5 BGB auch Monats- und Jahres-Abo
+> erfasst. Diese Frage stellt sich jetzt nicht: Der Abschnitt gilt, wann
+> immer Lifetime wählbar ist, und die Zustimmung wird in
+> `choose_subscription_plan` weiterhin erzwungen
+> (`p_withdrawal_consent`). Der offene Punkt aus dem ersten Entwurf ist
+> damit erledigt.
 
----
+#### Was noch zu entscheiden ist
+
+**Ob ein Aktionszeitraum zusätzlich angekündigt werden muss.** Wird
+Lifetime befristet geöffnet, ist das eine zeitlich begrenzte Aktion. Wird
+in der App mit dem Ende geworben („nur noch bis …"), muss das Datum
+stimmen und eingehalten werden — eine Aktion, die stillschweigend
+verlängert wird, ist irreführend. Wird nicht damit geworben, entsteht
+keine zusätzliche Pflicht. Das ist eine Gestaltungsfrage und gehört nach
+Spur 1 über einen Entwurf, nicht in diesen Text.
+
+**Bewusst nicht umgesetzt:** Die Fehlermeldung „Dieses Abo-Modell wird
+derzeit nicht angeboten." habe ich in der Migration gesetzt, weil eine
+Sicherheitslücke nicht offenbleibt, während eine Formulierung aussteht.
+Sie ist sichtbarer Text und damit deine Entscheidung — wenn sie anders
+lauten soll, ändere ich sie.
 
 ### A2 · „Wir haben auch keinen Zahlungsdienstleister eingebunden"
 
@@ -356,9 +384,9 @@ Damit die Prüfung vollständig ist, auch das ausdrücklich:
 
 ## Reihenfolge
 
-1. **Jetzt:** A1 entscheiden (Streichung Lifetime) — wirkt sofort,
-   unabhängig von allem anderen. Offene Frage § 356 Abs. 5 BGB als
-   eigenen Punkt führen.
+1. **Jetzt:** A1 entscheiden (Zusatz „nur zeitweise verfügbar" in zwei
+   Texten) — wirkt sofort, unabhängig von allem anderen. Die technische
+   Seite ist bereits geschlossen; offen ist nur der Wortlaut.
 2. **Vor dem ersten Automatenkauf:** Vertragslage CleverPay klären
    (B4) — das ist die Angabe mit der längsten Vorlaufzeit.
 3. **Vor der ersten Kartenzahlung:** A2 austauschen, B1–B5 einsetzen.
