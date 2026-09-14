@@ -1,0 +1,394 @@
+/* ──────────────────────────────────────────────────────────────────────
+   Bördesnack24 — Landingpage boerdesnack24.de
+   Tokens 1:1 aus packages/bs24_kern/lib/core/theme/app_tokens.dart.
+   Keine Animationsbibliothek, keine externen Schriften, kein Build.
+   ────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Marke */
+  --gold: #FDC102;
+  --gold-hell: #FEE7A0;
+  --gold-dunkel: #B89A00;
+  /* Gold als Textfarbe auf hellem Grund: #FDC102 erreicht auf Weiss nur
+     ~1,6:1. Bewusst eine Spur dunkler als der App-Token #8A6E00: dort gibt
+     es nur weisse Flaechen (4,87:1), hier liegen Abschnitte auf Creme
+     #F7F5F1, und darauf faellt #8A6E00 mit 4,47:1 durch. #856A00 traegt
+     beides (5,17:1 auf Weiss, 4,75:1 auf Creme). Geprueft von
+     scripts/landing_kontrast.py. */
+  --gold-text: #856A00;
+
+  --ink: #202321;
+  --text: #4A4844;
+  --text-leise: #6E6A66;
+
+  --flaeche: #FFFFFF;
+  --flaeche-alt: #F7F5F1;
+  --linie: #E3DFDA;
+  --dunkel: #0C0A07;
+
+  /* 8-px-Raster */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 20px;
+  --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
+  --s20: 80px;
+
+  --r-base: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-pill: 9999px;
+
+  /* Schriften: bewusst systemeigen. Google Fonts zur Laufzeit wuerde die
+     IP jedes Besuchers an Google uebertragen (LG Muenchen I,
+     20.01.2022 - 3 O 17493/20) und kostet im laendlichen Mobilfunk
+     Ladezeit. Die Marken-Schriften selbst zu hosten steht als offener
+     Punkt in der README. */
+  --schrift-display: "Bricolage Grotesque", "Segoe UI", system-ui,
+    -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --schrift-text: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Zeitgesetz (scrollcraft): Zustaende vollstaendig nach 56 % der
+     Strecke, Haltezeit 26 %. */
+  --dauer: 620ms;
+  --kurve: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* clip, NICHT hidden: hidden macht den Body zum Scrollcontainer und
+     bricht jedes position:sticky auf der Seite. */
+  overflow-x: clip;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--flaeche);
+  color: var(--text);
+  font-family: var(--schrift-text);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, picture { max-width: 100%; height: auto; display: block; }
+
+h1, h2, h3 {
+  font-family: var(--schrift-display);
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s4);
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.2rem, 7vw, 4.4rem); font-weight: 800; }
+h2 { font-size: clamp(1.6rem, 4.4vw, 2.8rem); font-weight: 800; }
+h3 { font-size: clamp(1.1rem, 2.4vw, 1.4rem); font-weight: 700; }
+p  { margin: 0 0 var(--s4); max-width: 62ch; }
+
+a { color: var(--gold-text); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible {
+  outline: 3px solid var(--gold-text);
+  outline-offset: 2px;
+  border-radius: var(--r-base);
+}
+
+.bahn { width: min(1120px, 100% - 2 * var(--s5)); margin-inline: auto; }
+.eng  { width: min(760px, 100% - 2 * var(--s5)); margin-inline: auto; }
+
+.nur-vorlesen {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+.sprung {
+  position: absolute; left: var(--s4); top: var(--s4); z-index: 60;
+  transform: translateY(-200%);
+  background: var(--gold); color: var(--ink);
+  padding: var(--s3) var(--s5); border-radius: var(--r-base); font-weight: 700;
+}
+.sprung:focus { transform: translateY(0); }
+
+/* ── Szenen ─────────────────────────────────────────────────────────── */
+
+.szene {
+  position: relative;
+  padding-block: clamp(var(--s16), 12vh, 140px);
+}
+.szene--dunkel { background: var(--dunkel); color: var(--gold-hell); }
+.szene--dunkel h1, .szene--dunkel h2, .szene--dunkel h3 { color: #fff; }
+.szene--creme { background: var(--flaeche-alt); }
+
+.augenbraue {
+  font-size: 0.8rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gold-text);
+  margin: 0 0 var(--s3);
+}
+.szene--dunkel .augenbraue { color: var(--gold); }
+
+.hinweis {
+  font-size: 0.86rem; color: var(--text-leise);
+  border-left: 3px solid var(--linie); padding-left: var(--s4);
+  max-width: 62ch;
+}
+.szene--dunkel .hinweis { color: var(--gold-hell); border-left-color: var(--gold-dunkel); }
+
+/* Der Auftritt. Ohne JS und bei reduzierter Bewegung ist alles sofort da —
+   die Bewegung aendert nur Sichtbarkeit, nie den Inhalt. */
+.tritt-auf {
+  opacity: 1;
+  transform: none;
+}
+html.js .tritt-auf {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--dauer) var(--kurve),
+              transform var(--dauer) var(--kurve);
+}
+html.js .tritt-auf.da { opacity: 1; transform: none; }
+html.js .tritt-auf:nth-child(2) { transition-delay: 80ms; }
+html.js .tritt-auf:nth-child(3) { transition-delay: 160ms; }
+
+/* ── 01 Ankunft ─────────────────────────────────────────────────────── */
+
+.ankunft {
+  min-height: 88svh;
+  display: grid;
+  align-content: center;
+  background:
+    radial-gradient(120% 90% at 20% 120%, #3A2C10 0%, #1A1409 35%, var(--dunkel) 85%);
+}
+.ankunft__raster {
+  display: grid; gap: var(--s10);
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+@media (min-width: 860px) {
+  .ankunft__raster { grid-template-columns: 1.15fr 0.85fr; }
+}
+.claim { display: block; }
+.claim span { display: block; }
+.claim span:nth-child(2) { color: var(--gold-hell); }
+.claim span:nth-child(3) { color: var(--gold); }
+
+.ankunft p { color: var(--gold-hell); }
+
+/* ── Markenzeichen und Bördeumriss ──────────────────────────────────── */
+
+.marke { position: relative; display: grid; justify-items: center; gap: var(--s4); }
+.mark { width: min(200px, 46vw); position: relative; z-index: 1; }
+
+.wortmarke {
+  position: relative; z-index: 1; margin: 0;
+  font-family: var(--schrift-display);
+  font-weight: 800; letter-spacing: 0.06em;
+  font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+  color: #fff;
+}
+.wortmarke span { color: var(--gold); }
+
+/* Leises Hintergrundmotiv: der Bördekreis liegt hinter dem Zeichen und
+   traegt die Herkunft mit, ohne mit ihm um Aufmerksamkeit zu streiten. */
+.boerde {
+  position: absolute; z-index: 0;
+  top: 50%; left: 50%; transform: translate(-50%, -58%);
+  width: min(380px, 88vw);
+  pointer-events: none;
+}
+.boerde__linie {
+  fill: none; stroke: var(--gold-dunkel); stroke-width: 1.2;
+  stroke-linejoin: round; opacity: 0.55;
+  stroke-dasharray: 320; stroke-dashoffset: 0;
+}
+html.js .boerde__linie { stroke-dashoffset: 320; transition: stroke-dashoffset 1600ms var(--kurve); }
+html.js .da .boerde__linie { stroke-dashoffset: 0; }
+
+/* ── Automat (schematisch) ──────────────────────────────────────────── */
+
+.automat { width: min(300px, 68vw); margin-inline: auto; }
+.automat__korpus { fill: #17130C; stroke: var(--gold-dunkel); stroke-width: 2; }
+.automat__scheibe { fill: #221B10; }
+.automat__fach { fill: none; stroke: var(--gold-dunkel); stroke-width: 1.2; opacity: 0.75; }
+.automat__ware { fill: var(--gold); opacity: 0.55; }
+.automat__band { fill: var(--gold); }
+.automat__ausgabe { fill: #0B0906; stroke: var(--gold-dunkel); stroke-width: 1.5; }
+
+.ki-hinweis {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  margin-top: var(--s4);
+  font-size: 0.78rem; line-height: 1.35;
+  color: var(--text-leise);
+  border: 1px solid var(--linie); border-radius: var(--r-pill);
+  padding: var(--s2) var(--s4);
+  max-width: 46ch;
+}
+.szene--dunkel .ki-hinweis { color: var(--gold-hell); border-color: var(--gold-dunkel); }
+.ki-hinweis b { font-weight: 800; letter-spacing: 0.06em; }
+
+/* ── 03 Sortiment ───────────────────────────────────────────────────── */
+
+.karten {
+  display: grid; gap: var(--s5);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  list-style: none; padding: 0; margin: 0;
+}
+.karte {
+  background: var(--flaeche); border: 1px solid var(--linie);
+  border-radius: var(--r-lg); padding: var(--s6);
+}
+.karte h3 { margin-bottom: var(--s2); }
+.karte p { margin: 0; font-size: 0.95rem; color: var(--text-leise); }
+
+/* ── 04 Geben — der Höhepunkt ───────────────────────────────────────── */
+
+.anteil {
+  --anteil: 0;
+  position: relative;
+  height: 76px; border-radius: var(--r-md);
+  background: var(--flaeche-alt); border: 1px solid var(--linie);
+  overflow: hidden;
+  margin-block: var(--s6) var(--s4);
+}
+.anteil__balken {
+  position: absolute; inset: 0 auto 0 0;
+  width: calc(var(--anteil) * 100%);
+  background: linear-gradient(90deg, var(--gold-dunkel), var(--gold));
+  transition: width 900ms var(--kurve);
+}
+.anteil__wert {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  padding-inline: var(--s5);
+  font-family: var(--schrift-display); font-weight: 800;
+  font-size: clamp(1.4rem, 4vw, 2rem); color: var(--ink);
+}
+.hervorgehoben {
+  background: linear-gradient(transparent 62%, var(--gold-hell) 62%);
+  background-size: 0% 100%; background-repeat: no-repeat;
+  transition: background-size 900ms var(--kurve) 200ms;
+}
+html.js .da .hervorgehoben, html.js .hervorgehoben.da { background-size: 100% 100%; }
+
+/* ── 06 Ein Automat kann mehr — Sticky-Bühne ────────────────────────── */
+
+/* Bewusst kein display:grid um die Buehne: der Bezugsrahmen fuer sticky
+   waere dann die Rasterzelle, und es gaebe keinen Klebeweg. */
+.buehne { position: relative; }
+.buehne__strecke { min-height: 260vh; }
+.buehne__halt {
+  position: sticky; top: 0;
+  min-height: 100svh;
+  display: flex; align-items: center;
+}
+.buehne__inhalt { width: 100%; }
+.ebenen { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; gap: var(--s4); }
+.ebene {
+  border: 1px solid var(--gold-dunkel); border-radius: var(--r-lg);
+  padding: var(--s5) var(--s6);
+  background: rgba(253, 193, 2, 0.04);
+  opacity: 0.35;
+  transition: opacity var(--dauer) var(--kurve),
+              background-color var(--dauer) var(--kurve);
+}
+.ebene[data-aktiv="1"] { opacity: 1; background: rgba(253, 193, 2, 0.12); }
+.ebene h3 { margin-bottom: var(--s1); }
+.ebene p { margin: 0; font-size: 0.95rem; }
+
+/* ── 07 Ihre Fläche — horizontale Sequenz ───────────────────────────── */
+
+.sequenz {
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: min(78vw, 340px);
+  gap: var(--s5);
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-block: var(--s4) var(--s6);
+  margin: 0; list-style: none;
+  scrollbar-width: thin;
+}
+.sequenz > li { scroll-snap-align: start; }
+
+/* ── 08 Abschluss / Formular ────────────────────────────────────────── */
+
+.wege { display: grid; gap: var(--s6); grid-template-columns: 1fr; }
+@media (min-width: 860px) { .wege { grid-template-columns: 1fr 1fr; } }
+
+.weg {
+  border: 1px solid var(--linie); border-radius: var(--r-xl);
+  padding: var(--s8); background: var(--flaeche);
+}
+
+.knopf {
+  display: inline-block; border: 0; cursor: pointer;
+  font: inherit; font-weight: 800;
+  padding: var(--s4) var(--s8); border-radius: var(--r-pill);
+  background: var(--gold); color: var(--ink);
+  text-decoration: none;
+}
+/* Ink statt Weiss: Weiss auf #B89A00 sind 2,74:1 und faellt durch. */
+.knopf:hover { background: var(--gold-dunkel); color: var(--ink); }
+.knopf--leise { background: transparent; color: var(--gold-text); border: 2px solid var(--gold-dunkel); }
+.knopf--leise:hover { background: var(--gold-hell); color: var(--ink); }
+
+.feld { display: block; margin-bottom: var(--s5); }
+.feld > span { display: block; font-weight: 700; color: var(--ink); margin-bottom: var(--s2); font-size: 0.92rem; }
+.feld input, .feld textarea {
+  width: 100%; font: inherit; color: var(--text);
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--linie); border-radius: var(--r-base);
+  background: var(--flaeche);
+}
+.feld textarea { min-height: 120px; resize: vertical; }
+.feld--zustimmung { display: flex; gap: var(--s3); align-items: flex-start; }
+.feld--zustimmung input { width: auto; margin-top: 4px; }
+.feld--zustimmung span { font-weight: 400; font-size: 0.9rem; color: var(--text); margin: 0; }
+
+/* Honigtopf: fuer Menschen unsichtbar, fuer Formularausfueller nicht. */
+.honigtopf {
+  position: absolute; left: -9999px; width: 1px; height: 1px;
+  overflow: hidden;
+}
+
+.meldung { margin-top: var(--s5); padding: var(--s4) var(--s5); border-radius: var(--r-md); font-size: 0.95rem; }
+.meldung--gut  { background: #EAF3E5; color: #33591F; }
+.meldung--sorge{ background: #FBE9E9; color: #7A1414; }
+.meldung[hidden] { display: none; }
+
+/* ── Fuss ───────────────────────────────────────────────────────────── */
+
+.fuss { background: var(--dunkel); color: var(--gold-hell); padding-block: var(--s16); }
+.fuss a { color: var(--gold); }
+.fuss__zeilen { display: grid; gap: var(--s8); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.fuss h3 { color: #fff; font-size: 1rem; }
+.fuss ul { list-style: none; padding: 0; margin: 0; }
+.fuss li { margin-bottom: var(--s2); }
+
+/* ── Bewegungsschalter ──────────────────────────────────────────────── */
+
+.schalter {
+  position: fixed; right: var(--s4); bottom: var(--s4); z-index: 50;
+  display: inline-flex; align-items: center; gap: var(--s2);
+  background: var(--flaeche); color: var(--ink);
+  border: 1px solid var(--linie); border-radius: var(--r-pill);
+  padding: var(--s2) var(--s4); font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 15px rgba(32, 35, 33, 0.15);
+}
+.schalter[hidden] { display: none; }
+
+/* Zwei Wege, Bewegung abzuschalten: die Systemeinstellung und der
+   sichtbare Schalter. Beide muessen wirken, auch gemeinsam. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  html.js .tritt-auf { opacity: 1; transform: none; transition: none; }
+  html.js .boerde__linie { stroke-dashoffset: 0; transition: none; }
+  .anteil__balken, .hervorgehoben, .ebene { transition: none; }
+}
+html.ruhig, html.ruhig * { animation: none !important; transition: none !important; }
+html.ruhig .tritt-auf { opacity: 1 !important; transform: none !important; }
+html.ruhig .boerde__linie { stroke-dashoffset: 0 !important; }
+html.ruhig .buehne__strecke { min-height: 0; }
+html.ruhig .buehne__halt { position: static; min-height: 0; }
+html.ruhig .ebene { opacity: 1; }
+
+@media print {
+  .schalter, .sprung { display: none; }
+  .szene, .fuss { background: #fff !important; color: #000 !important; }
+}

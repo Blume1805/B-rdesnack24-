@@ -136,10 +136,20 @@ jobs:
           elif [ -n "$EINGABE" ]; then
             LISTE="$EINGABE"
           else
-            # Die fünf, die auf dieses Ausrollen warten: vier Mail-Functions
-            # (DB-Vorlagen + Maskierung von title/preheader in components.ts)
-            # und document-finalize (Finanzzahlen).
-            LISTE="subscription-cancel subscription-choose account-deletion-request auth-email-hook document-finalize"
+            # Stand 05.09.2026 (Gesamtaudit, H-3): Diese drei tragen die
+            # verschaerfte Berechtigungspruefung aus _shared/auth.ts und sind
+            # nachweislich nicht schwaecher als das, was laeuft.
+            #
+            # ABSICHTLICH NICHT DABEI: documents-init-templates,
+            # documents-install-branded-set, documents-install-haccp-set. Sie
+            # wurden am 03.08.2026 ueber das Dashboard ausgerollt, das
+            # Repository ist aelter. Ein Ausrollen aus dem Repo koennte dort
+            # Aenderungen entfernen, die noch niemand verglichen hat -- genau
+            # dieser Fall ist bei signature-retouch aufgetreten, wo die
+            # laufende Fassung eine Sicherheitspruefung trug, die im
+            # Repository fehlte. Erst vergleichen, dann aufnehmen.
+            # Siehe docs/audit/GESAMTAUDIT-2026-09-05-PHASE2.md
+            LISTE="email-send docusign-fetch-signature signature-retouch"
           fi
           echo "liste=$LISTE" >> "$GITHUB_OUTPUT"
           echo "Ausgewählt: $LISTE"

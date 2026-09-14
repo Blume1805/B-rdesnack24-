@@ -12,6 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { decode, Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { istBerechtigt, NUR_GESELLSCHAFTER } from "../_shared/auth.ts";
 
 const SRC_ROW = "f00b9764-a7e9-4275-b64e-938357faa0de"; // Pia (trug das Bild)
 const DST_ROW = "b126eb54-5ee2-4329-b20c-cafa5afc7ffa"; // Philipp (Ziel)
@@ -35,9 +36,9 @@ Deno.serve(async (req) => {
 
   const uid = (await caller.auth.getUser()).data.user?.id;
   if (!uid) return jsonResponse({ error: "Nicht angemeldet" }, 401);
-  const { data: prof } = await admin.from("profiles").select("role").eq("id", uid).maybeSingle();
-  const role = (prof as { role?: string } | null)?.role;
-  if (role !== "system_admin" && role !== "shareholder") {
+  // Rolle allein genuegt nicht: sie stammt bei Selbstregistrierung aus
+  // clientseitigen Metadaten. Siehe _shared/auth.ts.
+  if (!await istBerechtigt(admin, NUR_GESELLSCHAFTER, uid)) {
     return jsonResponse({ error: "Nicht autorisiert" }, 403);
   }
 

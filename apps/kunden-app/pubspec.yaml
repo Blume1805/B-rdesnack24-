@@ -1,0 +1,51 @@
+name: bs24_kunden
+description: Bördesnack24 — Kunden-App (Automatenfinder, Bonus, Belege, Konto).
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  bs24_kern:
+    path: ../../packages/bs24_kern
+
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.6.2
+  supabase_flutter: ^2.8.0
+
+  # QR-Code für die Kundenkarte (Automaten-Verifizierung)
+  qr_flutter: ^4.1.0
+
+  # Externe Links (Navigation zu Maps, Google-Bewertung)
+  url_launcher: ^6.3.1
+
+  shared_preferences: ^2.3.3
+  equatable: ^2.0.7
+  intl: ^0.20.2
+
+  # Web-Interop (Inline-PDF-Viewer in Flutter Web)
+  web: ^1.1.0
+
+  # Push-Benachrichtigungen (FCM) — nur native Builds; für die Web-Demo
+  # deaktiviert, weil firebase_messaging_web sich beim Plugin-Register ohne
+  # firebase_options.dart synchron initialisiert und crasht.
+  # firebase_core: ^3.8.0
+  # firebase_messaging: ^15.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true

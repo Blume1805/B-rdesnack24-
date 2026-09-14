@@ -31,10 +31,44 @@ AV-Vertrag). Analytics (PostHog) und Karten werden **erst nach Einwilligung** ak
 
 ## Betroffenenrechte
 
-Auskunft/Löschung/Berichtigung: Konten werden nicht hart gelöscht (GoBD/HACCP-Aufbewahrung),
-sondern deaktiviert/archiviert; personenbezogene Felder können auf Anfrage anonymisiert werden,
-soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Einwilligungen sind in
-`consents` versioniert dokumentiert und jederzeit widerrufbar (Profil → Einwilligungen).
+**Auskunft (Art. 15 DSGVO):** `export_my_data()` gibt dem angemeldeten Konto
+seinen vollständigen Bestand über 38 Bereiche aus; erreichbar in der App unter
+Profil → Meine Daten.
+
+**Löschung (Art. 17 DSGVO):** Seit dem 02.09.2026 ist der Ablauf umgesetzt und
+nicht mehr nur entgegengenommen. Für **jede** der 36 Tabellen mit Personenbezug
+steht in `public.loeschregeln` fest, was geschieht — die Regel ist Datenbestand,
+nicht Programmtext, und damit prüfbar:
+
+| Behandlung | Anzahl | Was passiert |
+| --- | --- | --- |
+| `loeschen` | 13 | wird sofort entfernt |
+| `aufbewahren` | 18 | bleibt bis zum Ablauf der Frist (sechs oder acht Jahre), dann automatisch entfernt |
+| `anonymisieren` | 3 | Zeile bleibt, der Personenbezug fällt weg (`profiles`, `customers`, `audit_log`) |
+| `ausserhalb` | 2 | Beschäftigtendaten (IfSG-Belehrungen, Schulungen) — eigener Vorgang zum Ende des Arbeitsverhältnisses, nicht Teil der Kundenlöschung |
+
+Der Zugang wird gesperrt (`auth.users.banned_until`), Name, E-Mail, Telefon,
+Geburtsdatum und Rechnungsanschrift werden ersetzt oder geleert. Das
+Änderungsprotokoll behält, wer wann welchen Datensatz geändert hat, verliert
+aber den protokollierten Inhalt, soweit dieser aus einer gelöschten oder
+anonymisierten Tabelle stammt.
+
+**Fristbeginn:** Die Aufbewahrungsfrist läuft ab dem **Ende** des Vorgangs
+(§ 147 Abs. 4 AO), nicht ab seiner Anlage. Ein laufendes Abo, eine geltende
+Einwilligung und eine bestehende Firmenmitgliedschaft werden deshalb nicht
+gelöscht, solange sie laufen. Ein nächtlicher Lauf (03:40) entfernt, was seine
+Frist überschritten hat; er lässt sich für eine Betriebsprüfung anhalten
+(Ablaufhemmung, § 147 Abs. 3 Satz 5 AO).
+
+**Berichtigung:** Stammdaten sind im Profil selbst änderbar. Die E-Mail-Adresse
+folgt der Anmeldung und wird über Supabase doppelt bestätigt.
+
+**Einwilligungen** sind in `consents` versioniert dokumentiert und jederzeit
+widerrufbar (Profil → Einwilligungen). Werbung an ein gelöschtes Konto wird
+unterdrückt; Vertrags- und Rechtsnachrichten gehen weiter hinaus, weil Art. 18
+DSGVO die Verarbeitung einschränkt und nicht verbietet.
+
+Nachweise und Messwerte: `docs/SECURITY.md`, Abschnitte 16 und 18.
 
 > Hinweis: Dies ist eine technische Zuarbeit, keine Rechtsberatung. Datenschutzerklärung und
 > App-Store-Angaben sind vor Veröffentlichung rechtlich zu prüfen.

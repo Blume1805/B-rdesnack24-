@@ -36,8 +36,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Lokalisierung im Kern erzeugen
+        run: flutter pub get && flutter gen-l10n
+        working-directory: packages/bs24_kern
       - name: Dependencies
         run: flutter pub get
-        working-directory: apps/mobile
+        working-directory: apps/kunden-app
       - name: Build + Deploy
         run: bash scripts/deploy_web.sh
