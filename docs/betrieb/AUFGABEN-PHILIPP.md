@@ -50,12 +50,16 @@ zertifiziert. Der Gespraechspartner ist aber nicht CCV, sondern
 **Automatenland** — das Terminal kommt mit deren App *CleverMetrics*, und
 „ohne App ist das IM30 ein leeres Terminal".
 
-**Die wichtigste Frage, und sie gehoert VOR die Bestellung:**
-- [ ] **Gibt es eine Schnittstelle fuer Dritte?** Es gibt ein
-      CleverMetrics-Cloud-Dashboard mit Echtzeitdaten. Kommt man an diese
-      Daten auch **programmatisch** heran (Webhook, API, Export)?
-      **Ohne sie sehen unsere Apps keine Verkaeufe.** Dann bleibt nur ein
-      manueller Export, und „Echtzeit in die App" faellt aus.
+**Erledigt am 14.09.:** Es gibt eine Schnittstelle. Damit koennen
+Verkaeufe in unsere Systeme fliessen und Preise aus der Ferne gesetzt
+werden — der MHD-Abschlag wird ausspielbar.
+
+**Aber:** Die Angaben dazu stammen aus einer KI-Zusammenfassung von
+Google, nicht aus einer Unterlage von Automatenland. Der dort gezeigte
+Aufruf sieht nach einem erfundenen Beispiel aus. Die Richtung stimmt
+vermutlich, die konkrete Form wird **nicht verbaut**, bevor sie schwarz
+auf weiss vorliegt.
+- [ ] **Schnittstellendokumentation bei Automatenland anfordern.**
 
 **Danach:**
 - [ ] **Nachrichtenformat**: Feldnamen, Betraege in Cent oder Euro,
@@ -72,8 +76,28 @@ zertifiziert. Der Gespraechspartner ist aber nicht CCV, sondern
 - [ ] **Wer ist Vertragspartner** fuer die Zahlungsabwicklung —
       Automatenland, CCV oder ein dritter Zahlungsdienstleister? Davon
       haengen Auftragsverarbeitung und Datenschutzerklaerung ab.
-- [ ] **Nimmt der Automat selbst Bargeld an?** (§ 146a AO). Das Terminal
-      tut es nicht; die Frage geht an den Automaten, nicht an das Terminal.
+### 1.0b Bargeld am Automaten — neue Pflichten
+
+**Du hast am 14.09. gesagt: Muenzzaehler und Scheinpruefer.** Damit
+entsteht ein Kassenbestand, und der bringt Pflichten mit, die es bei
+reiner Kartenzahlung nicht gaebe.
+
+- [ ] **§ 146a AO vom Steuerberater bewerten lassen.** Waren- und
+      Dienstleistungsautomaten sind nach § 1 Satz 2 KassenSichV
+      ausgenommen — das spricht gegen eine TSE-Pflicht. **Neu dazu:**
+      CleverCart traegt laut Anbieter eine „Kassenfunktion". Wird die als
+      Kassensystem betrieben, ist es ein anderer Sachverhalt. Das ist
+      keine Frage fuer eine Faustregel.
+- [ ] **Leerungsverfahren festlegen:** Wer zaehlt, wie oft, mit welchem
+      Protokoll, wer prueft die Differenzen gegen, wie kommt das Geld zur
+      Bank?
+- [ ] **Wechselgeldbestand** je Automat festlegen und als Kassenbestand
+      fuehren.
+
+Gebaut ist dafuer: Soll-Betrag und Differenz an der Zaehlung,
+Zaehlprotokoll je Muenz- und Scheinsorte, und die Regel, dass eine
+Zaehlung nicht nachtraeglich geaendert wird — Korrekturen laufen ueber
+einen neuen Satz.
 
 **Die Entscheidung, die dir gehoert:** Ein Kartenterminal weiss nicht, wer
 davorsteht, und darf es auch nicht wissen (das waere PCI DSS). Der

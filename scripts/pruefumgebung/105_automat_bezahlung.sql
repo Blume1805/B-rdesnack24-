@@ -43,7 +43,9 @@ insert into auth.users (id, email, raw_user_meta_data)
   on conflict (id) do nothing;
 
 insert into public.user_permissions (user_id, permission_key, granted)
-  values (:nutzer, 'payments.view', true)
+  values (:nutzer, 'payments.view', true),
+         (:nutzer, 'cash.collect', true),
+         (:nutzer, 'prices.manage', true)
   on conflict (user_id, permission_key) do update set granted = true;
 
 insert into public.machines (id, code, name) values
@@ -303,3 +305,122 @@ select 'F3 Abgleich' as fall, tag, umsatz_gemeldet, umsatz_ausgewiesen, abweichu
        case when abweichung is not null then 'OK — Abweichung benannt' else 'FEHLER' end as urteil
   from public.auszahlungen_abgleich(60)
  limit 1;
+
+\echo '=== G  Bargeld: Soll, Ist, Differenz ==='
+
+-- G1 Barverkaeufe ergeben das Soll fuer die naechste Leerung.
+-- Zwei zugeordnete Verkaeufe, einer bar, einer mit Karte.
+insert into public.terminal_ereignisse
+  (terminal_id, hersteller, terminal_kennung, idempotenz_schluessel,
+   anbieter_lfd_nr, art, zahlart, nutzlast)
+select t.id, 'clevermetrics', 'PRUEF-0001', v.schluessel, v.nr, 'verkauf', v.zahlart, v.betrag
+  from public.terminals t
+  cross join (values ('pruef-bar-1', 7, 'bar',   '{"betrag": 2.50}'::jsonb),
+                     ('pruef-kar-1', 9, 'karte', '{"betrag": 9.99}'::jsonb)
+             ) as v(schluessel, nr, zahlart, betrag)
+ where t.terminal_kennung = 'PRUEF-0001';
+
+-- Ein Barverkauf, dessen Geraet nicht zugeordnet werden konnte. Er MUSS
+-- trotzdem ins Soll, sonst weist der Kassensturz einen Ueberschuss aus.
+insert into public.terminal_ereignisse
+  (hersteller, terminal_kennung, idempotenz_schluessel, anbieter_lfd_nr,
+   art, zahlart, nutzlast)
+values ('clevermetrics', 'PRUEF-0001', 'pruef-bar-2', 8, 'verkauf', 'bar', '{"betrag": 1.50}'::jsonb);
+
+select 'G1 Bar-Soll' as fall, soll_betrag, anzahl_verkaeufe,
+       case when soll_betrag = 4.00 and anzahl_verkaeufe = 2
+            then 'OK — Karte zaehlt nicht mit, unzugeordneter Barverkauf schon'
+            else 'FEHLER' end as urteil
+  from public.bar_soll(:maschine);
+
+-- G1b Ohne Barverkaeufe ist das Soll null und die Anzahl null — nicht eins.
+select 'G1b leeres Soll' as fall, soll_betrag, anzahl_verkaeufe,
+       case when soll_betrag = 0 and anzahl_verkaeufe = 0 then 'OK' else 'FEHLER' end as urteil
+  from public.bar_soll(:fremd);
+
+-- G2 Eine Zaehlung mit Fehlbetrag weist ihn aus, statt ihn zu verschlucken.
+insert into public.cash_collection_logs
+  (machine_id, amount_gross, change_amount, soll_betrag, stueckelung, bemerkung)
+values (:maschine, 3.50, 0, 4.00,
+        '{"2eur": 1, "1eur": 1, "50cent": 1}'::jsonb,
+        'Fehlbetrag, Ursache offen');
+
+select 'G2 Differenz' as fall, differenz,
+       case when differenz = -0.50 then 'OK — Fehlbetrag ausgewiesen' else 'FEHLER' end as urteil
+  from public.cash_collection_logs
+ where machine_id = :maschine order by collected_at desc limit 1;
+
+-- G3 Eine Zaehlung laesst sich nicht glattziehen.
+do $$
+begin
+  update public.cash_collection_logs set amount_gross = 4.00
+   where machine_id = 'aaaa0000-0000-4000-8000-000000000001';
+  raise exception 'FEHLER G3: Zaehlung liess sich aendern';
+exception
+  when others then
+    if position('nicht nachträglich geändert' in sqlerrm) > 0 then
+      raise notice 'G3 Nachtraegliche Aenderung abgewiesen: OK';
+    else
+      raise;
+    end if;
+end;
+$$;
+
+-- G4 Loeschen ebenso wenig.
+do $$
+begin
+  delete from public.cash_collection_logs
+   where machine_id = 'aaaa0000-0000-4000-8000-000000000001';
+  raise exception 'FEHLER G4: Zaehlung liess sich loeschen';
+exception
+  when others then
+    if position('nicht gelöscht' in sqlerrm) > 0 then
+      raise notice 'G4 Loeschen abgewiesen: OK';
+    else
+      raise;
+    end if;
+end;
+$$;
+
+-- G5 Die Differenz taucht in der Uebersicht auf. Eine Bemerkung ist Pflicht
+--    im Verfahren, nicht in der Spalte — deshalb wird sie mit ausgegeben.
+select 'G5 Uebersicht' as fall, differenz, bemerkung,
+       case when differenz = -0.50 then 'OK' else 'FEHLER' end as urteil
+  from public.kassendifferenzen(180)
+ where machine_id = :maschine limit 1;
+
+\echo '=== H  Preisausspielung ==='
+
+-- H1 Ohne Ausspielung weicht jedes Fach ab: der Automat kennt den Preis nicht.
+insert into public.machine_slots (machine_id, slot_code, product_id, unit_price_net)
+values (:maschine, 'A1', :produkt, 2.3364)
+on conflict (machine_id, slot_code) do nothing;
+
+select 'H1 ohne Ausspielung' as fall, slot_code, soll_brutto, zuletzt_bestaetigt,
+       case when zuletzt_bestaetigt is null then 'OK — Abweichung erkannt' else 'FEHLER' end as urteil
+  from public.preis_abweichungen(:maschine);
+
+-- H2 Nach der Bestaetigung stimmt es.
+insert into public.preis_ausspielungen
+  (machine_id, slot_code, product_id, preis_brutto, grund, gesendet_am, bestaetigt_am)
+select :maschine, 'A1', :produkt, a.brutto, 'mhd_abschlag', now(), now()
+  from public.automatenpreis(:maschine, :produkt) a;
+
+-- Zaehlt die Faecher mit, damit 'keine Abweichung' nicht mit 'kein Zugriff'
+-- verwechselt wird: Ohne Berechtigung waere das Ergebnis ebenfalls leer.
+select 'H2 nach Bestaetigung' as fall,
+       (select count(*) from public.machine_slots where machine_id = :maschine) as faecher,
+       count(*) as abweichungen,
+       case when count(*) = 0
+             and (select count(*) from public.machine_slots where machine_id = :maschine) > 0
+            then 'OK — keine Abweichung mehr' else 'FEHLER' end as urteil
+  from public.preis_abweichungen(:maschine);
+
+-- H3 Aendert sich das MHD, weicht das Fach wieder ab — genau das soll es.
+update public.inventory set expiry_date = current_date + 30
+ where machine_id = :maschine and product_id = :produkt;
+
+select 'H3 MHD geaendert' as fall, soll_brutto, zuletzt_bestaetigt,
+       case when soll_brutto = 2.50 and zuletzt_bestaetigt = 1.50
+            then 'OK — neuer Preis muss raus' else 'FEHLER' end as urteil
+  from public.preis_abweichungen(:maschine);

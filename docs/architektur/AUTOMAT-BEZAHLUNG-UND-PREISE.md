@@ -235,6 +235,84 @@ Sicherheit — steht und ist geprüft.
 
 ---
 
+## Nachtrag 2 (14.09.2026): Bargeld und die API
+
+Philipp hat zwei Angaben nachgereicht. Die erste ändert mehr als die
+zweite.
+
+### „Am Automaten kann auch bar bezahlt werden."
+
+Münzzähler und Scheinprüfer. Das ist keine Randnotiz, sondern ein zweiter
+Geldweg mit eigenen Pflichten — und es hat eine Lücke im ersten Entwurf
+sichtbar gemacht: **An den Ereignissen stand die Zahlart nicht.** Ohne sie
+lassen sich Bar- und Kartenumsätze nicht trennen, und ohne diese Trennung
+gibt es kein Soll für die Kasse.
+
+**Bargeld erzeugt einen Kassenbestand.** Geld liegt im Gerät, bis jemand
+es holt. Damit gilt die **Kassensturzfähigkeit**: Es muss jederzeit
+feststellbar sein, wie viel drin sein müsste, und beim Leeren gehört das
+Gezählte dagegengestellt.
+
+Die Tabelle `cash_collection_logs` gibt es seit Juni. Sie erfasste, **was
+entnommen wurde — nicht, was drin sein müsste**. Ohne Soll gibt es keine
+Differenz, und ohne Differenz ist eine Entnahme kein Kassensturz, sondern
+eine Notiz. Nachgetragen sind deshalb: Soll-Betrag, Differenz (gerechnet,
+nicht eingetippt), Zählprotokoll je Münz- und Scheinsorte, Wechselgeld
+danach, Bemerkung — und die Regel, dass eine Zählung **nicht nachträglich
+geändert** wird. Korrekturen laufen über einen neuen Satz.
+
+Dazu `bar_soll()` (Barverkäufe seit der letzten Leerung) und
+`kassendifferenzen()` (Zählungen, bei denen Ist und Soll auseinandergehen).
+
+**Ein Fund aus dem Prüflauf:** Die erste Fassung von `bar_soll()` zählte
+nur Verkäufe, deren Terminal zugeordnet werden konnte. Ein Barverkauf von
+einem Gerät, das noch nicht in `terminals` steht, fiel heraus — und der
+Kassensturz hätte einen **Überschuss** ausgewiesen, den es nicht gibt.
+Beim Bargeld ist ein zu niedriges Soll der gefährlichere Fehler; die
+Zuordnung läuft jetzt zusätzlich über die Gerätekennung.
+
+**Drei Geldwege statt einem**, und sie treffen sich nirgends von selbst:
+
+| Weg | Wohin | Nachweis |
+|---|---|---|
+| Karte | über CleverPay täglich aufs Konto, abzüglich Gebühren | `terminal_auszahlungen` |
+| Bargeld | bleibt im Gerät bis zur Leerung | `cash_collection_logs` + Zählprotokoll |
+| App-Kauf | wie Karte, aber mit Kundenzuordnung | `vend_freigaben` |
+
+### „Ja, man kommt auch programmatisch heran."
+
+Damit ist die wichtigste offene Frage beantwortet: Die Verkäufe können in
+unsere Systeme fließen, und Preise lassen sich aus der Ferne setzen. Der
+MHD-Abschlag wird damit ausspielbar, statt von Hand am Gerät gedreht zu
+werden.
+
+Neu gebaut: `preis_ausspielungen` — welcher Preis wann an welchem Fach
+gelten sollte, **und ob der Automat es bestätigt hat**. Der Unterschied
+ist wichtig: Ein gesendeter Preis ist noch kein Preis, den das Gerät
+verlangt. `preis_abweichungen()` nennt die Fächer, an denen der Kunde
+etwas anderes sieht als das Gerechnete.
+
+Die Historie ist zugleich eine GoBD-Anforderung: Wer Preise fernsteuert,
+muss später sagen können, welcher Preis zum Zeitpunkt eines Verkaufs galt.
+Ohne diese Aufzeichnung lässt sich ein Verkauf von vorletzter Woche nicht
+mehr nachrechnen.
+
+### Vorbehalt zu den beiden letzten Bildschirmfotos
+
+Die Angaben zur Enterprise-API stammen aus einer **KI-Zusammenfassung von
+Google**, nicht aus der Dokumentation von Automatenland. Das ist keine
+Primärquelle, und der gezeigte Aufruf `machine.setPrice('A1', 2.50)` sieht
+nach einem erfundenen Beispiel aus — solche Schnipsel entstehen in
+KI-Übersichten regelmäßig, ohne dass es die Funktion so gibt.
+
+**Was daraus folgt:** Die Richtung stimmt vermutlich (es gibt eine
+Schnittstelle). Die konkrete Signatur wird **nicht verbaut**, bevor sie in
+einer Unterlage von Automatenland steht. Der Adapter bleibt deshalb, wie
+er ist — mit dem ausdrücklichen Vermerk, dass die Feldbenennung eine
+Annahme ist.
+
+---
+
 ## Rechtliche Würdigung
 
 ### Sachverhalt
@@ -248,7 +326,8 @@ nach Restlaufzeit des Produkts und nach Kundenmerkmalen.
 | Bereich | Geprüft | Ergebnis | Anpassung nötig |
 |---|---|---|---|
 | Steuer und Buchführung (§§ 145–147 AO, GoBD) | ✓ | Aufzeichnungs- und Aufbewahrungspflicht greift ab dem ersten Verkauf. Unveränderbarkeit über Hashkette, Vollständigkeit über Lückenprüfung. | **Ja** — Verfahrensdokumentation fortschreiben |
-| § 146a AO / KassenSichV | ✓ | **Das Terminal nimmt nur Karte** (Produktseite 14.09.2026), löst die Pflicht also nicht aus. Warenautomaten stehen zudem auf der Negativliste des § 1 KassenSichV. Offen bleibt allein, ob der **Automat selbst** Bargeld annimmt. | **Teilweise geklärt** — Rest hängt am Automaten, nicht am Terminal |
+| § 146a AO / KassenSichV | ✓ | **Der Automat nimmt Bargeld an** (Münzzähler und Scheinprüfer, Angabe Philipp 14.09.2026). Waren- und Dienstleistungsautomaten sind nach § 1 Satz 2 KassenSichV vom Anwendungsbereich ausgenommen — die TSE-Pflicht entsteht aus dem Automaten selbst also nicht. **Neu zu prüfen:** CleverCart trägt laut Anbieter eine „Kassenfunktion". Wird sie als Kassensystem betrieben, ist das ein anderer Sachverhalt. **Keine abschließende Bewertung ohne Steuerberater.** | **Ja — fachliche Prüfung** |
+| Bargeld: Kassenführung (§§ 145–146 AO, GoBD) | ✓ | Kassensturzfähigkeit, Einzelaufzeichnung, Zählprotokoll, Dokumentation von Differenzen. Gebaut; der Ablauf gehört in die Verfahrensdokumentation. | **Ja** — Verfahren festlegen |
 | Umsatzsteuer (§ 22 UStG, § 14 UStG, § 33 UStDV) | ✓ | Je Position mit dem Steuersatz des Produkts. Kleinbetragsregel greift bei Automatenverkäufen regelmäßig. | Nein — Rechenweg steht |
 | Preisangaben (PAngV) | ✓ | Der ausgewiesene Preis muss der geforderte sein. Deshalb kommen alle Preise vom Server, und der Prozentsatz wird vor der Anwendung gerundet. | Nein |
 | UWG (§ 5) | ✓ | Ein durchgestrichener Preis ohne echte Ersparnis wäre irreführend. Der MHD-Abschlag ist eine echte Reduzierung. | Nein |
@@ -266,8 +345,10 @@ nach Restlaufzeit des Produkts und nach Kundenmerkmalen.
 ### Handlungsbedarf
 
 - [ ] **Verfahrensdokumentation** fortschreiben — Philipp, vor dem ersten Verkauf
-- [ ] **Nimmt der Automat selbst Bargeld?** (§ 146a AO) — Philipp, mit der Bestellung des Automaten. Das Terminal tut es nicht.
-- [ ] **Schnittstelle von CleverMetrics klären** — vor der Bestellung, nicht danach
+- [ ] **§ 146a AO vom Steuerberater bewerten lassen** — der Automat nimmt Bargeld, und CleverCart trägt eine „Kassenfunktion". Die Ausnahme des § 1 Satz 2 KassenSichV spricht dagegen, aber das ist keine Frage für eine Faustregel.
+- [ ] **Leerungsverfahren festlegen**: Wer zählt, wie oft, mit welchem Protokoll, wer prüft die Differenzen gegen — und wie kommt das Geld zur Bank?
+- [ ] **Wechselgeldbestand** je Automat festlegen und als Kassenbestand führen
+- [ ] **Schnittstellendokumentation von Automatenland anfordern** — die KI-Zusammenfassung von Google ist keine Grundlage
 - [ ] **Gebührenkonto** für die CleverPay-Abzüge anlegen und Abstimmung einrichten
 - [ ] **Datenschutzerklärung** um Terminal und Zahlungsdienstleister ergänzen
 - [ ] **Vertrag prüfen** — und zuerst klären, mit wem: Automatenland, CCV oder ein dritter Zahlungsdienstleister
