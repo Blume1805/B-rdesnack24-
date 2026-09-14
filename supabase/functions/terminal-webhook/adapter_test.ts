@@ -1,7 +1,11 @@
 // Prüft die Herstellerschicht — vor allem das, was NICHT durchkommen darf.
 //
 // Ausführen: deno test supabase/functions/terminal-webhook/adapter_test.ts
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+//
+// Die Zusicherungen kommen von JSR, nicht von deno.land/std: deno.land ist
+// aus der Prüfumgebung nicht erreichbar, und ein Test, den niemand starten
+// kann, ist kein Nachweis.
+import { assert, assertEquals } from "jsr:@std/assert@1";
 import {
   ausCleverMetrics,
   entferneKartendaten,

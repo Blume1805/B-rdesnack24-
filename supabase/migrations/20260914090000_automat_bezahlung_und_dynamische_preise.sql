@@ -824,15 +824,42 @@ create policy vf_eigene on public.vend_freigaben
 -- ----------------------------------------------------------------------------
 -- 9. Rechte
 -- ----------------------------------------------------------------------------
-revoke all on public.terminals           from public, anon;
-revoke all on public.terminal_ereignisse from public, anon;
-revoke all on public.mhd_preisstufen     from public, anon;
-revoke all on public.vend_freigaben      from public, anon;
-revoke all on public.terminal_auszahlungen from public, anon;
+-- ACHTUNG, wiederkehrende Falle in diesem Projekt: Supabase vergibt jeder
+-- neu angelegten Tabelle über ALTER DEFAULT PRIVILEGES automatisch
+-- SELECT, INSERT, UPDATE und DELETE an `authenticated`. Ein
+-- `revoke ... from public, anon` fasst diese Rechte NICHT an — sie stehen
+-- danach immer noch da.
+--
+-- Bis zum 14.09.2026 stand hier genau dieses unvollständige Revoke. RLS
+-- hätte den Zugriff trotzdem abgefangen (ohne Policy keine Zeilen), aber
+-- das ist eine Schicht statt zwei: Wer später versehentlich eine
+-- großzügige Policy schreibt, hat sofort auch das Recht dazu. Gefunden
+-- durch das Isolationsprotokoll, nicht durch Lesen — der Schreibversuch
+-- meldete `ROWS:0` statt `42501`.
+--
+-- Deshalb: erst allen alles entziehen, dann einzeln zurückgeben.
+revoke all on public.terminals             from public, anon, authenticated;
+revoke all on public.terminal_ereignisse   from public, anon, authenticated;
+revoke all on public.mhd_preisstufen       from public, anon, authenticated;
+revoke all on public.vend_freigaben        from public, anon, authenticated;
+revoke all on public.terminal_auszahlungen from public, anon, authenticated;
 
+-- Nur lesen, und auch das nur, soweit eine Policy es zulässt.
 grant select on public.terminals       to authenticated;
 grant select on public.mhd_preisstufen to authenticated;
 grant select on public.vend_freigaben  to authenticated;
+
+-- Schreibrechte nur dort, wo es eine Verwaltungspolicy gibt, die sie
+-- einschränkt. `terminals` und `mhd_preisstufen` tragen eine solche Policy
+-- (Rolle system_admin oder shareholder); ohne das Recht liefe sie ins
+-- Leere, und die Verwaltung könnte nichts pflegen.
+grant insert, update, delete on public.terminals       to authenticated;
+grant insert, update, delete on public.mhd_preisstufen to authenticated;
+
+-- `terminal_ereignisse` und `terminal_auszahlungen` bekommen NICHTS: Der
+-- Zugang läuft ausschließlich über die Prüffunktionen, geschrieben wird
+-- allein mit dem Dienstschlüssel. `vend_freigaben` bleibt bei SELECT —
+-- angelegt und eingelöst wird über die beiden Funktionen.
 
 revoke all on function public.automatenpreis(uuid, uuid)                from public, anon;
 revoke all on function public.kundenpreis(uuid, uuid, uuid)             from public, anon;

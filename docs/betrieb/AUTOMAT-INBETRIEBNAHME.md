@@ -98,6 +98,41 @@ danach.
 - [ ] Verfahrensdokumentation fortschreiben — der Ablauf ändert sich mit
       dem ersten Automaten grundlegend
 
+### 4b. Rechtstexte austauschen — vor der ersten Kartenzahlung
+
+Der Wortlaut liegt fertig vor in
+`docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md`, Teil B. Es ist
+ein **Entwurf**: jeder Satz braucht Philipps Freigabe, bevor er in einen
+Rechtstext geht.
+
+- [ ] **Zuerst klären, wer Vertragspartner der Zahlungsabwicklung ist**
+      — Automatenland, CCV oder ein dritter Zahlungsdienstleister — und
+      **ob CleverPay Auftragsverarbeiter nach Art. 28 DSGVO oder eigener
+      Verantwortlicher** ist. Davon hängen Vertrag, Rechtsgrundlage,
+      Empfängerangabe und Verarbeitungsverzeichnis ab. Das hat die
+      längste Vorlaufzeit und gehört deshalb an den Anfang.
+- [ ] `zahlung.md`: „Wir haben auch keinen Zahlungsdienstleister
+      eingebunden" **ersetzen**. Der Satz wird mit der ersten
+      Kartenzahlung falsch.
+- [ ] `datenschutz.md`, Abschnitt 3: „… und binden keinen
+      Zahlungsdienstleister ein" ebenso ersetzen.
+- [ ] `datenschutz.md`, Abschnitt 4: Zahlungsdienst als Empfänger
+      aufnehmen — mit der Rolle, die sich aus dem Vertrag ergibt.
+- [ ] `datenschutz.md`, Abschnitt 1: Vorgangsnummer bei den Kaufdaten
+      ergänzen; bei app-geführtem Kauf den Buchstaben zu den
+      Freigabecodes aufnehmen.
+- [ ] `zahlung.md`: Abschnitt „Preise am Automaten" aufnehmen — warum der
+      Preis in der App niedriger sein kann. Ohne ihn steht die App gegen
+      den Automaten ohne Erklärung (§ 5 UWG).
+- [ ] Verzeichnis der Verarbeitungstätigkeiten um den Zahlungsdienst
+      ergänzen; Auftragsverarbeitungsvertrag schließen, **falls** die
+      Rolle das ergibt.
+- [ ] **Nur bei app-geführtem Kauf:** Sperrmechanismus für
+      `vend_freigaben` im Löschkonzept (CUST-008) — eingelöste Freigaben
+      hängen an einem buchungsrelevanten Vorgang und werden nach
+      Art. 18 DSGVO gesperrt, nicht gelöscht; nicht eingelöste,
+      abgelaufene werden gelöscht. Erst danach den Text dazu schreiben.
+
 ### 5. Push scharfstellen (getrennt zu betrachten)
 - [ ] `send-push` ist ebenfalls nicht ausgerollt. Die App registriert
       bereits Gerätekennungen in `device_tokens`, es geht nur nichts

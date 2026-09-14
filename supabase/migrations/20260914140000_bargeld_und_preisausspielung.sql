@@ -277,8 +277,13 @@ create policy pa_rw on public.preis_ausspielungen
   using (public.auth_has_permission('prices.manage'))
   with check (public.auth_has_permission('prices.manage'));
 
-revoke all on public.preis_ausspielungen from public, anon;
+-- Erst alles entziehen, auch `authenticated` (siehe die ausführliche
+-- Begründung in 20260914090000): Supabase vergibt Schreibrechte an neue
+-- Tabellen automatisch, und ein Revoke ohne diese Rolle lässt sie stehen.
+revoke all on public.preis_ausspielungen from public, anon, authenticated;
 grant select on public.preis_ausspielungen to authenticated;
+-- Schreiben nur, soweit die Policy `prices.manage` verlangt.
+grant insert, update, delete on public.preis_ausspielungen to authenticated;
 
 revoke all on function public.bar_soll(uuid)                  from public, anon;
 revoke all on function public.kassendifferenzen(integer)      from public, anon;

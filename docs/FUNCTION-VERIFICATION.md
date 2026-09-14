@@ -1,6 +1,6 @@
 # Verification-Matrix Bördesnack24
 
-Stand: **02.09.2026**. Eine Zeile je geprüfter Funktion, ein Status je
+Stand: **14.09.2026**. Eine Zeile je geprüfter Funktion, ein Status je
 Spalte. Die Matrix berichtet über durchgeführte Prüfungen.
 
 Status: 🔴 ROT (neu, geändert, ungeprüft, nicht testbar, Test
@@ -113,9 +113,101 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 | MAIL-003 | `email_report_share` / `fetch_email_report_share` | ✓ | 🟢 (S-1 behoben) |
 | MAIL-004 | Zustellung über Resend an Testpostfach | ✗ kein Testpostfach | 🔴 |
 | DOC-001 | Änderungsprotokoll buchführungsrelevanter Tabellen | ✓ | 🟢 (S-7 behoben) |
-| DB-003 | Migrationen von Null wiederholbar | ✓ 197/197, Ergebnis in neun Merkmalen deckungsgleich mit der Produktion | 🟢 (S-14 behoben) |
+| DB-003 | Migrationen von Null wiederholbar | ✓ 232/232 am 14.09.2026; die neun Merkmale waren am 02.09.2026 deckungsgleich mit der Produktion, seither nicht erneut messbar (Supabase-Verbindung nicht autorisiert) | 🟢 (S-14 behoben) |
 | DB-004 | PUBLIC hat kein Ausführungsrecht auf Funktionen | ✓ 0 von 156 | 🟢 (S-19 behoben) |
 | DB-005 | `authenticated` führt nur die vorgesehenen 138 Funktionen aus | ✓ Fingerabdruck `c5f00ccb…` | 🟢 (S-20 behoben) |
+
+## 7. Automatenzahlung und dynamische Preise (14.09.2026)
+
+Nachweise: `scripts/pruefumgebung/105_automat_bezahlung.sql` (28 Urteile,
+alle OK) und `106_automat_isolation.sql` (22 Urteile, alle OK), gelaufen
+gegen einen **Neubau von Null** über alle 232 Migrationen.
+
+**Keine dieser Zeilen ist grün, und das liegt nicht an der Technik.** Die
+technischen Nachweise sind geführt; offen ist der Rechtsteil. Nach
+`docs/COMPLIANCE.md` stehen elf Anpassungen aus, darunter eine Frage, die
+ohne den Vertrag mit Automatenland nicht zu beantworten ist. Solange die
+Legal-Spalte offen ist, ist die Funktion 🔴 — so sieht es der Skill vor,
+und hier gibt es dafür kein Gelb.
+
+Hinzu kommt für alle Zeilen gleichermaßen: **Die Migrationen sind nicht
+ausgerollt.** Die Supabase-Verbindung ist nicht autorisiert; geprüft
+wurde die lokale Replik. Das ist nach der Gleichheitsmessung in
+`scripts/pruefumgebung/README.md` ein gültiger Nachweis über das
+Verhalten — aber kein Nachweis, dass es in der Produktion steht.
+
+| ID | Funktion | Datenklasse | Test | Negativ | Regression | Security | DB/RLS | Legal | Doku | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| AUT-001 | `automatenpreis()` — Grundpreis plus MHD-Stufe | D2 | ✓ A1–A4 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-002 | `kundenpreis()` — Dauerrabatt und Gutschein am Konto | D3 | ✓ | ✓ | ✓ | ✓ 106/V | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-003 | `vend_freigabe_anlegen()` — Code nur als Hash, 3 min | D3 | ✓ D1–D4 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-004 | `app.vend_freigabe_einloesen()` — genau einmal | D3/D6 | ✓ D3 | ✓ Zweiteinlösung abgewiesen | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-005 | `terminal_ereignisse` unveränderbar, Hashkette | D6 | ✓ B1–B4, C0–C2 | ✓ erzwungene Änderung wird erkannt | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-006 | `terminal_luecken()` / `ereigniskette_pruefen()` | D6 | ✓ E1, C1–C2 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-007 | `terminal_auszahlungen` / `auszahlungen_abgleich()` | D6 | ✓ F1–F3 | ✓ Betrag ≠ Umsatz − Gebühr abgewiesen | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-008 | `bar_soll()` / `kassendifferenzen()` — Kassensturz | D6 | ✓ G1–G5 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-009 | `preis_ausspielungen` / `preis_abweichungen()` | D2 | ✓ H1–H3 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+| AUT-010 | Edge Function `terminal-webhook` | D5/D6 | ✓ 10 von 10 (`deno test`, 14.09.) | ✓ Kartendaten, Replay, verfälschte Signatur | ✓ | ✓ Einheitsebene | — | ✗ offen | ✓ | 🔴 |
+| AUT-011 | Datenisolation der fünf neuen Tabellen (IDOR/BOLA) | D3/D6 | ✓ T1–T5d, V1–V6, M1–M4, F1–F2 | ✓ | ✓ | ✓ | ✓ | ✗ offen | ✓ | 🔴 |
+
+Zu AUT-010: Die Herstellerschicht ist am 14.09.2026 zum ersten Mal
+tatsächlich ausgeführt worden — **10 von 10 Tests grün**. Geprüft wurden
+unter anderem, dass eine Kartennummer auch aus einem Feld verschwindet,
+das auf keiner Sperrliste steht; dass eine Belegnummer gleicher Länge
+**nicht** verworfen wird (Luhn-Prüfung statt Ziffernzählen); dass eine
+echt signierte, aber eine Stunde alte Nachricht abgewiesen wird; und dass
+der Signaturvergleich nicht früh abbricht.
+
+Die Tests beziehen ihre Zusicherungen jetzt von JSR statt von
+`deno.land/std` — letzteres ist aus dieser Umgebung nicht erreichbar. Ein
+Test, den niemand starten kann, ist kein Nachweis; genau daran lag es,
+dass diese zehn Prüfungen seit ihrer Entstehung nie gelaufen sind.
+
+### Was das Isolationsprotokoll gefunden hat (S-25)
+
+`106_automat_isolation.sql` hat nicht bestätigt, sondern **einen Befund
+erzeugt**: Prüfung T3 („A ändert Daten von B") lieferte `ROWS:0` statt
+`42501`. Kein Datenabfluss — die RLS-Policy griff —, aber das Recht war
+da: Alle fünf neuen Tabellen trugen die Supabase-Standardrechte
+`SELECT, INSERT, UPDATE, DELETE` für `authenticated`. Ein `revoke … from
+public, anon` entfernt die nicht; das steht seit dem 02.09.2026 in
+`scripts/pruefumgebung/README.md` und ist mir trotzdem wieder passiert.
+
+Beide Migrationen entziehen die Rechte jetzt ausdrücklich von
+`authenticated` und geben nur zurück, was die Policies brauchen. Nach der
+Korrektur liefert T3/T4 `ERR:42501` und T5a/T5b `-1`.
+
+**Der Befund wäre durch Codelektüre nicht gefunden worden.** In der
+Migration stand das `revoke`; was fehlte, stand nirgends geschrieben.
+
+### Was der Suite-Lauf am Prüfwerkzeug gefunden hat (S-26, S-27)
+
+Der vollständige Durchlauf aller 23 Skripte gegen einen Neubau von Null
+ist in dieser Sitzung zum ersten Mal seit Längerem wirklich ausgeführt
+worden — und ist an zwei Stellen gescheitert, die nichts mit der
+Automatenzahlung zu tun haben:
+
+| ID | Befund | Folge | Behoben |
+| --- | --- | --- | --- |
+| S-26 | `pruef.lies()` wird von acht Skripten aufgerufen, war aber **nirgends im Repository definiert** | Die betroffenen Prüfungen brachen mitten im Skript ab. Weil die Skripte ohne `ON_ERROR_STOP` liefen, sah der Lauf trotzdem unauffällig aus. | ✓ in `20_werkzeug.sql` ergänzt |
+| S-27 | `10_pruefdaten.sql` legte weder den Automaten `3b9ac0eb…` noch die Firma `bb000000…` an, die `102` und `100` voraussetzen | Beide Skripte scheiterten am Fremdschlüssel — ihre Nachweise waren aus dem Repository nicht wiederholbar | ✓ beide Datensätze ergänzt |
+
+Dazu ein dritter Punkt, den ich selbst verursacht habe: Die Ergänzung von
+`invited_at` in `01_supabase_nachbau.sql` (nötig für `handle_new_user()`)
+hat dazu geführt, dass für den Gesellschafter überhaupt ein Profil
+entsteht — und damit schlug `app.guard_profile_update()` beim
+Aktivieren zu. Vorher traf die `UPDATE`-Anweisung null Zeilen und der
+Trigger feuerte nie. Die Fixture setzt den Status jetzt mit
+stillgelegtem Trigger; der Wächter selbst wird weiterhin mit aktivem
+Trigger in `50_schreib_isolation.sql` geprüft.
+
+**Was daraus folgt, ist unangenehm und gehört gesagt:** Ein Teil der
+grünen Zeilen weiter oben stützt sich auf Läufe, die aus dem Repository
+heraus zuletzt nicht mehr reproduzierbar waren. Sie sind es jetzt wieder
+— der Durchlauf vom 14.09.2026 ergab **0 psql-Fehler in 23 von 23
+Skripten** bei 232 von 232 eingespielten Migrationen. Dass das Werkzeug
+selbst verfallen kann, ohne dass es jemandem auffällt, ist der eigentlich
+wichtige Befund.
 
 ---
 
@@ -124,15 +216,23 @@ namentlich: Sandbox-Konto App Store / Play Billing.
 Stand nach dem Ausrollen der Korrekturen am 02.09.2026:
 
 ```
-🔴 ROT: 8   🟡 GELB: 0   🟢 GRÜN: 54
+🔴 ROT: 19   🟡 GELB: 0   🟢 GRÜN: 54
 ```
+
+Stand am 14.09.2026: acht rote Zeilen aus dem Bestand, elf neue aus
+Abschnitt 7. Die elf neuen sind **nicht rot, weil ein Test fehlgeschlagen
+wäre** — bis auf AUT-010 sind alle technischen Nachweise geführt. Sie
+sind rot, weil der Rechtsteil offen ist und `docs/COMPLIANCE.md` elf
+Anpassungen mit Verantwortlichem und Frist führt. Die Unterscheidung ist
+wichtig: Hier wartet niemand auf einen Fix im Code, sondern auf
+Entscheidungen und auf einen Vertrag.
 
 **Das System Green Gate ist nicht erreicht.** Abschluss nur bei ROT = 0
 und GELB = 0. Formulierungen wie „erfolgreich implementiert",
 „abgeschlossen" oder „keine weiteren Maßnahmen erforderlich" sind bis
 dahin unzulässig.
 
-Stand am Abend des 02.09.2026: Alle roten Zeilen sind entweder eine
+Stand am 14.09.2026: Alle roten Zeilen sind entweder eine
 **Entscheidung**, ein **fehlendes Mittel** oder ein **Nachweis, den ich
 aus dieser Umgebung nicht führen kann** — keine ist ein offener
 Sicherheitsbefund im Code.
@@ -145,6 +245,9 @@ Sicherheitsbefund im Code.
 | AUTH-002/003/004 | Rate Limiting, Passwort-Reset, Enumeration | Zugriff auf `*.supabase.co` (Egress `403`) | fehlendes Mittel |
 | MAIL-004 | Zustellung über Resend | ein Testpostfach | Philipp |
 | PAY-005 | `store_subscription_claim` | Sandbox-Konto App Store / Play Billing | Philipp |
+| AUT-001 bis AUT-009, AUT-011 | Technisch nachgewiesen; **Legal offen** — elf Anpassungen in `docs/COMPLIANCE.md`, davon die Rolle des Zahlungsdienstes (Art. 28 DSGVO oder eigener Verantwortlicher) ohne Vertrag nicht entscheidbar | Vertrag mit Automatenland, dann Freigabe der Rechtstexte aus `docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md` | Philipp |
+| AUT-010 | Die zehn Einheitstests laufen jetzt und sind grün. Offen bleibt der Lauf **gegen die ausgerollte Funktion** — die Negativmatrix N1–N12 auf HTTP-Ebene (ohne Token, veraltete Signatur, doppelte Zustellung am echten Endpunkt) | Ausrollen der Edge Function und ein erreichbarer Endpunkt | Philipp |
+| alle AUT-* | Migrationen nicht ausgerollt | Autorisierung der Supabase-Verbindung | Philipp |
 
 Kein Eintrag steht auf 🟡: Wo ein Nachweis fehlt, steht ROT mit
 benanntem fehlendem Mittel und Verantwortlichem — nicht Gelb.

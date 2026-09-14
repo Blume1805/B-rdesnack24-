@@ -67,3 +67,36 @@ end $$;
 create or replace function pruef.wahrheit(p_sql text) returns text language plpgsql as $$
 declare r text; begin execute p_sql into r; return coalesce(r,'<null>');
 exception when others then return 'ERR:'||sqlstate; end $$;
+
+-- Liest einen Einzelwert in der Haut einer Rolle.
+-- Rückgabe: der Wert als Text, '<null>' bei NULL, 'ERR:<sqlstate>' bei
+-- Abweisung. Gegenstück zu pruef.zaehle für Abfragen, deren Ergebnis
+-- interessiert und nicht nur ihre Zeilenzahl — vor allem bei RPCs, die
+-- einen Wert zurückgeben statt einer Menge.
+--
+-- Diese Funktion fehlte bis zum 14.09.2026 im Repository, obwohl acht
+-- Prüfskripte sie aufrufen (100, 101, 70, 80, 81, 90, 92, 97, 98). Der
+-- Suite-Lauf ist an genau diesen Stellen abgebrochen, ohne dass es jemand
+-- gemerkt hat, weil die Skripte ohne ON_ERROR_STOP liefen. Wer sie wieder
+-- entfernt, macht die betroffenen Nachweise erneut unführbar.
+--
+-- Wie bei pruef.zaehle wird die Rolle in JEDEM Pfad zurückgesetzt.
+create or replace function pruef.lies(p_sql text, p_uid uuid, p_rolle text default 'authenticated')
+returns text language plpgsql as $$
+declare r text; begin
+  begin
+    execute format('set local role %I', p_rolle);
+    if p_uid is not null then
+      perform set_config('request.jwt.claims', json_build_object('sub',p_uid,'role',p_rolle)::text, true);
+    else
+      perform set_config('request.jwt.claims', '', true);
+    end if;
+    execute p_sql into r;
+    r := coalesce(r, '<null>');
+  exception when others then
+    r := 'ERR:'||sqlstate;
+  end;
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  return r;
+end $$;

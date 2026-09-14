@@ -652,3 +652,118 @@ Wareneinsatz 72,4 % statt 68,7 %, nach Spende bleiben 1,15 € statt
 Supabase-Freigabe. Nachweise: alle Migrationen von Null lokal
 durchgelaufen, `flutter analyze` ohne Befund in allen drei Paketen,
 161 + 39 + 41 Tests grün.
+
+---
+
+## Legal Impact — Automatenbezahlung, Bargeld und dynamische Preise (14.09.2026)
+
+### Sachverhalt
+
+Bezahlterminal CCV IM30 mit der App CleverMetrics (Automatenland). Der
+Automat nimmt **Karte und Bargeld** (Münzzähler, Scheinprüfer). Verkäufe
+laufen in die Buchführung. Preise verändern sich nach Restlaufzeit des
+Produkts (MHD-Abschlag) und, auf dem app-geführten Weg, nach
+Kundenmerkmalen. Kartengeld kommt über CleverPay täglich aufs Konto,
+abzüglich Gebühren; Bargeld bleibt bis zur Leerung im Gerät.
+
+**Datenklassen:** D6 (Buchführung: `terminal_ereignisse`,
+`terminal_auszahlungen`, `cash_collection_logs`), D5 (Zahlung), D3
+(personenbezogen: `vend_freigaben`), D2 (kaufmännisch:
+`preis_ausspielungen`, `mhd_preisstufen`).
+**Änderungsklasse:** K3.
+
+### Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | Unberührt — kein neuer Anbieter, keine neue Adresse | Nein | |
+| AGB / Nutzungsbedingungen | ✓ | Kauf am Automaten ist bereits geregelt. **Aber: Bestandsfehler gefunden** — siehe unten | **Ja** | Philipp |
+| Datenschutzerklärung | ✓ | Neu: Terminalverarbeitung, Zahlungsdienstleister CleverPay, app-geführter Kauf mit Kundenzuordnung | **Ja** | Philipp |
+| DSGVO Art. 5/6 | ✓ | Weg A (anonym) erzeugt keine personenbezogenen Daten — Datenminimierung von selbst. Weg B: Art. 6 Abs. 1 lit. b (Vertragserfüllung) | Nein | |
+| DSGVO Art. 13 | ✓ | Informationspflicht über Zahlungsdienstleister und Verarbeitungszweck | **Ja** (mit Datenschutzerklärung) | Philipp |
+| DSGVO Art. 17/18 | ✓ | Kaufdaten unterliegen der Aufbewahrung — Einschränkung statt Löschung. Bestehendes Löschkonzept greift; `vend_freigaben` ist neu einzuordnen | **Ja** | Claude |
+| DSGVO Art. 28 | ✓ | CleverMetrics/CleverPay verarbeiten Zahlungs- und Umsatzdaten. Auftragsverarbeitung oder eigene Verantwortlichkeit hängt am Vertrag | **Ja** | Philipp |
+| DSGVO Art. 30 | ✓ | Neue Verarbeitungstätigkeit „Automatenverkauf und Zahlungsabwicklung" | **Ja** | Philipp |
+| DSGVO Art. 32 | ✓ | Nachgewiesen: Isolation zwischen Kunden (22 Prüfungen), Unveränderbarkeit, Hashkette, keine Kartendaten | Nein | |
+| Verbraucherrecht (§§ 312i–312k BGB) | ✓ | Automatenkauf ist kein Fernabsatz — Ware wird unmittelbar übergeben. Kein Widerrufsrecht am Automaten | Nein | |
+| Preisangaben (PAngV) | ✓ | Der ausgewiesene Preis muss der geforderte sein. Alle Preise vom Server, Prozentsatz wird vor der Anwendung gerundet, `preis_abweichungen()` nennt Fächer mit abweichendem Gerätepreis | Nein | |
+| Steuer & Buchführung (§§ 145–147 AO, GoBD) | ✓ | Unveränderbarkeit über Hashkette, Vollständigkeit über Lückenprüfung, Bargeld über Soll/Ist mit Zählprotokoll. **Verfahrensdokumentation fehlt** | **Ja** | Philipp |
+| § 146a AO / KassenSichV | ✓ | Warenautomaten sind nach § 1 Satz 2 KassenSichV ausgenommen — die TSE-Pflicht entsteht aus dem Automaten nicht. **Neuer Umstand:** CleverCart trägt laut Anbieter eine „Kassenfunktion". Wird sie als Kassensystem betrieben, ist das ein anderer Sachverhalt. **Nicht abschließend geklärt** | **Ja — fachliche Prüfung** | Philipp / Steuerberater |
+| § 22 UStG / § 14 UStG / § 33 UStDV | ✓ | Aufzeichnung je Steuersatz vorhanden; Kleinbetragsregel greift bei Automatenverkäufen regelmäßig | Nein | |
+| Lebensmittelrecht (LMIV) | ✓ | Der MHD-Abschlag ändert nichts an der Kennzeichnung. **Abgelaufene Ware darf nicht verkauft werden** — der Abschlag ersetzt keine Sichtkontrolle | Nein, aber betrieblich | Philipp |
+| Jugendschutz | ✓ | Keine altersbeschränkten Waren im Sortiment. CleverMetrics kann Altersverifizierung — ungenutzt | Nein | |
+| Verpackung & Pfand | ✓ | Unberührt | Nein | |
+| Barrierefreiheit (BFSG, WCAG) | ✓ | Das Terminal ist ein fremdes Gerät. App-Seite folgt den bestehenden Vorgaben | Nein | |
+| EU AI Act | ✓ | Der MHD-Abschlag ist eine Regel, kein KI-System. In der App gehört der Chip **„Automatisch"** an die Preisanzeige, nicht „KI" | **Ja** | Claude |
+| UWG § 5 | ✓ | Der MHD-Abschlag ist eine echte Reduzierung. **Aber: Bestandsfehler gefunden** — siehe unten | **Ja** | Philipp |
+| Urheber-/Markenrecht | ✓ | Unberührt | Nein | |
+| Store-Regeln | ✓ | Warenkauf am Automaten ist keine digitale Leistung — keine Store-Abgabe | Nein | |
+| PCI DSS | ✓ | Keine Kartendaten in unseren Systemen; Terminal ist PCI PTS 6.x zertifiziert. `entferneKartendaten()` wirft sie weg, bevor gespeichert wird | Nein | |
+
+### Zwei Bestandsfehler in den Rechtstexten
+
+Gefunden bei der Prüfung, **nicht durch diese Änderung verursacht**. Der
+Verifikationszyklus verlangt, dass Dokumentation gegen den Code geprüft
+wird; Bestandsfehler sind Fehler.
+
+**1. Das Lifetime-Abo wird angeboten, es gibt es aber nicht.**
+
+`docs/rechtstexte/zahlung.md`, `nutzungsbedingungen.md` und `widerruf.md`
+nennen ein **Lifetime-Abo für 79,99 € einmalig**, in den
+Nutzungsbedingungen sogar mit Kontingent („Founders Edition"). Im Code
+steht `Pricing.lifetimePubliclyOffered = false`, und das Projektwissen
+sagt ausdrücklich: „Es gibt **kein** Lifetime-Abo im Angebot."
+
+Ein Rechtstext, der eine Leistung zu einem Preis anbietet, die nicht
+erhältlich ist, ist eine irreführende Angabe über die Verfügbarkeit
+(§ 5 Abs. 1, Abs. 2 Nr. 1 UWG). Das wirkt **sofort** und hängt nicht am
+Automaten.
+
+**2. „Wir haben auch keinen Zahlungsdienstleister eingebunden."**
+
+`zahlung.md` sagt das wörtlich. Mit CleverPay — täglicher Auszahlung
+abzüglich Gebühren — stimmt es nicht mehr. Die Aussage wird mit dem
+ersten Automaten falsch, und sie steht an der Stelle, an der ein Kunde
+sich über den Umgang mit seinen Zahlungsdaten informiert.
+
+**Beide Texte sind Entwürfe, keine Setzungen.** Wortlaut in
+`docs/rechtstexte/ENTWURF-2026-09-AUTOMATENZAHLUNG.md`; die Freigabe
+gehört Philipp, nicht mir.
+
+### Anpassungskategorien
+
+| Kategorie | Was | Verantwortlich | Frist |
+|---|---|---|---|
+| **Technisch** | Chip „Automatisch" an die Preisanzeige in der App | Claude | mit dem Preis-Bildschirm |
+| **Technisch** | `vend_freigaben` ins Löschkonzept aufnehmen (Aufbewahrung vs. Löschung) | Claude | vor dem ersten Verkauf |
+| **Dokumentarisch** | Datenschutzerklärung: Terminal, CleverPay, app-geführter Kauf | Philipp | vor dem ersten Verkauf |
+| **Dokumentarisch** | `zahlung.md`: Zahlungsdienstleister-Satz korrigieren | Philipp | vor dem ersten Verkauf |
+| **Dokumentarisch** | Lifetime-Abo aus allen drei Rechtstexten entfernen | Philipp | **sofort** — wirkt unabhängig vom Automaten |
+| **Organisatorisch** | Verfahrensdokumentation: Geldwege, Leerungsverfahren, Preisausspielung | Philipp | vor dem ersten Verkauf |
+| **Organisatorisch** | Leerungsverfahren festlegen: wer zählt, wie oft, welches Protokoll | Philipp | vor dem ersten Verkauf |
+| **Organisatorisch** | Verzeichnis der Verarbeitungstätigkeiten ergänzen | Philipp | vor dem ersten Verkauf |
+| **Organisatorisch** | Wechselgeldbestand je Automat festlegen und als Kassenbestand führen | Philipp | vor dem ersten Verkauf |
+| **Vertraglich** | Vertrag mit Automatenland/CleverPay auf Auftragsverarbeitung prüfen, Dienstleisterregister ergänzen | Philipp | vor dem ersten Verkauf |
+| **Fachlich** | § 146a AO durch den Steuerberater bewerten lassen (Bargeld + CleverCart-Kassenfunktion) | Philipp / Steuerberater | vor dem ersten Verkauf |
+
+### Was ausdrücklich nicht entschieden wurde
+
+* Ob der **app-geführte Kauf** (Weg B) überhaupt kommt. Ohne ihn gibt es
+  am Automaten keinen Dauerrabatt und keine Coupons. Das ist eine
+  Entscheidung über die Kaufmechanik und gehört Philipp.
+* Die **Höhe der MHD-Abschläge**. Voreingestellt sind 20 % ab zehn und
+  40 % ab drei Resttagen — eine kaufmännische Entscheidung, keine
+  Vorgabe.
+* Die **Feldbenennung der CleverMetrics-Schnittstelle**. Die vorliegenden
+  Angaben stammen aus einer KI-Zusammenfassung, nicht aus einer Unterlage
+  des Anbieters, und werden nicht verbaut.
+
+### Status
+
+🟡 **GELB** — technisch nachgewiesen (Neubau aus 233 Migrationen
+fehlerfrei, 25 Fachprüfungen und 22 Isolationsprüfungen bestanden, kein
+Vorfall), aber **elf Anpassungen offen**, davon eine sofort wirksam
+(Lifetime-Abo) und eine ohne fachliche Bewertung nicht abschließbar
+(§ 146a AO).
+
+GELB ist Zwischenstatus, nicht Abschluss. Der Auftrag bleibt offen.

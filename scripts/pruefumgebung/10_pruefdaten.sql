@@ -14,8 +14,18 @@ values
 on conflict (id) do nothing;
 
 -- Gesellschafter aktiv schalten (Einladung wird sonst nur "invited").
+--
+-- `app.guard_profile_update()` verbietet jede Statusänderung, die nicht von
+-- einem `system_admin` kommt — und der erste Administrator kann sich selbst
+-- nicht aktivieren. Im Betrieb geschieht das deshalb ohnehin außerhalb der
+-- Anwendung. Hier wird derselbe Weg gegangen: Trigger für diese eine
+-- Anweisung stillgelegt, danach sofort wieder scharf. Das ist eine
+-- Fixture-Anweisung, kein Testergebnis — der Wächter selbst wird in
+-- 50_schreib_isolation.sql geprüft, und zwar mit aktivem Trigger.
+set session_replication_role = replica;
 update public.profiles set status='active', activated_at=now()
  where id='33333333-3333-3333-3333-333333333333';
+set session_replication_role = origin;
 
 -- Stammdaten
 insert into public.products(id,name,tax_rate) values
@@ -24,6 +34,27 @@ insert into public.products(id,name,tax_rate) values
 on conflict (id) do nothing;
 
 insert into public.locations(id,code,name) values ('f0000000-0000-0000-0000-000000000001','TEST','Teststandort')
+on conflict (id) do nothing;
+
+-- Ein Prüfautomat und ein Prüf-Werbekunde.
+--
+-- Beide gab es bis zum 14.09.2026 in diesen Prüfdaten nicht, obwohl
+-- 100_kundenkarte_werbeplatz.sql und 102_verkauf_bucht_bestand.sql sie
+-- voraussetzen. Beide Skripte sind deshalb beim Neubau aus dem Repository
+-- an einem Fremdschlüssel gescheitert — ihre Nachweise waren nicht
+-- wiederholbar. Die Kennungen sind genau die, die dort erwartet werden;
+-- wer sie ändert, macht die Skripte wieder unführbar.
+--
+-- Das ist ein Datensatz in der lokalen Replik, kein Automat im Betrieb.
+-- Die Regel aus CLAUDE.md bleibt unberührt: in der Produktion steht in
+-- `machines` weiterhin kein aktiver Automat.
+insert into public.machines(id,code,name,type,location_id,status)
+values ('3b9ac0eb-3ca7-44c1-885e-db0a678f3549','PRUEF-01','Prüfautomat',
+        'snack','f0000000-0000-0000-0000-000000000001','active')
+on conflict (id) do nothing;
+
+insert into public.businesses(id,name,legal_form,billing_country,status)
+values ('bb000000-0000-0000-0000-000000000001','Prüf-Werbekunde','GmbH','DE','active')
 on conflict (id) do nothing;
 
 -- Käufe je Kunde

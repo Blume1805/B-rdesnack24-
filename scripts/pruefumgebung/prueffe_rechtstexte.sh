@@ -20,8 +20,13 @@ soll="$hier/rechtstexte.pruefsummen"
 tmp_soll="$(mktemp)"; tmp_ist="$(mktemp)"
 trap 'rm -f "$tmp_soll" "$tmp_ist"' EXIT
 
+# Entwuerfe sind keine geltenden Rechtstexte. Sie liegen bewusst hier —
+# der Vorschlag gehoert neben den Text, den er ersetzen soll —, aber sie
+# stehen in keiner Datenbank und duerfen die Pruefsumme nicht stoeren.
+# Erkennungsmerkmal: Dateiname beginnt mit ENTWURF-.
 for datei in "$repo"/docs/rechtstexte/*.md; do
   slug="$(basename "$datei" .md)"
+  case "$slug" in ENTWURF-*) continue ;; esac
   printf '%s|%s\n' "$slug" "$(md5sum < "$datei" | cut -d' ' -f1)"
 done | sort > "$tmp_soll"
 
