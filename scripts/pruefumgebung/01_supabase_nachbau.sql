@@ -75,6 +75,12 @@ create table if not exists auth.users (
   banned_until timestamptz,
   deleted_at timestamptz,
   last_sign_in_at timestamptz,
+  -- Steht im echten auth.users und wird von handle_new_user() gelesen: Die
+  -- Rolle aus den Metadaten gilt nur bei einer Einladung. Ohne diese Spalte
+  -- scheitert jede Anlage eines Nutzers im Nachbau mit
+  -- 'record "new" has no field "invited_at"'. Nachgetragen am 14.09.2026.
+  invited_at timestamptz,
+  confirmation_sent_at timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

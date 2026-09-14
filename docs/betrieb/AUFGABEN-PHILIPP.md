@@ -38,6 +38,33 @@ ob sie im Suelzetal sitzt oder in der weiteren Region. Format egal
 
 Quelle: `apps/landing/README.md`, `docs/scrollcraft/references/truth.md`
 
+### 1.0 Bezahlterminal CCV IM30 — vier Fragen an CCV/Automatenland
+
+**Neu am 14.09.2026.** Die Datenbank- und Sicherheitsschicht fuer die
+Automatenbezahlung steht und ist nachgewiesen. Ausrollen laesst sie sich
+noch nicht, weil die Feldbenennung des Geraets nicht belegt ist.
+
+- [ ] **Integrationsdokumentation des IM30 anfordern**: Nachrichtenformat,
+      Feldnamen, Betraege in Cent oder Euro, laufende Nummer
+- [ ] **Sendet das Terminal ueberhaupt Webhooks?** Oder kommen die Daten
+      ueber den Automatenrechner (MDB) oder ein CCV-Portal? Davon haengt
+      ab, ob der gebaute Weg der richtige ist.
+- [ ] **Laesst sich ein Referenzfeld vom Automaten zum Terminal
+      durchreichen?** Ohne dieses Feld gibt es **keinen Dauerrabatt und
+      keine Coupons am Automaten** — siehe unten.
+- [ ] **Zahlarten:** nur Karte, oder steht daneben eine Bargeldannahme?
+      Das entscheidet die Frage nach § 146a AO.
+
+**Die Entscheidung, die dir gehoert:** Ein Kartenterminal weiss nicht, wer
+davorsteht, und darf es auch nicht wissen (das waere PCI DSS). Der
+MHD-Abschlag funktioniert am Geraet, weil er am Produkt haengt. Der
+Dauerrabatt von 5 % und Coupons funktionieren dort **nicht** — sie haengen
+am Konto. Wer sie am Automaten haben will, braucht den app-gefuehrten
+Kauf: in der App waehlen, Einmalcode am Automaten einloesen. Das ist eine
+Entscheidung ueber die Kaufmechanik, nicht ueber Technik.
+
+Alles dazu in `docs/architektur/AUTOMAT-BEZAHLUNG-UND-PREISE.md`.
+
 ### 1.1b Lovable-Guthaben ist wieder leer
 
 - [ ] Credits aufladen: https://lovable.dev/settings/billing
@@ -558,3 +585,4 @@ Damit klar ist, was du **nicht** anfassen musst:
 | 12.09.2026 | Umbenennung „Meine Spenden“ auf „Fuer die Region“ in der App zu Ende gefuehrt |
 | 13.09.2026 | Landingpage: Bewegungsschalter, KI-Hinweise, Geraeteschwellen 600/900 und der neue Abo-Vergleich umgesetzt |
 | 14.09.2026 | Hub: Ladescreen und App-Struktur entworfen; Empfehlung Chat-Assistent in den Kopfbereich |
+| 14.09.2026 | Automatenbezahlung: Terminalschicht, dynamische Preise, Unveraenderbarkeit und Lueckenpruefung gebaut und nachgewiesen |
