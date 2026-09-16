@@ -162,6 +162,51 @@ void main() {
       expect(Pricing.effectiveDiscountRate('silber'), closeTo(0.075, 1e-9));
       expect(Pricing.effectiveDiscountRate('gold'), closeTo(0.10, 1e-9));
     });
+  });
+
+  group('Statusstaffel (Beschluss vom 2026-09-16)', () {
+    // Verbindlich festgelegt: bis 149,99 € 5 %, ab 150 € 6 %, ab 500 € 7,5 %,
+    // ab 1.000 € 10 %. Der Server bildet dieselbe Staffel in
+    // app.status_tiers() (Migration 0060) ab — am 2026-09-16 gegen eine
+    // laufende PostgreSQL-16-Instanz geprüft, Grenzwerte eingeschlossen.
+    //
+    // Der Client kennt die Umsatzschwellen NICHT: my_gamification_status()
+    // liefert den Stufencode, der Client bildet nur Code → Rabatt ab. Dieser
+    // Test sichert deshalb die Zuordnung, nicht die Schwellen. Die Schwellen
+    // gehören in supabase/tests/status_tiers_test.sql.
+    const erwartet = <String?, double>{
+      null: 0.05, // nicht angemeldet / keine Stufe geliefert
+      'basis': 0.05,
+      'bronze': 0.06,
+      'silber': 0.075,
+      'gold': 0.10,
+    };
+
+    erwartet.forEach((code, rate) {
+      test('Stufe ${code ?? "(keine)"} ergibt ${(rate * 100)} %', () {
+        expect(Pricing.effectiveDiscountRate(code), closeTo(rate, 1e-9));
+      });
+    });
+
+    test('unbekannte Stufe fällt sicher auf den Grundrabatt zurück', () {
+      // Käme vom Server je ein neuer Code, darf daraus kein Rabatt von 0 %
+      // werden — der Kunde behält mindestens die zugesagten 5 %.
+      expect(Pricing.effectiveDiscountRate('platin'), closeTo(0.05, 1e-9));
+      expect(Pricing.effectiveDiscountRate('diamant'), closeTo(0.05, 1e-9));
+    });
+
+    test('die Staffel ist monoton steigend', () {
+      final rates = ['basis', 'bronze', 'silber', 'gold']
+          .map(Pricing.effectiveDiscountRate)
+          .toList();
+      for (var i = 1; i < rates.length; i++) {
+        expect(
+          rates[i],
+          greaterThan(rates[i - 1]),
+          reason: 'höherer Umsatz darf nie weniger Rabatt bedeuten',
+        );
+      }
+    });
 
     test('Abo-Preise bleiben als Konstanten erhalten (umkehrbar)', () {
       // Bewusst NICHT gelöscht: Die Entscheidung fällt vor den

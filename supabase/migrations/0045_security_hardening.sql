@@ -32,12 +32,24 @@
 -- Password → "Prevent use of leaked passwords".
 
 -- ── 1) Signatur-Staging aus der API nehmen ──────────────────────────────
+-- Die beiden Staging-Tabellen stammen aus einem einmaligen Import und werden
+-- von keiner Migration angelegt. Das `alter ... if exists` lief deshalb in
+-- einer leeren Datenbank ins Leere, das nachfolgende `comment on table` brach
+-- ab (Befund A-5). Kommentare sind reine Beschriftung — sie werden gesetzt,
+-- wenn die Tabelle da ist, und sonst ausgelassen.
 alter table if exists public._sig_upload set schema app;
 alter table if exists public._pia_sig    set schema app;
-comment on table app._sig_upload is
-  'Import-Rest DocuSign-Signaturen (gemerged in partner_signatures) — nach Go-Live löschen.';
-comment on table app._pia_sig is
-  'Import-Rest Demo-Signatur Pia (gemerged in partner_signatures) — nach Go-Live löschen.';
+do $$
+begin
+  if to_regclass('app._sig_upload') is not null then
+    comment on table app._sig_upload is
+      'Import-Rest DocuSign-Signaturen (gemerged in partner_signatures) — nach Go-Live löschen.';
+  end if;
+  if to_regclass('app._pia_sig') is not null then
+    comment on table app._pia_sig is
+      'Import-Rest Demo-Signatur Pia (gemerged in partner_signatures) — nach Go-Live löschen.';
+  end if;
+end $$;
 
 -- ── 1b) document_folders unter RLS ──────────────────────────────────────
 alter table public.document_folders enable row level security;
@@ -55,17 +67,37 @@ alter default privileges in schema public revoke execute on functions from anon;
 alter default privileges in schema app    revoke execute on functions from anon;
 
 -- ── 3) search_path pinnen ───────────────────────────────────────────────
-alter function app.generate_redemption_code()            set search_path = public, app;
-alter function app.assign_customer_number()              set search_path = public, app;
-alter function app.loyalty_milestones()                  set search_path = public, app;
-alter function app.trg_purchase_loyalty()                set search_path = public, app;
-alter function app.trg_subscriptions_lifetime_lock()     set search_path = public, app;
-alter function app.mhd_writedown_pct(integer)            set search_path = public, app;
-alter function app.snapshot_slot_history()               set search_path = public, app;
-alter function app.snapshot_slot_insert()                set search_path = public, app;
-alter function public.donation_rate()                    set search_path = public, app;
-alter function public.purchase_net(numeric)              set search_path = public, app;
-alter function public.purchase_donation(numeric)         set search_path = public, app;
+-- `alter function` kennt kein `if exists`. app.snapshot_slot_history() und
+-- app.snapshot_slot_insert() werden von keiner Migration in diesem Repository
+-- angelegt; in einer leeren Datenbank brach die Kette deshalb hier ab
+-- (Befund A-5). Die Schleife pinnt jede vorhandene Funktion und meldet jede
+-- fehlende als Warnung — das Pinnen ist eine Härtung, die ohne die Funktion
+-- gegenstandslos ist, das Fehlen aber nicht verschwiegen werden darf.
+do $$
+declare
+  v_sig  text;
+  v_sigs text[] := array[
+    'app.generate_redemption_code()',
+    'app.assign_customer_number()',
+    'app.loyalty_milestones()',
+    'app.trg_purchase_loyalty()',
+    'app.trg_subscriptions_lifetime_lock()',
+    'app.mhd_writedown_pct(integer)',
+    'app.snapshot_slot_history()',
+    'app.snapshot_slot_insert()',
+    'public.donation_rate()',
+    'public.purchase_net(numeric)',
+    'public.purchase_donation(numeric)'
+  ];
+begin
+  foreach v_sig in array v_sigs loop
+    if to_regprocedure(v_sig) is null then
+      raise warning 'A-5: % fehlt — search_path wird nicht gepinnt. Siehe docs/OPERATIONS.md, Runbook D.', v_sig;
+    else
+      execute format('alter function %s set search_path = public, app', v_sig);
+    end if;
+  end loop;
+end $$;
 
 -- ── 4) Test-Helper entfernen ────────────────────────────────────────────
 drop function if exists public._sign_jwt_hs256(jsonb, text);

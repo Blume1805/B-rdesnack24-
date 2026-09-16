@@ -48,12 +48,30 @@ create table if not exists public.document_approval_decisions (
   unique (approval_id, approver_id)
 );
 
-alter table public.partner_signatures
-  add column if not exists captured_via         text,
-  add column if not exists docusign_envelope_id text,
-  add column if not exists captured_at          timestamptz,
-  add column if not exists profile_id           uuid references public.profiles(id);
-create index if not exists idx_ps_profile on public.partner_signatures(profile_id);
+-- public.partner_signatures wird von KEINER Migration in diesem Repository
+-- angelegt (0033 vermerkt dazu „Vollständige Definition siehe
+-- Backend-Migration"). Beim Aufbau aus einer leeren Datenbank brach die Kette
+-- deshalb hier ab — docs/ARCHITECTURE.md, Befund A-5.
+--
+-- Die Tabelle wird hier bewusst NICHT nachgebaut: Ihre echte Struktur steht
+-- nur im Produktivprojekt, und eine geratene Fassung würde stillschweigend
+-- davon abweichen — das ist gefährlicher als ihr Fehlen. Stattdessen wird die
+-- Erweiterung übersprungen und der Grund laut ausgegeben, damit ein
+-- unvollständiger Aufbau nicht wie ein vollständiger aussieht.
+-- Export-Anleitung: docs/OPERATIONS.md, Runbook D.
+do $$
+begin
+  if to_regclass('public.partner_signatures') is null then
+    raise warning 'A-5: public.partner_signatures fehlt — Spalten captured_via, docusign_envelope_id, captured_at, profile_id werden NICHT angelegt. Die Signatur-Funktionen sind in dieser Datenbank unvollstaendig. Siehe docs/OPERATIONS.md, Runbook D.';
+  else
+    alter table public.partner_signatures
+      add column if not exists captured_via         text,
+      add column if not exists docusign_envelope_id text,
+      add column if not exists captured_at          timestamptz,
+      add column if not exists profile_id           uuid references public.profiles(id);
+    create index if not exists idx_ps_profile on public.partner_signatures(profile_id);
+  end if;
+end $$;
 
 alter table public.document_approvals enable row level security;
 alter table public.document_approval_decisions enable row level security;

@@ -73,6 +73,22 @@ create table if not exists public.role_permissions (
   primary key (role_key, permission_key)
 );
 
+-- Die vier Rollen gehören zum Schema, nicht zu den Beispieldaten: Spätere
+-- Migrationen (ab 0007) hängen Berechtigungen an 'shareholder' und laufen ohne
+-- diese Zeilen in einen Fremdschlüsselfehler. Bis zum 2026-09-16 standen sie
+-- nur in supabase/seed/seed.sql, das erst NACH den Migrationen geladen wird —
+-- dadurch war die Kette aus einer leeren Datenbank nicht wiederherstellbar
+-- (docs/ARCHITECTURE.md, Befund A-5).
+--
+-- Die Anweisung ist idempotent und ändert an einer bestehenden Datenbank
+-- nichts; seed.sql darf dieselben Zeilen weiterhin pflegen.
+insert into public.roles(key, name, description) values
+  ('system_admin', 'Systemadministrator', 'Vollzugriff auf das gesamte System'),
+  ('shareholder',  'Gesellschafter',      'Finanzen, Verwaltung, Doku, Inventur, Preise, Angebote'),
+  ('employee',     'Mitarbeiter',         'Nur individuell freigegebene Einzelberechtigungen'),
+  ('customer',     'Kunde',               'Nur eigener Kundenbereich')
+on conflict (key) do nothing;
+
 -- ----------------------------------------------------------------------------
 -- user_permissions  (ABAC-Overrides, v. a. für Mitarbeiter)
 -- ----------------------------------------------------------------------------

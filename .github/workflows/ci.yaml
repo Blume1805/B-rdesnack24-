@@ -72,7 +72,13 @@ jobs:
       - name: Start DB & Migrationen anwenden
         run: |
           supabase db start || supabase start || true
-          supabase db reset --debug || true
+          # Blockierend seit 2026-09-16: `|| true` verschluckte, dass sich die
+          # Migrationskette aus einer leeren Datenbank gar nicht aufbauen
+          # liess (Befund A-5). Der anschliessende pgTAP-Schritt lief dann
+          # gegen ein unvollstaendiges Schema und meldete Folgefehler statt
+          # der Ursache. Schlaegt dieser Schritt fehl, ist die Kette kaputt —
+          # siehe docs/OPERATIONS.md, Runbook D.
+          supabase db reset --debug
       - name: RLS-/Permission-Tests (pgTAP)
         # Blockierend seit 2026-09-16: Die fehlende RLS auf dem IoT-Layer
         # (Migration 0031) blieb unentdeckt, weil dieser Schritt nicht

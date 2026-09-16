@@ -31,29 +31,31 @@ abstract final class Pricing {
   /// die RPC `choose_subscription_plan` und die Preisfelder bleiben unberührt.
   static const benefitsFreeForAll = true;
 
-  /// Lebenslanger Status-Zusatzrabatt (ON TOP auf die 5 % Abo-Rabatt).
+  /// Lebenslanger Status-Zusatzrabatt (ON TOP auf den 5-%-Grundrabatt).
   ///
-  /// ACHTUNG — dieser Code ist **kein** Spiegel der Server-RPC, auch wenn das
-  /// hier früher behauptet wurde. Geprüft am 2026-09-16:
+  /// **Spiegel der Server-RPC `app.status_tiers()` in Migration 0060.**
+  /// Am 2026-09-16 gegen eine laufende PostgreSQL-16-Instanz geprüft, indem
+  /// 0058 und danach 0060 eingespielt und die Stufen abgefragt wurden:
   ///
-  /// `app.status_tiers` (Migration 0058) liefert vier Stufen mit anderen
-  /// Schwellen und einem anderen Vorteil:
-  ///   bronze ab   0 € → 0 % Cashback
-  ///   silber ab  50 € → 1 % Cashback
-  ///   gold   ab 150 € → 2 % Cashback
-  ///   platin ab 400 € → 3 % Cashback
+  /// | Lebenszeit-Umsatz | Stufe  | Zusatz | gesamt |
+  /// |-------------------|--------|--------|--------|
+  /// | 0 – 149,99 €      | basis  | +0,0 % |  5,0 % |
+  /// | 150 – 499,99 €    | bronze | +1,0 % |  6,0 % |
+  /// | 500 – 999,99 €    | silber | +2,5 % |  7,5 % |
+  /// | ab 1.000 €        | gold   | +5,0 % | 10,0 % |
   ///
-  /// Der Client bildet dieselben Codes dagegen auf Rabattsätze ab. Daraus
-  /// folgen drei Abweichungen, die vor jeder Weiterverwendung zu entscheiden
-  /// sind (siehe docs/strategy/2026-09-16-umsetzungsplan.md, Befund P-1):
-  ///   1. Der Zusatzrabatt greift viel früher als dokumentiert — „silber"
-  ///      ab 50 € statt ab 500 €, „gold" ab 150 € statt ab 1.000 €.
-  ///   2. `platin` ist hier nicht abgebildet und fällt auf 0 %. Die höchste
-  ///      Stufe erhält damit den geringsten Rabatt.
-  ///   3. Cashback der Server-Stufe kommt zum Rabatt hinzu.
+  /// Diese Staffel hat der Gesellschafter am 2026-09-16 ausdrücklich
+  /// bestätigt. Client und Server stimmen überein; `basis` fällt hier in den
+  /// `default`-Zweig und damit korrekt auf 0 %.
   ///
-  /// Die Werte bleiben unverändert, bis über den Verbleib des Abo-Modells
-  /// entschieden ist (Phase 2, gesperrt).
+  /// **Richtigstellung zu „Befund P-1".** Eine frühere Fassung dieses
+  /// Kommentars behauptete einen Widerspruch zwischen Client und Server
+  /// (silber ab 50 €, platin ab 400 €, Cashback statt Rabatt). Das war
+  /// falsch: Gelesen worden war Migration **0058**, die von **0060**
+  /// abgelöst wird — 0060 droppt die alte Funktion ausdrücklich und ersetzt
+  /// Cashback durch Rabatt. Es gab nie zwei widersprüchliche Stufensysteme,
+  /// nur eine veraltete Quelle. `pricing_test.dart` hält die Staffel fest,
+  /// damit sie nicht unbemerkt auseinanderläuft.
   static double statusBonusRate(String? tierCode) {
     switch (tierCode) {
       case 'bronze':

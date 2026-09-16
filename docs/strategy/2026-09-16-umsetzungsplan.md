@@ -110,7 +110,21 @@ Kein Konto, keine Anmeldung, kein Abo, kein Rabatt, keine Punkte, keine
 Benachrichtigungen, keine Kundenidentifikation, keine native App, kein Tracking
 ohne Einwilligung.
 
-## Befund P-1 — zwei widersprüchliche Stufensysteme im Code
+## Befund P-1 — ZURÜCKGEZOGEN am 2026-09-16
+
+> **Dieser Abschnitt war falsch.** Er beruht auf Migration `0058`, die von
+> `0060` abgelöst wird — `0060` droppt die alte Stufenfunktion ausdrücklich
+> und ersetzt Cashback durch Rabatt. Es gab nie zwei Stufensysteme, nur eine
+> veraltete Quelle. Geprüft durch Einspielen beider Migrationen in eine
+> laufende PostgreSQL-16-Instanz; die geltende Staffel lautet 5 % bis
+> 149,99 €, 6 % ab 150 €, 7,5 % ab 500 €, 10 % ab 1.000 € und stimmt mit dem
+> Client überein. Elf Zusicherungen einschließlich aller Grenzwerte bestanden.
+>
+> Der Text bleibt zur Nachvollziehbarkeit stehen. Er ist **keine** Beschreibung
+> des Codes, sondern das Protokoll eines Irrtums: Eine Migration wurde für die
+> Wahrheit gehalten, obwohl nur die zuletzt angewandte es ist. Siehe
+> `docs/ARCHITECTURE.md`, A-7.
+
 
 Gefunden am 2026-09-16 beim Gegenprüfen der Statuslogik. **FAKT**, aus dem Code
 belegt.
@@ -195,12 +209,15 @@ Ebenfalls ungelöst:
   ist damit **überholt** — sie ist neu zu rechnen, sobald die Zahl der
   angemeldeten Konten aussagekräftig ist. Bis dahin: Der Defizitbereich
   beginnt früher als dort ausgewiesen.
-* **Befund P-1 wiegt schwerer.** Solange der Statusrabatt an ein Abo gebunden
-  war, betraf der Widerspruch zwischen Client- und Server-Stufen wenige Konten.
-  Jetzt betrifft er jedes. Ein Kunde mit 150 € Umsatz bekommt im Client 10 %
-  Gesamtrabatt, einer mit 400 € nur 5 %. Das ist nicht nur inkonsistent,
-  sondern in der Sache falsch herum. **Das ist der dringlichste offene Punkt
-  dieses Dokuments.**
+* ~~**Befund P-1 wiegt schwerer.**~~ **Zurückgezogen am 2026-09-16.** Der
+  behauptete Widerspruch zwischen Client- und Server-Stufen existiert nicht.
+  Die Analyse hatte Migration `0058` gelesen, die von `0060` abgelöst wird.
+  Geprüft durch Einspielen beider Migrationen: Die geltende Staffel lautet
+  5 % bis 149,99 €, 6 % ab 150 €, 7,5 % ab 500 €, 10 % ab 1.000 € — genau so,
+  wie der Client sie abbildet und wie der Gesellschafter sie bestätigt hat.
+  Der Fehler lag bei der Analyse, nicht im Code. Was bleibt: Der Dauerrabatt
+  gilt jetzt für jedes Konto, nicht nur für Abonnenten — die Kostenwirkung
+  unten steht unverändert.
 * **Die These der Querfinanzierung ist unbelegt.** Die Annahme war, ein
   niedriger Abopreis erzeuge Reichweite, die sich an B2B-Werbekunden verkaufen
   lässt. Die Gegenrechnung steht in Nachtrag 2: Bei realistischer Nutzerzahl
@@ -229,9 +246,10 @@ der Sperre für Phase 2 nichts.
 
 Vorschlag zur Reihenfolge:
 
-1. **Befund P-1 entscheiden** — welche Stufenschwellen und welcher Vorteil
-   gelten sollen. Das ist eine Geschäftsentscheidung und liegt bei Philipp.
-   Dringend, weil die Regel jetzt jedes Konto betrifft.
+1. ~~Befund P-1 entscheiden~~ — **erledigt am 2026-09-16.** Der Befund war
+   falsch (veraltete Migration gelesen) und ist zurückgezogen. Die Staffel
+   5 / 6 / 7,5 / 10 % ab 0 / 150 / 500 / 1.000 € ist bestätigt und in Client
+   wie Server identisch.
 2. **Standortgespräche führen** — unverändert der Engpass.
 3. **Bestandsabfrage fahren** —
    `select plan, count(*) from app.subscriptions group by plan;`. Ergibt sie

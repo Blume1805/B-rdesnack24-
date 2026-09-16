@@ -227,6 +227,103 @@ Abfrage mit `select id, name, adapter, is_active from public.telemetry_providers
 Einrichtung des Datenversands gebraucht wird. Anlass, Datum und Anbieter in der
 Verfahrensdokumentation festhalten — das Passwort selbst nicht.
 
+## Runbook D: Die drei fehlenden Datenbank-Objekte nachziehen
+
+**Zeitbedarf:** etwa 20 Minuten. Kein Eingriff in Live-Daten — es wird nur
+gelesen und anschließend eine Datei ins Repository gelegt.
+
+### Warum das gemacht werden soll
+
+Die Datenbank wird aus einer Reihe nummerierter Dateien aufgebaut
+(„Migrationen", `supabase/migrations/`). Der Gedanke dahinter: Ginge die
+Datenbank verloren, ließe sie sich aus diesen Dateien neu erzeugen.
+
+Am 16.09.2026 hat sich beim Ausprobieren gezeigt, dass das **nicht**
+funktionierte. Vier Stellen brachen ab. Drei davon sind repariert. Die vierte
+Ursache lässt sich nicht im Repository reparieren: **Drei Objekte existieren
+nur in der Live-Datenbank.** Jemand hat sie seinerzeit direkt im
+Supabase-Dashboard angelegt, statt eine Migrationsdatei dafür zu schreiben.
+Mehrere Dateien vermerken das sogar selbst mit dem Satz „Vollständige
+Definition siehe Backend-Migration".
+
+Es geht um:
+
+| Objekt | Wofür es gebraucht wird |
+|---|---|
+| Tabelle `public.partner_signatures` | Unterschriften der Gesellschafter — genutzt von vier Edge Functions (DocuSign-Abruf, Signatur-Nachbearbeitung, Finanz-PDF, Protokoll-PDF) |
+| Funktion `app.snapshot_slot_history()` | Historie der Automatenfächer |
+| Funktion `app.snapshot_slot_insert()` | dito |
+
+**Was passiert, wenn es nicht gemacht wird:** Im Alltag nichts — die
+Live-Datenbank hat diese Objekte ja. Gefährlich wird es genau einmal, nämlich
+dann, wenn die Datenbank neu aufgebaut werden muss: nach einem Ausfall, beim
+Anlegen einer Testumgebung, oder wenn jemand das Projekt übernimmt. Dann fehlen
+die Unterschriften-Funktionen, und zwar ohne Fehlermeldung an der richtigen
+Stelle. Es ist die Art von Problem, die man erst bemerkt, wenn man sie am
+wenigsten gebrauchen kann.
+
+### Was dabei passiert
+
+Du lässt dir von Supabase anzeigen, wie diese drei Objekte aufgebaut sind, und
+schickst mir das Ergebnis. Ich mache daraus eine ordentliche Migrationsdatei.
+**Es wird nichts geändert, nichts gelöscht und nichts angelegt** — die Abfragen
+lesen ausschließlich.
+
+### Schritt für Schritt
+
+1. Öffne <https://supabase.com/dashboard> und melde dich an.
+2. Wähle links oben das Bördesnack24-Projekt aus.
+3. Klicke in der linken Leiste auf **SQL Editor** (Symbol mit dem Datenbank-
+   Blatt), dann oben auf **New query**.
+4. Füge den folgenden Text vollständig in das große Eingabefeld ein:
+
+   ```sql
+   -- 1) Aufbau der Tabelle partner_signatures
+   select column_name, data_type, is_nullable, column_default
+   from information_schema.columns
+   where table_schema = 'public' and table_name = 'partner_signatures'
+   order by ordinal_position;
+   ```
+
+5. Klicke rechts unten auf **Run** (oder drücke Strg+Enter).
+6. Unter dem Eingabefeld erscheint eine Tabelle. Klicke auf **Download CSV**
+   oder markiere den Inhalt und kopiere ihn.
+7. Lösche den Text im Eingabefeld und füge stattdessen diesen ein:
+
+   ```sql
+   -- 2) Vollständiger Quelltext der beiden Funktionen
+   select pg_get_functiondef(p.oid) as definition
+   from pg_proc p
+   join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'app'
+     and p.proname in ('snapshot_slot_history', 'snapshot_slot_insert');
+   ```
+
+8. Wieder auf **Run** klicken. Es sollten **zwei** Zeilen erscheinen. Klicke in
+   jede Zelle und kopiere den kompletten Inhalt — das ist jeweils ein längerer
+   Text, der mit `CREATE OR REPLACE FUNCTION` beginnt.
+9. Schicke mir beide Ergebnisse (die Spaltenliste aus Schritt 6 und die zwei
+   Funktionstexte aus Schritt 8).
+
+### So sieht Erfolg aus
+
+Schritt 5 liefert eine Liste von etwa acht bis zwölf Zeilen mit Spaltennamen
+wie `id`, `full_name`, `image_url`, `sort_order`. Schritt 8 liefert genau zwei
+Zeilen, die mit `CREATE OR REPLACE FUNCTION app.snapshot_slot_` beginnen.
+
+### Wenn etwas schiefgeht
+
+* **„relation does not exist" bei Schritt 5** — dann heißt die Tabelle anders
+  oder liegt in einem anderen Schema. Schick mir die Fehlermeldung.
+* **Schritt 8 liefert keine Zeilen** — dann existieren die Funktionen auch
+  live nicht mehr. Das wäre eine gute Nachricht: Dann können die beiden
+  Verweise in `0045` ersatzlos entfallen. Schick mir auch das.
+* **Du hast versehentlich etwas geändert** — kann hier nicht passieren, beide
+  Abfragen lesen nur. Es gibt nichts rückgängig zu machen.
+
+**Eilt es?** Nein, nicht für den laufenden Betrieb. Aber es sollte vor dem
+Go-Live erledigt sein, weil danach der Druck im Ernstfall größer ist.
+
 ## Monitoring
 
 - **Sentry** (Fehler/Crashes), **PostHog** (Nutzung, consent-gated).

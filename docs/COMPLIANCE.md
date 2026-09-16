@@ -292,6 +292,16 @@ fest. **Dieser Test wurde nicht ausgeführt**: pgTAP steht in der Arbeitsumgebun
 nicht zur Verfügung. Der Nachweis oben stammt aus einem manuellen SQL-Durchlauf
 derselben Fälle.
 
+**Nachtrag zur Preisangabe (2026-09-16).** Die Prüfung der Marketing-PDF war
+zunächst wertlos: Chromium bettet Text als Hex-Strings mit Subset-Fonts ein,
+weshalb eine Suche nach „0,99" im PDF **immer** erfolglos bleibt — auch wenn
+die Angabe gut sichtbar auf der Seite steht. Die erste Prüfung meldete „sauber",
+ohne ein einziges Zeichen gelesen zu haben. Wiederholt mit einem Extraktor, der
+die `/ToUnicode`-Tabellen auflöst (`scripts/pdf_text_pruefen.py`, bricht ab,
+wenn keine Tabelle gefunden wird): 4.322 bzw. 3.716 bzw. 7.373 Zeichen gelesen,
+keine der Zeichenfolgen „0,99", „9,99", „79,99", „Lifetime" enthalten, die
+Statusstaffel dagegen vorhanden. Erst damit ist die Aussage belegt.
+
 Sachlage zum Bestandsschutz: Nach dem Stand vom 2026-09-16 wurde über die App
 kein Entgelt vereinnahmt; die Auswahl eines Modells war eine unverbindliche
 Vormerkung ohne Abbuchung (Store-Billing war nie aktiv). Die Datenbank enthält
@@ -411,9 +421,12 @@ Behandlung. Die Gewährung von Coupons an alle Registrierten statt an Abonnenten
       der maßgebliche Maßstab und jede betroffene Person ist aktiv zu
       informieren.
 - [ ] Store-Metadaten auf Preisangaben prüfen — vor der ersten Einreichung
-- [ ] Befund P-1 entscheiden (zwei widersprüchliche Statussysteme): Der
-      Widerspruch wiegt schwerer, seit der Statusrabatt jedem Konto zusteht.
-      Bis zur Entscheidung nennt die App keine konkreten Schwellen mehr.
+- [x] Befund P-1 aufgelöst — er beruhte auf einer veralteten Migration und
+      ist zurückgezogen (`docs/ARCHITECTURE.md`, A-7). Die Statusstaffel
+      (5 / 6 / 7,5 / 10 % ab 0 / 150 / 500 / 1.000 €) ist vom Gesellschafter
+      am 2026-09-16 bestätigt, in Client und Server identisch und durch
+      Ausführen belegt. Die konkreten Schwellen stehen deshalb wieder im
+      Chatbot und in den Marketing-Unterlagen.
 
 **Status 🟡** · Verantwortlich: Philipp Blume · Fällig: Bestandsabfrage und
 Store-Metadaten vor der ersten Veröffentlichung der App.

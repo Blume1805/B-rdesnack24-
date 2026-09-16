@@ -148,6 +148,16 @@ $$;
 grant execute on function public.inventory_report(timestamptz, timestamptz) to authenticated;
 
 -- ── inventory_summary_by_product ebenfalls zu Anschaffungskosten ────────
+-- Der OUT-Parameter heißt jetzt unit_cost statt unit_price (0027). Für
+-- PostgreSQL ist das eine Änderung des Rückgabetyps, die `create or replace`
+-- ablehnt — die Kette brach hier beim Aufbau aus einer leeren Datenbank ab
+-- (docs/ARCHITECTURE.md, Befund A-5). Deshalb erst droppen, wie es 0060 bei
+-- app.status_tiers() aus demselben Grund ebenfalls tut.
+--
+-- Unbedenklich: Die Funktion hat außerhalb der Migrationen keinen Aufrufer
+-- (Suche über *.sql, *.ts, *.dart am 2026-09-16), und das `grant` unten
+-- stellt die Ausführungsrechte unmittelbar wieder her.
+drop function if exists public.inventory_summary_by_product();
 create or replace function public.inventory_summary_by_product()
 returns table(
   product_id       uuid,

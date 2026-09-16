@@ -130,11 +130,11 @@ const _kFaq = <_FaqCategory>[
       'Was spare ich mit der App?',
       'Du zahlst an jedem Automaten immer 5 % weniger — den '
           'App-Preis siehst du direkt an jedem Produkt. Mit deinem Status '
-          'wächst der Dauerrabatt lebenslang; welche Stufe du erreicht hast '
-          'und was sie dir bringt, steht jederzeit in deinem Status. '
-          'Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- und '
-          'Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis und '
-          'Treue-Coupons von 5 bis 25 %.',
+          'wächst der Dauerrabatt lebenslang und ohne Reset: 6 % ab 150 € '
+          'Gesamtumsatz (Bronze), 7,5 % ab 500 € (Silber), 10 % ab 1.000 € '
+          '(Gold). Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- '
+          'und Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis '
+          'und Treue-Coupons von 5 bis 25 %.',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
