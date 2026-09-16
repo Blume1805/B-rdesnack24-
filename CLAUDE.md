@@ -41,3 +41,25 @@ dem Gedächtnis.
   stillschweigend zurückkehren.
 * Kein Nachfragen beim User nötig. Die Prüfung gehört zur Aufgabe, nicht zur
   Zusatzleistung.
+
+## Selbstständig arbeiten (Pflicht, ohne Nachfrage)
+
+Erkannte Aufgaben werden **erledigt, nicht angeboten**. Wer feststellt, dass
+etwas getan werden muss, tut es — einschließlich der Nacharbeiten, die sich aus
+einer Änderung ergeben: Dokumentation, Runbook, Testabdeckung, Compliance-Eintrag.
+
+Rückfrage nur bei **Grundsatzentscheidungen**. Das sind:
+
+* Architektur- und Technologiewechsel (Framework, Datenhaltung, Anbieter)
+* Geschäftsmodell, Preise, Konditionen gegenüber Dritten
+* alles, was nach außen wirkt, bevor es abgestimmt ist — Versand an Dritte,
+  Veröffentlichung, Vertragsinhalte
+* destruktive oder unumkehrbare Eingriffe (K4 nach `boerdesnack24-verify`):
+  Löschen von Tabellen, Spalten oder Code, irreversible Migrationen,
+  Produktionsdaten, Schlüsselrotation
+* Fälle, in denen zwei sinnvolle Wege offenstehen und die Wahl vom
+  Geschäftsziel abhängt, nicht von der Technik
+
+Alles andere wird ausgeführt und anschließend berichtet: was getan wurde, womit
+es nachgewiesen ist, und was offen bleibt. Ein Bericht ersetzt die Rückfrage —
+nicht die Arbeit.
