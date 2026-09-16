@@ -76,3 +76,44 @@ gestrichen, entsteht eine Lücke — nicht Klarheit.
 Kein Konto, keine Anmeldung, kein Abo, kein Rabatt, keine Punkte, keine
 Benachrichtigungen, keine Kundenidentifikation, keine native App, kein Tracking
 ohne Einwilligung.
+
+## Befund P-1 — zwei widersprüchliche Stufensysteme im Code
+
+Gefunden am 2026-09-16 beim Gegenprüfen der Statuslogik. **FAKT**, aus dem Code
+belegt.
+
+Es existieren zwei Stufensysteme mit denselben Namen, aber unterschiedlichen
+Schwellen und unterschiedlichem Vorteil:
+
+| | Server: `app.status_tiers` (Migration 0058) | Client: `core/pricing/pricing.dart` |
+|---|---|---|
+| bronze | ab 0 € → 0 % Cashback | +1 % Rabatt |
+| silber | ab 50 € → 1 % Cashback | +2,5 % Rabatt |
+| gold | ab 150 € → 2 % Cashback | +5 % Rabatt |
+| platin | ab 400 € → 3 % Cashback | **nicht abgebildet → 0 %** |
+
+`customer_providers.dart` liest den Stufencode vom Server und reicht ihn an
+`Pricing.effectiveDiscountRate` weiter. Daraus folgt im Betrieb:
+
+1. **Der Zusatzrabatt greift zehnmal früher als dokumentiert.** Ein Kunde mit
+   50 € kumuliertem Umsatz ist serverseitig `silber` und bekommt im Client
+   2,5 Prozentpunkte extra — der Kommentar nannte dafür 500 €. Bei 150 € sind
+   es bereits 10 % Gesamtrabatt statt der dokumentierten 1.000 €-Schwelle.
+2. **Die höchste Stufe ist die schlechteste.** `platin` kennt der Client nicht
+   und fällt auf 0 %. Ein Kunde mit 400 € Umsatz erhält 5 % Gesamtrabatt, einer
+   mit 200 € dagegen 10 %.
+3. **Cashback kommt obendrauf.** Der Server gewährt zusätzlich 1 bis 3 %.
+
+**Wirkung.** Die Rechnung im Fundamentdokument ging vom dokumentierten Stand
+aus. Real ist der Margenabfluss höher und setzt früher ein. Das schwächt das
+Abo-Modell zusätzlich — und ist ein weiteres Argument dafür, die Statuslogik
+nicht zu reparieren, bevor entschieden ist, ob sie überhaupt bleibt.
+
+**Nicht behoben, mit Absicht.** Welche Schwellen und welcher Vorteil richtig
+wären, ist eine Geschäftsentscheidung, keine technische. Sie gehört in Phase 2.
+Korrigiert wurde nur der irreführende Kommentar in `pricing.dart`, der das
+Gegenteil behauptete.
+
+**Verbraucherrechtlich unkritisch:** Kunden erhalten derzeit einen höheren
+Rabatt als dokumentiert, nicht einen niedrigeren. Es entsteht kein Nachteil für
+sie und damit kein Anpassungsbedarf an Preisangaben oder AGB.

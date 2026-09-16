@@ -14,12 +14,29 @@ abstract final class Pricing {
   /// App-Vorteil: Abonnenten sparen gegenüber dem Automatenpreis immer 5 %.
   static const appDiscountRate = 0.05;
 
-  /// Lebenslanger Status-Zusatzrabatt (ON TOP auf die 5 % Abo-Rabatt),
-  /// gestaffelt nach kumulativem Umsatz — Spiegel der Server-RPC
-  /// my_gamification_status / app.status_tiers:
-  ///   Bronze ab 150 € → +1 % (gesamt 6 %)
-  ///   Silber ab 500 € → +2,5 % (gesamt 7,5 %)
-  ///   Gold ab 1000 € → +5 % (gesamt 10 %)
+  /// Lebenslanger Status-Zusatzrabatt (ON TOP auf die 5 % Abo-Rabatt).
+  ///
+  /// ACHTUNG — dieser Code ist **kein** Spiegel der Server-RPC, auch wenn das
+  /// hier früher behauptet wurde. Geprüft am 2026-09-16:
+  ///
+  /// `app.status_tiers` (Migration 0058) liefert vier Stufen mit anderen
+  /// Schwellen und einem anderen Vorteil:
+  ///   bronze ab   0 € → 0 % Cashback
+  ///   silber ab  50 € → 1 % Cashback
+  ///   gold   ab 150 € → 2 % Cashback
+  ///   platin ab 400 € → 3 % Cashback
+  ///
+  /// Der Client bildet dieselben Codes dagegen auf Rabattsätze ab. Daraus
+  /// folgen drei Abweichungen, die vor jeder Weiterverwendung zu entscheiden
+  /// sind (siehe docs/strategy/2026-09-16-umsetzungsplan.md, Befund P-1):
+  ///   1. Der Zusatzrabatt greift viel früher als dokumentiert — „silber"
+  ///      ab 50 € statt ab 500 €, „gold" ab 150 € statt ab 1.000 €.
+  ///   2. `platin` ist hier nicht abgebildet und fällt auf 0 %. Die höchste
+  ///      Stufe erhält damit den geringsten Rabatt.
+  ///   3. Cashback der Server-Stufe kommt zum Rabatt hinzu.
+  ///
+  /// Die Werte bleiben unverändert, bis über den Verbleib des Abo-Modells
+  /// entschieden ist (Phase 2, gesperrt).
   static double statusBonusRate(String? tierCode) {
     switch (tierCode) {
       case 'bronze':
