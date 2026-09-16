@@ -55,8 +55,13 @@ angeglichen wurden (Stand 2026-09-16):
 - **Riverpod** als State- und DI-Container. Provider liefern UseCases/Repositories; Tests
   überschreiben Provider mit Fakes/Mocks.
 - **go_router** für deklaratives Routing inkl. rollenbasierter Redirects (Auth-Guards).
-- **freezed** + **json_serializable** für unveränderliche Modelle & DTOs.
-- **drift** (SQLite) für Offline-Cache und eine **Outbox** zur Synchronisation.
+- **equatable** für Wertgleichheit in Entities und DTOs (17 Dateien). Es wird
+  **keine Codegenerierung** eingesetzt — weder `freezed` noch `json_serializable`;
+  Mapper sind von Hand geschrieben.
+- **Offline-Outbox** für Protokoll-Schreibvorgänge in der Feldarbeit:
+  `core/services/outbox_service.dart`, persistiert über **shared_preferences**
+  und ausgelöst über **connectivity_plus**. Eine SQLite-Schicht (drift o. ä.)
+  existiert nicht.
 
 ## Backend (Supabase)
 
