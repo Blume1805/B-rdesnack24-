@@ -229,3 +229,199 @@ jeweiligen Empfänger nicht steht.
 
 **Status 🔴** · Verantwortlich: Philipp Blume · Fällig: vor Veröffentlichung
 der ersten Automatenseite.
+
+---
+
+## V-007 · Umstellung der App auf unentgeltliche Nutzung (2026-09-16)
+
+### Sachverhalt
+
+Beschluss des Gesellschafters vom 2026-09-16: Die Bördesnack24-App wird **nicht
+mehr kostenpflichtig** angeboten. Dauerrabatt (5 %), Coupons, Treue-Meilensteine
+und Statusstufen stehen allen registrierten Kundinnen und Kunden offen. Die drei
+Abo-Modelle (0,99 € monatlich, 9,99 € jährlich, 79,99 € Lifetime „Founders
+Edition") werden eingestellt.
+
+Umsetzung im Code über den Schalter `Pricing.benefitsFreeForAll = true`
+(`apps/mobile/lib/core/pricing/pricing.dart`). Die Abo-Logik, die Server-RPC
+`choose_subscription_plan` (Migration 0061), die Abo-Tabellen und die
+Preiskonstanten bleiben **unverändert erhalten**, damit die Entscheidung bis zum
+Abschluss der Standortgespräche umkehrbar ist. Der Kundenbereich erreicht diese
+Pfade nicht mehr: `SubscriptionScreen.build` kehrt vor dem Verkaufsweg zurück,
+die Vorteilsprüfung läuft über den neuen `hasBenefitsProvider`.
+
+**Serverseitiges Gating (nachträglich gefunden und behoben).** Die erste
+Umsetzung betraf nur den Client. Eine Prüfung der Migrationen ergab, dass
+Migration 0048 die Vorteile **serverseitig** an ein Abo bindet: `activate_offer`
+und `activate_personal_offer` werfen ohne Abo einen Fehler, und
+`app.grant_loyalty_bonuses` steigt mit `return 0` aus. Ein angemeldeter Kunde
+hätte in der App gelesen, Coupons stünden ihm zu — und beim Aktivieren die
+Meldung „Abo erforderlich" bekommen. Das wäre nicht nur ein Fehler, sondern nach
+§ 5 UWG eine irreführende Angabe über die Bedingungen einer Vergünstigung.
+
+Behoben mit Migration `0065_free_benefits_for_all.sql`:
+`app.benefits_free_for_all()` ist der Schalter (Spiegel von
+`Pricing.benefitsFreeForAll`), `app.has_app_benefits()` das neue Gate der drei
+Funktionen. `app.has_subscription()` bleibt unverändert und meldet weiterhin
+wahrheitsgemäß, ob ein Abo gewählt wurde.
+
+Datenklasse D5 (Zahlung und Abo), Änderungsklasse K3 (Außenwirkung, Rechtstexte
+betroffen). Kein Datenverlust, keine Tabellen- oder Spaltenänderung, keine
+destruktive Operation.
+
+**Nachweis (ausgeführt am 2026-09-16, nicht nur behauptet).** Gegen eine lokale
+PostgreSQL-16-Instanz mit den Tabellen aus 0048:
+
+| Prüfung | Vor 0065 | Nach 0065 |
+|---|---|---|
+| Coupon aktivieren (Konto ohne Abo) | abgelehnt („Abo erforderlich") | erlaubt |
+| Persönliches Angebot aktivieren | abgelehnt | erlaubt |
+| Treue-Meilensteine vergeben | 0 Coupons | 3 Coupons |
+| Schalter auf `false` zurückgesetzt | — | wieder abgelehnt |
+| Mit Abo trotz `false` | — | erlaubt |
+| Fremdes Angebot aktivieren | — | keine Zeile geändert (Isolation hält) |
+| Meilensteine ohne eigene Käufe | — | 0 Coupons |
+
+Die letzten beiden Zeilen sind die Regressionsprüfung nach
+`boerdesnack24-security-regression`: Die Öffnung der Vorteile darf die
+Mandantentrennung nicht aufweichen. Sie tut es nicht — die Funktionen filtern
+weiterhin auf `auth.uid()` bzw. den übergebenen Kunden.
+
+`supabase/tests/free_benefits_test.sql` hält dieselben Prüfungen als pgTAP-Test
+fest. **Dieser Test wurde nicht ausgeführt**: pgTAP steht in der Arbeitsumgebung
+nicht zur Verfügung. Der Nachweis oben stammt aus einem manuellen SQL-Durchlauf
+derselben Fälle.
+
+Sachlage zum Bestandsschutz: Nach dem Stand vom 2026-09-16 wurde über die App
+kein Entgelt vereinnahmt; die Auswahl eines Modells war eine unverbindliche
+Vormerkung ohne Abbuchung (Store-Billing war nie aktiv). Die Datenbank enthält
+zwei Kundenkonten. **Diese Aussage ist nicht durch eine Abfrage der Tabelle
+`app.subscriptions` belegt** — sie stützt sich auf die Vormerkungs-Klausel der
+bisherigen AGB Ziffer 4 f) und darauf, dass keine Zahlungsanbindung existiert.
+`ZU VERIFIZIEREN` (siehe Handlungsbedarf).
+
+### Rechtliche Würdigung
+
+**Verbraucherrecht, Wegfall der Entgeltlichkeit.** Der Übergang von einem
+entgeltlichen zu einem unentgeltlichen Angebot ist für Verbraucher ausschließlich
+vorteilhaft. Eine Zustimmung ist dafür nicht erforderlich. Umgekehrt gilt: Ein
+späteres Zurückschalten auf ein Entgelt wäre **keine** bloße Rückkehr, sondern
+ein neues Angebot, das erneut aktiv angenommen werden muss (§ 312a Abs. 3 BGB
+sperrt stillschweigende Entgeltvereinbarungen). Der technische Schalter darf
+darüber nicht hinwegtäuschen.
+
+**§ 312k BGB (Kündigungsschaltfläche).** Die Vorschrift setzt einen entgeltlichen
+Vertrag im elektronischen Geschäftsverkehr voraus. Mit dem Wegfall des Entgelts
+entfällt die Pflicht. Die Schaltfläche „Verträge hier kündigen" bleibt bewusst
+erhalten — als freiwillige Leistung und weil sie bei einer Rücknahme des
+Beschlusses sofort wieder gebraucht wird. In AGB und Formular ist sie jetzt als
+freiwillig gekennzeichnet; sie darf nicht als gesetzlich geschuldet dargestellt
+werden.
+
+**§ 312j Abs. 3 BGB (Button-Lösung).** Entfällt aus demselben Grund. Es gibt
+keine zahlungspflichtige Bestellung mehr, für die eine Beschriftung
+„zahlungspflichtig bestellen" nötig wäre.
+
+**§§ 327 ff. BGB (Verträge über digitale Produkte).** Diese Vorschriften gelten
+nach § 327 Abs. 3 BGB **auch dann, wenn der Verbraucher statt eines Preises
+personenbezogene Daten bereitstellt**. Genau das ist bei der Registrierung der
+Fall. Die Pflichten zur Mangelfreiheit und zur Aktualisierung der App bleiben
+also bestehen. Die Unentgeltlichkeit ist hier kein Haftungsausschluss — das
+wurde in AGB Ziffer 6 d) ausdrücklich klargestellt, statt es wegzulassen.
+
+**Widerrufsrecht.** §§ 312g, 355 BGB knüpfen im Ausgangspunkt an entgeltliche
+Verbraucherverträge an. Über § 312 Abs. 1a BGB kann der Anwendungsbereich auch
+Verträge erfassen, bei denen personenbezogene Daten bereitgestellt werden; die
+Einordnung ist nicht zweifelsfrei. Gewählt wurde die für den Verbraucher
+günstigere Variante: 14 Tage Widerrufsrecht ab Registrierung, ausdrücklich
+„vorsorglich und unabhängig von der rechtlichen Einordnung". Wertersatz entfällt
+mangels Zahlungspflicht. Das ist der sichere Weg, weil ein zu weit gewährtes
+Widerrufsrecht kein Risiko begründet, ein zu eng gefasstes dagegen schon.
+
+**Jugendschutz und Minderjährige.** Die bisherige Volljährigkeitsklausel war an
+das kostenpflichtige Abo geknüpft (§§ 106 ff., 110 BGB) und ist gegenstandslos.
+An ihre Stelle tritt eine Altersgrenze von 16 Jahren für die **Registrierung**,
+begründet über Art. 8 DSGVO: Deutschland hat die dort vorgesehene Altersgrenze
+nicht abgesenkt, sodass Einwilligungen in Dienste der Informationsgesellschaft
+erst ab 16 allein wirksam erteilt werden können. Der Kauf am Automaten bleibt
+davon unberührt. **Diese Klausel ist neu und verschärft** gegenüber der bisherigen
+Fassung, die das Bonusprogramm ohne Abo „allen Altersgruppen" öffnete — der
+Widerspruch zum Datenschutzrecht wird damit aufgelöst, nicht ignoriert.
+
+**UWG § 5 (irreführende Werbung) und PAngV.** Preisangaben, die es nicht mehr
+gibt, dürfen nicht weiter beworben werden. Betroffen sind sämtliche Stellen mit
+„0,99 €", „9,99 €", „79,99 €" und den Break-even-Rechnungen. Im Code sind sie
+ersetzt. Ebenso in den drei Marketing-Unterlagen: `abo-rechnet-sich`,
+`app-mehrwert` und `sachbezug-steuerfrei` liegen als HTML-Quelle unter
+`docs/marketing/` und wurden am 2026-09-16 aus dieser Quelle neu als PDF
+gedruckt (Headless-Chromium) und in `docs/marketing/` sowie
+`apps/mobile/web/marketing/` ersetzt. Geprüft wurde anschließend der
+**Textinhalt der erzeugten PDF-Dateien**, nicht nur die HTML-Quelle: keine der
+Zeichenfolgen „0,99", „9,99", „79,99", „Lifetime" kommt darin noch vor.
+
+Anmerkung zum Vorgehen: Eine frühere Fassung dieses Eintrags hielt fest, für die
+PDF-Dateien existiere keine Quelle im Repository, weshalb der Link in der App
+ausgeblendet werde. Das war falsch — die HTML-Quellen lagen unter
+`docs/marketing/` und wurden bei der ersten Suche übersehen. Der Link ist wieder
+sichtbar, weil das PDF jetzt stimmt. Der Dateiname `abo-rechnet-sich.pdf` bleibt
+aus Gründen der Verlinkbarkeit erhalten; sein Inhalt nennt kein Abo mehr.
+
+**Store-Regeln.** Der Wegfall von In-App-Käufen vereinfacht die Store-Prüfung
+(keine IAP-Pflicht nach Apple-Richtlinie 3.1.1, keine Google-Play-Billing-
+Pflicht). Die Store-Metadaten dürfen keine Preise mehr nennen; sie sind vor der
+Einreichung zu prüfen.
+
+**Steuerrecht.** Ohne Abo-Erlöse entfällt die umsatzsteuerliche Behandlung der
+Abo-Entgelte (elektronische Dienstleistung, 19 %). Der Dauerrabatt mindert das
+Entgelt des Automatenkaufs und teilt dessen Steuersatz (7 % bzw. 19 % je
+Produkt); das ist keine Änderung, sondern die Fortführung der bisherigen
+Behandlung. Die Gewährung von Coupons an alle Registrierten statt an Abonnenten
+ändert daran nichts. Offen bleibt V-003 (Produktmix).
+
+### Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Status |
+|---|---|---|---|---|
+| Impressum | ✓ | unberührt | Nein | 🟢 |
+| AGB / Nutzungsbedingungen | ✓ | Ziffern 4, 5, 6 vollständig neu gefasst, Version v1 → v2 | **Ja, erledigt** | 🟢 |
+| Datenschutzerklärung | ✓ | keine neue Verarbeitung; Altersgrenze 16 ergänzt die Einwilligungslogik | Nein | 🟢 |
+| DSGVO Art. 8 (Kinder) | ✓ | Altersgrenze 16 neu aufgenommen | **Ja, erledigt** | 🟢 |
+| Verbraucherrecht § 312k BGB | ✓ | Pflicht entfällt, Funktion bleibt freiwillig | **Ja, erledigt** | 🟢 |
+| Verbraucherrecht § 312j Abs. 3 BGB | ✓ | Button-Lösung gegenstandslos | Nein | 🟢 |
+| §§ 327 ff. BGB (digitale Produkte) | ✓ | gelten weiter (Daten statt Preis), klargestellt | **Ja, erledigt** | 🟢 |
+| Widerrufsrecht §§ 312g, 355 BGB | ✓ | vorsorglich 14 Tage eingeräumt | **Ja, erledigt** | 🟢 |
+| Preisangaben (PAngV) | ✓ | keine Preisangabe mehr im Kundenbereich | **Ja, erledigt** | 🟢 |
+| UWG § 5 (Irreführung) | ✓ | Code und alle drei Marketing-PDF neu erzeugt und im Textinhalt geprüft | **Ja, erledigt** | 🟢 |
+| Jugendschutz | ✓ | Volljährigkeitsklausel ersetzt durch Altersgrenze 16 | **Ja, erledigt** | 🟢 |
+| Steuer und Buchführung | ✓ | keine Abo-Erlöse mehr; Rabattbehandlung unverändert | Nein | 🟢 |
+| Store-Regeln | ✓ | keine IAP mehr; Metadaten zu prüfen | Ja, offen | 🟡 |
+| Barrierefreiheit (BFSG) | ✗ | nicht geprüft | unbekannt | ⬜ |
+| EU AI Act Art. 50 | ✓ | keine neue algorithmische Auswahl; Coupons und Empfehlungen waren bereits gekennzeichnet | Nein | 🟢 |
+
+### Ergebnis / Handlungsbedarf
+
+- [x] AGB Ziffern 4, 5, 6 neu gefasst, Version auf `v2 · 2026-09` gehoben
+- [x] Kündigungsformular sprachlich und rechtlich neu eingeordnet
+- [x] Alle Preisangaben aus dem Kundenbereich entfernt
+- [x] Alle drei Marketing-PDF aus ihrer HTML-Quelle neu erzeugt; Textinhalt
+      auf Preisnennungen geprüft; Link in der App bleibt sichtbar
+- [ ] **Bestand an Abonnements durch Abfrage belegen** —
+      `select plan, count(*) from app.subscriptions group by plan;`. Ergibt die
+      Abfrage Zeilen mit gesetztem Plan, ist AGB Ziffer 4 f) (Erstattungszusage)
+      der maßgebliche Maßstab und jede betroffene Person ist aktiv zu
+      informieren.
+- [ ] Store-Metadaten auf Preisangaben prüfen — vor der ersten Einreichung
+- [ ] Befund P-1 entscheiden (zwei widersprüchliche Statussysteme): Der
+      Widerspruch wiegt schwerer, seit der Statusrabatt jedem Konto zusteht.
+      Bis zur Entscheidung nennt die App keine konkreten Schwellen mehr.
+
+**Status 🟡** · Verantwortlich: Philipp Blume · Fällig: Bestandsabfrage und
+Store-Metadaten vor der ersten Veröffentlichung der App.
+
+**Nachgeprüft am 2026-09-16:** `docs/CUSTOMER.md`, `docs/LEGAL_AUDIT.md` und
+`docs/PRIVACY.md` enthalten keine Aussagen zu Abo-Modellen, Abo-Preisen oder zur
+Kündigungsschaltfläche (Volltextsuche nach „Abo", „Abonn", den drei Preisen,
+„Lifetime", „312k", „kostenpflicht"). Der einzige Treffer in `CUSTOMER.md` ist
+das Wort „abonniert" in seiner technischen Bedeutung (Realtime-Kanal
+`inventory`). Damit besteht dort kein Anpassungsbedarf — geprüft, nicht bloß
+vermutet.

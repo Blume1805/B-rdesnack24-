@@ -44,9 +44,10 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
     ),
     _StoryPage(
       icon: Icons.workspace_premium_outlined,
-      eyebrow: 'Abo-Vorteile',
+      eyebrow: 'Deine Vorteile',
       title: 'Immer 5 % günstiger',
-      body: 'Mit Abo (ab 0,99 € im Monat) zahlst du an jedem Automaten immer '
+      body:
+          'Als angemeldete Kundin oder Kunde zahlst du an jedem Automaten immer '
           '5 % weniger — mit Bronze-, Silber- und Gold-Status wächst der '
           'Dauerrabatt lebenslang auf bis zu 10 %. Frühstücks- und '
           'Feierabend-Deals sparen weitere 10 %. Ob sich das lohnt, zeigt '

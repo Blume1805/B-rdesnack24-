@@ -13,10 +13,21 @@ import 'app_benefits_compare_screen.dart';
 import 'employer_benefit_screen.dart';
 import 'subscription_value_screen.dart';
 
-/// „Mein Abo" — Auswahl/Wechsel zwischen den drei Abo-Modellen.
+/// „Deine Vorteile" — seit dem Beschluss vom 2026-09-16 eine reine
+/// Informationsseite.
 ///
-/// Regeln (serverseitig in `choose_subscription_plan` durchgesetzt,
-/// hier nur gespiegelt):
+/// Solange [Pricing.benefitsFreeForAll] gesetzt ist, verlässt `build` die
+/// Methode sofort und zeigt die kostenlose Variante. **Alles darunter ist
+/// derzeit nicht erreichbar** und beschreibt den früheren Abo-Verkauf.
+///
+/// Der Code bleibt absichtlich stehen, statt gelöscht zu werden: Die
+/// Entscheidung, die App kostenlos zu machen, fällt vor den Standort-
+/// gesprächen und ist umkehrbar. Ein Umlegen des Schalters stellt den
+/// vollständigen Verkaufsweg wieder her, ohne dass Server-RPC, Tabellen
+/// oder Rechtstexte neu gebaut werden müssen.
+///
+/// Die früheren Regeln (serverseitig in `choose_subscription_plan`
+/// weiterhin vorhanden, hier nur gespiegelt):
 ///   * Monatlich 0,99 €, jährlich 9,99 €, Lifetime 79,99 € einmalig.
 ///   * Lifetime ist eine limitierte „Founders Edition": nur die ersten
 ///     20 Konten (serverseitiges Kontingent, Anzeige der Restplätze).
@@ -420,6 +431,41 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Seit dem 2026-09-16 ist die App kostenlos. Der Kaufweg bleibt im Code
+    // erhalten, ist aber nicht mehr erreichbar; stattdessen wird erklärt, dass
+    // alle Vorteile ohne Zahlung gelten.
+    if (Pricing.benefitsFreeForAll) {
+      return Scaffold(
+        backgroundColor: AppColors.surfaceAlt,
+        appBar: const HeroAppBar(title: Text('Deine Vorteile')),
+        body: ListView(
+          padding: const EdgeInsets.all(AppSpacing.s5),
+          children: [
+            AppCard(
+              topStripeColor: AppColors.brand,
+              padding: const EdgeInsets.all(AppSpacing.s5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Alles ohne Kosten.',
+                    style: AppTypography.display(size: 22),
+                  ),
+                  const SizedBox(height: AppSpacing.s3),
+                  Text(
+                    'Die Bördesnack24-App ist kostenlos. Dauerrabatt, Coupons, '
+                    'Treue-Meilensteine und dein Belohnungsstatus gelten für '
+                    'alle angemeldeten Kundinnen und Kunden — ohne Abo, ohne '
+                    'Mindestlaufzeit, ohne Kündigung.',
+                    style: AppTypography.body(size: 14),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
       appBar: const HeroAppBar(title: Text('Mein Abo')),

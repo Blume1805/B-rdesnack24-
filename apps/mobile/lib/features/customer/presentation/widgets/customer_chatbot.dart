@@ -117,57 +117,53 @@ const _kFaq = <_FaqCategory>[
       deepLink: 'tab:3@kontakt',
     ),
   ]),
-  _FaqCategory('Abo & Preise', Icons.workspace_premium_outlined, [
+  _FaqCategory('Vorteile & Preise', Icons.workspace_premium_outlined, [
     _FaqEntry(
-      'Welche Abo-Modelle gibt es?',
-      'Drei Modelle: 0,99 € pro Monat, 9,99 € pro Jahr (2 Monate geschenkt) '
-          'oder 79,99 € einmalig (Lifetime). Das Lifetime-Abo ist eine '
-          'limitierte Founders Edition — nur die ersten 20 Konten können es '
-          'abschließen. Nach jeder Wahl oder jedem Wechsel bekommst du eine '
-          'Bestätigung an deine hinterlegte E-Mail-Adresse.',
+      'Was kostet die App?',
+      'Nichts. Die Bördesnack24-App ist kostenlos — es gibt kein Abo, keine '
+          'Mindestlaufzeit und nichts zu kündigen. Dauerrabatt, Coupons, '
+          'Treue-Meilensteine und dein Status gelten für alle angemeldeten '
+          'Kundinnen und Kunden.',
       deepLink: 'abo',
     ),
     _FaqEntry(
-      'Kann ich mein Abo-Modell wechseln?',
-      'Ja, ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit '
-          'möglich. Nur das Lifetime-Abo ist endgültig — deshalb bestätigst '
-          'du beim Lifetime-Kauf ausdrücklich, dass dein Widerrufsrecht mit '
-          'der Bereitstellung erlischt.',
-      deepLink: 'abo',
-    ),
-    _FaqEntry(
-      'Was spare ich mit dem Abo?',
-      'Mit Abo zahlst du an jedem Automaten immer 5 % weniger — den '
+      'Was spare ich mit der App?',
+      'Du zahlst an jedem Automaten immer 5 % weniger — den '
           'App-Preis siehst du direkt an jedem Produkt. Mit deinem Status '
-          'wächst der Dauerrabatt lebenslang: 6 % ab Bronze (150 € '
-          'Gesamtumsatz), 7,5 % ab Silber (500 €), 10 % ab Gold (1000 €). '
+          'wächst der Dauerrabatt lebenslang; welche Stufe du erreicht hast '
+          'und was sie dir bringt, steht jederzeit in deinem Status. '
           'Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- und '
           'Wochenangebote mit weiteren 10 % Rabatt auf den App-Preis und '
           'Treue-Coupons von 5 bis 25 %.',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
-      'Ab wann rechnet sich das Abo?',
-      'Vorsichtig gerechnet (nur der 5-%-Vorteil): Jahres-Abo ab 16,65 € '
-          'Einkauf im Monat, Monats-Abo ab 19,80 €. Bei normaler Nutzung '
-          'von Deals und Coupons (zusammen ca. 9,4 % Ersparnis) sind es rund '
-          '8,90 € bzw. 10,60 € im Monat. Der Status-Rabatt kommt noch '
-          'obendrauf. Die komplette Beispielrechnung mit allen Annahmen:',
+      'Wie viel spare ich im Jahr?',
+      'Das hängt davon ab, wie oft du kaufst. Vorsichtig gerechnet (nur der '
+          '5-%-Vorteil, ohne einen einzigen Coupon) sind es bei 20 € Einkauf '
+          'im Monat rund 12 € im Jahr. Bei normaler Nutzung von Deals und '
+          'Coupons (zusammen ca. 9,4 % Ersparnis) rund 23 €. Der '
+          'Status-Rabatt kommt noch obendrauf. Da die App nichts kostet, ist '
+          'das keine Rechnung mit Gegenposten — die Ersparnis beginnt beim '
+          'ersten Kauf. Die komplette Beispielrechnung mit allen Annahmen:',
       deepLink: 'abo-rechnung',
     ),
     _FaqEntry(
-      'Was kann ich ohne Abo nutzen?',
-      'Kostenlos bleiben: Automatenfinder, Bestände in Echtzeit, Produkt-'
-          'infos mit Nährwerten, Kaufhistorie, News und Favoriten. Die '
-          'Rabatt-Vorteile (App-Preis −5 %, Status-Rabatt bis 10 %, Deals, '
-          'Coupons, Treuepunkte) gibt es mit Abo ab 0,99 € im Monat.',
+      'Was brauche ich, um die Vorteile zu nutzen?',
+      'Nur ein kostenloses Konto. Danach gelten App-Preis mit 5 % Rabatt, '
+          'Status-Rabatt bis 10 %, Deals, Coupons und Treue-Meilensteine '
+          'automatisch. Ohne Anmeldung bleiben Automatenfinder, Bestände in '
+          'Echtzeit, Produktinfos mit Nährwerten und News nutzbar.',
       deepLink: 'abo',
     ),
     _FaqEntry(
-      'Wie kündige ich mein Abo?',
-      'Über den Kündigungsbutton „Verträge hier kündigen" — ohne Hürden, '
-          'auch ohne Login erreichbar. Du bekommst sofort eine Bestätigung '
-          'mit Datum und Uhrzeit deiner Kündigungserklärung (§ 312k BGB).',
+      'Muss ich etwas kündigen?',
+      'Nein. Die App ist kostenlos, es gibt keinen laufenden Vertrag und '
+          'keine Laufzeit. Wenn du trotzdem eine Erklärung abgeben oder dein '
+          'Konto beenden möchtest, findest du den Kündigungsbutton '
+          '„Verträge hier kündigen" — ohne Hürden, auch ohne Login '
+          'erreichbar. Du bekommst sofort eine Bestätigung mit Datum und '
+          'Uhrzeit (§ 312k BGB).',
       deepLink: 'route:${AppRoutes.cancellation}',
     ),
   ]),

@@ -6,13 +6,20 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/design_system/design_system.dart';
 
-/// Kündigungsformular nach § 312k BGB („Verträge hier kündigen").
+/// Kündigungsformular („Verträge hier kündigen").
+///
+/// Seit dem 16.09.2026 ist die App kostenlos (Pricing.benefitsFreeForAll).
+/// Damit entfällt die **Pflicht** aus § 312k BGB, der entgeltliche
+/// Dauerschuldverhältnisse voraussetzt. Der Weg bleibt trotzdem bestehen:
+/// Er ist der einfachste Weg, das Nutzungsverhältnis zu beenden, und er
+/// kehrt ohne Umbau zurück, falls wieder etwas Entgeltliches angeboten
+/// wird. Formal ist er jetzt eine freiwillige Leistung.
 ///
 /// Muss ohne Anmeldung erreichbar sein — die Route ist öffentlich und
 /// die Edge Function subscription-cancel akzeptiert anonyme Aufrufe.
-/// Nach dem Absenden wird der Zugang der Kündigung sofort mit Datum und
-/// Uhrzeit angezeigt und zusätzlich per E-Mail bestätigt
-/// (§ 312k Abs. 2 S. 3 BGB).
+/// Nach dem Absenden wird der Zugang der Erklärung sofort mit Datum und
+/// Uhrzeit angezeigt und zusätzlich per E-Mail bestätigt (Maßstab bleibt
+/// § 312k Abs. 2 S. 3 BGB, auch wenn er nicht mehr zwingend gilt).
 class CancellationScreen extends ConsumerStatefulWidget {
   const CancellationScreen({super.key, this.prefillEmail});
 
@@ -99,7 +106,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
             const Eyebrow('Kündigung'),
             const SizedBox(height: 2),
             Text(
-              'Abo-Vertrag kündigen',
+              'Nutzung beenden',
               style: AppTypography.display(
                 size: 22,
                 weight: FontWeight.w800,
@@ -108,9 +115,11 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Hier können Sie Ihr Bördesnack24-Abo kündigen — auch ohne '
-              'Anmeldung. Den Zugang Ihrer Kündigung bestätigen wir sofort '
-              'mit Datum und Uhrzeit sowie per E-Mail.',
+              'Die Bördesnack24-App ist kostenlos — es läuft kein '
+              'kostenpflichtiger Vertrag, den Sie kündigen müssten. Wenn Sie '
+              'Ihre Nutzung dennoch beenden möchten, erklären Sie das hier — '
+              'auch ohne Anmeldung. Den Zugang Ihrer Erklärung bestätigen '
+              'wir sofort mit Datum und Uhrzeit sowie per E-Mail.',
               style: AppTypography.body(size: 13, color: AppColors.textMuted)
                   .copyWith(height: 1.4),
             ),
@@ -126,7 +135,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'E-Mail-Adresse *',
-                        helperText: 'Die zum Vertrag gehörende E-Mail-Adresse',
+                        helperText: 'Die zu Ihrem Konto gehörende Adresse',
                         prefixIcon: Icon(Icons.mail_outline, size: 20),
                       ),
                       validator: (v) {
@@ -251,9 +260,10 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
             ),
             const SizedBox(height: AppSpacing.s3),
             Text(
-              'Hinweis: Nach Veröffentlichung in den App-Stores kann ein '
-              'dort abgeschlossenes Abo zusätzlich über die Abo-Verwaltung '
-              'des jeweiligen Stores gekündigt werden.',
+              'Hinweis: Mit der Beendigung verfallen noch nicht eingelöste '
+              'Coupons und der erreichte Status. Ihr Konto wird deaktiviert '
+              'und Ihre Daten nach Ablauf der gesetzlichen '
+              'Aufbewahrungsfristen gelöscht.',
               style: AppTypography.body(size: 11, color: AppColors.textMuted),
             ),
           ],

@@ -110,7 +110,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.workspace_premium_outlined,
               title: 'Mein Abo',
-              subtitle: 'Monats- oder Jahres-Abo wählen',
+              subtitle: 'Dauerrabatt, Coupons und Meilensteine — kostenlos',
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubscriptionScreen()),

@@ -62,13 +62,24 @@ final myGamificationProvider =
   return Map<String, dynamic>.from(res as Map);
 });
 
-/// Effektiver App-Rabatt (Bruchzahl) für die Preisanzeige: 5 % Abo-Rabatt
-/// plus lebenslanger Status-Zusatzrabatt (Bronze/Silber/Gold). Nur für
-/// Abonnent:innen; ohne Abo 0 (Automatenpreis). Fällt bei Ladefehlern auf
-/// die 5 % Basis zurück.
+/// Hat der Kunde Anspruch auf die App-Vorteile?
+///
+/// Seit dem Beschluss vom 2026-09-16 ist die App kostenlos: Dauerrabatt,
+/// Coupons und Meilensteine stehen allen registrierten Kunden offen
+/// ([Pricing.benefitsFreeForAll]). Solange der Schalter gesetzt ist, spielt
+/// der Abo-Status für die Vorteile keine Rolle mehr. Er wird weiter ermittelt,
+/// damit Bestandsabonnements sichtbar bleiben und die Entscheidung umkehrbar
+/// ist.
+final hasBenefitsProvider = FutureProvider.autoDispose<bool>((ref) async {
+  if (Pricing.benefitsFreeForAll) return true;
+  return ref.watch(hasSubscriptionProvider.future);
+});
+
+/// Effektiver App-Rabatt (Bruchzahl) für die Preisanzeige: 5 % Grundrabatt
+/// plus lebenslanger Status-Zusatzrabatt. Steht allen registrierten Kunden zu.
 final myEffectiveDiscountProvider = Provider.autoDispose<double>((ref) {
-  final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
-  if (!hasSub) return 0.0;
+  final hasBenefits = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
+  if (!hasBenefits) return 0.0;
   final tier = ref.watch(myGamificationProvider).valueOrNull?['tier']
       as Map<String, dynamic>?;
   return Pricing.effectiveDiscountRate(tier?['code'] as String?);

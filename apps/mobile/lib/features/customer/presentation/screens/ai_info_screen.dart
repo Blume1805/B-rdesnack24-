@@ -66,7 +66,12 @@ class AiInfoScreen extends StatelessWidget {
                 'personalisierte Coupons vorzuschlagen. Zusätzlich wählt '
                 'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
                 'den Feierabend-Deal je eine Getränk-/Snack-Paarung '
-                'aus dem Produktkatalog aus. '
+                'aus dem Produktkatalog aus. Ebenfalls automatisch berechnet '
+                'werden deine Treue-Meilensteine und deine Statusstufe: Aus '
+                'deiner Kaufhistorie ergibt sich, welche Stufe du erreicht '
+                'hast und welcher Dauerrabatt daraus folgt. Seit dem '
+                '16.09.2026 gilt das für alle angemeldeten Kundinnen und '
+                'Kunden — die Funktionen hängen nicht mehr an einem Abo. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
@@ -106,9 +111,11 @@ class AiInfoScreen extends StatelessWidget {
             title: 'Beschwerde',
             body: 'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
                 'verletzt, kannst du dich an die zuständige Datenschutz-'
-                'Aufsichtsbehörde wenden: den Bundesbeauftragten für den '
-                'Datenschutz und die Informationsfreiheit (BfDI) oder — für '
-                'Sachsen-Anhalt — die Landesbeauftragte für den Datenschutz.',
+                'Aufsichtsbehörde wenden. Für uns als Unternehmen mit Sitz '
+                'in Sachsen-Anhalt ist das die oder der Landesbeauftragte '
+                'für den Datenschutz Sachsen-Anhalt. Du kannst dich immer '
+                'auch an die Aufsichtsbehörde deines Wohnorts wenden '
+                '(Art. 77 DSGVO).',
           ),
           const SizedBox(height: AppSpacing.s5),
           OutlinedButton.icon(

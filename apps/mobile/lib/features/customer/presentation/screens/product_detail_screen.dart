@@ -147,15 +147,15 @@ class ProductDetailScreen extends ConsumerWidget {
 }
 
 /// Preisblock: Abonnenten sehen den App-Preis (−5 %) prominent mit
-/// durchgestrichenem Automatenpreis; ohne Abo steht der Automatenpreis
-/// vorn und der App-Preis wirbt als Abo-Vorteil.
+/// durchgestrichenem Automatenpreis. Der App-Preis gilt seit dem
+/// 2026-09-16 für alle registrierten Kunden.
 class _PriceCard extends ConsumerWidget {
   const _PriceCard({required this.gross});
   final double gross;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+    final hasSub = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
     // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
     final rate = ref.watch(myEffectiveDiscountProvider);
     final effRate = rate > 0 ? rate : Pricing.appDiscountRate;
@@ -230,7 +230,7 @@ class _PriceCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Mit Abo ${Formatters.euro(appPrice)} · '
+                    'Dein App-Preis ${Formatters.euro(appPrice)} · '
                     '−$pctText % ',
                     style: AppTypography.body(
                       size: 12.5,

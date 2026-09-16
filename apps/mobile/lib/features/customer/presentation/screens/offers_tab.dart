@@ -31,7 +31,7 @@ class OffersTab extends ConsumerWidget {
     // Abo-Gating: Basis frei, Vorteile im Abo. Während des Ladens wird
     // nicht gesperrt (kein Lock-Flackern); die Durchsetzung liegt
     // ohnehin zusätzlich serverseitig in den Aktivierungs-RPCs.
-    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? true;
+    final hasSub = ref.watch(hasBenefitsProvider).valueOrNull ?? true;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -66,8 +66,9 @@ class OffersTab extends ConsumerWidget {
             const SizedBox(height: AppSpacing.s5),
           ],
 
-          // Ohne Abo: ein Freischalt-Hinweis ersetzt die Abo-Vorteile
-          // (Deals, Aktionen, Loyalty, persönliche + Wochenangebote).
+          // Vorteile stehen seit dem 2026-09-16 allen Kunden offen; der
+          // Freischalt-Hinweis erscheint nur noch, wenn der Anspruch aus
+          // anderen Gründen fehlt (Schalter Pricing.benefitsFreeForAll).
           if (!hasSub) ...[
             const _SubscriptionLockCard(),
             const SizedBox(height: AppSpacing.s6),
@@ -2279,7 +2280,7 @@ class _SubscriptionLockCard extends ConsumerWidget {
                 // Tab sofort.
                 ref.invalidate(hasSubscriptionProvider);
               },
-              child: const Text('Abo wählen — ab 0,99 € im Monat'),
+              child: const Text('Vorteile ansehen'),
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

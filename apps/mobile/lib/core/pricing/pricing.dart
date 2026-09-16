@@ -14,6 +14,23 @@ abstract final class Pricing {
   /// App-Vorteil: Abonnenten sparen gegenüber dem Automatenpreis immer 5 %.
   static const appDiscountRate = 0.05;
 
+  /// **Kostenlose App (Beschluss vom 2026-09-16).**
+  ///
+  /// Die App wird nicht mehr kostenpflichtig angeboten. Dauerrabatt, Coupons,
+  /// Treue-Meilensteine und Statusstufen stehen **allen registrierten Kunden**
+  /// offen; es gibt keine Bezahlschranke mehr.
+  ///
+  /// Hintergrund: Die Abogebühr sollte nie ein Ertragsprodukt sein, sondern
+  /// Reichweite für das B2B-Geschäft schaffen. Sie hat dabei genau das
+  /// reduziert, was sie steigern sollte. Siehe
+  /// `docs/strategy/2026-09-15-fundament-und-finanzlogik.md`, Nachtrag 2.
+  ///
+  /// Der Schalter bleibt bewusst als Konstante bestehen, statt die Abo-Logik
+  /// zu löschen: Die Entscheidung ist damit ohne Datenverlust umkehrbar,
+  /// solange die Standortgespräche nicht abgeschlossen sind. Die Abo-Tabellen,
+  /// die RPC `choose_subscription_plan` und die Preisfelder bleiben unberührt.
+  static const benefitsFreeForAll = true;
+
   /// Lebenslanger Status-Zusatzrabatt (ON TOP auf die 5 % Abo-Rabatt).
   ///
   /// ACHTUNG — dieser Code ist **kein** Spiegel der Server-RPC, auch wenn das
@@ -54,7 +71,10 @@ abstract final class Pricing {
   static double effectiveDiscountRate(String? tierCode) =>
       appDiscountRate + statusBonusRate(tierCode);
 
-  /// Abo-Preise (brutto, inkl. USt) — Spiegel der Server-RPC
+  /// Abo-Preise (brutto, inkl. USt). **Seit dem 2026-09-16 nicht mehr im
+  /// Verkauf** (siehe [benefitsFreeForAll]); die Werte bleiben für die
+  /// Break-even-Rechnungen und eine mögliche Rückkehr erhalten.
+  /// Spiegel der Server-RPC
   /// choose_subscription_plan (Migration 0061). Einzige Quelle für alle
   /// Anzeigen und Break-even-Rechnungen im Client.
   static const subMonthlyEur = 0.99;

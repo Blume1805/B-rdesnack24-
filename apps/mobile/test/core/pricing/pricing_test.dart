@@ -143,4 +143,32 @@ void main() {
       expect(Pricing.lifetimeFoundersLimit, 20);
     });
   });
+
+  group('Kostenlose App (Beschluss vom 2026-09-16)', () {
+    test('Vorteile stehen allen registrierten Kunden offen', () {
+      // Der Schalter ist der einzige Ort, an dem die Entscheidung steht.
+      // Wird er umgelegt, muss das eine bewusste Entscheidung sein — dieser
+      // Test macht sie sichtbar, statt sie in einem Diff untergehen zu lassen.
+      expect(Pricing.benefitsFreeForAll, isTrue);
+    });
+
+    test('der Dauerrabatt bleibt bei 5 %, auch ohne Abo', () {
+      expect(Pricing.appDiscountRate, 0.05);
+      expect(Pricing.effectiveDiscountRate(null), 0.05);
+    });
+
+    test('Statusstufen erhöhen den Rabatt weiterhin', () {
+      expect(Pricing.effectiveDiscountRate('bronze'), closeTo(0.06, 1e-9));
+      expect(Pricing.effectiveDiscountRate('silber'), closeTo(0.075, 1e-9));
+      expect(Pricing.effectiveDiscountRate('gold'), closeTo(0.10, 1e-9));
+    });
+
+    test('Abo-Preise bleiben als Konstanten erhalten (umkehrbar)', () {
+      // Bewusst NICHT gelöscht: Die Entscheidung fällt vor den
+      // Standortgesprächen und muss ohne Datenverlust rückholbar sein.
+      expect(Pricing.subMonthlyEur, 0.99);
+      expect(Pricing.subYearlyEur, 9.99);
+      expect(Pricing.subLifetimeEur, 79.99);
+    });
+  });
 }

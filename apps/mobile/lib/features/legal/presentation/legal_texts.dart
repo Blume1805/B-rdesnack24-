@@ -5,7 +5,7 @@
 /// geprüft und final ergänzt werden (insbesondere gesetzlicher Vertreter,
 /// Steuernummer, ggf. USt-ID, Berufshaftpflicht usw. gemäß § 5 DDG).
 abstract final class LegalTexts {
-  static const version = 'v1 · 2026-06';
+  static const version = 'v2 · 2026-09';
 
   // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
   static const imprint = '''
@@ -135,63 +135,87 @@ Die App zeigt Angebote, Standorte, Produktverfügbarkeiten und individuelle Prei
 Kauf und Warenausgabe erfolgen am jeweiligen Automaten und unterliegen der Verfügbarkeit.
 Rechtsgeschäfte über Waren kommen am Automaten zustande.
 
-4) Abo-Modelle
-  a) Für erweiterte App-Funktionen bieten wir drei Abo-Modelle an
-     (alle Preise inklusive gesetzlicher Umsatzsteuer):
-       * Monats-Abo:  0,99 € pro Monat
-       * Jahres-Abo:  9,99 € pro Jahr
-       * Lifetime-Abo: 79,99 € einmalig, dauerhafte Nutzung
-  b) Laufzeit und Verlängerung: Das Monats-Abo verlängert sich jeweils um einen
-     Monat, das Jahres-Abo jeweils um ein Jahr, sofern nicht zum Ende des laufenden
-     Abrechnungszeitraums gekündigt wird. Das Lifetime-Abo ist eine Einmalzahlung
-     ohne Verlängerung.
-  c) Kontingent Lifetime-Abo („Founders Edition"): Das Lifetime-Abo wird nur in
-     begrenzter Stückzahl angeboten. Insgesamt können höchstens 20 Kundenkonten
-     ein Lifetime-Abo abschließen. Ist das Kontingent ausgeschöpft, steht das
-     Modell nicht mehr zur Auswahl; ein Anspruch auf Abschluss besteht nicht.
-     Die Zahl der verbleibenden Plätze wird in der App angezeigt.
-  d) Wechsel: Ein Wechsel zwischen Monats- und Jahres-Abo ist jederzeit möglich und
-     wird zum nächsten Abrechnungszeitraum wirksam. Nach Abschluss des Lifetime-Abos
-     ist ein Wechsel ausgeschlossen; hierauf wird vor Abschluss gesondert hingewiesen.
-  e) Jede Auswahl und jeder Wechsel wird per E-Mail an die hinterlegte Adresse
-     bestätigt.
-  f) Zahlungsabwicklung: Nach Veröffentlichung der App in den Stores erfolgt die
-     Abrechnung über den Apple App Store bzw. Google Play; ergänzend gelten deren
-     Bedingungen. Bis dahin ist die Auswahl eine unverbindliche Vormerkung, es
-     erfolgt keine Abbuchung.
-  g) Mindestalter: Kostenpflichtige Abonnements können nur von volljährigen
-     Personen abgeschlossen werden. Minderjährige benötigen die Zustimmung
-     ihrer gesetzlichen Vertreter (§§ 106 ff. BGB); der Taschengeldparagraph
-     (§ 110 BGB) findet auf fortlaufende Abonnements regelmäßig keine
-     Anwendung. Vor jedem Abschluss ist die Volljährigkeit bzw. das Vorliegen
-     der Zustimmung zu bestätigen. Die kostenlose Nutzung der App sowie das
-     Bonus- und Rabattprogramm ohne Abo stehen allen Altersgruppen offen.
+4) Unentgeltlichkeit der App und Vorteilsprogramm
+  a) Die Bördesnack24-App wird unentgeltlich bereitgestellt. Es gibt kein
+     Abonnement, keine Grund-, Nutzungs- oder Freischaltgebühr und keine
+     kostenpflichtigen Zusatzfunktionen. Für die Nutzung der App entstehen
+     lediglich die Verbindungsentgelte des jeweiligen Mobilfunk- oder
+     Internetanbieters.
+  b) Vorteilsprogramm: Registrierten Nutzerinnen und Nutzern gewähren wir auf
+     Käufe an unseren Automaten einen Dauerrabatt, zeitlich befristete
+     Aktionsangebote, persönliche Coupons sowie ein Treueprogramm mit
+     Meilensteinen und Statusstufen. Die jeweils geltenden Rabattsätze,
+     Bedingungen und Gültigkeitszeiträume werden in der App angezeigt.
+     Maßgeblich ist stets die Anzeige in der App zum Zeitpunkt des Kaufs.
+  c) Kein Rechtsanspruch auf Fortbestand: Das Vorteilsprogramm ist eine
+     freiwillige Leistung. Wir dürfen einzelne Bestandteile ändern, ersetzen
+     oder einstellen. Änderungen zum Nachteil der Nutzerinnen und Nutzer
+     kündigen wir mindestens vier Wochen vorher in der App oder per E-Mail an.
+     Bereits gewährte, noch nicht eingelöste Coupons bleiben bis zu ihrem
+     Ablaufdatum bestehen.
+  d) Keine Barauszahlung: Rabatte, Coupons und Statusvorteile werden
+     ausschließlich beim Kauf am Automaten verrechnet. Eine Auszahlung in Geld,
+     eine Übertragung auf andere Konten oder eine Kombination mehrerer Coupons
+     auf denselben Artikel ist ausgeschlossen. Sind für ein Produkt mehrere
+     Vorteile aktiviert, wird automatisch der für die Kundin oder den Kunden
+     günstigste Preis berechnet.
+  e) Mindestalter: Die Registrierung setzt ein Alter von mindestens 16 Jahren
+     voraus. Hintergrund ist Art. 8 DSGVO: Für Dienste der
+     Informationsgesellschaft können Einwilligungen erst ab diesem Alter
+     wirksam allein erteilt werden. Jüngere Personen benötigen die Zustimmung
+     der Sorgeberechtigten. Der Kauf am Automaten selbst ist von der
+     Registrierung unabhängig und steht allen Altersgruppen offen, soweit
+     keine produktbezogenen Abgabebeschränkungen entgegenstehen.
+  f) Frühere Abo-Modelle: Bis zum 16.09.2026 sahen diese Bedingungen
+     kostenpflichtige Abo-Modelle vor. Diese werden nicht mehr angeboten. Es
+     wurden hierüber keine Zahlungen vereinnahmt; eine bloße Vormerkung in der
+     App begründete keine Zahlungspflicht. Sollte im Einzelfall dennoch ein
+     entgeltliches Abonnement zustande gekommen sein, endet es ohne
+     Kündigungserfordernis mit Wirkung zum 16.09.2026; etwaige Zahlungen
+     erstatten wir vollständig.
 
-5) Kündigung der Abos
-  a) Monats- und Jahres-Abo können jederzeit zum Ende des laufenden
-     Abrechnungszeitraums gekündigt werden; das Recht zur außerordentlichen
-     Kündigung aus wichtigem Grund bleibt unberührt.
-  b) Die Kündigung ist möglich über die Schaltfläche „Verträge hier kündigen"
-     in der App (auch ohne Anmeldung erreichbar, § 312k BGB), im Kundenbereich
-     unter „Mein Abo" sowie — nach Store-Veröffentlichung — über die
-     Abo-Verwaltung des jeweiligen Stores.
-  c) Den Zugang einer über die App erklärten Kündigung bestätigen wir sofort
+5) Laufzeit, Beendigung und Löschung des Kontos
+  a) Das Nutzungsverhältnis über die App wird auf unbestimmte Zeit geschlossen
+     und ist unentgeltlich. Es besteht keine Mindestlaufzeit und keine
+     automatische Verlängerung; es gibt nichts zu kündigen, um Kosten zu
+     vermeiden.
+  b) Nutzerinnen und Nutzer können das Nutzungsverhältnis jederzeit ohne Frist
+     und ohne Angabe von Gründen beenden — über das Kontaktformular in der App,
+     über die Schaltfläche „Verträge hier kündigen" oder formlos per E-Mail an
+     kontakt@boerdesnack24.de.
+  c) Die Schaltfläche „Verträge hier kündigen" ist auch ohne Anmeldung
+     erreichbar. Wir halten sie freiwillig vor. Eine gesetzliche Pflicht nach
+     § 312k BGB besteht seit dem Wegfall der entgeltlichen Abonnements nicht
+     mehr, weil die Vorschrift entgeltliche Dauerschuldverhältnisse voraussetzt.
+  d) Den Zugang einer über die App erklärten Beendigung bestätigen wir sofort
      elektronisch in Textform (E-Mail) unter Angabe von Datum und Uhrzeit.
+  e) Nach Beendigung deaktivieren wir das Konto und löschen die
+     personenbezogenen Daten nach Ablauf der gesetzlichen Aufbewahrungsfristen;
+     Einzelheiten regelt die Datenschutzerklärung. Noch nicht eingelöste
+     Coupons und der erreichte Status verfallen mit der Beendigung.
+  f) Wir können das Nutzungsverhältnis mit einer Frist von vier Wochen
+     kündigen; das Recht zur außerordentlichen Kündigung aus wichtigem Grund
+     (insbesondere bei Missbrauch) bleibt unberührt.
 
 6) Widerrufsrecht
   a) Waren, die am Automaten unmittelbar entnommen werden, sind vom Widerrufsrecht
      ausgenommen (unmittelbare Übergabe der Ware, §§ 355 ff. BGB finden insoweit
      keine Anwendung).
-  b) Für Abos (digitale Dienstleistung) gilt: Verbraucher haben das Recht, binnen
-     14 Tagen ohne Angabe von Gründen den Vertrag zu widerrufen. Die Frist beginnt
-     mit Vertragsschluss. Zur Ausübung genügt eine eindeutige Erklärung (z. B.
-     E-Mail an kontakt@boerdesnack24.de). Im Fall des Widerrufs erstatten wir
-     bereits geleistete Zahlungen unverzüglich, spätestens binnen 14 Tagen.
-  c) Verlangt die Kundin/der Kunde ausdrücklich, dass die Leistung vor Ablauf der
-     Widerrufsfrist beginnt, ist bei Widerruf ein anteiliger Betrag für die bereits
-     erbrachte Leistung zu zahlen. Beim Lifetime-Abo erlischt das Widerrufsrecht
-     mit vollständiger Bereitstellung, wenn zuvor ausdrücklich zugestimmt und die
-     Kenntnis vom Erlöschen bestätigt wurde (§ 356 Abs. 5 BGB).
+  b) Für die Nutzung der App selbst ist kein Entgelt zu zahlen. Ein
+     Widerrufsrecht nach §§ 312g, 355 BGB setzt grundsätzlich einen
+     entgeltlichen Verbrauchervertrag voraus. Da bei der Registrierung jedoch
+     personenbezogene Daten bereitgestellt werden, kann § 312 Abs. 1a BGB
+     eingreifen. Wir räumen deshalb vorsorglich und unabhängig von der
+     rechtlichen Einordnung ein Widerrufsrecht von 14 Tagen ab Registrierung
+     ein. Zur Ausübung genügt eine eindeutige Erklärung, zum Beispiel per
+     E-Mail an kontakt@boerdesnack24.de. Wertersatz fällt nicht an, weil keine
+     Zahlung geschuldet ist.
+  c) Unabhängig vom Widerrufsrecht kann das Konto jederzeit und ohne Frist
+     beendet werden (Ziffer 5). Der praktische Unterschied ist damit gering.
+  d) Gewährleistung für digitale Produkte: Auch bei unentgeltlicher
+     Bereitstellung gelten die §§ 327 ff. BGB, soweit personenbezogene Daten
+     bereitgestellt werden. Die Pflichten zur Mangelfreiheit und zur
+     Aktualisierung der App bleiben davon unberührt.
 
 7) Preise
 Preise gelten wie am Automaten und in der App angezeigt. Für Bestandskundinnen können

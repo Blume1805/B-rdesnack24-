@@ -65,7 +65,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
   @override
   Widget build(BuildContext context) {
     final stock = ref.watch(machineStockProvider(widget.machineId));
-    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+    final hasSub = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
     // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
     final effRate = ref.watch(myEffectiveDiscountProvider);
     return Scaffold(
@@ -284,7 +284,7 @@ class _StockRow extends StatelessWidget {
 
 /// Preiszeile im Katalog: Abonnenten sehen den App-Preis (−5 %) mit
 /// durchgestrichenem Automatenpreis, alle anderen den Automatenpreis
-/// plus Hinweis auf den Abo-Vorteil.
+/// plus Hinweis auf den App-Vorteil.
 class _PriceLine extends StatelessWidget {
   const _PriceLine({
     required this.gross,
@@ -340,7 +340,7 @@ class _PriceLine extends StatelessWidget {
         const SizedBox(width: AppSpacing.s3),
         Expanded(
           child: Text(
-            'Mit Abo ${Formatters.euro(appPrice)} (−5 %)',
+            'Dein App-Preis ${Formatters.euro(appPrice)} (−5 %)',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w600,

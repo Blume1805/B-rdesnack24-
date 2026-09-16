@@ -4,10 +4,14 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 
-/// „Kostenlos vs. App" — der Mehrwert-Vergleich als wiederverwendbare Karte
-/// (wird direkt im Abo-Screen eingebettet, Layout orientiert an einer klaren
-/// Feature-Matrix: Funktion · Kostenlos · App). Bewusst textarm — nur Fakten
-/// mit Haken/Strich, keine ausformulierten Sätze.
+/// „Ohne Konto vs. mit Konto" — der Mehrwert-Vergleich als wiederverwendbare
+/// Karte (Layout orientiert an einer klaren Feature-Matrix: Funktion · ohne
+/// Konto · mit Konto). Bewusst textarm — nur Fakten mit Haken/Strich, keine
+/// ausformulierten Sätze.
+///
+/// Seit dem Beschluss vom 2026-09-16 ist die App kostenlos: Beide Spalten
+/// kosten 0 €, unterschieden wird nur noch danach, ob jemand angemeldet ist.
+/// Die Spar-Vorteile hängen am Kundenkonto, nicht an einem Abo.
 class AppBenefitsCompareCard extends StatelessWidget {
   const AppBenefitsCompareCard({super.key});
 
@@ -21,7 +25,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
     'Kontakt & Reklamation',
   ];
 
-  // Nur mit App (Spar- und Extra-Vorteile). Non-breaking spaces vor %/€/−,
+  // Nur mit Konto (Spar- und Extra-Vorteile). Non-breaking spaces vor %/€/−,
   // damit keine Waisen-Umbrüche entstehen (Zahl + Zeichen bleiben zusammen).
   static const _appOnly = <String>[
     '5 % Dauerrabatt',
@@ -42,7 +46,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.borderSubtle),
           const _GroupLabel('In allen Varianten'),
           for (final f in _shared) _CompareRow(label: f, free: true, app: true),
-          const _GroupLabel('Nur mit App'),
+          const _GroupLabel('Nur mit Konto'),
           for (final f in _appOnly)
             _CompareRow(label: f, free: false, app: true),
           const _PriceRow(),
@@ -52,7 +56,7 @@ class AppBenefitsCompareCard extends StatelessWidget {
   }
 }
 
-/// Vollbild-Variante des Vergleichs (Deeplink/Chatbot). Die Abo-Seite selbst
+/// Vollbild-Variante des Vergleichs (Deeplink/Chatbot). Die Vorteilsseite
 /// bettet die Karte inline ein und braucht diesen Screen nicht mehr.
 class AppBenefitsCompareScreen extends StatelessWidget {
   const AppBenefitsCompareScreen({super.key});
@@ -61,12 +65,12 @@ class AppBenefitsCompareScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: const HeroAppBar(title: Text('Kostenlos vs. App')),
+      appBar: const HeroAppBar(title: Text('Ohne Konto vs. mit Konto')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s4),
         children: [
           Text(
-            'App-Variante = alles aus Kostenlos + jeder Spar-Vorteil.',
+            'Mit Konto = alles ohne Konto + jeder Spar-Vorteil. Beides kostenlos.',
             style: AppTypography.body(size: 13, color: AppColors.textMuted)
                 .copyWith(height: 1.4),
           ),
@@ -85,7 +89,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Zu den Abo-Modellen'),
+              child: const Text('Zurück zu deinen Vorteilen'),
             ),
           ),
         ],
@@ -119,7 +123,7 @@ class _CompareHeader extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Kostenlos',
+                  'Ohne Konto',
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w800,
@@ -148,7 +152,7 @@ class _CompareHeader extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'App',
+                    'Mit Konto',
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w800,
@@ -156,7 +160,7 @@ class _CompareHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '0,99 €',
+                    '0 €',
                     style: AppTypography.display(
                       size: 15,
                       weight: FontWeight.w800,
@@ -164,7 +168,7 @@ class _CompareHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '/ Monat',
+                    'kostenlos',
                     style: AppTypography.body(
                       size: 9,
                       color: AppColors.onDark.withValues(alpha: 0.7),
@@ -274,7 +278,7 @@ class _PriceRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'oder 9,99 € / Jahr (2 Monate geschenkt)',
+              'Kein Abo, keine Laufzeit, keine Kündigung — Anmelden genügt.',
               style: AppTypography.body(size: 11, color: AppColors.textMuted),
             ),
           ),

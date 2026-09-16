@@ -10,46 +10,50 @@ import '../../../../core/widgets/design_system/design_system.dart';
 import '../controllers/customer_providers.dart';
 import 'subscription_screen.dart';
 
-/// Marketing-Rechnung „Wann rechnet sich das Abo?" — der One-Pager als
+/// Marketing-Rechnung „Was du mit der App sparst" — der One-Pager als
 /// In-App-Screen. Zwei Szenarien aus der zentralen Preislogik (Pricing):
 ///   * konservativ: nur der garantierte 5-%-App-Preis,
 ///   * normal: zusätzlich Frühstücks-/Feierabend-Deals, Tages- und
 ///     Wochenangebote (weitere 10 % auf den App-Preis) sowie
 ///     Treue-Meilensteine (Coupons 5–25 %).
-/// Wird Nicht-Abonnenten als Kaufargument gezeigt; Abonnenten können die
-/// Rechnung ebenfalls öffnen.
+///
+/// Seit dem Beschluss vom 2026-09-16 ([Pricing.benefitsFreeForAll]) kostet
+/// die App nichts mehr. Damit entfällt die Break-even-Frage „ab welchem
+/// Einkauf trägt sich die Gebühr?" — es gibt keine Gebühr, die getragen
+/// werden müsste. An ihre Stelle tritt eine reine Ersparnis-Tabelle: wie
+/// viel bei einem gegebenen monatlichen Einkauf im Jahr zusammenkommt.
+/// Die Break-even-Logik bleibt in [Pricing] erhalten, falls die
+/// Entscheidung zurückgenommen wird.
 class SubscriptionValueScreen extends ConsumerWidget {
   const SubscriptionValueScreen({super.key});
 
   /// Der One-Pager als PDF — wird mit dem Web-Build ausgeliefert
   /// (apps/mobile/web/marketing/) und liegt damit auf GitHub Pages;
   /// die absolute URL funktioniert auch aus den nativen Apps.
+  ///
+  /// Am 2026-09-16 neu erzeugt aus `docs/marketing/abo-rechnet-sich.html`
+  /// (Headless-Chromium-Druck). Der Dateiname stammt noch aus der Abo-Zeit,
+  /// der Inhalt nicht mehr: Er nennt keine Abo-Preise. Wird das PDF erneut
+  /// geändert, muss die HTML-Quelle die Vorlage bleiben — sonst driften
+  /// beide auseinander und die Preisangaben werden irreführend (§ 5 UWG).
   static final Uri onePagerPdf = Uri.parse(
     'https://blume1805.github.io/B-rdesnack24-/marketing/abo-rechnet-sich.pdf',
   );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasSub = ref.watch(hasSubscriptionProvider).valueOrNull ?? false;
+    final hasBenefits = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
 
-    // Break-even je Abo (monatlicher Einkaufswert bzw. kumuliert bei
-    // Lifetime) — konservativ vs. normal, aus derselben Formel.
     const conservative = Pricing.appDiscountRate;
     final normal = Pricing.normalSavingsRate;
-    const monthly = Pricing.subMonthlyEur;
-    const yearly = Pricing.subYearlyEur;
-    const lifetime = Pricing.subLifetimeEur;
-    final beMonthlyCons = Pricing.breakEvenMonthlySpend(monthly);
-    final beMonthlyNorm =
-        Pricing.breakEvenMonthlySpend(monthly, savingsRate: normal);
-    final beYearlyCons = Pricing.breakEvenMonthlySpend(yearly / 12);
-    final beYearlyNorm =
-        Pricing.breakEvenMonthlySpend(yearly / 12, savingsRate: normal);
-    const beLifetimeCons = lifetime / conservative;
-    final beLifetimeNorm = lifetime / normal;
+
+    // Ersparnis-Beispiele: monatlicher Einkaufswert → Ersparnis im Jahr.
+    // Keine Kosten mehr gegenzurechnen, deshalb ist die Ersparnis die
+    // Ersparnis — nicht der Überschuss über eine Gebühr.
+    const spendSteps = <double>[10, 20, 40];
 
     return Scaffold(
-      appBar: const HeroAppBar(title: Text('Wann rechnet sich das Abo?')),
+      appBar: const HeroAppBar(title: Text('Was du sparst')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s5,
@@ -164,36 +168,22 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s5),
 
-          // ── Break-even-Tabelle ────────────────────────────────────────
-          const Eyebrow('Ab wann bist du im Plus?'),
+          // ── Ersparnis-Tabelle ─────────────────────────────────────────
+          const Eyebrow('Was das im Jahr ausmacht'),
           const SizedBox(height: AppSpacing.s3),
           AppCard(
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                const _BreakEvenHeader(),
-                const Divider(height: 1, color: AppColors.borderSubtle),
-                _BreakEvenRow(
-                  plan: 'Monats-Abo',
-                  cost: '${Formatters.euro(monthly)} / Monat',
-                  conservative: '${Formatters.euro(beMonthlyCons)} / Monat',
-                  normal: '${Formatters.euro(beMonthlyNorm)} / Monat',
-                ),
-                const Divider(height: 1, color: AppColors.borderSubtle),
-                _BreakEvenRow(
-                  plan: 'Jahres-Abo',
-                  cost: '${Formatters.euro(yearly)} / Jahr',
-                  conservative: '${Formatters.euro(beYearlyCons)} / Monat',
-                  normal: '${Formatters.euro(beYearlyNorm)} / Monat',
-                ),
-                // Lifetime bleibt im Code, wird aber nur bei Aktionen gezeigt.
-                if (Pricing.lifetimePubliclyOffered) ...[
+                const _SavingsHeader(),
+                for (final spend in spendSteps) ...[
                   const Divider(height: 1, color: AppColors.borderSubtle),
-                  _BreakEvenRow(
-                    plan: 'Lifetime · Founders Edition',
-                    cost: '${Formatters.euro(lifetime)} einmalig',
-                    conservative: '${Formatters.euro(beLifetimeCons)} gesamt',
-                    normal: '${Formatters.euro(beLifetimeNorm)} gesamt',
+                  _SavingsRow(
+                    spend: '${Formatters.euro(spend)} / Monat',
+                    perYear: '= ${Formatters.euro(spend * 12)} im Jahr',
+                    conservative:
+                        '${Formatters.euro(spend * 12 * conservative)} / Jahr',
+                    normal: '${Formatters.euro(spend * 12 * normal)} / Jahr',
                   ),
                 ],
               ],
@@ -201,8 +191,8 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack ca. 6 €. Normal reichen 2 Besuche im Monat fürs '
-            'Jahres-Abo (vorsichtig: 3).',
+            'Kaffee + Snack ca. 6 €. Die Ersparnis beginnt beim ersten Kauf — '
+            'es gibt keine Gebühr, die sich erst rechnen müsste.',
             style: AppTypography.body(size: 12.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),
@@ -235,8 +225,8 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s6),
 
-          // ── CTA (nur ohne Abo) ────────────────────────────────────────
-          if (!hasSub)
+          // ── CTA (nur, wenn die Vorteile noch nicht aktiv sind) ─────────
+          if (!hasBenefits)
             SizedBox(
               width: double.infinity,
               child: FilledButton(
@@ -251,7 +241,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 onPressed: () => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
                 ),
-                child: const Text('Abo wählen — ab 0,99 € im Monat'),
+                child: const Text('Vorteile ansehen'),
               ),
             )
           else
@@ -267,7 +257,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.s2),
                   Expanded(
                     child: Text(
-                      'Du hast bereits ein Abo — deine Vorteile sind aktiv.',
+                      'Deine Vorteile sind aktiv — kostenlos, dauerhaft.',
                       style: AppTypography.body(
                         size: 13,
                         color: AppColors.textDefault,
@@ -282,7 +272,9 @@ class SubscriptionValueScreen extends ConsumerWidget {
             'Kalkulationsbasis: Produktkatalog 03/2026, Preise inkl. USt. '
             'Das normale Szenario ist eine Beispielrechnung — deine '
             'tatsächliche Ersparnis hängt davon ab, wie oft du Deals und '
-            'Coupons nutzt. Angaben ohne Gewähr, Preise können sich ändern.',
+            'Coupons nutzt. Die App selbst kostet nichts; es fällt weder eine '
+            'Grund- noch eine Nutzungsgebühr an. Angaben ohne Gewähr, Preise '
+            'können sich ändern.',
             style: AppTypography.body(size: 11, color: AppColors.textMuted)
                 .copyWith(height: 1.45),
           ),
@@ -354,8 +346,9 @@ class _ScenarioCard extends StatelessWidget {
   }
 }
 
-class _BreakEvenHeader extends StatelessWidget {
-  const _BreakEvenHeader();
+/// Kopfzeile der Ersparnis-Tabelle.
+class _SavingsHeader extends StatelessWidget {
+  const _SavingsHeader();
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +370,7 @@ class _BreakEvenHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          head('ABO', flex: 5),
+          head('EINKAUF', flex: 5),
           head('KONSERVATIV', flex: 5),
           head('NORMAL', flex: 5),
         ],
@@ -386,16 +379,18 @@ class _BreakEvenHeader extends StatelessWidget {
   }
 }
 
-class _BreakEvenRow extends StatelessWidget {
-  const _BreakEvenRow({
-    required this.plan,
-    required this.cost,
+/// Eine Zeile der Ersparnis-Tabelle: monatlicher Einkauf → Ersparnis
+/// im Jahr, konservativ und im normalen Szenario.
+class _SavingsRow extends StatelessWidget {
+  const _SavingsRow({
+    required this.spend,
+    required this.perYear,
     required this.conservative,
     required this.normal,
   });
 
-  final String plan;
-  final String cost;
+  final String spend;
+  final String perYear;
   final String conservative;
   final String normal;
 
@@ -415,7 +410,7 @@ class _BreakEvenRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plan,
+                  spend,
                   style: AppTypography.body(
                     size: 13,
                     weight: FontWeight.w700,
@@ -423,7 +418,7 @@ class _BreakEvenRow extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  cost,
+                  perYear,
                   style: AppTypography.body(
                     size: 11,
                     color: AppColors.textMuted,
