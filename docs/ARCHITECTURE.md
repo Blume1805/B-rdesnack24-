@@ -26,16 +26,29 @@ noch Data; Data implementiert Domain-Interfaces; Presentation nutzt UseCases.
 ```
 apps/mobile/                Flutter-App (Android/iOS/Web)
   lib/
-    core/                   config · di · error · network · theme · l10n · security · widgets · router
+    core/                   billing · config · di · error · pricing · router ·
+                            security · services · theme · utils · widgets
+    l10n/                   ARB-Dateien und generierte Lokalisierung
     features/<feature>/     domain · data · presentation
-packages/                   geteilte Dart-Packages (design_system, validators, …)
 supabase/
   migrations/               versionierte SQL (Schema, RLS, Trigger, Funktionen)
   functions/                Edge Functions (Deno/TS): sevdesk-sync, nayax-webhook, pdf-export …
   seed/                     Referenzdaten (Rollen, Permissions, SKR03-Konten)
-docs/                       Architektur, ADRs, Berechtigungskonzept, Deployment, API, DB
-.github/workflows/          CI/CD
+docs/                       Architektur, ADRs, Berechtigungskonzept, Compliance,
+                            Strategie, Deployment
+scripts/                    Hilfsskripte
+.github/workflows/          CI/CD — ci, deploy-functions, deploy-web, release
 ```
+
+Drei Punkte, die früher anders dokumentiert waren und hier an den Code
+angeglichen wurden (Stand 2026-09-16):
+
+* **Kein `packages/`-Verzeichnis.** Geteilte Dart-Packages existieren nicht;
+  das Design-System liegt als `core/widgets/design_system/`.
+* **Kein `core/network`.** Der Backend-Zugriff läuft über `core/services` und
+  die Repository-Implementierungen im `data`-Layer der Features.
+* **`l10n` liegt nicht unter `core/`,** sondern als `lib/l10n/` mit
+  generiertem Unterordner.
 
 ## State-Management & DI
 
