@@ -19,8 +19,11 @@ final, die Zahlen sind Beispieldaten.
 * Optional: Screenshots mit echten Daten vom Gerät nachschießen
   (insb. Bestand/Produktkatalog und Beispielrechnung).
 * Feature-Grafik Google Play (1024×500).
-* StoreKit-/Play-Billing-Anbindung für die Abo-Modelle (In-App-Purchase);
-  bis dahin sind die Abos in der App nur vorgemerkt.
+* ~~StoreKit-/Play-Billing-Anbindung für die Abo-Modelle~~ — **entfällt seit
+  dem 16.09.2026.** Die App ist unentgeltlich, es gibt keine In-App-Käufe.
+  In App Store Connect „In-App-Käufe: Nein", in der Play Console „Enthält
+  In-App-Käufe" aus. Etwaige bereits angelegte IAP-Produkte vor der
+  Einreichung löschen oder deaktivieren.
 * Datenschutzerklärung als öffentliche URL auf boerdesnack24.de spiegeln
   (Store-Pflichtfeld).
 

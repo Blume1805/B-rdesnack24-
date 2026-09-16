@@ -252,6 +252,7 @@ Vorschlag zur Reihenfolge:
    wie Server identisch.
 2. **Standortgespräche führen** — unverändert der Engpass.
 3. **Bestandsabfrage fahren** —
-   `select plan, count(*) from app.subscriptions group by plan;`. Ergibt sie
-   Zeilen mit gesetztem Plan, greift die Erstattungszusage aus AGB Ziffer 4 f)
-   und die betroffenen Personen sind aktiv zu informieren.
+   Anleitung in `docs/OPERATIONS.md`, Runbook E. Ergibt sie Zeilen, greift die
+   Erstattungszusage aus AGB Ziffer 4 f) und die betroffenen Personen sind
+   aktiv zu informieren. (Der hier zuvor genannte Tabellenname
+   `app.subscriptions` war falsch; sie heißt `public.customer_subscriptions`.)

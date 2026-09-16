@@ -306,7 +306,7 @@ Sachlage zum Bestandsschutz: Nach dem Stand vom 2026-09-16 wurde über die App
 kein Entgelt vereinnahmt; die Auswahl eines Modells war eine unverbindliche
 Vormerkung ohne Abbuchung (Store-Billing war nie aktiv). Die Datenbank enthält
 zwei Kundenkonten. **Diese Aussage ist nicht durch eine Abfrage der Tabelle
-`app.subscriptions` belegt** — sie stützt sich auf die Vormerkungs-Klausel der
+`public.customer_subscriptions` belegt** — sie stützt sich auf die Vormerkungs-Klausel der
 bisherigen AGB Ziffer 4 f) und darauf, dass keine Zahlungsanbindung existiert.
 `ZU VERIFIZIEREN` (siehe Handlungsbedarf).
 
@@ -415,11 +415,13 @@ Behandlung. Die Gewährung von Coupons an alle Registrierten statt an Abonnenten
 - [x] Alle Preisangaben aus dem Kundenbereich entfernt
 - [x] Alle drei Marketing-PDF aus ihrer HTML-Quelle neu erzeugt; Textinhalt
       auf Preisnennungen geprüft; Link in der App bleibt sichtbar
-- [ ] **Bestand an Abonnements durch Abfrage belegen** —
-      `select plan, count(*) from app.subscriptions group by plan;`. Ergibt die
-      Abfrage Zeilen mit gesetztem Plan, ist AGB Ziffer 4 f) (Erstattungszusage)
-      der maßgebliche Maßstab und jede betroffene Person ist aktiv zu
-      informieren.
+- [ ] **Bestand an Abonnements durch Abfrage belegen** — Anleitung in
+      `docs/OPERATIONS.md`, Runbook E. Die Tabelle heißt
+      `public.customer_subscriptions` (nicht `app.subscriptions`, wie hier bis
+      zum 2026-09-16 falsch stand — die Abfrage wäre mit „relation does not
+      exist" fehlgeschlagen). Ergibt die Abfrage Zeilen, ist AGB Ziffer 4 f)
+      (Erstattungszusage) der maßgebliche Maßstab und jede betroffene Person
+      ist aktiv zu informieren.
 - [ ] Store-Metadaten auf Preisangaben prüfen — vor der ersten Einreichung
 - [x] Befund P-1 aufgelöst — er beruhte auf einer veralteten Migration und
       ist zurückgezogen (`docs/ARCHITECTURE.md`, A-7). Die Statusstaffel

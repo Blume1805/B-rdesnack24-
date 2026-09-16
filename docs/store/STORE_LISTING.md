@@ -1,5 +1,22 @@
 # Store-Listing — Bördesnack24
 
+> ## ⚠️ ABGELÖST — nicht für die Einreichung verwenden
+>
+> Maßgeblich ist **`docs/store-assets/store-listing.md`**. Dort stehen die
+> vollständigen Texte samt Zeichenlimits, Datenschutzangaben, Screenshots und
+> Review-Hinweisen; dieser Text hier ist ein älterer, kürzerer Entwurf.
+>
+> Am 16.09.2026 fiel auf, dass beide Dateien nebeneinander existieren und
+> unterschiedliche Untertitel, Kurzbeschreibungen und Keywords enthalten. Wer
+> die falsche Datei erwischt, reicht einen veralteten Text ein. Deshalb dieser
+> Hinweis statt einer stillen Löschung — der Entwurf bleibt nachvollziehbar.
+>
+> Inhaltlich ist dieser Text von der Umstellung auf die kostenlose App
+> (Beschluss vom 16.09.2026) **nicht** betroffen: Er nennt keine Abo-Preise.
+> Vor einer Wiederverwendung wäre er trotzdem vollständig gegen den
+> tatsächlichen Funktionsumfang zu prüfen.
+
+
 ## App-Name
 Bördesnack24
 

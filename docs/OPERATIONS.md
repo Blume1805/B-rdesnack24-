@@ -324,6 +324,72 @@ Zeilen, die mit `CREATE OR REPLACE FUNCTION app.snapshot_slot_` beginnen.
 **Eilt es?** Nein, nicht für den laufenden Betrieb. Aber es sollte vor dem
 Go-Live erledigt sein, weil danach der Druck im Ernstfall größer ist.
 
+## Runbook E: Prüfen, ob jemand ein Abo abgeschlossen hat
+
+**Zeitbedarf:** etwa 5 Minuten. Es wird nur gelesen, nichts geändert.
+
+### Warum das gemacht werden soll
+
+Seit dem 16.09.2026 ist die App kostenlos. In den neuen AGB steht der Satz, dass
+über die App keine Zahlungen vereinnahmt wurden — und dass wir erstatten, falls
+doch. Dieser Satz ist bisher **nicht überprüft**. Er stützt sich darauf, dass
+die Bezahlanbindung an Apple und Google nie eingebaut wurde und die Auswahl
+eines Abos in der App nur eine Vormerkung war.
+
+Wahrscheinlich stimmt das. Aber eine Zusage in AGB, die niemand nachgesehen
+hat, ist eine Behauptung. Fünf Minuten lösen das auf.
+
+**Was passiert, wenn es nicht gemacht wird:** Vermutlich nichts. Im schlechten
+Fall hat jemand ein Abo vorgemerkt, bekommt weder Erstattung noch Nachricht,
+und wir haben in den AGB etwas zugesagt, das wir nicht eingehalten haben.
+
+### Was passiert dabei
+
+Du lässt dir anzeigen, wie viele Zeilen in der Abo-Tabelle stehen. Eine Zeile
+entsteht, sobald jemand in der App ein Modell ausgewählt hat — unabhängig
+davon, ob jemals Geld geflossen ist (es ist keines geflossen, weil nie eine
+Bezahlanbindung bestand).
+
+### Schritt für Schritt
+
+1. Öffne <https://supabase.com/dashboard> und melde dich an.
+2. Wähle links oben das Bördesnack24-Projekt.
+3. Klicke links auf **SQL Editor**, dann oben auf **New query**.
+4. Füge diesen Text vollständig ein:
+
+   ```sql
+   select plan,
+          count(*)                as anzahl,
+          min(chosen_at)          as erste_wahl,
+          max(chosen_at)          as letzte_wahl
+   from public.customer_subscriptions
+   group by plan
+   order by anzahl desc;
+   ```
+
+5. Klicke rechts unten auf **Run** (oder Strg+Enter).
+
+### So sieht Erfolg aus
+
+* **„Success. No rows returned"** oder eine leere Ergebnistabelle → niemand hat
+  je ein Abo gewählt. Die Zusage in den AGB stimmt, es ist nichts zu tun. Sag
+  mir kurz Bescheid, dann hake ich den Punkt in `docs/COMPLIANCE.md` ab.
+* **Eine oder mehrere Zeilen** → es gibt Vormerkungen. Dann brauche ich die
+  Ausgabe, und wir gehen die betroffenen Konten durch: Jede Person wird
+  angeschrieben, und falls wider Erwarten doch abgebucht wurde, wird erstattet.
+  Das ist kein Drama, aber es muss aktiv passieren, nicht stillschweigend.
+
+### Wenn etwas schiefgeht
+
+* **„relation ... does not exist"** — dann heißt die Tabelle anders als
+  angenommen. Schick mir die Fehlermeldung; der Name stand in meinen Unterlagen
+  schon einmal falsch (`app.subscriptions` statt
+  `public.customer_subscriptions`), das kann erneut passiert sein.
+* **Du hast versehentlich etwas verändert** — ausgeschlossen: `select` liest
+  nur. Es gibt nichts rückgängig zu machen.
+
+**Eilt es?** Vor der ersten Veröffentlichung der App, nicht vorher.
+
 ## Monitoring
 
 - **Sentry** (Fehler/Crashes), **PostHog** (Nutzung, consent-gated).
