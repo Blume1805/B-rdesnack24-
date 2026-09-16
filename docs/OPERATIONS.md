@@ -54,59 +54,117 @@ Apple-Signing (Zertifikat/Provisioning via Fastlane match o. Ä.).
 - **Secret-Rotation:** Provider-Geheimnisse turnusmäßig wechseln, siehe Runbook
   weiter unten.
 
-## Runbook: Rotation eines Telemetrie-Provider-Geheimnisses
+## Runbook A: Sicherheitsregeln für die Telemetrie-Tabellen einspielen
 
-Gilt für `public.telemetry_providers.hmac_secret`, geprüft von `iot-webhook`.
-Ein HMAC-Secret ist ein **geteiltes** Geheimnis: Es wird auf unserer Seite und
-beim absendenden System gleichzeitig gewechselt. Wird es einseitig geändert,
-schlägt ab sofort jede Signaturprüfung fehl und der Telemetrie-Eingang steht.
+*Geschrieben für den Betrieb, nicht für Entwickler. Dauer etwa 10 Minuten.*
 
-**Auslöser**
-Verdacht auf Offenlegung, Personalwechsel beim Dienstleister, turnusmäßige
-Rotation, oder nach einem Sicherheitsbefund — zuletzt am 2026-09-16, weil die
-Tabelle bis dahin ohne RLS lag (siehe `docs/ARCHITECTURE.md`, Abweichung A-1).
+**Warum das gemacht werden muss.**
+In der Datenbank gibt es sechs Tabellen mit Betriebsdaten der Automaten —
+welches Produkt in welchem Fach liegt, welches Gerät wo hängt, wie warm es im
+Automaten ist. Diese Tabellen hatten keine Zugriffsregel. Das heißt: Jeder, der
+ein Konto in der App hat, konnte sie auslesen — auch ein Kunde. In einer der
+Tabellen steht zusätzlich ein Passwort, mit dem der Automatenanbieter seine
+Meldungen an uns unterschreibt. Wer dieses Passwort kennt, könnte uns erfundene
+Verkäufe schicken.
 
-**Vorbedingung**
-Migration `0064_iot_telemetry_rls.sql` ist eingespielt. Sonst ist auch das neue
-Geheimnis wieder für jedes Konto lesbar.
+**Was passiert, wenn es nicht gemacht wird.**
+Sobald die ersten Kunden ein Konto anlegen, sind diese Daten für sie offen. Das
+ist kein Datenschutzvorfall im engeren Sinne, weil keine Kundendaten betroffen
+sind — es sind Betriebsdaten. Aber das Passwort gehört niemandem außer uns.
 
-```bash
-supabase db push                 # oder: supabase migration up --linked
-supabase test db                 # RLS-Nachweis, muss grün sein
-```
+**Was die Änderung bewirkt — und was nicht.**
+Danach dürfen die sechs Tabellen nur noch von Konten gelesen werden, die das
+Recht „Inventur ansehen" haben, also ihr beide. Das Passwort ist für gar kein
+Konto mehr lesbar. Der Kundenbereich der App ist davon **nicht** betroffen — er
+greift auf diese Tabellen nie zu. Der Telemetrie-Bereich in der Verwaltung
+funktioniert unverändert weiter; das wurde vorab getestet.
 
-**Schritt 1 — Betroffenheit feststellen** (SQL-Editor des Projekts)
+**Schritt für Schritt**
+
+1. Öffne `https://supabase.com` und melde dich an.
+2. Wähle das Projekt **boerdesnack24** aus der Liste.
+3. Klicke in der linken Leiste auf **SQL Editor** (Symbol mit Datenbank und
+   Bleistift), dann oben auf **New query**.
+4. Öffne im Projektordner die Datei
+   `supabase/migrations/0064_iot_telemetry_rls.sql`, markiere den **gesamten**
+   Inhalt und kopiere ihn.
+5. Füge ihn in das leere Feld im SQL Editor ein.
+6. Klicke unten rechts auf **Run** (oder Strg + Enter).
+
+**So sieht Erfolg aus.**
+Unten erscheint eine grüne Meldung, meist „Success. No rows returned". Einzelne
+graue Hinweise mit dem Wort `NOTICE` sind normal — sie bedeuten nur, dass eine
+Regel noch nicht existierte und deshalb nicht gelöscht werden musste.
+
+Zur Gegenprobe: neue Abfrage öffnen, folgenden Text einfügen und ausführen.
 
 ```sql
-select id, name, adapter, is_active, created_at from public.telemetry_providers;
+select c.relname as tabelle, c.relrowsecurity as geschuetzt
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+ where n.nspname = 'public'
+   and c.relname in ('telemetry_providers','machine_devices','machine_slots',
+                     'machine_slots_history','machine_telemetry_events','machine_health');
+```
+
+Es müssen sechs Zeilen erscheinen, in der Spalte `geschuetzt` überall **true**.
+
+**Wenn etwas schiefgeht.**
+Erscheint eine rote Fehlermeldung, ändere nichts weiter und schicke den
+Fehlertext. Die Datei darf gefahrlos mehrfach ausgeführt werden — ein zweiter
+Durchlauf richtet keinen Schaden an. Es eilt nicht auf die Stunde, sollte aber
+vor dem ersten echten Kundenkonto erledigt sein.
+
+## Runbook B: Passwort des Telemetrie-Anbieters wechseln
+
+*Dauer etwa 20 Minuten, plus Abstimmung mit Automatenland. Erst durchführen,
+wenn Runbook A erledigt ist.*
+
+**Warum.**
+Das Passwort aus Runbook A war eine Zeit lang für jedes Konto lesbar. Ein
+Passwort, das offen lag, wird ersetzt — auch wenn nichts passiert ist.
+
+**Das Wichtigste vorweg.**
+Dieses Passwort kennen **zwei** Seiten: wir und der Automatenanbieter. Beide
+müssen gleichzeitig denselben neuen Wert verwenden. Änderst du es nur bei uns,
+werden ab diesem Moment alle Meldungen der Automaten abgewiesen — die
+Bestandsdaten stehen dann still, bis die Gegenseite nachgezogen hat.
+
+**Schritt 1 — Prüfen, ob es überhaupt nötig ist.**
+Im SQL Editor ausführen:
+
+```sql
+select id, name, is_active, created_at from public.telemetry_providers;
 select role, count(*) from public.profiles group by role;
 ```
 
-Existiert nur ein Platzhalter und hat nie ein fremdes Konto bestanden, genügt es,
-das Geheimnis vor dem Produktivstart einmal sauber zu setzen.
+Ist die erste Liste leer oder enthält nur einen Testeintrag, und gibt es in der
+zweiten Liste keine Zeile `customer`, dann hat nie jemand das Passwort lesen
+können. Dann reicht es, vor dem Produktivstart einmal ein sauberes Passwort zu
+setzen — Schritt 2 bis 5, ohne Eile.
 
-**Schritt 2 — Neues Geheimnis erzeugen**
+**Schritt 2 — Neues Passwort erzeugen.**
+Nutze einen Passwortgenerator mit mindestens 40 Zeichen, oder frage mich danach.
+Notiere es vorübergehend in eurem Passwortmanager, nicht in einer E-Mail.
 
-```bash
-openssl rand -hex 32
-```
+**Schritt 3 — Mit Automatenland abstimmen.**
+Termin vereinbaren, zu dem beide Seiten umstellen. Das Passwort über einen
+sicheren Weg übergeben, nicht im E-Mail-Text. Lege den Termin auf eine Zeit mit
+wenig Automatenverkauf.
 
-**Schritt 3 — Übergabe an den Dienstleister**
-Über einen sicheren Kanal, nicht per E-Mail im Klartext. Umstellungsfenster
-vereinbaren; außerhalb der Stoßzeiten der Automaten legen.
-
-**Schritt 4 — Wert setzen**
-Im SQL-Editor mit privilegiertem Zugriff. **Nicht** aus der App heraus: Seit
-Migration 0064 darf keine Clientrolle diese Tabelle schreiben.
+**Schritt 4 — Bei uns setzen.**
+Im SQL Editor, wobei du die beiden Platzhalter ersetzt:
 
 ```sql
 update public.telemetry_providers
-   set hmac_secret = '<neuer Wert>', updated_at = now()
- where id = '<provider-id>';
+   set hmac_secret = 'NEUES-PASSWORT-HIER', updated_at = now()
+ where name = 'NAME-DES-ANBIETERS';
 ```
 
-**Schritt 5 — Nachweis**
-Testereignis senden lassen, dann prüfen:
+Erwartete Meldung: `Success. 1 row affected` — steht dort `0 rows`, stimmt der
+Name nicht; dann Schritt 1 wiederholen und den Namen genau übernehmen.
+
+**Schritt 5 — Nachweis.**
+Automatenland um eine Testmeldung bitten, danach im SQL Editor:
 
 ```sql
 select event_uid, status, received_at
@@ -114,19 +172,17 @@ select event_uid, status, received_at
  order by received_at desc limit 5;
 ```
 
-Erwartet: neuer Eintrag mit Status `received`. Zusätzlich die Function-Logs auf
-`Invalid signature` (401) kontrollieren — dort dürfen nach der Umstellung keine
-neuen Einträge auflaufen.
+Erwartet: ein neuer Eintrag mit dem heutigen Datum und dem Status `received`.
 
-**Schritt 6 — Dokumentation**
-Datum, Provider, Anlass und ausführende Person festhalten. **Der alte und der
-neue Wert gehören nicht ins Protokoll.** Der Vorgang ist für die
-Verfahrensdokumentation aufzubewahren.
+**Wenn etwas schiefgeht.**
+Kommen keine neuen Einträge, ist das alte Passwort noch bei der Gegenseite
+hinterlegt. Setze den alten Wert mit demselben Befehl aus Schritt 4 zurück und
+vereinbare einen neuen Termin. Halte den alten Wert deshalb bis zum
+erfolgreichen Nachweis bereit.
 
-**Rollback**
-Schlägt die Prüfung fehl, den alten Wert zurückschreiben und das Fenster neu
-ansetzen. Deshalb den alten Wert bis zum bestandenen Nachweis griffbereit halten
-— außerhalb des Repositorys.
+**Zum Schluss.**
+Datum, Anbieter und Anlass in der Verfahrensdokumentation festhalten. Die
+Passwörter selbst gehören **nicht** in dieses Protokoll.
 
 ## Monitoring
 

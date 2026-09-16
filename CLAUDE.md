@@ -63,3 +63,27 @@ Rückfrage nur bei **Grundsatzentscheidungen**. Das sind:
 Alles andere wird ausgeführt und anschließend berichtet: was getan wurde, womit
 es nachgewiesen ist, und was offen bleibt. Ein Bericht ersetzt die Rückfrage —
 nicht die Arbeit.
+
+## Anleitungen für Philipp: Schritt für Schritt und ohne Fachjargon (Pflicht)
+
+Philipp ist kein IT-Fachmann. Sobald eine Aufgabe bei ihm liegt — weil sie
+Zugangsdaten, eine Abstimmung mit Dritten oder einen Klick in einer fremden
+Oberfläche erfordert —, wird sie so übergeben, dass sie ohne Vorwissen
+ausführbar ist:
+
+1. **Warum** — in ein bis zwei einfachen Sätzen: Was ist das Problem, und was
+   passiert, wenn es nicht gemacht wird? Keine Fachbegriffe ohne Erklärung.
+2. **Was passiert dabei** — was die Änderung bewirkt und was sie *nicht*
+   bewirkt, damit klar ist, was auf dem Spiel steht.
+3. **Schritt für Schritt** — nummeriert, mit dem konkreten Ort (welche Seite,
+   welcher Menüpunkt, welche Schaltfläche) und dem exakten Text zum Einfügen.
+   Kein „konfiguriere X", sondern „öffne A, klicke B, füge C ein".
+4. **So sieht Erfolg aus** — woran er erkennt, dass es geklappt hat.
+5. **Wenn etwas schiefgeht** — der Rückweg, und ob es eilt.
+
+Fachbegriffe, die unvermeidbar sind, werden beim ersten Vorkommen in einem
+Halbsatz erklärt. Zeitangabe dazuschreiben, wenn ein Schritt länger dauert oder
+ein Fenster mit Dritten abgestimmt werden muss.
+
+Das gilt auch für Runbooks in `/docs/`: Sie werden für den Betreiber
+geschrieben, nicht für einen Entwickler.
