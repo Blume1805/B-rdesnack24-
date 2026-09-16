@@ -150,3 +150,82 @@ die Korrekturen betreffen ausschließlich interne Planungsrechnungen. Die unter
 V-002 bis V-004 geführten offenen Punkte bleiben unverändert bestehen.
 
 **Ergebnis.** Keine Anpassung erforderlich. **Status 🟢** für diese Änderung.
+
+---
+
+## V-006 · Öffentliche Automatenseite (Phase 1) — OFFEN
+
+### Sachverhalt
+
+Geplant ist eine öffentliche, ohne Anmeldung erreichbare Webseite je Automat,
+aufgerufen über einen QR-Code am Gerät. Inhalte: Standortbezeichnung, Empfänger
+und bisher erwirtschafteter Betrag des zweckgebundenen Anteils, Produktliste,
+ein Formular zur Meldung von Störungen, Hinweise zum Beleg, Impressum und
+Datenschutz. Kein Konto, kein Bezahlvorgang, kein Tracking, keine Cookies.
+
+Datenklasse: **D3**, sobald das Störungsformular Kontaktdaten erhebt. Der
+übrige Inhalt ist D0. Änderungsklasse **K3** (Außenwirkung, personenbezogene
+Daten).
+
+### Rechtliche Würdigung
+
+**Impressum.** Eine geschäftsmäßige öffentliche Seite unterliegt der
+Anbieterkennzeichnung. Die maßgebliche Vorschrift ist seit 2024 im Gesetz über
+digitale Dienste verortet, das an die Stelle des Telemediengesetzes getreten
+ist; die genaue Fundstelle ist vor Veröffentlichung gegenzuprüfen. Die Angaben
+der GbR sind vollständig zu übernehmen, einschließlich beider Gesellschafter,
+Kontakt und Umsatzsteuer-Identifikationsnummer. `ZU VERIFIZIEREN` (Fundstelle)
+
+**Datenschutz.** Das Störungsformular verarbeitet personenbezogene Daten.
+Erforderlich sind: Rechtsgrundlage (Vertragsanbahnung bzw. berechtigtes
+Interesse), Informationen nach Art. 13 DSGVO **auf der Seite selbst**,
+Zweckbindung, eine festgelegte Löschfrist für erledigte Meldungen, sowie ein
+Auftragsverarbeitungsvertrag mit dem Hoster und ein Eintrag im Verzeichnis der
+Verarbeitungstätigkeiten. Serverstandort prüfen. `ZU VERIFIZIEREN`
+
+**Kein Einwilligungsbanner.** Die Seite kommt ohne Cookies, ohne Tracking und
+ohne eingebettete Fremdinhalte aus. Das ist eine bewusste Entwurfsvorgabe und
+der Grund, warum keine Einwilligung eingeholt werden muss. Wird später ein
+Analysewerkzeug, eine Kartenansicht oder eine externe Schriftquelle ergänzt,
+fällt diese Grundlage und der Vorgang ist neu zu bewerten.
+
+**Werbliche Aussage zum Impact (UWG).** Die Angabe, dieser Automat habe einen
+Betrag für einen benannten Empfänger erwirtschaftet, ist eine geschäftliche
+Aussage. Sie muss zutreffend, klar und nachprüfbar sein und **Empfänger,
+Bezugsgröße, Zeitraum und Stand** nennen. Solange die Beträge nicht automatisch
+aus Transaktionsdaten berechnet werden, ist der Stand als Datum auszuweisen und
+die Berechnung nachvollziehbar zu dokumentieren. `ZU VERIFIZIEREN`
+
+**Wortwahl und Konstruktion.** Die Einordnung des Anteils als Sponsoring,
+Entgelt oder Spende ist unter V-002 offen. Die Seite darf dieser Klärung nicht
+vorgreifen: Formulierungen wie „gespendet" sind bis zur Klärung zu vermeiden;
+neutral ist „für … erwirtschaftet". `ZU VERIFIZIEREN`
+
+**Lebensmittelrecht.** Die Produktliste dient der Information, nicht der
+Bestellung; ein Fernabsatzangebot entsteht dadurch nicht. Die Abgrenzung hängt
+daran, dass über die Seite weder bestellt noch reserviert werden kann — diese
+Eigenschaft ist bei jeder Erweiterung erneut zu prüfen, weil Kennzeichnungs-
+pflichten an die Bestellmöglichkeit anknüpfen. `ZU VERIFIZIEREN`
+
+**Barrierefreiheit.** Anwendbarkeit des BFSG und die Kleinstunternehmensausnahme
+sind gesondert zu prüfen. Unabhängig davon gilt WCAG 2.1 AA als
+Qualitätsanforderung des Briefings. `ZU VERIFIZIEREN`
+
+**Entwurfsphase bei Lovable.** In den Entwurf gehören ausschließlich erfundene
+Beispieldaten. Echte Kundendaten, echte Spendenbeträge oder Klarnamen von
+Vereinen werden dem Dienst nicht übergeben, solange die Vereinbarung mit dem
+jeweiligen Empfänger nicht steht.
+
+### Ergebnis / Handlungsbedarf
+
+- [ ] Impressum und Datenschutzerklärung für die Seite erstellen — **vor** der
+      ersten Veröffentlichung, nicht danach
+- [ ] Auftragsverarbeitungsvertrag mit dem Hoster, Eintrag ins Verzeichnis
+- [ ] Löschfrist für Störungsmeldungen festlegen und technisch umsetzen
+- [ ] Berechnungsweg des Impact-Betrags dokumentieren (UWG-Nachweis)
+- [ ] Einordnung des Anteils klären (V-002) und Wortwahl daran ausrichten
+- [x] Keine Anpassung an AGB und Widerrufsbelehrung: Die Seite begründet keinen
+      Vertrag und berührt die Abo-Regelungen nicht.
+
+**Status 🔴** · Verantwortlich: Philipp Blume · Fällig: vor Veröffentlichung
+der ersten Automatenseite.
