@@ -7,6 +7,37 @@ Stand: 16.09.2026 · Texte auf Deutsch (einzige Store-Sprache zum Start).
 > siehe `docs/COMPLIANCE.md`, V-007). Alle Preisangaben sind aus diesem Text
 > entfernt — eine Preisangabe im Store, die es nicht gibt, wäre irreführend
 > (§ 5 UWG) und würde die Store-Prüfung zusätzlich angreifbar machen.
+>
+> ## ⚠️ Eine Store-Einreichung ist derzeit gar nicht vorbereitet
+>
+> Stand 16.09.2026, geprüft im Repository:
+>
+> * Es gibt **keine** Ordner `apps/mobile/ios/` und `apps/mobile/android/`.
+>   Ohne sie lässt sich weder eine iOS- noch eine Android-App bauen. Vorhanden
+>   ist ausschließlich `apps/mobile/web/`.
+> * Es besteht **kein** Entwicklerkonto — weder App Store Connect noch Google
+>   Play Console (Auskunft des Gesellschafters vom 16.09.2026).
+> * Die App läuft als **Web-App** und wird über `scripts/deploy_web.sh` nach
+>   GitHub Pages ausgeliefert. `web/manifest.json` ist ein vollständiges
+>   PWA-Manifest (`display: standalone`, maskable Icons, Theme-Farbe): Die App
+>   lässt sich damit auf dem Startbildschirm ablegen und öffnet sich wie eine
+>   installierte App — ohne Store, ohne Konto, ohne Prüfverfahren.
+> * Push-Benachrichtigungen sind **nicht** implementiert (`firebase_core` und
+>   `firebase_messaging` sind in `pubspec.yaml` auskommentiert).
+>
+> **Dieses Dokument beschreibt daher einen Weg, der noch nicht beschritten
+> wird.** Es bleibt als vorbereiteter Text erhalten, falls eine
+> Store-Veröffentlichung später beschlossen wird. Bis dahin ist es kein
+> Arbeitsauftrag. Die Screenshots, das 1024er-Icon und der Demo-Zugang fürs
+> Review-Team sind für diesen Fall bereits vorhanden.
+>
+> **Wichtig für die Entscheidung:** Die Unentgeltlichkeit der App beseitigt die
+> Pflicht zu In-App-Käufen und die Store-Provision — sie beseitigt **nicht**
+> die Kontopflicht. Auch eine kostenlose App braucht für eine Listung ein
+> Apple-Entwicklerkonto (Apple Developer Program, derzeit jährliche Gebühr) und
+> ein Google-Play-Entwicklerkonto (einmalige Registrierungsgebühr). Wer ohne
+> Stores auskommen will, bleibt bei der Web-App — das ist der heutige Zustand
+> und funktioniert.
 
 ## App-Name & Untertitel
 
