@@ -112,10 +112,10 @@ wurden im Text bereits korrigiert; dieser Abschnitt hält fest, was **im Code** 
 
 | Nr. | Befund | Bewertung |
 |---|---|---|
-| A-1 | `0031_iot_telemetry.sql` legt sechs Tabellen an, ohne RLS zu aktivieren und ohne Policy: `telemetry_providers`, `machine_devices`, `machine_slots`, `machine_slots_history`, `machine_telemetry_events`, `machine_health`. Keine spätere Migration holt das nach. | **🔴 offen** — ohne RLS kann jedes authentifizierte Konto diese Betriebsdaten lesen, auch ein Kundenkonto. Datenklasse D2. Eigener Prüfzyklus nach `boerdesnack24-security-regression` erforderlich, inklusive Cross-User-Test mit zwei Konten. |
+| A-1 | `0031_iot_telemetry.sql` legte sechs Tabellen ohne RLS und ohne Policy an: `telemetry_providers`, `machine_devices`, `machine_slots`, `machine_slots_history`, `machine_telemetry_events`, `machine_health`. Jedes authentifizierte Konto konnte sie lesen, einschließlich `telemetry_providers.hmac_secret` im Klartext. | **behoben durch `0064_iot_telemetry_rls.sql`** (2026-09-16). Lesen nur mit `inventory.view` oder Adminrolle, Schreiben nur auf `machine_devices` mit `inventory.edit`, `hmac_secret` für keine Clientrolle lesbar. Verhalten in einer lokalen PostgreSQL-16-Instanz nachgewiesen (Lücke reproduziert, danach geschlossen, Hub-Abfragen ohne Regression). **Offen bleibt 🟡: Rotation der Webhook-Geheimnisse**, da sie zeitweise für jedes Konto lesbar waren. |
 | A-2 | Feldverschlüsselung sensibler Felder ist dokumentiert, aber nicht implementiert. | 🟡 — als Ziel führen oder streichen, nicht als Ist behaupten. |
 | A-3 | Observability (Sentry, PostHog) ist auskommentiert. | 🟡 — vor Produktivstart entscheiden. |
-| A-4 | Keine E2E-Tests; Deno- und pgTAP-Läufe in der CI sind nicht blockierend (`|| true`). | 🟡 — die pgTAP-Zeile ist besonders relevant, weil sie genau die RLS-Regeln prüfen soll, die unter A-1 fehlen. |
+| A-4 | Keine E2E-Tests. Der pgTAP-Lauf war nicht blockierend — deshalb blieb A-1 unentdeckt. | teilweise behoben: `supabase test db` ist seit 2026-09-16 blockierend, neuer Test `supabase/tests/iot_telemetry_rls_test.sql`. 🟡 offen: `deno lint` und `deno test` enden weiterhin auf `|| true`; E2E-Tests fehlen weiterhin. |
 
 Bestätigt und unverändert: Clean-Architecture-Schichtung je Feature, Riverpod, go_router,
 Realtime für Bestände (`availability_screen.dart`, `machine_stock_screen.dart`), Storage mit

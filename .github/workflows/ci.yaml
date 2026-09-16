@@ -74,5 +74,7 @@ jobs:
           supabase db start || supabase start || true
           supabase db reset --debug || true
       - name: RLS-/Permission-Tests (pgTAP)
-        # Vorerst nicht-blockierend, bis gegen ein Live-Projekt verifiziert.
-        run: supabase test db || true
+        # Blockierend seit 2026-09-16: Die fehlende RLS auf dem IoT-Layer
+        # (Migration 0031) blieb unentdeckt, weil dieser Schritt nicht
+        # fehlschlagen konnte.
+        run: supabase test db
