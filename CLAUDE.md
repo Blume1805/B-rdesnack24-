@@ -23,3 +23,21 @@ Der regelbasierte Chatbot bleibt bewusst als „Automatischer
 Chat-Assistent" gekennzeichnet — nicht als „KI", weil er kein
 AI-System i. S. v. Art. 3 EU AI Act ist. Für zukünftige LLM-Backends
 das gleiche Prinzip anwenden.
+
+## Dokumentation immer gegen den Code prüfen (Pflicht, ohne Nachfrage)
+
+Jede Aussage in `/docs/` gilt als Behauptung, nicht als Wahrheit. Wird eine
+Dokumentationsstelle gelesen, zitiert oder geändert, ist sie **im selben Zug
+gegen den tatsächlichen Code zu prüfen** — durch Suche im Repository, nicht aus
+dem Gedächtnis.
+
+* Stimmt die Doku nicht mit dem Code überein, ist der Widerspruch aufzulösen:
+  entweder die Doku angleichen oder den Befund als offenen Punkt führen.
+* **Beschreibt die Doku eine Sicherheits- oder Compliance-Eigenschaft, die der
+  Code nicht erfüllt, wird niemals die Doku heruntergeschrieben.** Dann ist der
+  Code der Fehler, und der Punkt geht als 🔴 in den Abweichungsabschnitt des
+  jeweiligen Dokuments und, sofern rechtlich relevant, in `docs/COMPLIANCE.md`.
+* Geprüfte Abweichungen werden mit Datum festgehalten, damit sie nicht
+  stillschweigend zurückkehren.
+* Kein Nachfragen beim User nötig. Die Prüfung gehört zur Aufgabe, nicht zur
+  Zusatzleistung.
