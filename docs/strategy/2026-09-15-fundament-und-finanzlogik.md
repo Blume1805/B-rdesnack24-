@@ -17,6 +17,20 @@ Sie werden hier ausdrücklich zurückgenommen, damit sie nicht weiterzitiert wer
 | „Routendichte bringt 600–700 €/Jahr je Automat" | Rechenfehler | Befüllzeit war mitgekürzt, obwohl nur die Fahrzeit geteilt wird. Korrekt ≈ **396 €/Jahr**, davon 96 € zahlungswirksam |
 | „25 Automaten erzeugen 71.000 €" | zurückgenommen | korrigiert auf ≈ 42.800 € bei 20 Automaten unter ausgewiesenen Annahmen |
 
+### Nachtrag 16.09.2026 — vier weitere Korrekturen nach Schlussprüfung
+
+| Stelle | Fehler | Korrektur |
+|---|---|---|
+| 7.4, Fall-B-Spalten | Impact von 5 % war nicht zusätzlich zur Standortvergütung belastet; alle Werte um eine Stufe zu günstig | Tabelle ersetzt; Defizitschwelle 12,7 / 22,0 / 27,4 % statt 17 / 27 % |
+| 7.8, Fall-B-Spalte | erbte den Fehler aus 7.4 | neu berechnet |
+| 7.1 / 7.3 | Zins in der Definition genannt, in keiner Tabelle abgezogen | als offene Position ausgewiesen, ZU VERIFIZIEREN |
+| 7.2 | Nettoerlös-Differenz als DB-Differenz dargestellt | 546 €/Jahr statt 1.074 €, rund 24 % statt „Hälfte" |
+| 7.12 | DB mit Einzelanfahrt, Arbeitszeit mit Routendichte | Widerspruch benannt, konservative Variante beibehalten |
+| 9 | Standortregel als ODER-Verknüpfung | durch gemeinsame Amortisationsbedingung ersetzt |
+
+Bestätigt und unverändert: Tabelle 7.3 vollständig, 7.6, 7.7, 7.9, 7.10, die
+Pauschalzeile in 7.4 sowie die Szenarien Konservativ und Basis.
+
 ## 1. Fundamentale Erkenntnis
 
 Bördesnack24 ist kein Automatenbetrieb mit App und kein digitales Produkt mit
@@ -29,8 +43,10 @@ Förderverein des Bades. Dieser Anteil ist billiger als die marktübliche
 Provision und für bestimmte Standortgeber attraktiver als Geld in einem
 Haushalt. Er erzeugt zugleich etwas, das keine Provision erzeugt: Der Empfänger
 bewirbt den Automaten bei seinen Mitgliedern, weil er direkt profitiert. Der
-Impact ist damit kein Marketingaufwand, sondern der Ersatz zweier Kostenblöcke —
-Standortentgelt und Kundengewinnung. Die digitale Ebene hat genau eine Aufgabe:
+Impact ist damit kein Marketingaufwand, sondern belegbar der Ersatz **eines**
+Kostenblocks: des Standortentgelts. Dass er zusätzlich Kundengewinnungskosten
+ersetzt, ist HYPOTHESE und geht in keine Rechnung ein. Die digitale Ebene hat
+genau eine Aufgabe:
 den Nachweis zu führen, dass dieser Anteil tatsächlich geflossen ist.
 
 ## 2. Das Gesamtmodell
@@ -115,7 +131,7 @@ Historie sichtbar machen.
 | Ebene | enthält | enthält **nicht** |
 |---|---|---|
 | 1 — Cash | Sachkosten, Kfz-Kilometer, Zahlungsgebühren, Tilgung, Zins | Gesellschafterzeit, Abschreibung |
-| 2 — wirtschaftlicher DB | Ebene 1 ohne Tilgung, plus kalkulatorische Befüllzeit, Abschreibung, Zins | Verwaltungs- und Akquisezeit, zentrale Gemeinkosten |
+| 2 — wirtschaftlicher DB | Ebene 1 ohne Tilgung, plus kalkulatorische Befüllzeit und Abschreibung. **Zins gehört hierher, ist mangels Konditionen aber in keiner Tabelle angesetzt** (bei 7.000 € und beispielhaft 4 % rund 280 €/Jahr im ersten Jahr, fallend) — ZU VERIFIZIEREN | Verwaltungs- und Akquisezeit, zentrale Gemeinkosten |
 | 3 — Unternehmensergebnis | Summe Ebene 2, B2B-DB, zentrale Gemeinkosten, digitale Ebene, restliche Gesellschaftertätigkeit | — |
 
 Befüllzeit erscheint nur auf Ebene 2, Verwaltungszeit nur auf Ebene 3.
@@ -124,8 +140,11 @@ Keine Position doppelt.
 ### 7.2 Umsatzsteuer
 
 Ein Pauschalsatz ist **nicht sachgerecht**. Bei 950 € brutto liegt der
-Nettoerlös zwischen 888 € (7 %) und 798 € (19 %) — rund 1.080 € Unterschied im
-Jahr, etwa die Hälfte des Jahres-DB. Gerechnet wird mit 12 % als ANNAHME.
+Nettoerlös zwischen 887,85 € (7 %) und 798,32 € (19 %) — rund 1.074 €
+Unterschied im Jahr. Auf den Deckungsbeitrag wirkt davon der Faktor 0,508
+(Rohertrag abzüglich der netto-abhängigen Positionen Wartung, Warenverlust und
+Impact), also rund **546 €/Jahr** oder etwa 24 % des Jahres-DB — nicht die
+Hälfte. Gerechnet wird mit 12 % als ANNAHME.
 **Erforderlich:** Produktmix nach Umsatzanteil je Steuersatz sowie die
 Einordnung von Heißgetränken aus dem Automaten — ZU VERIFIZIEREN.
 
@@ -162,17 +181,18 @@ Werte in Fall A (Impact ersetzt die Standortvergütung).
 
 | Standortvergütung | 700 A | 700 B | 950 A | 950 B | 1.200 A | 1.200 B |
 |---|---|---|---|---|---|---|
-| 0 % | 949 | 1.324 | 2.235 | 2.744 | 3.520 | 4.163 |
-| 5 % | 949 | 949 | 2.235 | 2.235 | 3.520 | 3.520 |
-| 10 % | 949 | 574 | 2.235 | 1.726 | 3.520 | 2.877 |
-| 15 % | 949 | **199** | 2.235 | 1.217 | 3.520 | 2.234 |
-| 20 % | 949 | **−176** | 2.235 | **708** | 3.520 | 1.591 |
-| 25 % | 949 | **−551** | 2.235 | **199** | 3.520 | 948 |
+| 0 % | 949 | 949 | 2.235 | 2.235 | 3.520 | 3.520 |
+| 5 % | 949 | 574 | 2.235 | 1.726 | 3.520 | 2.878 |
+| 10 % | 949 | 199 | 2.235 | 1.217 | 3.520 | 2.235 |
+| 15 % | 949 | **−176** | 2.235 | 708 | 3.520 | 1.592 |
+| 20 % | 949 | **−551** | 2.235 | 199 | 3.520 | 949 |
+| 25 % | 949 | **−926** | 2.235 | **−310** | 3.520 | 306 |
 | Pauschale 100 €/Monat | 949 | −251 | 2.235 | 1.035 | 3.520 | 2.320 |
 
-Fall A: Impact ersetzt die Vergütung. Fall B: Impact kommt hinzu.
-In Fall B ist ein 700-€-Automat ab etwa 17 % defizitär, ein 950-€-Automat ab
-etwa 27 %.
+Fall A: Impact ersetzt die Vergütung, der DB ist deshalb von p unabhängig.
+Fall B: Impact **plus** Vergütung; bei p = 0 sind beide Fälle notwendig gleich.
+In Fall B wird der wirtschaftliche DB negativ ab **p ≈ 12,7 %** (700 €),
+**p ≈ 22,0 %** (950 €) und **p ≈ 27,4 %** (1.200 €).
 
 ### 7.5 Wert des Mechanismus und Break-even
 
@@ -223,9 +243,9 @@ Erforderliche Standorte = Vollkosten ÷ DB je Standort:
 
 | | Fall A | Fall B, p = 15 % |
 |---|---|---|
-| 700 € | **2,8** | 13,6 |
-| 950 € | **1,2** | 2,2 |
-| 1.200 € | **0,8** | 1,2 |
+| 700 € | **2,8** | rechnerisch nicht erreichbar (DB negativ) |
+| 950 € | **1,2** | 3,8 |
+| 1.200 € | **0,8** | 1,7 |
 | native App | 6,3 / 2,7 / 1,7 | — |
 
 Auf Cash-Basis ist die Website trivial. Der eigentliche Wettbewerb ist
@@ -284,7 +304,7 @@ Impact nur auf Automatenebene. Tilgung nur in der Cash-Rechnung.
 | Standortmodell | Fall A | Fall A | Fall A |
 | wirtschaftlicher DB je Automat | 1.206 € | 2.235 € | 2.492 € |
 | Summe Automaten-DB | 4.825 € | 17.880 € | 49.840 € |
-| B2B (ANNAHME) | 0 € | 0 € | 8.000 € |
+| B2B (**Zielgröße, kein Fakt**) | 0 € | 0 € | 8.000 € |
 | − zentrale Gemeinkosten | −4.300 € | −4.300 € | −10.000 € |
 | − digitale Ebene | −2.700 € | −2.700 € | −5.000 € |
 | **Ergebnis Ebene 3** | **−2.175 €** | **≈ 10.880 €** | **≈ 42.840 €** |
@@ -292,9 +312,17 @@ Impact nur auf Automatenebene. Tilgung nur in der Cash-Rechnung.
 
 Konservativ ist das Unternehmen **cash-positiv, wirtschaftlich negativ** — die
 Gesellschafter arbeiten, ohne dass ihre Zeit verdient wird. Für eine
-Aufbauphase vertretbar, aber kein Gewinn. Befüllaufwand im Ausbau: 20 Automaten
-× 2 h = 40 Stunden im Monat plus Verwaltung — an der Leistungsgrenze zweier
-nebenberuflicher Personen.
+Aufbauphase vertretbar, aber kein Gewinn.
+
+**Zum Ausbauszenario:** Der DB von 2.492 € je Automat ist mit Einzelanfahrt
+gerechnet (3 h, 60 km). Dann beträgt der Befüllaufwand 20 × 3 h = **60 Stunden
+im Monat** plus Verwaltung — das übersteigt die Leistungsfähigkeit zweier
+nebenberuflicher Personen. Gilt stattdessen die Routendichte aus 7.6 (2 h,
+33 km), sind es 40 Stunden, der DB steigt auf **2.888 €** je Automat und das
+Ergebnis auf **≈ 50.800 €**. Beides zugleich ist nicht möglich; welche der
+beiden Annahmen gilt, entscheidet die Messung des tatsächlichen
+Routenaufwands (ZU VERIFIZIEREN). Die Tabelle führt bewusst die konservative
+Variante.
 
 ### 7.13 Wird B2B-Werbung gebraucht?
 
@@ -312,9 +340,13 @@ entfällt, weil der zentrale Mechanismus ohne ihn funktioniert.
 ## 9. Die fundamentale Entscheidung
 
 **Das Fundament von Bördesnack24 ist ein dichtes regionales Automatennetz mit
-einer harten Aufnahmeschwelle je Standort — mindestens 950 € erwarteter
-Monatsumsatz oder höchstens 10 % Standortvergütung, jeweils mit Amortisation
-unter drei Jahren. Der zweckgebundene Anteil bleibt das Akquiseinstrument, ist
+einer harten Aufnahmeschwelle je Standort: **Amortisation = 7.000 € ÷
+(wirtschaftlicher DB + Abschreibung) unter drei Jahren**, geprüft aus der
+Kombination von Umsatz, Standortvergütung, Marge, Arbeitszeit, Fahrtkosten,
+Strom und Gebühren. Die frühere Formulierung „mindestens 950 € **oder**
+höchstens 10 %" war logisch unzulässig: Bei 950 € und 10 % Vergütung beträgt
+die Amortisation 3,3 Jahre und verletzt die eigene Regel. Die
+Drei-Jahres-Grenze ist ein Managementziel (ANNAHME), kein Rechenergebnis. Der zweckgebundene Anteil bleibt das Akquiseinstrument, ist
 aber nur vorteilhaft, wenn er eine Vergütung über 5 % ersetzt. Die digitale
 Ebene bleibt eine Website und wird an Akquisestunden gemessen.**
 

@@ -131,3 +131,22 @@ Funktionen entschieden ist (siehe Strategiedokument Abschnitt 10). Bis dahin
 gilt: keine Weiterentwicklung dieser Funktionen ohne Einzelprüfung.
 **Status 🔴** · Verantwortlich: Philipp Blume · Fällig: mit der Entscheidung
 über den Verbleib der Kunden-App.
+
+---
+
+## V-005 · Rechenkorrekturen am Strategiedokument (2026-09-16)
+
+**Sachverhalt.** Korrektur von sechs Stellen in
+`docs/strategy/2026-09-15-fundament-und-finanzlogik.md` nach interner
+Schlussprüfung: Sensitivitätstabelle 7.4 und die daraus abgeleitete Tabelle 7.8,
+fehlende Zinsposition, Verwechslung von Nettoerlös- und
+Deckungsbeitragsdifferenz bei der Umsatzsteuer, Widerspruch im Ausbauszenario,
+logisch unzulässige ODER-Verknüpfung der Standortregel. Datenklasse D0,
+Änderungsklasse K1. Keine Codeänderung, keine Außenwirkung, keine
+personenbezogenen Daten.
+
+**Rechtliche Würdigung.** Keiner der sechzehn Bereiche der Matrix ist berührt;
+die Korrekturen betreffen ausschließlich interne Planungsrechnungen. Die unter
+V-002 bis V-004 geführten offenen Punkte bleiben unverändert bestehen.
+
+**Ergebnis.** Keine Anpassung erforderlich. **Status 🟢** für diese Änderung.
