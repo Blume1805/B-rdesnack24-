@@ -129,6 +129,12 @@ müssen gleichzeitig denselben neuen Wert verwenden. Änderst du es nur bei uns,
 werden ab diesem Moment alle Meldungen der Automaten abgewiesen — die
 Bestandsdaten stehen dann still, bis die Gegenseite nachgezogen hat.
 
+**Stand 16.09.2026:** Die Prüfung nach Schritt 1 ergab null eingetragene
+Anbieter. Es gab also nie ein Geheimnis in dieser Tabelle, und eine Rotation war
+nicht nötig. Das Runbook bleibt für den künftigen Bedarf bestehen — und für den
+Fall, der als Nächstes eintritt: die **erstmalige Anlage** eines Anbieters,
+siehe Runbook C.
+
 **Schritt 1 — Prüfen, ob es überhaupt nötig ist.**
 Im SQL Editor ausführen:
 
@@ -183,6 +189,43 @@ erfolgreichen Nachweis bereit.
 **Zum Schluss.**
 Datum, Anbieter und Anlass in der Verfahrensdokumentation festhalten. Die
 Passwörter selbst gehören **nicht** in dieses Protokoll.
+
+## Runbook C: Ersten Telemetrie-Anbieter anlegen
+
+*Fällt an, wenn Automatenland den Datenzugang bereitstellt. Dauer etwa 10 Minuten.*
+
+**Warum das über den SQL-Editor läuft.**
+Seit der Absicherung vom 16.09.2026 darf kein Konto der App diese Tabelle
+beschreiben — auch eures nicht. Das ist Absicht: Dort steht das Passwort, mit
+dem die Automatenmeldungen unterschrieben werden, und es soll nirgends über die
+App erreichbar sein. Das Anlegen erfolgt deshalb einmalig von Hand.
+
+**Was du brauchst.** Den Namen, unter dem ihr den Anbieter führen wollt, und das
+Passwort, das ihr mit Automatenland vereinbart habt. Erzeuge es mit einem
+Passwortgenerator, mindestens 40 Zeichen, und hinterlege es in eurem
+Passwortmanager.
+
+**Schritt für Schritt**
+
+1. Supabase öffnen, Projekt **boerdesnack24**, links **SQL Editor**, oben **+**,
+   dann **Create a new snippet**.
+2. Folgenden Text einfügen und die beiden Platzhalter ersetzen. Bei `adapter`
+   trägst du ein, welches System liefert — `clevermetrics`, `nayax`, `generic`
+   oder `custom`:
+
+   ```sql
+   insert into public.telemetry_providers (name, adapter, hmac_secret)
+   values ('NAME-DES-ANBIETERS', 'clevermetrics', 'PASSWORT-HIER');
+   ```
+3. **Run** klicken.
+
+**So sieht Erfolg aus.** `Success. 1 row affected`. Zur Kontrolle eine neue
+Abfrage mit `select id, name, adapter, is_active from public.telemetry_providers;`
+— der Anbieter erscheint, das Passwort ist bewusst nicht abfragbar.
+
+**Danach.** Die angezeigte `id` an Automatenland übergeben, falls sie für die
+Einrichtung des Datenversands gebraucht wird. Anlass, Datum und Anbieter in der
+Verfahrensdokumentation festhalten — das Passwort selbst nicht.
 
 ## Monitoring
 
