@@ -423,3 +423,101 @@ Zählstand: 🔴 0 · 🟡 0 · 🟢 1.
 
 **Offen bleibt davon unberührt** der Gesamtstatus des Geschäftsmodells: fünf
 Größen nach Abschnitt 10 sind ZU VERIFIZIEREN bzw. ZU VALIDIEREN.
+
+---
+
+## Nachtrag 2 (16.09.2026) — Querfinanzierungsthese des Gründers
+
+### Die Aussage
+
+Philipp hat die Absicht hinter dem Abo präzisiert. **FAKT (Angabe des Gründers):**
+
+1. Der 5-%-Dauerrabatt bezieht sich auf **Automatenverkäufe**, nicht auf
+   Abo-Umsätze.
+2. Die 0,99 € sind **bewusst niedrig angesetzt**, um möglichst viele Kunden zum
+   Abschluss zu bewegen. Die Gebühr ist kein Ertragsziel.
+3. Der eigentliche Zweck ist **Querfinanzierung**: Viele App-Nutzer machen das
+   B2B-Angebot — digitale und analoge Werbung — wertvoll. Dort soll der Umsatz
+   entstehen.
+
+### Was davon die bisherige Rechnung bestätigt
+
+Punkt 1 war in der Unit-Economics-Rechnung bereits so angesetzt: Der Rabatt
+mindert den Rohertrag je Automatenverkauf, nicht die Abogebühr. Die Zeile
+„entgangener Rohertrag durch 5 % Dauerrabatt bei Ø-Warenkorb 1–3 €" rechnet
+genau das. An den Zahlen ändert sich dadurch nichts.
+
+### Was neu ist und geprüft werden muss
+
+Punkt 2 und 3 verschieben den Zweck des Abos: Es ist kein Erlösprodukt, sondern
+ein Mittel, um eine Nutzerbasis aufzubauen, die B2B vermarktbar macht. Damit ist
+die Frage nicht mehr „trägt sich das Abo", sondern **„erzeugt das Abo eine
+Nutzerbasis, die genug Werbeerlös trägt".**
+
+### Die Rechnung dazu
+
+ANNAHME, Szenario aus Abschnitt 7.12: 300 aktive Nutzer, vier App-Öffnungen im
+Monat. Das ergibt **1.200 Sichtkontakte im Monat, rund 14.400 im Jahr**.
+
+Damit In-App-Werbung die im Ausbauszenario angesetzten 8.000 € im Jahr trägt,
+müsste der Tausenderkontaktpreis bei rund **555 €** liegen. Selbst bei einem für
+regionale Verhältnisse ambitionierten Tausenderkontaktpreis von 20 € (ANNAHME,
+ZU VERIFIZIEREN — kein belastbarer Marktwert erhoben) ergäben 14.400 Kontakte
+etwa **288 € im Jahr**. Zwischen beiden Werten liegt der Faktor 28.
+
+**Ergebnis:** Digitale In-App-Werbung trägt bei dieser Nutzerzahl keine Säule des
+Geschäftsmodells. Nicht, weil die These falsch wäre, sondern weil die
+Reichweite dafür um eine Größenordnung zu klein ist.
+
+### Der Widerspruch im Instrument
+
+Die Querfinanzierungsthese verlangt **maximale Reichweite**. Die 0,99 € sind das
+größte Hindernis dafür: Der Schritt von kostenlos auf einen beliebigen
+Positivbetrag kostet erfahrungsgemäß den weitaus größten Teil potenzieller
+Nutzer — der Schritt von 0,99 € auf 1,99 € kostet vergleichsweise wenig
+(HYPOTHESE, in der Produktpraxis gut gestützt, hier nicht gemessen).
+
+Dazu kommen drei Kosten, die eine kostenpflichtige App auslöst und eine
+kostenlose nicht:
+
+* Verbraucherrechtliche Pflichten: Widerruf, Kündigungsschaltfläche,
+  Laufzeitgrenzen, Preisangaben.
+* Store-Abwicklung mit 15 bis 30 % Provision und Review-Aufwand.
+* Minderjährigenproblematik, die an den Standorten Sporthalle und Schwimmbad
+  besonders wiegt.
+
+**Damit ist das Abo für den erklärten Zweck das falsche Instrument:** Es
+reduziert genau die Größe, die es steigern soll, und erkauft damit einen Erlös,
+der nach der Rechnung in Abschnitt 7 ohnehin deckungsbeitragsnegativ ist.
+
+### Wo die These dagegen trägt
+
+Die Unterscheidung liegt nicht zwischen „Werbung ja" und „Werbung nein",
+sondern zwischen zwei völlig verschiedenen Produkten:
+
+| | digitale In-App-Werbung | Werbefläche und Sponsoring am Automaten |
+|---|---|---|
+| verkauft wird | Reichweite, Kontakte | Präsenz an einem Ort und Verbindung mit einer lokalen Sache |
+| Preislogik | Tausenderkontaktpreis | Jahrespauschale wie bei Bandenwerbung im Vereinssport |
+| skaliert mit | Nutzerzahl der App | Zahl und Qualität der Standorte |
+| bei 300 Nutzern | ≈ 288 €/Jahr | unabhängig von der Nutzerzahl |
+| braucht ein kostenpflichtiges Abo | nein | nein |
+
+Fünf Standorte mit je einem lokalen Partner zu einer Jahrespauschale von 500 €
+(ANNAHME, ZU VALIDIEREN) ergäben 2.500 € im Jahr — und zwar **ohne einen
+einzigen App-Nutzer**. Das ist die tragfähige Form der Querfinanzierung.
+
+### Offene Entscheidung
+
+Die These des Gründers ist in der Richtung richtig und in der Wahl des Trägers
+zu prüfen. Zu entscheiden ist:
+
+**Wird das Abo abgeschafft, um Reichweite zu maximieren — oder wird die
+Querfinanzierung von der App auf den Automaten als Werbeträger umgestellt, womit
+das Abo für diesen Zweck entbehrlich wird?**
+
+Beides führt zum selben Ergebnis für das Abo. Die Entscheidung liegt beim
+Gesellschafterkreis, nicht in der Technik. Sie ist mit derselben
+Datenbeschaffung verbunden wie Abschnitt 10: Was zahlt ein regionales
+Unternehmen tatsächlich, und wofür? Drei Gespräche mit möglichen Werbepartnern
+beantworten das schneller als jede weitere Rechnung.
