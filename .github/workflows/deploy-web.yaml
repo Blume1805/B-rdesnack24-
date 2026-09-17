@@ -62,31 +62,47 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          # Vorhandensein allein genuegt nicht. Am 17.09.2026 lief eine
-          # Auslieferung durch, in deren Paket zwar der Schluessel steckte, aber
-          # keine Projektadresse — ein Wert kann gesetzt und trotzdem unbrauchbar
-          # sein (Leerzeichen, abgeschnitten, verwechselt). Deshalb wird die Form
-          # geprueft. Die Werte selbst tauchen im Protokoll nie auf; GitHub
-          # ersetzt sie durch ***, gemeldet werden nur Laenge und Befund.
+          # Vorhandensein allein genuegt nicht, und die Werte kommen aus einem
+          # Kopiervorgang von Hand. Beobachtet am 17.09.2026, in dieser
+          # Reihenfolge:
+          #   Lauf 36 — SUPABASE_URL enthielt einen Schluessel statt einer
+          #             Adresse. Das Paket ging trotzdem raus, ohne nutzbare
+          #             Datenbankverbindung.
+          #   Lauf 39 — Die Adresse stimmte, trug aber einen Zeilenumbruch am
+          #             Ende. Der wanderte ungeprueft in die Uebersetzung:
+          #               dart compile js ... -DSUPABASE_URL=***
+          #                -DSUPABASE_ANON_KEY=***
+          #             und brach sie ab ("Failed to compile application for
+          #             the Web").
+          # Deshalb erst saeubern, dann pruefen. Wer einen Wert mit Leerzeichen
+          # oder Umbruch einfuegt, soll nicht scheitern — das ist kein Fehler,
+          # den ein Mensch sehen kann.
+          SUPABASE_URL="$(printf '%s' "$SUPABASE_URL" | tr -d '\r\n\t' | sed 's/^ *//; s/ *$//; s|/*$||')"
+          SUPABASE_ANON_KEY="$(printf '%s' "$SUPABASE_ANON_KEY" | tr -d '\r\n\t' | sed 's/^ *//; s/ *$//')"
+
+          # [[ =~ ]] vergleicht die gesamte Zeichenkette, nicht Zeile fuer Zeile.
+          # grep haette einen eingebetteten Umbruch durchgelassen — genau das ist
+          # in Lauf 39 passiert.
           fehler=0
           if [ -z "$SUPABASE_URL" ]; then
             echo "::error::SUPABASE_URL ist nicht gesetzt."
             fehler=1
-          elif ! printf '%s' "$SUPABASE_URL" | grep -Eq '^https://[a-z0-9]+\.supabase\.co/?$'; then
-            echo "::error::SUPABASE_URL hat nicht die erwartete Form https://<kennung>.supabase.co (Laenge: ${#SUPABASE_URL} Zeichen). Bitte den Wert Project URL aus Project Settings → Data API erneut kopieren — ohne Leerzeichen und ohne Zeilenumbruch davor oder dahinter."
+          elif [[ ! "$SUPABASE_URL" =~ ^https://[a-z0-9]+\.supabase\.co$ ]]; then
+            echo "::error::SUPABASE_URL hat nicht die erwartete Form https://<kennung>.supabase.co (Laenge nach dem Saeubern: ${#SUPABASE_URL} Zeichen). Eine Projektadresse hat rund 40 Zeichen; ist der Wert deutlich laenger, wurde versehentlich ein Schluessel eingefuegt."
             fehler=1
           fi
           if [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "::error::SUPABASE_ANON_KEY ist nicht gesetzt."
             fehler=1
-          elif ! printf '%s' "$SUPABASE_ANON_KEY" | grep -Eq '^(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_publishable_[A-Za-z0-9_-]+)$'; then
-            echo "::error::SUPABASE_ANON_KEY hat nicht die erwartete Form (Laenge: ${#SUPABASE_ANON_KEY} Zeichen). Erwartet wird der Wert anon public aus dem Reiter 'Legacy anon, service_role' — er beginnt mit eyJ und enthaelt zwei Punkte."
+          elif [[ ! "$SUPABASE_ANON_KEY" =~ ^(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_publishable_[A-Za-z0-9_-]+)$ ]]; then
+            echo "::error::SUPABASE_ANON_KEY hat nicht die erwartete Form (Laenge nach dem Saeubern: ${#SUPABASE_ANON_KEY} Zeichen). Erwartet wird der Wert anon public aus dem Reiter 'Legacy anon, service_role' — er beginnt mit eyJ und enthaelt zwei Punkte."
             fehler=1
           fi
           if [ "$fehler" = "1" ]; then
             echo "::error::Abbruch vor dem Bauen. Es wurde nichts veroeffentlicht; der bisherige Stand im Netz bleibt unveraendert."
             exit 1
           fi
+          echo "Beide Werte geprueft: Adresse ${#SUPABASE_URL} Zeichen, Schluessel ${#SUPABASE_ANON_KEY} Zeichen."
           mkdir -p apps/mobile/env
           jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" \
             '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key, APP_ENV: "prod",
