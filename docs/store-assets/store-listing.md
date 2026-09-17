@@ -67,7 +67,7 @@ DEINE VORTEILE MIT KOSTENLOSEM KONTO
 • Digitale Belege zu jedem Kauf und schnellere Reklamationsabwicklung
 • Kein Abo, keine Laufzeit, keine Kündigung — Anmelden genügt
 
-AUCH OHNE ANMELDUNG
+RUND UM DEN EINKAUF (ebenfalls im kostenlosen Konto)
 • Automatenfinder mit Navigation
 • Produktbestand in Echtzeit — sehen, was da ist, bevor du losgehst
 • Produktinfos mit Nährwerten und Allergenen

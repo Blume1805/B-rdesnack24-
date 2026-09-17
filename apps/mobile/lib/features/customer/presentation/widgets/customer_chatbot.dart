@@ -152,8 +152,9 @@ const _kFaq = <_FaqCategory>[
       'Was brauche ich, um die Vorteile zu nutzen?',
       'Nur ein kostenloses Konto. Danach gelten App-Preis mit 5 % Rabatt, '
           'Status-Rabatt bis 10 %, Deals, Coupons und Treue-Meilensteine '
-          'automatisch. Ohne Anmeldung bleiben Automatenfinder, Bestände in '
-          'Echtzeit, Produktinfos mit Nährwerten und News nutzbar.',
+          'automatisch. Die App selbst setzt eine Anmeldung voraus: Ohne '
+          'Konto sind nur Impressum, Datenschutzerklärung, AGB und die '
+          'Kündigungsseite erreichbar.',
       deepLink: 'abo',
     ),
     _FaqEntry(

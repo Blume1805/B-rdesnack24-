@@ -4,18 +4,28 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 
-/// „Ohne Konto vs. mit Konto" — der Mehrwert-Vergleich als wiederverwendbare
-/// Karte (Layout orientiert an einer klaren Feature-Matrix: Funktion · ohne
-/// Konto · mit Konto). Bewusst textarm — nur Fakten mit Haken/Strich, keine
-/// ausformulierten Sätze.
+/// „Das bekommst Du mit Deinem kostenlosen Konto" — die Leistungsübersicht als
+/// wiederverwendbare Karte. Bewusst textarm, nur Fakten, keine ausformulierten
+/// Sätze.
 ///
-/// Seit dem Beschluss vom 2026-09-16 ist die App kostenlos: Beide Spalten
-/// kosten 0 €, unterschieden wird nur noch danach, ob jemand angemeldet ist.
-/// Die Spar-Vorteile hängen am Kundenkonto, nicht an einem Abo.
+/// **Warum keine Gegenüberstellung mehr (Stand 2026-09-17).** Bis zum
+/// 2026-09-16 stellte diese Karte zwei Spalten gegenüber, zuerst
+/// „Kostenlos vs. App", danach „Ohne Konto vs. mit Konto". Beide Fassungen
+/// behaupteten Funktionen ohne Anmeldung. Das ist falsch: Der Auth-Guard in
+/// `app_router.dart` leitet jede Route außer den vier Rechtsseiten auf
+/// `/signin` um. Ohne Konto ist in dieser App nichts nutzbar. Die Umbenennung
+/// vom 2026-09-16 hatte den Fehler sogar verschärft, weil die linke Spalte
+/// seither „Kundenkarte & Kaufhistorie" ohne Konto versprach.
+///
+/// Eine Spalte, die nichts enthält, ist keine Gegenüberstellung. Deshalb jetzt
+/// eine einfache Liste dessen, was das kostenlose Konto bringt. Sollte die
+/// öffentliche Automatenseite aus Phase 1 entstehen (siehe
+/// `docs/strategy/2026-09-16-umsetzungsplan.md`), kann die Gegenüberstellung
+/// zurückkehren, dann aber mit belegbarem Inhalt auf beiden Seiten.
 class AppBenefitsCompareCard extends StatelessWidget {
   const AppBenefitsCompareCard({super.key});
 
-  // In allen Varianten enthalten (kostenlos + App).
+  // Rund um den Einkauf.
   static const _shared = <String>[
     'Automatenfinder & Navigation',
     'Echtzeit-Bestand',
@@ -25,8 +35,8 @@ class AppBenefitsCompareCard extends StatelessWidget {
     'Kontakt & Reklamation',
   ];
 
-  // Nur mit Konto (Spar- und Extra-Vorteile). Non-breaking spaces vor %/€/−,
-  // damit keine Waisen-Umbrüche entstehen (Zahl + Zeichen bleiben zusammen).
+  // Sparen. Non-breaking spaces vor %/€/−, damit keine Waisen-Umbrüche
+  // entstehen (Zahl + Zeichen bleiben zusammen).
   static const _appOnly = <String>[
     '5 % Dauerrabatt',
     'Status-Rabatt bis 10 %',
@@ -44,11 +54,10 @@ class AppBenefitsCompareCard extends StatelessWidget {
         children: [
           const _CompareHeader(),
           const Divider(height: 1, color: AppColors.borderSubtle),
-          const _GroupLabel('In allen Varianten'),
-          for (final f in _shared) _CompareRow(label: f, free: true, app: true),
-          const _GroupLabel('Nur mit Konto'),
-          for (final f in _appOnly)
-            _CompareRow(label: f, free: false, app: true),
+          const _GroupLabel('Rund um den Einkauf'),
+          for (final f in _shared) _CompareRow(label: f),
+          const _GroupLabel('Sparen'),
+          for (final f in _appOnly) _CompareRow(label: f),
           const _PriceRow(),
         ],
       ),
@@ -65,12 +74,12 @@ class AppBenefitsCompareScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceAlt,
-      appBar: const HeroAppBar(title: Text('Ohne Konto vs. mit Konto')),
+      appBar: const HeroAppBar(title: Text('Dein kostenloses Konto')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s4),
         children: [
           Text(
-            'Mit Konto = alles ohne Konto + jeder Spar-Vorteil. Beides kostenlos.',
+            'Anmelden kostet nichts und schaltet alles frei.',
             style: AppTypography.body(size: 13, color: AppColors.textMuted)
                 .copyWith(height: 1.4),
           ),
@@ -98,8 +107,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
   }
 }
 
-// Feste Spaltenbreiten, damit Haken sauber unter den Kopfzeilen sitzen.
-const double _colFree = 66;
+// Feste Spaltenbreite, damit die Haken sauber unter der Kopfzeile sitzen.
 const double _colApp = 82;
 
 class _CompareHeader extends StatelessWidget {
@@ -118,29 +126,6 @@ class _CompareHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           const Expanded(child: SizedBox()),
-          SizedBox(
-            width: _colFree,
-            child: Column(
-              children: [
-                Text(
-                  'Ohne Konto',
-                  style: AppTypography.body(
-                    size: 11,
-                    weight: FontWeight.w800,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-                Text(
-                  '0 €',
-                  style: AppTypography.display(
-                    size: 15,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
-                ),
-              ],
-            ),
-          ),
           SizedBox(
             width: _colApp,
             child: Container(
@@ -209,15 +194,13 @@ class _GroupLabel extends StatelessWidget {
   }
 }
 
+/// Eine Leistungszeile. Es gibt nur noch einen Haken: Was hier steht, ist mit
+/// dem kostenlosen Konto enthalten. Eine zweite Spalte gab es bis zum
+/// 2026-09-17; sie behauptete Funktionen ohne Anmeldung, die der Auth-Guard
+/// nicht zulässt (siehe Klassenkommentar oben).
 class _CompareRow extends StatelessWidget {
-  const _CompareRow({
-    required this.label,
-    required this.free,
-    required this.app,
-  });
+  const _CompareRow({required this.label});
   final String label;
-  final bool free;
-  final bool app;
 
   @override
   Widget build(BuildContext context) {
@@ -243,21 +226,18 @@ class _CompareRow extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: _colFree, child: Center(child: _mark(free, false))),
-          SizedBox(width: _colApp, child: Center(child: _mark(app, true))),
+          const SizedBox(
+            width: _colApp,
+            child: Center(
+              child: Icon(
+                Icons.check_circle,
+                size: 18,
+                color: AppColors.brandDark,
+              ),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _mark(bool on, bool gold) {
-    if (!on) {
-      return const Icon(Icons.remove, size: 16, color: AppColors.textMuted);
-    }
-    return Icon(
-      Icons.check_circle,
-      size: 18,
-      color: gold ? AppColors.brandDark : AppColors.statusPositive,
     );
   }
 }

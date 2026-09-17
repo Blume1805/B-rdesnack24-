@@ -485,13 +485,30 @@ weiter wie bisher.
 
 ## Runbook G: Automatenaufkleber drucken und anbringen
 
-**Voraussetzung:** Runbook F ist abgeschlossen, die Adresse ist endgültig.
+**Voraussetzungen:** Runbook F ist abgeschlossen, die Adresse ist endgültig —
+**und** die Frage unten ist entschieden.
 
 ### Warum
 
-Der Aufkleber ist bei uns das, was bei anderen der App-Store ist: der einzige
-Weg, auf dem ein Kunde die App überhaupt findet. Er steht bereits vor dem
-Automaten. Alles, was ihn jetzt aufhält, kostet den Kunden.
+Der Aufkleber ist einer von zwei Wegen, auf denen ein Kunde die App findet. Der
+zweite ist die Landingpage. Store-Suche gibt es nicht, weil wir keine
+Store-App anbieten. Der Kunde am Automaten steht bereits davor, alles was ihn
+jetzt aufhält, kostet ihn.
+
+### ⚠️ Vor der ersten Auflage zu klären: Wohin zeigt der Code?
+
+Die App ist ohne Konto vollständig verschlossen. Wer heute den Code scannt,
+sieht als Erstes ein Anmeldeformular, bevor er einen Grund hatte, sich
+anzumelden (`docs/ARCHITECTURE.md`, Befund A-8). Ein paar Dutzend Aufkleber auf
+diesen Zustand zu kleben, verschenkt genau die Kunden, die schon vor dem Gerät
+stehen.
+
+Vorgesehen ist dafür die öffentliche Automatenseite aus Phase 1 des
+Umsetzungsplans: eine sehr leichte Seite je Automat, ohne Konto, mit Standort,
+Bestand und Störungsmeldung, die von dort in die App führt. Sie ist noch nicht
+gebaut.
+
+Bis dahin gilt: **Einzelne Aufkleber zum Ausprobieren ja, Auflage nein.**
 
 ### Erzeugen
 
