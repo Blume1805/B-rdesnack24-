@@ -39,5 +39,35 @@ jobs:
       - name: Dependencies
         run: flutter pub get
         working-directory: apps/mobile
+      - name: Build-Konfiguration aus den Repository-Secrets schreiben
+        # apps/mobile/env/*.json ist in .gitignore (dort stehen Zugangsdaten).
+        # In der Werkbank existiert die Datei also nicht, und `deploy_web.sh`
+        # baut ohne sie eine App, die keine Datenbankverbindung kennt:
+        # AppConfig.isValid wird false, der Nutzer sieht "nicht konfiguriert".
+        # Bis zum 17.09.2026 fiel das nicht auf, weil der letzte Deploy
+        # (04.09.2026) von Hand lief, mit einer lokal vorhandenen demo.json.
+        # Der erste Lauf dieses Workflows haette den funktionierenden Stand
+        # durch einen toten ersetzt.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_URL oder SUPABASE_ANON_KEY fehlt in den Repository-Secrets. Ohne sie waere die ausgelieferte App ohne Datenbankverbindung — Abbruch statt stiller Fehlfunktion."
+            exit 1
+          fi
+          mkdir -p apps/mobile/env
+          jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" \
+            '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key, APP_ENV: "prod",
+              SENTRY_DSN: "", POSTHOG_API_KEY: "",
+              POSTHOG_HOST: "https://eu.posthog.com", GOOGLE_REVIEW_URL: ""}' \
+            > apps/mobile/env/demo.json
+          echo "Konfiguration geschrieben (Werte sind maskiert)."
       - name: Build + Deploy
+        # Ohne CUSTOM_DOMAIN kompiliert das Skript den Basispfad
+        # /B-rdesnack24-/ ein und schreibt keine CNAME-Datei. Unter
+        # app.boerdesnack24.de suchte der Browser dann alle Dateien in einem
+        # Unterordner, der es nicht gibt — sichtbar als weisse Seite.
+        env:
+          CUSTOM_DOMAIN: app.boerdesnack24.de
         run: bash scripts/deploy_web.sh
