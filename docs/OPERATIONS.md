@@ -390,6 +390,158 @@ Bezahlanbindung bestand).
 
 **Eilt es?** Vor der ersten Veröffentlichung der App, nicht vorher.
 
+## Runbook F: Eigene Adresse für die App einrichten (vor dem Aufkleber-Druck)
+
+**Zeitbedarf:** 15 Minuten Arbeit, danach bis zu 24 Stunden Wartezeit, bis die
+Adresse überall bekannt ist. Kein Eingriff in die App selbst.
+
+### Warum das gemacht werden soll
+
+Die App ist heute unter dieser Adresse erreichbar:
+
+```
+https://blume1805.github.io/B-rdesnack24-/
+```
+
+Diese Adresse taugt nicht für einen Aufkleber am Automaten. Drei Gründe:
+
+1. **Sie wirkt nicht wie Bördesnack24.** Ein Kunde, der am Automaten steht,
+   sieht einen fremden Namen und eine kryptische Zeichenfolge. Das kostet
+   Vertrauen genau in dem Moment, in dem er sich entscheidet.
+2. **Sie hängt an einem privaten Konto.** Der Teil `blume1805` ist ein
+   persönlicher GitHub-Benutzername. Ändert er sich, ist die Adresse weg.
+3. **Ein Aufkleber lässt sich nicht ändern.** Klebt er einmal an zwanzig
+   Automaten und die Adresse zieht um, ist jeder einzelne tot. Deshalb muss die
+   Adresse **vor** dem ersten Druck endgültig sein.
+
+Empfehlung: `app.boerdesnack24.de`. Die Domain besitzt ihr bereits, es kommt
+nur eine Unteradresse dazu. Die Hauptseite `www.boerdesnack24.de` bleibt
+unberührt.
+
+**Was passiert, wenn es nicht gemacht wird:** Der Aufkleber müsste die lange
+GitHub-Adresse tragen, oder es gibt keinen Aufkleber. Beides bremst genau den
+Weg, der Kunden bringt.
+
+### Was dabei passiert
+
+Ihr sagt eurem Domain-Anbieter, dass `app.boerdesnack24.de` auf GitHub zeigen
+soll, und sagt GitHub, dass es diese Adresse annehmen soll. Danach ist die App
+unter beiden Adressen erreichbar, die alte funktioniert weiter.
+
+**Wichtig:** Zwischen den beiden Schritten kann die Seite kurz nicht erreichbar
+sein. Legt das nicht auf einen Tag, an dem ihr Werbung schaltet.
+
+### Schritt für Schritt
+
+**Teil 1: beim Domain-Anbieter (Hostinger)**
+
+1. Melde dich bei <https://hpanel.hostinger.com> an.
+2. Wähle oben **Domains** und dann `boerdesnack24.de`.
+3. Klicke auf **DNS / Nameserver** und dort auf **DNS-Einträge verwalten**.
+4. Klicke auf **Eintrag hinzufügen** und trage genau das ein:
+   * Typ: **CNAME**
+   * Name: **app**
+   * Ziel (auch „Points to" oder „Wert"): **blume1805.github.io**
+     (mit einem Punkt am Ende, falls das Feld einen verlangt)
+   * TTL: den Standardwert stehen lassen
+5. Auf **Hinzufügen** bzw. **Speichern** klicken.
+
+**Teil 2: bei GitHub**
+
+6. Öffne <https://github.com/Blume1805/B-rdesnack24-/settings/pages>.
+7. Unter **Custom domain** `app.boerdesnack24.de` eintragen und auf **Save**
+   klicken.
+8. Warte, bis unter dem Feld ein grüner Haken erscheint (kann bis zu einer
+   Stunde dauern). Setze dann das Häkchen bei **Enforce HTTPS**. Ist es noch
+   ausgegraut, warte und komm später zurück.
+
+**Teil 3: sagt mir Bescheid**
+
+9. Wenn beides steht, gib mir Bescheid. Ich stelle das Veröffentlichungsskript
+   um (`CUSTOM_DOMAIN=app.boerdesnack24.de`) und veröffentliche neu. Das ist
+   nötig, weil die App sonst unter der neuen Adresse eine weiße Seite zeigt.
+   Erst danach drucke ich den Aufkleber ohne Wasserzeichen.
+
+### So sieht Erfolg aus
+
+* `https://app.boerdesnack24.de` öffnet die App, mit Schloss-Symbol in der
+  Adresszeile.
+* Die alte GitHub-Adresse funktioniert weiterhin.
+
+### Wenn etwas schiefgeht
+
+* **„Domain does not resolve to the GitHub Pages server"** bei Schritt 7 —
+  der DNS-Eintrag ist noch nicht überall bekannt. Das ist normal. Warte eine
+  Stunde und klicke erneut auf Save.
+* **Weiße Seite unter der neuen Adresse** — genau dafür ist Schritt 9 da. Die
+  App muss einmal neu veröffentlicht werden. Das ist kein Schaden, nur ein
+  fehlender Schritt.
+* **Die alte Adresse geht nicht mehr** — sollte nicht passieren. Falls doch:
+  Bei GitHub unter Schritt 7 das Feld leeren und Save klicken, dann ist der
+  alte Zustand wiederhergestellt.
+
+**Eilt es?** Nur, wenn der Aufkleber gedruckt werden soll. Ohne ihn läuft alles
+weiter wie bisher.
+
+## Runbook G: Automatenaufkleber drucken und anbringen
+
+**Voraussetzung:** Runbook F ist abgeschlossen, die Adresse ist endgültig.
+
+### Warum
+
+Der Aufkleber ist bei uns das, was bei anderen der App-Store ist: der einzige
+Weg, auf dem ein Kunde die App überhaupt findet. Er steht bereits vor dem
+Automaten. Alles, was ihn jetzt aufhält, kostet den Kunden.
+
+### Erzeugen
+
+Der Aufkleber wird aus einem Skript erzeugt, nicht von Hand gestaltet, damit
+Adresse und QR-Code nie auseinanderlaufen können:
+
+```
+pip install segno
+python3 scripts/automatenaufkleber.py --url https://app.boerdesnack24.de
+```
+
+Ohne `--entwurf` entsteht die Druckfassung ohne Wasserzeichen. Daraus das PDF
+drucken (Befehl steht im Kopf des Skripts) und vor dem Druck gegenprüfen:
+
+```
+python3 scripts/pdf_text_pruefen.py docs/marketing/automatenaufkleber.pdf \
+  --erwartet "Bördesnack24" "app.boerdesnack24.de"
+```
+
+### Vor dem Druck unbedingt selbst scannen
+
+Mit dem eigenen Handy den QR-Code vom Bildschirm scannen und prüfen, ob die
+richtige Seite aufgeht. Ein falsch gedruckter Aufkleber fällt sonst erst am
+Automaten auf, und dann ist die ganze Auflage Altpapier.
+
+### Anbringen und prüfen
+
+* Auf Augenhöhe neben das Bezahlfeld, nicht auf eine Scheibe, hinter der eine
+  Leuchte sitzt: Spiegelungen machen den Code unlesbar.
+* Nach dem Kleben einmal aus etwa einem Meter Entfernung scannen.
+
+### Haltbarkeit
+
+Gemessen am 17.09.2026 mit einem automatischen Lesegerät, das strenger ist als
+eine Handy-Kamera:
+
+| Zustand | Ergebnis |
+|---|---|
+| Foto aus Entfernung, sehr klein (300 px Breite) | lesbar |
+| um 12 Grad schräg fotografiert | lesbar |
+| bei 60 Prozent Helligkeit | lesbar |
+| rund 10 Prozent der Fläche verkratzt oder überklebt | lesbar |
+| rund 15 Prozent der Fläche beschädigt | **nicht mehr lesbar** |
+| eines der drei Eck-Quadrate beschädigt | **nicht mehr lesbar** |
+
+Daraus die Regel für den Automatenbesuch: **Sind eines der drei großen Quadrate
+in den Ecken oder mehr als etwa ein Zehntel der Fläche beschädigt, Aufkleber
+austauschen.** Ein halb lesbarer Code ist schlimmer als keiner, weil der Kunde
+es einmal versucht und dann aufgibt.
+
 ## Monitoring
 
 - **Sentry** (Fehler/Crashes), **PostHog** (Nutzung, consent-gated).

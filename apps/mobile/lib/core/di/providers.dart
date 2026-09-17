@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/app_config.dart';
+import '../services/install_prompt.dart';
 import '../services/push_service.dart';
 
 /// Globale Konfiguration. Wird in main() via overrideWithValue gesetzt.
@@ -42,4 +43,14 @@ final pushRegistrationProvider = Provider<void>((ref) {
     },
     fireImmediately: true,
   );
+});
+
+/// Soll der Hinweis „Zum Startbildschirm hinzufügen" erscheinen?
+///
+/// Drei Bedingungen müssen zusammenkommen: Das Gerät kann es überhaupt
+/// ([InstallPrompt.method]), die App läuft noch im Browser, und der Kunde hat
+/// den Hinweis nicht bereits weggeklickt. Siehe `install_prompt.dart`.
+final showInstallHintProvider = FutureProvider<bool>((ref) async {
+  if (InstallPrompt.method == InstallMethod.none) return false;
+  return !await InstallHintPreference.isDismissed();
 });

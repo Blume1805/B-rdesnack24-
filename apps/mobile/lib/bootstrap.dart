@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
+import 'core/services/install_prompt.dart';
 
 /// Initialisiert Infrastruktur und startet die App.
 ///
@@ -28,6 +29,12 @@ Future<void> bootstrap() async {
   if (kIsWeb) {
     GoogleFonts.config.allowRuntimeFetching = false;
   }
+
+  // Muss so früh wie möglich geschehen: Chromium feuert `beforeinstallprompt`
+  // kurz nach dem Laden. Wer sich erst später anhängt, verpasst das Ereignis,
+  // und der Knopf „Auf den Startbildschirm" bliebe wirkungslos. Der Aufruf
+  // ist auf allen anderen Plattformen ein No-op (bedingter Import).
+  InstallPrompt.init();
 
   await _safe(
     () => initializeDateFormatting('de_DE'),

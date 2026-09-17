@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/pricing/pricing.dart';
+import '../../../../core/services/install_prompt.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
@@ -57,6 +59,22 @@ class OffersTab extends ConsumerWidget {
           // 0. ── Suchleiste (öffnet Produktkatalog-Filter) ────────────
           const _ProductSearchBar(),
           const SizedBox(height: AppSpacing.s4),
+
+          // 0.05. ── „Aufs Handy legen" ────────────────────────────────
+          // Bördesnack24 läuft als Web-App, nicht über die App-Stores. Wer
+          // über den QR-Code am Automaten kommt, landet im Browser und müsste
+          // ihn beim nächsten Einkauf wiederfinden. Der Hinweis erscheint nur,
+          // wenn das Gerät die Ablage überhaupt anbietet und der Kunde ihn
+          // nicht schon weggeklickt hat.
+          if (ref.watch(showInstallHintProvider).valueOrNull ?? false) ...[
+            InstallHintCard(
+              onDismiss: () async {
+                await InstallHintPreference.dismiss();
+                ref.invalidate(showInstallHintProvider);
+              },
+            ),
+            const SizedBox(height: AppSpacing.s4),
+          ],
 
           // 0.1. ── Key-Facts: Rabatt · Punkte · Coupons auf einen Blick ─
           // Die drei Zahlen, die den Kunden interessieren — ohne Lesen

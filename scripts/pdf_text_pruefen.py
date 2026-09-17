@@ -90,10 +90,45 @@ def extract(path):
             if len(h) % 4: continue
             chunks.append(''.join(
                 cmap.get(int(h[i:i+4], 16), '') for i in range(0, len(h), 4)))
-    return ' '.join(chunks)
+    # OHNE Trennzeichen zusammensetzen. Chromium schreibt je nach Schriftgrad
+    # und Kerning mal ganze Woerter, mal einzelne Buchstaben als eigenen
+    # Hex-String. Ein Leerzeichen dazwischen zerlegte "Kuendigung" in
+    # "K u e n d i g u n g", und jede Suche liefe ins Leere - der zweite
+    # Fehlschlag derselben Art am 2026-09-16/17. Echte Wortabstaende stehen
+    # als eigene Glyphe im Strom und bleiben erhalten.
+    return ''.join(chunks)
+
+def main(argv):
+    if len(argv) < 2:
+        raise SystemExit(__doc__)
+    erwartet = None
+    args = []
+    it = iter(argv[1:])
+    for a in it:
+        if a == '--erwartet':
+            erwartet = next(it, None)
+        else:
+            args.append(a)
+
+    txt = extract(args[0])
+    print('ZEICHEN:', len(txt))
+
+    # Gegenprobe: Ein Suchbegriff, der drin sein MUSS. Ohne ihn ist die
+    # Extraktion nicht belegt, und ein "nicht gefunden" waere wertlos.
+    if erwartet is not None:
+        if erwartet not in txt:
+            raise SystemExit(
+                f'ABBRUCH: Gegenprobe {erwartet!r} nicht gefunden. Die '
+                f'Extraktion ist nicht verlaesslich, das Ergebnis waere '
+                f'wertlos.')
+        print(f'GEGENPROBE ok: {erwartet!r} gefunden')
+
+    fehler = 0
+    for probe in args[1:]:
+        drin = probe in txt
+        print(('GEFUNDEN  ' if drin else 'nicht da  ') + repr(probe))
+    return fehler
+
 
 if __name__ == '__main__':
-    txt = extract(sys.argv[1])
-    print('ZEICHEN:', len(txt))
-    for probe in sys.argv[2:]:
-        print(('GEFUNDEN  ' if probe in txt else 'nicht da  ') + repr(probe))
+    raise SystemExit(main(sys.argv))

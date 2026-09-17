@@ -29,7 +29,27 @@ REPO="${REPO:-B-rdesnack24-}"
 # https://<user>.github.io/<REPO>/ zeigt direkt die App, kein Redirect nötig.
 # Ein Sub-Path wird nur noch benutzt, wenn explizit gesetzt (SUBPATH=demo o. ä.).
 SUBPATH="${SUBPATH-}"
-if [ -z "$SUBPATH" ]; then
+
+# Eigene Domain (z. B. CUSTOM_DOMAIN=app.boerdesnack24.de).
+#
+# Warum das hier stehen muss: Unter einer eigenen Domain liegt die App am
+# Wurzelpfad, nicht mehr unter /<REPO>/. Bliebe der Basispfad stehen, suchte
+# der Browser alle Dateien unter app.boerdesnack24.de/B-rdesnack24-/ und die
+# App zeigte nur eine weisse Seite. Der Basispfad ist in den Build
+# einkompiliert und laesst sich nachtraeglich nicht umbiegen.
+#
+# Ist die Variable gesetzt, wird zusaetzlich eine CNAME-Datei in den
+# gh-pages-Branch geschrieben. GitHub Pages liest genau diese Datei; fehlt
+# sie nach einem Deploy, faellt die Seite auf die github.io-Adresse zurueck.
+CUSTOM_DOMAIN="${CUSTOM_DOMAIN-}"
+
+if [ -n "$CUSTOM_DOMAIN" ]; then
+  BASE_HREF="/"
+  if [ -n "$SUBPATH" ]; then
+    echo "FEHLER: CUSTOM_DOMAIN und SUBPATH schliessen sich aus." >&2
+    exit 1
+  fi
+elif [ -z "$SUBPATH" ]; then
   BASE_HREF="/$REPO/"
 else
   BASE_HREF="/$REPO/$SUBPATH/"
@@ -161,6 +181,13 @@ if [ -z "$SUBPATH" ]; then
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
+  # Eigene Domain: CNAME bei JEDEM Deploy neu schreiben. Sie liegt im
+  # gh-pages-Branch und wird von den Aufraeumschritten oben sonst geloescht,
+  # womit die Domain nach dem naechsten Deploy stillschweigend ausfiele.
+  if [ -n "$CUSTOM_DOMAIN" ]; then
+    echo "$CUSTOM_DOMAIN" > "$ROOT/CNAME"
+    echo "  CNAME → $CUSTOM_DOMAIN"
+  fi
   # WICHTIG: NIEMALS `git add -A` verwenden — sonst landen untracked Sources
   # (apps/, .dart_tool/, scripts/ …) im gh-pages-Commit. Explizit nur die
   # Build-Artefakte stagen, plus `git add -u` für gelöschte Alt-Dateien.
@@ -172,7 +199,7 @@ if [ -z "$SUBPATH" ]; then
   # komplett ab und fügt dann GAR NICHTS hinzu — das hat schon einmal die
   # dart2js-part-Dateien still vom Deploy ausgeschlossen. Einzeln + laut.
   ( cd "$ROOT" && \
-    for f in index.html 404.html manifest.json favicon.png flutter.js \
+    for f in index.html 404.html manifest.json favicon.png flutter.js CNAME \
       flutter_bootstrap.js flutter_service_worker.js main.dart.js \
       main.dart.js_*.part.js \
       version.json version.txt assets canvaskit icons marketing .last_build_id \
