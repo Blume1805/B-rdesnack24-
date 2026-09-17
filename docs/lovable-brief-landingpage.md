@@ -64,6 +64,13 @@ zu kaufen.
 4. **Für Kundinnen und Kunden.** Die App: kostenlos, 5 % an jedem Automaten,
    Stufen 6 % ab 150 €, 7,5 % ab 500 €, 10 % ab 1.000 € Gesamtumsatz. Ein
    Knopf in die App. Kurz halten, drei bis vier Sätze.
+
+   **Der Knopf heißt „app öffnen", nicht „app herunterladen".** Die App ist
+   eine PWA: Es gibt keine Installationsdatei und keinen Store. Wer sie öffnet,
+   kann sie über das Browsermenü auf den Startbildschirm legen; danach startet
+   sie im eigenen Fenster. Ein Text, der „Download" verspricht, erzeugt eine
+   falsche Erwartung und lässt die Seite unseriös wirken, wenn nichts
+   heruntergeladen wird. Ein kurzer Satz darf erklären, wie die Ablage geht.
 5. **Wer dahintersteht.** Bördesnack24 GbR aus Osterweddingen, zwei Personen.
    Keine Kette, kein Investorengeld. Das ist für einen Vereinsvorstand ein
    Argument, kein Makel.

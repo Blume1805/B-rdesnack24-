@@ -2,6 +2,9 @@
 
 - **Status:** Akzeptiert
 - **Datum:** 2026-06-28
+- **Teilweise abgelöst:** ADR 0004 (2026-09-17) — das Kundenfrontend
+  wechselt von Flutter auf React. Datenbank, RLS und Edge Functions bleiben,
+  wie hier festgelegt.
 
 ## Kontext
 
