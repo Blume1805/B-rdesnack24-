@@ -13,7 +13,14 @@ values
   ('f1111111-1111-1111-1111-111111111111','00000000-0000-0000-0000-000000000000','authenticated','authenticated','iot-kunde@test.de','x', now(), now()),
   ('f2222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-000000000000','authenticated','authenticated','iot-gesellschafter@test.de','x', now(), now());
 
+-- Der Waechter trg_profiles_guard laesst Rollenwechsel nur durch einen
+-- Administrator zu (app.guard_profile_update, Migration 0002). Im Test gibt es
+-- zu diesem Zeitpunkt noch keine angemeldete Sitzung, deshalb wird er fuer die
+-- Einrichtung kurz abgeschaltet. Die eigentlichen Zusicherungen laufen danach
+-- wieder mit allen Triggern.
+alter table public.profiles disable trigger trg_profiles_guard;
 update public.profiles set role = 'shareholder' where id = 'f2222222-2222-2222-2222-222222222222';
+alter table public.profiles enable trigger trg_profiles_guard;
 
 insert into public.machines(id, code, name)
 values ('fa000000-0000-0000-0000-000000000001','T-IOT','Testautomat Telemetrie');

@@ -58,11 +58,31 @@ select isnt(
   'persönliches Angebot ist ohne Abo aktivierbar');
 
 -- ── 5) Treue-Meilensteine werden vergeben ────────────────────────────────
+-- Meilensteine haengen am Monatsumsatz (1 Punkt = 1 Cent); die erste Stufe
+-- liegt bei 500 Punkten = 5,00 EUR. Vergeben werden sie vom Trigger
+-- trg_purchase_loyalty beim Einbuchen eines Kaufs, nicht durch einen Aufruf
+-- aus der App.
+--
+-- Bis zum 17.09.2026 pruefte dieser Test den Rueckgabewert eines zweiten,
+-- eigenen Aufrufs von app.grant_loyalty_bonuses() — der ist nach dem Trigger
+-- korrekterweise 0, weil die Stufe bereits vergeben ist. Der Test lief nie
+-- (pgTAP war nirgends eingerichtet), deshalb fiel es nicht auf. Geprueft wird
+-- jetzt das Ergebnis statt des Rueckgabewerts: Hat der Kunde ohne Abo einen
+-- Meilenstein erhalten?
+reset role;
+insert into public.purchases(customer_id, total_gross, purchased_at, source, payment_method)
+values ('e1111111-1111-1111-1111-111111111111', 9.90,
+        date_trunc('month', current_date) + interval '1 day', 'manual', 'card_ec');
+
 select cmp_ok(
-  app.grant_loyalty_bonuses('e1111111-1111-1111-1111-111111111111'), '>', 0,
+  (select count(*)::int from public.loyalty_bonus_grants
+    where customer_id = 'e1111111-1111-1111-1111-111111111111'
+      and month_start = date_trunc('month', current_date)::date),
+  '>', 0,
   'Treue-Meilensteine werden ohne Abo vergeben');
 
 -- ── 6) Kein Fremdzugriff: fremdes Angebot bleibt unberührt ───────────────
+set local role authenticated;
 set local request.jwt.claim.sub = 'e9999999-9999-9999-9999-999999999999';
 select is(
   (select id from public.activate_personal_offer(
