@@ -4,6 +4,9 @@
 - **Datum:** 2026-09-17
 - **Löst ab:** ADR 0002 (Tech-Stack), soweit dort Flutter für den
   Kundenbereich festgelegt ist
+- **Teilweise abgelöst:** ADR 0006 (2026-09-17) — der interne Bereich bleibt
+  nicht in Flutter, sondern wird eine eigene PWA. Die Festlegung auf React
+  für den Kundenbereich bleibt, wie hier beschlossen.
 
 ## Kontext
 

@@ -66,7 +66,7 @@ Legende: ✅ konform · 🟨 fix hinzugefügt (siehe unten) · 🟥 Anwalt erfor
 |---|---|
 | Session-Mgmt (Rotation, Refresh) | ✅ Supabase Auth |
 | Passwort-Anforderungen | 🟨 Länge + Komplexität (Groß/Klein/Ziffer) erzwingen |
-| MFA | ✅ TOTP vorbereitet; empfohlen Pflicht für interne Rollen vor Go-Live |
+| MFA | 🟨 TOTP vorhanden; die Pflicht für interne Rollen ist seit `0066` serverseitig durchsetzbar (`app.security_settings.require_mfa_internal`), der Schalter steht aber noch auf `false`. Einschalten vor Go-Live: `docs/OPERATIONS.md`, Runbook H. |
 | Brute-Force / Rate-Limit | ✅ Supabase Auth Limits + serverseitige RPCs |
 | Verschlüsselung in Übertragung | ✅ TLS |
 | Verschlüsselung sensibler Felder at-rest | 🟥 pgcrypto-Konzept vorhanden; Ausbau optional (Klartextfelder wie Adressen sind nicht besonders schutzwürdig i.S.v. Art. 9) |

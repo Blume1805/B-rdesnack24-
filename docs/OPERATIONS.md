@@ -564,6 +564,174 @@ es einmal versucht und dann aufgibt.
 - **Sentry** (Fehler/Crashes), **PostHog** (Nutzung, consent-gated).
 - Edge-Function-Logs via `supabase functions logs <name>`.
 
+## Runbook H: Zwei-Faktor-Anmeldung für Pia und dich einschalten
+
+**Zeitbedarf:** 20 Minuten, davon 5 Minuten je Person. Beide Personen müssen
+gleichzeitig verfügbar sein.
+
+**Dringlichkeit:** vor Go-Live. Solange es keine echten Umsätze gibt, ist das
+Risiko klein — aber der Schalter gehört umgelegt, bevor der erste Automat läuft.
+
+### Warum das gemacht werden soll
+
+Heute reicht ein Passwort, um in den Verwaltungsbereich zu kommen. Wer dein
+Passwort hat — durch eine Phishing-Mail, ein altes Datenleck, einen Blick über
+die Schulter —, sieht Umsätze, Einkaufspreise, Verträge und Unterschriften.
+
+Zwei-Faktor bedeutet: Zusätzlich zum Passwort braucht man eine sechsstellige
+Zahl, die eine App auf deinem Telefon alle 30 Sekunden neu erzeugt. Ohne dein
+Telefon kommt niemand hinein, auch nicht mit dem richtigen Passwort.
+
+### Was dabei passiert — und was nicht
+
+Es passiert: Verwaltung, Finanzen und Freigaben verlangen ab dem Einschalten
+eine Anmeldung mit zweitem Faktor.
+
+Es passiert **nicht**: Kunden merken nichts. Für sie ändert sich kein einziger
+Handgriff — sie melden sich weiter nur mit E-Mail und Passwort an. Das ist
+geprüft und in `supabase/tests/mfa_gate_test.sql` festgehalten.
+
+### Schritt für Schritt
+
+**Teil 1 — die Authenticator-App einrichten (jede Person für sich, 5 Minuten)**
+
+1. Auf dem Telefon eine Authenticator-App installieren. Empfehlung: „Google
+   Authenticator" oder „Aegis" (Android) beziehungsweise die in iOS eingebaute
+   Funktion unter *Einstellungen → Passwörter*. Alle drei sind kostenlos.
+2. In der Bördesnack24-App anmelden wie immer.
+3. Oben im Startbildschirm steht der Hinweis „Konto absichern:
+   Zwei-Faktor-Authentifizierung einrichten." Auf die Schaltfläche daneben
+   tippen. Ist der Hinweis nicht zu sehen, wurde er früher einmal weggetippt:
+   Dann in der Adresszeile des Browsers hinter die App-Adresse `/security/mfa`
+   anhängen und die Eingabetaste drücken.
+4. Es erscheint ein QR-Code. In der Authenticator-App auf „+" beziehungsweise
+   „Code hinzufügen" tippen und den QR-Code abfotografieren.
+5. Die App zeigt nun eine sechsstellige Zahl. Diese Zahl in das Feld in der
+   Bördesnack24-App eintippen und bestätigen.
+6. **Wichtig:** Der Hinweis oben verschwindet erst nach dem Neuladen der Seite.
+   Erst wenn er weg ist, ist der Faktor bestätigt.
+
+**Teil 2 — beide Personen prüfen (2 Minuten)**
+
+7. Beide melden sich einmal komplett neu an (abmelden, wieder anmelden) und
+   geben dabei die sechsstellige Zahl ein. Erst wenn das bei **beiden** geklappt
+   hat, weiter mit Teil 3. Wird dieser Schritt übersprungen, sperrt Teil 3 unter
+   Umständen beide aus.
+
+**Teil 3 — den Schalter umlegen (3 Minuten, nur eine Person)**
+
+8. <https://supabase.com/dashboard> öffnen und am Projekt anmelden.
+9. Links auf **SQL Editor** klicken, dann auf **New query**.
+10. Diesen Text genau so einfügen:
+
+```sql
+update app.security_settings
+   set enabled = true, updated_at = now()
+ where key = 'require_mfa_internal';
+```
+
+11. Auf **Run** klicken (grüne Schaltfläche rechts unten).
+
+### So sieht Erfolg aus
+
+Unter dem Eingabefeld steht `Success. No rows returned` oder `UPDATE 1`.
+
+Danach die Gegenprobe: In der App abmelden und nur mit Passwort anmelden
+(die Authenticator-Zahl weglassen, falls das Anmeldefenster sie nicht ohnehin
+verlangt). Verwaltung und Finanzen müssen leer bleiben oder eine Fehlermeldung
+zeigen. Nach Eingabe der Zahl sind sie wieder da.
+
+### Wenn etwas schiefgeht
+
+**Fall 1 — ihr seid ausgesperrt** (das Telefon ist weg, die Authenticator-App
+gelöscht, die Zahl wird nicht angenommen). Dann im SQL Editor denselben Text
+noch einmal einfügen, aber mit `false` statt `true`:
+
+```sql
+update app.security_settings
+   set enabled = false, updated_at = now()
+ where key = 'require_mfa_internal';
+```
+
+Danach ist alles wie vorher. Der Zugang zum SQL Editor hängt **nicht** an der
+App und **nicht** am zweiten Faktor der App — er ist der Rückweg. Deshalb ist
+das Supabase-Passwort selbst besonders zu schützen.
+
+**Fall 2 — der QR-Code erscheint nicht.** Dann ist die Einrichtung in der App
+noch nicht freigeschaltet. In diesem Fall Teil 3 **nicht** ausführen und
+Bescheid geben.
+
+Es eilt in beiden Fällen nicht, solange kein Automat läuft.
+
+---
+
+## Runbook I: Zweites Supabase-Projekt als Testumgebung anlegen
+
+**Zeitbedarf:** 30 Minuten. Danach einmalig etwa 15 Minuten je Monat für
+Auffrischung.
+
+**Dringlichkeit:** vor der ersten Änderung, die echte Umsätze berührt.
+
+### Warum das gemacht werden soll
+
+Es gibt heute genau eine Datenbank, und das ist die echte. Jede Änderung an
+Preisen, Rabatten oder Tabellen wird unmittelbar an echten Daten wirksam. Geht
+etwas schief, geht es an den echten Daten schief.
+
+Eine Testumgebung ist eine zweite, leere Kopie derselben Struktur — ohne echte
+Kunden, ohne echte Umsätze. Dort lässt sich ausprobieren, was ausprobiert
+werden muss.
+
+**Ausdrücklich nicht** dient dieses zweite Projekt dazu, Kunden-App und
+Gesellschafter-App voneinander zu trennen. Beide Anwendungen arbeiten weiterhin
+gegen dasselbe Produktivprojekt (ADR 0006).
+
+### Was dabei passiert — und was nicht
+
+Es passiert: Ein zweites, leeres Projekt entsteht. Es kostet im kostenlosen
+Tarif nichts.
+
+Es passiert **nicht**: Am Produktivprojekt ändert sich nichts. Keine Daten
+werden kopiert, keine Kunden umgezogen, keine Adresse umgebogen.
+
+### Schritt für Schritt
+
+1. <https://supabase.com/dashboard> öffnen und anmelden.
+2. Oben auf **New project** klicken.
+3. Ausfüllen:
+   - *Name:* `boerdesnack24-test`
+   - *Database Password:* auf **Generate a password** klicken und das Ergebnis
+     sofort im Passwortmanager speichern. Es wird kein zweites Mal angezeigt.
+   - *Region:* `Central EU (Frankfurt)` — dieselbe wie beim Produktivprojekt.
+     Grund: personenbezogene Daten bleiben in der EU (Art. 44 ff. DSGVO), auch
+     wenn hier nur Testdaten liegen.
+4. Auf **Create new project** klicken und etwa zwei Minuten warten.
+5. Links auf **Project Settings → API** klicken. Dort stehen zwei Werte:
+   *Project URL* und *anon public*. Beide kopieren. Im Projekt liegt die Vorlage
+   `apps/mobile/env/staging.example.json`; daraus eine Kopie namens
+   `staging.json` im selben Ordner anlegen und die beiden Werte eintragen.
+   (`staging.json` selbst gehört nicht ins Repository — die Vorlage schon.)
+   Wer das nicht selbst machen möchte: die beiden Werte schicken genügt.
+6. **Nicht** den Wert unter *service_role* kopieren oder verschicken. Das ist
+   der Generalschlüssel; er gehört ausschließlich in die Servereinstellungen.
+
+### So sieht Erfolg aus
+
+Im Dashboard stehen zwei Projekte untereinander: das bisherige und
+`boerdesnack24-test`. Das neue zeigt unter *Table Editor* keine Tabellen —
+das ist richtig so, die Struktur spiele ich anschließend ein.
+
+### Wenn etwas schiefgeht
+
+Ein leeres Projekt lässt sich folgenlos löschen: *Project Settings → General →
+Delete project*. Solange keine Daten darin liegen, geht dabei nichts verloren.
+Das Produktivprojekt bleibt davon unberührt.
+
+Es eilt nicht — aber es sollte vor der nächsten Preis- oder Rabattänderung
+stehen.
+
+---
+
 ## Verifikation vor Go-Live
 
 Siehe `docs/DEPLOYMENT.md` (Go-Live-Checkliste) und die Verifikationsabschnitte in

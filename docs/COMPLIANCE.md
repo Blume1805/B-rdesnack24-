@@ -658,3 +658,88 @@ Behauptung, es stünden bereits Geräte.
 
 **Status 🟡** · Verantwortlich: Philipp Blume · Fällig: vor der ersten
 Veröffentlichung. Kein akutes Risiko, solange nichts online ist.
+
+---
+
+## V-011 · Zwei-Faktor-Pflicht für interne Rollen, Rechteschicht repariert (2026-09-17)
+
+### Sachverhalt
+
+Bei der Prüfung der Frage, ob Kunden- und Gesellschafteroberfläche in getrennte
+Anwendungen aufgeteilt werden sollen (ADR 0006), sind zwei Befunde entstanden,
+die unabhängig von dieser Entscheidung bestehen.
+
+**Erstens.** Kunden- und Gesellschafterbereich werden in einem einzigen
+Web-Bundle unter einer einzigen Adresse ausgeliefert. Die Daten selbst sind
+serverseitig durch Row Level Security geschützt (35 Tabellen, 98 Policies,
+124 Rollenprüfungen). Ungeschützt war die Schicht davor: Die
+Zwei-Faktor-Anmeldung war nur eine Erinnerung im Client
+(`home_shell.dart`); in keiner der 63 Migrationen stand eine Bedingung, die sie
+erzwingt. Ein entwendetes Passwort eines Gesellschafters genügte damit allein
+für Umsätze, Einkaufspreise, Verträge und Unterschriften.
+
+**Zweitens.** Die Migrationen `0045`/`0046` entziehen `anon` und `PUBLIC` das
+Ausführungsrecht auf alle Datenbankfunktionen und setzen dasselbe als Standard
+für künftige Funktionen. Der Standardteil wirkt nachweislich nicht. Dadurch war
+jede seit `0047` angelegte Funktion ohne Anmeldung aufrufbar — zehn Stück.
+Neun davon filtern intern über `auth.uid()` und gaben nichts heraus; eine,
+`public.lifetime_founders_status()`, lieferte einer nicht angemeldeten
+Aufruferin die Zahl der vergebenen Lifetime-Plätze.
+
+### Rechtliche Würdigung
+
+**Art. 32 Abs. 1 DSGVO** verlangt technische und organisatorische Maßnahmen, die
+dem Risiko angemessen sind. Bei einem Zugang, hinter dem Kaufhistorien,
+Kontaktdaten und kaufmännische Daten liegen, ist ein alleiniger Passwortschutz
+für privilegierte Konten nicht mehr Stand der Technik; die Aufsichtsbehörden
+setzen Mehr-Faktor-Authentifizierung für administrative Zugänge seit Jahren als
+Regelmaßnahme an. Der Befund war damit eine Abweichung vom Sollzustand, nicht
+bloß eine Verbesserungsmöglichkeit.
+
+**Art. 25 Abs. 2 DSGVO** (Datenschutz durch Voreinstellung) verlangt, dass
+standardmäßig nur die erforderlichen Daten verarbeitet und zugänglich sind. Eine
+Funktion, die ohne Anmeldung aufrufbar ist, weil ein Standardrecht nicht
+entzogen wurde, verfehlt diese Vorgabe — auch dann, wenn die Funktion selbst
+nichts Personenbezogenes herausgibt.
+
+**Meldepflicht nach Art. 33 DSGVO: nicht ausgelöst.** Der zweite Befund betrifft
+eine aggregierte Zahl ohne Personenbezug (`count(distinct customer_id)`); ein
+Zugriff auf personenbezogene Daten hat nicht stattgefunden und war über diesen
+Weg auch nicht möglich. Der erste Befund beschreibt ein Risiko, keinen
+eingetretenen Vorfall. Zudem ist derzeit kein Automat in Betrieb (V-010), es
+gibt keine echten Kundendaten. Eine Meldung an die Aufsichtsbehörde ist damit
+nicht veranlasst; der Vorgang wird hier dokumentiert, weil die Bewertung
+nachvollziehbar bleiben muss.
+
+### Ergebnis
+
+Behoben durch `supabase/migrations/0066_mfa_gate_and_execute_privileges.sql`
+(17.09.2026):
+
+* Die Zwei-Faktor-Prüfung sitzt in `public.is_admin()`,
+  `public.is_shareholder()` und `public.auth_has_permission()` — hinter dem
+  Schalter `app.security_settings.require_mfa_internal`.
+* Das Ausführungsrecht für `anon` und `PUBLIC` wird erneut entzogen; gezählt
+  zehn anon-ausführbare Funktionen vorher, null nachher.
+* Beide Zustände sind durch ausgeführte pgTAP-Tests belegt
+  (`mfa_gate_test.sql`, zehn Zusicherungen; `execute_privileges_test.sql`, vier
+  Zusicherungen, geprüft gegen eine Datenbank mit und ohne `0066`).
+
+**Offen — 🔴:** Der Schalter steht noch auf `false`. Er wird erst eingeschaltet,
+wenn Pia und Philipp je einen TOTP-Faktor bestätigt haben; sonst sperrt sich der
+Betrieb selbst aus. Anleitung: `docs/OPERATIONS.md`, Runbook H.
+Verantwortlich: Philipp Blume. Fällig: vor Go-Live.
+
+### Optimierungsvorschläge
+
+1. **Zweites Supabase-Projekt als Testumgebung** (Runbook I). Heute geht jede
+   Migration ungetestet an die Produktivdaten. Das ist nicht nur ein
+   Betriebsrisiko, sondern auch eines für die Verfahrensdokumentation nach GoBD:
+   Änderungen an buchführungsrelevanten Daten sollen nachvollziehbar und geprüft
+   erfolgen.
+2. **Zugang zum Supabase-Dashboard absichern.** Er ist der Rückweg aus einer
+   MFA-Aussperrung und damit der stärkste verbliebene Einzelschlüssel. Dort
+   Zwei-Faktor aktivieren und das Passwort nicht mit anderen Diensten teilen.
+3. **Getrennte Rücksprungadressen je Anwendung** in den Supabase-Auth-
+   Einstellungen, sobald die zweite PWA existiert (ADR 0006), damit ein
+   Passwort-Reset aus dem Innenbereich nicht in der Kunden-App landet.
