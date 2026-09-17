@@ -833,6 +833,101 @@ stehen.
 
 ---
 
+## Runbook J: Die zwei Zugangsdaten für die Auslieferung hinterlegen
+
+**Zeitbedarf:** 5 Minuten. Danach läuft jede Auslieferung von selbst.
+
+**Dringlichkeit:** Ohne diesen Schritt kommt keine neue Fassung der App ins
+Netz. Der Live-Stand bleibt auf dem 04.09.2026 stehen — also auf der alten
+Fassung mit dem Abo für 9,99 €.
+
+### Warum das gemacht werden soll
+
+Die App muss wissen, wo ihre Datenbank steht. Diese Angabe darf aus gutem Grund
+nicht im Programmcode liegen (sie stünde sonst für jeden lesbar auf GitHub),
+sondern wird beim Bauen von außen zugesteckt. GitHub hat dafür einen
+Tresor — „Secrets". Für dieses Projekt ist er leer.
+
+Solange er leer ist, bricht die Auslieferung ab. Das ist Absicht: Lieber ein
+sichtbarer Abbruch als eine veröffentlichte App, die sich mit nichts verbinden
+kann und dem Kunden nur „nicht konfiguriert" zeigt.
+
+### Was dabei passiert — und was nicht
+
+Es passiert: Zwei Werte werden in GitHubs Tresor gelegt. Ab dann baut GitHub
+die App bei jeder Änderung selbst und stellt sie online.
+
+Es passiert **nicht**: An der Datenbank ändert sich nichts. Die beiden Werte
+sind keine Passwörter — der eine ist eine Adresse, der andere ein öffentlicher
+Schlüssel, der auch heute schon in jeder ausgelieferten App steht. Wer was
+sehen darf, entscheidet weiterhin die Datenbank anhand des angemeldeten Kontos.
+
+⚠️ **Der dritte Wert im Supabase-Dashboard, `service_role`, gehört hier
+NICHT hinein.** Das ist der Generalschlüssel. Er hebelt jeden Schutz aus und
+darf niemals in eine App gebaut werden.
+
+### Schritt für Schritt
+
+**Teil 1 — die zwei Werte holen (2 Minuten)**
+
+1. <https://supabase.com/dashboard> öffnen, Bördesnack24-Projekt wählen.
+2. Links unten auf das Zahnrad **Project Settings**, dann in der Liste auf
+   **API**.
+3. Ganz oben steht **Project URL**. Sie sieht aus wie
+   `https://irgendwas.supabase.co`. Auf das Kopier-Symbol daneben klicken.
+   Diesen Wert gleich in Teil 2 einsetzen — oder kurz in eine Notiz legen.
+4. Darunter steht ein Abschnitt **Project API keys** mit dem Eintrag
+   **anon** **public**. Auch diesen kopieren. Er ist lang (mehrere hundert
+   Zeichen) und beginnt mit `eyJ`.
+
+**Teil 2 — die Werte in GitHub hinterlegen (3 Minuten)**
+
+5. <https://github.com/Blume1805/B-rdesnack24-/settings/secrets/actions>
+   öffnen. (Falls GitHub nach Anmeldung fragt: dein GitHub-Konto, nicht das
+   Supabase-Konto.)
+6. Rechts oben auf den grünen Knopf **New repository secret**.
+7. Ins Feld **Name** genau das hier eintippen — Groß- und Kleinschreibung
+   zählt, keine Leerzeichen:
+
+   ```
+   SUPABASE_URL
+   ```
+
+8. Ins große Feld **Secret** die *Project URL* aus Schritt 3 einfügen.
+9. Auf **Add secret** klicken.
+10. Erneut auf **New repository secret**. Diesmal als **Name**:
+
+    ```
+    SUPABASE_ANON_KEY
+    ```
+
+11. Ins Feld **Secret** den langen Schlüssel aus Schritt 4 einfügen.
+12. Auf **Add secret** klicken.
+
+### So sieht Erfolg aus
+
+Auf der Seite stehen jetzt zwei Einträge untereinander: `SUPABASE_ANON_KEY` und
+`SUPABASE_URL`, jeweils mit „Updated now". Die Werte selbst zeigt GitHub nie
+wieder an — das ist richtig so.
+
+Sag mir danach Bescheid: Ich löse die Auslieferung aus und melde, ob sie
+durchgelaufen ist. Rund drei Minuten später ist die neue Fassung im Netz.
+
+### Wenn etwas schiefgeht
+
+* **„Secrets" ist im Menü nicht zu finden** — dann bist du nicht als Eigentümer
+  des Repositorys angemeldet. Prüfe rechts oben, mit welchem Konto du
+  eingeloggt bist.
+* **Der Name wurde vertippt** — dann greift die Auslieferung ins Leere und
+  bricht mit derselben Meldung ab. Eintrag löschen (Mülleimer-Symbol) und neu
+  anlegen. Kaputtgehen kann nichts.
+* **Du hast versehentlich den `service_role`-Wert eingefügt** — dann sofort
+  löschen und mir Bescheid geben. Der Schlüssel muss anschließend im
+  Supabase-Dashboard erneuert werden. Das ist kein Drama, aber es sollte am
+  selben Tag passieren.
+
+---
+
 ## Verifikation vor Go-Live
 
 Siehe `docs/DEPLOYMENT.md` (Go-Live-Checkliste) und die Verifikationsabschnitte in
