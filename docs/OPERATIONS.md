@@ -862,23 +862,43 @@ sind keine Passwörter — der eine ist eine Adresse, der andere ein öffentlich
 Schlüssel, der auch heute schon in jeder ausgelieferten App steht. Wer was
 sehen darf, entscheidet weiterhin die Datenbank anhand des angemeldeten Kontos.
 
-⚠️ **Der dritte Wert im Supabase-Dashboard, `service_role`, gehört hier
-NICHT hinein.** Das ist der Generalschlüssel. Er hebelt jeden Schutz aus und
-darf niemals in eine App gebaut werden.
+⚠️ **Die Generalschlüssel im Supabase-Dashboard gehören hier NICHT hinein** —
+weder `service_role` (alter Reiter) noch `sb_secret_…` (neuer Reiter). Sie
+hebeln jeden Schutz aus und dürfen niemals in eine App gebaut werden.
 
 ### Schritt für Schritt
 
-**Teil 1 — die zwei Werte holen (2 Minuten)**
+**Teil 1 — den Schlüssel holen (2 Minuten)**
+
+Die Adresse musst du nicht suchen, sie steht ohnehin in jeder ausgelieferten
+App und lautet:
+
+```
+https://nnfsyuglkqycwenwxmuw.supabase.co
+```
+
+Bleibt der Schlüssel. Supabase hat die Oberfläche 2025 umgestellt und zeigt
+jetzt zwei Sorten an — die alte und die neue. **Gebraucht wird die alte.**
 
 1. <https://supabase.com/dashboard> öffnen, Bördesnack24-Projekt wählen.
-2. Links unten auf das Zahnrad **Project Settings**, dann in der Liste auf
-   **API**.
-3. Ganz oben steht **Project URL**. Sie sieht aus wie
-   `https://irgendwas.supabase.co`. Auf das Kopier-Symbol daneben klicken.
-   Diesen Wert gleich in Teil 2 einsetzen — oder kurz in eine Notiz legen.
-4. Darunter steht ein Abschnitt **Project API keys** mit dem Eintrag
-   **anon** **public**. Auch diesen kopieren. Er ist lang (mehrere hundert
-   Zeichen) und beginnt mit `eyJ`.
+2. **Project Settings → API Keys**.
+3. Oben stehen zwei Reiter nebeneinander:
+   *Publishable and secret API keys* und *Legacy anon, service_role*.
+   Auf den **rechten** tippen: **Legacy anon, service_role**.
+4. Dort den Eintrag **anon** **public** kopieren. Er ist lang und beginnt mit
+   `eyJ`.
+
+**Warum die alte Sorte und nicht die neue?** Weil nachweislich sie es ist, die
+funktioniert: Im ausgelieferten Stand vom 04.09.2026 steckt genau ein solcher
+Schlüssel (`role: anon`, Projekt `nnfsyuglkqycwenwxmuw`, gültig bis 2036). Ob
+die neue Sorte (`sb_publishable_…`) mit der eingesetzten Client-Fassung
+(`supabase_flutter 2.17.2`) ebenfalls funktioniert, ist nicht geprüft — und eine
+Auslieferung ins Netz ist der falsche Ort für einen Versuch. Der Wechsel auf die
+neue Sorte ist ein eigener Punkt für später, kein Teil dieser Aufgabe.
+
+⚠️ **Zwei Werte auf derselben Seite dürfen hier nicht verwendet werden:**
+`service_role` (alter Reiter) und `sb_secret_…` (neuer Reiter). Beide sind
+Generalschlüssel, die jeden Schutz aushebeln.
 
 **Teil 2 — die Werte in GitHub hinterlegen (3 Minuten)**
 
