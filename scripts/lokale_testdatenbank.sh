@@ -58,7 +58,9 @@ echo "  $(ls "$ROOT"/supabase/migrations/*.sql | wc -l) Migrationen eingespielt"
 # seed.sql laeuft bei `supabase db reset` nach den Migrationen; die Tests
 # setzen die dort vergebenen Rollenrechte (z. B. shareholder -> inventory.view)
 # voraus. Ohne diesen Schritt schluegen sie aus dem falschen Grund fehl.
-if [ -f "$ROOT/supabase/seed/seed.sql" ]; then
+# MIT_SEED=0 laesst die Seed-Datei bewusst weg. Damit laesst sich pruefen, ob
+# ein Test nur deshalb besteht, weil Beispieldaten vorhanden sind.
+if [ "${MIT_SEED:-1}" = "1" ] && [ -f "$ROOT/supabase/seed/seed.sql" ]; then
   psql_db -q -v ON_ERROR_STOP=1 -f "$ROOT/supabase/seed/seed.sql"
   echo "  seed.sql geladen"
 fi

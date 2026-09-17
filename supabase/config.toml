@@ -14,6 +14,18 @@ max_rows = 1000
 port = 54322
 major_version = 15
 
+# Die Seed-Datei liegt unter supabase/seed/seed.sql, nicht unter dem
+# Standardpfad supabase/seed.sql. Ohne diesen Eintrag laedt `supabase db reset`
+# sie nicht — obwohl die Datei selbst in ihrem Kopf behauptet, sie werde
+# geladen. Folge bis zum 17.09.2026: Ein frisch aufgebautes Projekt hatte
+# keinerlei Rollenrechte, `shareholder` also weder inventory.view noch
+# finance.view. In der CI fielen dadurch vier pgTAP-Zusicherungen aus
+# (iot_telemetry_rls 8/9, mfa_gate 2/6), sobald der Testschritt ueberhaupt
+# erreicht wurde (Befund A-11).
+[db.seed]
+enabled = true
+sql_paths = ["./seed/seed.sql"]
+
 [studio]
 enabled = true
 port = 54323

@@ -31,6 +31,16 @@ alter table public.profiles enable trigger trg_profiles_guard;
 insert into public.shareholder_approvals(requested_for, requested_by, status)
 values ('b1111111-1111-1111-1111-111111111111','b2222222-2222-2222-2222-222222222222','approved');
 
+-- Rollenrechte nicht aus der Seed-Datei voraussetzen: Ein Test, der nur mit
+-- Beispieldaten besteht, prueft die Beispieldaten mit. Die benoetigte
+-- Permission wird deshalb hier selbst angelegt (idempotent).
+insert into public.permissions(key, area, description)
+values ('inventory.view', 'inventory', 'Inventur/Bestaende ansehen')
+on conflict (key) do nothing;
+insert into public.role_permissions(role_key, permission_key)
+values ('shareholder', 'inventory.view')
+on conflict do nothing;
+
 -- ── Schalter AUS: alles bleibt, wie es war ──────────────────────────────────
 update app.security_settings set enabled = false where key = 'require_mfa_internal';
 

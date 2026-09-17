@@ -22,6 +22,18 @@ alter table public.profiles disable trigger trg_profiles_guard;
 update public.profiles set role = 'shareholder' where id = 'f2222222-2222-2222-2222-222222222222';
 alter table public.profiles enable trigger trg_profiles_guard;
 
+-- Rollenrechte nicht aus der Seed-Datei voraussetzen: Ein Test, der nur mit
+-- Beispieldaten besteht, prueft die Beispieldaten mit. Die benoetigten
+-- Permissions werden deshalb hier selbst angelegt (idempotent).
+insert into public.permissions(key, area, description) values
+  ('inventory.view', 'inventory', 'Inventur/Bestaende ansehen'),
+  ('inventory.edit', 'inventory', 'Inventur/Bestaende bearbeiten')
+on conflict (key) do nothing;
+insert into public.role_permissions(role_key, permission_key) values
+  ('shareholder', 'inventory.view'),
+  ('shareholder', 'inventory.edit')
+on conflict do nothing;
+
 insert into public.machines(id, code, name)
 values ('fa000000-0000-0000-0000-000000000001','T-IOT','Testautomat Telemetrie');
 insert into public.telemetry_providers(id, name, hmac_secret)
