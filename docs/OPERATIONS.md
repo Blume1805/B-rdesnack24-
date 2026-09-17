@@ -594,10 +594,10 @@ einem anderen Anbieter liegen.
 | Adresse | Inhalt | Anbieter | Stand 17.09.2026 |
 |---|---|---|---|
 | `boerdesnack24.de` | Landingpage | Hostinger | ✅ eingerichtet (A-Eintrag → `2.57.91.91`) |
-| `www.boerdesnack24.de` | dasselbe | Hostinger | ⚠️ antwortet derzeit nicht — prüfen |
-| `app.boerdesnack24.de` | Kunden-App (PWA) | GitHub Pages | ✅ eingerichtet (CNAME → `blume1805.github.io`) |
+| `www.boerdesnack24.de` | dasselbe | Hostinger | ✅ eingerichtet (CNAME → `boerdesnack24.de`) |
+| `app.boerdesnack24.de` | Kunden-App (PWA) | GitHub Pages | 🔴 **Eintrag im Panel vorhanden, wird aber nicht ausgeliefert.** Am 17.09.2026 von 18:13 bis 18:28 Uhr durchgehend ohne Antwort, während `www` — wenige Minuten zuvor angelegt — sofort beantwortet wurde. Ein doppelter Name (`app.boerdesnack24.de.boerdesnack24.de`) wurde ausgeschlossen. Ursache liegt damit in der Zone bei Hostinger, nicht im Projekt. |
 | `send.boerdesnack24.de` | E-Mail-Versand | Resend / Amazon SES | ✅ eingerichtet (SPF, DKIM, MX) |
-| `verwaltung.boerdesnack24.de` | Gesellschafter-App (PWA) | offen | ⏳ **noch nicht anlegen** |
+| `verwaltung.boerdesnack24.de` | Gesellschafter-App (PWA) | offen | ⏳ **noch nicht anlegen** — siehe unten |
 
 ### Warum `verwaltung.` noch nicht angelegt wird
 
@@ -614,6 +614,21 @@ Zwei Gründe, beide sachlich:
 
 Sobald sie steht, ist es eine Zeile: Typ `CNAME`, Name `verwaltung`, Ziel = die
 Adresse des neuen Zuhauses.
+
+**Der voraussichtlich einfachste Weg** ist ein zweites, eigenes GitHub-Projekt
+für die interne PWA. GitHub Pages entscheidet anhand der `CNAME`-Datei im
+jeweiligen Projekt, welche Adresse es bedient — zwei Projekte können deshalb
+zwei verschiedene Adressen tragen, die beide auf denselben Zielnamen zeigen.
+Der DNS-Eintrag sähe dann genauso aus wie der für die Kunden-App:
+
+| Feld | Wert |
+|---|---|
+| Typ | `CNAME` |
+| Name | `verwaltung` |
+| Zeigt auf | `blume1805.github.io` |
+| TTL | 300 |
+
+Entschieden wird das zusammen mit dem Bau der internen PWA, nicht vorher.
 
 ### Wer darf was ändern
 
