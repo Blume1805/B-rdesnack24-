@@ -165,6 +165,40 @@ Gegenteil behauptete.
 Rabatt als dokumentiert, nicht einen niedrigeren. Es entsteht kein Nachteil für
 sie und damit kein Anpassungsbedarf an Preisangaben oder AGB.
 
+## Nachtrag 2: Technologiewechsel und PWA (Beschlüsse vom 2026-09-17)
+
+Drei Entscheidungen des Gesellschafters, festgehalten in ADR 0004 und 0005:
+
+1. **Das Kundenfrontend wechselt von Flutter auf React.** Damit werden
+   Lovable-Entwürfe zum Produkt statt zur Vorlage, und das Ladegewicht von
+   2,8 bis 4,1 MB verschwindet — ausgerechnet am Automaten der Abbruchgrund.
+2. **Die App wird als PWA ausgeliefert, ohne App-Store.** Kein
+   Entwicklerkonto, keine Provision, keine zweite und dritte Plattform.
+3. **Das B2B-Werbeangebot wird Teil derselben App**, mit eigener Rolle. Das
+   Projekt „Partner Portal" entfällt.
+
+**Was das für diesen Plan bedeutet.** Phase 1 (öffentliche Automatenseite) ist
+umgesetzt und geprüft. Die Sperre für Phase 2 bleibt bestehen: Sie betraf den
+Rückbau von Abo, Statusstufen und Dauerrabatt, und darüber ist weiterhin nicht
+entschieden. Der Technologiewechsel ist davon unabhängig — er ändert die
+Oberfläche, nicht den Funktionsumfang.
+
+**Die Reihenfolge, die gilt:**
+
+| Schritt | Zustand |
+|---|---|
+| Öffentliche Automatenseite | steht, geprüft, Aufkleber wartet auf die Adresse |
+| Landingpage umbauen | beauftragt, wartet auf Lovable-Guthaben |
+| PWA-Kern (Anmeldung, Finder, Preise, Kundenkarte) | Briefing steht: `docs/lovable-brief-pwa.md` |
+| Standortgespräche | **unverändert der Engpass** |
+| B2B-Werbung | zuletzt, siehe unten |
+
+**Der Einwand, der bestehen bleibt.** Der Engpass sind Standorte, nicht die
+App. Ein mehrwöchiger Technologiewechsel gewinnt keinen einzigen Standort. Die
+Entscheidung ist getroffen und wird ausgeführt; der Satz steht hier, damit die
+Reihenfolge nicht unbemerkt kippt. Wer zuerst Werbung verkauft, ohne Automaten
+zu haben, verkauft Fläche, die es nicht gibt.
+
 ## Nachtrag: kostenlose App (Beschluss vom 2026-09-16)
 
 ### Sachverhalt

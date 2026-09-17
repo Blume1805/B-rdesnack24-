@@ -48,6 +48,33 @@ Der Gesellschafter hat sich am 17.09.2026 dafür entschieden, nachdem ihm die
 Alternative (bei Flutter bleiben, Entwürfe doppelt bauen) und die
 Zwischenoption (erst messen, dann entscheiden) vorgelegen haben.
 
+## Nachtrag vom 17.09.2026 — Umfang präzisiert
+
+Bei der Inventur für das PWA-Briefing zeigte sich, dass die Flutter-App **nicht
+nur die Kunden-App** ist. Sie enthält auch den internen Bereich:
+
+| Bereich | Dart-Dateien | Wandert nach React? |
+|---|---|---|
+| `customer` | 41 | ja |
+| `auth` | 11 | ja |
+| `legal` | 3 | ja |
+| `home` | 1 | ja |
+| `management` (Inventur, HACCP, Dokumente, Mitarbeiter) | 35 | **nein, vorerst** |
+| `finance` (Finanzdashboard) | 10 | **nein, vorerst** |
+| `approvals` (Dokumentenfreigaben) | 6 | **nein, vorerst** |
+
+Der Wechsel betrifft damit rund 56 von 107 Feature-Dateien, also etwa die
+Hälfte. Der interne Bereich bleibt zunächst in Flutter, und zwar aus einem
+sachlichen Grund: Er wird am Schreibtisch benutzt, nicht am Automaten bei
+schlechtem Netz. Das Ladegewicht ist dort kein Problem, und in Lovable wird er
+nicht entworfen. Beide Argumente für den Wechsel treffen auf ihn nicht zu.
+
+**Damit ist eine Konsequenz oben zu korrigieren:** „Eine Technologie für alle
+vier Oberflächen" wird durch diesen Schritt **nicht** erreicht. Erreicht wird:
+eine Technologie für alles, was nach außen wirkt (Landingpage, Automatenseite,
+Kunden-PWA, B2B-Werbung). Intern bleibt Flutter, bis über dessen Zukunft
+gesondert entschieden ist. Wer das anders darstellt, beschönigt.
+
 ## Konsequenzen
 
 **Was besser wird**
