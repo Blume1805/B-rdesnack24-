@@ -62,8 +62,29 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::SUPABASE_URL oder SUPABASE_ANON_KEY fehlt in den Repository-Secrets. Ohne sie waere die ausgelieferte App ohne Datenbankverbindung — Abbruch statt stiller Fehlfunktion."
+          # Vorhandensein allein genuegt nicht. Am 17.09.2026 lief eine
+          # Auslieferung durch, in deren Paket zwar der Schluessel steckte, aber
+          # keine Projektadresse — ein Wert kann gesetzt und trotzdem unbrauchbar
+          # sein (Leerzeichen, abgeschnitten, verwechselt). Deshalb wird die Form
+          # geprueft. Die Werte selbst tauchen im Protokoll nie auf; GitHub
+          # ersetzt sie durch ***, gemeldet werden nur Laenge und Befund.
+          fehler=0
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL ist nicht gesetzt."
+            fehler=1
+          elif ! printf '%s' "$SUPABASE_URL" | grep -Eq '^https://[a-z0-9]+\.supabase\.co/?$'; then
+            echo "::error::SUPABASE_URL hat nicht die erwartete Form https://<kennung>.supabase.co (Laenge: ${#SUPABASE_URL} Zeichen). Bitte den Wert Project URL aus Project Settings → Data API erneut kopieren — ohne Leerzeichen und ohne Zeilenumbruch davor oder dahinter."
+            fehler=1
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_ANON_KEY ist nicht gesetzt."
+            fehler=1
+          elif ! printf '%s' "$SUPABASE_ANON_KEY" | grep -Eq '^(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_publishable_[A-Za-z0-9_-]+)$'; then
+            echo "::error::SUPABASE_ANON_KEY hat nicht die erwartete Form (Laenge: ${#SUPABASE_ANON_KEY} Zeichen). Erwartet wird der Wert anon public aus dem Reiter 'Legacy anon, service_role' — er beginnt mit eyJ und enthaelt zwei Punkte."
+            fehler=1
+          fi
+          if [ "$fehler" = "1" ]; then
+            echo "::error::Abbruch vor dem Bauen. Es wurde nichts veroeffentlicht; der bisherige Stand im Netz bleibt unveraendert."
             exit 1
           fi
           mkdir -p apps/mobile/env
