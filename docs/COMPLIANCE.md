@@ -415,13 +415,24 @@ Behandlung. Die Gewährung von Coupons an alle Registrierten statt an Abonnenten
 - [x] Alle Preisangaben aus dem Kundenbereich entfernt
 - [x] Alle drei Marketing-PDF aus ihrer HTML-Quelle neu erzeugt; Textinhalt
       auf Preisnennungen geprüft; Link in der App bleibt sichtbar
-- [ ] **Bestand an Abonnements durch Abfrage belegen** — Anleitung in
-      `docs/OPERATIONS.md`, Runbook E. Die Tabelle heißt
-      `public.customer_subscriptions` (nicht `app.subscriptions`, wie hier bis
-      zum 2026-09-16 falsch stand — die Abfrage wäre mit „relation does not
-      exist" fehlgeschlagen). Ergibt die Abfrage Zeilen, ist AGB Ziffer 4 f)
-      (Erstattungszusage) der maßgebliche Maßstab und jede betroffene Person
-      ist aktiv zu informieren.
+- [x] **Keine Zahlungen über die App vereinnahmt — durch Code belegt.** Der
+      Gesellschafter hat am 17.09.2026 erklärt, dass über die App nie Geld
+      eingenommen wurde, da kein Abo-Modell besteht. Das ist nicht nur eine
+      Aussage: Eine Suche über `apps/` und `supabase/functions/` nach
+      `stripe`, `in_app_purchase`, `paypal`, `adyen`, `mollie`, `klarna`,
+      `revenuecat`, `StoreKit` und `BillingClient` ergibt **keinen einzigen
+      Treffer**; `apps/mobile/pubspec.yaml` enthält keine Abhängigkeit mit
+      Bezug zu Zahlungen. Eine Zahlung war über die App technisch nicht
+      möglich. AGB Ziffer 4 f) ist damit gedeckt.
+- [ ] **Restpunkt: Vormerkungen prüfen (eine Zeile SQL).** Offen bleibt allein,
+      ob jemand in der App ein Abo *vorgemerkt* hat — `public.customer_subscriptions`.
+      Das ist keine Zahlungs-, sondern eine Informationsfrage: Ergibt die
+      Abfrage Zeilen, ist die betroffene Person über das Ende des Modells zu
+      unterrichten. Der Punkt ist nicht erledigt, weil der seit dem 04.09.2026
+      ausgelieferte Stand die Abo-Auswahl noch enthält (Befund A-11) — eine
+      Vormerkung war also möglich. Anleitung: `docs/OPERATIONS.md`, Runbook E.
+      (Der Tabellenname lautet `public.customer_subscriptions`, nicht
+      `app.subscriptions`, wie hier bis zum 2026-09-16 falsch stand.)
 - [ ] Store-Metadaten auf Preisangaben prüfen — vor der ersten Einreichung
 - [x] Befund P-1 aufgelöst — er beruhte auf einer veralteten Migration und
       ist zurückgezogen (`docs/ARCHITECTURE.md`, A-7). Die Statusstaffel
@@ -738,8 +749,28 @@ Verantwortlich: Philipp Blume. Fällig: vor Go-Live.
    Änderungen an buchführungsrelevanten Daten sollen nachvollziehbar und geprüft
    erfolgen.
 2. **Zugang zum Supabase-Dashboard absichern.** Er ist der Rückweg aus einer
-   MFA-Aussperrung und damit der stärkste verbliebene Einzelschlüssel. Dort
-   Zwei-Faktor aktivieren und das Passwort nicht mit anderen Diensten teilen.
+   MFA-Aussperrung und damit der stärkste verbliebene Einzelschlüssel.
+
+   **Entscheidung des Gesellschafters vom 17.09.2026:** Ein kostenpflichtiger
+   Supabase-Tarif wird erst angeschafft, wenn die PWA live geht. Zu trennen
+   sind dabei zwei Dinge, die leicht verwechselt werden:
+
+   * **MFA-*Erzwingung* für alle Organisationsmitglieder** — setzt Pro, Team
+     oder Enterprise voraus. Damit ist die Entscheidung zutreffend begründet.
+   * **MFA für das *eigene* Supabase-Konto** — eine persönliche
+     Kontoeinstellung (*Account → Security*), nach der Supabase-Dokumentation
+     nicht an einen Tarif gebunden. Sie kostet nichts und sollte gesetzt
+     werden, weil sie genau die Tür sichert, die als Rückweg offen bleibt.
+   * **MFA für die Konten *in der Bördesnack24-App*** (Runbook H) — die
+     TOTP-Schnittstelle von Supabase Auth ist nach der Dokumentation in allen
+     Tarifen enthalten und in jedem Projekt aktiv. Runbook H ist damit
+     **nicht** vom Tarif abhängig, sondern nur davon, dass beide Personen
+     anwesend sind.
+
+   🟡 **Offener Punkt mit Frist:** Bis ein Tarifwechsel erfolgt, bleibt der
+   Dashboard-Zugang ein Einzelschlüssel. Ausgleichende Maßnahme bis dahin: ein
+   langes, nirgends sonst verwendetes Passwort im Passwortmanager.
+   Verantwortlich: Philipp Blume. Erneut zu bewerten: beim Livegang der PWA.
 3. **Getrennte Rücksprungadressen je Anwendung** in den Supabase-Auth-
    Einstellungen, sobald die zweite PWA existiert (ADR 0006), damit ein
    Passwort-Reset aus dem Innenbereich nicht in der Kunden-App landet.

@@ -271,53 +271,91 @@ lesen ausschließlich.
 
 ### Schritt für Schritt
 
+**Vorbereitung.** Du brauchst nur einen Browser und dein Supabase-Passwort.
+Alles Folgende **liest nur** — es wird nichts geändert, nichts gelöscht und
+nichts angelegt. Es gibt deshalb auch nichts rückgängig zu machen.
+
 1. Öffne <https://supabase.com/dashboard> und melde dich an.
-2. Wähle links oben das Bördesnack24-Projekt aus.
-3. Klicke in der linken Leiste auf **SQL Editor** (Symbol mit dem Datenbank-
-   Blatt), dann oben auf **New query**.
-4. Füge den folgenden Text vollständig in das große Eingabefeld ein:
+2. Klicke oben links auf das Bördesnack24-Projekt (falls mehrere zur Auswahl
+   stehen — das Testprojekt aus Runbook I gibt es noch nicht).
+3. Klicke in der schmalen Leiste ganz links auf **SQL Editor**. Das Symbol
+   sieht aus wie ein Blatt Papier mit einer Datenbank-Tonne.
+4. Klicke oben auf **+ New query**. Es öffnet sich ein großes leeres Feld.
+5. Markiere den gesamten folgenden Block, kopiere ihn und füge ihn in das
+   leere Feld ein. Er sieht länger aus, als er ist — es ist eine einzige
+   Abfrage, die alles auf einmal holt:
 
    ```sql
-   -- 1) Aufbau der Tabelle partner_signatures
-   select column_name, data_type, is_nullable, column_default
-   from information_schema.columns
-   where table_schema = 'public' and table_name = 'partner_signatures'
-   order by ordinal_position;
+   select 'TABELLE public.partner_signatures — Spalten' as objekt,
+          string_agg(column_name || '  |  ' || data_type || '  |  nullable=' || is_nullable ||
+                     '  |  default=' || coalesce(column_default, '-'), E'\n' order by ordinal_position) as definition
+     from information_schema.columns
+    where table_schema = 'public' and table_name = 'partner_signatures'
+   union all
+   select 'TABELLE public.partner_signatures — Constraints',
+          string_agg(conname || '  ::  ' || pg_get_constraintdef(c.oid), E'\n')
+     from pg_constraint c
+     join pg_class t on t.oid = c.conrelid
+     join pg_namespace n on n.oid = t.relnamespace
+    where n.nspname = 'public' and t.relname = 'partner_signatures'
+   union all
+   select 'TABELLE public.partner_signatures — Indizes',
+          string_agg(indexdef, E'\n')
+     from pg_indexes where schemaname = 'public' and tablename = 'partner_signatures'
+   union all
+   select 'TABELLE public.partner_signatures — RLS-Policies',
+          coalesce(string_agg(policyname || '  ::  ' || cmd || '  ::  using(' || coalesce(qual, '-') ||
+                   ')  ::  check(' || coalesce(with_check, '-') || ')', E'\n'), '(keine)')
+     from pg_policies where schemaname = 'public' and tablename = 'partner_signatures'
+   union all
+   select 'FUNKTION app.' || p.proname, pg_get_functiondef(p.oid)
+     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'app' and p.proname in ('snapshot_slot_history', 'snapshot_slot_insert');
    ```
 
-5. Klicke rechts unten auf **Run** (oder drücke Strg+Enter).
-6. Unter dem Eingabefeld erscheint eine Tabelle. Klicke auf **Download CSV**
-   oder markiere den Inhalt und kopiere ihn.
-7. Lösche den Text im Eingabefeld und füge stattdessen diesen ein:
+6. Klicke rechts unten auf **Run** (oder drücke Strg+Enter).
+7. Unter dem Feld erscheint eine Tabelle mit sechs Zeilen und zwei Spalten.
+   Klicke auf **Download CSV** — das ist der zuverlässigste Weg, weil die
+   Funktionstexte lang sind und beim Markieren leicht abgeschnitten werden.
+   Schicke mir die heruntergeladene Datei.
+
+**Noch offen aus Runbook E — kostet dich dabei 30 Sekunden.** Wenn du schon im
+SQL Editor bist: Lösche den Text im Feld, füge stattdessen diese eine Zeile ein
+und klicke wieder auf **Run**:
 
    ```sql
-   -- 2) Vollständiger Quelltext der beiden Funktionen
-   select pg_get_functiondef(p.oid) as definition
-   from pg_proc p
-   join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'app'
-     and p.proname in ('snapshot_slot_history', 'snapshot_slot_insert');
+   select count(*) as vormerkungen from public.customer_subscriptions;
    ```
 
-8. Wieder auf **Run** klicken. Es sollten **zwei** Zeilen erscheinen. Klicke in
-   jede Zelle und kopiere den kompletten Inhalt — das ist jeweils ein längerer
-   Text, der mit `CREATE OR REPLACE FUNCTION` beginnt.
-9. Schicke mir beide Ergebnisse (die Spaltenliste aus Schritt 6 und die zwei
-   Funktionstexte aus Schritt 8).
+   Steht dort `0`, ist der Punkt endgültig geschlossen. Steht dort eine Zahl
+   größer als null, schick sie mir — dann sind die betroffenen Personen über
+   das Ende des Abo-Modells zu unterrichten. Geld ist in keinem Fall geflossen;
+   das ist bereits durch den Code belegt (`docs/COMPLIANCE.md`, V-007).
 
 ### So sieht Erfolg aus
 
-Schritt 5 liefert eine Liste von etwa acht bis zwölf Zeilen mit Spaltennamen
-wie `id`, `full_name`, `image_url`, `sort_order`. Schritt 8 liefert genau zwei
-Zeilen, die mit `CREATE OR REPLACE FUNCTION app.snapshot_slot_` beginnen.
+Die Ergebnistabelle hat **sechs Zeilen**:
+
+| Zeile | Was darin stehen sollte |
+|---|---|
+| Spalten | acht bis zwölf Zeilen mit Namen wie `id`, `full_name`, `image_url`, `sort_order` |
+| Constraints | mindestens ein `PRIMARY KEY` |
+| Indizes | mindestens eine Zeile, beginnend mit `CREATE UNIQUE INDEX` |
+| RLS-Policies | eine oder mehrere Regeln — oder `(keine)` |
+| `app.snapshot_slot_history` | ein längerer Text, beginnend mit `CREATE OR REPLACE FUNCTION` |
+| `app.snapshot_slot_insert` | dasselbe |
+
+Erscheinen nur **vier** Zeilen, fehlen die beiden Funktionen — siehe unten.
 
 ### Wenn etwas schiefgeht
 
-* **„relation does not exist" bei Schritt 5** — dann heißt die Tabelle anders
-  oder liegt in einem anderen Schema. Schick mir die Fehlermeldung.
-* **Schritt 8 liefert keine Zeilen** — dann existieren die Funktionen auch
-  live nicht mehr. Das wäre eine gute Nachricht: Dann können die beiden
-  Verweise in `0045` ersatzlos entfallen. Schick mir auch das.
+* **Die ersten vier Zeilen sind leer** — dann heißt die Tabelle anders oder
+  liegt in einem anderen Schema. Schick mir die Ausgabe, wie sie ist.
+* **Es kommen nur vier Zeilen statt sechs** — dann existieren die beiden
+  Funktionen auch live nicht mehr. Das wäre eine gute Nachricht: Dann können
+  die beiden Verweise in `0045` ersatzlos entfallen. Schick mir auch das.
+* **Eine Fehlermeldung in roter Schrift** — kopiere sie vollständig und schick
+  sie mir. Kaputtgehen kann nichts; die Abfrage liest ausschließlich.
 * **Du hast versehentlich etwas geändert** — kann hier nicht passieren, beide
   Abfragen lesen nur. Es gibt nichts rückgängig zu machen.
 
