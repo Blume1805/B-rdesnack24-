@@ -30,6 +30,25 @@ REPO="${REPO:-B-rdesnack24-}"
 # Ein Sub-Path wird nur noch benutzt, wenn explizit gesetzt (SUBPATH=demo o. ä.).
 SUBPATH="${SUBPATH-}"
 
+# Arbeitsstand vor dem Bauen merken.
+#
+# Warum: Weiter unten wechselt das Skript auf den gh-pages-Zweig. Git bricht das
+# ab, sobald eine verfolgte Datei unfertige Aenderungen traegt — am 17.09.2026
+# in der Werkbank geschehen, dort hatte der Bauvorgang
+# apps/mobile/analysis_options.yaml angefasst:
+#
+#   error: Your local changes to the following files would be overwritten
+#          by checkout: apps/mobile/analysis_options.yaml
+#
+# Der Build war zu dem Zeitpunkt schon fertig; die Auslieferung scheiterte also
+# erst ganz am Ende, nach 70 Sekunden Uebersetzungszeit.
+#
+# Statt pauschal aufzuraeumen — was jemandem seine unfertige Arbeit vernichten
+# wuerde — wird der Stand hier festgehalten und unten verglichen: War vorher
+# nichts offen, stammt jede Aenderung vom Bauvorgang und darf verworfen werden.
+# War vorher etwas offen, bricht das Skript ab und sagt, was zu tun ist.
+DIRTY_BEFORE="$(git -C "$ROOT" status --porcelain --untracked-files=no)"
+
 # Eigene Domain (z. B. CUSTOM_DOMAIN=app.boerdesnack24.de).
 #
 # Warum das hier stehen muss: Unter einer eigenen Domain liegt die App am
@@ -163,6 +182,25 @@ sed -i "s/__BUILD_V__/$TS/g" "$BUILD_DIR/index.html"
 sed -i "s|\"mainJsPath\":\"main.dart.js\"|\"mainJsPath\":\"main.dart.js?v=$TS\"|g" "$BOOT"
 
 echo "▶︎ Deploy nach gh-pages"
+
+# Der Bauvorgang fasst gelegentlich verfolgte Dateien an. Oben wurde
+# sichergestellt, dass vorher nichts offen war — was jetzt offen ist, stammt
+# also vom Bauen und wird verworfen, damit der Zweigwechsel nicht scheitert.
+# Das Ergebnis des Builds liegt in build/web und ist davon nicht betroffen.
+DIRTY_AFTER="$(git -C "$ROOT" status --porcelain --untracked-files=no)"
+if [ -n "$DIRTY_AFTER" ]; then
+  if [ -n "$DIRTY_BEFORE" ]; then
+    echo "FEHLER: Es gab schon vor dem Bauen unfertige Aenderungen an" >&2
+    echo "verfolgten Dateien. Sie werden nicht angetastet:" >&2
+    git -C "$ROOT" status --short --untracked-files=no >&2
+    echo "Bitte committen oder verwerfen und erneut starten." >&2
+    exit 1
+  fi
+  echo "  Vom Bauvorgang geaenderte Dateien werden zurueckgesetzt:"
+  echo "$DIRTY_AFTER" | sed 's/^/    /'
+  git -C "$ROOT" checkout -- .
+fi
+
 CURRENT_BRANCH=$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)
 STAGE="$(mktemp -d)"
 cp -r "$BUILD_DIR"/. "$STAGE/"
