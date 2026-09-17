@@ -3,6 +3,13 @@
 Dieses Dokument ist zugleich die Projektanweisung für Lovable und die
 Abnahmegrundlage für den zurückkommenden Entwurf.
 
+**Stand 17.09.2026.** Das Projekt existiert bereits in Lovable als
+**„Börde Snack Connect"** (angelegt am 16.09.2026, TanStack Start, React,
+TypeScript, Tailwind). Der Entwurf setzt die Abschnitte 1 bis 6 unten bereits
+um. Ergänzt wurde am 17.09.2026 Abschnitt 2a, der Einstieg in die App — er
+fehlte, und ohne ihn erfüllt die Seite ihren Hauptzweck nicht. Gehostet wird
+später über Hostinger, wie die Landingpage.
+
 ## Was gebaut wird
 
 Eine **öffentliche Webseite je Verkaufsautomat**, erreichbar über einen QR-Code
@@ -10,7 +17,9 @@ am Gerät. Eine Route je Automat: `/automat/:code`, zum Beispiel
 `/automat/sporthalle-suelzetal`. Dazu eine schlichte Startseite, die erklärt,
 worum es geht, und alle Automaten auflistet.
 
-**Kein Konto. Keine Anmeldung. Kein Warenkorb. Kein Bezahlvorgang.**
+**Auf dieser Seite selbst: kein Konto, keine Anmeldung, kein Warenkorb, kein
+Bezahlvorgang.** Die Seite *verweist* auf die App, in der man sich anmelden
+kann — sie baut diese Anmeldung aber nicht nach.
 
 ## Wer davorsteht
 
@@ -28,18 +37,38 @@ Karten, Videos, Web-Fonts in vielen Schnitten.
 
 1. **Welcher Automat.** Name des Standorts, eine Zeile Orientierung
    („sporthalle sülzetal, eingang süd").
-2. **Was dieser Automat bewirkt.** Der Kern der Seite: Welcher Verein oder
+2. **Der Weg in die App.** Der eigentliche Grund, warum diese Seite
+   existiert. Wer hier landet, steht vor dem Automaten und ist im Begriff zu
+   kaufen. Genau jetzt, und zu keinem späteren Zeitpunkt, ist der Hinweis auf
+   den Rabatt etwas wert.
+
+   Ein kompakter Block, hoch auf der Seite, direkt unter dem Standort:
+   * „5 % sparen." als Aussage, nicht als Werbespruch.
+   * Ein Satz dazu: kostenlos, kein Abo, keine Laufzeit, keine Kündigung.
+   * Die Stufen, weil sie belegbar sind: 6 % ab 150 €, 7,5 % ab 500 €,
+     10 % ab 1.000 € Gesamtumsatz, lebenslang und ohne Reset.
+   * Eine Schaltfläche, die in die App führt, mit dem Automatencode als
+     Parameter (`?a=<code>`), damit später erkennbar ist, welcher Automat
+     Konten bringt. Der Parameter ist kein Personenbezug, setzt kein Cookie
+     und löst keine Einwilligungspflicht aus.
+
+   **Ehrlich bleiben.** Die App verlangt ein Konto; ohne Anmeldung ist dort
+   nichts nutzbar (`docs/ARCHITECTURE.md`, Befund A-8). Der Block muss das
+   sagen, statt Funktionen ohne Anmeldung zu versprechen. „anmelden dauert
+   eine minute" ist erlaubt, „ohne anmeldung nutzbar" ist falsch.
+
+3. **Was dieser Automat bewirkt.** Der Kern der Seite: Welcher Verein oder
    welche Einrichtung erhält einen Anteil des Umsatzes dieses Geräts, und
    wie viel ist im laufenden Jahr zusammengekommen. Mit Bezugsgröße und Stand:
    „5 % vom Nettoerlös · stand 30.09.2026". Ohne Stand und Bezugsgröße ist die
    Zahl wertlos und rechtlich angreifbar.
-3. **Was drin ist.** Eine einfache Liste der Produkte im Automaten. Wenn später
+4. **Was drin ist.** Eine einfache Liste der Produkte im Automaten. Wenn später
    Bestandsdaten vorliegen, wird daraus eine Verfügbarkeitsanzeige — dafür
    Platz vorsehen, aber noch nichts erfinden.
-4. **Problem mit dem Kauf.** Ein kurzes Formular: Was ist passiert, welches
+5. **Problem mit dem Kauf.** Ein kurzes Formular: Was ist passiert, welches
    Fach, wie erreichen wir dich. Drei Felder, nicht mehr.
-5. **Beleg.** Ein Hinweis, wie man einen Beleg bekommt.
-6. **Fußbereich.** Impressum, Datenschutz, Kontakt. Pflicht, nicht Beiwerk.
+6. **Beleg.** Ein Hinweis, wie man einen Beleg bekommt.
+7. **Fußbereich.** Impressum, Datenschutz, Kontakt. Pflicht, nicht Beiwerk.
 
 ## Gestaltung
 
@@ -76,12 +105,21 @@ erwirtschaftet." Kein Ausrufezeichen, keine Superlative.
   Absicht und Teil der Anforderung.
 * Inhalte je Automat aus einer einfachen Datenstruktur lesen (JSON oder eine
   Tabelle), damit ein neuer Automat ohne Codeänderung ergänzt werden kann.
+* **Die Adresse der App steht an genau einer Stelle** in dieser Datenstruktur,
+  nicht verstreut im Code. Sie ändert sich, sobald `app.boerdesnack24.de`
+  eingerichtet ist (`docs/OPERATIONS.md`, Runbook F). Bis dahin zeigt sie auf
+  die heutige GitHub-Pages-Adresse.
 
 ## Was ausdrücklich nicht gebaut wird
 
-Anmeldung, Benutzerkonto, Abo, Rabatte, Gutscheine, Punkte, Abzeichen,
-Fortschrittsbalken, Push-Nachrichten, Chat, Empfehlungen, personalisierte
-Inhalte, Kartenansicht mit Fremdanbieter, Bezahlfunktion.
+Anmeldeformular, Benutzerkonto, Abo, Gutscheineinlösung, Punktestand,
+Abzeichen, Fortschrittsbalken, Push-Nachrichten, Chat, Empfehlungen,
+personalisierte Inhalte, Kartenansicht mit Fremdanbieter, Bezahlfunktion.
+
+Zur Abgrenzung: Der Rabatt wird **genannt** (Abschnitt 2) und verlinkt, aber
+nicht auf dieser Seite gewährt, berechnet oder eingelöst. Das passiert in der
+App und am Automaten. Eine Zahl, die hier steht, ist eine Angabe über ein
+bestehendes Angebot, keine Funktion.
 
 ## Abnahme
 
@@ -94,3 +132,6 @@ Der Entwurf gilt als brauchbar, wenn er diese Fragen mit ja beantwortet:
 * Sind Impressum und Datenschutz von jeder Seite aus erreichbar?
 * Hält die Seite die Kontrastwerte ein?
 * Lässt sich ein neuer Automat ohne Codeänderung ergänzen?
+* Führt die Seite sichtbar und in einem Schritt in die App?
+* Steht die Adresse der App an genau einer Stelle?
+* Wird **nirgends** behauptet, die App sei ohne Anmeldung nutzbar?

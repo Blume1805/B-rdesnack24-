@@ -440,3 +440,100 @@ Kündigungsschaltfläche (Volltextsuche nach „Abo", „Abonn", den drei Preise
 das Wort „abonniert" in seiner technischen Bedeutung (Realtime-Kanal
 `inventory`). Damit besteht dort kein Anpassungsbedarf — geprüft, nicht bloß
 vermutet.
+
+---
+
+## V-008 · Öffentliche Automatenseite: Entwurf geprüft (2026-09-17)
+
+### Sachverhalt
+
+Der Lovable-Entwurf der öffentlichen Automatenseite („Börde Snack Connect",
+angelegt am 16.09.2026) wurde am 17.09.2026 gegen das Briefing
+`docs/lovable-brief-automatenseite.md` und gegen die geltende Rechtslage
+geprüft. Die Seite ist noch nicht veröffentlicht.
+
+Ergänzt wurde in derselben Prüfung der Einstieg in die App („5 % sparen" mit
+Link), der bisher fehlte und ohne den die Seite ihren Hauptzweck verfehlt
+(Befund A-8 in `docs/ARCHITECTURE.md`).
+
+Datenklasse D0 bis D1 (keine personenbezogenen Daten auf der Seite selbst),
+Änderungsklasse K2.
+
+### Rechtliche Würdigung
+
+**🔴 Google Fonts vom CDN, bei gleichzeitiger gegenteiliger Zusage.** Der
+Entwurf lud „Bricolage Grotesque" und „Hanken Grotesk" über
+`fonts.googleapis.com` und `fonts.gstatic.com`. Damit wird beim bloßen Aufruf
+die IP-Adresse jeder Besucherin und jedes Besuchers an Google übertragen, ohne
+Einwilligung und ohne Erforderlichkeit. Im Fußbereich stand zugleich: „diese
+seite nutzt keine cookies, kein tracking, keine externen einbettungen."
+
+Das ist in zweifacher Hinsicht angreifbar: als Verarbeitung ohne Rechtsgrundlage
+(Art. 6 Abs. 1 DSGVO; LG München I, Urteil vom 20.01.2022, 3 O 17493/20, das
+einen Unterlassungs- und Schadensersatzanspruch bejaht hat) und als unwahre
+Angabe über eine Eigenschaft der Dienstleistung.
+
+**Nicht die Zusage wurde abgeschwächt, sondern der Code korrigiert.** Die
+Schriften werden selbst ausgeliefert, die Google-Verweise entfernt. Das
+entspricht der Regel aus `CLAUDE.md`: Beschreibt die Doku eine
+Compliance-Eigenschaft, die der Code nicht erfüllt, ist der Code der Fehler.
+
+**Einwilligungsbanner.** Ohne externe Verbindungen, ohne Cookies und ohne
+Speicherzugriff greift § 25 TDDDG nicht. Die Seite kommt ohne Banner aus. Das
+ist keine Nachlässigkeit, sondern die Voraussetzung dafür, dass jemand vor dem
+Automaten in wenigen Sekunden an seine Information kommt. Jede spätere
+Erweiterung, die einen Banner nötig machte, müsste sich an diesem Zweck messen
+lassen.
+
+**Fehlerbericht an Lovable geprüft, unkritisch.** `lovable-error-reporting.ts`
+ruft ausschließlich `window.__lovableEvents` und
+`window.__lovableReportRuntimeError` auf. Beide existieren nur in der
+Editor-Vorschau; im veröffentlichten Stand läuft die Funktion ins Leere. Es
+verlässt also kein Datum die Seite. Geprüft durch Lesen der Datei, nicht
+angenommen.
+
+**Beispieldaten.** Alle Inhalte sind als Beispiel gekennzeichnet („Bördesnack24
+(Beispieldaten)", „sv beispiel sülzetal (beispiel)", `hallo@example.org`). Damit
+ist die Auflage aus V-006 eingehalten, dem Dienst keine echten Kunden-, Spenden-
+oder Vereinsdaten zu übergeben, solange die Vereinbarungen nicht stehen.
+
+**Impact-Angabe.** Der Entwurf nennt Betrag, Bezugsgröße und Stand
+(„5 % vom nettoerlös · stand 30.09.2026") und sagt ausdrücklich: „die rechtliche
+einordnung des beitrags ist noch offen." Das entspricht V-002 und der
+UWG-Anforderung aus V-006.
+
+**Rabattangabe.** Die drei Stufen (6 % ab 150 €, 7,5 % ab 500 €, 10 % ab
+1.000 €) sind durch Ausführung belegt (`docs/ARCHITECTURE.md`, A-7). Der Block
+sagt ausdrücklich, dass für die Rabatte ein kostenloses Konto nötig ist, und
+behauptet nirgends eine Nutzung ohne Anmeldung.
+
+### Matrix
+
+| Bereich | Geprüft | Ergebnis | Status |
+|---|---|---|---|
+| Datenschutz, externe Verbindungen | ✓ | Google Fonts gefunden, Korrektur beauftragt | 🟡 in Arbeit |
+| § 25 TDDDG (Einwilligung) | ✓ | keine Cookies, kein Speicherzugriff, kein Banner nötig | 🟢 |
+| UWG § 5 (Impact- und Rabattangaben) | ✓ | Bezugsgröße, Stand und Kontopflicht genannt | 🟢 |
+| Beispieldaten statt echter Daten | ✓ | durchgehend gekennzeichnet | 🟢 |
+| Impressum, Datenschutz erreichbar | ✓ | aus jedem Fußbereich | 🟢 |
+| Barrierefreiheit (Bedienelemente) | ✓ | `knopf` und `feld` mit `min-height: 44px`, sichtbarer Fokus | 🟢 |
+| Sprache der Fehlerseiten | ✓ | englisch vorgefunden, Korrektur beauftragt | 🟡 in Arbeit |
+| Kontrastwerte WCAG 2.1 AA | ✗ | nicht gemessen | ⬜ |
+| Barrierefreiheit gesamt (BFSG) | ✗ | nicht geprüft | ⬜ |
+
+### Ergebnis / Handlungsbedarf
+
+- [x] Einstieg in die App ergänzt, mit Kontopflicht-Hinweis
+- [x] App-Adresse an genau einer Stelle, damit der Wechsel auf
+      `app.boerdesnack24.de` eine einzige Änderung bleibt
+- [ ] **Google Fonts selbst ausliefern** — beauftragt am 17.09.2026, Ergebnis
+      noch zu prüfen. **Ohne diese Korrektur darf die Seite nicht online
+      gehen.**
+- [ ] Fehlerseiten auf Deutsch — beauftragt
+- [ ] Kontrastwerte messen, nicht schätzen
+- [ ] Vor Veröffentlichung: Impressum und Datenschutzerklärung mit echten
+      Angaben füllen (aktuell Beispieldaten), Auftragsverarbeitung mit dem
+      Hoster klären (V-006)
+
+**Status 🟡** · Verantwortlich: Philipp Blume · Fällig: vor der ersten
+Veröffentlichung.
