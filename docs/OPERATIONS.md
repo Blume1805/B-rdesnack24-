@@ -595,9 +595,9 @@ einem anderen Anbieter liegen.
 |---|---|---|---|
 | `boerdesnack24.de` | Landingpage | Hostinger | ✅ eingerichtet (A-Eintrag → `2.57.91.91`) |
 | `www.boerdesnack24.de` | dasselbe | Hostinger | ✅ eingerichtet (CNAME → `boerdesnack24.de`) |
-| `app.boerdesnack24.de` | Kunden-App (PWA) | GitHub Pages | 🔴 **Eintrag im Panel vorhanden, wird aber nicht ausgeliefert.** Am 17.09.2026 von 18:13 bis 18:28 Uhr durchgehend ohne Antwort, während `www` — wenige Minuten zuvor angelegt — sofort beantwortet wurde. Ein doppelter Name (`app.boerdesnack24.de.boerdesnack24.de`) wurde ausgeschlossen. Ursache liegt damit in der Zone bei Hostinger, nicht im Projekt. |
+| `app.boerdesnack24.de` | Kunden-App (PWA) | GitHub Pages | ✅ eingerichtet (CNAME → `blume1805.github.io`). Der Eintrag war am 17.09.2026 von 18:13 bis 18:28 Uhr ohne Antwort; nach Löschen und Neuanlegen antwortet er seit 18:37 Uhr stabil — sechs Abfragen über eine Minute, alle beantwortet, alle auf GitHub-Pages-Adressen (185.199.108–111.153 bzw. 2606:50c0:8001::153). |
 | `send.boerdesnack24.de` | E-Mail-Versand | Resend / Amazon SES | ✅ eingerichtet (SPF, DKIM, MX) |
-| `verwaltung.boerdesnack24.de` | Gesellschafter-App (PWA) | offen | ⏳ **noch nicht anlegen** — siehe unten |
+| `verwaltung.boerdesnack24.de` | Gesellschafter-App (PWA) | offen | ⚠️ **am 17.09.2026 bereits angelegt, obwohl es die Anwendung noch nicht gibt.** Der Name zeigt auf GitHub Pages, wo ihn kein Projekt beansprucht. Siehe Hinweis unten — bis zum Bau der internen PWA besser wieder entfernen. |
 
 ### Warum `verwaltung.` noch nicht angelegt wird
 
@@ -629,6 +629,29 @@ Der DNS-Eintrag sähe dann genauso aus wie der für die Kunden-App:
 | TTL | 300 |
 
 Entschieden wird das zusammen mit dem Bau der internen PWA, nicht vorher.
+
+### Warum ein Name, der ins Leere zeigt, nicht harmlos ist
+
+Zeigt `verwaltung.boerdesnack24.de` auf GitHub Pages, ohne dass ein Projekt
+diesen Namen beansprucht, ist das ein sogenannter **hängender Verweis**. Bei
+GitHub Pages bedient das Projekt eine Adresse, sobald es sie in seiner
+`CNAME`-Datei trägt und die DNS-Abfrage dorthin führt. Beides ist hier für
+Fremde erfüllbar: Die DNS-Seite steht bereits, das Projekt kann jeder anlegen.
+Wer schneller ist, veröffentlicht eigene Inhalte unter einer Bördesnack24-
+Adresse — mit allem, was daran hängt (Vertrauen, Suchmaschinen, Cookies auf der
+Domain).
+
+Drei Wege, geordnet nach Aufwand:
+
+1. **Eintrag löschen**, bis die interne PWA existiert. Ein Klick, keine
+   Nebenwirkung. Für den jetzigen Stand die richtige Wahl.
+2. **Namen selbst belegen**: ein leeres GitHub-Projekt anlegen, das
+   `verwaltung.boerdesnack24.de` in seiner `CNAME`-Datei trägt. Dann kann ihn
+   niemand sonst beanspruchen.
+3. **Domain bei GitHub verifizieren** (*Settings → Pages → Verified domains*).
+   Danach darf kein fremdes Konto mehr eine Adresse unter
+   `boerdesnack24.de` bedienen. Das ist die saubere Dauerlösung und lohnt sich
+   spätestens, wenn mehrere Unteradressen auf GitHub zeigen.
 
 ### Wer darf was ändern
 
