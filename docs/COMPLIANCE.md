@@ -511,13 +511,13 @@ behauptet nirgends eine Nutzung ohne Anmeldung.
 
 | Bereich | Geprüft | Ergebnis | Status |
 |---|---|---|---|
-| Datenschutz, externe Verbindungen | ✓ | Google Fonts gefunden, Korrektur beauftragt | 🟡 in Arbeit |
+| Datenschutz, externe Verbindungen | ✓ | Google Fonts entfernt, Schriften selbst ausgeliefert | 🟢 |
 | § 25 TDDDG (Einwilligung) | ✓ | keine Cookies, kein Speicherzugriff, kein Banner nötig | 🟢 |
 | UWG § 5 (Impact- und Rabattangaben) | ✓ | Bezugsgröße, Stand und Kontopflicht genannt | 🟢 |
 | Beispieldaten statt echter Daten | ✓ | durchgehend gekennzeichnet | 🟢 |
 | Impressum, Datenschutz erreichbar | ✓ | aus jedem Fußbereich | 🟢 |
 | Barrierefreiheit (Bedienelemente) | ✓ | `knopf` und `feld` mit `min-height: 44px`, sichtbarer Fokus | 🟢 |
-| Sprache der Fehlerseiten | ✓ | englisch vorgefunden, Korrektur beauftragt | 🟡 in Arbeit |
+| Sprache der Fehlerseiten | ✓ | auf Deutsch übersetzt, Klasse `knopf` verwendet | 🟢 |
 | Kontrastwerte WCAG 2.1 AA | ✗ | nicht gemessen | ⬜ |
 | Barrierefreiheit gesamt (BFSG) | ✗ | nicht geprüft | ⬜ |
 
@@ -526,10 +526,16 @@ behauptet nirgends eine Nutzung ohne Anmeldung.
 - [x] Einstieg in die App ergänzt, mit Kontopflicht-Hinweis
 - [x] App-Adresse an genau einer Stelle, damit der Wechsel auf
       `app.boerdesnack24.de` eine einzige Änderung bleibt
-- [ ] **Google Fonts selbst ausliefern** — beauftragt am 17.09.2026, Ergebnis
-      noch zu prüfen. **Ohne diese Korrektur darf die Seite nicht online
-      gehen.**
-- [ ] Fehlerseiten auf Deutsch — beauftragt
+- [x] **Google Fonts selbst ausliefern** — erledigt am 17.09.2026, Commit
+      `d4349c5`. **Nachgeprüft, nicht geglaubt:** Die drei Google-Verweise sind
+      aus `__root.tsx` verschwunden, `styles.css` enthält zwei `@font-face`-
+      Regeln mit `font-display: swap` und `unicode-range` für Latin, und
+      `public/fonts/hanken.woff2` beginnt mit der Signatur `wOF2` — es ist also
+      eine echte Schriftdatei und kein leerer Platzhalter. Diese letzte Prüfung
+      war nötig, weil die Dateiliste die woff2-Dateien fälschlich als
+      nicht-binär auswies.
+- [x] Fehlerseiten auf Deutsch — erledigt, mit Klasse `knopf` (44 px)
+- [x] `@tanstack/react-query` entfernt (die Seite lädt keine Daten nach)
 - [ ] Kontrastwerte messen, nicht schätzen
 - [ ] Vor Veröffentlichung: Impressum und Datenschutzerklärung mit echten
       Angaben füllen (aktuell Beispieldaten), Auftragsverarbeitung mit dem
@@ -537,3 +543,12 @@ behauptet nirgends eine Nutzung ohne Anmeldung.
 
 **Status 🟡** · Verantwortlich: Philipp Blume · Fällig: vor der ersten
 Veröffentlichung.
+
+**Dauervorgaben nachgezogen.** Die Projektanweisungen in Lovable verboten
+pauschal „Rabatte" und widersprachen damit dem neuen Block. Sie sind am
+17.09.2026 neu gefasst: Der Rabatt darf genannt und verlinkt, aber nicht auf
+dieser Seite gewährt oder berechnet werden. Zusätzlich aufgenommen: das Verbot
+von Schriften über ein CDN mit Begründung, die belegten Stufenwerte, das Verbot
+der Behauptung „ohne Anmeldung nutzbar" und die Regel, dass die App-Adresse nur
+an einer Stelle steht. Ohne diese Anpassung hätte die nächste Sitzung den Block
+als Regelverstoß behandeln können.
