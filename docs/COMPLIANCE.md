@@ -552,3 +552,62 @@ von Schriften über ein CDN mit Begründung, die belegten Stufenwerte, das Verbo
 der Behauptung „ohne Anmeldung nutzbar" und die Regel, dass die App-Adresse nur
 an einer Stelle steht. Ohne diese Anpassung hätte die nächste Sitzung den Block
 als Regelverstoß behandeln können.
+
+---
+
+## V-009 · Zwei unterschiedliche Nutzungsbedingungen für dasselbe Angebot (2026-09-17)
+
+### Sachverhalt
+
+Beim Umbau der Landingpage ist aufgefallen, dass für ein und dasselbe Angebot
+**zwei verschiedene Fassungen der Nutzungsbedingungen** existieren:
+
+| Ort | Fassung | Umfang | Stand |
+|---|---|---|---|
+| App: `apps/mobile/lib/features/legal/presentation/legal_texts.dart` | `v2 · 2026-09` | 11 Abschnitte | am 16.09.2026 auf die kostenlose App umgestellt |
+| Landingpage (Lovable, `src/routes/agb.tsx`) | ohne Versionsangabe | 16 Abschnitte | beschreibt noch die Abo-Modelle |
+
+Beide sind nicht veröffentlicht (`is_published: false`, App nicht im Store und
+ohne öffentliche Bewerbung). Es ist also noch kein Kunde betroffen.
+
+### Rechtliche Würdigung
+
+**Zwei Fassungen sind ein Fehler, kein Detail.** Bei widersprüchlichen
+Bedingungen für dieselbe Leistung gilt im Zweifel die für den Verwender
+ungünstigere Auslegung (§ 305c Abs. 2 BGB). Praktisch hieße das: Wir wären an
+die jeweils kundenfreundlichere Variante gebunden, ohne es zu wollen, und
+könnten im Streitfall nicht sagen, was eigentlich vereinbart war.
+
+**Die Landingpage-Fassung ist inhaltlich die bessere.** Sie regelt Dinge, die
+in der App-Fassung fehlen: Bewertungen, Kontolöschung mit Frist, Verfügbarkeit
+und Änderungsvorbehalt, unzulässige Nutzung, Rechte an der App, ausdrücklicher
+TDDDG-Hinweis, ODR-Plattform, salvatorische Klausel. Sie ist zugleich die
+veraltete: Abschnitt 6 beschreibt die Abo-Modelle, Abschnitt 7 die Kündigung
+von Abos.
+
+**Sie enthält zusätzlich denselben Fehler wie Befund A-8**: „Kostenlose
+Nutzung, Bonusprogramm und Rabatte stehen allen Altersgruppen offen" — die App
+ist ohne Konto vollständig verschlossen, und seit dem 17.09.2026 gilt eine
+Altersgrenze von 16 Jahren für die Registrierung (Art. 8 DSGVO, V-007).
+
+**Vokabel.** Die Landingpage verwendet an mehreren Stellen „Spende" und
+„Spendenempfänger". Das greift der offenen Einordnung des Anteils vor (V-002)
+und widerspricht der für die Automatenseite verbindlichen Wortwahl
+„erwirtschaftet für".
+
+### Ergebnis / Handlungsbedarf
+
+- [ ] **Eine einzige maßgebliche Fassung herstellen.** Empfehlung: Struktur und
+      Detailtiefe der Landingpage-Fassung übernehmen, die Abo-Abschnitte durch
+      die Regelungen aus `v2 · 2026-09` ersetzen (Unentgeltlichkeit,
+      Vorteilsprogramm, Beendigung statt Kündigung, Widerruf vorsorglich,
+      Altersgrenze 16). Ergebnis als `v3` in **beiden** Oberflächen ausspielen.
+- [ ] Widerrufsbelehrung und Kündigungsseite der Landingpage entsprechend
+      nachziehen (beide beschreiben heute Abo-Sachverhalte).
+- [ ] „Spende" in jeder Form aus der Landingpage entfernen.
+- [ ] Vor Go-Live: anwaltliche Prüfung der zusammengeführten Fassung. Die
+      Texte tragen weiterhin den Hinweis, dass sie technische Vorlagen sind.
+
+**Status 🟡** · Verantwortlich: Philipp Blume · Fällig: bevor eine der beiden
+Oberflächen öffentlich erreichbar ist. Solange beide unveröffentlicht sind,
+besteht kein akutes Risiko.
