@@ -630,6 +630,33 @@ Der DNS-Eintrag sähe dann genauso aus wie der für die Kunden-App:
 
 Entschieden wird das zusammen mit dem Bau der internen PWA, nicht vorher.
 
+### Nach dem Anlegen: das Zertifikat kommt später
+
+Sobald eine Adresse zum ersten Mal auf GitHub Pages zeigt, meldet der Browser
+für eine Weile **„Diese Verbindung ist nicht privat"**. Das ist kein Fehler und
+kein Angriff, sondern die normale Reihenfolge:
+
+1. Die Adresse zeigt auf GitHub (DNS) — sofort wirksam.
+2. GitHub prüft das nach und beantragt einen kostenlosen Ausweis
+   („Let's-Encrypt-Zertifikat") für genau diesen Namen — **10 bis 60 Minuten**.
+3. Bis dahin liefert GitHub den Ausweis aus, den es für seine eigene Adresse
+   hat. Der passt nicht zum Namen, und der Browser warnt zu Recht.
+
+Beobachtet am 17.09.2026: DNS ab 18:37 Uhr stabil, Safari meldete um 18:40 Uhr
+noch die Warnung.
+
+**Nicht auf „diese Website trotzdem besuchen" tippen** — nicht wegen der Gefahr
+in diesem Fall, sondern weil es die Gewohnheit einübt, solche Warnungen
+wegzuklicken. Genau darauf zielen echte Angriffe.
+
+**Beschleunigen** lässt sich Schritt 2 durch eine erneute Auslieferung: Dabei
+wird die Datei `CNAME` neu geschrieben, und GitHub startet die Prüfung neu.
+
+**Kontrollieren** lässt es sich unter *Repository → Settings → Pages*:
+Steht dort unter *Custom domain* der Name mit grünem Haken und ist das Kästchen
+*Enforce HTTPS* anklickbar (statt ausgegraut), ist der Ausweis da. Eine rote
+Meldung an dieser Stelle nennt die Ursache im Klartext.
+
 ### Warum ein Name, der ins Leere zeigt, nicht harmlos ist
 
 Zeigt `verwaltung.boerdesnack24.de` auf GitHub Pages, ohne dass ein Projekt
