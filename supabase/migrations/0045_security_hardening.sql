@@ -68,9 +68,12 @@ alter default privileges in schema app    revoke execute on functions from anon;
 
 -- ── 3) search_path pinnen ───────────────────────────────────────────────
 -- `alter function` kennt kein `if exists`. app.snapshot_slot_history() und
--- app.snapshot_slot_insert() werden von keiner Migration in diesem Repository
--- angelegt; in einer leeren Datenbank brach die Kette deshalb hier ab
--- (Befund A-5). Die Schleife pinnt jede vorhandene Funktion und meldet jede
+-- app.snapshot_slot_insert() wurden bis zum 17.09.2026 von keiner Migration in
+-- diesem Repository angelegt; in einer leeren Datenbank brach die Kette deshalb
+-- hier ab (Befund A-5). Seither legt `0068` beide an — mit bereits gepinntem
+-- search_path, weil der Produktivexport ihn enthielt. Die Warnung unten
+-- erscheint beim Aufbau aus einer leeren Datenbank weiterhin (0045 läuft vor
+-- 0068) und ist gegenstandslos. Die Schleife pinnt jede vorhandene Funktion und meldet jede
 -- fehlende als Warnung — das Pinnen ist eine Härtung, die ohne die Funktion
 -- gegenstandslos ist, das Fehlen aber nicht verschwiegen werden darf.
 do $$

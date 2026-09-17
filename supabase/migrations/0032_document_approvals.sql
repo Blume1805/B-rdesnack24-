@@ -58,11 +58,19 @@ create table if not exists public.document_approval_decisions (
 -- davon abweichen — das ist gefährlicher als ihr Fehlen. Stattdessen wird die
 -- Erweiterung übersprungen und der Grund laut ausgegeben, damit ein
 -- unvollständiger Aufbau nicht wie ein vollständiger aussieht.
--- Export-Anleitung: docs/OPERATIONS.md, Runbook D.
+--
+-- SEIT DEM 17.09.2026 ERLEDIGT: Der Gesellschafter hat die Struktur über
+-- Runbook D exportiert; `0068_partner_signatures_and_slot_snapshots.sql` legt
+-- die Tabelle vollständig an — einschließlich der vier Spalten, die hier
+-- nachgetragen würden. Beim Aufbau aus einer leeren Datenbank erscheint die
+-- Warnung unten deshalb weiterhin, sie ist aber gegenstandslos: Was hier
+-- übersprungen wird, entsteht in 0068 in derselben Fassung.
+-- Diese Anweisung bleibt stehen, weil sie in Umgebungen greift, in denen die
+-- Tabelle in ihrer alten, kürzeren Fassung bereits existiert.
 do $$
 begin
   if to_regclass('public.partner_signatures') is null then
-    raise warning 'A-5: public.partner_signatures fehlt — Spalten captured_via, docusign_envelope_id, captured_at, profile_id werden NICHT angelegt. Die Signatur-Funktionen sind in dieser Datenbank unvollstaendig. Siehe docs/OPERATIONS.md, Runbook D.';
+    raise warning 'A-5 (gegenstandslos seit 0068): public.partner_signatures existiert hier noch nicht; sie wird in 0068 vollstaendig angelegt, inklusive captured_via, docusign_envelope_id, captured_at und profile_id. Kein Handlungsbedarf.';
   else
     alter table public.partner_signatures
       add column if not exists captured_via         text,

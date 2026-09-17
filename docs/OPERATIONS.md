@@ -362,6 +362,69 @@ Erscheinen nur **vier** Zeilen, fehlen die beiden Funktionen — siehe unten.
 **Eilt es?** Nein, nicht für den laufenden Betrieb. Aber es sollte vor dem
 Go-Live erledigt sein, weil danach der Druck im Ernstfall größer ist.
 
+## Runbook D, Teil 2: Zwei Restfragen klären (30 Sekunden)
+
+**Stand 17.09.2026:** Teil 1 ist erledigt — die drei Objekte sind exportiert und
+liegen als `0068_partner_signatures_and_slot_snapshots.sql` im Repository. Zwei
+Dinge hat der Export nicht mit abgedeckt.
+
+### Warum das gemacht werden soll
+
+**Frage 1 — sind die Unterschriften wirklich geschützt?** Auf der Tabelle
+`partner_signatures` liegt eine Leseregel, die den Zugriff auf interne Rollen
+beschränkt. So eine Regel wirkt aber nur, wenn der Zugriffsschutz auf der
+Tabelle überhaupt eingeschaltet ist. Ist er es nicht, ist die Regel bloß
+Dekoration und **jedes angemeldete Konto** könnte die Unterschriften lesen.
+Aus dem Export geht nicht hervor, welcher Fall vorliegt.
+
+**Frage 2 — wird die Fachhistorie überhaupt geschrieben?** Die beiden
+exportierten Funktionen halten fest, welches Produkt wann in welchem
+Automatenfach lag. Sie laufen nicht von selbst, sondern müssen an die Tabelle
+`machine_slots` angehängt sein („Trigger"). Ob diese Verbindung ebenfalls nur
+im Live-System existiert, ist offen. Fehlt sie nach einem Neuaufbau, bleibt die
+Historie still leer — und das fällt erst auf, wenn man sie braucht.
+
+### Schritt für Schritt
+
+1. <https://supabase.com/dashboard> öffnen, Bördesnack24-Projekt wählen.
+2. **SQL Editor → + New query**.
+3. Diesen Text einfügen und auf **Run** klicken:
+
+   ```sql
+   select 'Zugriffsschutz auf partner_signatures' as frage,
+          case when relrowsecurity then 'AN' else 'AUS' end as antwort
+     from pg_class where oid = 'public.partner_signatures'::regclass
+   union all
+   select 'Trigger auf machine_slots', coalesce(string_agg(tgname || '  ::  ' ||
+          pg_get_triggerdef(t.oid), E'\n'), '(keine)')
+     from pg_trigger t
+     join pg_class c on c.oid = t.tgrelid
+    where c.relname = 'machine_slots' and not t.tgisinternal;
+   ```
+
+4. **Download CSV** und mir schicken — oder einfach abtippen, es sind zwei
+   Zeilen.
+
+### So sieht Erfolg aus
+
+Zwei Zeilen. Die erste sollte **AN** sagen. Die zweite sollte mindestens einen
+Eintrag enthalten, der `snapshot_slot` im Namen trägt.
+
+### Wenn etwas schiefgeht
+
+* **Erste Zeile sagt AUS** — dann sind die Unterschriften derzeit für jedes
+  angemeldete Konto lesbar. Das ist zu beheben, und zwar zügig. Sag mir
+  Bescheid, ich bereite die Anweisung vor; sie ist eine Zeile und ändert an den
+  Daten nichts.
+* **Zweite Zeile sagt `(keine)`** — dann wird die Fachhistorie auch live nicht
+  geschrieben. Dann brauchen wir die Trigger neu, nicht bloß abgeschrieben.
+* Beide Abfragen **lesen nur**. Es kann nichts kaputtgehen.
+
+**Eilt es?** Frage 1 ja, sobald echte Unterschriften in der Tabelle liegen.
+Frage 2 nein, aber vor dem ersten Automaten.
+
+---
+
 ## Runbook E: Prüfen, ob jemand ein Abo abgeschlossen hat
 
 **Zeitbedarf:** etwa 5 Minuten. Es wird nur gelesen, nichts geändert.
