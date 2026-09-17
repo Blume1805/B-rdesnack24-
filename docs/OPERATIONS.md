@@ -584,6 +584,47 @@ sein. Legt das nicht auf einen Tag, an dem ihr Werbung schaltet.
 **Eilt es?** Nur, wenn der Aufkleber gedruckt werden soll. Ohne ihn läuft alles
 weiter wie bisher.
 
+## Die Adressen von Bördesnack24 (Zielbild)
+
+**Eine Domain, mehrere Häuser.** `boerdesnack24.de` ist entgeltlich erworben und
+trägt alles; es wird keine zweite Domain gebraucht. Die Unteradressen
+(„Subdomains") kosten nichts und sind voneinander unabhängig — jede kann bei
+einem anderen Anbieter liegen.
+
+| Adresse | Inhalt | Anbieter | Stand 17.09.2026 |
+|---|---|---|---|
+| `boerdesnack24.de` | Landingpage | Hostinger | ✅ eingerichtet (A-Eintrag → `2.57.91.91`) |
+| `www.boerdesnack24.de` | dasselbe | Hostinger | ⚠️ antwortet derzeit nicht — prüfen |
+| `app.boerdesnack24.de` | Kunden-App (PWA) | GitHub Pages | ✅ eingerichtet (CNAME → `blume1805.github.io`) |
+| `send.boerdesnack24.de` | E-Mail-Versand | Resend / Amazon SES | ✅ eingerichtet (SPF, DKIM, MX) |
+| `verwaltung.boerdesnack24.de` | Gesellschafter-App (PWA) | offen | ⏳ **noch nicht anlegen** |
+
+### Warum `verwaltung.` noch nicht angelegt wird
+
+Zwei Gründe, beide sachlich:
+
+1. **Die Anwendung gibt es noch nicht.** ADR 0006 hat entschieden, dass der
+   interne Bereich eine eigene PWA wird; gebaut ist sie nicht. Ein Eintrag,
+   der auf nichts zeigt, ist kein halber Fortschritt, sondern eine Fehlerquelle.
+2. **GitHub Pages bedient je Projekt nur *eine* eigene Adresse** (die Datei
+   `CNAME` im ausgelieferten Zweig trägt genau einen Namen). Ein zweiter Eintrag
+   auf dasselbe Projekt würde nicht bedient. Die interne PWA braucht also ein
+   eigenes Zuhause — eigenes GitHub-Projekt, Hostinger oder ein anderer
+   Anbieter. Das wird mit ihr zusammen entschieden.
+
+Sobald sie steht, ist es eine Zeile: Typ `CNAME`, Name `verwaltung`, Ziel = die
+Adresse des neuen Zuhauses.
+
+### Wer darf was ändern
+
+DNS-Einträge liegen ausschließlich im Hostinger-Konto. Von der Entwicklungs-
+seite aus sind sie **nicht** erreichbar — jede Änderung dort macht der
+Gesellschafter selbst. Umgekehrt braucht die App-Seite nichts von Hostinger:
+Der Name `app.boerdesnack24.de` steht im Auslieferungs-Workflow
+(`CUSTOM_DOMAIN`) und wandert bei jedem Ausliefern als Datei `CNAME` mit.
+
+---
+
 ## Runbook G: Automatenaufkleber drucken und anbringen
 
 **Voraussetzungen:** Runbook F ist abgeschlossen, die Adresse ist endgültig —
