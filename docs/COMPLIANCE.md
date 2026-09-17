@@ -611,3 +611,50 @@ und widerspricht der für die Automatenseite verbindlichen Wortwahl
 **Status 🟡** · Verantwortlich: Philipp Blume · Fällig: bevor eine der beiden
 Oberflächen öffentlich erreichbar ist. Solange beide unveröffentlicht sind,
 besteht kein akutes Risiko.
+
+---
+
+## V-010 · Kein Automat in Betrieb — Sperre für jede Veröffentlichung (2026-09-17)
+
+### Sachverhalt
+
+Auf Nachfrage am 17.09.2026 hat der Gesellschafter bestätigt: **Es ist bislang
+kein Automat in Betrieb.** Das Unternehmen sucht Standorte; der erste Automat
+steht noch nicht.
+
+Mehrere Texte sprechen jedoch im Präsens von vorhandenen Automaten, unter
+anderem das Store-Listing („Die App zu den Bördesnack24-Automaten in Sülzetal
+und Umgebung") und die Marketing-Unterlagen („an jedem Automaten, bei jedem
+Kauf").
+
+### Rechtliche Würdigung
+
+Solange nichts davon veröffentlicht ist, entsteht **kein Verstoß**. Weder App
+noch Landingpage noch Automatenseite sind öffentlich erreichbar, es gibt keine
+Adressaten und keine geschäftliche Handlung gegenüber Verbrauchern.
+
+Mit der ersten Veröffentlichung ändert sich das. Wer für ein Angebot wirbt, das
+es nicht gibt, handelt irreführend (§ 5 Abs. 1 Satz 2 Nr. 1 UWG: Angaben über
+die Verfügbarkeit der Ware). Der Satz „die App zu den Automaten in Sülzetal"
+behauptet die Existenz von Automaten. Ein Rabattversprechen „an jedem
+Automaten" setzt voraus, dass es Automaten gibt, an denen er eingelöst werden
+kann.
+
+Nicht betroffen ist die Beschreibung des Angebots als solches: Dass die App
+kostenlos ist und 5 % Rabatt gewährt, bleibt richtig. Falsch wird erst die
+Behauptung, es stünden bereits Geräte.
+
+### Ergebnis / Handlungsbedarf
+
+- [x] Landingpage: Betriebsstand hängt an einem einzigen Schalter, der auf
+      `vorbereitung` steht (`docs/lovable-brief-landingpage.md`)
+- [ ] **Vor der ersten Veröffentlichung irgendeiner Oberfläche** sämtliche
+      Präsensaussagen über vorhandene Automaten prüfen. Betroffen mindestens:
+      `docs/store-assets/store-listing.md`, `docs/marketing/*.html` und die
+      zugehörigen PDF, der Automatenfinder in der App.
+- [ ] Automatenseite: Der Aufkleber kommt erst mit dem ersten Gerät zum
+      Einsatz; die Seite selbst zeigt bis dahin nur Beispieldaten und ist nicht
+      zu veröffentlichen.
+
+**Status 🟡** · Verantwortlich: Philipp Blume · Fällig: vor der ersten
+Veröffentlichung. Kein akutes Risiko, solange nichts online ist.

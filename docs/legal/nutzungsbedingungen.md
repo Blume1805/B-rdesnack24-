@@ -1,123 +1,15 @@
-/// Zentral gepflegte Vorlagen für die Rechtsseiten der App.
-///
-/// **Wichtig:** Diese Texte sind technische Vorlagen und **kein Anwaltsdokument**.
-/// Vor Go-Live müssen sie durch einen Fachanwalt für IT-/Datenschutzrecht
-/// geprüft und final ergänzt werden (insbesondere gesetzlicher Vertreter,
-/// Steuernummer, ggf. USt-ID, Berufshaftpflicht usw. gemäß § 5 DDG).
-abstract final class LegalTexts {
-  static const version = 'v3 · 2026-09';
+<!-- ERZEUGT - NICHT VON HAND AENDERN.
+     Quelle: apps/mobile/lib/features/legal/presentation/legal_texts.dart
+     Neu erzeugen: python3 scripts/rechtstexte_export.py
+     Aenderungen gehoeren in die Dart-Datei, sonst laufen App und Landingpage
+     auseinander (docs/COMPLIANCE.md, V-009). -->
 
-  // ── Impressum (§ 5 DDG) ────────────────────────────────────────────────────
-  static const imprint = '''
-Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
+# Nutzungsbedingungen
 
-Bördesnack24 GbR
-Pia Blume, Philipp Blume (vertretungsberechtigte Gesellschafter)
-Sülldorfer Str. 3A
-39171 Sülzetal OT Osterweddingen
+Fassung v3 · 2026-09
 
-Kontakt
-E-Mail: kontakt@boerdesnack24.de
-Website: https://www.boerdesnack24.de
-
-Umsatzsteuer / Steuernummer
-Steuernummer: 102/178/01635
-Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE 458804058
-
-Zuständige Aufsichtsbehörde für Lebensmittelrecht
-Veterinär- und Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis
-
-Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
-Pia Blume, Philipp Blume, Anschrift wie oben.
-
-Streitbeilegung
-Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-https://ec.europa.eu/consumers/odr
-Wir sind nicht bereit oder verpflichtet, an einem Streitbeilegungsverfahren vor einer
-Verbraucherschlichtungsstelle teilzunehmen.
-
-Haftungshinweis
-Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte
-externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber
-verantwortlich.
-''';
-
-  // ── Datenschutzerklärung (Art. 12/13 DSGVO, § 25 TDDDG) ────────────────────
-  static const privacy = '''
-Datenschutzerklärung (Vorlage · $version)
-
-Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist die Bördesnack24 GbR (Kontakt siehe
-Impressum).
-
-1) Verarbeitete Datenkategorien und Zwecke
-
-  a) Konto- und Kontaktdaten (Name, E-Mail, Telefon, Rolle)
-     Zweck: Registrierung, Authentifizierung, Zugriffssteuerung.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertrag/vorvertragliche Maßnahmen).
-
-  b) Kundenprofil, individuelle Preise, Kaufhistorie, Empfehlungen
-     Zweck: Vertragsdurchführung, individuelle Angebote.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
-
-  c) HACCP-/GoBD-Protokolle (Temperatur, Reinigung, Vernichtung, Wartung,
-     Geldentnahme, Belehrungen), Audit-Log
-     Zweck: Erfüllung gesetzlicher Pflichten (LMHV, HACCP, AO, HGB).
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. c DSGVO in Verbindung mit den o. g. Gesetzen.
-
-  d) Push-Gerätetokens (nur nach Einwilligung)
-     Zweck: App-Benachrichtigungen.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
-
-  e) Nutzungsanalyse (nur nach Einwilligung, aktuell deaktiviert)
-     Zweck: Produktverbesserung.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
-
-  f) Kartendarstellung / Standortabfrage (nur nach Einwilligung)
-     Zweck: Automatenfinder / Navigation.
-     Rechtsgrundlage: § 25 Abs. 1 TDDDG, Art. 6 Abs. 1 lit. a DSGVO.
-
-  g) Diagnose-/Fehlerdaten (ohne personenbezogene Rohdaten)
-     Zweck: Stabilität und IT-Sicherheit.
-     Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
-
-2) Empfänger / Auftragsverarbeiter
-
-  * Supabase (EU-Region, Hosting/Datenbank/Auth/Storage) — Auftragsverarbeitung gem. Art. 28 DSGVO.
-  * Firebase Cloud Messaging (Push) — nur nativ, nach Einwilligung.
-  * Google Maps (Kartenanzeige) — nur nach Einwilligung.
-  Weitergaben an Behörden erfolgen nur bei gesetzlicher Verpflichtung.
-
-3) Speicherdauer
-
-  Vertrags-/Kontodaten: bis zur Vertragsbeendigung + gesetzliche Aufbewahrungsfristen.
-  Buchhaltung und Nachweise: 10 Jahre (§ 147 AO).
-  HACCP-Protokolle: gemäß VLÜA-Vorgaben.
-  Einwilligungen: bis Widerruf; Nachweisdokumentation im Audit-Log.
-
-4) Ihre Rechte (DSGVO)
-
-  * Auskunft (Art. 15) — in der App: „Meine Daten exportieren"
-  * Berichtigung (Art. 16)
-  * Löschung (Art. 17) — in der App: „Kontolöschung beantragen".
-    Hinweis: Aufgrund handels- und steuerrechtlicher Aufbewahrungspflichten
-    (§§ 147 AO, 257 HGB) erfolgt die Löschung ggf. erst nach Ablauf dieser Fristen;
-    zwischenzeitlich erfolgt Sperrung/Anonymisierung.
-  * Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21)
-  * Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft.
-  * Beschwerde bei einer Aufsichtsbehörde (Art. 77), z. B. LfD Sachsen-Anhalt.
-
-5) Sicherheit
-  Verschlüsselte Übertragung (TLS), Server-Standort EU, rollenbasierter Zugriff mit
-  Row-Level-Security, Audit-Trail, MFA vorbereitet.
-
-6) Änderungen
-  Diese Erklärung ist eine Vorlage und wird vor Live-Betrieb durch einen Fachanwalt
-  finalisiert. Änderungen werden versioniert.
-''';
-
-  // ── AGB (Vorlage) ──────────────────────────────────────────────────────────
-  static const terms = '''
-Nutzungsbedingungen (Vorlage · $version)
+```
+Nutzungsbedingungen (Vorlage · v3 · 2026-09)
 
 1) Wer wir sind und wofür diese Bedingungen gelten
 Betreiberin der Bördesnack24-App ist die Bördesnack24 GbR, Sülldorfer Str. 3A,
@@ -382,5 +274,4 @@ Diese Bedingungen gelten ab ihrer Veröffentlichung in der App.
 
 Diese Bedingungen sind eine technische Vorlage und werden vor Live-Betrieb
 anwaltlich finalisiert.
-''';
-}
+```

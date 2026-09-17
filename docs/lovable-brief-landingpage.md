@@ -83,7 +83,10 @@ Seite, die Betrieb behauptet, den es nicht gibt, ist irreführend. Eine, die
 nach dem ersten Automaten noch von Vorbereitung spricht, ist peinlich. Beides
 lässt sich mit einem Wort vermeiden.
 
-**Der Schalter steht bis auf Weiteres auf `vorbereitung`.**
+**Der Schalter steht auf `vorbereitung`.** Der Gesellschafter hat am
+17.09.2026 bestätigt: **Es ist noch kein Automat in Betrieb.** Das ist keine
+Vorsichtsannahme mehr, sondern der festgestellte Stand. Die Seite darf deshalb
+an keiner Stelle im Präsens von laufenden Automaten sprechen.
 
 ## Was gelöscht oder ersetzt wird
 
