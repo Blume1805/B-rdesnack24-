@@ -161,6 +161,39 @@ Bewegung sofort da.
   sind ein Fehler, kein Versehen. Der Wortlaut liegt exportiert in
   `docs/legal/impressum.md`, `docs/legal/datenschutzerklaerung.md` und
   `docs/legal/nutzungsbedingungen.md` — daraus übernehmen, nicht neu schreiben.
+
+* **Aber nicht alle drei auf dieselbe Weise.** Beim Zusammenstellen des
+  Auftrags am 20.09.2026 fiel auf, dass die Erstfassung dieses Briefings hier
+  zu grob war. Richtig ist:
+
+  | Text | Auf der Landingpage |
+  |---|---|
+  | Impressum | **wörtlich übernehmen.** Gilt für Betreiberin und Seite gleichermaßen. |
+  | Nutzungsbedingungen / AGB | **wörtlich übernehmen**, erkennbar als Bedingungen *der App*. Die Landingpage selbst schließt keinen Vertrag. |
+  | Datenschutzerklärung | **nicht wörtlich übernehmen.** |
+
+  Grund: Die Datenschutzerklärung der App beschreibt Konto- und Kaufdaten,
+  Push-Tokens über Firebase, Kartenanzeige über Google Maps und Supabase als
+  Auftragsverarbeiter. Die Landingpage macht **nichts davon**. Würde der Text
+  unverändert übernommen, behauptete die Seite eine Verarbeitung, die dort
+  nicht stattfindet — das ist keine Formalie, sondern eine falsche Angabe
+  gegenüber Betroffenen (Art. 13 DSGVO verlangt eine Unterrichtung über die
+  *tatsächliche* Verarbeitung).
+
+  Die Landingpage braucht deshalb eine **eigene, kurze Datenschutzerklärung**
+  mit genau diesem Inhalt: Verantwortliche wie im Impressum; keine Cookies,
+  kein Tracking, keine Formulare, keine externen Einbettungen; verarbeitet
+  werden allein die Server-Protokolldaten des Hosters (IP-Adresse,
+  Zeitstempel, abgerufene Seite) auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
+  zum Betrieb und zur Sicherheit; Kontaktaufnahme per E-Mail und was damit
+  geschieht; die Betroffenenrechte aus Art. 15 bis 21 und 77 DSGVO. Für die
+  Bedingungen der App wird auf deren Erklärung verwiesen.
+
+  🔴 **Offener Punkt, der davon abhängt:** Für die Server-Protokolldaten ist
+  ein Auftragsverarbeitungsvertrag mit dem Hoster (Hostinger) nötig und ins
+  Verarbeitungsverzeichnis einzutragen. Das steht bereits als offener Haken in
+  `docs/COMPLIANCE.md`. Die Seite darf gebaut, aber nicht veröffentlicht
+  werden, bevor das vorliegt.
 * Ziel für den ersten Aufruf: unter 400 KB komprimiert. Die Landingpage darf
   etwas schwerer sein als die Automatenseite, weil niemand mit ihr vor einem
   Gerät steht — aber nicht beliebig.
@@ -175,4 +208,7 @@ Bewegung sofort da.
 * Sagt die Seite die Wahrheit über den Betriebsstand, und hängt das an genau
   einem Schalter?
 * Enthält das ausgelieferte HTML und CSS keine externe Adresse?
-* Stimmen die Rechtstexte mit der Fassung `v3 · 2026-09` überein?
+* Stimmen Impressum und AGB wörtlich mit der Fassung `v3 · 2026-09` überein?
+* Hat die Seite eine **eigene** Datenschutzerklärung, die nur beschreibt, was
+  auf der Landingpage tatsächlich passiert — und behauptet sie nirgends
+  Firebase, Google Maps oder Supabase?
