@@ -5,7 +5,11 @@ Projektanweisung und Abnahmegrundlage für den Umbau des bestehenden Projekts
 neues Projekt angelegt; Schriften, Rechtsseiten und Komponenten bleiben, wo sie
 tragen.
 
-Stand: 17.09.2026.
+Stand: 20.09.2026 (Erstfassung 17.09.2026).
+
+**Nachtrag vom 20.09.2026:** Zwei Angaben haben sich seither geändert und sind
+oben eingearbeitet — die maßgebliche Fassung der Rechtstexte ist `v3` statt
+`v2`, und die App ist unter `https://app.boerdesnack24.de` erreichbar.
 
 ## Warum die Seite umgebaut wird
 
@@ -64,6 +68,10 @@ zu kaufen.
 4. **Für Kundinnen und Kunden.** Die App: kostenlos, 5 % an jedem Automaten,
    Stufen 6 % ab 150 €, 7,5 % ab 500 €, 10 % ab 1.000 € Gesamtumsatz. Ein
    Knopf in die App. Kurz halten, drei bis vier Sätze.
+
+   **Der Knopf führt auf `https://app.boerdesnack24.de`.** Diese Adresse ist
+   seit dem 17.09.2026 in Betrieb; beim ersten Entwurf dieses Briefings gab es
+   sie noch nicht.
 
    **Der Knopf heißt „app öffnen", nicht „app herunterladen".** Die App ist
    eine PWA: Es gibt keine Installationsdatei und keinen Store. Wer sie öffnet,
@@ -149,8 +157,10 @@ Bewegung sofort da.
   sichtbarer Fokus.
 * **Die Rechtstexte müssen mit der App übereinstimmen.** Maßgeblich ist
   `apps/mobile/lib/features/legal/presentation/legal_texts.dart`, Fassung
-  `v2 · 2026-09`. Zwei unterschiedliche AGB-Fassungen für dasselbe Angebot sind
-  ein Fehler, kein Versehen.
+  **`v3 · 2026-09`**. Zwei unterschiedliche AGB-Fassungen für dasselbe Angebot
+  sind ein Fehler, kein Versehen. Der Wortlaut liegt exportiert in
+  `docs/legal/impressum.md`, `docs/legal/datenschutzerklaerung.md` und
+  `docs/legal/nutzungsbedingungen.md` — daraus übernehmen, nicht neu schreiben.
 * Ziel für den ersten Aufruf: unter 400 KB komprimiert. Die Landingpage darf
   etwas schwerer sein als die Automatenseite, weil niemand mit ihr vor einem
   Gerät steht — aber nicht beliebig.
@@ -165,4 +175,4 @@ Bewegung sofort da.
 * Sagt die Seite die Wahrheit über den Betriebsstand, und hängt das an genau
   einem Schalter?
 * Enthält das ausgelieferte HTML und CSS keine externe Adresse?
-* Stimmen die Rechtstexte mit der Fassung `v2 · 2026-09` überein?
+* Stimmen die Rechtstexte mit der Fassung `v3 · 2026-09` überein?
