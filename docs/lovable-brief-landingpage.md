@@ -115,10 +115,23 @@ an keiner Stelle im Präsens von laufenden Automaten sprechen.
 
 ## Sprache
 
-Deutsch, konsequente Kleinschreibung, du-Form gegenüber Kundschaft, **Sie-Form
-gegenüber Standortgebern** — ein Vereinsvorstand wird nicht geduzt.
-Überschriften enden mit einem Punkt. Keine Emoji, keine Ausrufezeichen, keine
-Superlative.
+Deutsch, du-Form gegenüber Kundschaft, **Sie-Form gegenüber Standortgebern** —
+ein Vereinsvorstand wird nicht geduzt. Überschriften enden mit einem Punkt.
+Keine Emoji, keine Ausrufezeichen, keine Superlative.
+
+**Groß- und Kleinschreibung nach den Regeln der deutschen Rechtschreibung —
+Entscheidung des Gesellschafters vom 21.09.2026.** Das ersetzt die bisherige
+Vorgabe der durchgehenden Kleinschreibung, und zwar überall: Fließtext,
+Überschriften, Eyebrows, Schaltflächen, Navigationspunkte.
+
+Warum das eine Änderung und kein Detail ist: Die Kleinschreibung stand bislang
+an drei Stellen — im Skill `boerdesnack24-design` („deutsche Kleinschreibung",
+Abschnitt Schreibweise sowie in der Abnahme-Checkliste), im Briefing der
+Automatenseite (`docs/lovable-brief-automatenseite.md`) und hier. Sie war also
+Markensprache, nicht Zufall. Mit der Entscheidung gilt sie nicht mehr. Damit
+Landingpage und Automatenseite nicht auseinanderlaufen, ist die Automatenseite
+beim nächsten Durchlauf nachzuziehen; der Skill lässt sich aus dem Repository
+heraus nicht ändern und ist vom Gesellschafter anzupassen.
 
 **Verbindliche Wortwahl:** „erwirtschaftet für", niemals „gespendet", „Spende"
 oder „wir spenden". Die rechtliche Einordnung des Anteils ist offen; die
@@ -146,6 +159,37 @@ Die vorhandene Bewegungssteuerung (`MotionToggle`, `Reveal`, `SceneMotion`)
 bleibt, einschließlich der Rücksicht auf `prefers-reduced-motion`. Animation
 darf den Inhalt nicht verzögern: Was zum Verständnis nötig ist, steht auch ohne
 Bewegung sofort da.
+
+### Bewegung beim Scrollen — Entscheidung vom 21.09.2026
+
+Der Umbau vom 20.09.2026 hat die Seite auf schlichte Abschnitte mit `Reveal`
+reduziert. Die Bausteine für scrollgeführte Darstellung liegen aber weiterhin
+im Projekt und werden seither von keiner Seite benutzt: `Stage.tsx`,
+`Sequence.tsx`, `SceneMotion.tsx`, `ShareBar.tsx`, `VendingMachine.tsx` und die
+Scroll-Mechanik in `src/lib/scroll.ts`. Der Gesellschafter möchte sie wieder
+eingesetzt sehen — **sinnvoll**, also dort, wo Bewegung etwas erklärt, und
+nicht als Zierde.
+
+Vorschlag, welche Stelle welche Bewegung verdient:
+
+| Abschnitt | Bewegung | Was sie erklären soll |
+|---|---|---|
+| Kopf | ruhig, nur Einblenden | Der erste Eindruck darf nicht warten. |
+| Für Standortgeber | `Stage` + `Sequence`: die drei Karten (bekommt / kostet / brauchen) kommen nacheinander, während der Automat stehen bleibt | Dass es drei getrennte Zusagen sind, nicht ein Absatz |
+| Wie der Nachweis funktioniert | `ShareBar`: der Anteil am Umsatz wächst beim Scrollen sichtbar | Der Kern des Angebots — ein Anteil, der entsteht, nicht eine Pauschale |
+| Für Kundschaft | nur Einblenden | Nebenschauplatz, verdient keine Aufmerksamkeit |
+| Wer dahintersteht | nur Einblenden | dito |
+
+Feste Grenzen, unabhängig von der Gestaltung:
+
+* **Ohne Bewegung ist die Seite vollständig.** Kein Satz, keine Zahl und kein
+  Knopf existiert nur innerhalb einer Animation. Wer `prefers-reduced-motion`
+  gesetzt hat oder den Schalter umlegt, sieht denselben Inhalt.
+* **Kein Scroll-Hijacking.** Das Rad bewegt die Seite weiter wie überall
+  sonst. Ein sticky Abschnitt darf höchstens zwei Bildschirmhöhen festhalten.
+* **Auf dem Telefon nicht mehr als zwei sticky Abschnitte insgesamt.** Sonst
+  wird aus einer Seite ein Tunnel, durch den man sich durchwischen muss.
+* Der `MotionToggle` bleibt erreichbar und wirkt sofort.
 
 ## Technik und Recht
 
@@ -201,6 +245,10 @@ Bewegung sofort da.
 ## Abnahme
 
 * Versteht ein Vereinsvorstand in zehn Sekunden, was er davon hat?
+* Ist die Groß- und Kleinschreibung durchgehend regelkonform — auch in
+  Eyebrows, Schaltflächen und Navigationspunkten?
+* Bleibt die Seite ohne Bewegung vollständig lesbar, und wirkt der
+  Bewegungsschalter sofort?
 * Steht der Standortabschnitt vor dem Kundenabschnitt?
 * Wird nirgends ein Abo, ein Preis oder ein Store genannt?
 * Wird nirgends behauptet, die App sei ohne Anmeldung nutzbar?

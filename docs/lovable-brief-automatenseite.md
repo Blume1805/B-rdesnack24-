@@ -85,7 +85,12 @@ Karten, Videos, Web-Fonts in vielen Schnitten.
 **Schrift** — Überschriften *Bricolage Grotesque* (700–800, eng gesetzt, `-0.02em`),
 Fließtext *Hanken Grotesk*. Nur die tatsächlich benutzten Schnitte laden.
 
-**Sprache** — durchgehend deutsch, konsequente **Kleinschreibung**, „du"-Form.
+**Sprache** — durchgehend deutsch, „du"-Form, **Groß- und Kleinschreibung nach
+den Regeln der deutschen Rechtschreibung**. Die frühere Vorgabe der
+durchgehenden Kleinschreibung ist mit der Entscheidung des Gesellschafters vom
+21.09.2026 aufgehoben. 🔴 **Offen:** Die Automatenseite trägt sie noch und ist
+beim nächsten Durchlauf nachzuziehen, damit sie nicht anders schreibt als die
+Landingpage.
 Überschriften enden mit einem Punkt. Keine Emoji. Eyebrows (kleine Vorzeilen
 über Überschriften) ebenfalls klein und mit Punkt, etwa „dein automat.".
 
