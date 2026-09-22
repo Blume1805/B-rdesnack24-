@@ -134,3 +134,56 @@ zu melden. Sie sind erneut zu beauftragen.
 `<div id="nachweis">` statt auf eine Überschrift. Die Überschrift liegt in
 `ShareScene` und trägt keine Kennung. Für Screenreader wird der Abschnittsname
 dadurch unscharf. Eine Zeile: die Kennung an das `h2` in `ShareBar.tsx` hängen.
+
+---
+
+# Nachbesserung vom 22.09.2026 — Durchlauf 3
+
+Auftrag: die vier Befunde des Gesellschafters aus der Vorschau sowie die drei
+im zweiten Durchlauf übergangenen Punkte (Nachtrag 3 in
+`docs/lovable-brief-landingpage.md`). Geprüft wurde der Unterschied zu Commit
+`c23c364`, nicht die Bildschirmfotos des Agenten.
+
+## Erledigt
+
+| Punkt | Nachweis im Code |
+|---|---|
+| K-1 Fußzeile linksbündig | `SiteFooter.tsx`: `justify-content: flex-start`, `gap: 2rem 4rem`. |
+| K-1 Trennpunkt entfernt | Die Zeichenfolge „ · " kommt in `SiteFooter.tsx` nicht mehr vor. |
+| K-2 Vorteilskachel | `index.tsx`: `APP_BENEFITS` mit genau den sieben beauftragten Stichpunkten, Wortlaut unverändert; `ul`/`li`, Symbole aus `lucide-react` mit `aria-hidden`, Reveal-Versatz je Zeile (`Reveal.tsx`: Deckel von 4 auf 8 angehoben). |
+| K-2 Coupon-Vorbehalt | `.app-benefits__note` mit dem Wortlaut aus `offers_tab.dart`. |
+| K-3 Überlagerung | `Stage.tsx` misst `scrollHeight` des klebenden Inhalts, klebt nur bei `contentHeight <= innerHeight`, sonst `data-sticky="false"` und normaler Fluss; `ResizeObserver`, `MutationObserver` auf `data-motion` und `document.fonts.ready` messen nach. `styles.css` bindet `position: sticky` an `.stage[data-sticky="true"]`. |
+| L-1 AGB-Auszeichnung | Alle 16 Ziffern sind `<h2>`, die Sternchenzeilen sind `<ul>/<li>`, die Buchstaben a) bis g) bleiben erhalten. Wortlaut unverändert. |
+| L-2 Schlusssatz | Als letzter Absatz ergänzt, wörtlich wie in `docs/legal/nutzungsbedingungen.md`. |
+| L-4 Beschriftung | `ShareBar.tsx`: `id="nachweis"` am `h2`; das `div` in `index.tsx` hat keine Kennung mehr. |
+
+Die vier übrigen Rechtsseiten wurden gegengelesen: `impressum.tsx`,
+`widerruf.tsx`, `kuendigung.tsx` und `datenschutz.tsx` verwenden bereits
+`<h2>`, Absätze und — im Impressum — `.addr` innerhalb von `.prose`. Dort war
+nichts zu korrigieren; die Meldung des Agenten trifft zu.
+
+## Nicht erledigt
+
+🟡 **L-5 (neu) — der Zeilenumbruch in der Fußzeile greift nicht.**
+`SiteFooter.tsx` setzt die Firmenzeile als
+`<p className="addr">{"Bördesnack24 GbR\nOsterweddingen"}</p>`. Der Umbruch
+hängt an der Regel `.prose .addr { white-space: pre-line }` in `styles.css`.
+Die Fußzeile liegt aber außerhalb von `.prose` — `LegalPage.tsx` legt die
+Klasse nur um die Rechtstexte. Im Browser steht deshalb
+„Bördesnack24 GbR Osterweddingen" in einer Zeile mit Leerzeichen statt in
+zwei Zeilen. Der Trennpunkt ist damit zwar weg, der zweite Teil des Auftrags
+aber nicht erfüllt.
+
+Die Nachbesserung war bereits formuliert und konnte nicht abgesendet werden:
+**das Lovable-Guthaben der Arbeitsumgebung ist aufgebraucht.** Der Punkt bleibt
+offen, bis Guthaben nachgelegt ist. Er ist rein gestalterisch — keine
+rechtliche oder inhaltliche Auswirkung.
+
+## Anmerkung zur Selbstauskunft des Agenten
+
+Die Zusammenfassung des Durchlaufs behauptet zusätzlich, „obsolete CSS-Regeln
+aus dem Abo-Vergleich" seien aus `styles.css` entfernt worden. Im Unterschied
+von `c23c364` steht keine solche Entfernung; `styles.css` wurde nur ergänzt und
+die Sticky-Regel umgeschrieben. Die Behauptung ist folgenlos, aber falsch —
+festgehalten, weil die Selbstauskunft des Agenten schon im zweiten Durchlauf
+nicht zuverlässig war.
