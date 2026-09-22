@@ -774,3 +774,98 @@ Verantwortlich: Philipp Blume. Fällig: vor Go-Live.
 3. **Getrennte Rücksprungadressen je Anwendung** in den Supabase-Auth-
    Einstellungen, sobald die zweite PWA existiert (ADR 0006), damit ein
    Passwort-Reset aus dem Innenbereich nicht in der Kunden-App landet.
+
+---
+
+## V-012 · Spendenmodell getrennt von der Standortvergütung, öffentliche Spenden- und Werbeaussage (2026-09-22) — OFFEN
+
+### Sachverhalt
+
+Der Gesellschafter hat am 22.09.2026 entschieden, den zweckgebundenen
+Umsatzanteil und die Standortvergütung **zu trennen**:
+
+1. Standortgeber erhalten eine **marktübliche Vergütung** — Festmiete oder
+   prozentuale Umsatzbeteiligung, je Standort vereinbart.
+2. **5 % des Nettoerlöses** jedes Automaten gehen als **Spende** an
+   gemeinnützige Vereine und Organisationen der Region. Die Empfänger werden
+   von der Kundschaft in der App vorgeschlagen und gewählt; Auszahlung zum
+   Quartalsende mit öffentlichem Nachweis (Migration `0020_donations_news.sql`,
+   `donations_screen.dart`).
+3. Auf der Landingpage entstehen zwei neue öffentliche Aussagen: die
+   Spendenzusage als eigener Abschnitt und ein Bereich, in dem Unternehmen
+   **digitale und analoge Werbung** erwerben können sollen (ADR 0005).
+
+Datenklasse: **D0** für die Landingpage selbst (keine Verarbeitung
+personenbezogener Daten; Kontakt ausschließlich per E-Mail-Link). Die
+Abstimmung über Spendenempfänger findet in der App statt und ist dort bereits
+als D3 geführt.
+
+### Rechtliche Würdigung
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | unverändert; Betreiberin gleich | Nein | |
+| AGB | ✓ | Verbraucher-AGB `v3` unberührt; **Werbeleistungen an Unternehmen brauchen eigene Bedingungen** (ADR 0005) | Ja, vor der ersten Buchung | Philipp Blume |
+| Nutzungsbedingungen | ✓ | Ziffer 6 beschreibt das Vorteilsprogramm, nicht die Spende; die Spendenmechanik in der App ist dort **nicht** geregelt | Ja, bei Livegang der Abstimmung | Philipp Blume |
+| Datenschutzerklärung | ✓ | Landingpage verarbeitet nur Server-Protokolldaten; Abstimmungsdaten liegen in der App | Nein für die Landingpage | |
+| DSGVO Art. 5/6/13/17/28/30/32/35 | ✓ | kein neuer Personenbezug auf der Seite | Nein | |
+| Verbraucherrecht §§ 312i–312k BGB | ✓ | kein Vertragsschluss über die Seite; Werbung wird angefragt, nicht gebucht | Nein, solange kein Buchungsweg entsteht | |
+| Preisangaben (PAngV) | ✓ | es wird kein Preis genannt — weder für Werbung noch für die Standortvergütung | Nein | |
+| Steuer und Buchführung (AO, GoBD, UStG) | ✓ | **Spende und Sponsoring sind auseinanderzuhalten.** Die Trennung vom Standortentgelt spricht für eine Spende i. S. v. § 10b EStG, setzt aber voraus, dass der Empfänger steuerbegünstigt ist und keine Gegenleistung erhält — insbesondere **keine Werbewirkung für Bördesnack24**. Sobald der Empfänger auf der Automatenseite genannt oder beworben wird, kippt die Einordnung Richtung Sponsoring mit Umsatzsteuer. Bei einer GbR wird der Spendenabzug den Gesellschaftern anteilig zugerechnet. Werbeleistungen unterliegen **19 %** Umsatzsteuer, unabhängig vom Steuersatz der Waren. Die Verpflichtung aus der Spendenzusage ist periodengerecht zu erfassen. | Ja, mit der Steuerberatung vor der ersten Auszahlung und vor der ersten Werberechnung | Philipp Blume |
+| Lebensmittelrecht (LMIV) | ✓ | keine Produktdarstellung auf der Seite | Nein | |
+| Jugendschutz | ✓ | nicht berührt | Nein | |
+| Verpackung und Pfand | ✓ | nicht berührt | Nein | |
+| Barrierefreiheit (BFSG/BFSGV, WCAG) | ✓ | neue Abschnitte müssen ohne Bewegung vollständig und mit Tastatur bedienbar sein; als Qualitätsanforderung geführt | Ja, technisch | Umsetzung Lovable |
+| EU AI Act | ✓ | die KI-erzeugte Automatenzeichnung ist bereits gekennzeichnet; keine neue KI-Ausgabe | Nein | |
+| UWG / Werbung | ✓ | **Kernpunkt.** Die Aussage „5 % des Nettoerlöses spenden wir" ist eine geschäftliche Handlung und muss zutreffend, klar und nachprüfbar sein — Empfänger, Bezugsgröße, Zeitraum und Höhe (§ 5, § 5a UWG). Alle vier Angaben stehen im beauftragten Text. Solange **kein Automat in Betrieb** ist, darf die Aussage nicht im Präsens stehen, als liefe sie bereits; der Vorbehalt ist Teil der Aussage. Der Nachweis muss geführt werden können, **bevor** die erste Auszahlung behauptet wird. | Ja, Vorbehalt und Nachweisweg | Umsetzung Lovable, Nachweis Philipp Blume |
+| Urheber- und Markenrecht | ✓ | eigene Inhalte | Nein | |
+| Store-Regeln Apple/Google | ✓ | keine Store-Einreichung (ADR 0005) | Nein | |
+
+### Ergebnis / Handlungsbedarf
+
+* [ ] **Technisch:** Spendenabschnitt mit allen vier Angaben und mit
+  Betriebsstands-Vorbehalt; Werbebereich ohne Preise, ohne Buchungsstrecke,
+  mit ausdrücklichem „noch nicht buchbar". — Umsetzung Lovable, mit der
+  Beauftragung vom 22.09.2026 losgeschickt.
+* [ ] **Organisatorisch:** Nachweisführung für die Spendenauszahlung
+  (Quartalsabschluss, Beleg, Veröffentlichung) festlegen, **bevor** die erste
+  Auszahlung öffentlich behauptet wird. — Philipp Blume, vor Livegang.
+* [ ] **Vertraglich/steuerlich:** Einordnung Spende oder Sponsoring mit der
+  Steuerberatung klären; Muster für den Mietvertrag mit Standortgebern
+  (Festmiete oder Umsatzbeteiligung); eigene Bedingungen für Werbeleistungen.
+  — Philipp Blume, vor dem ersten Standortvertrag beziehungsweise vor der
+  ersten Werberechnung.
+* [x] **Dokumentarisch:** Briefing der Landingpage (Nachtrag 4) und
+  `docs/scrolling-funktionen.md` geschrieben.
+
+### Verhältnis zu V-002
+
+V-002 behandelte den **standortgebundenen** Anteil als Ersatz der
+Standortvergütung. Dieser Sachverhalt besteht so nicht mehr. Die dort unter
+Nr. 1 bis 3 aufgeworfenen Fragen (Spende oder Sponsoring, Stellung des
+Empfängers, Empfänger ≠ Flächeneigentümer) sind durch die Trennung **entschärft,
+aber nicht erledigt**: Sie kehren wieder, sobald ein Empfänger einem Standort
+zugeordnet oder auf der Automatenseite genannt wird. Nr. 4 (UWG) und Nr. 5
+(Buchführung) gelten unverändert und sind oben fortgeschrieben.
+
+### Optimierungsvorschläge
+
+1. **Den Spendenbeleg automatisch erzeugen.** Die Quartalssumme lässt sich aus
+   `purchases` berechnen; ein fester Bericht je Quartal — Summe, Empfänger,
+   Zahlungsnachweis — erspart die Handarbeit und ist zugleich der Nachweis, den
+   § 5 UWG verlangt. Ohne ihn bleibt die Aussage angreifbar.
+2. **Die Nettobasis einmal sauber festlegen.** Migration 0020 rechnet
+   ersatzweise mit 7 % Umsatzsteuer, weil nur der Bruttobetrag gespeichert
+   wird. Getränke haben 19 %. Wird `total_net` je Bon mitgeschrieben, stimmt
+   die Spendenbasis mit der Buchhaltung überein — das ist zugleich die
+   Grundlage für V-003.
+3. **Standortvertrag als Vorlage statt als Einzelfall.** Zwei Varianten
+   (Festmiete, Umsatzbeteiligung) einmal anwaltlich erstellen lassen, dann ist
+   jedes weitere Gespräch eine Zahl statt eines Vertragsentwurfs.
+4. **Werbung erst anbieten, wenn Reichweite belegbar ist.** Ein Interessen-
+   Verteiler kostet nichts und verspricht nichts; eine Preisliste ohne
+   Nutzungszahlen ist angreifbar und verbrennt den ersten Kontakt.
+
+**Status: 🟡** — Die öffentliche Aussage ist zulässig formuliert, solange der
+Vorbehalt steht. Offen bleiben Nachweisführung, steuerliche Einordnung und die
+Bedingungen für Werbeleistungen, jeweils mit Verantwortlichem oben.

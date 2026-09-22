@@ -344,3 +344,117 @@ Fensters und nach dem Laden der Schrift.
   anwaltlich finalisiert."
 * **L-4** `ShareBar.tsx`: `aria-labelledby="nachweis"` zeigt auf ein `<div>`,
   nicht auf die Überschrift. Es muss auf die `<h2>` zeigen.
+
+## Nachtrag 4 — Geschäftsmodell-Änderung und drei neue Abschnitte (22.09.2026)
+
+Der Gesellschafter hat am 22.09.2026 auf Rückfrage entschieden:
+
+> „Der Standortgeber soll keine 5 % bekommen aus den Spenden. Man einigt sich
+> auf einen Mietvertrag, entweder Festmiete oder prozentuale
+> Umsatzbeteiligung."
+
+**Das hebt die bisherige Kernaussage dieser Seite auf.** Bis hierher stand im
+Briefing, Bördesnack24 bezahle Standorte „mit einer anderen Währung" und
+erwirtschafte statt Miete einen zweckgebundenen Anteil für einen Empfänger am
+Ort. Genau das gilt nicht mehr. Ab sofort:
+
+* **Standortgeber erhalten eine marktübliche Vergütung** — Festmiete oder
+  prozentuale Umsatzbeteiligung, je nach Vereinbarung.
+* **Die 5 % laufen unabhängig davon** und gehen als **Spende** an gemeinnützige
+  Vereine und Organisationen der Region. **Wer sie bekommt, entscheidet die
+  Kundschaft** über Vorschlag und Abstimmung in der App.
+
+Damit sind folgende Stellen dieses Briefings **aufgehoben**: der Satz
+„andere betreiber zahlen ihnen miete. wir zahlen ihrem verein." in Abschnitt 2,
+die Zusage eines „am Standort vereinbarten Anteils für einen Empfänger am Ort",
+und das generelle Verbot des Wortes „Spende". Der Rest bleibt in Kraft,
+insbesondere die Wahrheitspflicht zum Betriebsstand.
+
+### Wortwahl, differenziert (Entscheidung vom 22.09.2026)
+
+| Wo | Wort | Warum |
+|---|---|---|
+| 5 % an gemeinnützige Empfänger | **„Spende", „spenden"** | Es steht keine Gegenleistung dahinter. Die Empfänger werden von der Kundschaft gewählt, nicht vom Flächengeber gestellt. |
+| Vergütung des Standortgebers | **„Miete", „Umsatzbeteiligung"** | Das ist ein Entgelt für die Überlassung der Fläche. „Spende" wäre hier unzutreffend (§ 10b EStG setzt Unentgeltlichkeit voraus). |
+
+Beide Begriffe dürfen nie im selben Atemzug für dasselbe Geld stehen.
+
+### Abschnitt 2 — Für Standortgeber, neu
+
+* Kern als Aussage: **„Sie stellen die Fläche. Wir tragen den Rest."**
+* Die drei Zusagen in `Stage`/`Sequence`:
+  * **Was Sie bekommen.** „Eine Vergütung, die zum Ort passt — feste Miete oder
+    ein Anteil am Umsatz. Was besser passt, besprechen wir."
+  * **Was es Sie kostet.** „Nichts. Kein Kaufpreis, keine Wartung und keine
+    Befüllung." (unverändert)
+  * **Was wir brauchen.** „Eine Stellfläche, einen Stromanschluss und Zugang
+    zum Befüllen." (unverändert)
+* Ein Satz zum Anschluss an den nächsten Abschnitt: „Unabhängig von Ihrer
+  Vergütung gehen 5 % des Nettoerlöses jedes Automaten an einen gemeinnützigen
+  Empfänger in der Region."
+* **Weiterhin keine Zahl zur Höhe der Miete oder der Beteiligung.** Sie wird je
+  Standort verhandelt; eine Zahl auf der Seite wäre ein Versprechen, das nicht
+  für jeden Standort gilt.
+
+### Abschnitt 3 — „Fünf Prozent bleiben in der Region" (neu, die Hook)
+
+Eigener Abschnitt zwischen Standortgebern und Kundschaft, mit `ShareScene`
+(der Anteil wächst beim Scrollen) und dem Farbübergang davor.
+
+* Eyebrow: „Der Anteil"
+* Überschrift: **„Fünf Prozent bleiben in der Region."**
+* Text: „5 % des Nettoerlöses jedes Automaten spenden wir an gemeinnützige
+  Vereine und Organisationen aus der Umgebung. Nettoerlös heißt: der Umsatz
+  ohne Umsatzsteuer. Wer das Geld bekommt, entscheiden nicht wir — in der App
+  schlägt die Kundschaft Empfänger vor und stimmt darüber ab. Ausgezahlt wird
+  zum Quartalsende, und jede Auszahlung weisen wir öffentlich nach."
+* Vorbehalt, solange `betriebsstatus === "vorbereitung"`: „Noch ist kein Automat
+  in Betrieb. Es gibt deshalb bisher nichts auszuzahlen; die erste Abstimmung
+  startet mit dem ersten Automaten."
+
+Die vier Angaben Empfänger, Bezugsgröße, Zeitraum und Höhe stehen bewusst alle
+im Text. Eine Werbeaussage über einen Spendenanteil muss zutreffend, klar und
+nachprüfbar sein (§ 5 UWG; siehe `docs/COMPLIANCE.md`, V-002 Nr. 4).
+
+### Abschnitt 4 — Kundenkachel, Ergänzung
+
+Ein achter Stichpunkt, an zweiter Stelle nach dem Dauerrabatt:
+
+* **„Mitentscheiden, wohin die 5 % gehen: Empfänger vorschlagen und abstimmen"**
+
+Belegt durch Migration `0020_donations_news.sql` (Tabelle `donation_causes`,
+Vorschlag und Abstimmung) und `donations_screen.dart`.
+
+Daneben die bereits fertige, bisher ungenutzte Szene `PhysicalDigital` aus
+`SceneMotion.tsx`: Aus dem Automaten wächst beim Scrollen die App mit der Frage
+„Wohin sollen 5 % gehen?" und den beiden Auswahlfeldern.
+
+### Abschnitt 5 — Für Unternehmen: Werbung (neu)
+
+Grundlage ist `docs/adr/0005-pwa-ohne-store-und-b2b-in-der-app.md`: Das
+B2B-Werbeangebot ist beschlossen und wird Teil derselben App.
+
+* Eyebrow: „Für Unternehmen"
+* Überschrift: **„Werbung, die im Ort ankommt."**
+* Zwei Karten:
+  * **Digital in der App.** „Anzeigenfläche in der Bördesnack24-App — sichtbar
+    für die Menschen, die an unseren Automaten kaufen."
+  * **Analog am Automaten.** „Fläche direkt am Gerät, dort, wo gekauft wird."
+* Bewegung: `MachineZoom` — der Automat wird herangezoomt, die beiden Karten
+  stehen daneben.
+* **Ehrlichkeitsvorbehalt, zwingend:** „Buchbar ist das noch nicht. Solange
+  kein Automat steht, gibt es keine Reichweite zu verkaufen. Wir nehmen
+  Interessenten auf und melden uns, sobald die ersten Geräte in Betrieb sind."
+* Schaltfläche: „Werbung anfragen" als E-Mail-Link, kein Formular.
+* **Keine Preise, keine Pakete, keine Reichweitenzahlen.** Es gibt weder eine
+  Preisliste noch Nutzungszahlen; jede Angabe wäre erfunden. Werbeleistungen
+  unterliegen außerdem 19 % Umsatzsteuer und brauchen eigene
+  Geschäftsbedingungen — beides ist noch nicht erstellt (ADR 0005).
+
+### Was dadurch an anderer Stelle nachzuziehen ist
+
+* Der Abschnitt „Wie der Nachweis funktioniert" bezog sich bisher auf den
+  standortgebundenen Anteil. Er bezieht sich ab sofort auf den Spendentopf.
+* `docs/COMPLIANCE.md` führt den geänderten Sachverhalt unter V-002 fort.
+* Die Automatenseite („Börde Snack Connect") trägt dieselbe Aussage und ist
+  beim nächsten Durchlauf anzugleichen.
