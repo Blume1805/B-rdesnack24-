@@ -11,6 +11,10 @@ Stand: 20.09.2026 (Erstfassung 17.09.2026).
 oben eingearbeitet — die maßgebliche Fassung der Rechtstexte ist `v3` statt
 `v2`, und die App ist unter `https://app.boerdesnack24.de` erreichbar.
 
+**Nachtrag vom 22.09.2026:** Vier Befunde aus der Vorschau und drei offene
+Punkte der Abnahme stehen am Ende unter „Nachtrag 3 — Korrekturauftrag vom
+22.09.2026".
+
 ## Warum die Seite umgebaut wird
 
 Zwei Gründe, beide zwingend:
@@ -260,3 +264,83 @@ Feste Grenzen, unabhängig von der Gestaltung:
 * Hat die Seite eine **eigene** Datenschutzerklärung, die nur beschreibt, was
   auf der Landingpage tatsächlich passiert — und behauptet sie nirgends
   Firebase, Google Maps oder Supabase?
+
+## Nachtrag 3 — Korrekturauftrag vom 22.09.2026
+
+Grundlage: drei Bildschirmfotos der Vorschau (Stand Commit `f36a1b2d`) mit
+Befunden des Gesellschafters, ergänzt um drei Punkte aus der Abnahme vom
+21.09.2026, die der Agent beim letzten Lauf übergangen hat.
+
+### K-1 Fußzeile linksbündig, Trennpunkt weg
+
+`SiteFooter.tsx` verteilt drei Blöcke mit `justify-content: space-between`
+über die volle Breite; bei 1140 px stehen die Rechtslinks weit rechts und
+wirken abgerissen. Die Fußzeile wird linksbündig: alle drei Blöcke beginnen
+an derselben Kante, nebeneinander mit festem Abstand (`flex-start` plus
+`gap`), auf schmalen Geräten untereinander.
+
+Der „Punkt" ist das Trennzeichen „·" in `Bördesnack24 GbR · Osterweddingen`.
+Es entfällt; Firma und Ort stehen in zwei Zeilen untereinander. Das ist die
+einzige Stelle der Seite mit diesem Zeichen, deshalb ist die Anweisung
+eindeutig.
+
+### K-2 Vorteile der App als Kachel mit Stichpunkten und Symbolen
+
+Der Kundenabschnitt beschreibt die Rabattstufen bisher in einem Fließsatz.
+Er wird eine Kachel mit Stichpunkten, je Punkt ein Symbol. Die Coupons
+fehlen bisher vollständig und kommen hinzu.
+
+Der Inhalt ist nicht frei formulierbar. Er steht so im Code der App und ist
+dort am 22.09.2026 geprüft worden:
+
+| Stichpunkt | Beleg im Code |
+|---|---|
+| 5 % Dauerrabatt auf jeden Kauf, mit kostenlosem Konto | `Pricing.appDiscountRate`, `core/pricing/pricing.dart` |
+| Statusstufen: 6 % ab 150 €, 7,5 % ab 500 €, 10 % ab 1.000 € Gesamtumsatz | `Pricing.statusBonusRate` + `app.status_tiers()`, Migration 0060 |
+| Deals und Aktionsangebote: 10 % zusätzlich, zusammen 14,5 % | `Pricing.dealExtraDiscountRate`, `Pricing.dealSavingsRate` |
+| Persönliche Coupons aus dem Treueprogramm: 5 %, 10 %, 15 % und 25 % | `app.grant_loyalty_bonuses()`, Migration 0065, Stufen 500/1200/2000/3000 |
+| Geburtstagsgutschein und Gutschein zum Jahrestag der Anmeldung | `grant_birthday_offer()`, `grant_anniversary_offer()`, Migration 0017 |
+| Digitale Belege, Kundenkarte und Kaufhistorie | `AppBenefitsCompareCard`, `app_benefits_compare_screen.dart` |
+| Automatenfinder, Echtzeit-Bestand, Nährwerte und Allergene | ebenda |
+
+Zwei Werte werden **bewusst nicht** genannt, obwohl sie im Code stehen: die
+50 % des Geburtstags- und die 30 % des Jubiläumsgutscheins. Beide gelten auf
+ein vom System gewähltes Produkt (`app.wildcard_product()`), nicht auf den
+Einkauf. Eine Prozentzahl ohne diese Einschränkung wäre nach § 5 UWG
+irreführend, die Einschränkung selbst ist für eine Kachel zu sperrig. Die
+App nennt an dieser Stelle ebenfalls nur „Geburtstagsgutschein".
+
+Unter die Kachel gehört der Vorbehalt, den die App schon führt: Coupons sind
+nicht mit anderen Aktionen kombinierbar; sind mehrere für dasselbe Produkt
+aktiv, wird automatisch der günstigste Preis berechnet (§ 5a UWG, wesentliche
+Bedingung). Wortlaut aus `offers_tab.dart`.
+
+### K-3 Schaltfläche überlagert den folgenden Abschnitt
+
+`Stage.tsx` setzt die Höhe der Bühne fest auf `innerHeight * 2`, während
+`.stage__sticky` klebt und mindestens `100svh` hoch ist. Ist der klebende
+Inhalt höher als zwei Bildschirmhöhen — auf schmalen Geräten bricht das
+Raster auf eine Spalte um, Überschrift, Einleitung, Zeichnung, drei Zusagen
+und der Handlungsblock stehen dann untereinander —, läuft er unten aus der
+Bühne heraus. Sichtbare Folge: „Gespräch vereinbaren" steht über der
+Überschrift des nächsten Abschnitts.
+
+Die Höhe darf nicht geraten werden. Sie ergibt sich aus der tatsächlich
+gemessenen Höhe des klebenden Inhalts zuzüglich der Strecke, über die die
+Zusagen wechseln sollen. Ist der Inhalt höher als der Bildschirm, wird gar
+nicht geklebt: dann scrollt der Abschnitt normal, und die Zusagen erscheinen
+nacheinander beim Hereinscrollen. Neu gemessen wird bei Größenänderung des
+Fensters und nach dem Laden der Schrift.
+
+### Offen aus der Abnahme vom 21.09.2026
+
+* **L-1** `src/routes/agb.tsx` ist unverändert. Die Nummern 1) bis 16)
+  stehen mit eingebettetem Zeilenumbruch im selben `<p>` wie die
+  Überschrift und laufen im Browser zu einem Fließtext zusammen; die
+  Aufzählungen erscheinen als Sternchen im Text. Die Nummern werden
+  Überschriften, die Sternchenzeilen echte Listen.
+* **L-2** Der Schlusssatz aus `docs/legal/nutzungsbedingungen.md` fehlt:
+  „Diese Bedingungen sind eine technische Vorlage und werden vor Live-Betrieb
+  anwaltlich finalisiert."
+* **L-4** `ShareBar.tsx`: `aria-labelledby="nachweis"` zeigt auf ein `<div>`,
+  nicht auf die Überschrift. Es muss auf die `<h2>` zeigen.
