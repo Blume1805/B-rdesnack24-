@@ -187,3 +187,74 @@ von `c23c364` steht keine solche Entfernung; `styles.css` wurde nur ergänzt und
 die Sticky-Regel umgeschrieben. Die Behauptung ist folgenlos, aber falsch —
 festgehalten, weil die Selbstauskunft des Agenten schon im zweiten Durchlauf
 nicht zuverlässig war.
+
+---
+
+# Nachbesserung vom 23.09.2026 — Durchlauf 4
+
+Auftrag: die Geschäftsmodell-Änderung aus ADR 0007, zwei neue Abschnitte und
+die offene Fußzeilen-Korrektur (Nachtrag 4 im Briefing). Geprüft wurde der
+Quelltext zu Commit `505fd40`, nicht die Bildschirmfotos des Agenten.
+Verbrauch: 4,3 Credits.
+
+## Erledigt
+
+| Punkt | Nachweis im Code |
+|---|---|
+| Standortgeber inhaltlich korrigiert | `Stage.tsx`: Überschrift „Sie stellen die Fläche. Wir tragen den Rest.", Zusage „feste Miete oder ein Anteil am Umsatz", Brückensatz zu den 5 %. Der Satz „Andere Betreiber zahlen Ihnen Miete…" kommt im Projekt nicht mehr vor. |
+| Neuer Abschnitt „Fünf Prozent bleiben in der Region" | `index.tsx` nach `<Stage />`, mit `SceneColorTransition` davor; `ShareBar.tsx` trägt Eyebrow „Der Anteil", die Überschrift und den beauftragten Text **wörtlich**. |
+| Kein erfundener Auszahlungsrhythmus | Der Agent hatte in einem Zwischenschritt „zum Quartalsende" in Kopftext und Seitenbeschreibung geschrieben und es im selben Lauf selbst zurückgenommen. Im ausgelieferten Stand kommt „Quartal" auf keiner Seite vor. |
+| Kundenkachel | Achter Stichpunkt „Mitentscheiden, wohin die 5 % gehen…" an zweiter Stelle, Symbol `HandCoins`. |
+| Bisher ungenutzte Szenen eingesetzt | `PhysicalDigital` im Kundenabschnitt, `MachineZoom` im Werbeabschnitt, `SceneColorTransition` vor dem Anteilsabschnitt — alle drei wurden seit dem 20.09.2026 von keiner Seite aufgerufen. |
+| Neuer Abschnitt „Für Unternehmen: Werbung" | `index.tsx`, zwei Karten, Vorbehalt „Buchbar ist das noch nicht…", `mailto`-Schaltfläche, keine Preise, keine Reichweitenzahlen. |
+| L-5 Fußzeile | `SiteFooter.tsx`: zwei `<span style={{display:"block"}}>` statt des Zeilenumbruchs über `white-space`. Die Regel `.prose .addr` ist unverändert, das Impressum hängt weiter daran. |
+| KI-Kennzeichnung erhalten | `MachineZoom` trägt statt der langen `AssetNote` das Label „KI-Zeichnung"; die ausführliche Erläuterung steht weiterhin an der Zeichnung in `Stage`. |
+
+## Zwei eigene Befunde, sofort nachbeauftragt
+
+🔴 **B-1 — Kontrastfehler.** Der Anteilsabschnitt steht jetzt auf
+`scene--night`, die Zeile „5 % des Nettoerlöses" trägt aber weiterhin
+`color: var(--gold-text)` (`#856A00`). Auf `#202321` ergibt das rund
+**3,1 : 1** und verfehlt die geforderten 4,5 : 1. Die Regel steht im
+Projekt selbst: heller Grund `--gold-text`, dunkler Grund `--gold`.
+
+🟡 **B-2 — der erste Bildschirm hatte die Kernaussage verloren.** Der Agent
+hat den Kopftext auf „…vereinbart mit Standortgebern eine passende Vergütung
+für die Fläche" geändert. Fachlich richtig, aber es ist die Innensicht auf
+einen Mietvertrag; die 5 % — das einzige Unterscheidungsmerkmal — standen
+nirgends mehr auf dem ersten Bildschirm, auch nicht in der Seitenbeschreibung
+für Suchmaschinen. Der Gesellschafter hatte ausdrücklich „eine aussagekräftige
+Hook" verlangt.
+
+## Nachbesserung im selben Durchlauf — beide Befunde behoben
+
+Beide Punkte wurden unmittelbar nachbeauftragt und sind im Quelltext belegt:
+
+* **B-1 behoben.** `ShareBar.tsx` nutzt statt des Inline-Styles die neue Klasse
+  `.share__label`; `styles.css` setzt sie auf hellem Grund auf `--gold-text`
+  und unter `.scene--night` auf `--gold`. Damit steigt der Kontrast dieser
+  Zeile von rund 3,1 : 1 auf rund 9,7 : 1. Die übrigen Farben des
+  Nacht-Abschnitts wurden nachgerechnet und liegen zwischen 9,6 : 1 und
+  12,6 : 1.
+* **B-2 behoben.** Der Kopftext lautet jetzt: „Bördesnack24 plant
+  Verkaufsautomaten für Osterweddingen und die Umgebung. 5 % des Nettoerlöses
+  gehen als Spende an gemeinnützige Vereine und Organisationen der Region —
+  wer sie bekommt, entscheidet die Kundschaft." Die Seitenbeschreibung für
+  Suchmaschinen trägt dieselbe Aussage. Kein Auszahlungsrhythmus in beiden.
+
+🟢 **Nachrangig, bewusst so belassen:** Die Füllung des wachsenden Balkens
+(`--gold-deep` auf Creme) erreicht 2,59 : 1 und bleibt damit unter den 3 : 1
+für grafische Elemente. Der Balken ist `aria-hidden` und trägt keine
+Information, die nicht im Text daneben steht; er ist Illustration, nicht
+Datenanzeige. Wird er später zu einer echten Anzeige des erwirtschafteten
+Betrags, ist der Wert nachzuziehen.
+
+## Was damit weiterhin offen ist
+
+* 🔴 **Die Auszahlungsregel** (COMPLIANCE V-012, Befund D-1) — drei
+  widersprüchliche Beschreibungen im System, keine davon umgesetzt. Bis zur
+  Entscheidung nennt die Seite zu Recht keinen Rhythmus.
+* 🟡 **Veröffentlichungssperre** bleibt: Auftragsverarbeitungsvertrag mit dem
+  Hoster (V-012, V-006) und kein Automat in Betrieb (V-010).
+* 🟡 Die Automatenseite trägt die alte Modellaussage und ist beim nächsten
+  Durchlauf anzugleichen (Nachtrag vom 22.09.2026 im dortigen Briefing).

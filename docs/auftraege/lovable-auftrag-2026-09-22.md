@@ -1,9 +1,12 @@
 # Auftragstext für Lovable — 22.09.2026
 
-Dieser Text konnte nicht abgeschickt werden: Das Lovable-Guthaben der
-Arbeitsumgebung ist aufgebraucht. Er liegt hier wortgleich bereit und ist
-entweder von mir zu senden, sobald Guthaben nachgelegt ist, oder von Philipp
-selbst in Lovable einzufügen (Anleitung unten).
+**Erledigt.** Der Auftrag wurde am 23.09.2026 abgesendet, sobald wieder
+Guthaben vorhanden war, und in Commit `505fd40` umgesetzt (4,3 Credits). Die
+Abnahme steht in `docs/abnahme-landingpage-2026-09-20.md`, Durchlauf 4. Der
+Text bleibt als Nachweis dessen stehen, was beauftragt wurde.
+
+Die Anleitung unten wird nicht mehr gebraucht; sie bleibt als Muster für den
+nächsten Fall, in dem das Guthaben nicht reicht.
 
 Das dauerhafte Projektwissen (Sprache, Wortwahl beim Geld, alle
 Scroll-Bausteine und ihre Grenzen) ist bereits im Lovable-Projekt hinterlegt —
