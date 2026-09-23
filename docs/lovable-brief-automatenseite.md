@@ -57,11 +57,18 @@ Karten, Videos, Web-Fonts in vielen Schnitten.
    sagen, statt Funktionen ohne Anmeldung zu versprechen. „anmelden dauert
    eine minute" ist erlaubt, „ohne anmeldung nutzbar" ist falsch.
 
-3. **Was dieser Automat bewirkt.** Der Kern der Seite: Welcher Verein oder
-   welche Einrichtung erhält einen Anteil des Umsatzes dieses Geräts, und
-   wie viel ist im laufenden Jahr zusammengekommen. Mit Bezugsgröße und Stand:
-   „5 % vom Nettoerlös · stand 30.09.2026". Ohne Stand und Bezugsgröße ist die
-   Zahl wertlos und rechtlich angreifbar.
+3. **Was dieser Automat bewirkt.** Der Kern der Seite: wie viel dieses Gerät
+   bisher zum Spendentopf beigetragen hat, und wer den Topf im laufenden
+   Quartal erhält. Mit Bezugsgröße und Stand: „5 % vom Nettoerlös · Stand
+   30.09.2026". Ohne Stand und Bezugsgröße ist die Zahl wertlos und rechtlich
+   angreifbar.
+
+   **Geändert am 22.09.2026 — bitte nicht nach der alten Fassung bauen.** Hier
+   stand bisher, welcher Verein einen Anteil am Umsatz *dieses* Geräts erhält.
+   Das ist überholt: Der Empfänger ist nicht mehr standortgebunden. Alle
+   Automaten zahlen in denselben Topf, und über den Empfänger stimmt die
+   Kundschaft in der App ab (ADR 0007). Die Seite zeigt deshalb den **Beitrag
+   dieses Automaten**, nicht einen eigenen Empfänger.
 4. **Was drin ist.** Eine einfache Liste der Produkte im Automaten. Wenn später
    Bestandsdaten vorliegen, wird daraus eine Verfügbarkeitsanzeige — dafür
    Platz vorsehen, aber noch nichts erfinden.
@@ -140,3 +147,26 @@ Der Entwurf gilt als brauchbar, wenn er diese Fragen mit ja beantwortet:
 * Führt die Seite sichtbar und in einem Schritt in die App?
 * Steht die Adresse der App an genau einer Stelle?
 * Wird **nirgends** behauptet, die App sei ohne Anmeldung nutzbar?
+
+
+## Nachtrag 22.09.2026 — zwei Vorgaben, die diesen Auftrag überholen
+
+Dieses Briefing stammt aus der Zeit vor zwei Entscheidungen. Beide gelten auch
+hier, obwohl der Text oben stellenweise noch anders klingt.
+
+**1. Groß- und Kleinschreibung nach den Regeln der deutschen Rechtschreibung.**
+Die durchgehende Kleinschreibung ist am 21.09.2026 abgeschafft worden. Alle
+Beispieltexte oben, die klein geschrieben sind („stand 30.09.2026", „5 %
+sparen."), sind entsprechend groß zu schreiben. Das gilt auch für Eyebrows,
+Schaltflächen und Navigationspunkte. Die Landingpage ist bereits umgestellt;
+beide Seiten dürfen nicht auseinanderlaufen.
+
+**2. Spende und Standortvergütung sind getrennt** (ADR 0007). Auf dieser Seite
+heißen die 5 % „Spende". Eine Standortvergütung wird auf der Automatenseite
+überhaupt nicht erwähnt — sie ist eine Sache zwischen Bördesnack24 und dem
+Flächengeber und geht die Kundschaft nichts an. Der Empfänger der Spende darf
+nicht als „Empfänger dieses Automaten" dargestellt werden.
+
+**Weiterhin gilt:** Solange kein Automat in Betrieb ist, gibt es keine
+Automatenseite zu veröffentlichen. Der Auftrag wird erst ausgelöst, wenn das
+erste Gerät steht (`docs/COMPLIANCE.md`, V-010).

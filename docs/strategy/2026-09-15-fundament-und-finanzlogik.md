@@ -4,6 +4,49 @@ Stand: 2026-09-15 · Status: **Arbeitsstand, nicht beschlossen** · Keine Umsetz
 Vorgänger: `2026-09-14-stufe-2-produktkern.md`, `2026-09-15-konzeptstand-v1.md`
 Kennzeichnung: **FAKT** · **ANNAHME** · **HYPOTHESE** · **ZU VERIFIZIEREN**
 
+## 0a. Nachtrag 22.09.2026 — die Kernthese ist überholt
+
+**Abschnitte 1, 2 und 9 dieses Dokuments gelten nicht mehr in ihrer bisherigen
+Form.** Der Gesellschafter hat am 22.09.2026 entschieden, dass Standortgeber
+eine marktübliche Vergütung erhalten — Festmiete oder prozentuale
+Umsatzbeteiligung — und die 5 % des Nettoerlöses davon unabhängig als Spende an
+gemeinnützige Empfänger der Region gehen, über die die Kundschaft abstimmt
+(`docs/adr/0007-standortverguetung-und-spendenanteil-getrennt.md`).
+
+Damit entfällt **Fall A** aus Abschnitt 7. Jeder Standort rechnet ab sofort nach
+**Fall B**: Der Anteil ersetzt die Vergütung nicht, er kommt hinzu.
+
+Die Rechnung dieses Dokuments bleibt gültig — nur ist ab sofort die jeweils
+ungünstigere Spalte die maßgebliche. Aus der Aufnahmeschwelle aus Abschnitt 9
+(Amortisation der 7.000 € unter drei Jahren, also wirtschaftlicher
+Deckungsbeitrag ≥ 1.458 €/Jahr) folgen diese Obergrenzen für das, was einem
+Standortgeber überhaupt geboten werden kann:
+
+| Umsatz/Monat | höchste Umsatzbeteiligung | höchste Festmiete |
+|---|---|---|
+| 700 € | **nicht erreichbar** — auch bei 0 % verfehlt der Standort die Schwelle | — |
+| 950 € | ≈ 7,6 % | ≈ 65 €/Monat |
+| 1.200 € | ≈ 16,0 % | ≈ 172 €/Monat |
+
+Abgeleitet aus Tabelle 7.4 und den dortigen Annahmen; die als ZU VERIFIZIEREN
+markierten Positionen sind unverändert unbestätigt.
+
+Zwei Sätze, die dadurch falsch geworden sind und nicht weiterzitiert werden:
+
+* Abschnitt 1: „Der Impact ist damit … belegbar der Ersatz **eines**
+  Kostenblocks: des Standortentgelts." — Er ersetzt nichts mehr.
+* Abschnitt 9: „Der zweckgebundene Anteil bleibt das Akquiseinstrument, ist aber
+  nur vorteilhaft, wenn er eine Vergütung über 5 % ersetzt." — Er ersetzt keine
+  Vergütung mehr und ist damit als Akquiseinstrument entwertet. Die Spende
+  bleibt ein Argument gegenüber Kundschaft und Öffentlichkeit, nicht am
+  Verhandlungstisch.
+
+Der Kreislauf in Abschnitt 2 verliert seinen ersten Pfeil: Der Empfänger ist
+nicht mehr der Standortgeber und hat deshalb kein Eigeninteresse, den Automaten
+bei seinen Mitgliedern zu bewerben. Die daran hängende Hypothese
+„Umsatzsteigerung ohne Werbekosten" ist damit offen und geht weiterhin in keine
+Rechnung ein.
+
 ## 0. Rücknahmen früherer Aussagen
 
 Die verschärfte Deckungsbeitragsrechnung hat vier eigene frühere Zahlen widerlegt.
