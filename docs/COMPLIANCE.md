@@ -788,9 +788,9 @@ Umsatzanteil und die Standortvergütung **zu trennen**:
    prozentuale Umsatzbeteiligung, je Standort vereinbart.
 2. **5 % des Nettoerlöses** jedes Automaten gehen als **Spende** an
    gemeinnützige Vereine und Organisationen der Region. Die Empfänger werden
-   von der Kundschaft in der App vorgeschlagen und gewählt; Auszahlung zum
-   Quartalsende mit öffentlichem Nachweis (Migration `0020_donations_news.sql`,
-   `donations_screen.dart`).
+   von der Kundschaft in der App vorgeschlagen und gewählt (Migration
+   `0020_donations_news.sql`, `donations_screen.dart`). **Wie und wann
+   ausgezahlt wird, ist nicht entschieden — siehe Befund D-1 unten.**
 3. Auf der Landingpage entstehen zwei neue öffentliche Aussagen: die
    Spendenzusage als eigener Abschnitt und ein Bereich, in dem Unternehmen
    **digitale und analoge Werbung** erwerben können sollen (ADR 0005).
@@ -837,6 +837,36 @@ als D3 geführt.
   ersten Werberechnung.
 * [x] **Dokumentarisch:** Briefing der Landingpage (Nachtrag 4) und
   `docs/scrolling-funktionen.md` geschrieben.
+
+### 🔴 Befund D-1 — drei widersprüchliche Auszahlungsregeln, keine davon umgesetzt
+
+Bei der Prüfung der Doku gegen den Code am 22.09.2026 fand sich, dass das
+System die Auszahlung des Spendentopfs an **drei verschiedenen Stellen
+unterschiedlich** beschreibt:
+
+| Quelle | Regel |
+|---|---|
+| `donations_screen.dart`, `_DistributionExplainerCard` | Der Topf wird **zu gleichen Teilen** auf alle aktuell gewählten Empfänger verteilt; ausgezahlt wird erst, wenn **jedes Projekt 500 €** erreicht hat. |
+| Migration `0020_donations_news.sql`, Seed des News-Beitrags „5 % für den guten Zweck" | **Zum Quartalsabschluss** an den **meistgewählten** Zweck, mit veröffentlichtem Nachweis. |
+| Erste Fassung des Landingpage-Auftrags (22.09.2026, vor dem Absenden korrigiert) | „Ausgezahlt wird zum Quartalsende." |
+
+**Keine dieser Regeln ist implementiert.** Die Migrationen enthalten
+Erfassung, Abstimmung und Anzeige, aber keine Auszahlungslogik und keinen
+Auszahlungsbeleg — eine Suche über alle Migrationen nach „payout", „auszahl"
+und „quartal" liefert außerhalb der Loyalty-Funktionen keinen Treffer.
+
+Solange das so ist, darf keine öffentliche Seite einen Auszahlungsrhythmus
+nennen. Der Landingpage-Auftrag wurde vor dem Absenden entsprechend geändert:
+Er nennt Höhe, Bezugsgröße und Empfänger und sagt zu, den Rhythmus vor dem
+ersten Automaten festzulegen.
+
+**Zu entscheiden (Philipp Blume, vor dem ersten Automaten):** eine Regel, und
+zwar nur eine. Die beiden vorhandenen unterscheiden sich erheblich — „alle
+Empfänger zu gleichen Teilen, Schwelle 500 €" bindet Geld über Monate, „einmal
+im Quartal an den meistgewählten Zweck" zahlt planbar aus und ist leichter zu
+belegen. Danach sind App-Text, News-Beitrag und Landingpage auf dieselbe
+Formulierung zu bringen, und die Auszahlung braucht einen Beleg, der die
+GoBD-Anforderungen erfüllt.
 
 ### Verhältnis zu V-002
 

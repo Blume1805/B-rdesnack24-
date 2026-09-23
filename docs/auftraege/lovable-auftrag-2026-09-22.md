@@ -63,8 +63,8 @@ Kommt zwischen den Standortgeber-Abschnitt und den Kundenabschnitt und ersetzt d
 
 - Eyebrow: „Der Anteil"
 - Überschrift: „Fünf Prozent bleiben in der Region."
-- Text: „5 % des Nettoerlöses jedes Automaten spenden wir an gemeinnützige Vereine und Organisationen aus der Umgebung. Nettoerlös heißt: der Umsatz ohne Umsatzsteuer. Wer das Geld bekommt, entscheiden nicht wir — in der App schlägt die Kundschaft Empfänger vor und stimmt darüber ab. Ausgezahlt wird zum Quartalsende, und jede Auszahlung weisen wir öffentlich nach."
-- Vorbehalt, nur solange site.betriebsstatus === "vorbereitung", als caveat-Kasten: „Noch ist kein Automat in Betrieb. Es gibt deshalb bisher nichts auszuzahlen; die erste Abstimmung startet mit dem ersten Automaten."
+- Text: „5 % des Nettoerlöses jedes Automaten spenden wir an gemeinnützige Vereine und Organisationen aus der Umgebung. Nettoerlös heißt: der Umsatz ohne Umsatzsteuer. Wer das Geld bekommt, entscheiden nicht wir — in der App schlägt die Kundschaft Empfänger vor und stimmt darüber ab. Jede Auszahlung weisen wir öffentlich nach."
+- Vorbehalt, nur solange site.betriebsstatus === "vorbereitung", als caveat-Kasten: „Noch ist kein Automat in Betrieb. Es gibt deshalb bisher nichts auszuzahlen; die erste Abstimmung startet mit dem ersten Automaten. Wie oft ausgezahlt wird, legen wir vorher fest und schreiben es hier hin."
 - Bewegung: ShareScene (der Balken wächst beim Scrollen), davor SceneColorTransition aus SceneMotion.tsx als Farbübergang.
 
 Die vier Angaben Höhe, Bezugsgröße, Empfänger und Zeitraum müssen alle im Text stehen bleiben. Bitte nichts davon kürzen — eine Werbeaussage über einen Spendenanteil muss vollständig und nachprüfbar sein.

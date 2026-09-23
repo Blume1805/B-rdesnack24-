@@ -406,15 +406,24 @@ Eigener Abschnitt zwischen Standortgebern und Kundschaft, mit `ShareScene`
 * Text: „5 % des Nettoerlöses jedes Automaten spenden wir an gemeinnützige
   Vereine und Organisationen aus der Umgebung. Nettoerlös heißt: der Umsatz
   ohne Umsatzsteuer. Wer das Geld bekommt, entscheiden nicht wir — in der App
-  schlägt die Kundschaft Empfänger vor und stimmt darüber ab. Ausgezahlt wird
-  zum Quartalsende, und jede Auszahlung weisen wir öffentlich nach."
+  schlägt die Kundschaft Empfänger vor und stimmt darüber ab. Jede Auszahlung
+  weisen wir öffentlich nach."
 * Vorbehalt, solange `betriebsstatus === "vorbereitung"`: „Noch ist kein Automat
   in Betrieb. Es gibt deshalb bisher nichts auszuzahlen; die erste Abstimmung
-  startet mit dem ersten Automaten."
+  startet mit dem ersten Automaten. Wie oft ausgezahlt wird, legen wir vorher
+  fest und schreiben es hier hin."
 
-Die vier Angaben Empfänger, Bezugsgröße, Zeitraum und Höhe stehen bewusst alle
-im Text. Eine Werbeaussage über einen Spendenanteil muss zutreffend, klar und
-nachprüfbar sein (§ 5 UWG; siehe `docs/COMPLIANCE.md`, V-002 Nr. 4).
+Höhe, Bezugsgröße und Empfänger stehen bewusst alle im Text. Eine Werbeaussage
+über einen Spendenanteil muss zutreffend, klar und nachprüfbar sein (§ 5 UWG;
+siehe `docs/COMPLIANCE.md`, V-002 Nr. 4).
+
+**Der Auszahlungsrhythmus fehlt bewusst.** Eine erste Fassung dieses Nachtrags
+schrieb „Ausgezahlt wird zum Quartalsende". Die Prüfung gegen den Code am
+22.09.2026 hat ergeben, dass das nicht belegt ist — im Gegenteil, es stehen
+**drei verschiedene Regeln** im System (siehe `docs/COMPLIANCE.md`, V-012,
+Befund D-1). Solange das nicht entschieden ist, darf die Seite keinen Rhythmus
+nennen; der Vorbehalt sagt stattdessen zu, ihn vor dem ersten Automaten
+festzulegen.
 
 ### Abschnitt 4 — Kundenkachel, Ergänzung
 
