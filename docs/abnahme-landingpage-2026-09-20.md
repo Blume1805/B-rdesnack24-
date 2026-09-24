@@ -258,3 +258,16 @@ Betrags, ist der Wert nachzuziehen.
   Hoster (V-012, V-006) und kein Automat in Betrieb (V-010).
 * 🟡 Die Automatenseite trägt die alte Modellaussage und ist beim nächsten
   Durchlauf anzugleichen (Nachtrag vom 22.09.2026 im dortigen Briefing).
+
+---
+
+# Nachbesserung vom 24.09.2026 — Impressum v4
+
+Umgesetzt und im Code belegt: Aufsichtsbehörde entfernt, Abschnitt
+„Streitbeilegung" samt Link auf die eingestellte OS-Plattform ersetzt durch
+„Verbraucherstreitbeilegung" mit dem Wortlaut der Quelle (die Seite trug
+zuvor die abweichende Formulierung aus den AGB), AGB-Kopfzeile auf
+`v4 · 2026-09`. Hintergrund: COMPLIANCE V-013.
+
+🟡 Rest: Die Seitenbeschreibung (`DESC`) in `impressum.tsx` nennt weiterhin
+„Aufsichtsbehörde". Rein Metadaten, beim nächsten Auftrag mitkorrigieren.

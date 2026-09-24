@@ -957,7 +957,13 @@ Prüfung — sie bleibt, wie für alle Rechtstexte, vor Live-Betrieb vorgesehen.
 * [ ] **Technisch — App:** Die korrigierte Fassung wird erst mit dem nächsten
   Zusammenführen nach `main` ausgeliefert. Bis dahin zeigt die **Live-App**
   weiter den alten Text. — Philipp Blume, beim nächsten Zusammenführen.
-* [ ] **Technisch — Landingpage und Automatenseite:** Impressum `v4`
-  übernehmen, per Lovable-Auftrag vom 24.09.2026.
+* [x] **Technisch — Landingpage und Automatenseite:** Impressum `v4`
+  übernommen, am 24.09.2026 im Quelltext beider Lovable-Projekte geprüft
+  (Landingpage einschließlich Fassungsnummer der AGB; Automatenseite siehe
+  `docs/abnahme-automatenseite-2026-09-24.md`).
+* [ ] Nachrangig: Die Seitenbeschreibung des Landingpage-Impressums nennt noch
+  „Aufsichtsbehörde" als Inhalt. Wird mit dem nächsten Landingpage-Auftrag
+  korrigiert.
 
-**Status: 🟡** — Quelle richtig, zwei Auslieferungen offen.
+**Status: 🟡** — Quelle und beide Webseiten richtig; offen ist allein die
+Auslieferung der App mit dem nächsten Zusammenführen.
