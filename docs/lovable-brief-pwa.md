@@ -165,7 +165,7 @@ Fremdbilder, keine generierten Bilder.
 
 Impressum, Datenschutzerklärung und Nutzungsbedingungen kommen **aus
 `docs/legal/`**, erzeugt aus einer einzigen Quelle. Sie werden nicht neu
-geschrieben und nicht abgeschrieben. Fassung `v3 · 2026-09`.
+geschrieben und nicht abgeschrieben. Fassung `v4 · 2026-09` (bis 24.09.2026: `v3`).
 
 ## KI-Kennzeichnung
 

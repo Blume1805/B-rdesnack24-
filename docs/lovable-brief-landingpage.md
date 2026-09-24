@@ -205,7 +205,7 @@ Feste Grenzen, unabhängig von der Gestaltung:
   sichtbarer Fokus.
 * **Die Rechtstexte müssen mit der App übereinstimmen.** Maßgeblich ist
   `apps/mobile/lib/features/legal/presentation/legal_texts.dart`, Fassung
-  **`v3 · 2026-09`**. Zwei unterschiedliche AGB-Fassungen für dasselbe Angebot
+  **`v4 · 2026-09`** (bis 24.09.2026 `v3`; geändert wurde nur das Impressum, siehe COMPLIANCE V-013). Zwei unterschiedliche AGB-Fassungen für dasselbe Angebot
   sind ein Fehler, kein Versehen. Der Wortlaut liegt exportiert in
   `docs/legal/impressum.md`, `docs/legal/datenschutzerklaerung.md` und
   `docs/legal/nutzungsbedingungen.md` — daraus übernehmen, nicht neu schreiben.
@@ -260,7 +260,7 @@ Feste Grenzen, unabhängig von der Gestaltung:
 * Sagt die Seite die Wahrheit über den Betriebsstand, und hängt das an genau
   einem Schalter?
 * Enthält das ausgelieferte HTML und CSS keine externe Adresse?
-* Stimmen Impressum und AGB wörtlich mit der Fassung `v3 · 2026-09` überein?
+* Stimmen Impressum und AGB wörtlich mit der Fassung `v4 · 2026-09` überein?
 * Hat die Seite eine **eigene** Datenschutzerklärung, die nur beschreibt, was
   auf der Landingpage tatsächlich passiert — und behauptet sie nirgends
   Firebase, Google Maps oder Supabase?

@@ -6,7 +6,7 @@
 
 # Impressum
 
-Fassung v3 · 2026-09
+Fassung v4 · 2026-09
 
 ```
 Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)
@@ -24,15 +24,10 @@ Umsatzsteuer / Steuernummer
 Steuernummer: 102/178/01635
 Umsatzsteuer-Identifikationsnummer nach § 27a UStG: DE 458804058
 
-Zuständige Aufsichtsbehörde für Lebensmittelrecht
-Veterinär- und Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis
-
 Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
 Pia Blume, Philipp Blume, Anschrift wie oben.
 
-Streitbeilegung
-Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-https://ec.europa.eu/consumers/odr
+Verbraucherstreitbeilegung
 Wir sind nicht bereit oder verpflichtet, an einem Streitbeilegungsverfahren vor einer
 Verbraucherschlichtungsstelle teilzunehmen.
 

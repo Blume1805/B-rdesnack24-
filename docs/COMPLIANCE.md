@@ -899,3 +899,65 @@ zugeordnet oder auf der Automatenseite genannt wird. Nr. 4 (UWG) und Nr. 5
 **Status: 🟡** — Die öffentliche Aussage ist zulässig formuliert, solange der
 Vorbehalt steht. Offen bleiben Nachweisführung, steuerliche Einordnung und die
 Bedingungen für Werbeleistungen, jeweils mit Verantwortlichem oben.
+
+---
+
+## V-013 · Impressum: überholter OS-Link und falsche Aufsichtsbehörde (2026-09-24) — Quelle behoben, Auslieferung offen
+
+### Sachverhalt
+
+Beim Vorbereiten des Lovable-Auftrags für die Automatenseite wurde das Impressum
+`v3 · 2026-09` gegen Primärquellen geprüft, bevor es in ein drittes Projekt
+kopiert wird. Zwei Angaben waren fehlerhaft. Das Impressum steht wortgleich in
+der App (live unter `app.boerdesnack24.de`) und auf der Landingpage (nicht
+veröffentlicht).
+
+1. **Hinweis auf die OS-Plattform.** Das Impressum verlinkte
+   `https://ec.europa.eu/consumers/odr`. Die zugrunde liegende Verordnung (EU)
+   Nr. 524/2013 ist durch die Verordnung (EU) 2024/3228 mit Wirkung vom
+   **20.07.2025** aufgehoben, die Plattform eingestellt. Der Hinweis ist seither
+   nicht mehr vorgeschrieben und verweist auf ein nicht mehr bestehendes Angebot;
+   Kammern und Fachanwälte raten, ihn zu entfernen, weil er irreführen kann.
+   Die davon **unabhängige** Erklärung nach § 36 VSBG (keine Teilnahme an
+   Verbraucherschlichtung) bleibt bestehen.
+2. **Zuständige Aufsichtsbehörde.** Angegeben war das „Veterinär- und
+   Lebensmittelüberwachungsamt (VLÜA) Salzlandkreis". Die Anschrift
+   Sülzetal OT Osterweddingen liegt im **Landkreis Börde** (Gemeindeschlüssel
+   15083490, Statistisches Landesamt Sachsen-Anhalt); zuständig wäre das Amt
+   für Gesundheit und Verbraucherschutz des Landkreises Börde in Haldensleben.
+   Die Angabe war also unzutreffend.
+
+### Rechtliche Würdigung
+
+* § 5 Abs. 1 Nr. 3 DDG verlangt die Aufsichtsbehörde nur, wenn die Tätigkeit
+  einer **behördlichen Zulassung** bedarf. Der Verkauf verpackter Lebensmittel
+  über Automaten erfordert nach Art. 6 Abs. 2 VO (EG) Nr. 852/2004 eine
+  Registrierung, keine Zulassung. Die Angabe ist deshalb nicht Pflicht — ist
+  sie aber gemacht, muss sie stimmen; eine falsche Behörde ist eine
+  unzutreffende Angabe (§ 5 UWG). Der Gesellschafter hat am 24.09.2026
+  entschieden, die Zeile **zu streichen**.
+* Den OS-Hinweis zu streichen ist nach Aufhebung der Grundlage
+  unbedenklich; die VSBG-Erklärung bleibt unter der Überschrift
+  „Verbraucherstreitbeilegung".
+
+Quellen, abgerufen am 24.09.2026: EUR-Lex, Verordnung (EU) 2024/3228
+(Eintrag über die Suche bestätigt; der direkte Abruf ist aus der
+Arbeitsumgebung gesperrt); Handwerkskammer Erfurt und IHK Düsseldorf zur
+Aufhebung der Verlinkungspflicht; Statistisches Landesamt Sachsen-Anhalt,
+Gemeinde Sülzetal — Landkreis Börde. Die Kammerseiten und das Landesamt waren
+nur über die Suche, nicht im Volltext abrufbar; das Ergebnis ist in mehreren
+unabhängigen Quellen übereinstimmend. **Vorbehalt:** keine anwaltliche
+Prüfung — sie bleibt, wie für alle Rechtstexte, vor Live-Betrieb vorgesehen.
+
+### Ergebnis / Handlungsbedarf
+
+* [x] **Dokumentarisch:** `legal_texts.dart` korrigiert, Fassung auf
+  **`v4 · 2026-09`** erhöht, `docs/legal/` neu erzeugt,
+  `rechtstexte_export.py --pruefen` ohne Abweichung.
+* [ ] **Technisch — App:** Die korrigierte Fassung wird erst mit dem nächsten
+  Zusammenführen nach `main` ausgeliefert. Bis dahin zeigt die **Live-App**
+  weiter den alten Text. — Philipp Blume, beim nächsten Zusammenführen.
+* [ ] **Technisch — Landingpage und Automatenseite:** Impressum `v4`
+  übernehmen, per Lovable-Auftrag vom 24.09.2026.
+
+**Status: 🟡** — Quelle richtig, zwei Auslieferungen offen.

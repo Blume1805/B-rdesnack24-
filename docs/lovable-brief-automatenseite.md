@@ -58,8 +58,8 @@ Karten, Videos, Web-Fonts in vielen Schnitten.
    eine minute" ist erlaubt, „ohne anmeldung nutzbar" ist falsch.
 
 3. **Was dieser Automat bewirkt.** Der Kern der Seite: wie viel dieses Gerät
-   bisher zum Spendentopf beigetragen hat, und wer den Topf im laufenden
-   Quartal erhält. Mit Bezugsgröße und Stand: „5 % vom Nettoerlös · Stand
+   bisher zum Spendentopf beigetragen hat, und dass die Kundschaft in der App
+   über die Empfänger abstimmt. Mit Bezugsgröße und Stand: „5 % vom Nettoerlös · Stand
    30.09.2026". Ohne Stand und Bezugsgröße ist die Zahl wertlos und rechtlich
    angreifbar.
 
@@ -170,3 +170,10 @@ nicht als „Empfänger dieses Automaten" dargestellt werden.
 **Weiterhin gilt:** Solange kein Automat in Betrieb ist, gibt es keine
 Automatenseite zu veröffentlichen. Der Auftrag wird erst ausgelöst, wenn das
 erste Gerät steht (`docs/COMPLIANCE.md`, V-010).
+
+**Korrektur 24.09.2026:** Die Fassung vom 22.09.2026 sprach in Punkt 3 davon,
+„wer den Topf im laufenden Quartal erhält". Das war vorschnell: Ein
+Auszahlungsrhythmus ist nicht entschieden, und im System stehen drei
+widersprüchliche Regeln (`docs/COMPLIANCE.md`, V-012, Befund D-1). Die Seite
+nennt deshalb weder einen Rhythmus noch einen „aktuellen Empfänger", bis die
+Regel feststeht.

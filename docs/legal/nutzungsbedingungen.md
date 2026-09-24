@@ -6,10 +6,10 @@
 
 # Nutzungsbedingungen
 
-Fassung v3 · 2026-09
+Fassung v4 · 2026-09
 
 ```
-Nutzungsbedingungen (Vorlage · v3 · 2026-09)
+Nutzungsbedingungen (Vorlage · v4 · 2026-09)
 
 1) Wer wir sind und wofür diese Bedingungen gelten
 Betreiberin der Bördesnack24-App ist die Bördesnack24 GbR, Sülldorfer Str. 3A,

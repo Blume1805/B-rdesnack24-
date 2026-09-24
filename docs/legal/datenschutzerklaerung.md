@@ -6,10 +6,10 @@
 
 # Datenschutzerklärung
 
-Fassung v3 · 2026-09
+Fassung v4 · 2026-09
 
 ```
-Datenschutzerklärung (Vorlage · v3 · 2026-09)
+Datenschutzerklärung (Vorlage · v4 · 2026-09)
 
 Verantwortlicher im Sinne von Art. 4 Nr. 7 DSGVO ist die Bördesnack24 GbR (Kontakt siehe
 Impressum).
