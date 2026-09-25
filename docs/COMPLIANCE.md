@@ -954,9 +954,12 @@ Prüfung — sie bleibt, wie für alle Rechtstexte, vor Live-Betrieb vorgesehen.
 * [x] **Dokumentarisch:** `legal_texts.dart` korrigiert, Fassung auf
   **`v4 · 2026-09`** erhöht, `docs/legal/` neu erzeugt,
   `rechtstexte_export.py --pruefen` ohne Abweichung.
-* [ ] **Technisch — App:** Die korrigierte Fassung wird erst mit dem nächsten
-  Zusammenführen nach `main` ausgeliefert. Bis dahin zeigt die **Live-App**
-  weiter den alten Text. — Philipp Blume, beim nächsten Zusammenführen.
+* [x] **Technisch — App:** Am 25.09.2026 auf Freigabe des Gesellschafters nach
+  `main` übernommen (Commit `360dd32`), CI und Auslieferung grün (Läufe 849
+  und 52). **Am ausgelieferten Paket nachgeprüft** (`gh-pages` `1ebc908`,
+  `main.dart.js`): „Verbraucherstreitbeilegung" enthalten, Fassung
+  `v4 · 2026-09`, kein Treffer mehr für `consumers/odr` oder „Salzlandkreis";
+  `CNAME` = `app.boerdesnack24.de`.
 * [x] **Technisch — Landingpage und Automatenseite:** Impressum `v4`
   übernommen, am 24.09.2026 im Quelltext beider Lovable-Projekte geprüft
   (Landingpage einschließlich Fassungsnummer der AGB; Automatenseite siehe
@@ -964,5 +967,6 @@ Prüfung — sie bleibt, wie für alle Rechtstexte, vor Live-Betrieb vorgesehen.
 * [x] Nachrangig: Die Seitenbeschreibung des Landingpage-Impressums nannte noch
   „Aufsichtsbehörde" als Inhalt — am 25.09.2026 korrigiert und im Code geprüft.
 
-**Status: 🟡** — Quelle und beide Webseiten richtig; offen ist allein die
-Auslieferung der App mit dem nächsten Zusammenführen.
+**Status: 🟢** — Quelle, App (live) und beide Webseiten stimmen überein.
+Anwaltliche Prüfung der Rechtstexte bleibt, wie für alle, vor Live-Betrieb
+vorgesehen.
