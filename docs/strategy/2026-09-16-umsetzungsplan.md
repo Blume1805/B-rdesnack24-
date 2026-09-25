@@ -3,6 +3,29 @@
 Stand: 2026-09-16 · Grundlage: `2026-09-15-fundament-und-finanzlogik.md`
 Kennzeichnung: **FAKT** · **ANNAHME** · **ZU VERIFIZIEREN** · **GESPERRT**
 
+> **Nachtrag 25.09.2026 — die Leitfrage ist entschieden.** Der Leitgedanke
+> hängt den Rückbau an die Frage, ob der zweckgebundene Anteil eine
+> Standortvergütung *ersetzt*. Diese Frage hat der Gesellschafter am 22.09.2026
+> beantwortet: **nein** (ADR 0007). Standortgeber erhalten Festmiete oder
+> Umsatzbeteiligung; die 5 % sind davon getrennt und gehen als Spende in einen
+> gemeinsamen Topf, über den die Kundschaft abstimmt.
+>
+> Was daraus für diesen Plan folgt:
+>
+> * **Phase 2 bleibt gesperrt, aber aus einem anderen Grund.** Der Rückbau
+>   sollte greifen, *falls* der Anteil die Vergütung ersetzt und die App damit
+>   überflüssig würde. Das Gegenteil ist eingetreten: Die App trägt jetzt die
+>   Abstimmung über den Spendentopf und ist damit Teil des Modells. Gelöscht
+>   wird nichts. Offen bleibt allein die Sperre für „Dauerrabatt entfernen"
+>   bis zur technischen Auskunft von Automatenland.
+> * **Phase 1 zeigt keinen Empfänger je Automat mehr**, sondern den Beitrag des
+>   Automaten zum gemeinsamen Topf — so am 24.09.2026 in Lovable umgesetzt
+>   (`docs/abnahme-automatenseite-2026-09-24.md`). Die Zeile „welcher Empfänger"
+>   unten ist entsprechend überholt.
+> * Der Auslöser „drei Standortgespräche" behält seinen Wert, fragt aber jetzt
+>   nach der Höhe der Vergütung, nicht mehr danach, ob ein Anteil sie ersetzt.
+>   Die Obergrenzen je Umsatzklasse stehen in ADR 0007.
+
 ## Leitgedanke
 
 Das Konzept enthält zwei Arten von Änderungen, die **nicht** zusammen umgesetzt

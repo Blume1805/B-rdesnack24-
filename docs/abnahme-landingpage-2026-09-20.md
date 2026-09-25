@@ -271,3 +271,6 @@ zuvor die abweichende Formulierung aus den AGB), AGB-Kopfzeile auf
 
 🟡 Rest: Die Seitenbeschreibung (`DESC`) in `impressum.tsx` nennt weiterhin
 „Aufsichtsbehörde". Rein Metadaten, beim nächsten Auftrag mitkorrigieren.
+
+✅ Am 25.09.2026 behoben: `DESC` lautet jetzt „…: Anschrift, Kontakt und
+Steuernummer." Im Code geprüft.
