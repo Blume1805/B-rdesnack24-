@@ -1011,3 +1011,95 @@ Prüfung — sie bleibt, wie für alle Rechtstexte, vor Live-Betrieb vorgesehen.
 **Status: 🟢** — Quelle, App (live) und beide Webseiten stimmen überein.
 Anwaltliche Prüfung der Rechtstexte bleibt, wie für alle, vor Live-Betrieb
 vorgesehen.
+
+---
+
+## V-014 · Erfundene Käufe mit Kassenbon, zwei Sicherheitslücken, Terminal-Anbindung (2026-09-26) — OFFEN
+
+Ausführlich: `docs/audit/AUDIT-2026-09-BACKEND.md`. Hier nur die rechtliche
+Seite.
+
+### Sachverhalt
+
+* **B-1:** `dev_add_demo_purchase` ist seit Juli für jedes angemeldete Konto
+  ausführbar und in der ausgelieferten App als Schaltfläche „Demo-Testkauf"
+  sichtbar. Ein Kauf ohne Lieferung erzeugt echte Treue-Coupons und — über
+  `receipt-pdf` — einen Kassenbon mit Steuernummer, USt-IdNr. und
+  USt-Ausweis, ohne Hinweis auf „Demo". Am Produktions-Nachbau nachgestellt.
+* **B-2:** Netto- und Spendenbetrag eines fremden Kaufs über dessen ID
+  abrufbar (Rollout-Stand in der Produktion unbekannt).
+* **B-3:** Bargeld-Soll je Automat für jedes Konto lesbar (vermutlich nicht
+  ausgerollt).
+* **B-4/B-5:** Terminal-Webhook würde app-geführte Käufe nicht verbuchen
+  (nicht ausgerollt, kein Automat in Betrieb).
+
+### Rechtliche Würdigung
+
+* **DSGVO Art. 33/34:** B-1 berührt nur das eigene Konto des Handelnden. B-2
+  eröffnet Zugriff auf einen personenbezogenen Einzelbetrag, ein
+  tatsächlicher Zugriff ist aber nicht festgestellt; die fremde Kauf-ID ist
+  für Kunden nicht sichtbar. Keine Verletzung des Schutzes personenbezogener
+  Daten festgestellt → **keine Meldung, keine Benachrichtigung.** Neu zu
+  bewerten, falls ein Aufruf mit fremder ID belegt wird.
+* **§ 14c Abs. 2 UStG:** Ein Bon mit gesondertem Steuerausweis ohne
+  Lieferung kann die ausgewiesene Steuer schulden lassen; Berichtigung nur auf
+  Antrag, soweit die Gefährdung des Steueraufkommens beseitigt ist. Nach
+  BFH vom 09.07.2025, XI R 25/23, kann auch eine Kleinbetragsrechnung ohne
+  Empfängerangabe genügen. Empfänger sind überwiegend Verbraucher ohne
+  Vorsteuerabzug → Risiko begrenzt. Ob Demo-Belege heruntergeladen wurden, ist
+  nicht feststellbar (`receipt-pdf` protokolliert nicht).
+* **UWG:** Solange kein Automat Umsatz meldet, rechnet der in der App allen
+  Konten gezeigte Spendentopf Demo-Käufe mit. Liegen in der Produktion
+  Demo-Käufe, ist die Topf-Angabe zu hoch (§ 5 UWG). Abhängig vom Ergebnis
+  von Runbook L, Schritt 3.
+* **GoBD:** Demo-Käufe lösen Bestandsabgänge aus; ohne Automat in Betrieb
+  ohne realen Bestand.
+
+Quellen, Stand 26.09.2026: § 14c UStG und Abschnitt 14c.2 UStAE (Wortlaut über
+die Suche aus gesetze-im-internet.de und der BMF-Umsatzsteuer-Handausgabe
+bestätigt; direkter Abruf aus der Arbeitsumgebung gesperrt); BFH XI R 25/23
+(gelistet auf bundesfinanzhof.de). **Vorbehalt:** keine steuerliche Beratung.
+
+### Legal Impact Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | nicht betroffen | Nein | |
+| AGB | ✓ | nicht betroffen | Nein | |
+| Nutzungsbedingungen | ✓ | Treuestufen setzen echte Käufe voraus; kein Textbedarf, der Code war falsch | Nein | |
+| Datenschutzerklärung | ✓ | keine neue Verarbeitung | Nein | |
+| DSGVO (Art. 5/6/13/17/28/30/32/35) | ✓ | Art. 32: Lücken B-2/B-3 geschlossen (Code); kein meldepflichtiger Vorfall festgestellt | Ja — technisch (Runbook L) | Philipp |
+| Verbraucherrecht | ✓ | nicht betroffen | Nein | |
+| Preisangaben (PAngV) | ✓ | nicht betroffen | Nein | |
+| Steuer & Buchführung | ✓ | § 14c UStG-Risiko aus Demo-Belegen; Bestandsabgänge durch Demo-Käufe | Ja — technisch (erledigt im Code), organisatorisch (Diagnose, ggf. Steuerbüro) | Philipp |
+| Lebensmittelrecht | ✓ | nicht betroffen | Nein | |
+| Jugendschutz | ✓ | nicht betroffen (Altersschranke unverändert, Prüfskript 50/60 grün) | Nein | |
+| Verpackung & Pfand | ✓ | nicht betroffen | Nein | |
+| Barrierefreiheit | ✓ | gesperrter PDF-Knopf trägt Klartext statt nur Grauton | Nein | |
+| EU AI Act | ✓ | nicht betroffen | Nein | |
+| UWG / Werbung | ✓ | Spendentopf-Anzeige ggf. zu hoch, falls Demo-Käufe existieren | Abhängig von Diagnose | Philipp, danach Claude |
+| Urheber-/Markenrecht | ✓ | nicht betroffen | Nein | |
+| Store-Regeln | ✓ | keine Store-App (ADR 0005) | Nein | |
+
+### Ergebnis / Handlungsbedarf
+
+* [x] **Technisch — Datenbank:** Migration `0070`, pgTAP-Test, Migration für die
+  Produktionslinie, Prüfskripte 108/109 — nachgewiesen (Bericht Abschnitt 4.2).
+* [x] **Technisch — App:** Demo-Bereich nur in Entwickler-Builds, Demo-Käufe
+  gekennzeichnet, kein PDF dafür. Ausgeliefert erst nach Freigabe.
+* [x] **Technisch — Edge Function:** `receipt-pdf` verweigert Demo-Käufe (409).
+* [ ] **Technisch — Produktion:** Runbook L — Philipp — **28.09.2026**.
+* [ ] **Organisatorisch:** Diagnose melden; bei Demo-Käufen von Kundenkonten
+  Steuerbüro zu § 14c UStG — Philipp — **15.10.2026**.
+* [ ] **Technisch — Auslieferung:** App (`main`) und `receipt-pdf` — nach
+  Freigabe — **28.09.2026**.
+
+### Optimierungsvorschläge
+
+* `receipt-pdf` protokolliert jede Erzeugung — dann ist die Frage „wurde ein
+  solcher Beleg ausgegeben?" beantwortbar statt geschätzt.
+* Der Spendentopf in der App sollte nur Käufe zählen, die ein Automat gemeldet
+  hat, nie Käufe aus der App selbst.
+
+**Status: 🔴** — im Code behoben und nachgewiesen; in der Produktion offen,
+bis Runbook L ausgeführt und gemeldet ist.

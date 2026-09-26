@@ -1137,3 +1137,235 @@ durch `where not is_published` ersetzen.
 
 Technischer Hintergrund: Migration `0069_demo_news_ausblenden.sql`, Test
 `supabase/tests/demo_news_test.sql`, COMPLIANCE V-012.
+
+
+## Runbook L: Erfundene Käufe und zwei Sicherheitslücken in der Datenbank sperren
+
+**Zeitbedarf:** 10 Minuten.
+
+**Dringlichkeit:** hoch — bitte **heute oder morgen**. Solange es nicht gemacht
+ist, kann jede Person mit einem App-Konto Käufe erfinden und sich damit echte
+Rabatt-Coupons holen.
+
+### Warum das gemacht werden soll
+
+Beim Aufbau der App gab es eine Test-Schaltfläche „Demo-Testkauf". Sie legt
+einen Kauf an, ohne dass etwas gekauft wurde. Diese Schaltfläche ist in der
+echten App auf der Beleg-Seite sichtbar, und die Datenbank führt den Befehl
+für **jedes** Konto aus — auch direkt, ohne App, mit einem beliebigen Betrag.
+
+Das hat drei Folgen:
+
+* **Rabatte ohne Einkauf.** Sieben Klicks reichen für einen 25-%-Coupon.
+* **Kassenbons ohne Verkauf.** Zu jedem erfundenen Kauf erzeugt die App einen
+  Kassenbon als PDF — mit Steuernummer und USt-IdNr. von Bördesnack24 und
+  ausgewiesener Umsatzsteuer. Für Umsatzsteuer auf einem solchen Beleg kann
+  Bördesnack24 haften, obwohl nichts verkauft wurde (§ 14c UStG).
+* **Falsche Zahlen.** Treuepunkte, Spendenanteil und Bestand rechnen die
+  erfundenen Käufe mit.
+
+Dieselbe Änderung schließt zwei weitere Lücken, sofern es die betroffenen
+Funktionen in Deiner Datenbank schon gibt: Man konnte den Betrag eines
+**fremden** Einkaufs abfragen, und man konnte sehen, **wie viel Bargeld** in
+einem Automaten liegt.
+
+### Was dabei passiert — und was nicht
+
+* Die Test-Funktion wird für Kundenkonten **gesperrt, nicht gelöscht.** Sie
+  lässt sich jederzeit wieder freigeben.
+* Die Bargeld-Anzeige bleibt für Dich und Pia sichtbar; nur Kundenkonten
+  sehen nichts mehr.
+* Es werden **keine Daten** verändert oder gelöscht: keine Käufe, keine
+  Coupons, keine Konten.
+* Die App funktioniert danach genauso wie vorher. Drückt jemand noch die alte
+  Test-Schaltfläche, erscheint eine Fehlermeldung. Mit der nächsten
+  App-Version verschwindet die Schaltfläche ganz.
+
+### Schritt für Schritt
+
+1. Öffne `https://supabase.com/dashboard` und melde Dich an.
+2. Klicke auf Dein Projekt (die Adresse endet auf `nnfsyuglkqycwenwxmuw`).
+3. Klicke links in der Leiste auf **SQL Editor** (das Symbol mit den eckigen
+   Klammern).
+4. Klicke oben auf **New query**.
+
+**Schritt 1 — sperren.** Kopiere den folgenden Text vollständig und füge ihn
+in das leere Feld ein. Er ist lang; wichtig ist, dass er von der ersten bis
+zur letzten Zeile komplett drin ist.
+
+   ```sql
+   revoke execute on function public.dev_add_demo_purchase(text, numeric)
+     from public, anon, authenticated;
+
+   do $$
+   begin
+     -- B-2: Netto- und Spendenbetrag eines beliebigen Kaufs über dessen ID.
+     -- Alle Verwender sind SECURITY DEFINER und rufen mit Eigentümerrechten;
+     -- für Kundenkonten ist ein direkter Aufruf nie vorgesehen gewesen.
+     if to_regprocedure('public.purchase_net_items(uuid, numeric)') is not null then
+       revoke execute on function public.purchase_net_items(uuid, numeric)
+         from public, anon, authenticated;
+     end if;
+     if to_regprocedure('public.purchase_donation_for(uuid, numeric)') is not null then
+       revoke execute on function public.purchase_donation_for(uuid, numeric)
+         from public, anon, authenticated;
+     end if;
+
+     -- B-3: Bargeld-Soll je Automat. Verrät jedem Konto, wie viel Bargeld in
+     -- welchem Gerät liegt. Dieselbe Prüfung wie `kassendifferenzen`: nur wer
+     -- `cash.collect` oder `finance.view` trägt, bekommt eine Zeile.
+     if to_regprocedure('public.bar_soll(uuid)') is not null then
+       execute $f$
+         create or replace function public.bar_soll(p_machine uuid)
+          returns table(seit timestamp with time zone, soll_betrag numeric, anzahl_verkaeufe bigint)
+          language sql
+          stable security definer
+          set search_path to 'public', 'app'
+         as $body$
+           with letzte as (
+             select coalesce(max(c.collected_at), '-infinity'::timestamptz) as zeitpunkt
+               from public.cash_collection_logs c
+              where c.machine_id = p_machine
+           )
+           select l.zeitpunkt,
+                  coalesce(sum((e.nutzlast->>'betrag')::numeric), 0),
+                  -- count(e.lfd_nr), nicht count(*): Ohne Treffer liefert der Left Join
+                  -- trotzdem eine Zeile, und count(*) meldete dann einen Verkauf, den
+                  -- es nicht gibt.
+                  count(e.lfd_nr)
+             from letzte l
+             left join public.terminal_ereignisse e
+               on e.art = 'verkauf'
+              and e.zahlart = 'bar'
+              and e.eingegangen_am > l.zeitpunkt
+              and jsonb_typeof(e.nutzlast->'betrag') = 'number'
+              -- Zuordnung über die Kennung, nicht nur über terminal_id: Ein Ereignis,
+              -- dessen Gerät (noch) nicht in `terminals` steht, kommt mit
+              -- terminal_id = null an. Zählte es nicht mit, fehlte sein Betrag im
+              -- Soll — und der Kassensturz wiese einen Überschuss aus, den es nicht
+              -- gibt. Ein zu niedriges Soll ist beim Bargeld der gefährlichere Fehler.
+              and (
+                    e.terminal_id in (
+                      select t.id from public.terminals t where t.machine_id = p_machine
+                    )
+                    or (e.terminal_id is null and e.terminal_kennung in (
+                      select t.terminal_kennung from public.terminals t
+                       where t.machine_id = p_machine
+                    ))
+                  )
+            -- Befund B-3 (26.09.2026): ohne diese Bedingung sah jedes Konto das
+            -- Bargeld im Automaten.
+            where (public.auth_has_permission('cash.collect')
+                   or public.auth_has_permission('finance.view'))
+            group by l.zeitpunkt;
+         $body$
+       $f$;
+       revoke all on function public.bar_soll(uuid) from public, anon;
+       grant execute on function public.bar_soll(uuid) to authenticated;
+     end if;
+   end $$;
+   ```
+
+5. Klicke unten rechts auf **Run**. Unten erscheint „Success. No rows
+   returned". Das ist richtig so.
+
+**Schritt 2 — kontrollieren.** Lösche den Text im Feld (Strg+A, dann
+Entf) und füge diesen ein:
+
+   ```sql
+   select
+     case when has_function_privilege('authenticated',
+                 'public.dev_add_demo_purchase(text,numeric)', 'EXECUTE')
+          then 'OFFEN' else 'gesperrt' end as scheinkauf,
+     case when to_regprocedure('public.purchase_net_items(uuid,numeric)') is null
+          then 'nicht vorhanden'
+          when has_function_privilege('authenticated',
+                 'public.purchase_net_items(uuid,numeric)', 'EXECUTE')
+          then 'OFFEN' else 'gesperrt' end as fremde_kaufbetraege,
+     case when to_regprocedure('public.bar_soll(uuid)') is null
+          then 'nicht vorhanden'
+          when (select prosrc from pg_proc
+                 where oid = to_regprocedure('public.bar_soll(uuid)')) like '%cash.collect%'
+          then 'geschützt' else 'OFFEN' end as bargeld_im_automaten;
+   ```
+
+6. Klicke auf **Run**. Unten erscheint eine Tabelle mit einer Zeile.
+
+**Schritt 3 — zählen.** Lösche den Text wieder und füge diesen ein. Er ändert
+nichts, er zählt nur:
+
+   ```sql
+   -- Zählt, ob und in welchem Umfang in der echten Datenbank Demo-Käufe liegen
+   -- und welche Folgen sie ausgelöst haben (Befund B-1, 26.09.2026).
+   -- Nutzt nur Tabellen, die vor dem 02.09.2026 angelegt wurden und damit
+   -- sicher in der Produktion stehen.
+   select
+     (select count(*) from public.purchases where source = 'demo')
+       as demo_kaeufe,
+     (select count(distinct customer_id) from public.purchases where source = 'demo')
+       as betroffene_konten,
+     (select count(*) from public.purchases pu
+        join public.profiles p on p.id = pu.customer_id
+       where pu.source = 'demo' and p.role = 'customer')
+       as davon_von_kundenkonten,
+     (select coalesce(sum(total_gross), 0) from public.purchases where source = 'demo')
+       as summe_brutto_euro,
+     (select coalesce(max(total_gross), 0) from public.purchases where source = 'demo')
+       as hoechster_einzelbetrag,
+     (select count(*) from public.invoices i
+        join public.purchases pu on pu.id = i.purchase_id
+       where pu.source = 'demo')
+       as rechnungen_zu_demo_kaeufen,
+     (select count(*) from public.loyalty_bonus_grants g
+       where exists (select 1 from public.purchases pu
+                      where pu.customer_id = g.customer_id
+                        and pu.source = 'demo'
+                        and date_trunc('month', pu.purchased_at)::date = g.month_start))
+       as treuestufen_in_monaten_mit_demo,
+     (select min(purchased_at)::date from public.purchases where source = 'demo')
+       as erster_demo_kauf,
+     (select max(purchased_at)::date from public.purchases where source = 'demo')
+       as letzter_demo_kauf;
+   ```
+
+7. Klicke auf **Run** und mache ein Bildschirmfoto der Tabelle.
+
+### So sieht Erfolg aus
+
+Nach Schritt 2 steht in der Tabelle:
+
+| Spalte | richtig ist |
+| --- | --- |
+| `scheinkauf` | `gesperrt` |
+| `fremde_kaufbetraege` | `gesperrt` oder `nicht vorhanden` |
+| `bargeld_im_automaten` | `geschützt` oder `nicht vorhanden` |
+
+Steht irgendwo `OFFEN`, hat Schritt 1 nicht gewirkt — schick mir ein
+Bildschirmfoto.
+
+Schritt 3 zeigt, ob in Deiner Datenbank schon erfundene Käufe liegen. Schick
+mir das Bildschirmfoto:
+
+* **`demo_kaeufe` = 0** — es ist nichts passiert. Der Punkt ist erledigt.
+* **`demo_kaeufe` größer als 0** — dann entscheiden wir gemeinsam, was mit
+  diesen Käufen passiert (ausblenden oder entfernen). Ist zusätzlich
+  **`davon_von_kundenkonten` größer als 0**, frag bitte Dein Steuerbüro, ob zu
+  diesen Käufen ein Kassenbon mit Umsatzsteuer entstanden sein kann und was
+  zu tun ist (Stichwort „§ 14c Abs. 2 UStG, Kassenbon ohne Lieferung").
+
+### Wenn etwas schiefgeht
+
+Erscheint bei Schritt 1 eine rote Fehlermeldung, ist **nichts** verändert
+worden — schick mir ein Bildschirmfoto. Die Schritte 2 und 3 lesen nur und
+können nichts kaputt machen.
+
+Willst Du die Sperre rückgängig machen (zum Beispiel, weil etwas in der App
+nicht mehr geht), genügt diese eine Zeile im SQL Editor:
+
+   ```sql
+   grant execute on function public.dev_add_demo_purchase(text, numeric) to authenticated;
+   ```
+
+Technischer Hintergrund: Migration `0070_scheinkaeufe_sperren.sql`, Test
+`supabase/tests/scheinkauf_test.sql`, Prüfbericht
+`docs/audit/AUDIT-2026-09-BACKEND.md` (Befunde B-1 bis B-3), COMPLIANCE V-014.
