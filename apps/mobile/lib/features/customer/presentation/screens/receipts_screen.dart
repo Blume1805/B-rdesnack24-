@@ -35,7 +35,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   static String _srcLabel(String s) => switch (s) {
         'nayax' || 'machine' => 'Automat',
         'import' => 'Import',
-        'demo' => 'Demo-Kauf · kein Beleg',
+        'demo' => 'Demo-Kauf, kein Beleg',
         _ => 'Manuell',
       };
 

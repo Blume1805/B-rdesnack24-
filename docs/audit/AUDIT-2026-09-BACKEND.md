@@ -254,7 +254,7 @@ Betrieb ist, gibt es keinen realen Bestand, der verfälscht werden könnte.
 | `docs/audit/2026-09-26-backend/109_terminal_webhook_weg.sql` | Prüfskript: der Weg des Webhooks als `service_role`, 5 Urteile |
 | `docs/audit/2026-09-26-backend/pruefwerkzeug-korrekturen.patch` | W-1 bis W-6 |
 | `supabase/functions/receipt-pdf/index.ts` | kein Beleg zu Demo-Käufen (409) |
-| `apps/mobile/…/receipts_screen.dart` | Demo-Bereich nur in Entwickler-Builds; Demo-Käufe als „Demo-Kauf · kein Beleg" gekennzeichnet; PDF-Knopf dafür gesperrt |
+| `apps/mobile/…/receipts_screen.dart` | Demo-Bereich nur in Entwickler-Builds; Demo-Käufe als „Demo-Kauf, kein Beleg" gekennzeichnet; PDF-Knopf dafür gesperrt |
 | `docs/OPERATIONS.md`, Runbook L | Sperre in der Produktion, mit Diagnose und Kontrolle |
 
 ### 4.2 Nachweise

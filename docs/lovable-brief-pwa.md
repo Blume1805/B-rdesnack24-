@@ -2,6 +2,9 @@
 
 Projektanweisung und Abnahmegrundlage. Stand 17.09.2026.
 
+> **Ruht seit 26.09.2026** mit ADR 0004, zurückgestellt durch ADR 0008:
+> Das Redesign findet in der bestehenden App statt.
+
 Grundlage sind ADR 0004 (Kundenfrontend auf React) und ADR 0005 (PWA ohne
 Store, B2B in derselben App).
 

@@ -1,6 +1,6 @@
 # ADR 0004 — Kundenfrontend von Flutter auf React umstellen
 
-- **Status:** Akzeptiert
+- **Status:** Akzeptiert, **zurückgestellt** durch ADR 0008 (2026-09-26)
 - **Datum:** 2026-09-17
 - **Löst ab:** ADR 0002 (Tech-Stack), soweit dort Flutter für den
   Kundenbereich festgelegt ist
