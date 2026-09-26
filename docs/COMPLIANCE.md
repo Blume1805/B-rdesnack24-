@@ -868,6 +868,40 @@ belegen. Danach sind App-Text, News-Beitrag und Landingpage auf dieselbe
 Formulierung zu bringen, und die Auszahlung braucht einen Beleg, der die
 GoBD-Anforderungen erfüllt.
 
+### ✅ Befund D-1 entschieden (26.09.2026)
+
+Der Gesellschafter hat die Auszahlungsregel festgelegt:
+
+> **Einmal jährlich**, nach Abschluss des Kalenderjahres, **zu gleichen Teilen
+> an die drei Zwecke mit den meisten Stimmen**; maßgeblich ist der Stand der
+> Abstimmung am 31. Dezember. Stehen weniger als drei Zwecke zur Wahl, wird
+> unter ihnen geteilt.
+
+Damit sind alle vier Angaben, die § 5 UWG für die Spendenaussage verlangt,
+bestimmt: Höhe (5 %), Bezugsgröße (Nettoerlös), Empfänger (die drei
+Erstplatzierten der Abstimmung) und Zeitraum (jährlich).
+
+Umgesetzt beziehungsweise veranlasst:
+
+* [x] **App:** `donations_screen.dart` erklärt die Regel; die 500-€-Schwelle je
+  Projekt samt Fortschrittsbalken ist entfernt und durch den voraussichtlichen
+  Anteil ersetzt. „gespendet" beim eigenen Beitrag heißt jetzt „für den
+  Spendentopf" — gespendet ist erst, was ausgezahlt wurde.
+* [x] **Datenbank:** Migration `0069` blendet die drei Beispiel-Nachrichten aus
+  0020 aus, darunter die mit der vierteljährlichen Regel und die mit dem
+  erfundenen Automaten am Bahnhof. Test `demo_news_test.sql`, nachweislich
+  nicht leer (schlägt ohne 0069 fehl).
+* [ ] **Produktivdatenbank:** 0069 ist von Hand einzuspielen —
+  `docs/OPERATIONS.md`, Runbook K. Verantwortlich: Philipp Blume, zeitnah.
+* [ ] **Landingpage und Automatenseite:** Regel ergänzen, Lovable-Aufträge vom
+  26.09.2026.
+* [ ] **Organisatorisch:** Der Auszahlungsbeleg je Jahr (Summe, drei Empfänger,
+  Zahlungsnachweise, Zuwendungsbestätigungen) ist bis zum ersten
+  Jahresabschluss mit Automatenbetrieb festzulegen — mit der Steuerberatung.
+* [ ] **Nutzungsbedingungen:** Die Abstimmung und diese Regel sind in Ziffer 6
+  noch nicht beschrieben. Vor Livegang der Abstimmung mit echtem Geld
+  aufzunehmen.
+
 ### Verhältnis zu V-002
 
 V-002 behandelte den **standortgebundenen** Anteil als Ersatz der

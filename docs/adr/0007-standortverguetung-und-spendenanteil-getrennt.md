@@ -111,3 +111,27 @@ Preis. Die Spende bleibt ein Sympathieargument gegenüber Kundschaft und
 gewonnene Klarheit diesen Verlust aufwiegt, entscheidet sich an den ersten drei
 Standortgesprächen — dieselben drei, die in Abschnitt 10 des Strategiedokuments
 ohnehin als fehlende Größe geführt werden.
+
+## Nachtrag 26.09.2026 — Auszahlungsregel
+
+Offen geblieben war, wann und an wen der Topf ausgezahlt wird; im System
+standen drei widersprüchliche Regeln (COMPLIANCE V-012, Befund D-1). Der
+Gesellschafter hat entschieden:
+
+* **Rhythmus:** einmal jährlich, nach Abschluss des Kalenderjahres.
+* **Empfänger:** die drei Zwecke mit den meisten Stimmen am 31. Dezember, zu
+  gleichen Teilen; bei weniger als drei zur Wahl stehenden Zwecken unter
+  diesen.
+
+Die 500-€-Schwelle je Projekt, die die App bis dahin anzeigte, entfällt: Sie
+hätte bei einer festen jährlichen Auszahlung bedeutet, dass Geld über den
+Stichtag hinaus zurückgehalten wird, ohne dass das irgendwo zugesagt war.
+
+## Nachtrag 26.09.2026 — Bild im Kopf der Landingpage
+
+Das fotorealistische Bild eines Automaten mit Schriftzug im Kopf der
+Landingpage bleibt, auf Entscheidung des Gesellschafters. Festgehalten, weil
+dieselbe Seite weiter unten an der KI-Zeichnung sagt, Fotos von Automaten gebe
+es noch nicht; der Hinweis zum Betriebsstand direkt unter dem Kopf („Noch ist
+kein Automat in Betrieb") steht weiterhin und löst den Eindruck eines laufenden
+Betriebs auf.

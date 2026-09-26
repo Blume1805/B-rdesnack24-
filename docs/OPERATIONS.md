@@ -1058,3 +1058,82 @@ durchgelaufen ist. Rund drei Minuten später ist die neue Fassung im Netz.
 
 Siehe `docs/DEPLOYMENT.md` (Go-Live-Checkliste) und die Verifikationsabschnitte in
 `docs/FINANCE.md`, `docs/MANAGEMENT.md`, `docs/CUSTOMER.md`.
+
+## Runbook K: Drei falsche Beispiel-Nachrichten in der App ausblenden
+
+**Zeitbedarf:** 3 Minuten.
+
+**Dringlichkeit:** zeitnah, am besten diese Woche. Solange es nicht gemacht ist,
+kann jede angemeldete Person in der App eine Nachricht lesen, die behauptet, es
+stehe ein neuer Automat am Bahnhof Osterweddingen.
+
+### Warum das gemacht werden soll
+
+Beim Aufbau der App wurden drei Beispiel-Nachrichten in die Datenbank
+geschrieben, damit der Nachrichtenbereich nicht leer aussieht. Sie stehen auch in
+Ihrer echten Datenbank und sind in der App unter „News" sichtbar. Alle drei
+stimmen nicht:
+
+* „Neuer Automat am Bahnhof Osterweddingen" — es ist noch kein Automat in Betrieb.
+* „5 % für den guten Zweck" — sagt „ab sofort" und nennt eine vierteljährliche
+  Auszahlung an einen einzigen Zweck. Beschlossen ist: einmal jährlich, zu
+  gleichen Teilen an die drei Zwecke mit den meisten Stimmen.
+* „Sommer-Sortiment ist da" — ein Sortiment, das es nicht gibt.
+
+Eine falsche Aussage über den eigenen Betrieb gilt als irreführende Werbung und
+ist abmahnfähig.
+
+### Was dabei passiert — und was nicht
+
+Die drei Nachrichten werden **ausgeblendet, nicht gelöscht.** Sie bleiben in der
+Datenbank und lassen sich jederzeit wieder einblenden. Nichts anderes wird
+verändert: keine Kundendaten, keine Käufe, keine anderen Nachrichten.
+
+### Schritt für Schritt
+
+1. Öffnen Sie `https://supabase.com/dashboard` und melden Sie sich an.
+2. Klicken Sie auf Ihr Projekt (die Adresse endet auf `nnfsyuglkqycwenwxmuw`).
+3. Klicken Sie links in der Leiste auf **SQL Editor** (das Symbol mit den
+   eckigen Klammern).
+4. Klicken Sie oben auf **New query**.
+5. Kopieren Sie den folgenden Text vollständig und fügen Sie ihn in das leere
+   Feld ein:
+
+   ```sql
+   update public.news_articles
+      set is_published = false
+    where is_published
+      and (
+            (title = 'Neuer Automat am Bahnhof Osterweddingen'
+             and body like 'Ab sofort findet ihr am Nordausgang des Bahnhofs Osterweddingen%')
+         or (title = '5 % für den guten Zweck'
+             and body like 'Ihr habt uns oft gefragt, ob wir uns sozial engagieren.%')
+         or (title = 'Sommer-Sortiment ist da'
+             and body like 'Wir haben unser Kühlautomaten-Sortiment für den Sommer erweitert%')
+          );
+   ```
+
+6. Klicken Sie unten rechts auf **Run**.
+
+### So sieht Erfolg aus
+
+Unten erscheint „Success" und eine Zahl betroffener Zeilen:
+
+* **3** — alle drei Nachrichten waren sichtbar und sind jetzt ausgeblendet.
+* **0** — sie waren in Ihrer Datenbank gar nicht vorhanden oder schon
+  ausgeblendet. Auch das ist in Ordnung.
+
+Zur Kontrolle können Sie danach in der App den Bereich „News" öffnen: Die drei
+Beiträge sind weg.
+
+Sagen Sie mir die Zahl, dann trage ich den Punkt als erledigt ein.
+
+### Wenn etwas schiefgeht
+
+Erscheint eine rote Fehlermeldung, ist nichts verändert worden — schicken Sie
+mir ein Bildschirmfoto. Wollen Sie die Nachrichten wieder einblenden, geht das
+mit demselben Text, in dem Sie `false` durch `true` und `where is_published`
+durch `where not is_published` ersetzen.
+
+Technischer Hintergrund: Migration `0069_demo_news_ausblenden.sql`, Test
+`supabase/tests/demo_news_test.sql`, COMPLIANCE V-012.
