@@ -886,7 +886,10 @@ Umgesetzt beziehungsweise veranlasst:
 * [x] **App:** `donations_screen.dart` erklärt die Regel; die 500-€-Schwelle je
   Projekt samt Fortschrittsbalken ist entfernt und durch den voraussichtlichen
   Anteil ersetzt. „gespendet" beim eigenen Beitrag heißt jetzt „für den
-  Spendentopf" — gespendet ist erst, was ausgezahlt wurde.
+  Spendentopf" — gespendet ist erst, was ausgezahlt wurde. **Live seit 26.09.2026**
+  (Auslieferung Lauf 53, `gh-pages` `7e61e78`); am ausgelieferten Paket
+  geprüft: neuer Erklärtext enthalten, „Zielwert je Projekt" und „Ziel
+  erreicht" nicht mehr.
 * [x] **Datenbank:** Migration `0069` blendet die drei Beispiel-Nachrichten aus
   0020 aus, darunter die mit der vierteljährlichen Regel und die mit dem
   erfundenen Automaten am Bahnhof. Test `demo_news_test.sql`, nachweislich
