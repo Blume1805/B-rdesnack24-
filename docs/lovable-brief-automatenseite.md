@@ -177,3 +177,8 @@ Auszahlungsrhythmus ist nicht entschieden, und im System stehen drei
 widersprüchliche Regeln (`docs/COMPLIANCE.md`, V-012, Befund D-1). Die Seite
 nennt deshalb weder einen Rhythmus noch einen „aktuellen Empfänger", bis die
 Regel feststeht.
+
+**Nachtrag 26.09.2026:** Die Auszahlungsregel ist entschieden — einmal im Jahr,
+zu gleichen Teilen an die drei Zwecke mit den meisten Stimmen. Die Seite nennt
+sie im Abschnitt „Beitrag zum Spendentopf." Die Korrektur vom 24.09.2026
+(„keinen Rhythmus nennen") ist damit überholt.

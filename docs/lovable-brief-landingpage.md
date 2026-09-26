@@ -467,3 +467,11 @@ B2B-Werbeangebot ist beschlossen und wird Teil derselben App.
 * `docs/COMPLIANCE.md` führt den geänderten Sachverhalt unter V-002 fort.
 * Die Automatenseite („Börde Snack Connect") trägt dieselbe Aussage und ist
   beim nächsten Durchlauf anzugleichen.
+
+## Nachtrag 5 — Auszahlungsregel entschieden (26.09.2026)
+
+Einmal im Jahr, zu gleichen Teilen an die drei Zwecke mit den meisten Stimmen
+(ADR 0007, Nachtrag). Der Anteilsabschnitt nennt die Regel jetzt; der Satz
+„Wie oft ausgezahlt wird, legen wir vorher fest…" im Hinweiskasten ist
+entfallen. Umgesetzt und im Code geprüft am 26.09.2026. Das Bild im Kopf bleibt
+auf Entscheidung des Gesellschafters.

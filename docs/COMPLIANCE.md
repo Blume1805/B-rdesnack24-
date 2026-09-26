@@ -893,8 +893,12 @@ Umgesetzt beziehungsweise veranlasst:
   nicht leer (schlägt ohne 0069 fehl).
 * [ ] **Produktivdatenbank:** 0069 ist von Hand einzuspielen —
   `docs/OPERATIONS.md`, Runbook K. Verantwortlich: Philipp Blume, zeitnah.
-* [ ] **Landingpage und Automatenseite:** Regel ergänzen, Lovable-Aufträge vom
-  26.09.2026.
+* [x] **Landingpage und Automatenseite:** Regel am 26.09.2026 ergänzt und im
+  Code beider Lovable-Projekte geprüft; das Projektwissen beider Projekte trägt
+  die Regel. **Selbstkorrektur:** Das Projektwissen der Landingpage nannte seit
+  dem 22.09.2026 „Auszahlung zum Quartalsende" — von mir eingetragen, bevor die
+  Regel entschieden war. Das erklärt, warum der Agent am 23.09.2026 kurzzeitig
+  „zum Quartalsende" in Kopftext und Beschreibung schrieb. Korrigiert.
 * [ ] **Organisatorisch:** Der Auszahlungsbeleg je Jahr (Summe, drei Empfänger,
   Zahlungsnachweise, Zuwendungsbestätigungen) ist bis zum ersten
   Jahresabschluss mit Automatenbetrieb festzulegen — mit der Steuerberatung.
