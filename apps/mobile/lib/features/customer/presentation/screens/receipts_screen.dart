@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,8 +33,9 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   bool _exporting = false;
 
   static String _srcLabel(String s) => switch (s) {
-        'nayax' => 'Automat',
+        'nayax' || 'machine' => 'Automat',
         'import' => 'Import',
+        'demo' => 'Demo-Kauf · kein Beleg',
         _ => 'Manuell',
       };
 
@@ -245,33 +247,41 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                       const SizedBox(height: AppSpacing.s3),
                     ],
                 ],
-                const SizedBox(height: AppSpacing.s6),
-                // Demo-Testkäufe: erzeugen einen Kauf am Automaten (Live
-                // ersetzt der Nayax-Webhook diesen Trigger). Hier gebündelt
-                // mit der Kaufhistorie/den Belegen.
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.science_outlined,
-                      size: 16,
-                      color: AppColors.brand,
-                    ),
-                    SizedBox(width: 6),
-                    Eyebrow('Demo-Testkauf'),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  'Simuliert einen Kauf am Automaten. Im Live-Betrieb liefert '
-                  'der Nayax-Webhook Datum, Produkt, Menge und Zahlungsart '
-                  'automatisch.',
-                  style: AppTypography.body(
-                    size: 12,
-                    color: AppColors.textMuted,
+                // Demo-Testkäufe nur in Entwickler-Builds (Befund B-1,
+                // 26.09.2026): Die ausgelieferte App zeigte die Schaltflächen
+                // jedem Konto; ein Klick legte einen Kauf mit Treuepunkten und
+                // Kassenbon an. Serverseitig ist die Funktion seit 0070 für
+                // Kundenkonten gesperrt — das hier ist nur Aufräumen, kein
+                // Schutz.
+                if (kDebugMode) ...[
+                  const SizedBox(height: AppSpacing.s6),
+                  // Demo-Testkäufe: erzeugen einen Kauf am Automaten (Live
+                  // ersetzt der Nayax-Webhook diesen Trigger). Hier gebündelt
+                  // mit der Kaufhistorie/den Belegen.
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.science_outlined,
+                        size: 16,
+                        color: AppColors.brand,
+                      ),
+                      SizedBox(width: 6),
+                      Eyebrow('Demo-Testkauf'),
+                    ],
                   ),
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                const _DemoPurchaseButtons(),
+                  const SizedBox(height: AppSpacing.s2),
+                  Text(
+                    'Simuliert einen Kauf am Automaten. Im Live-Betrieb liefert '
+                    'der Nayax-Webhook Datum, Produkt, Menge und Zahlungsart '
+                    'automatisch.',
+                    style: AppTypography.body(
+                      size: 12,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s3),
+                  const _DemoPurchaseButtons(),
+                ],
               ],
             ),
           );
@@ -730,7 +740,11 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: _busy ? null : _openPdf,
+              // Zu einem Demo-Kauf gibt es keinen Beleg: Ein Kassenbon mit
+              // Steuerausweis ohne Lieferung ist steuerlich wirksam
+              // (§ 14c Abs. 2 UStG). receipt-pdf verweigert ihn ebenfalls.
+              onPressed:
+                  _busy || widget.receipt.source == 'demo' ? null : _openPdf,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.ink,
                 foregroundColor: AppColors.brand,
@@ -749,7 +763,11 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                       ),
                     )
                   : const Icon(Icons.picture_as_pdf_outlined, size: 18),
-              label: const Text('Beleg als PDF'),
+              label: Text(
+                widget.receipt.source == 'demo'
+                    ? 'Kein Beleg für Demo-Käufe'
+                    : 'Beleg als PDF',
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

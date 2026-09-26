@@ -45,7 +45,7 @@ class Receipt extends Equatable {
   final String id;
   final DateTime purchasedAt;
   final double totalGross;
-  final String source; // nayax | manual | import
+  final String source; // nayax | manual | import | demo
   final String category; // dominante Kategorie
   final int itemCount;
   final List<ReceiptItem> items;
