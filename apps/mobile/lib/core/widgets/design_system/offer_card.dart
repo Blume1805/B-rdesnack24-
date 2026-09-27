@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/formatters.dart';
+import '../motion/motion.dart';
 import 'brand_marks.dart';
 import 'product_image.dart';
 import 'rating_stars.dart';
@@ -81,7 +82,7 @@ class OfferCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.ink,
+                    color: AppColors.surfaceInverse,
                     borderRadius: BorderRadius.circular(AppRadii.sm),
                   ),
                   child: Text(
@@ -117,10 +118,10 @@ class OfferCard extends StatelessWidget {
                       style: AppTypography.body(
                         size: 12,
                         weight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.onBrand,
                       ).copyWith(
                         decoration: TextDecoration.lineThrough,
-                        decorationColor: AppColors.ink,
+                        decorationColor: AppColors.onBrand,
                         decorationThickness: 2,
                       ),
                     ),
@@ -129,7 +130,7 @@ class OfferCard extends StatelessWidget {
                       style: AppTypography.display(
                         size: 26,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.onBrand,
                       ).copyWith(height: 1),
                     ),
                   ],
@@ -149,7 +150,7 @@ class OfferCard extends StatelessWidget {
                 style: AppTypography.body(
                   size: 15,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -168,7 +169,7 @@ class OfferCard extends StatelessWidget {
       ],
     );
 
-    return SizedBox(
+    final card = SizedBox(
       width: width,
       child: Material(
         color: AppColors.surfaceCard,
@@ -207,6 +208,8 @@ class OfferCard extends StatelessWidget {
         ),
       ),
     );
+    // Muster 05 nur, wenn die Karte selbst etwas öffnet.
+    return onTap == null ? card : Pressable(child: card);
   }
 }
 
@@ -223,7 +226,7 @@ class _DiscountAnchor extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: AppColors.ink, width: 1.5),
+        border: Border.all(color: AppColors.textStrong, width: 1.5),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -235,7 +238,7 @@ class _DiscountAnchor extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ).copyWith(height: 1),
           ),
         ],

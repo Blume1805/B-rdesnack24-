@@ -54,7 +54,7 @@ class KpiCard extends StatelessWidget {
             style: AppTypography.display(
               size: 22,
               weight: FontWeight.w700,
-              color: valueColor ?? AppColors.ink,
+              color: valueColor ?? AppColors.textStrong,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

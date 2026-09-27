@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -23,12 +21,6 @@ import 'core/services/install_prompt.dart';
 /// ok — der Auth-Provider zeigt so oder so das Login-Formular an.
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Runtime-Fetching der Google-Fonts im Web unterdrücken (System-Fallback
-  // rendert sofort; siehe app_typography.dart).
-  if (kIsWeb) {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  }
 
   // Muss so früh wie möglich geschehen: Chromium feuert `beforeinstallprompt`
   // kurz nach dem Laden. Wer sich erst später anhängt, verpasst das Ereignis,

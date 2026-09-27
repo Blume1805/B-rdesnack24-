@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
+import '../motion/motion.dart';
 
-/// Bördesnack24-Karte — Cream-Surface mit subtiler 1 px-Border, 16 px-Radius,
-/// keine Elevation. Optional klickbar mit dezenter Ripple-Animation.
+/// Bördesnack24-Karte: dunkle Kartenfläche mit feinem 1-px-Rand, 16 px Radius,
+/// keine Elevation. Optional klickbar mit Ripple und leichtem Nachgeben
+/// beim Drücken (Muster 05).
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -57,24 +59,35 @@ class AppCard extends StatelessWidget {
     }
 
     if (onTap == null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: DecoratedBox(decoration: decoration, child: stripedContent),
+      // Material statt DecoratedBox: Listenzeilen und Schaltflächen in der
+      // Karte zeichnen ihre Berührungsrückmeldung auf das nächste Material.
+      // Unter einer DecoratedBox wäre sie verdeckt (Befund 26.09.2026).
+      return Material(
+        color: color ?? AppColors.surfaceCard,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: BorderSide(color: borderColor ?? AppColors.borderSubtle),
+        ),
+        child: stripedContent,
       );
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: Ink(
-        decoration: decoration,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(radius),
-          splashColor: AppColors.brandLight.withValues(alpha: 0.35),
-          highlightColor: AppColors.brandLight.withValues(alpha: 0.15),
-          child: ClipRRect(
+    // Muster 05: Karte gibt beim Drücken leicht nach.
+    return Pressable(
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: decoration,
+          child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(radius),
-            child: stripedContent,
+            splashColor: AppColors.brandLight.withValues(alpha: 0.35),
+            highlightColor: AppColors.brandLight.withValues(alpha: 0.15),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: stripedContent,
+            ),
           ),
         ),
       ),

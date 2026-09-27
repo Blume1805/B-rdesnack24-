@@ -159,7 +159,7 @@ class _MapPreview extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.ink,
+                            color: AppColors.surfaceInverse,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -181,7 +181,7 @@ class _MapPreview extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.ink,
+                      color: AppColors.surfaceInverse,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -205,7 +205,7 @@ class _MapPreview extends StatelessWidget {
           label: const Text('In Google Maps öffnen'),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.brand,
-            foregroundColor: AppColors.ink,
+            foregroundColor: AppColors.onBrand,
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
@@ -268,7 +268,7 @@ class _MachineLocationCard extends StatelessWidget {
                         style: AppTypography.body(
                           size: 20,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                     ),
@@ -306,7 +306,7 @@ class _MachineLocationCard extends StatelessWidget {
                         child: FilledButton(
                           onPressed: onOpen,
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.ink,
+                            backgroundColor: AppColors.surfaceInverse,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius:
@@ -336,7 +336,7 @@ class _MachineLocationCard extends StatelessWidget {
                       child: IconButton(
                         tooltip: 'Navigation starten',
                         icon: const Icon(Icons.directions_outlined),
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                         onPressed: onNavigate,
                       ),
                     ),

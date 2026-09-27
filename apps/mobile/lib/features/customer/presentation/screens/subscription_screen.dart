@@ -81,7 +81,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       price: '79,99 €',
       cadence: 'einmalig',
       description: 'Einmal zahlen, für immer nutzen. Limitiert auf 20 Konten. '
-          'Endgültig — kein späterer Wechsel.',
+          'Endgültig, kein späterer Wechsel.',
       badge: 'Founders Edition',
     ),
   ];
@@ -194,7 +194,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Möchtest du das ${plan.title} zu den folgenden Konditionen '
+                  'Möchtest Du das ${plan.title} zu den folgenden Konditionen '
                   'jetzt verbindlich bestellen?',
                   style:
                       AppTypography.body(size: 14, color: AppColors.textDefault)
@@ -218,14 +218,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w700,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ).copyWith(height: 1.5),
                   ),
                 ),
                 if (lifetime) ...[
                   const SizedBox(height: AppSpacing.s3),
                   Text(
-                    'Achtung: Das Lifetime-Abo ist endgültig — ein späterer '
+                    'Achtung: Das Lifetime-Abo ist endgültig, ein späterer '
                     'Wechsel in ein anderes Abo-Modell ist nicht mehr möglich.',
                     style: AppTypography.body(
                       size: 13,
@@ -244,14 +244,16 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     activeColor: AppColors.brand,
-                    checkColor: AppColors.ink,
+                    checkColor: AppColors.textStrong,
                     title: Text(
                       'Ich stimme ausdrücklich zu, dass die Leistung sofort '
                       'bereitgestellt wird, und nehme zur Kenntnis, dass mein '
                       'Widerrufsrecht mit vollständiger Bereitstellung erlischt '
                       '(§ 356 Abs. 5 BGB).',
-                      style: AppTypography.body(size: 12, color: AppColors.ink)
-                          .copyWith(height: 1.35),
+                      style: AppTypography.body(
+                        size: 12,
+                        color: AppColors.textStrong,
+                      ).copyWith(height: 1.35),
                     ),
                   ),
                 ],
@@ -266,12 +268,14 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   activeColor: AppColors.brand,
-                  checkColor: AppColors.ink,
+                  checkColor: AppColors.textStrong,
                   title: Text(
                     'Ich bin mindestens 18 Jahre alt oder handle mit '
                     'Zustimmung meiner gesetzlichen Vertreter.',
-                    style: AppTypography.body(size: 12, color: AppColors.ink)
-                        .copyWith(height: 1.35),
+                    style: AppTypography.body(
+                      size: 12,
+                      color: AppColors.textStrong,
+                    ).copyWith(height: 1.35),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s2),
@@ -356,7 +360,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         case PurchasePhase.error:
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: AppColors.statusCritical,
+              backgroundColor: AppColors.statusCriticalFill,
               content: Text('Kauf fehlgeschlagen: ${outcome.message}'),
             ),
           );
@@ -392,18 +396,18 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Kaufanfrage an deine Eltern gesendet',
+              'Kaufanfrage an Deine Eltern gesendet',
               style: AppTypography.display(
                 size: 19,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Dein ${plan.title} wartet auf die Freigabe deiner Eltern. '
-              'Sobald sie zustimmen, wird dein Zugang beim nächsten App-Start '
-              'automatisch freigeschaltet — du musst nichts weiter tun.',
+              'Dein ${plan.title} wartet auf die Freigabe Deiner Eltern. '
+              'Sobald sie zustimmen, wird Dein Zugang beim nächsten App-Start '
+              'automatisch freigeschaltet: Du musst nichts weiter tun.',
               style:
                   AppTypography.body(size: 13.5, color: AppColors.textDefault)
                       .copyWith(height: 1.45),
@@ -413,7 +417,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
               width: double.infinity,
               child: FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.ink,
+                  backgroundColor: AppColors.surfaceInverse,
                   foregroundColor: AppColors.brand,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -436,7 +440,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     // alle Vorteile ohne Zahlung gelten.
     if (Pricing.benefitsFreeForAll) {
       return Scaffold(
-        backgroundColor: AppColors.surfaceAlt,
+        backgroundColor: AppColors.canvas,
         appBar: const HeroAppBar(title: Text('Deine Vorteile')),
         body: ListView(
           padding: const EdgeInsets.all(AppSpacing.s5),
@@ -454,8 +458,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   const SizedBox(height: AppSpacing.s3),
                   Text(
                     'Die Bördesnack24-App ist kostenlos. Dauerrabatt, Coupons, '
-                    'Treue-Meilensteine und dein Belohnungsstatus gelten für '
-                    'alle angemeldeten Kundinnen und Kunden — ohne Abo, ohne '
+                    'Treue-Meilensteine und Dein Belohnungsstatus gelten für '
+                    'alle angemeldeten Kundinnen und Kunden, ohne Abo, ohne '
                     'Mindestlaufzeit, ohne Kündigung.',
                     style: AppTypography.body(size: 14),
                   ),
@@ -467,7 +471,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       );
     }
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Mein Abo')),
       body: _loading
           ? const Center(
@@ -479,11 +483,11 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                 const Eyebrow('Abo-Modelle'),
                 const SizedBox(height: 2),
                 Text(
-                  'Wähle dein Modell',
+                  'Wähle Dein Modell',
                   style: AppTypography.display(
                     size: 22,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s2),
@@ -506,7 +510,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   style: AppTypography.display(
                     size: 18,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -528,7 +532,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                   style: AppTypography.display(
                     size: 18,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s3),
@@ -658,12 +662,12 @@ class _EmployerBenefitTeaser extends StatelessWidget {
                   style: AppTypography.body(
                     size: 13.5,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Bis zu 50 € im Monat steuerfrei — auch fürs Abo nutzbar.',
+                  'Bis zu 50 € im Monat steuerfrei, auch fürs Abo nutzbar.',
                   style: AppTypography.body(
                     size: 12,
                     color: AppColors.textMuted,
@@ -708,12 +712,12 @@ class _PendingBanner extends StatelessWidget {
                   style: AppTypography.body(
                     size: 13.5,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Kauf gesendet — Freischaltung erfolgt automatisch nach '
+                  'Kauf gesendet: Freischaltung erfolgt automatisch nach '
                   'Zustimmung.',
                   style: AppTypography.body(
                     size: 12,
@@ -763,7 +767,7 @@ class _PlanCard extends StatelessWidget {
                   style: AppTypography.display(
                     size: 16,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -776,11 +780,11 @@ class _PlanCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadii.pill),
                   ),
                   child: Text(
-                    'AKTIV',
+                    'Aktiv',
                     style: AppTypography.body(
                       size: 10,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ).copyWith(letterSpacing: 0.8),
                   ),
                 )
@@ -793,11 +797,11 @@ class _PlanCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadii.pill),
                   ),
                   child: Text(
-                    plan.badge!.toUpperCase(),
+                    plan.badge!,
                     style: AppTypography.body(
                       size: 10,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ).copyWith(letterSpacing: 0.6),
                   ),
                 ),
@@ -812,7 +816,7 @@ class _PlanCard extends StatelessWidget {
                 style: AppTypography.display(
                   size: 28,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
               const SizedBox(width: 6),
@@ -868,7 +872,7 @@ class _PlanCard extends StatelessWidget {
             child: FilledButton(
               onPressed: disabled ? null : onChoose,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.ink,
+                backgroundColor: AppColors.surfaceInverse,
                 foregroundColor: AppColors.brand,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadii.pill),

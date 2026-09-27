@@ -274,3 +274,52 @@ zuvor die abweichende Formulierung aus den AGB), AGB-Kopfzeile auf
 
 ✅ Am 25.09.2026 behoben: `DESC` lautet jetzt „…: Anschrift, Kontakt und
 Steuernummer." Im Code geprüft.
+
+---
+
+# Durchlauf 5 vom 26.09.2026 — Redesign: kurze Hooks, Symbole, „Du" groß, Text-Highlight
+
+Auftrag: `docs/auftraege/lovable-auftrag-2026-09-26-redesign.md`
+(Lovable-Commit `eaaf8ef`, 4,2 Guthabenpunkte). Grundlage: ADR 0008,
+Staffelplan in `docs/scrolling-funktionen.md` Abschnitt 4.
+
+## Geprüft am Code (Lovable-Vorschau ist aus der Arbeitsumgebung gesperrt)
+
+| Punkt | Ergebnis |
+|---|---|
+| A Anrede „Du" groß, keine Gedankenstriche, keine Mittelpunkte | Suchläufe des Agenten: kein kleines „du", Gedankenstriche nur noch in zwei Code-Kommentaren |
+| B Texte je Abschnitt | wortgleich übernommen (index.tsx, Stage.tsx, ShareBar.tsx, Sequence.tsx) |
+| B § 5 UWG, Spende vollständig | Abschnitt „Der Anteil" nennt Höhe, Bezugsgröße, Empfänger und Zeitraum als vier Zeilen mit Symbol |
+| C Text-Highlight (Muster 04) | `TextHighlight` hängt an `subscribe`, kein zweiter Scroll-Handler; ohne Bewegung und bei „Bewegung reduzieren" vollständig gold |
+| D Mikrointeraktion (05) | Anheben beim Überfahren, `scale(.98)` beim Drücken, nur bei `data-motion="on"`; Fokusrahmen unverändert |
+| E Bildplätze (12, gesperrt) | `site.bilder.automat/standort = null`; Zeichnung und KI-Hinweis bleiben, kein Platzhalter |
+| Aktive Muster | 01, 04, 05, 06, 09, 10, 17, 18 = acht; Vorteilsliste als ein Block |
+
+**Kontrast der neuen Farben, nachgerechnet:** Fakten im „Anteil" 9,65:1 und
+15,6:1; nicht eingefärbte Highlight-Wörter 12,64:1; Gold auf Nacht 9,67:1;
+Hinweiskasten auf Nacht 9,13:1; leise Zeile der Vorteile 5,36:1; Symbole in
+Dunkelgold auf Weiß 5,17:1; Ink auf Gold beim Überfahren 5,79:1. Alle über
+4,5:1.
+
+## Was der Agent zusätzlich geändert hat
+
+* Kopfbereich niedriger (`min(86svh, 54rem)` statt `100svh`) und engere
+  Abstände im Standortgeber-Abschnitt. Gestalterisch, keine Aussage.
+* In der App-Skizze von `PhysicalDigital` lautet die Frage jetzt „Wohin geht
+  die Spende?" statt „Wohin sollen 5 % gehen?". Folgt der Regel „Zahl nur mit
+  Bezugsgröße" — übernommen.
+
+## Befund, der eine Entscheidung braucht
+
+🔴 **Im Kopfbild steht der abgelöste Claim.** Auf der Seitenwand des
+gezeichneten Automaten im Markenbild (`boerdesnack24-logo.png`) steht klein
+„Immer da, wenn der Hunger kommt.". Der Claim ist laut Wahrheitsschicht
+(`scrollcraft`, A1) abgelöst und steht auf der Liste der Release-Blocker. Das
+Bild bleibt auf Entscheidung des Gesellschafters; offen ist nur, ob der kleine
+Schriftzug retuschiert wird. Vorgelegt am 26.09.2026.
+
+## Noch offen
+
+* 🟡 Sichtprüfung der Vorschau in 390 und 1280 Pixel Breite durch Philipp
+  (die Vorschauadresse ist aus der Arbeitsumgebung nicht erreichbar).
+* 🟡 Veröffentlichungssperre unverändert (V-006, V-010, V-012).

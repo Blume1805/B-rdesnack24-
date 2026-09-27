@@ -1103,3 +1103,87 @@ bestätigt; direkter Abruf aus der Arbeitsumgebung gesperrt); BFH XI R 25/23
 
 **Status: 🔴** — im Code behoben und nachgewiesen; in der Produktion offen,
 bis Runbook L ausgeführt und gemeldet ist.
+
+## V-015 · App-Redesign: dunkles Design, Bewegung, korrigierte Kundenaussagen (2026-09-27) — OFFEN
+
+Grundlage: ADR 0008, Staffelplan `docs/scrolling-funktionen.md` Abschnitt 4.1.
+
+### Sachverhalt
+
+* Die App ist auf das dunkle Design umgestellt, die Kundschaft wird mit „Du"
+  großgeschrieben angesprochen, Gedankenstriche und Mittelpunkte als Trenner
+  sind aus dem Kundenbereich entfernt. Bewegungsmuster 01, 02, 03, 05, 07, 08,
+  11, 13 und 15 sind umgesetzt.
+* Bei der Durchsicht fielen drei **inhaltlich falsche Kundenaussagen** auf,
+  die mit dem Redesign korrigiert sind:
+  1. Belohnungen und Stufenkacheln sprachen von „Abo-Rabatt", „5 % Abo" und
+     „auf jeden Einkauf im Abo". Seit dem 16.09.2026 gibt es kein Abo mehr
+     (`Pricing.benefitsFreeForAll = true`, V-007); die Landingpage sagt
+     „kostenloses Konto genügt". Jetzt: „Grundrabatt".
+  2. Die Einführung sagte „Du entscheidest über die Empfänger". Tatsächlich
+     stimmt die Kundschaft ab, die drei Zwecke mit den meisten Stimmen
+     bekommen den Topf (ADR 0007). Jetzt: „Du schlägst vor und stimmst mit
+     ab. Einmal im Jahr wird ausgezahlt und öffentlich nachgewiesen."
+  3. Die Spendenseite nannte „5 % Netto-Umsatz" und „Datenquelle: Nayax →
+     Bördesnack24-Backend". Jetzt einheitlich mit der Landingpage „5 % des
+     Nettoerlöses", ohne Technikangabe.
+* Zwei Darstellungsfehler aus dem Bestand behoben: Prozentwerte lagen in den
+  Meilensteinkacheln auf dem Symbol und waren unlesbar; Berührungsrückmeldung
+  von Listenzeilen in Karten war verdeckt.
+
+### Rechtliche Würdigung
+
+* **§ 5 UWG (Irreführung):** Aussage 1 legte nahe, der Rabatt setze ein
+  kostenpflichtiges Abo voraus, das es nicht gibt; Aussage 2 überzeichnete
+  den Einfluss des Einzelnen. Beides betrifft wesentliche Merkmale des
+  Angebots. Mit der Korrektur decken sich App, Landingpage und Code.
+* **BFSG / WCAG 2.1 AA:** Schrift mindestens 4,5:1, Bedienelemente 3:1,
+  gemessen: 54 Farbpaare im Test, jeder Text auf sieben Bildschirmen
+  automatisch gegen seinen tatsächlichen Hintergrund. Alle Bewegungen folgen
+  „Bewegung reduzieren"; kein Inhalt steht nur in einer Animation (Zähler
+  tragen den Endwert in der Semantik, die Stufenreihe bleibt wischbar).
+  Ob das BFSG für die GbR gilt (Kleinstunternehmen), bleibt offen wie in
+  V-006; die Anforderungen werden unabhängig davon erfüllt.
+* **EU AI Act Art. 50:** keine neue algorithmisch erzeugte Kundenausgabe.
+  Die Wochenangebote im neuen Karussell tragen den KI-Chip wie bisher,
+  `AiInfoScreen` bleibt vollständig.
+* **Datenschutz:** keine neue Verarbeitung, keine neuen Datenflüsse. Die
+  Markenschriften liegen jetzt im App-Paket. Vorher war das Nachladen von
+  Google Fonts im Web abgeschaltet (`bootstrap.dart`), die App zeigte dort
+  also eine Systemschrift statt der Markenschrift. Ein Abruf bei Google
+  fand weder vorher noch jetzt statt (geprüft 27.09.2026).
+
+Quellen: Code-Stand 27.09.2026 (`pricing.dart`, `my_gamification_status` in
+Migration 0060 und im Produktions-Nachbau). **Vorbehalt:** keine
+Rechtsberatung.
+
+### Legal Impact Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Impressum | ✓ | nicht betroffen | Nein | |
+| AGB / Nutzungsbedingungen | ✓ | nicht betroffen, Texte in `legal_texts.dart` unverändert | Nein | |
+| Datenschutzerklärung | ✓ | keine neue Verarbeitung; `legal_texts.dart` nennt als Google-Dienst nur Google Maps, das bleibt richtig | Nein | |
+| Verbraucherrecht / PAngV | ✓ | Preise und Rabatte unverändert berechnet | Nein | |
+| UWG / Werbung | ✓ | drei Aussagen korrigiert (oben) | Ja, erledigt im Code | Claude |
+| Barrierefreiheit | ✓ | gemessen, 0 Befunde | Nein | |
+| EU AI Act | ✓ | Kennzeichnung unverändert vollständig | Nein | |
+| Steuer, Lebensmittel, Jugendschutz, Pfand, Store | ✓ | nicht betroffen | Nein | |
+
+### Ergebnis / Handlungsbedarf
+
+* [x] **Technisch:** umgesetzt, `flutter analyze` ohne Befund, `flutter test`
+  144/144, Bildschirmfotos ohne Kontrastbefund.
+* [ ] **Auslieferung:** nach `main` erst mit Freigabe des Gesellschafters —
+  Philipp — **30.09.2026**.
+* [ ] **Entscheidung:** alter Claim „Immer da, wenn der Hunger kommt." im
+  Kopfbild (`brand_hero_wide.webp`) und im Ladebildschirm (`web/index.html`) —
+  Philipp — **30.09.2026**.
+
+### Optimierungsvorschläge
+
+* Die Rabattaussagen stehen an vier Stellen im Code als Text. Eine gemeinsame
+  Quelle (wie `Pricing` für die Zahlen) verhindert, dass App und Landingpage
+  wieder auseinanderlaufen.
+
+**Status: 🔴** — im Code nachgewiesen, Auslieferung und Claim-Entscheidung offen.

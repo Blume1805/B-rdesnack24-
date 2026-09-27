@@ -39,7 +39,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       title: 'Marketing-Mitteilungen',
       description:
           'Rabatt­aktionen, Wochen­angebote und Neuigkeiten per E-Mail und '
-          'Push-Benachrichtigung. Kein Weitergeben deiner Adresse an Dritte.',
+          'Push-Benachrichtigung. Kein Weitergeben Deiner Adresse an Dritte.',
       icon: Icons.campaign_outlined,
     ),
     _ConsentItem(
@@ -47,7 +47,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       title: 'Karten & Standort',
       description:
           'Google-Maps-Karten (Automaten­finder + Navigation) werden erst '
-          'nach deiner Zustimmung geladen. Ohne Zustimmung siehst du '
+          'nach Deiner Zustimmung geladen. Ohne Zustimmung siehst Du '
           'Adressen als Text; kein Karten-Widget wird eingebettet.',
       icon: Icons.map_outlined,
     ),
@@ -144,7 +144,7 @@ class _ConsentCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
-                child: Icon(item.icon, color: AppColors.ink, size: 22),
+                child: Icon(item.icon, color: AppColors.textStrong, size: 22),
               ),
               const SizedBox(width: AppSpacing.s3),
               Expanded(
@@ -153,7 +153,7 @@ class _ConsentCard extends StatelessWidget {
                   style: AppTypography.display(
                     size: 18,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),

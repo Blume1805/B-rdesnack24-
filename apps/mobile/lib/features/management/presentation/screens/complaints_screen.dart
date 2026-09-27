@@ -119,14 +119,14 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
       case 'rejected':
         return (label: 'ABGELEHNT', color: AppColors.statusCritical);
       default:
-        return (label: 'OFFEN', color: AppColors.ink);
+        return (label: 'OFFEN', color: AppColors.textStrong);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Reklamationen')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _future,
@@ -142,7 +142,8 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
                 padding: const EdgeInsets.all(AppSpacing.s5),
                 child: Text(
                   'Fehler: ${snap.error}',
-                  style: AppTypography.body(size: 13, color: AppColors.ink),
+                  style:
+                      AppTypography.body(size: 13, color: AppColors.textStrong),
                 ),
               ),
             );
@@ -212,7 +213,7 @@ class _ComplaintCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(kind.icon, size: 18, color: AppColors.ink),
+              Icon(kind.icon, size: 18, color: AppColors.textStrong),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -220,7 +221,7 @@ class _ComplaintCard extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -253,7 +254,7 @@ class _ComplaintCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.s2),
             Text(
               '„${row['comment']}"',
-              style: AppTypography.body(size: 13, color: AppColors.ink)
+              style: AppTypography.body(size: 13, color: AppColors.textStrong)
                   .copyWith(height: 1.4),
             ),
           ],
@@ -277,7 +278,7 @@ class _ComplaintCard extends StatelessWidget {
                     icon: const Icon(Icons.hourglass_top, size: 16),
                     label: const Text('In Bearbeitung'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.textStrong,
                       side: const BorderSide(color: AppColors.brand),
                     ),
                   ),
@@ -286,7 +287,7 @@ class _ComplaintCard extends StatelessWidget {
                   icon: const Icon(Icons.check, size: 16),
                   label: const Text('Erledigt'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.ink,
+                    backgroundColor: AppColors.surfaceInverse,
                     foregroundColor: AppColors.brand,
                   ),
                 ),

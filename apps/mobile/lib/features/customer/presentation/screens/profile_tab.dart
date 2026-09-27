@@ -37,8 +37,8 @@ class ProfileTab extends ConsumerWidget {
       ),
       children: [
         AppCard(
-          color: AppColors.ink,
-          borderColor: AppColors.ink,
+          color: AppColors.surfaceInverse,
+          borderColor: AppColors.brand,
           child: Row(
             children: [
               Container(
@@ -56,7 +56,7 @@ class ProfileTab extends ConsumerWidget {
                   style: AppTypography.display(
                     size: 20,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ),
                 ),
               ),
@@ -79,7 +79,7 @@ class ProfileTab extends ConsumerWidget {
                       u?.email ?? '',
                       style: AppTypography.body(
                         size: 12,
-                        color: AppColors.brandLight,
+                        color: AppColors.brandPale,
                       ),
                     ),
                   ],
@@ -110,7 +110,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.workspace_premium_outlined,
               title: 'Mein Abo',
-              subtitle: 'Dauerrabatt, Coupons und Meilensteine — kostenlos',
+              subtitle: 'Dauerrabatt, Coupons und Meilensteine, kostenlos',
               iconColor: AppColors.brand,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
@@ -197,7 +197,7 @@ class ProfileTab extends ConsumerWidget {
             _ProfileRow(
               icon: Icons.delete_outline,
               title: 'Konto löschen',
-              subtitle: 'Antrag stellen — wir bearbeiten manuell.',
+              subtitle: 'Antrag stellen, wir bearbeiten manuell.',
               iconColor: AppColors.statusCritical,
               onTap: () => _requestDeletion(context, ref),
             ),
@@ -223,7 +223,7 @@ class ProfileTab extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Wir bearbeiten deinen Antrag manuell. Wegen steuer- und '
+              'Wir bearbeiten Deinen Antrag manuell. Wegen steuer- und '
               'lebensmittelrechtlicher Aufbewahrungspflichten werden Daten '
               'teilweise erst nach Ablauf der Frist gelöscht; bis dahin '
               'werden sie gesperrt oder anonymisiert.',
@@ -574,7 +574,7 @@ class _ProfileRow extends StatelessWidget {
                     style: AppTypography.body(
                       size: 14,
                       weight: FontWeight.w700,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                   if (subtitle != null)

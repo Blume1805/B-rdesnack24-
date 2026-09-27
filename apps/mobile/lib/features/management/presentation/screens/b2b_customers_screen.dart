@@ -67,14 +67,14 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   )
                 : const Icon(Icons.refresh),
             label: const Text('Datensätze laden'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
@@ -85,7 +85,7 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
               icon: const Icon(Icons.download_outlined),
               label: const Text('CSV herunterladen (b2b_customers.csv)'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.textStrong,
                 side: const BorderSide(color: AppColors.brand),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -97,7 +97,7 @@ class _B2bCustomersScreenState extends ConsumerState<B2bCustomersScreen> {
                 _preview!,
                 style: AppTypography.body(
                   size: 12,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ).copyWith(fontFamily: 'monospace'),
               ),
             ),

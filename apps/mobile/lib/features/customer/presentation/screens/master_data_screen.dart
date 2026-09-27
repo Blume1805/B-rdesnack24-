@@ -86,8 +86,8 @@ class MasterDataScreen extends ConsumerWidget {
             ),
             children: [
               Text(
-                'Diese Angaben stammen aus deiner Registrierung und sind '
-                'nicht veränderbar. Nur dein Geschlecht kannst du hier '
+                'Diese Angaben stammen aus Deiner Registrierung und sind '
+                'nicht veränderbar. Nur Dein Geschlecht kannst Du hier '
                 'ergänzen.',
                 style: AppTypography.body(size: 13, color: AppColors.textMuted),
               ),
@@ -113,7 +113,7 @@ class MasterDataScreen extends ConsumerWidget {
                       label: 'Geburtsdatum',
                       value: birthDate != null ? _formatDate(birthDate) : '—',
                       hint:
-                          'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt deiner Wahl.',
+                          'Zum Geburtstag gibt es 50 % Rabatt auf ein Produkt Deiner Wahl.',
                     ),
                     const Divider(height: 1, color: AppColors.borderSubtle),
                     _DataRow(
@@ -127,7 +127,7 @@ class MasterDataScreen extends ConsumerWidget {
                       label: 'Kunde seit',
                       value: registered != null ? _formatDate(registered) : '—',
                       hint:
-                          'Am Jahrestag deiner Anmeldung gibt es ein individuelles Angebot.',
+                          'Am Jahrestag Deiner Anmeldung gibt es ein individuelles Angebot.',
                     ),
                   ],
                 ),
@@ -139,7 +139,7 @@ class MasterDataScreen extends ConsumerWidget {
                     Icon(
                       Icons.business_center_outlined,
                       size: 16,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                     SizedBox(width: 6),
                     Eyebrow('Unternehmensangaben'),
@@ -148,7 +148,7 @@ class MasterDataScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.s2),
                 if (!businessComplete)
                   AppCard(
-                    color: const Color(0xFFFFF3D6),
+                    color: AppColors.statusWarningTint,
                     borderColor: AppColors.statusWarning,
                     child: Row(
                       children: [
@@ -160,12 +160,12 @@ class MasterDataScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             'Anschrift und Steuernummer sind erforderlich, '
-                            'damit wir dir eine ordnungsgemäße Rechnung '
+                            'damit wir Dir eine ordnungsgemäße Rechnung '
                             'nach § 14 UStG ausstellen können.',
                             style: AppTypography.body(
                               size: 12,
                               weight: FontWeight.w700,
-                              color: AppColors.ink,
+                              color: AppColors.textStrong,
                             ),
                           ),
                         ),
@@ -237,7 +237,7 @@ class MasterDataScreen extends ConsumerWidget {
                   label: const Text('Unternehmensangaben bearbeiten'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.brand,
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.onBrand,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
@@ -249,7 +249,7 @@ class MasterDataScreen extends ConsumerWidget {
                 style: AppTypography.body(
                   size: 14,
                   weight: FontWeight.w700,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
               const SizedBox(height: AppSpacing.s3),
@@ -291,7 +291,7 @@ class _DataRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 22, color: AppColors.ink),
+          Icon(icon, size: 22, color: AppColors.textStrong),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
             child: Column(
@@ -311,7 +311,7 @@ class _DataRow extends StatelessWidget {
                   style: AppTypography.body(
                     size: 15,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 if (hint != null) ...[
@@ -321,7 +321,7 @@ class _DataRow extends StatelessWidget {
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w600,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ],
@@ -400,7 +400,7 @@ class _GenderChoice extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ),
@@ -507,7 +507,7 @@ class _EditBusinessDataScreenState
         children: [
           Text(
             'Diese Daten erscheinen auf allen künftigen Rechnungen. '
-            'Firmenname, Anschrift und Steuernummer sind Pflicht — sonst '
+            'Firmenname, Anschrift und Steuernummer sind Pflicht, sonst '
             'kann keine ordnungsgemäße Rechnung ausgestellt werden.',
             style: AppTypography.body(size: 13, color: AppColors.textMuted),
           ),
@@ -569,14 +569,14 @@ class _EditBusinessDataScreenState
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   )
                 : const Icon(Icons.save_outlined),
             label: const Text('Speichern'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
           ),

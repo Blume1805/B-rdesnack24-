@@ -42,7 +42,7 @@ class PriceRow extends StatelessWidget {
           style: AppTypography.display(
             size: size,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
         ),
         const SizedBox(width: AppSpacing.s3),
@@ -92,7 +92,7 @@ class DiscountBadge extends StatelessWidget {
         style: AppTypography.body(
           size: dense ? 12 : 14,
           weight: FontWeight.w800,
-          color: AppColors.ink,
+          color: AppColors.onBrand,
         ).copyWith(letterSpacing: 0.2),
       ),
     );

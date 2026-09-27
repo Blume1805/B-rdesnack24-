@@ -112,9 +112,12 @@ class _NotificationTile extends StatelessWidget {
       case 'offer':
         return (icon: Icons.card_giftcard, color: AppColors.brand);
       case 'invoice':
-        return (icon: Icons.receipt_long_outlined, color: AppColors.ink);
+        return (icon: Icons.receipt_long_outlined, color: AppColors.textStrong);
       default:
-        return (icon: Icons.notifications_outlined, color: AppColors.ink);
+        return (
+          icon: Icons.notifications_outlined,
+          color: AppColors.textStrong
+        );
     }
   }
 
@@ -157,7 +160,7 @@ class _NotificationTile extends StatelessWidget {
                         style: AppTypography.body(
                           size: 14,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -185,7 +188,7 @@ class _NotificationTile extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: const BoxDecoration(
-                      color: AppColors.statusCritical,
+                      color: AppColors.statusCriticalFill,
                       shape: BoxShape.circle,
                     ),
                   ),

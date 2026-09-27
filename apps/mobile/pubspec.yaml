@@ -37,9 +37,6 @@ dependencies:
   # PDF teilen/drucken (Export Finanzauswertung)
   printing: ^5.13.4
 
-  # Design-System-Fonts (Bricolage Grotesque + Hanken Grotesk)
-  google_fonts: ^6.2.1
-
   # Externe Links (Navigation zu Maps, Google-Bewertung)
   url_launcher: ^6.3.1
 
@@ -87,3 +84,24 @@ flutter:
 
   assets:
     - assets/images/
+
+  # Markenschriften, selbst gehostet (ADR 0008). Keine Abfrage bei Google:
+  # Die Dateien kommen von derselben Adresse wie die App. Lizenz: SIL Open
+  # Font License 1.1, Texte unter assets/fonts/OFL-*.txt.
+  fonts:
+    - family: Bricolage Grotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BricolageGrotesque-ExtraBold.ttf
+          weight: 800
+    - family: Hanken Grotesk
+      fonts:
+        - asset: assets/fonts/HankenGrotesk-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/HankenGrotesk-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/HankenGrotesk-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/HankenGrotesk-ExtraBold.ttf
+          weight: 800

@@ -32,20 +32,24 @@ class AiBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.brand,
-        border: Border.all(color: AppColors.ink, width: 1.2),
+        border: Border.all(color: AppColors.onBrand, width: 1.2),
         borderRadius: BorderRadius.circular(AppRadii.pill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.auto_awesome, size: dense ? 12 : 14, color: AppColors.ink),
+          Icon(
+            Icons.auto_awesome,
+            size: dense ? 12 : 14,
+            color: AppColors.onBrand,
+          ),
           const SizedBox(width: 4),
           Text(
             label,
             style: AppTypography.body(
               size: dense ? 10 : 11,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.onBrand,
             ).copyWith(letterSpacing: 0.6),
           ),
           if (onTap != null) ...[
@@ -53,7 +57,7 @@ class AiBadge extends StatelessWidget {
             Icon(
               Icons.info_outline,
               size: dense ? 12 : 13,
-              color: AppColors.ink,
+              color: AppColors.onBrand,
             ),
           ],
         ],

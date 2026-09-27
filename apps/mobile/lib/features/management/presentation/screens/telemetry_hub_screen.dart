@@ -154,7 +154,7 @@ class _HealthCard extends StatelessWidget {
                     style: AppTypography.body(
                       size: 16,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),
@@ -226,7 +226,7 @@ class _Kv extends StatelessWidget {
   final bool warn;
   @override
   Widget build(BuildContext context) {
-    final c = warn ? AppColors.statusCritical : AppColors.ink;
+    final c = warn ? AppColors.statusCritical : AppColors.textStrong;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s3,
@@ -281,7 +281,7 @@ class _ProvidersTab extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openCreateProvider(context, ref),
         backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.ink,
+        foregroundColor: AppColors.onBrand,
         icon: const Icon(Icons.add),
         label: const Text('Provider anlegen'),
       ),
@@ -336,7 +336,7 @@ class _ProviderCard extends StatelessWidget {
                     style: AppTypography.body(
                       size: 15,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),
@@ -518,7 +518,7 @@ class _DevicesTab extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openRegister(context, ref),
         backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.ink,
+        foregroundColor: AppColors.onBrand,
         icon: const Icon(Icons.add),
         label: const Text('Gerät registrieren'),
       ),
@@ -571,7 +571,7 @@ class _DeviceCard extends StatelessWidget {
               style: AppTypography.body(
                 size: 14,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: 2),
@@ -806,7 +806,7 @@ class _SlotList extends ConsumerWidget {
                 label: const Text('Slot anlegen / bearbeiten'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onBrand,
                 ),
               ),
             ),
@@ -876,7 +876,7 @@ class _SlotCard extends StatelessWidget {
                 style: AppTypography.body(
                   size: 14,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ),
@@ -890,7 +890,7 @@ class _SlotCard extends StatelessWidget {
                     style: AppTypography.body(
                       size: 14,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                   Text(
@@ -1123,7 +1123,7 @@ class _EventCard extends StatelessWidget {
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),

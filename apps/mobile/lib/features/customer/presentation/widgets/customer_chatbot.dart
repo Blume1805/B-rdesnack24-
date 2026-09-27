@@ -50,7 +50,7 @@ class ChatbotLauncherFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       shape: const CircleBorder(),
       elevation: 4,
       child: InkWell(
@@ -104,32 +104,32 @@ const _kFaq = <_FaqCategory>[
     ),
     _FaqEntry(
       'Wo finde ich meine Kundennummer?',
-      'Deine Kundennummer findest du im Profil-Tab unter „Stammdaten". '
-          'Sie ist eine fortlaufende, fünfstellige Zahl ab 10001 — '
+      'Deine Kundennummer findest Du im Profil-Tab unter „Stammdaten". '
+          'Sie ist eine fortlaufende, fünfstellige Zahl ab 10001, '
           'kein Buchstaben-Präfix davor.',
       deepLink: 'tab:3@kundennummer',
     ),
     _FaqEntry(
       'Wie deaktiviere ich mein Konto?',
       'Nutze bitte das Kontaktformular im Profil-Tab. Wir bestätigen die '
-          'Deaktivierung binnen 24 Stunden und löschen deine Daten nach '
-          '30 Tagen, falls du nicht widerrufst.',
+          'Deaktivierung binnen 24 Stunden und löschen Deine Daten nach '
+          '30 Tagen, falls Du nicht widerrufst.',
       deepLink: 'tab:3@kontakt',
     ),
   ]),
   _FaqCategory('Vorteile & Preise', Icons.workspace_premium_outlined, [
     _FaqEntry(
       'Was kostet die App?',
-      'Nichts. Die Bördesnack24-App ist kostenlos — es gibt kein Abo, keine '
+      'Nichts. Die Bördesnack24-App ist kostenlos, es gibt kein Abo, keine '
           'Mindestlaufzeit und nichts zu kündigen. Dauerrabatt, Coupons, '
-          'Treue-Meilensteine und dein Status gelten für alle angemeldeten '
+          'Treue-Meilensteine und Dein Status gelten für alle angemeldeten '
           'Kundinnen und Kunden.',
       deepLink: 'abo',
     ),
     _FaqEntry(
       'Was spare ich mit der App?',
-      'Du zahlst an jedem Automaten immer 5 % weniger — den '
-          'App-Preis siehst du direkt an jedem Produkt. Mit deinem Status '
+      'Du zahlst an jedem Automaten immer 5 % weniger, den '
+          'App-Preis siehst Du direkt an jedem Produkt. Mit Deinem Status '
           'wächst der Dauerrabatt lebenslang und ohne Reset: 6 % ab 150 € '
           'Gesamtumsatz (Bronze), 7,5 % ab 500 € (Silber), 10 % ab 1.000 € '
           '(Gold). Obendrauf: Frühstücks- & Feierabend-Deals sowie Tages- '
@@ -139,12 +139,12 @@ const _kFaq = <_FaqCategory>[
     ),
     _FaqEntry(
       'Wie viel spare ich im Jahr?',
-      'Das hängt davon ab, wie oft du kaufst. Vorsichtig gerechnet (nur der '
+      'Das hängt davon ab, wie oft Du kaufst. Vorsichtig gerechnet (nur der '
           '5-%-Vorteil, ohne einen einzigen Coupon) sind es bei 20 € Einkauf '
           'im Monat rund 12 € im Jahr. Bei normaler Nutzung von Deals und '
           'Coupons (zusammen ca. 9,4 % Ersparnis) rund 23 €. Der '
           'Status-Rabatt kommt noch obendrauf. Da die App nichts kostet, ist '
-          'das keine Rechnung mit Gegenposten — die Ersparnis beginnt beim '
+          'das keine Rechnung mit Gegenposten, die Ersparnis beginnt beim '
           'ersten Kauf. Die komplette Beispielrechnung mit allen Annahmen:',
       deepLink: 'abo-rechnung',
     ),
@@ -160,9 +160,9 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Muss ich etwas kündigen?',
       'Nein. Die App ist kostenlos, es gibt keinen laufenden Vertrag und '
-          'keine Laufzeit. Wenn du trotzdem eine Erklärung abgeben oder dein '
-          'Konto beenden möchtest, findest du den Kündigungsbutton '
-          '„Verträge hier kündigen" — ohne Hürden, auch ohne Login '
+          'keine Laufzeit. Wenn Du trotzdem eine Erklärung abgeben oder Dein '
+          'Konto beenden möchtest, findest Du den Kündigungsbutton '
+          '„Verträge hier kündigen", ohne Hürden, auch ohne Login '
           'erreichbar. Du bekommst sofort eine Bestätigung mit Datum und '
           'Uhrzeit (§ 312k BGB).',
       deepLink: 'route:${AppRoutes.cancellation}',
@@ -173,39 +173,39 @@ const _kFaq = <_FaqCategory>[
       'Kann ich mehrere Coupons kombinieren?',
       'Nein. Coupons und Aktionen sind nicht miteinander kombinierbar. Sind '
           'für ein Produkt mehrere Coupons aktiviert, wählt der Automat '
-          'automatisch den günstigsten Preis für dich.',
+          'automatisch den günstigsten Preis für Dich.',
     ),
     _FaqEntry(
       'Wo sehe ich meine aktivierten Coupons?',
-      'Alle aktivierten Coupons findest du in deiner Kundenkarte.',
+      'Alle aktivierten Coupons findest Du in Deiner Kundenkarte.',
       deepLink: 'qr',
     ),
     _FaqEntry(
       'Wie löse ich einen Coupon am Automaten ein?',
-      'Halte deine Kundenkarte (QR-Code) vor den Scanner des Automaten. '
-          'Der günstigste aktivierte Coupon für dein gewähltes Produkt wird '
+      'Halte Deine Kundenkarte (QR-Code) vor den Scanner des Automaten. '
+          'Der günstigste aktivierte Coupon für Dein gewähltes Produkt wird '
           'automatisch verrechnet.',
       deepLink: 'qr',
     ),
     _FaqEntry(
       'Warum sind meine Coupons plötzlich weg?',
-      'Coupons haben ein Ablaufdatum, das dir auf jeder Karte angezeigt wird. '
+      'Coupons haben ein Ablaufdatum, das Dir auf jeder Karte angezeigt wird. '
           'Nach Einlösung oder nach Fristablauf verschwinden sie automatisch. '
-          'Aktuelle Wochenangebote siehst du im Angebote-Tab.',
+          'Aktuelle Wochenangebote siehst Du im Angebote-Tab.',
       deepLink: 'tab:0@wochenangebote',
     ),
     _FaqEntry(
       'Was sind Frühstücks- und Feierabend-Deals?',
       'Wechselnde Aktionen für morgens und für den Feierabend: zusätzlich '
-          '10 % Rabatt auf deinen App-Preis — zusammen also 14,5 % unter dem '
+          '10 % Rabatt auf Deinen App-Preis, zusammen also 14,5 % unter dem '
           'Automatenpreis. Du findest sie ganz oben im Angebote-Tab.',
       deepLink: 'tab:0',
     ),
     _FaqEntry(
       'Funktionieren Coupons auch ohne Internet?',
       'Ja. Deine aktivierten Coupons und Einlöse-Codes werden auf dem Gerät '
-          'gespeichert. Hast du am Automaten keinen Empfang, zeigt die App '
-          'den zuletzt gespeicherten Stand mit einem Offline-Hinweis an — '
+          'gespeichert. Hast Du am Automaten keinen Empfang, zeigt die App '
+          'den zuletzt gespeicherten Stand mit einem Offline-Hinweis an, '
           'einlösen funktioniert trotzdem.',
       deepLink: 'qr',
     ),
@@ -213,7 +213,7 @@ const _kFaq = <_FaqCategory>[
   _FaqCategory('Automaten & Standorte', Icons.place_outlined, [
     _FaqEntry(
       'Wie finde ich den nächsten Automaten?',
-      'Im Automaten-Tab siehst du die Karte mit allen Standorten in deiner '
+      'Im Automaten-Tab siehst Du die Karte mit allen Standorten in Deiner '
           'Nähe. Tap auf einen Marker öffnet die Navigation.',
       deepLink: 'tab:1',
     ),
@@ -222,13 +222,13 @@ const _kFaq = <_FaqCategory>[
       'Wir aktualisieren die Bestände über die Automaten-Telemetrie mehrmals '
           'täglich. Ist ein Produkt „ausverkauft" markiert, wird beim nächsten '
           'Auffüllen (i. d. R. binnen 48 h) wieder befüllt. Aktuelle Bestände '
-          'pro Automat siehst du im Automaten-Tab.',
+          'pro Automat siehst Du im Automaten-Tab.',
       deepLink: 'tab:1',
     ),
     _FaqEntry(
       'Wo sehe ich die Preise der Produkte?',
-      'Im Automaten-Tab bei jedem Produkt: der Automatenpreis und — mit '
-          'Abo — dein App-Preis (−5 %). Auf der Produktdetailseite stehen '
+      'Im Automaten-Tab bei jedem Produkt: der Automatenpreis und, mit '
+          'Abo: Dein App-Preis (−5 %). Auf der Produktdetailseite stehen '
           'zusätzlich Nährwerte und Allergene.',
       deepLink: 'tab:1',
     ),
@@ -236,7 +236,7 @@ const _kFaq = <_FaqCategory>[
       'Gibt es auch Kaffee und Heißgetränke?',
       'Ja, am Heißgetränkeautomaten: Espresso (doppelt), Cappuccino, '
           'Latte Macchiato, Café Crema, Tee und heiße Schokolade. Auch hier '
-          'gilt dein App-Preis mit 5 % Rabatt — und Deals sparen weitere '
+          'gilt Dein App-Preis mit 5 % Rabatt, und Deals sparen weitere '
           '10 %.',
       deepLink: 'tab:1',
     ),
@@ -244,16 +244,16 @@ const _kFaq = <_FaqCategory>[
   _FaqCategory('Loyalty-Punkte', Icons.stars_rounded, [
     _FaqEntry(
       'Wie sammle ich Punkte?',
-      'Für jeden Kauf am Automaten (Karten-QR gescannt) bekommst du 1 Punkt '
-          'pro Cent Umsatz — 1 € Einkauf = 100 Punkte. Sonderaktionen '
-          'können deinen Bonus zusätzlich erhöhen. Deinen aktuellen Punkte-'
-          'stand siehst du im Angebote-Tab.',
+      'Für jeden Kauf am Automaten (Karten-QR gescannt) bekommst Du 1 Punkt '
+          'pro Cent Umsatz, 1 € Einkauf = 100 Punkte. Sonderaktionen '
+          'können Deinen Bonus zusätzlich erhöhen. Deinen aktuellen Punkte-'
+          'stand siehst Du im Angebote-Tab.',
       deepLink: 'tab:0@punkte',
     ),
     _FaqEntry(
       'Wann werden meine Punkte zurückgesetzt?',
-      'Du hast jeden Monat Zeit, deine Punkte zu sammeln. Am 1. des '
-          'Folgemonats werden die Punkte zurückgesetzt und du beginnst '
+      'Du hast jeden Monat Zeit, Deine Punkte zu sammeln. Am 1. des '
+          'Folgemonats werden die Punkte zurückgesetzt und Du beginnst '
           'von vorn. Bereits erreichte Meilenstein-Boni (Coupons) bleiben '
           'aber trotzdem noch 2 Wochen nach Erreichen des Meilensteins '
           'einlösbar.',
@@ -262,9 +262,9 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Welche Meilensteine gibt es?',
       'Es gibt vier Meilensteine: 500 Punkte = 5 % Rabatt, 1200 Punkte = 10 %, '
-          '2000 Punkte = 15 %, 3000 Punkte = 25 %. Sobald du einen Meilenstein '
-          'erreichst, ist dein Rabatt-Coupon 2 Wochen lang einlösbar — auch '
-          'wenn zwischenzeitlich der Monatswechsel deinen Punktestand '
+          '2000 Punkte = 15 %, 3000 Punkte = 25 %. Sobald Du einen Meilenstein '
+          'erreichst, ist Dein Rabatt-Coupon 2 Wochen lang einlösbar, auch '
+          'wenn zwischenzeitlich der Monatswechsel Deinen Punktestand '
           'zurücksetzt. Deine Meilenstein-Übersicht:',
       deepLink: 'tab:0@punkte',
     ),
@@ -273,28 +273,28 @@ const _kFaq = <_FaqCategory>[
     _FaqEntry(
       'Welche Daten speichert ihr über mich?',
       'Wir speichern nur, was für den Betrieb nötig ist: Kaufhistorie, '
-          'Kundennummer, freiwillig eingetragene Stammdaten. Details findest du '
+          'Kundennummer, freiwillig eingetragene Stammdaten. Details findest Du '
           'in der Datenschutzerklärung.',
       deepLink: 'route:${AppRoutes.privacy}',
     ),
     _FaqEntry(
       'Wo lese ich die Datenschutzerklärung?',
-      'Direkt hier — oder im Profil-Tab unter „Rechtliches".',
+      'Direkt hier, oder im Profil-Tab unter „Rechtliches".',
       deepLink: 'route:${AppRoutes.privacy}',
     ),
     _FaqEntry(
       'Nutzt ihr KI, um mir Angebote zu zeigen?',
-      'Ja — ein regel-basierter Empfehlungs-Generator. Alle KI-gekennzeichneten '
+      'Ja, ein regel-basierter Empfehlungs-Generator. Alle KI-gekennzeichneten '
           'Sections tragen einen goldenen „KI"-Chip. Details, Widerspruch und '
-          'Beschwerde-Wege findest du auf der KI-Info-Seite.',
+          'Beschwerde-Wege findest Du auf der KI-Info-Seite.',
       deepLink: 'ai-info',
     ),
     _FaqEntry(
       'Wie widerspreche ich personalisierten Angeboten?',
-      'Auf der KI-Info-Seite (über jedes „KI"-Chip erreichbar) findest du '
+      'Auf der KI-Info-Seite (über jedes „KI"-Chip erreichbar) findest Du '
           'den genauen Widerspruchs-Weg. Du kannst uns auch per Kontakt-'
-          'formular schreiben — wir deaktivieren dann alle personalisierten '
-          'Vorschläge für dich.',
+          'formular schreiben, wir deaktivieren dann alle personalisierten '
+          'Vorschläge für Dich.',
       deepLink: 'ai-info',
     ),
   ]),
@@ -323,7 +323,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
     const _ChatbotMsg(
       role: 'bot',
       text: 'Hallo! Ich bin der automatische Chat-Assistent von '
-          'Bördesnack24. Wobei kann ich dir helfen? Wähle unten ein Thema.',
+          'Bördesnack24. Wobei kann ich Dir helfen? Wähle unten ein Thema.',
     ),
   ];
   _FaqCategory? _openCategory;
@@ -342,7 +342,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       _log.add(
         _ChatbotMsg(
           role: 'bot',
-          text: 'Welche Frage zu „${c.title}" hast du? Tippe auf eine der '
+          text: 'Welche Frage zu „${c.title}" hast Du? Tippe auf eine der '
               'folgenden Fragen.',
         ),
       );
@@ -364,7 +364,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       _log.add(
         const _ChatbotMsg(
           role: 'bot',
-          text: 'Alles klar. Womit kann ich dir sonst helfen?',
+          text: 'Alles klar. Womit kann ich Dir sonst helfen?',
         ),
       );
     });
@@ -448,7 +448,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
     try {
       await repo.submitContact(
         category: 'frage',
-        subject: 'Chat-Assistent — Anfrage konnte nicht abschließend '
+        subject: 'Chat-Assistent: Anfrage konnte nicht abschließend '
             'beantwortet werden',
         body: 'Chatverlauf:\n\n$transcript',
       );
@@ -457,7 +457,7 @@ class _ChatbotSheetState extends ConsumerState<_ChatbotSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Wir haben deine Anfrage an den Support weitergeleitet und '
+            'Wir haben Deine Anfrage an den Support weitergeleitet und '
             'melden uns per E-Mail.',
           ),
         ),
@@ -580,8 +580,11 @@ class _Header extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.pill),
             ),
             alignment: Alignment.center,
-            child:
-                const Icon(Icons.support_agent, color: AppColors.ink, size: 22),
+            child: const Icon(
+              Icons.support_agent,
+              color: AppColors.onBrand,
+              size: 22,
+            ),
           ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
@@ -594,7 +597,7 @@ class _Header extends StatelessWidget {
                   style: AppTypography.display(
                     size: 16,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 Row(
@@ -608,7 +611,7 @@ class _Header extends StatelessWidget {
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        'Regelbasiert — keine KI',
+                        'Regelbasiert, keine KI',
                         style: AppTypography.body(
                           size: 11,
                           weight: FontWeight.w600,
@@ -666,7 +669,7 @@ class _Bubble extends StatelessWidget {
                 style: AppTypography.body(
                   size: 15,
                   weight: FontWeight.w600,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ).copyWith(height: 1.45),
               ),
               if (msg.deepLink != null) ...[
@@ -679,7 +682,7 @@ class _Bubble extends StatelessWidget {
                       const Icon(
                         Icons.touch_app_outlined,
                         size: 16,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -687,10 +690,10 @@ class _Bubble extends StatelessWidget {
                         style: AppTypography.body(
                           size: 15,
                           weight: FontWeight.w900,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ).copyWith(
                           decoration: TextDecoration.underline,
-                          decorationColor: AppColors.ink,
+                          decorationColor: AppColors.textStrong,
                           decorationThickness: 2,
                         ),
                       ),
@@ -721,7 +724,7 @@ class _CategoryChips extends StatelessWidget {
           children: [
             for (final c in _kFaq)
               ActionChip(
-                avatar: Icon(c.icon, size: 16, color: AppColors.ink),
+                avatar: Icon(c.icon, size: 16, color: AppColors.textStrong),
                 label: Text(c.title),
                 onPressed: () => onPick(c),
                 backgroundColor: AppColors.surfaceAlt,
@@ -729,7 +732,7 @@ class _CategoryChips extends StatelessWidget {
                 labelStyle: AppTypography.body(
                   size: 12,
                   weight: FontWeight.w700,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
           ],
@@ -764,7 +767,7 @@ class _QuestionChips extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () => onPick(e),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.textStrong,
                 alignment: Alignment.centerLeft,
                 side: const BorderSide(color: AppColors.borderSubtle),
                 padding: const EdgeInsets.symmetric(
@@ -777,7 +780,7 @@ class _QuestionChips extends StatelessWidget {
                 style: AppTypography.body(
                   size: 12,
                   weight: FontWeight.w700,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ),

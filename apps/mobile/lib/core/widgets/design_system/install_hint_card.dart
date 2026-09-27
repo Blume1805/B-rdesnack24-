@@ -51,7 +51,7 @@ class _InstallHintCardState extends State<InstallHintCard> {
     if (_method == InstallMethod.none) return const SizedBox.shrink();
 
     return AppCard(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       borderColor: AppColors.brand,
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Column(
@@ -101,7 +101,7 @@ class _InstallHintCardState extends State<InstallHintCard> {
                     'Deinen Startbildschirm.',
             style: AppTypography.body(
               size: 12.5,
-              color: AppColors.brandLight,
+              color: AppColors.brandPale,
             ).copyWith(height: 1.45),
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -111,7 +111,7 @@ class _InstallHintCardState extends State<InstallHintCard> {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onBrand,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -124,7 +124,7 @@ class _InstallHintCardState extends State<InstallHintCard> {
                         width: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.ink,
+                          color: AppColors.onBrand,
                         ),
                       )
                     : const Text('Auf den Startbildschirm'),
@@ -163,7 +163,7 @@ class _IosSteps extends StatelessWidget {
                   style: AppTypography.body(
                     size: 10,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ),
                 ),
               ),

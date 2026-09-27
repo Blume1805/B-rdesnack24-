@@ -29,13 +29,13 @@ void main() {
     // Beide Szenario-Kacheln UND die Tabellen-Spalten sind da — das
     // schlägt fehl, wenn die Seite (wie beim Stretch-Row-Bug) nach dem
     // Intro abbricht.
-    expect(find.text('KONSERVATIV'), findsWidgets);
-    expect(find.text('NORMAL'), findsWidgets);
+    expect(find.text('Konservativ'), findsWidgets);
+    expect(find.text('Normal'), findsWidgets);
 
     // Ersparnis-Tabelle statt Break-even: monatlicher Einkauf je Zeile.
     // textContaining, weil Formatters.euro ein geschütztes Leerzeichen
     // vor das €-Zeichen setzt (de_DE) — ein exakter Vergleich wäre spröde.
-    expect(find.text('EINKAUF'), findsOneWidget);
+    expect(find.text('Einkauf'), findsOneWidget);
     expect(find.textContaining('20,00'), findsWidgets);
     expect(find.textContaining('240,00'), findsWidgets);
 
@@ -66,7 +66,7 @@ void main() {
 
     expect(find.text('Vorteile ansehen'), findsNothing);
     expect(
-      find.text('Deine Vorteile sind aktiv — kostenlos, dauerhaft.'),
+      find.text('Deine Vorteile sind aktiv. Kostenlos und dauerhaft.'),
       findsOneWidget,
     );
   });

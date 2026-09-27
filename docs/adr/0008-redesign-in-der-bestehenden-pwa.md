@@ -101,3 +101,23 @@ vorliegen, wird das Ergebnis dagegen abgeglichen.
 * Entwürfe entstehen im Code und werden mit Bildschirmfotos abgenommen, nicht
   vorab in Lovable.
 * Das Briefing `docs/lovable-brief-pwa.md` (React-Neubau) ruht mit ADR 0004.
+
+## Umsetzungsstand (27.09.2026)
+
+* **Farben:** semantische Rollen in `app_tokens.dart`, `AppTheme.dark()`,
+  App fest im dunklen Modus. Seitengrund `#151716` auch im Ladebildschirm,
+  in der Browserleiste und im Manifest.
+* **Schrift:** Bricolage Grotesque (Überschriften) und Hanken Grotesk
+  (Text) liegen im App-Paket (`assets/fonts/`, Lizenz OFL). Das Paket
+  `google_fonts` ist entfernt.
+* **Sprache:** „Du" groß im Kundenbereich und in `app_de.arb`; Überzeilen in
+  korrekter Groß- und Kleinschreibung; keine Gedankenstriche und Mittelpunkte
+  als Trenner im Kundenbereich. Rechtstexte (`legal_texts.dart`) unberührt.
+  Der interne Bereich behält Mittelpunkte und Bis-Striche in Tabellen.
+* **Bewegung:** neun Muster, siehe `docs/scrolling-funktionen.md`
+  Abschnitt 4.1.
+* **Nachweis:** Kontrasttest mit 54 Paaren, Bildschirmfotos mit
+  Kontrastmessung jedes Textes (`tool/screens/screens_test.dart`, läuft
+  nicht in der CI, weil es Bilder erzeugt), `flutter test` 144/144.
+* **Offen:** Auslieferung nach `main` (Freigabe), Kopfbild mit altem Claim,
+  echte Produktfotos (Muster 12 und 14).

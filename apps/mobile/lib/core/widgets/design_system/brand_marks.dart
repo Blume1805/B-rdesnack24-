@@ -36,7 +36,9 @@ class BoerdeOutlinePainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = color.withValues(alpha: 0.15)
+        // Deckkraft multiplizieren, nicht ersetzen: sonst wird eine schon
+        // transparente Linienfarbe als Fläche plötzlich kräftig.
+        ..color = color.withValues(alpha: color.a * 0.15)
         ..style = PaintingStyle.fill,
     );
     canvas.drawPath(
@@ -60,7 +62,7 @@ class VendingMachineGlyph extends StatelessWidget {
     super.key,
     this.size = 120,
     this.color = AppColors.brand,
-    this.background = AppColors.ink,
+    this.background = AppColors.surfaceInverse,
   });
 
   final double size;

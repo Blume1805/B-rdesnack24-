@@ -222,7 +222,7 @@ class _SignatureCard extends StatelessWidget {
                         style: AppTypography.body(
                           size: 15,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                       Text(
@@ -288,7 +288,7 @@ class _SignatureCard extends StatelessWidget {
                     label: const Text('Aus DocuSign holen'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.brand,
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.onBrand,
                     ),
                   ),
                 ),
@@ -299,8 +299,8 @@ class _SignatureCard extends StatelessWidget {
                     icon: const Icon(Icons.upload_file),
                     label: const Text('Manuell hochladen'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.ink,
-                      side: const BorderSide(color: AppColors.ink),
+                      foregroundColor: AppColors.textStrong,
+                      side: const BorderSide(color: AppColors.textStrong),
                     ),
                   ),
                 ),

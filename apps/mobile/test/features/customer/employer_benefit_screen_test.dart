@@ -17,7 +17,7 @@ void main() {
     // Kernzahl (50 €) und Rechtsgrundlage sind sichtbar.
     expect(find.text('50 € / Monat'), findsOneWidget);
     expect(
-      find.text('steuer- und SV-frei — § 8 Abs. 2 Satz 11 EStG'),
+      find.text('Steuer- und SV-frei nach § 8 Abs. 2 Satz 11 EStG'),
       findsOneWidget,
     );
 
@@ -30,7 +30,7 @@ void main() {
 
     // PDF-Link zum Weiterleiten an den Arbeitgeber ist da.
     expect(
-      find.text('Als PDF für deinen Arbeitgeber herunterladen'),
+      find.text('Als PDF für Deinen Arbeitgeber herunterladen'),
       findsOneWidget,
     );
   });

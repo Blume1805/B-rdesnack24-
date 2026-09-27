@@ -76,7 +76,7 @@ class ProductDetailScreen extends ConsumerWidget {
                 style: AppTypography.display(
                   size: 24,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
               const SizedBox(height: AppSpacing.s3),
@@ -176,7 +176,7 @@ class _PriceCard extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Dein App-Preis · $pctText % gespart',
+              'Dein App-Preis: $pctText % gespart',
               style: AppTypography.body(
                 size: 13,
                 weight: FontWeight.w800,
@@ -193,7 +193,7 @@ class _PriceCard extends ConsumerWidget {
                   style: AppTypography.display(
                     size: 26,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s2),
@@ -230,7 +230,7 @@ class _PriceCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Dein App-Preis ${Formatters.euro(appPrice)} · '
+                    'Dein App-Preis ${Formatters.euro(appPrice)}: '
                     '−$pctText % ',
                     style: AppTypography.body(
                       size: 12.5,
@@ -264,13 +264,13 @@ class _KeyFactChips extends StatelessWidget {
         (
           Icons.local_fire_department_outlined,
           '${detail.energyKcal!.toStringAsFixed(0)} kcal',
-          AppColors.ink,
+          AppColors.textStrong,
         ),
       if (detail.sugarsG != null)
         (
           Icons.icecream_outlined,
           '${g(detail.sugarsG!)} Zucker',
-          AppColors.ink,
+          AppColors.textStrong,
         ),
       (
         detail.allergens.isEmpty
@@ -417,7 +417,7 @@ class _NutritionRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             alignment: Alignment.center,
-            child: Icon(item.icon, size: 18, color: AppColors.ink),
+            child: Icon(item.icon, size: 18, color: AppColors.textStrong),
           ),
           const SizedBox(width: AppSpacing.s3),
           Expanded(
@@ -426,7 +426,7 @@ class _NutritionRow extends StatelessWidget {
               style: AppTypography.body(
                 size: 14,
                 weight: FontWeight.w700,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ),
@@ -435,7 +435,7 @@ class _NutritionRow extends StatelessWidget {
             style: AppTypography.body(
               size: 14,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ],
@@ -511,7 +511,7 @@ class _AllergenChip extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ],
@@ -567,12 +567,12 @@ class _MyRatingCardState extends ConsumerState<_MyRatingCard> {
         children: [
           Text(
             _value == null
-                ? 'Wie schmeckt dir das Produkt?'
+                ? 'Wie schmeckt Dir das Produkt?'
                 : 'Deine Bewertung: $_value ${_value == 1 ? 'Stern' : 'Sterne'}',
             style: AppTypography.body(
               size: 14,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

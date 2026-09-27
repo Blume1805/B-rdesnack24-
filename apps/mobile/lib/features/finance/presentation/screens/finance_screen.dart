@@ -121,7 +121,7 @@ class FinanceScreen extends ConsumerWidget {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Anfordern'),
@@ -255,7 +255,8 @@ class _IconAction extends StatelessWidget {
                     (emphasize ? AppColors.brand : AppColors.borderSubtle),
               ),
             ),
-            child: Icon(icon, size: 20, color: iconColor ?? AppColors.ink),
+            child:
+                Icon(icon, size: 20, color: iconColor ?? AppColors.textStrong),
           ),
         ),
       ),
@@ -280,7 +281,7 @@ class _PeriodSelector extends ConsumerWidget {
               const Icon(
                 Icons.date_range_outlined,
                 size: 20,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -289,7 +290,7 @@ class _PeriodSelector extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 16,
                     weight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -334,7 +335,7 @@ class _PeriodSelector extends ConsumerWidget {
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context).colorScheme.copyWith(
                 primary: AppColors.brand,
-                onPrimary: AppColors.ink,
+                onPrimary: AppColors.textStrong,
               ),
         ),
         child: child!,
@@ -374,7 +375,7 @@ class _RangeChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 14, color: AppColors.ink),
+                Icon(icon, size: 14, color: AppColors.textStrong),
                 const SizedBox(width: 6),
               ],
               Text(
@@ -382,7 +383,7 @@ class _RangeChip extends StatelessWidget {
                 style: AppTypography.body(
                   size: 13,
                   weight: FontWeight.w700,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ],
@@ -532,7 +533,7 @@ class _AccountRow extends StatelessWidget {
               style: AppTypography.display(
                 size: 14,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ),
@@ -546,7 +547,7 @@ class _AccountRow extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -564,7 +565,8 @@ class _AccountRow extends StatelessWidget {
             style: AppTypography.body(
               size: 15,
               weight: FontWeight.w700,
-              color: isRevenue ? AppColors.statusPositive : AppColors.ink,
+              color:
+                  isRevenue ? AppColors.statusPositive : AppColors.textStrong,
             ),
           ),
         ],
@@ -580,7 +582,7 @@ class _ErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      color: const Color(0xFFF7DBDB),
+      color: AppColors.statusCriticalTint,
       borderColor: AppColors.statusCritical,
       child: Row(
         children: [
@@ -589,7 +591,7 @@ class _ErrorCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: AppTypography.body(size: 14, color: AppColors.ink),
+              style: AppTypography.body(size: 14, color: AppColors.textStrong),
             ),
           ),
         ],

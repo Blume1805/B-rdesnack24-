@@ -120,7 +120,7 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Anfordern'),

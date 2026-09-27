@@ -68,7 +68,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.statusCritical,
+          backgroundColor: AppColors.statusCriticalFill,
           content: Text('Export fehlgeschlagen: $e'),
         ),
       );
@@ -99,7 +99,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   Widget build(BuildContext context) {
     final async = ref.watch(myReceiptsProvider);
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Belegarchiv')),
       body: async.when(
         loading: () => const Center(
@@ -110,7 +110,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
             padding: const EdgeInsets.all(AppSpacing.s5),
             child: Text(
               'Belege konnten nicht geladen werden: $e',
-              style: AppTypography.body(size: 13, color: AppColors.ink),
+              style: AppTypography.body(size: 13, color: AppColors.textStrong),
             ),
           ),
         ),
@@ -145,8 +145,8 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                   AppCard(
                     color: AppColors.surfaceAlt,
                     child: Text(
-                      'Noch keine Käufe vorhanden. Sobald du am Automaten '
-                      'kaufst, erscheinen deine Belege hier.',
+                      'Noch keine Käufe vorhanden. Sobald Du am Automaten '
+                      'kaufst, erscheinen Deine Belege hier.',
                       style: AppTypography.body(
                         size: 13,
                         color: AppColors.textMuted,
@@ -204,11 +204,11 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${rows.length} Belege · ${Formatters.euro(sum)}',
+                          '${rows.length} Belege, ${Formatters.euro(sum)}',
                           style: AppTypography.body(
                             size: 13,
                             weight: FontWeight.w700,
-                            color: AppColors.ink,
+                            color: AppColors.textStrong,
                           ),
                         ),
                       ),
@@ -318,7 +318,7 @@ class _FilterChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.s2),
       child: Material(
-        color: selected ? AppColors.ink : AppColors.surfaceCard,
+        color: selected ? AppColors.brand : AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(AppRadii.pill),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -330,7 +330,7 @@ class _FilterChip extends StatelessWidget {
               style: AppTypography.body(
                 size: 12,
                 weight: FontWeight.w700,
-                color: selected ? AppColors.brand : AppColors.textDefault,
+                color: selected ? AppColors.onBrand : AppColors.textDefault,
               ),
             ),
           ),
@@ -367,7 +367,7 @@ class _ReceiptCard extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -376,7 +376,7 @@ class _ReceiptCard extends StatelessWidget {
                 style: AppTypography.display(
                   size: 18,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ],
@@ -457,7 +457,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.statusCritical,
+          backgroundColor: AppColors.statusCriticalFill,
           content: Text('Bon konnte nicht erzeugt werden: $e'),
         ),
       );
@@ -527,13 +527,13 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                 style: AppTypography.display(
                   size: 18,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
               const SizedBox(height: AppSpacing.s2),
               Text(
                 'Kauf vom ${Formatters.date(r.purchasedAt)} über '
-                '${Formatters.euro(r.totalGross)}. Den Status siehst du '
+                '${Formatters.euro(r.totalGross)}. Den Status siehst Du '
                 'danach hier am Beleg.',
                 style: AppTypography.body(size: 12, color: AppColors.textMuted)
                     .copyWith(height: 1.4),
@@ -551,12 +551,14 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                   activeColor: AppColors.brand,
                   title: Row(
                     children: [
-                      Icon(k.$3, size: 16, color: AppColors.ink),
+                      Icon(k.$3, size: 16, color: AppColors.textStrong),
                       const SizedBox(width: 6),
                       Text(
                         k.$2,
-                        style:
-                            AppTypography.body(size: 13, color: AppColors.ink),
+                        style: AppTypography.body(
+                          size: 13,
+                          color: AppColors.textStrong,
+                        ),
                       ),
                     ],
                   ),
@@ -577,7 +579,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                 child: FilledButton.icon(
                   onPressed: () => Navigator.of(sctx).pop(true),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.ink,
+                    backgroundColor: AppColors.surfaceInverse,
                     foregroundColor: AppColors.brand,
                   ),
                   icon: const Icon(Icons.send_outlined, size: 18),
@@ -603,7 +605,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Reklamation eingegangen — wir prüfen das.'),
+          content: Text('Reklamation eingegangen, wir prüfen das.'),
         ),
       );
     } catch (e) {
@@ -612,7 +614,8 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
           e.toString().contains('uq_complaints_open_per_purchase');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: duplicate ? AppColors.ink : AppColors.statusCritical,
+          backgroundColor:
+              duplicate ? AppColors.surfaceAlt : AppColors.statusCriticalFill,
           content: Text(
             duplicate
                 ? 'Zu diesem Kauf läuft bereits eine Reklamation.'
@@ -629,7 +632,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
     final complaint =
         ref.watch(myComplaintsByPurchaseProvider).valueOrNull?[r.id];
     final warranty = r.warrantyUntil == null
-        ? 'Lebensmittel — Gewährleistung an MHD/Verbrauch gebunden.'
+        ? 'Lebensmittel: Gewährleistung an MHD/Verbrauch gebunden.'
         : 'Gewährleistung bis ${Formatters.date(r.warrantyUntil!)} (§ 438 BGB).';
     return Padding(
       padding: EdgeInsets.only(
@@ -647,12 +650,12 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
             style: AppTypography.display(
               size: 18,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            '${r.machineName ?? 'Automat'} · ${widget.srcLabel(r.source)}',
+            '${r.machineName ?? 'Automat'}, ${widget.srcLabel(r.source)}',
             style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s4),
@@ -677,7 +680,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                       style: AppTypography.body(
                         size: 13,
                         weight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   ),
@@ -686,7 +689,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w700,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ],
@@ -701,7 +704,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -710,7 +713,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                 style: AppTypography.display(
                   size: 20,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ],
@@ -746,7 +749,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
               onPressed:
                   _busy || widget.receipt.source == 'demo' ? null : _openPdf,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.ink,
+                backgroundColor: AppColors.surfaceInverse,
                 foregroundColor: AppColors.brand,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -779,7 +782,7 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                 icon: const Icon(Icons.flag_outlined, size: 18),
                 label: const Text('Problem melden'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.textStrong,
                   side: const BorderSide(color: AppColors.borderSubtle),
                   padding: const EdgeInsets.symmetric(vertical: 11),
                 ),
@@ -874,10 +877,10 @@ class _DemoPurchaseButtonsState extends ConsumerState<_DemoPurchaseButtons> {
         for (final e in entries)
           OutlinedButton.icon(
             onPressed: _busy ? null : () => _add(e.$1, e.$2),
-            icon: Icon(e.$3, size: 16, color: AppColors.ink),
+            icon: Icon(e.$3, size: 16, color: AppColors.textStrong),
             label: Text(e.$2),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.textStrong,
               side: const BorderSide(color: AppColors.brand),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s3,

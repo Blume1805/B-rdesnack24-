@@ -215,7 +215,7 @@ class _ApprovalCard extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 15,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -254,8 +254,8 @@ class _ApprovalCard extends ConsumerWidget {
                     icon: const Icon(Icons.check),
                     label: const Text('Freigeben'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.statusPositive,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.statusPositiveFill,
+                      foregroundColor: AppColors.onStatus,
                     ),
                   ),
                 ),
@@ -574,7 +574,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               style: AppTypography.display(
                 size: 20,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: AppSpacing.s2),
@@ -590,13 +590,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               )
             else if (!hasSlot)
               AppCard(
-                color: const Color(0xFFFAE9E4),
+                color: AppColors.statusCriticalTint,
                 borderColor: AppColors.statusCritical,
                 child: Text(
-                  'Für dein Konto ist kein Signatur-Slot verknüpft. Bitte '
+                  'Für Dein Konto ist kein Signatur-Slot verknüpft. Bitte '
                   'einen System-Admin bitten, partner_signatures.profile_id '
-                  'auf deine Profil-ID zu setzen.',
-                  style: AppTypography.body(size: 13, color: AppColors.ink),
+                  'auf Deine Profil-ID zu setzen.',
+                  style:
+                      AppTypography.body(size: 13, color: AppColors.textStrong),
                 ),
               )
             else ...[
@@ -623,7 +624,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                 label: const Text('Aus DocuSign holen'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onBrand,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
@@ -644,8 +645,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                 icon: const Icon(Icons.upload_file),
                 label: const Text('Bild hochladen'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.ink,
-                  side: const BorderSide(color: AppColors.ink),
+                  foregroundColor: AppColors.textStrong,
+                  side: const BorderSide(color: AppColors.textStrong),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
@@ -721,7 +722,7 @@ class _DecisionRow extends StatelessWidget {
                   style: AppTypography.body(
                     size: 12,
                     weight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 if (comment?.isNotEmpty == true)

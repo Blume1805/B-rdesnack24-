@@ -46,7 +46,7 @@ class InvoicePreviewScreen extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.mark_email_read_outlined,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                     size: 20,
                   ),
                   const SizedBox(width: AppSpacing.s2),
@@ -58,7 +58,7 @@ class InvoicePreviewScreen extends StatelessWidget {
                       style: AppTypography.body(
                         size: 12,
                         weight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   ),
@@ -112,7 +112,7 @@ class _InvoiceBody extends StatelessWidget {
                     style: AppTypography.body(
                       size: 14,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                   Text(
@@ -138,7 +138,7 @@ class _InvoiceBody extends StatelessWidget {
               style: AppTypography.display(
                 size: 24,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ],
@@ -169,7 +169,7 @@ class _InvoiceBody extends StatelessWidget {
                       style: AppTypography.body(
                         size: 13,
                         weight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   const SizedBox(height: 6),
@@ -228,7 +228,7 @@ class _InvoiceBody extends StatelessWidget {
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ),
                   ),
                   Text(
@@ -236,7 +236,7 @@ class _InvoiceBody extends StatelessWidget {
                     style: AppTypography.display(
                       size: 22,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ),
                   ),
                 ],
@@ -286,7 +286,7 @@ class _InvoiceBody extends StatelessWidget {
               style: AppTypography.body(
                 size: 12,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ],
@@ -321,8 +321,8 @@ class _RateTable extends StatelessWidget {
     return Table(
       border: const TableBorder(
         horizontalInside: BorderSide(color: AppColors.borderSubtle),
-        top: BorderSide(color: AppColors.ink),
-        bottom: BorderSide(color: AppColors.ink),
+        top: BorderSide(color: AppColors.textStrong),
+        bottom: BorderSide(color: AppColors.textStrong),
       ),
       columnWidths: const {
         0: FlexColumnWidth(3),
@@ -343,7 +343,7 @@ class _RateTable extends StatelessWidget {
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -361,7 +361,7 @@ class _RateTable extends StatelessWidget {
                     style: AppTypography.body(
                       size: 12,
                       weight: i == 0 ? FontWeight.w700 : FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                     textAlign: i == 0 ? TextAlign.left : TextAlign.right,
                   ),

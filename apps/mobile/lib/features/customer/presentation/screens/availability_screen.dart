@@ -204,7 +204,7 @@ class _StockRow extends StatelessWidget {
                       style: AppTypography.body(
                         size: 15,
                         weight: FontWeight.w700,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -234,7 +234,7 @@ class _StockRow extends StatelessWidget {
                 style: AppTypography.display(
                   size: 28,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
               const SizedBox(width: 4),
@@ -315,7 +315,7 @@ class _PriceLine extends StatelessWidget {
             ),
           ),
           Text(
-            'Dein App-Preis · −$pctText %',
+            'Dein App-Preis: −$pctText %',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
@@ -334,7 +334,7 @@ class _PriceLine extends StatelessWidget {
           style: AppTypography.display(
             size: 20,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
         ),
         const SizedBox(width: AppSpacing.s3),

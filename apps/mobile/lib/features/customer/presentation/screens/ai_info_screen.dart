@@ -21,7 +21,7 @@ class AiInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('KI-Transparenz')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -41,7 +41,7 @@ class AiInfoScreen extends StatelessWidget {
                   style: AppTypography.display(
                     size: 22,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -49,10 +49,10 @@ class AiInfoScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s4),
           Text(
-            'Wir informieren dich hier transparent nach Artikel 50 EU AI Act '
+            'Wir informieren Dich hier transparent nach Artikel 50 EU AI Act '
             '(Verordnung (EU) 2024/1689), an welchen Stellen unsere App '
             'automatisierte, algorithmische oder KI-basierte Entscheidungen '
-            'trifft, welchen Zweck sie verfolgen und welche Rechte du hast.',
+            'trifft, welchen Zweck sie verfolgen und welche Rechte Du hast.',
             style: AppTypography.body(size: 14, color: AppColors.textMuted)
                 .copyWith(height: 1.4),
           ),
@@ -62,24 +62,24 @@ class AiInfoScreen extends StatelessWidget {
             body:
                 'Ein regel-basierter Empfehlungs- und Angebots-Generator, der '
                 'Kaufhistorie, Kategorie-Präferenzen und Loyalty-Punkte '
-                'auswertet, um dir Wochenangebote, Bonus-Angebote und '
+                'auswertet, um Dir Wochenangebote, Bonus-Angebote und '
                 'personalisierte Coupons vorzuschlagen. Zusätzlich wählt '
                 'ein täglicher Kombi-Algorithmus für den Frühstücks- und '
                 'den Feierabend-Deal je eine Getränk-/Snack-Paarung '
                 'aus dem Produktkatalog aus. Ebenfalls automatisch berechnet '
-                'werden deine Treue-Meilensteine und deine Statusstufe: Aus '
-                'deiner Kaufhistorie ergibt sich, welche Stufe du erreicht '
+                'werden Deine Treue-Meilensteine und Deine Statusstufe: Aus '
+                'Deiner Kaufhistorie ergibt sich, welche Stufe Du erreicht '
                 'hast und welcher Dauerrabatt daraus folgt. Seit dem '
                 '16.09.2026 gilt das für alle angemeldeten Kundinnen und '
-                'Kunden — die Funktionen hängen nicht mehr an einem Abo. '
+                'Kunden. Die Funktionen hängen nicht mehr an einem Abo. '
                 '${_kAppUsesLlm ? 'Außerdem läuft ein KI-Chat-Assistent auf Basis eines großen Sprachmodells (LLM), der App-Fragen beantwortet.' : 'Der Chat-Assistent im Kundenbereich ist ein regel-basierter Q&A-Bot ohne generatives KI-Modell und wird deshalb als „Automatischer Chat-Assistent" gekennzeichnet.'}',
           ),
           const _InfoBlock(
             title: 'Zweck',
             body:
-                'Bessere Sichtbarkeit von Angeboten, die zu deinem bisherigen '
-                'Einkaufsverhalten passen. Die Vorschläge sind Empfehlungen — '
-                'du bist nie verpflichtet, ein Angebot anzunehmen.',
+                'Bessere Sichtbarkeit von Angeboten, die zu Deinem bisherigen '
+                'Einkaufsverhalten passen. Die Vorschläge sind Empfehlungen, '
+                'Du bist nie verpflichtet, ein Angebot anzunehmen.',
           ),
           const _InfoBlock(
             title: 'Welche Daten fließen ein?',
@@ -94,27 +94,27 @@ class AiInfoScreen extends StatelessWidget {
           const _InfoBlock(
             title: 'Widerspruch und Opt-out',
             body: 'Du kannst der personalisierten Angebots-Anzeige jederzeit '
-                'widersprechen — schreib uns über das Kontaktformular in '
+                'widersprechen, schreib uns über das Kontaktformular in '
                 'der App oder per E-Mail an datenschutz@boerdesnack24.de. Du '
                 'siehst dann nur noch die allgemeinen Wochenangebote, den '
                 'Frühstücks- und den Feierabend-Deal.',
           ),
           const _InfoBlock(
             title: 'Kennzeichnung im Kundenbereich',
-            body: 'Überall wo KI oder Algorithmen dir Inhalte vorschlagen, '
-                'siehst du in der oberen rechten Ecke der Section den '
+            body: 'Überall wo KI oder Algorithmen Dir Inhalte vorschlagen, '
+                'siehst Du in der oberen rechten Ecke der Section den '
                 'gold-schwarzen „KI"-Chip. Der Chat-Assistent trägt das '
-                'Label „Automatischer Chat-Assistent" damit du weißt, dass '
-                'du nicht mit einem Menschen sprichst.',
+                'Label „Automatischer Chat-Assistent" damit Du weißt, dass '
+                'Du nicht mit einem Menschen sprichst.',
           ),
           const _InfoBlock(
             title: 'Beschwerde',
-            body: 'Wenn du glaubst, dass unsere KI-Nutzung deine Rechte '
-                'verletzt, kannst du dich an die zuständige Datenschutz-'
+            body: 'Wenn Du glaubst, dass unsere KI-Nutzung Deine Rechte '
+                'verletzt, kannst Du Dich an die zuständige Datenschutz-'
                 'Aufsichtsbehörde wenden. Für uns als Unternehmen mit Sitz '
                 'in Sachsen-Anhalt ist das die oder der Landesbeauftragte '
-                'für den Datenschutz Sachsen-Anhalt. Du kannst dich immer '
-                'auch an die Aufsichtsbehörde deines Wohnorts wenden '
+                'für den Datenschutz Sachsen-Anhalt. Du kannst Dich immer '
+                'auch an die Aufsichtsbehörde Deines Wohnorts wenden '
                 '(Art. 77 DSGVO).',
           ),
           const SizedBox(height: AppSpacing.s5),
@@ -126,10 +126,10 @@ class AiInfoScreen extends StatelessWidget {
               mode: LaunchMode.externalApplication,
             ),
             icon: const Icon(Icons.open_in_new, size: 16),
-            label: const Text('EU AI Act — Volltext lesen'),
+            label: const Text('EU AI Act: Volltext lesen'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.ink,
-              side: const BorderSide(color: AppColors.ink),
+              foregroundColor: AppColors.textStrong,
+              side: const BorderSide(color: AppColors.textStrong),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s4,
                 vertical: AppSpacing.s3,
@@ -165,7 +165,7 @@ class _InfoBlock extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             body,
-            style: AppTypography.body(size: 14, color: AppColors.ink)
+            style: AppTypography.body(size: 14, color: AppColors.textStrong)
                 .copyWith(height: 1.45),
           ),
         ],

@@ -6,6 +6,9 @@ import '../../theme/app_typography.dart';
 enum StatusTone { positive, warning, critical, info, neutral, brand }
 
 /// Kleines Status-Chip (Pill), z. B. für „aktiv", „bald leer", „ausverkauft".
+///
+/// Dunkle, farbig getönte Flächen mit der Statusfarbe als Schrift (ADR 0008);
+/// Kontraste in `test/core/theme/contrast_test.dart`.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({
     super.key,
@@ -22,32 +25,32 @@ class StatusBadge extends StatelessWidget {
     switch (tone) {
       case StatusTone.positive:
         return (
-          bg: const Color(0xFFE7F1E0),
+          bg: AppColors.statusPositiveTint,
           fg: AppColors.statusPositive,
           border: AppColors.statusPositive
         );
       case StatusTone.warning:
         return (
-          bg: const Color(0xFFFCEECB),
+          bg: AppColors.statusWarningTint,
           fg: AppColors.statusWarning,
           border: AppColors.statusWarning
         );
       case StatusTone.critical:
         return (
-          bg: const Color(0xFFF7DBDB),
+          bg: AppColors.statusCriticalTint,
           fg: AppColors.statusCritical,
           border: AppColors.statusCritical
         );
       case StatusTone.info:
         return (
-          bg: const Color(0xFFDBE8F5),
+          bg: AppColors.statusInfoTint,
           fg: AppColors.statusInfo,
           border: AppColors.statusInfo
         );
       case StatusTone.brand:
         return (
           bg: AppColors.brandLight,
-          fg: AppColors.ink,
+          fg: AppColors.textStrong,
           border: AppColors.brand
         );
       case StatusTone.neutral:

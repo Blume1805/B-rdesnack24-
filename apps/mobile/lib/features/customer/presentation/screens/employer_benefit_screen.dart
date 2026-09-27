@@ -26,7 +26,7 @@ class EmployerBenefitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Steuerfreier Zuschuss')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -39,20 +39,20 @@ class EmployerBenefitScreen extends StatelessWidget {
           const Eyebrow('Für Arbeitgeber & Beschäftigte'),
           const SizedBox(height: 2),
           Text(
-            'Bis zu 50 € im Monat — steuerfrei vom Arbeitgeber',
+            'Bis zu 50 € im Monat, steuerfrei vom Arbeitgeber',
             style: AppTypography.display(
               size: 22,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
             'Arbeitgeber dürfen ihren Beschäftigten monatlich Sachbezüge bis '
-            'zu 50 € steuer- und sozialversicherungsfrei gewähren — das '
+            'zu 50 € steuer- und sozialversicherungsfrei gewähren, das '
             'lässt sich auch für Käufe an unseren Automaten nutzen: Snacks, '
-            'Getränke, Eis. Hier erfährst du, was rechtlich dahintersteckt '
-            'und was das für dein Gehalt bedeuten kann.',
+            'Getränke, Eis. Hier erfährst Du, was rechtlich dahintersteckt '
+            'und was das für Dein Gehalt bedeuten kann.',
             style: AppTypography.body(size: 13.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
           ),
@@ -60,13 +60,13 @@ class EmployerBenefitScreen extends StatelessWidget {
 
           // ── Die Kernzahl, groß ────────────────────────────────────────
           AppCard(
-            color: AppColors.ink,
+            color: AppColors.surfaceInverse,
             borderColor: AppColors.brand,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'SACHBEZUGSFREIGRENZE',
+                  'Sachbezugsfreigrenze',
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w800,
@@ -83,11 +83,11 @@ class EmployerBenefitScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'steuer- und SV-frei — § 8 Abs. 2 Satz 11 EStG',
+                  'Steuer- und SV-frei nach § 8 Abs. 2 Satz 11 EStG',
                   style: AppTypography.body(
                     size: 11.5,
                     weight: FontWeight.w600,
-                    color: AppColors.brandLight,
+                    color: AppColors.brandPale,
                   ),
                 ),
               ],
@@ -98,22 +98,22 @@ class EmployerBenefitScreen extends StatelessWidget {
           const _InfoBlock(
             title: 'Die Rechtsgrundlage',
             body: 'Nach § 8 Abs. 2 Satz 11 EStG bleiben Sachbezüge bis zu 50 € '
-                'im Kalendermonat steuerfrei — seit 1.1.2022 angehoben von '
+                'im Kalendermonat steuerfrei, seit 1.1.2022 angehoben von '
                 'zuvor 44 €. Wichtig: Es handelt sich um eine Freigrenze, '
                 'keinen Freibetrag. Wird der Betrag in einem Monat auch nur '
                 'um einen Cent überschritten, ist der gesamte Betrag '
-                'steuer- und beitragspflichtig — nicht nur der übersteigende '
+                'steuer- und beitragspflichtig, nicht nur der übersteigende '
                 'Teil. Die Grenze gilt außerdem für alle Sachbezüge eines '
                 'Monats zusammen, nicht getrennt je Anbieter.',
           ),
           const _InfoBlock(
-            title: 'Muss ein „Sachbezug" sein — kein Bargeld',
+            title: 'Muss ein „Sachbezug" sein, kein Bargeld',
             body: 'Steuerfrei ist nur eine Sach- oder Dienstleistung, keine '
                 'Geldzahlung. In der Praxis bedeutet das: eine Guthaben- '
                 'oder Gutscheinkarte, die nur bei einem begrenzten Kreis '
                 'von Akzeptanzstellen bzw. für ein begrenztes Waren- oder '
                 'Dienstleistungsangebot einlösbar ist (§ 2 Abs. 1 Nr. 10 '
-                'ZAG) — etwa eine Karte, die an unseren Automaten aufgeladen '
+                'ZAG), etwa eine Karte, die an unseren Automaten aufgeladen '
                 'und eingelöst wird.',
           ),
           const _InfoBlock(
@@ -123,7 +123,7 @@ class EmployerBenefitScreen extends StatelessWidget {
                 '§ 8 Abs. 4 EStG). Eine Umwandlung von bestehendem Gehalt in '
                 'den Sachbezug erfüllt die Voraussetzungen nicht. Der '
                 'naheliegendste Weg: den 50-€-Sachbezug bei der nächsten '
-                'Gehaltsrunde als Extra „on top" einführen — der Arbeitgeber '
+                'Gehaltsrunde als Extra „on top" einführen, der Arbeitgeber '
                 'beteiligt sich damit an den Verpflegungskosten, spart '
                 'dabei Lohnnebenkosten (keine SV-Beiträge auf diesen Teil), '
                 'und die Beschäftigten haben mehr Netto vom Brutto.',
@@ -152,7 +152,7 @@ class EmployerBenefitScreen extends StatelessWidget {
                         style: AppTypography.display(
                           size: 15,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                     ),
@@ -167,17 +167,18 @@ class EmployerBenefitScreen extends StatelessWidget {
                   'und ggf. Pauschalversteuerung durch den Arbeitgeber nach '
                   '§ 40 Abs. 2 EStG. Voraussetzung dafür ist aber eine '
                   '„Mahlzeit" im steuerlichen Sinne (R 8.1 Lohnsteuer-'
-                  'Richtlinien) — zum Beispiel ein belegtes Brötchen. Ein '
+                  'Richtlinien), zum Beispiel ein belegtes Brötchen. Ein '
                   'reiner Snack oder ein Getränk allein zählt nicht als '
                   'Mahlzeit.',
-                  style: AppTypography.body(size: 13, color: AppColors.ink)
-                      .copyWith(height: 1.5),
+                  style:
+                      AppTypography.body(size: 13, color: AppColors.textStrong)
+                          .copyWith(height: 1.5),
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
                   'Unsere Automaten bieten aktuell keine vollwertigen '
                   'Mahlzeiten an. Für Käufe bei uns gilt deshalb '
-                  'ausschließlich die 50-€-Sachbezugsfreigrenze — nicht die '
+                  'ausschließlich die 50-€-Sachbezugsfreigrenze, nicht die '
                   'Verpflegungszuschuss-Regel. Bieten wir künftig zum '
                   'Beispiel belegte Brötchen an, könnte zusätzlich die '
                   'Mahlzeiten-Regelung greifen und Arbeitgebern weitere '
@@ -196,13 +197,13 @@ class EmployerBenefitScreen extends StatelessWidget {
           const _InfoBlock(
             title: 'Vorteile auf einen Blick',
             body: '• Arbeitgeber: beteiligt sich an den Verpflegungskosten, '
-                'spart Lohnnebenkosten, kein zusätzlicher Verwaltungsaufwand '
-                '— nutzbar direkt am Arbeitsplatz-Automaten.\n'
+                'spart Lohnnebenkosten, kein zusätzlicher Verwaltungsaufwand, '
+                'nutzbar direkt am Arbeitsplatz-Automaten.\n'
                 '• Beschäftigte: bis zu 50 € mehr netto im Monat, ohne '
                 'Abzüge, direkt einsetzbar für Snacks, Getränke und Eis.\n'
                 '• Beide Seiten: das Abo-Guthaben und Käufe an unseren '
                 'Automaten lassen sich vollständig aus diesem Budget '
-                'decken — ein einfacher, sofort nutzbarer Vorteil ohne '
+                'decken, ein einfacher, sofort nutzbarer Vorteil ohne '
                 'Wartezeit.',
           ),
           const SizedBox(height: AppSpacing.s2),
@@ -217,14 +218,14 @@ class EmployerBenefitScreen extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Als PDF für deinen Arbeitgeber herunterladen',
+                      'Als PDF für Deinen Arbeitgeber herunterladen',
                       style: AppTypography.body(
                         size: 14.5,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ).copyWith(
                         decoration: TextDecoration.underline,
-                        decorationColor: AppColors.ink,
+                        decorationColor: AppColors.textStrong,
                         decorationThickness: 2,
                       ),
                     ),
@@ -233,7 +234,7 @@ class EmployerBenefitScreen extends StatelessWidget {
                   const Icon(
                     Icons.picture_as_pdf_outlined,
                     size: 18,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ],
               ),
@@ -279,7 +280,7 @@ class _InfoBlock extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             body,
-            style: AppTypography.body(size: 13.5, color: AppColors.ink)
+            style: AppTypography.body(size: 13.5, color: AppColors.textStrong)
                 .copyWith(height: 1.5),
           ),
         ],

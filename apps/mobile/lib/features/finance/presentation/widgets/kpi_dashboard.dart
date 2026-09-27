@@ -28,11 +28,11 @@ class KpiDashboard extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator(color: AppColors.brand)),
       ),
       error: (e, _) => AppCard(
-        color: const Color(0xFFF7DBDB),
+        color: AppColors.statusCriticalTint,
         borderColor: AppColors.statusCritical,
         child: Text(
           'KPIs konnten nicht geladen werden: $e',
-          style: AppTypography.body(size: 13, color: AppColors.ink),
+          style: AppTypography.body(size: 13, color: AppColors.textStrong),
         ),
       ),
       data: (k) => _KpiBody(k: k),
@@ -304,13 +304,13 @@ Future<void> _showZoomedChart(
                       style: AppTypography.display(
                         size: 18,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   ),
                   IconButton(
                     tooltip: 'Schließen',
-                    icon: const Icon(Icons.close, color: AppColors.ink),
+                    icon: const Icon(Icons.close, color: AppColors.textStrong),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -417,7 +417,7 @@ class _KpiTile extends StatelessWidget {
         ? (value.startsWith('-')
             ? AppColors.statusCritical
             : AppColors.statusPositive)
-        : AppColors.ink;
+        : AppColors.textStrong;
     // Screenreader: Kachel als Button ("Diagramm vergrößern") ansagen,
     // Inhalt (Label + Wert) bleibt als Kind-Semantik erhalten.
     return Semantics(
@@ -450,7 +450,7 @@ class _KpiTile extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: AppColors.statusCritical,
+                          color: AppColors.statusCriticalFill,
                           width: 0.8,
                         ),
                         borderRadius: BorderRadius.circular(AppRadii.sm),
@@ -684,7 +684,7 @@ class _CashflowChart extends StatelessWidget {
                   ),
                   BarChartRodData(
                     toY: points[i].expenseNet,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                     width: 6,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(3),
@@ -829,7 +829,7 @@ class _ComparisonBars extends StatelessWidget {
                       style: AppTypography.body(
                         size: 12,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   );
@@ -875,7 +875,7 @@ class _MachineList extends StatelessWidget {
                         style: AppTypography.body(
                           size: 14,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                       Text(
@@ -895,7 +895,7 @@ class _MachineList extends StatelessWidget {
                   style: AppTypography.display(
                     size: 16,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ],
@@ -984,7 +984,7 @@ class _Stat extends StatelessWidget {
           style: AppTypography.display(
             size: 20,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
         ),
       ],
@@ -1013,7 +1013,7 @@ class _TopProducts extends StatelessWidget {
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),
@@ -1030,7 +1030,7 @@ class _TopProducts extends StatelessWidget {
                   style: AppTypography.body(
                     size: 13,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ],
@@ -1098,7 +1098,7 @@ class _BalanceSection extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s2),
@@ -1502,7 +1502,7 @@ class _BalanceDialogState extends State<_BalanceDialog> {
         style: AppTypography.display(
           size: 18,
           weight: FontWeight.w800,
-          color: AppColors.ink,
+          color: AppColors.textStrong,
         ),
       ),
       content: SizedBox(
@@ -1581,7 +1581,7 @@ class _BalanceDialogState extends State<_BalanceDialog> {
           onPressed: _saving ? null : _save,
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.brand,
-            foregroundColor: AppColors.ink,
+            foregroundColor: AppColors.onBrand,
           ),
           child: _saving
               ? const SizedBox(
@@ -1589,7 +1589,7 @@ class _BalanceDialogState extends State<_BalanceDialog> {
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 )
               : const Text('Speichern'),

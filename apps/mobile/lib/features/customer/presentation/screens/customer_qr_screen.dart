@@ -22,7 +22,7 @@ class CustomerQrScreen extends ConsumerWidget {
     final payload = 'BS24:$customerNo:${user?.id ?? ''}';
 
     return Scaffold(
-      backgroundColor: AppColors.ink,
+      backgroundColor: AppColors.surfaceInverse,
       appBar: const HeroAppBar(title: Text('Meine Kundenkarte')),
       body: Center(
         child: Padding(
@@ -54,7 +54,7 @@ class CustomerQrScreen extends ConsumerWidget {
                 style: AppTypography.body(
                   size: 14,
                   weight: FontWeight.w700,
-                  color: AppColors.brandLight,
+                  color: AppColors.brandPale,
                 ),
               ),
               const SizedBox(height: AppSpacing.s6),
@@ -71,11 +71,11 @@ class CustomerQrScreen extends ConsumerWidget {
                   gapless: true,
                   eyeStyle: const QrEyeStyle(
                     eyeShape: QrEyeShape.square,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                   dataModuleStyle: const QrDataModuleStyle(
                     dataModuleShape: QrDataModuleShape.square,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -86,7 +86,7 @@ class CustomerQrScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: AppTypography.body(
                   size: 12,
-                  color: AppColors.brandLight,
+                  color: AppColors.brandPale,
                 ),
               ),
             ],

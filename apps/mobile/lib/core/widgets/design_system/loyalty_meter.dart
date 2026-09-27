@@ -29,7 +29,7 @@ class LoyaltyMeter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.ink,
+        color: AppColors.surfaceInverse,
         borderRadius: BorderRadius.circular(AppRadii.pill),
         border: Border.all(color: AppColors.brand, width: 1.5),
       ),

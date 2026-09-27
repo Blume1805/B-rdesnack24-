@@ -56,7 +56,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final isLoading = state.isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.ink,
+      backgroundColor: AppColors.surfaceInverse,
       body: SafeArea(
         top: false,
         child: LayoutBuilder(
@@ -149,7 +149,7 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
-                  'Melde dich mit deinem Konto an oder wähle einen Demo-Zugang.',
+                  'Melde Dich mit Deinem Konto an oder wähle einen Demo-Zugang.',
                   style:
                       AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
@@ -204,7 +204,7 @@ class _FormPanel extends StatelessWidget {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: AppColors.ink,
+                            color: AppColors.textStrong,
                           ),
                         )
                       : Text(l10n.signIn),
@@ -406,7 +406,7 @@ class _DemoChip extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
+import '../motion/motion.dart';
 
 /// Metallische Status-Kacheln (Bronze · Silber · Gold) für den lebenslangen
 /// Dauerrabatt. Wird sowohl im Status-/Belohnungen-Screen als auch im
@@ -17,53 +18,51 @@ class TierTiles extends StatelessWidget {
   static const _tiers = <_Tier>[
     _Tier(
       code: 'bronze',
-      name: 'BRONZE',
+      name: 'Bronze',
       threshold: 'ab 150 €',
       percent: '6 %',
-      breakdown: '5 % Abo + 1 % Status',
+      breakdown: '5 % Grund + 1 % Status',
       // Bronze-Verlauf, heller oben.
-      gradient: [Color(0xFFCBA26A), Color(0xFF9A7440)],
-      onColor: Colors.white,
+      // Unteres Ende aufgehellt (vorher 0xFF9A7440): Ink darauf erreicht so
+      // mindestens 4,5:1. Vorher stand hier Weiß mit 2,4:1 (Befund 26.09.2026).
+      gradient: [Color(0xFFCBA26A), Color(0xFFB68A4E)],
+      onColor: AppColors.onBrand,
     ),
     _Tier(
       code: 'silber',
-      name: 'SILBER',
+      name: 'Silber',
       threshold: 'ab 500 €',
       percent: '7,5 %',
-      breakdown: '5 % Abo + 2,5 % Status',
+      breakdown: '5 % Grund + 2,5 % Status',
       gradient: [Color(0xFFDDE1E6), Color(0xFFB2B8BF)],
-      onColor: AppColors.ink,
+      onColor: AppColors.onBrand,
     ),
     _Tier(
       code: 'gold',
-      name: 'GOLD',
+      name: 'Gold',
       threshold: 'ab 1.000 €',
       percent: '10 %',
-      breakdown: '5 % Abo + 5 % Status',
+      breakdown: '5 % Grund + 5 % Status',
       gradient: [Color(0xFFFDD65A), Color(0xFFE0A500)],
-      onColor: AppColors.ink,
+      onColor: AppColors.onBrand,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Feste Kachelbreite + horizontales Scrollen: verhindert Umbrüche wegen
-    // einzelner Zeichen (%/€) auf schmalen Displays und hält die Fakten
-    // gut lesbar nebeneinander.
-    return SizedBox(
+    // Feste Kachelbreite, Reihe breiter als ein Telefon: verhindert
+    // Umbrüche bei %/€ auf schmalen Displays. Muster 07: Die Reihe läuft beim
+    // Scrollen von Bronze nach Gold mit und bleibt von Hand wischbar.
+    return ScrollLinkedStrip(
       height: 118,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: _tiers.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s3),
-        itemBuilder: (context, i) => _TierTile(
-          tier: _tiers[i],
-          reached: currentCode != null &&
-              _rank(currentCode!) >= _rank(_tiers[i].code),
-        ),
-      ),
+      children: [
+        for (final t in _tiers)
+          _TierTile(
+            tier: t,
+            reached:
+                currentCode != null && _rank(currentCode!) >= _rank(t.code),
+          ),
+      ],
     );
   }
 
@@ -101,7 +100,10 @@ class _TierTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = tier.onColor.withValues(alpha: 0.72);
+    // Volle Deckkraft auch für die leise Zeile: 85 % Ink erreichten auf dem
+    // dunklen Bronzeton nur 4,07:1 (contrast_test, 27.09.2026). Die
+    // Abstufung trägt jetzt allein die Schriftstärke.
+    final muted = tier.onColor;
     return Container(
       width: 172,
       padding: const EdgeInsets.all(AppSpacing.s3),
@@ -130,7 +132,7 @@ class _TierTile extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${tier.name} · ${tier.threshold}',
+                  '${tier.name} ${tier.threshold}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.body(

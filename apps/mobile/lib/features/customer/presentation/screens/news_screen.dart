@@ -108,7 +108,7 @@ class _NewsCard extends StatelessWidget {
                   style: AppTypography.display(
                     size: 20,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 if (article.summary != null) ...[
@@ -127,7 +127,7 @@ class _NewsCard extends StatelessWidget {
                   article.body,
                   style: AppTypography.body(
                     size: 14,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ],

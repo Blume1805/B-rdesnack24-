@@ -50,7 +50,7 @@ class RatingStars extends StatelessWidget {
             style: AppTypography.body(
               size: size,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ],

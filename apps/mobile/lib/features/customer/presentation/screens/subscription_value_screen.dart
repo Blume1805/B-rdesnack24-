@@ -53,7 +53,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
     const spendSteps = <double>[10, 20, 40];
 
     return Scaffold(
-      appBar: const HeroAppBar(title: Text('Was du sparst')),
+      appBar: const HeroAppBar(title: Text('Was Du sparst')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s5,
@@ -77,7 +77,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
                   icon: Icons.workspace_premium_outlined,
-                  text: 'Status-Rabatt bis 10 % — lebenslang',
+                  text: 'Status-Rabatt bis 10 %, lebenslang',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
@@ -94,7 +94,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s2),
           Text(
-            'Zwei Szenarien — Status-Rabatt kommt obendrauf.',
+            'Zwei Szenarien: Status-Rabatt kommt obendrauf.',
             style: AppTypography.body(size: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -116,10 +116,10 @@ class SubscriptionValueScreen extends ConsumerWidget {
                       style: AppTypography.body(
                         size: 14.5,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ).copyWith(
                         decoration: TextDecoration.underline,
-                        decorationColor: AppColors.ink,
+                        decorationColor: AppColors.textStrong,
                         decorationThickness: 2,
                       ),
                     ),
@@ -128,7 +128,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                   const Icon(
                     Icons.picture_as_pdf_outlined,
                     size: 18,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ],
               ),
@@ -148,7 +148,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                   child: _ScenarioCard(
                     title: 'Konservativ',
                     rate: conservative,
-                    subtitle: 'Nur der garantierte 5-%-App-Preis — '
+                    subtitle: 'Nur der garantierte 5-%-App-Preis, '
                         'ohne einen einzigen Coupon.',
                     highlighted: false,
                   ),
@@ -191,7 +191,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Kaffee + Snack ca. 6 €. Die Ersparnis beginnt beim ersten Kauf — '
+            'Kaffee + Snack ca. 6 €. Die Ersparnis beginnt beim ersten Kauf, '
             'es gibt keine Gebühr, die sich erst rechnen müsste.',
             style: AppTypography.body(size: 12.5, color: AppColors.textMuted)
                 .copyWith(height: 1.5),
@@ -208,7 +208,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
               children: [
                 _AssumptionRow(
                   icon: Icons.percent,
-                  text: '5 % auf jeden Kauf — garantiert',
+                  text: '5 % auf jeden Kauf, garantiert',
                 ),
                 SizedBox(height: AppSpacing.s2),
                 _AssumptionRow(
@@ -232,7 +232,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.brand,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onBrand,
                   padding: const EdgeInsets.symmetric(vertical: 13),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -257,7 +257,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.s2),
                   Expanded(
                     child: Text(
-                      'Deine Vorteile sind aktiv — kostenlos, dauerhaft.',
+                      'Deine Vorteile sind aktiv. Kostenlos und dauerhaft.',
                       style: AppTypography.body(
                         size: 13,
                         color: AppColors.textDefault,
@@ -270,8 +270,8 @@ class SubscriptionValueScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.s4),
           Text(
             'Kalkulationsbasis: Produktkatalog 03/2026, Preise inkl. USt. '
-            'Das normale Szenario ist eine Beispielrechnung — deine '
-            'tatsächliche Ersparnis hängt davon ab, wie oft du Deals und '
+            'Das normale Szenario ist eine Beispielrechnung: Deine '
+            'tatsächliche Ersparnis hängt davon ab, wie oft Du Deals und '
             'Coupons nutzt. Die App selbst kostet nichts; es fällt weder eine '
             'Grund- noch eine Nutzungsgebühr an. Angaben ohne Gewähr, Preise '
             'können sich ändern.',
@@ -302,13 +302,13 @@ class _ScenarioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = (rate * 100).toStringAsFixed(1).replaceAll('.', ',');
     return AppCard(
-      color: highlighted ? AppColors.ink : AppColors.surfaceAlt,
+      color: highlighted ? AppColors.textStrong : AppColors.surfaceAlt,
       borderColor: highlighted ? AppColors.brand : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title.toUpperCase(),
+            title,
             style: AppTypography.body(
               size: 11,
               weight: FontWeight.w800,
@@ -321,7 +321,7 @@ class _ScenarioCard extends StatelessWidget {
             style: AppTypography.display(
               size: 26,
               weight: FontWeight.w800,
-              color: highlighted ? AppColors.onDark : AppColors.ink,
+              color: highlighted ? AppColors.onDark : AppColors.textStrong,
             ),
           ),
           Text(
@@ -329,7 +329,7 @@ class _ScenarioCard extends StatelessWidget {
             style: AppTypography.body(
               size: 11,
               weight: FontWeight.w600,
-              color: highlighted ? AppColors.brandLight : AppColors.textMuted,
+              color: highlighted ? AppColors.brandPale : AppColors.textMuted,
             ),
           ),
           const SizedBox(height: AppSpacing.s2),
@@ -337,7 +337,7 @@ class _ScenarioCard extends StatelessWidget {
             subtitle,
             style: AppTypography.body(
               size: 11.5,
-              color: highlighted ? AppColors.brandLight : AppColors.textMuted,
+              color: highlighted ? AppColors.brandPale : AppColors.textMuted,
             ).copyWith(height: 1.4),
           ),
         ],
@@ -370,9 +370,9 @@ class _SavingsHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          head('EINKAUF', flex: 5),
-          head('KONSERVATIV', flex: 5),
-          head('NORMAL', flex: 5),
+          head('Einkauf', flex: 5),
+          head('Konservativ', flex: 5),
+          head('Normal', flex: 5),
         ],
       ),
     );
@@ -414,7 +414,7 @@ class _SavingsRow extends StatelessWidget {
                   style: AppTypography.body(
                     size: 13,
                     weight: FontWeight.w700,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 Text(
@@ -434,7 +434,7 @@ class _SavingsRow extends StatelessWidget {
               style: AppTypography.body(
                 size: 12.5,
                 weight: FontWeight.w600,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ),

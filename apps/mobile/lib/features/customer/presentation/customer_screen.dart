@@ -69,7 +69,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _openQr,
         backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.ink,
+        foregroundColor: AppColors.onBrand,
         elevation: 4,
         shape: const CircleBorder(),
         tooltip: 'Kundenkarte',
@@ -140,11 +140,11 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Icon-Kachel im Screen-Design: gerundetes Quadrat, aktiv gold, inaktiv
-    // creme/beige, darunter das Label.
-    final tileColor = selected ? AppColors.brand : AppColors.borderSubtle;
-    final iconColor = selected ? AppColors.ink : AppColors.textMuted;
-    final labelColor = selected ? AppColors.ink : AppColors.textMuted;
+    // Icon-Kachel: gerundetes Quadrat, aktiv Gold mit Ink-Symbol, inaktiv
+    // angehobene Fläche, darunter das Label.
+    final tileColor = selected ? AppColors.brand : AppColors.surfaceAlt;
+    final iconColor = selected ? AppColors.onBrand : AppColors.textMuted;
+    final labelColor = selected ? AppColors.textStrong : AppColors.textMuted;
     return Expanded(
       child: InkResponse(
         onTap: onTap,

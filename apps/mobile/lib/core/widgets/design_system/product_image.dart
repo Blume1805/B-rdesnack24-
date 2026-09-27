@@ -93,24 +93,54 @@ class ProductImage extends StatelessWidget {
     return SizedBox(width: size, height: size, child: clipped);
   }
 
+  /// Getönte „Bild"-Kachel, solange es keine Produktfotos gibt
+  /// (Regel 5 des Skills `boerdesnack24-app-design`). Große Kacheln zeigen
+  /// das Wort „Bild" und den Anfangsbuchstaben, kleine nur den Buchstaben.
+  /// Sie wirken absichtlich als Platzhalter, nicht als fehlendes Bild.
   Widget _placeholder(double effective, String? letter) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Opacity(
-          opacity: 0.35,
-          child: Icon(icon, size: effective * 0.45, color: AppColors.brand),
+    final large = effective >= 72;
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.brandLight, AppColors.surfaceAlt],
         ),
-        if (letter != null)
-          Text(
-            letter,
-            style: AppTypography.display(
-              size: effective * 0.38,
-              weight: FontWeight.w800,
-              color: AppColors.ink,
-            ),
-          ),
-      ],
+      ),
+      alignment: Alignment.center,
+      child: ExcludeSemantics(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (large)
+              Icon(
+                Icons.image_outlined,
+                size: effective * 0.2,
+                color: AppColors.brandPale,
+              ),
+            if (letter != null)
+              Text(
+                letter,
+                style: AppTypography.display(
+                  size: effective * (large ? 0.3 : 0.42),
+                  weight: FontWeight.w800,
+                  color: AppColors.textStrong,
+                ),
+              ),
+            if (large)
+              Text(
+                'Bild',
+                style: AppTypography.body(
+                  size: 11,
+                  weight: FontWeight.w700,
+                  color: AppColors.brandPale,
+                ).copyWith(letterSpacing: 1.2),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

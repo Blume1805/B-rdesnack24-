@@ -83,7 +83,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
       final msg = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: AppColors.statusCritical,
+          backgroundColor: AppColors.statusCriticalFill,
           content: Text('Kündigung konnte nicht übermittelt werden: $msg'),
         ),
       );
@@ -95,7 +95,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Verträge hier kündigen')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s4),
@@ -110,14 +110,14 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
               style: AppTypography.display(
                 size: 22,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Die Bördesnack24-App ist kostenlos — es läuft kein '
+              'Die Bördesnack24-App ist kostenlos, es läuft kein '
               'kostenpflichtiger Vertrag, den Sie kündigen müssten. Wenn Sie '
-              'Ihre Nutzung dennoch beenden möchten, erklären Sie das hier — '
+              'Ihre Nutzung dennoch beenden möchten, erklären Sie das hier, '
               'auch ohne Anmeldung. Den Zugang Ihrer Erklärung bestätigen '
               'wir sofort mit Datum und Uhrzeit sowie per E-Mail.',
               style: AppTypography.body(size: 13, color: AppColors.textMuted)
@@ -236,7 +236,7 @@ class _CancellationScreenState extends ConsumerState<CancellationScreen> {
                     FilledButton(
                       onPressed: _busy ? null : _submit,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.ink,
+                        backgroundColor: AppColors.surfaceInverse,
                         foregroundColor: AppColors.brand,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -300,7 +300,7 @@ class _ConfirmationCard extends StatelessWidget {
                   style: AppTypography.display(
                     size: 18,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -310,7 +310,7 @@ class _ConfirmationCard extends StatelessWidget {
           Text(
             'Ihre Kündigungserklärung ist am $receivedAt Uhr bei uns '
             'eingegangen (Bestätigung gemäß § 312k Abs. 2 BGB). '
-            'Eine Bestätigung in Textform wurde an $emailTo gesendet — '
+            'Eine Bestätigung in Textform wurde an $emailTo gesendet, '
             'bitte als Nachweis aufbewahren.',
             style: AppTypography.body(size: 14, color: AppColors.textDefault)
                 .copyWith(height: 1.45),

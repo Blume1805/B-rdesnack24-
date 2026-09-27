@@ -140,7 +140,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               icon: const Icon(Icons.note_add),
               label: const Text('Neu'),
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
             )
           : null,
       body: Column(
@@ -404,7 +404,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Anfordern'),
@@ -494,7 +494,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brand,
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.onBrand,
               ),
               onPressed: () => Navigator.pop(dCtx, true),
               child: const Text('Einladen'),
@@ -715,7 +715,7 @@ class _FolderChips extends StatelessWidget {
           style: AppTypography.body(
             size: 12,
             weight: FontWeight.w700,
-            color: active ? AppColors.ink : AppColors.textDefault,
+            color: active ? AppColors.textStrong : AppColors.textDefault,
           ),
         ),
       ),
@@ -767,7 +767,7 @@ class _FolderSection extends StatelessWidget {
               Icon(
                 _iconFor(folder['icon']?.toString()),
                 size: 18,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -776,7 +776,7 @@ class _FolderSection extends StatelessWidget {
                   style: AppTypography.display(
                     size: 15,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -882,7 +882,7 @@ class _DocumentCard extends ConsumerWidget {
                     style: AppTypography.body(
                       size: 15,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),
@@ -1070,7 +1070,7 @@ class _SigTaskRow extends ConsumerWidget {
               style: AppTypography.body(
                 size: 12,
                 weight: FontWeight.w700,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ),

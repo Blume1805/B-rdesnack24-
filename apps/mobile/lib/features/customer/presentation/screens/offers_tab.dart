@@ -8,6 +8,7 @@ import '../../../../core/services/install_prompt.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../../core/widgets/motion/motion.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/donations_news.dart';
 import '../../domain/entities/loyalty_status.dart';
@@ -80,7 +81,7 @@ class OffersTab extends ConsumerWidget {
           // Die drei Zahlen, die den Kunden interessieren — ohne Lesen
           // erfassbar, direkt über den Angeboten.
           if (hasSub) ...[
-            const _KeyFactsRow(),
+            const Reveal(child: _KeyFactsRow()),
             const SizedBox(height: AppSpacing.s5),
           ],
 
@@ -94,16 +95,16 @@ class OffersTab extends ConsumerWidget {
 
           if (hasSub) ...[
             // 0.3. ── Frühstücks-Deal + Feierabend-Deal (Karussell) ───
-            const _DealsCarousel(),
+            const Reveal(index: 1, child: _DealsCarousel()),
             const SizedBox(height: AppSpacing.s5),
 
             // 0.5. ── Hero-Karussell (rotierende Aktionskarten) ───────
-            const _HeroCarousel(),
+            const Reveal(index: 2, child: _HeroCarousel()),
             const SizedBox(height: AppSpacing.s6),
           ],
 
           // 1. ── News-Teaser (klick öffnet Feed) ─────────────────────
-          const _NewsTeaser(),
+          const Reveal(child: _NewsTeaser()),
           const SizedBox(height: AppSpacing.s6),
 
           // 2. ── Punktesammler (Loyalty + persönliche Angebote) ──────
@@ -111,7 +112,7 @@ class OffersTab extends ConsumerWidget {
             // Offline-Hinweis: Coupons kommen aus dem lokalen Snapshot.
             if (ref.watch(personalOffersOfflineProvider)) ...[
               AppCard(
-                color: const Color(0xFFFFF3D6),
+                color: AppColors.statusWarningTint,
                 borderColor: AppColors.statusWarning,
                 padding: const EdgeInsets.all(AppSpacing.s3),
                 child: Row(
@@ -124,10 +125,12 @@ class OffersTab extends ConsumerWidget {
                     const SizedBox(width: AppSpacing.s2),
                     Expanded(
                       child: Text(
-                        'Kein Empfang — deine gespeicherten Coupons und '
+                        'Kein Empfang: Deine gespeicherten Coupons und '
                         'Codes werden offline angezeigt.',
-                        style:
-                            AppTypography.body(size: 12, color: AppColors.ink),
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textStrong,
+                        ),
                       ),
                     ),
                   ],
@@ -142,7 +145,7 @@ class OffersTab extends ConsumerWidget {
                 error: (_, __) => const SizedBox.shrink(),
                 data: (l) => l == null
                     ? const SizedBox.shrink()
-                    : _LoyaltyProgressCard(status: l),
+                    : Reveal(child: _LoyaltyProgressCard(status: l)),
               ),
             ),
             if (loyalty.valueOrNull != null)
@@ -163,17 +166,18 @@ class OffersTab extends ConsumerWidget {
                   children: [
                     if (specials.isNotEmpty) ...[
                       SectionHeader(
-                        eyebrow: 'Für dich persönlich',
+                        eyebrow: 'Für Dich persönlich',
                         title: 'Sonderangebote',
                         action: _AiSectionBadge(context: context),
                       ),
                       const SizedBox(height: AppSpacing.s4),
-                      for (final o in specials)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
-                        ),
-                      const SizedBox(height: AppSpacing.s5),
+                      CardStack(
+                        children: [
+                          for (final o in specials)
+                            _PersonalOfferCard(offer: o),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s6),
                     ],
                     if (loyalty.isNotEmpty) ...[
                       SectionHeader(
@@ -182,26 +186,26 @@ class OffersTab extends ConsumerWidget {
                         action: _AiSectionBadge(context: context),
                       ),
                       const SizedBox(height: AppSpacing.s4),
-                      for (final o in loyalty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
-                        ),
-                      const SizedBox(height: AppSpacing.s5),
+                      CardStack(
+                        children: [
+                          for (final o in loyalty) _PersonalOfferCard(offer: o),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s6),
                     ],
                     if (basis.isNotEmpty) ...[
                       SectionHeader(
-                        eyebrow: 'Nur für dich',
+                        eyebrow: 'Nur für Dich',
                         title: 'Dein Angebot',
                         action: _AiSectionBadge(context: context),
                       ),
                       const SizedBox(height: AppSpacing.s4),
-                      for (final o in basis)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.s4),
-                          child: _PersonalOfferCard(offer: o),
-                        ),
-                      const SizedBox(height: AppSpacing.s5),
+                      CardStack(
+                        children: [
+                          for (final o in basis) _PersonalOfferCard(offer: o),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.s6),
                     ],
                   ],
                 );
@@ -224,11 +228,12 @@ class OffersTab extends ConsumerWidget {
                 ),
               ),
               error: (e, _) => AppCard(
-                color: const Color(0xFFF7DBDB),
+                color: AppColors.statusCriticalTint,
                 borderColor: AppColors.statusCritical,
                 child: Text(
                   '$e',
-                  style: AppTypography.body(size: 13, color: AppColors.ink),
+                  style:
+                      AppTypography.body(size: 13, color: AppColors.textStrong),
                 ),
               ),
               data: (list) {
@@ -244,15 +249,16 @@ class OffersTab extends ConsumerWidget {
                     ),
                   );
                 }
-                return SizedBox(
+                return FocusCarousel(
                   height: 440,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.s3),
-                    itemBuilder: (context, i) =>
-                        _WeeklyOfferSlot(offer: list[i]),
+                  itemExtent: 260 + AppSpacing.s3,
+                  itemCount: list.length,
+                  itemBuilder: (context, i) => _WeeklyOfferSlot(offer: list[i]),
+                  labelFor: (i) => list[i].title,
+                  labelStyle: AppTypography.body(
+                    size: 14,
+                    weight: FontWeight.w800,
+                    color: AppColors.textStrong,
                   ),
                 );
               },
@@ -267,11 +273,20 @@ class OffersTab extends ConsumerWidget {
             title: 'Eure Favoriten',
           ),
           const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Getränke'),
+          const Reveal(
+            index: 0,
+            child: _FavoritesSection(category: 'Getränke'),
+          ),
           const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Snacks'),
+          const Reveal(
+            index: 1,
+            child: _FavoritesSection(category: 'Snacks'),
+          ),
           const SizedBox(height: AppSpacing.s4),
-          const _FavoritesSection(category: 'Eis'),
+          const Reveal(
+            index: 2,
+            child: _FavoritesSection(category: 'Eis'),
+          ),
         ],
       ),
     );
@@ -288,9 +303,6 @@ class _KeyFactsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rate = ref.watch(myEffectiveDiscountProvider);
     final effRate = rate > 0 ? rate : Pricing.appDiscountRate;
-    final pct = (effRate * 100)
-        .toStringAsFixed(effRate * 100 % 1 == 0 ? 0 : 1)
-        .replaceAll('.', ',');
     final points = ref.watch(myLoyaltyStatusProvider).valueOrNull?.points;
     final coupons = ref.watch(myPersonalOffersProvider).valueOrNull?.length;
 
@@ -299,7 +311,9 @@ class _KeyFactsRow extends ConsumerWidget {
         Expanded(
           child: _FactTile(
             icon: Icons.sell_outlined,
-            value: '$pct %',
+            number: effRate * 100,
+            format: (v) =>
+                '${v.toStringAsFixed(effRate * 100 % 1 == 0 ? 0 : 1).replaceAll('.', ',')} %',
             label: 'Dauerrabatt',
           ),
         ),
@@ -307,7 +321,8 @@ class _KeyFactsRow extends ConsumerWidget {
         Expanded(
           child: _FactTile(
             icon: Icons.stars_outlined,
-            value: points == null ? '—' : '$points',
+            number: points?.toDouble(),
+            format: (v) => '${v.round()}',
             label: 'Punkte',
           ),
         ),
@@ -315,7 +330,8 @@ class _KeyFactsRow extends ConsumerWidget {
         Expanded(
           child: _FactTile(
             icon: Icons.confirmation_number_outlined,
-            value: coupons == null ? '—' : '$coupons',
+            number: coupons?.toDouble(),
+            format: (v) => '${v.round()}',
             label: coupons == 1 ? 'Coupon' : 'Coupons',
           ),
         ),
@@ -328,15 +344,24 @@ class _KeyFactsRow extends ConsumerWidget {
 class _FactTile extends StatelessWidget {
   const _FactTile({
     required this.icon,
-    required this.value,
+    required this.number,
+    required this.format,
     required this.label,
   });
   final IconData icon;
-  final String value;
+
+  /// Wert aus der Datenbank; null, solange er lädt.
+  final double? number;
+  final String Function(double v) format;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final style = AppTypography.display(
+      size: 20,
+      weight: FontWeight.w800,
+      color: AppColors.textStrong,
+    );
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.s2,
@@ -353,15 +378,13 @@ class _FactTile extends StatelessWidget {
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              maxLines: 1,
-              style: AppTypography.display(
-                size: 20,
-                weight: FontWeight.w800,
-                color: AppColors.ink,
-              ),
-            ),
+            child: number == null
+                ? Text(
+                    '…',
+                    semanticsLabel: 'wird geladen',
+                    style: style,
+                  )
+                : CountUp(value: number!, format: format, style: style),
           ),
           const SizedBox(height: 1),
           Text(
@@ -428,7 +451,7 @@ class _CouponFootnote extends StatelessWidget {
       child: Text(
         '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind mehrere '
         'Coupons für dasselbe Produkt aktiviert, wird automatisch der '
-        'günstigste Preis für dich angewandt.',
+        'günstigste Preis für Dich angewandt.',
         style: AppTypography.body(
           size: 11,
           weight: FontWeight.w600,
@@ -454,7 +477,7 @@ class _PersonalOfferCard extends ConsumerWidget {
       case PersonalOfferSource.loyalty:
         return (label: 'Meilenstein-Bonus', icon: Icons.workspace_premium);
       case PersonalOfferSource.auto:
-        return (label: 'Nur für dich', icon: Icons.card_giftcard);
+        return (label: 'Nur für Dich', icon: Icons.card_giftcard);
     }
   }
 
@@ -464,15 +487,15 @@ class _PersonalOfferCard extends ConsumerWidget {
     final days = remaining.inDays;
     final hours = remaining.inHours;
     final validityLabel = days >= 1
-        ? 'noch $days ${days == 1 ? 'Tag' : 'Tage'}'
+        ? 'Noch $days ${days == 1 ? 'Tag' : 'Tage'}'
         : hours >= 1
-            ? 'noch $hours Std.'
-            : 'endet bald';
+            ? 'Noch $hours Std.'
+            : 'Endet bald';
     final h = _header;
     final isWildcard = offer.isSpecial;
 
     return AppCard(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       borderColor: AppColors.brand,
       padding: EdgeInsets.zero,
       child: Column(
@@ -533,11 +556,11 @@ class _PersonalOfferCard extends ConsumerWidget {
                           ),
                           if (isWildcard)
                             Text(
-                              'Auf ein Produkt deiner Wahl',
+                              'Auf ein Produkt Deiner Wahl',
                               style: AppTypography.body(
                                 size: 13,
                                 weight: FontWeight.w600,
-                                color: AppColors.brandLight,
+                                color: AppColors.brandPale,
                               ),
                             ),
                         ],
@@ -564,7 +587,7 @@ class _PersonalOfferCard extends ConsumerWidget {
                           style: AppTypography.body(
                             size: 13,
                             weight: FontWeight.w700,
-                            color: AppColors.brandLight,
+                            color: AppColors.brandPale,
                           ),
                         ),
                       ),
@@ -602,7 +625,7 @@ class _PersonalActivationFooter extends ConsumerWidget {
     if (!offer.isActivated) {
       return Container(
         decoration: const BoxDecoration(
-          color: Color(0xFF14110E),
+          color: AppColors.surfaceInverse,
           border: Border(top: BorderSide(color: AppColors.brand, width: 1)),
         ),
         padding: const EdgeInsets.symmetric(
@@ -617,7 +640,7 @@ class _PersonalActivationFooter extends ConsumerWidget {
                 style: AppTypography.body(
                   size: 12,
                   weight: FontWeight.w700,
-                  color: AppColors.brandLight,
+                  color: AppColors.brandPale,
                 ),
               ),
             ),
@@ -637,18 +660,18 @@ class _PersonalActivationFooter extends ConsumerWidget {
                       height: 14,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.ink,
+                        color: AppColors.onBrand,
                       ),
                     )
                   : const Icon(
                       Icons.add_circle_outline,
                       size: 18,
-                      color: AppColors.ink,
+                      color: AppColors.onBrand,
                     ),
               label: const Text('Aktivieren'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brand,
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.onBrand,
                 textStyle:
                     AppTypography.body(size: 13, weight: FontWeight.w800),
               ),
@@ -660,7 +683,7 @@ class _PersonalActivationFooter extends ConsumerWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF14110E),
+        color: AppColors.surfaceInverse,
         border: Border(top: BorderSide(color: AppColors.brand, width: 1)),
       ),
       padding: const EdgeInsets.symmetric(
@@ -732,13 +755,13 @@ class _PersonalActivationFooter extends ConsumerWidget {
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.onDark,
+                      color: AppColors.onStatus,
                     ),
                   )
                 : const Icon(
                     Icons.check_circle,
                     size: 18,
-                    color: AppColors.onDark,
+                    color: AppColors.onStatus,
                   ),
             label: Column(
               mainAxisSize: MainAxisSize.min,
@@ -748,7 +771,7 @@ class _PersonalActivationFooter extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 15,
                     weight: FontWeight.w800,
-                    color: AppColors.onDark,
+                    color: AppColors.onStatus,
                   ),
                 ),
                 Text(
@@ -756,14 +779,14 @@ class _PersonalActivationFooter extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w700,
-                    color: AppColors.onDark,
+                    color: AppColors.onStatus,
                   ),
                 ),
               ],
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.statusPositive,
-              foregroundColor: AppColors.onDark,
+              backgroundColor: AppColors.statusPositiveFill,
+              foregroundColor: AppColors.onStatus,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             ),
           ),
@@ -794,7 +817,7 @@ class _RedeemButton extends ConsumerWidget {
                 SnackBar(
                   content: Text(
                     offer != null
-                        ? 'Angebot eingelöst — viel Spaß!'
+                        ? 'Angebot eingelöst, viel Spaß!'
                         : 'Einlösen fehlgeschlagen: ${err ?? 'unbekannt'}',
                   ),
                 ),
@@ -802,7 +825,7 @@ class _RedeemButton extends ConsumerWidget {
             },
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.ink,
+        foregroundColor: AppColors.onBrand,
         padding:
             const EdgeInsets.symmetric(horizontal: AppSpacing.s4, vertical: 10),
         textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
@@ -813,7 +836,7 @@ class _RedeemButton extends ConsumerWidget {
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             )
           : const Icon(Icons.check_circle_outline, size: 18),
@@ -850,7 +873,7 @@ class _DarkPriceRow extends StatelessWidget {
           style: AppTypography.body(
             size: 16,
             weight: FontWeight.w600,
-            color: AppColors.brandLight,
+            color: AppColors.brandPale,
           ).copyWith(
             decoration: TextDecoration.lineThrough,
             decorationColor: AppColors.brandLight,
@@ -880,73 +903,108 @@ class _LoyaltyProgressCard extends StatelessWidget {
     final resetDay = status.nextReset.day.toString().padLeft(2, '0');
     final resetMonth = status.nextReset.month.toString().padLeft(2, '0');
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.s5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.stars_rounded, color: AppColors.brand, size: 22),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Deine Punkte',
-                  style: AppTypography.body(
-                    size: 16,
-                    weight: FontWeight.w800,
-                    color: AppColors.brand,
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+        child: Stack(
+          children: [
+            // Muster 11: Börde-Silhouette als Tiefenebene. Rein dekorativ.
+            Positioned(
+              right: -24,
+              top: 4,
+              child: ExcludeSemantics(
+                child: ParallaxLayer(
+                  depth: 0.14,
+                  child: SizedBox(
+                    width: 190,
+                    height: 90,
+                    child: CustomPaint(
+                      painter: BoerdeOutlinePainter(
+                        color: AppColors.brand.withValues(alpha: 0.12),
+                        stroke: 1.5,
+                      ),
+                    ),
                   ),
                 ),
               ),
-              Text(
-                'Reset $resetDay.$resetMonth.',
-                style: AppTypography.body(
-                  size: 12,
-                  weight: FontWeight.w700,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '${status.points}',
-                style: AppTypography.display(
-                  size: 40,
-                  weight: FontWeight.w800,
-                  color: AppColors.ink,
-                ).copyWith(height: 1),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Pkt.',
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.s5),
+              child: _loyaltyBody(resetDay, resetMonth, tiers),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _loyaltyBody(String resetDay, String resetMonth, List<int> tiers) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.stars_rounded, color: AppColors.brand, size: 22),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Deine Punkte',
                 style: AppTypography.body(
                   size: 16,
-                  weight: FontWeight.w700,
-                  color: AppColors.textMuted,
+                  weight: FontWeight.w800,
+                  color: AppColors.brand,
                 ),
               ),
-              const Spacer(),
-              if (status.nextTier != null)
-                Text(
-                  'noch ${status.pointsToNext} bis ${status.nextTier}',
-                  style: AppTypography.body(
-                    size: 13,
-                    weight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
+            ),
+            Text(
+              'Reset $resetDay.$resetMonth.',
+              style: AppTypography.body(
+                size: 12,
+                weight: FontWeight.w700,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            CountUp(
+              value: status.points.toDouble(),
+              format: (v) => '${v.round()}',
+              style: AppTypography.display(
+                size: 40,
+                weight: FontWeight.w800,
+                color: AppColors.textStrong,
+              ).copyWith(height: 1),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Pkt.',
+              style: AppTypography.body(
+                size: 16,
+                weight: FontWeight.w700,
+                color: AppColors.textMuted,
+              ),
+            ),
+            const Spacer(),
+            if (status.nextTier != null)
+              Text(
+                'Noch ${status.pointsToNext} bis ${status.nextTier}',
+                style: AppTypography.body(
+                  size: 13,
+                  weight: FontWeight.w800,
+                  color: AppColors.textStrong,
                 ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          // Meilenstein-Timeline
-          _TierTimeline(tiers: tiers, points: status.points),
-        ],
-      ),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s3),
+        // Meilenstein-Timeline
+        _TierTimeline(tiers: tiers, points: status.points),
+      ],
     );
   }
 }
@@ -1032,7 +1090,8 @@ class _MilestoneChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ink = AppColors.ink;
+    // Nur auf der erreichten (goldenen) Kachel verwendet.
+    const ink = AppColors.onBrand;
     return SizedBox(
       width: width,
       child: Column(
@@ -1049,38 +1108,26 @@ class _MilestoneChip extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             alignment: Alignment.center,
-            child: Stack(
-              alignment: Alignment.center,
+            // Symbol über dem Prozentwert. Vorher ein Stack, der nur so groß
+            // wie das Symbol war: der Wert lag dadurch auf dem Symbol
+            // (Befund Bildschirmfoto 27.09.2026).
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   reached ? Icons.card_giftcard_rounded : Icons.lock_outline,
-                  size: 24,
+                  size: 22,
                   color: reached ? ink : AppColors.textMuted,
                 ),
-                if (reached)
-                  Positioned(
-                    bottom: 4,
-                    child: Text(
-                      '-$percent %',
-                      style: AppTypography.body(
-                        size: 12,
-                        weight: FontWeight.w800,
-                        color: ink,
-                      ),
-                    ),
-                  )
-                else
-                  Positioned(
-                    bottom: 4,
-                    child: Text(
-                      '-$percent %',
-                      style: AppTypography.body(
-                        size: 12,
-                        weight: FontWeight.w700,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
+                const SizedBox(height: 2),
+                Text(
+                  '-$percent %',
+                  style: AppTypography.body(
+                    size: 12,
+                    weight: reached ? FontWeight.w800 : FontWeight.w700,
+                    color: reached ? ink : AppColors.textMuted,
                   ),
+                ),
               ],
             ),
           ),
@@ -1090,7 +1137,7 @@ class _MilestoneChip extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: reached ? AppColors.ink : AppColors.textMuted,
+              color: reached ? AppColors.textStrong : AppColors.textMuted,
             ),
           ),
           Text(
@@ -1189,7 +1236,7 @@ class _ActivationButton extends StatelessWidget {
                   height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.onDark,
+                    color: AppColors.onStatus,
                   ),
                 )
               : const Icon(Icons.check_circle, size: 18),
@@ -1201,7 +1248,7 @@ class _ActivationButton extends StatelessWidget {
                 style: AppTypography.body(
                   size: 15,
                   weight: FontWeight.w800,
-                  color: AppColors.onDark,
+                  color: AppColors.onStatus,
                 ),
               ),
               Text(
@@ -1209,14 +1256,14 @@ class _ActivationButton extends StatelessWidget {
                 style: AppTypography.body(
                   size: 11,
                   weight: FontWeight.w700,
-                  color: AppColors.onDark,
+                  color: AppColors.onStatus,
                 ),
               ),
             ],
           ),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.statusPositive,
-            foregroundColor: AppColors.onDark,
+            backgroundColor: AppColors.statusPositiveFill,
+            foregroundColor: AppColors.onStatus,
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           ),
         ),
@@ -1232,14 +1279,14 @@ class _ActivationButton extends StatelessWidget {
                 height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.ink,
+                  color: AppColors.onBrand,
                 ),
               )
             : const Icon(Icons.add_circle_outline, size: 18),
         label: const Text('Aktivieren'),
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.brand,
-          foregroundColor: AppColors.ink,
+          foregroundColor: AppColors.onBrand,
           textStyle: AppTypography.body(size: 13, weight: FontWeight.w800),
         ),
       ),
@@ -1267,7 +1314,7 @@ class _FavoritesSection extends ConsumerWidget {
               style: AppTypography.body(
                 size: 16,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ],
@@ -1366,7 +1413,7 @@ class _FavoriteCard extends StatelessWidget {
                       style: AppTypography.display(
                         size: 16,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.onBrand,
                       ),
                     ),
                   ),
@@ -1383,7 +1430,7 @@ class _FavoriteCard extends StatelessWidget {
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1498,7 +1545,7 @@ class _NewsTeaser extends ConsumerWidget {
                           ),
                           child: const Icon(
                             Icons.campaign,
-                            color: AppColors.ink,
+                            color: AppColors.onBrand,
                             size: 18,
                           ),
                         ),
@@ -1509,7 +1556,7 @@ class _NewsTeaser extends ConsumerWidget {
                             style: AppTypography.display(
                               size: 20,
                               weight: FontWeight.w800,
-                              color: AppColors.ink,
+                              color: AppColors.textStrong,
                             ),
                           ),
                         ),
@@ -1582,7 +1629,7 @@ class _NewsPreviewRow extends StatelessWidget {
                 style: AppTypography.body(
                   size: 15,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -1643,7 +1690,7 @@ class _ProductSearchBarState extends ConsumerState<_ProductSearchBar> {
               textInputAction: TextInputAction.search,
               onSubmitted: _search,
               decoration: InputDecoration(
-                hintText: 'Finde dein Lieblingsprodukt',
+                hintText: 'Finde Dein Lieblingsprodukt',
                 hintStyle: AppTypography.body(
                   size: 14,
                   color: AppColors.textMuted,
@@ -1686,14 +1733,14 @@ class _DealsCarouselState extends State<_DealsCarousel> {
     final slides = <Widget>[
       _TimeDealCard(
         key: CustomerAnchors.fruehstueckDeal,
-        eyebrow: 'FRÜHSTÜCKS-DEAL',
-        timeRange: 'Täglich von 6 bis 8 Uhr — an allen Automaten.',
+        eyebrow: 'Frühstücks-Deal',
+        timeRange: 'Täglich von 6 bis 8 Uhr, an allen Automaten.',
         icon: Icons.wb_sunny_outlined,
       ),
       _TimeDealCard(
         key: CustomerAnchors.feierabendDeal,
-        eyebrow: 'FEIERABEND-DEAL',
-        timeRange: 'Täglich von 16 bis 17 Uhr — an allen Automaten.',
+        eyebrow: 'Feierabend-Deal',
+        timeRange: 'Täglich von 16 bis 17 Uhr, an allen Automaten.',
         icon: Icons.nights_stay_outlined,
       ),
     ];
@@ -1784,14 +1831,14 @@ class _TimeDealCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.ink),
+              Icon(icon, size: 18, color: AppColors.onBrand),
               const SizedBox(width: 6),
               Text(
                 eyebrow,
                 style: AppTypography.body(
                   size: 12,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.onBrand,
                 ).copyWith(letterSpacing: 2, height: 1),
               ),
               const Spacer(),
@@ -1810,7 +1857,7 @@ class _TimeDealCard extends ConsumerWidget {
                   style: AppTypography.display(
                     size: 22,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ).copyWith(height: 1.1),
                 ),
                 TextSpan(
@@ -1818,7 +1865,7 @@ class _TimeDealCard extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 12,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ),
                 ),
               ],
@@ -1830,7 +1877,7 @@ class _TimeDealCard extends ConsumerWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.onBrand,
             ),
           ),
           const SizedBox(height: AppSpacing.s4),
@@ -1858,11 +1905,11 @@ class _TimeDealCard extends ConsumerWidget {
           Text(
             '* Nicht mit anderen Coupons/Aktionen kombinierbar. Sind '
             'mehrere Coupons für dasselbe Produkt aktiviert, wird '
-            'automatisch der günstigste Preis für dich angewandt.',
+            'automatisch der günstigste Preis für Dich angewandt.',
             style: AppTypography.body(
               size: 9,
               weight: FontWeight.w600,
-              color: AppColors.ink,
+              color: AppColors.onBrand,
             ).copyWith(height: 1.3),
           ),
         ],
@@ -1906,14 +1953,14 @@ class _DealSlot extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s2),
       decoration: BoxDecoration(
-        color: AppColors.ink,
+        color: AppColors.surfaceInverse,
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            label.toUpperCase(),
+            label,
             style: AppTypography.body(
               size: 10,
               weight: FontWeight.w800,
@@ -2022,6 +2069,22 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
 class _HeroLoyaltyCard extends StatelessWidget {
   const _HeroLoyaltyCard({required this.status});
   final LoyaltyStatus? status;
+
+  /// Coupon je Meilenstein, wie in `_LoyaltyProgressCard._rewards`.
+  static const _couponPct = {500: 5, 1200: 10, 2000: 15, 3000: 25};
+
+  /// Vorher stand hier fest „Nächster Meilenstein bringt weitere % Rabatt"
+  /// — ohne Zahl (Befund 26.09.2026). Jetzt aus den echten Daten.
+  static String _nextLine(LoyaltyStatus? s) {
+    final next = s?.nextTier;
+    if (s == null) return 'Sammle Punkte bei jedem Kauf.';
+    if (next == null) return 'Alle Meilensteine dieses Monats erreicht.';
+    final pct = _couponPct[next];
+    return pct == null
+        ? 'Noch ${s.pointsToNext} Punkte bis zum nächsten Meilenstein.'
+        : 'Noch ${s.pointsToNext} Punkte bis zu Deinem $pct-%-Coupon.';
+  }
+
   @override
   Widget build(BuildContext context) {
     final points = status?.points ?? 0;
@@ -2041,7 +2104,7 @@ class _HeroLoyaltyCard extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: AppColors.ink,
+              color: AppColors.surfaceInverse,
               borderRadius: BorderRadius.circular(AppRadii.md),
             ),
             alignment: Alignment.center,
@@ -2058,11 +2121,11 @@ class _HeroLoyaltyCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'DEIN PUNKTESTAND',
+                  'Dein Punktestand',
                   style: AppTypography.body(
                     size: 11,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ).copyWith(letterSpacing: 1),
                 ),
                 Text(
@@ -2070,14 +2133,14 @@ class _HeroLoyaltyCard extends StatelessWidget {
                   style: AppTypography.display(
                     size: 26,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ),
                 ),
                 Text(
-                  'Nächster Meilenstein bringt weitere % Rabatt',
+                  _nextLine(status),
                   style: AppTypography.body(
                     size: 12,
-                    color: AppColors.ink,
+                    color: AppColors.onBrand,
                   ),
                   maxLines: 2,
                 ),
@@ -2096,7 +2159,7 @@ class _HeroNewsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       borderRadius: BorderRadius.circular(AppRadii.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -2115,8 +2178,11 @@ class _HeroNewsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
-                child:
-                    const Icon(Icons.campaign, color: AppColors.ink, size: 30),
+                child: const Icon(
+                  Icons.campaign,
+                  color: AppColors.onBrand,
+                  size: 30,
+                ),
               ),
               const SizedBox(width: AppSpacing.s3),
               Expanded(
@@ -2125,7 +2191,7 @@ class _HeroNewsCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'NEUES VON UNS',
+                      'Neues von uns',
                       style: AppTypography.body(
                         size: 11,
                         weight: FontWeight.w800,
@@ -2169,7 +2235,7 @@ class _HeroDonationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.statusPositive,
+      color: AppColors.statusPositiveFill,
       borderRadius: BorderRadius.circular(AppRadii.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -2184,7 +2250,7 @@ class _HeroDonationCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.onDark,
+                  color: AppColors.onStatus,
                   borderRadius: BorderRadius.circular(AppRadii.md),
                 ),
                 alignment: Alignment.center,
@@ -2201,11 +2267,11 @@ class _HeroDonationCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'DEIN GUTES TUN',
+                      'Dein Beitrag',
                       style: AppTypography.body(
                         size: 11,
                         weight: FontWeight.w800,
-                        color: AppColors.onDark,
+                        color: AppColors.onStatus,
                       ).copyWith(letterSpacing: 1),
                     ),
                     Text(
@@ -2213,14 +2279,14 @@ class _HeroDonationCard extends StatelessWidget {
                       style: AppTypography.display(
                         size: 24,
                         weight: FontWeight.w800,
-                        color: AppColors.onDark,
+                        color: AppColors.onStatus,
                       ),
                     ),
                     Text(
-                      'gespendet · Empfänger abstimmen',
+                      'gespendet. Empfänger abstimmen',
                       style: AppTypography.body(
                         size: 12,
-                        color: AppColors.onDark,
+                        color: AppColors.onStatus,
                       ),
                     ),
                   ],
@@ -2243,7 +2309,7 @@ class _SubscriptionLockCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppCard(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       borderColor: AppColors.brand,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2270,12 +2336,12 @@ class _SubscriptionLockCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Mit dem Bördesnack24-Abo schaltest du frei:\n'
+            'Mit dem Bördesnack24-Abo schaltest Du frei:\n'
             '•  Frühstücks- & Feierabend-Deals\n'
             '•  Wochen- und Aktionsangebote mit Coupons\n'
             '•  Loyalty-Punkte mit Meilenstein-Boni\n'
-            '•  Persönliche Angebote nur für dich',
-            style: AppTypography.body(size: 14, color: AppColors.brandLight)
+            '•  Persönliche Angebote nur für Dich',
+            style: AppTypography.body(size: 14, color: AppColors.brandPale)
                 .copyWith(height: 1.6),
           ),
           const SizedBox(height: AppSpacing.s4),
@@ -2284,7 +2350,7 @@ class _SubscriptionLockCard extends ConsumerWidget {
             child: FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brand,
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.onBrand,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -2307,7 +2373,7 @@ class _SubscriptionLockCard extends ConsumerWidget {
             width: double.infinity,
             child: TextButton.icon(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.brandLight,
+                foregroundColor: AppColors.brandPale,
               ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(

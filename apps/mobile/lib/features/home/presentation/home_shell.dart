@@ -209,7 +209,7 @@ class _MfaReminderBanner extends ConsumerWidget {
     final enrolled = ref.watch(mfaEnrolledProvider).valueOrNull;
     if (dismissed || enrolled != false) return const SizedBox.shrink();
     return Material(
-      color: const Color(0xFFFFF3D6),
+      color: AppColors.statusWarningTint,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.s4,
@@ -231,7 +231,7 @@ class _MfaReminderBanner extends ConsumerWidget {
                 style: AppTypography.body(
                   size: 12.5,
                   weight: FontWeight.w600,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ),
@@ -394,7 +394,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                             ),
                             child: const BrandIcon(
                               size: 40,
-                              color: AppColors.ink,
+                              color: AppColors.onBrand,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.s3),
@@ -427,7 +427,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                                   style: AppTypography.body(
                                     size: 12,
                                     weight: FontWeight.w600,
-                                    color: AppColors.brandLight,
+                                    color: AppColors.brandPale,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -593,7 +593,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w500,
-                            color: AppColors.brandLight,
+                            color: AppColors.brandPale,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -647,7 +647,7 @@ class _NotificationBell extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               decoration: BoxDecoration(
-                color: AppColors.statusCritical,
+                color: AppColors.statusCriticalFill,
                 borderRadius: BorderRadius.circular(9),
               ),
               alignment: Alignment.center,

@@ -73,7 +73,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Dein kostenloses Konto')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s4),
@@ -90,7 +90,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
             width: double.infinity,
             child: FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.ink,
+                backgroundColor: AppColors.surfaceInverse,
                 foregroundColor: AppColors.brand,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
@@ -98,7 +98,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Zurück zu deinen Vorteilen'),
+              child: const Text('Zurück zu Deinen Vorteilen'),
             ),
           ),
         ],
@@ -131,7 +131,7 @@ class _CompareHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               decoration: BoxDecoration(
-                color: AppColors.ink,
+                color: AppColors.surfaceInverse,
                 borderRadius: BorderRadius.circular(AppRadii.sm),
               ),
               child: Column(
@@ -183,7 +183,7 @@ class _GroupLabel extends StatelessWidget {
         vertical: 6,
       ),
       child: Text(
-        text.toUpperCase(),
+        text,
         style: AppTypography.body(
           size: 9.5,
           weight: FontWeight.w800,
@@ -222,7 +222,7 @@ class _CompareRow extends StatelessWidget {
               style: AppTypography.body(
                 size: 12.5,
                 weight: FontWeight.w600,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
           ),
@@ -258,7 +258,7 @@ class _PriceRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'Kein Abo, keine Laufzeit, keine Kündigung — Anmelden genügt.',
+              'Kein Abo, keine Laufzeit, keine Kündigung: Anmelden genügt.',
               style: AppTypography.body(size: 11, color: AppColors.textMuted),
             ),
           ),

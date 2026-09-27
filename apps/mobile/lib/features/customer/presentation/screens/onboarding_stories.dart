@@ -38,7 +38,7 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       icon: Icons.qr_code_2,
       eyebrow: 'Kundenkarte',
       title: 'Am Automaten scannen',
-      body: 'Öffne die App und zeige deinen QR-Code am Automaten — Rabatte, '
+      body: 'Öffne die App und zeige Deinen QR-Code am Automaten: Rabatte, '
           'Punkte und (bei Unternehmern) die Rechnung werden automatisch '
           'verknüpft.',
     ),
@@ -47,26 +47,26 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
       eyebrow: 'Deine Vorteile',
       title: 'Immer 5 % günstiger',
       body:
-          'Als angemeldete Kundin oder Kunde zahlst du an jedem Automaten immer '
-          '5 % weniger — mit Bronze-, Silber- und Gold-Status wächst der '
+          'Als angemeldete Kundin oder Kunde zahlst Du an jedem Automaten immer '
+          '5 % weniger. Mit Bronze-, Silber- und Gold-Status wächst der '
           'Dauerrabatt lebenslang auf bis zu 10 %. Frühstücks- und '
           'Feierabend-Deals sparen weitere 10 %. Ob sich das lohnt, zeigt '
-          'dir die Beispielrechnung im Angebote-Tab.',
+          'Dir die Beispielrechnung im Angebote-Tab.',
     ),
     _StoryPage(
       icon: Icons.stars_rounded,
       eyebrow: 'Punktesystem',
       title: 'Sammeln und sparen',
-      body: 'Jeder Cent Umsatz = 1 Punkt. Bei 500 · 1200 · 2000 · 3000 '
-          'Punkten schaltest du 5 · 10 · 15 · 25 % Rabatt frei.',
+      body: 'Jeder Cent Umsatz = 1 Punkt. Bei 500, 1.200, 2.000 und 3.000 '
+          'Punkten schaltest Du 5, 10, 15 und 25 % Rabatt frei.',
     ),
     _StoryPage(
       icon: Icons.volunteer_activism,
       eyebrow: '5 % für den guten Zweck',
       title: 'Deine Spende zählt',
-      body: '5 % jedes Netto-Umsatzes wandern in einen Spendentopf. Du '
-          'entscheidest über die Empfänger — Vorschlagen, Abstimmen, '
-          'nachlesen wohin es geht.',
+      body: '5 % des Nettoerlöses gehen in einen Spendentopf für die '
+          'Region. Du schlägst vor und stimmst mit ab. Einmal im Jahr '
+          'wird ausgezahlt und öffentlich nachgewiesen.',
     ),
   ];
 
@@ -159,7 +159,7 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.brand,
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.onBrand,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.s5,
                       vertical: 12,
@@ -200,7 +200,7 @@ class _StoryPage {
             borderRadius: BorderRadius.circular(AppRadii.lg),
           ),
           alignment: Alignment.center,
-          child: Icon(icon, size: 44, color: AppColors.ink),
+          child: Icon(icon, size: 44, color: AppColors.textStrong),
         ),
         const SizedBox(height: AppSpacing.s4),
         Text(
@@ -217,7 +217,7 @@ class _StoryPage {
           style: AppTypography.display(
             size: 22,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
           textAlign: TextAlign.center,
         ),

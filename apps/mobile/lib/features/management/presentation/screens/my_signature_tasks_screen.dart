@@ -97,7 +97,7 @@ class _TaskCard extends ConsumerWidget {
                     style: AppTypography.body(
                       size: 15,
                       weight: FontWeight.w800,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   ),
                 ),
@@ -123,8 +123,8 @@ class _TaskCard extends ConsumerWidget {
                     icon: const Icon(Icons.visibility, size: 18),
                     label: const Text('Dokument lesen'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.ink,
-                      side: const BorderSide(color: AppColors.ink),
+                      foregroundColor: AppColors.textStrong,
+                      side: const BorderSide(color: AppColors.textStrong),
                     ),
                   ),
                 const Spacer(),
@@ -135,7 +135,7 @@ class _TaskCard extends ConsumerWidget {
                     label: const Text('Signieren'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.brand,
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.onBrand,
                     ),
                   )
                 else
@@ -144,8 +144,8 @@ class _TaskCard extends ConsumerWidget {
                     icon: const Icon(Icons.picture_as_pdf, size: 18),
                     label: const Text('Nachweis öffnen'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.statusPositive,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.statusPositiveFill,
+                      foregroundColor: AppColors.onStatus,
                     ),
                   ),
               ],
@@ -232,7 +232,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     super.initState();
     _controller = SignatureController(
       penStrokeWidth: 3,
-      penColor: AppColors.ink,
+      penColor: AppColors.textStrong,
       exportBackgroundColor: const Color(0x00000000),
     );
   }
@@ -311,12 +311,12 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               style: AppTypography.display(
                 size: 20,
                 weight: FontWeight.w800,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Zeichne deine Unterschrift mit dem Finger. Die Signatur '
+              'Zeichne Deine Unterschrift mit dem Finger. Die Signatur '
               'wird zusammen mit Zeitstempel und Auth-Kontext '
               'revisionssicher gespeichert.',
               style: AppTypography.body(size: 12, color: AppColors.textMuted),
@@ -383,14 +383,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                             height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.ink,
+                              color: AppColors.textStrong,
                             ),
                           )
                         : const Icon(Icons.check),
                     label: const Text('Speichern'),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.brand,
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.onBrand,
                     ),
                   ),
                 ),

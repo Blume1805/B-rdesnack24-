@@ -116,7 +116,7 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Anfordern'),
@@ -216,7 +216,7 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
                   icon: const Icon(Icons.date_range),
                   label: Text('Von ${Formatters.date(_from)}'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.textStrong,
                     side: const BorderSide(color: AppColors.brand),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -229,7 +229,7 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
                   icon: const Icon(Icons.date_range),
                   label: Text('Bis ${Formatters.date(_to)}'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.textStrong,
                     side: const BorderSide(color: AppColors.brand),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -246,25 +246,26 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   )
                 : const Icon(Icons.refresh),
             label: const Text('Inventur berechnen'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
           ),
           const SizedBox(height: AppSpacing.s4),
           if (_error != null)
             AppCard(
-              color: const Color(0xFFF7DBDB),
+              color: AppColors.statusCriticalTint,
               borderColor: AppColors.statusCritical,
               child: Text(
                 _error!,
-                style: AppTypography.body(size: 13, color: AppColors.ink),
+                style:
+                    AppTypography.body(size: 13, color: AppColors.textStrong),
               ),
             )
           else if (_movements == null)
@@ -352,7 +353,7 @@ class _ProductSection extends StatelessWidget {
                         style: AppTypography.body(
                           size: 16,
                           weight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                       Text(
@@ -464,9 +465,9 @@ class _ProductSection extends StatelessWidget {
     final reason = m['reason']?.toString() ?? '';
     final occurred = m['occurred_at']?.toString();
     final rowColor = type == 'refill'
-        ? const Color(0xFFF3F8ED)
+        ? AppColors.statusPositiveTint
         : type == 'disposal'
-            ? const Color(0xFFFAE9E4)
+            ? AppColors.statusCriticalTint
             : null;
     return DataRow(
       color: rowColor == null ? null : WidgetStateProperty.all(rowColor),
@@ -478,8 +479,9 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color:
-                  type == 'disposal' ? AppColors.statusCritical : AppColors.ink,
+              color: type == 'disposal'
+                  ? AppColors.statusCritical
+                  : AppColors.textStrong,
             ),
           ),
         ),
@@ -489,7 +491,7 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: qty > 0 ? AppColors.statusPositive : AppColors.ink,
+              color: qty > 0 ? AppColors.statusPositive : AppColors.textStrong,
             ),
           ),
         ),
@@ -535,7 +537,7 @@ class _ProductSection extends StatelessWidget {
         DataCell(
           Text(
             invNo,
-            style: AppTypography.body(size: 11, color: AppColors.ink),
+            style: AppTypography.body(size: 11, color: AppColors.textStrong),
           ),
         ),
         DataCell(Text(_fmtDate(invDate))),
@@ -545,7 +547,7 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ),
@@ -558,7 +560,7 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: warn ? AppColors.statusCritical : AppColors.ink,
+              color: warn ? AppColors.statusCritical : AppColors.textStrong,
             ),
           ),
         ),
@@ -569,7 +571,7 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w800,
-              color: warn ? AppColors.statusCritical : AppColors.ink,
+              color: warn ? AppColors.statusCritical : AppColors.textStrong,
             ),
           ),
         ),
@@ -579,7 +581,7 @@ class _ProductSection extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ),
@@ -591,7 +593,7 @@ class _ProductSection extends StatelessWidget {
     final bold = AppTypography.body(
       size: 13,
       weight: FontWeight.w800,
-      color: AppColors.ink,
+      color: AppColors.textStrong,
     );
     return DataRow(
       color: WidgetStateProperty.all(AppColors.brandLight),
@@ -661,7 +663,11 @@ class _GrandTotal extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.stacked_line_chart, color: AppColors.ink, size: 18),
+              Icon(
+                Icons.stacked_line_chart,
+                color: AppColors.textStrong,
+                size: 18,
+              ),
               SizedBox(width: 6),
               Eyebrow('Bilanzwert der Vorräte'),
             ],
@@ -737,7 +743,8 @@ class _KpiTile extends StatelessWidget {
             style: AppTypography.body(
               size: bold ? 17 : 15,
               weight: FontWeight.w800,
-              color: emphasize ? AppColors.statusCritical : AppColors.ink,
+              color:
+                  emphasize ? AppColors.statusCritical : AppColors.textStrong,
             ),
           ),
         ],
@@ -793,7 +800,11 @@ class _MhdWritedownMatrix extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.rule_folder_outlined, color: AppColors.ink, size: 18),
+              Icon(
+                Icons.rule_folder_outlined,
+                color: AppColors.textStrong,
+                size: 18,
+              ),
               SizedBox(width: 6),
               Eyebrow('Bewertungsansatz MHD-Abschlag'),
             ],
@@ -833,7 +844,7 @@ class _MhdWritedownMatrix extends StatelessWidget {
                           style: AppTypography.body(
                             size: 13,
                             weight: FontWeight.w800,
-                            color: AppColors.ink,
+                            color: AppColors.textStrong,
                           ),
                         ),
                       ),
@@ -845,7 +856,7 @@ class _MhdWritedownMatrix extends StatelessWidget {
                             size: 13,
                             weight: FontWeight.w800,
                             color: r.applied == '0 %'
-                                ? AppColors.ink
+                                ? AppColors.textStrong
                                 : AppColors.statusCritical,
                           ),
                         ),
@@ -897,7 +908,7 @@ class _SignatureBlock extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.draw_outlined, color: AppColors.ink, size: 18),
+              Icon(Icons.draw_outlined, color: AppColors.textStrong, size: 18),
               SizedBox(width: 6),
               Eyebrow('Freigabe / Unterschriften'),
             ],
@@ -952,7 +963,7 @@ class _SignatureSlot extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           Text(
@@ -971,6 +982,6 @@ class _Line extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         height: 1,
         margin: const EdgeInsets.only(bottom: 2),
-        color: AppColors.ink,
+        color: AppColors.surfaceInverse,
       );
 }

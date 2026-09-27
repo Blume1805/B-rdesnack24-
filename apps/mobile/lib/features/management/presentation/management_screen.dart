@@ -265,7 +265,7 @@ class _EmptyState extends StatelessWidget {
               child: const Icon(
                 Icons.lock_outline,
                 size: 32,
-                color: AppColors.ink,
+                color: AppColors.textStrong,
               ),
             ),
             const SizedBox(height: AppSpacing.s4),
@@ -276,7 +276,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Für dein Konto sind noch keine Module aktiviert. Bitte wende dich an einen Gesellschafter.',
+              'Für Dein Konto sind noch keine Module aktiviert. Bitte wende Dich an einen Gesellschafter.',
               textAlign: TextAlign.center,
               style: AppTypography.body(size: 14, color: AppColors.textMuted),
             ),

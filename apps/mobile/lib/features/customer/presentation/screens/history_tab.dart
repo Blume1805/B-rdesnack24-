@@ -74,7 +74,7 @@ class HistoryTab extends ConsumerWidget {
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.volunteer_activism,
-                            color: AppColors.ink,
+                            color: AppColors.onBrand,
                             size: 26,
                           ),
                         ),
@@ -84,7 +84,7 @@ class HistoryTab extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '5 % Netto-Umsatz für den guten Zweck',
+                                '5 % des Nettoerlöses für die Region',
                                 style: AppTypography.body(
                                   size: 12,
                                   weight: FontWeight.w700,
@@ -96,7 +96,7 @@ class HistoryTab extends ConsumerWidget {
                                 style: AppTypography.display(
                                   size: 22,
                                   weight: FontWeight.w800,
-                                  color: AppColors.ink,
+                                  color: AppColors.textStrong,
                                 ),
                               ),
                             ],
@@ -154,11 +154,11 @@ class HistoryTab extends ConsumerWidget {
       );
 
   Widget _errorCard(String message) => AppCard(
-        color: const Color(0xFFF7DBDB),
+        color: AppColors.statusCriticalTint,
         borderColor: AppColors.statusCritical,
         child: Text(
           message,
-          style: AppTypography.body(size: 13, color: AppColors.ink),
+          style: AppTypography.body(size: 13, color: AppColors.textStrong),
         ),
       );
 }
@@ -240,7 +240,7 @@ class _PurchaseDonationRow extends StatelessWidget {
                       style: AppTypography.body(
                         size: 15,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                     Text(
@@ -253,7 +253,7 @@ class _PurchaseDonationRow extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(pay.icon, size: 14, color: AppColors.ink),
+                        Icon(pay.icon, size: 14, color: AppColors.textStrong),
                         const SizedBox(width: 4),
                         Text(
                           pay.label,
@@ -291,7 +291,7 @@ class _PurchaseDonationRow extends StatelessWidget {
                   ),
                   Text(
                     '${purchase.sharePct.toStringAsFixed(1).replaceAll('.', ',')} % '
-                    'deiner Spende',
+                    'Deiner Spende',
                     style: AppTypography.body(
                       size: 11,
                       weight: FontWeight.w700,
@@ -328,7 +328,7 @@ class _ArchiveLinkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Row(
         children: [

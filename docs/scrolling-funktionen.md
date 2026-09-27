@@ -64,3 +64,73 @@ sich erst zeigen, wenn ein Automat bestückt ist.
   Animationsbibliothek.
 * **Der Bewegungsschalter wirkt sofort**, ohne Neuladen, und bleibt erreichbar.
 * Bewegung erklärt oder sie entfällt. Zierde wird gestrichen.
+
+## 4. Staffelplan aller 18 Muster (Entscheidung vom 26.09.2026)
+
+Der Gesellschafter hat entschieden: **alle 18 Muster des Kanons `scrollcraft`
+werden eingeplant, gestaffelt.** Der Kanon selbst setzt die Grenze von
+höchstens acht aktiven Mustern je Seite; mehr gilt im AI-Look-Audit als
+Befund. Deshalb verteilen sich die Muster auf drei Oberflächen, und drei
+schalten sich erst frei, wenn ihre Voraussetzung erfüllt ist.
+
+| # | Muster | Wo | Stufe | Voraussetzung |
+|---|---|---|---|---|
+| 01 | Reveal | Landingpage, App | jetzt | — |
+| 02 | Stagger | App (Listen, Vorteile) | jetzt | — |
+| 03 | Zähler | App (Punkte, eigener Spendenanteil) | jetzt | nur echte Werte aus der Datenbank |
+| 04 | Text-Highlight | Landingpage, Abschnitt „Der Anteil", **genau einmal** | jetzt | — |
+| 05 | Mikrointeraktion | Landingpage, App (Tasten, Karten) | jetzt | — |
+| 06 | Sticky-Bühne | Landingpage, Standortgeber (`Stage`) | besteht | — |
+| 07 | Horizontale Sequenz | App, Treuestufen in ihrer natürlichen Reihenfolge | jetzt | — |
+| 08 | Kartenstapel | App, persönliche Coupons (höchstens 4) | jetzt | — |
+| 09 | Szenen-Farbwechsel | Landingpage, Creme → Nacht (`SceneColorTransition`) | besteht | — |
+| 10 | Zoomfahrt | Landingpage, Werbung (`MachineZoom`) | besteht | — |
+| 11 | Parallax-Tiefe | App, Punktekarte der Startseite | jetzt | — |
+| 12 | Maskenreveal | Landingpage, Standortgeber und Werbung | **gesperrt** | echtes Foto von Automat oder Standort |
+| 13 | Produktwechsel | App, Wochenangebote der Startseite | jetzt | nur Angebote aus der Datenbank; ein Sortiment ohne laufenden Automaten wäre als „geplant" zu kennzeichnen |
+| 14 | Produkt 360° | App, Produktdetail | **gesperrt** | Produktsequenzen (24 Aufnahmen je Produkt) |
+| 15 | Objekt-Label | App, zusammen mit 13 | jetzt | — |
+| 16 | Tageszeit-Erzählung | Landingpage | **gesperrt** | erster Automat in Betrieb |
+| 17 | Physisch → digital | Landingpage, Kundschaft (`PhysicalDigital`) | besteht | — |
+| 18 | Anteilsdarstellung | Landingpage, „Der Anteil" (`ShareScene`) | besteht | — |
+
+**Landingpage, aktiv:** 01, 04, 05, 06, 09, 10, 17, 18, also genau acht.
+Die Vorteilsliste der Kundschaft wird deshalb als ein Block eingeblendet,
+nicht mehr Zeile für Zeile (02 wandert in die App).
+
+**Gesperrte Muster sind vorbereitet, nicht versteckt eingebaut.** Für 12
+gibt es in `src/data/site.ts` einen Bildplatz (`bilder.automat`,
+`bilder.standort`); solange er leer ist, bleibt die gekennzeichnete
+KI-Zeichnung stehen und nichts deutet auf ein fehlendes Bild hin. Ein
+sichtbarer Platzhalter auf der öffentlichen Seite wäre ein Release-Blocker.
+In der App zeigen Produktkacheln bis zu echten Fotos die getönte Kachel „Bild".
+
+In der App gelten die Regeln des Kanons sinngemäß: höchstens acht Muster je
+Bildschirm, Rücksicht auf die Systemeinstellung „Bewegung reduzieren", kein
+Inhalt nur in einer Animation.
+
+### 4.1 Umsetzung in der App (Stand 27.09.2026, gegen den Code geprüft)
+
+Alle Bausteine liegen in `apps/mobile/lib/core/widgets/motion/motion.dart`.
+Jeder springt bei „Bewegung reduzieren" sofort in den Endzustand, keiner
+verändert die Scrollposition.
+
+| # | Baustein | Eingesetzt in |
+|---|---|---|
+| 01 | `Reveal` | Startseite (Kennzahlen, Deals, Aktionen, Neuigkeiten, Punktekarte, Favoriten), Belohnungen, Spenden |
+| 02 | `Reveal(index:)`, 60 ms je Stufe, höchstens fünf | Favoriten, Herausforderungen, Top-3-Spendenzwecke |
+| 03 | `CountUp`, Endwert immer in der Semantik | Kennzahlen, Punktestand, Dauerrabatt, eigener Spendenbeitrag, Spendentopf |
+| 05 | `Pressable`, Verkleinerung auf 98 % | jede antippbare `AppCard`, jede antippbare `OfferCard` |
+| 07 | `ScrollLinkedStrip`, zusätzlich von Hand wischbar | Stufenkacheln Bronze → Silber → Gold (`TierTiles`) |
+| 08 | `CardStack`, höchstens vier Karten, sonst normale Liste | persönliche Coupons (Sonderangebote, Bonus, Dein Angebot) |
+| 11 | `ParallaxLayer`, Amplitude 210 px × 0,14 | Börde-Umriss hinter der Punktekarte, rein dekorativ |
+| 13 · 15 | `FocusCarousel` | Wochenangebote; Name und „X von N" unter dem Karussell |
+
+**Muster je Bildschirm:** Startseite 01, 02, 03, 05, 08, 11, 13, 15, also
+genau acht. Belohnungen 01, 02, 03, 05, 07. Spenden 01, 02, 03, 05.
+
+**Nachweise:** `flutter analyze` ohne Befund, `flutter test` 144 von 144
+bestanden, Kontrasttest (`test/core/theme/contrast_test.dart`) mit 54
+Paaren, darunter die abgeblendete Nachbarkarte im Karussell (80 %).
+Bildschirmfotos mit automatischer Kontrastmessung jedes Textes
+(`tool/screens/screens_test.dart`): 0 Befunde auf allen sieben Ansichten.

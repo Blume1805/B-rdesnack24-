@@ -1,14 +1,8 @@
 import 'package:boerdesnack24/core/widgets/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  setUpAll(() {
-    // Keine Font-Downloads im Test — deterministisches Rendering (Golden).
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   testWidgets('zeigt Titel und Actions, ohne Route kein Back-Button',
       (tester) async {
     await tester.pumpWidget(

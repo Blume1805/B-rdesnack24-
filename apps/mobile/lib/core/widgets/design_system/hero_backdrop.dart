@@ -36,7 +36,7 @@ class HeroBackdrop extends StatelessWidget {
         final target = naturalHeight.clamp(minHeight, maxHeight);
         return Container(
           width: width,
-          color: AppColors.ink,
+          color: AppColors.surfaceInverse,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -46,7 +46,7 @@ class HeroBackdrop extends StatelessWidget {
                 child: Image.asset(
                   'assets/images/brand_hero_wide.webp',
                   semanticLabel:
-                      'Bördesnack24 — Snackautomat mit Umrisskarte des Bördekreises',
+                      'Bördesnack24: Snackautomat mit Umrisskarte des Bördekreises',
                   fit: BoxFit.contain,
                   alignment: Alignment.center,
                 ),

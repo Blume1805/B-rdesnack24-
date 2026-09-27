@@ -59,7 +59,7 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Kündigungen')),
       body: RefreshIndicator(
         color: AppColors.brand,
@@ -72,7 +72,7 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
                 padding: const EdgeInsets.all(AppSpacing.s4),
                 children: [
                   AppCard(
-                    color: const Color(0xFFF7DBDB),
+                    color: AppColors.statusCriticalTint,
                     borderColor: AppColors.statusCritical,
                     child: Text('Kündigungen konnten nicht geladen werden: '
                         '${snap.error}'),
@@ -97,7 +97,7 @@ class _CancellationsScreenState extends ConsumerState<CancellationsScreen> {
                   style: AppTypography.display(
                     size: 22,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.s2),
@@ -155,7 +155,7 @@ class _CancellationCard extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -194,7 +194,7 @@ class _CancellationCard extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           Text(

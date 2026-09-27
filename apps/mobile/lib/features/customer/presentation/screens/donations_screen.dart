@@ -5,6 +5,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../../core/widgets/motion/motion.dart';
 import '../../domain/entities/donations_news.dart';
 import '../controllers/customer_providers.dart';
 
@@ -38,7 +39,7 @@ class DonationsScreen extends ConsumerWidget {
           ),
           children: [
             const SectionHeader(
-              eyebrow: '5 % Netto-Umsatz',
+              eyebrow: '5 % des Nettoerlöses',
               title: 'Dein Spendenbeitrag',
             ),
             const SizedBox(height: AppSpacing.s4),
@@ -46,20 +47,20 @@ class DonationsScreen extends ConsumerWidget {
               loading: () =>
                   const LinearProgressIndicator(color: AppColors.brand),
               error: (e, _) => _errorCard('$e'),
-              data: (s) => _SummaryCard(summary: s),
+              data: (s) => Reveal(child: _SummaryCard(summary: s)),
             ),
             const SizedBox(height: AppSpacing.s4),
             pool.when(
               loading: () => const SizedBox.shrink(),
               error: (e, _) => _errorCard('$e'),
-              data: (p) => _PoolCard(pool: p),
+              data: (p) => Reveal(index: 1, child: _PoolCard(pool: p)),
             ),
             const SizedBox(height: AppSpacing.s6),
             const Row(
               children: [
                 Icon(
                   Icons.how_to_vote_outlined,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                   size: 20,
                 ),
                 SizedBox(width: 6),
@@ -68,8 +69,8 @@ class DonationsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.s2),
             Text(
-              'Wähle einen oder mehrere Zwecke — jede Stimme zählt gleich. '
-              'Du kannst deine Stimme jederzeit widerrufen oder eigene '
+              'Wähle einen oder mehrere Zwecke, jede Stimme zählt gleich. '
+              'Du kannst Deine Stimme jederzeit widerrufen oder eigene '
               'Vorschläge einreichen.',
               style: AppTypography.body(
                 size: 13,
@@ -112,19 +113,22 @@ class DonationsScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.s4),
                       Eyebrow('Derzeit vorn (Top ${top3.length})'),
                       const SizedBox(height: AppSpacing.s2),
-                      for (final c in top3)
+                      for (final (i, c) in top3.indexed)
                         Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-                          child: _CauseCard(
-                            cause: c,
-                            share: sharePerProject,
-                            showProgress: true,
+                          child: Reveal(
+                            index: i,
+                            child: _CauseCard(
+                              cause: c,
+                              share: sharePerProject,
+                              showProgress: true,
+                            ),
                           ),
                         ),
                     ],
                     if (rest.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.s4),
-                      const Eyebrow('Weitere Zwecke — jetzt abstimmen'),
+                      const Eyebrow('Weitere Zwecke, jetzt abstimmen'),
                       const SizedBox(height: AppSpacing.s2),
                       for (final c in rest)
                         Padding(
@@ -134,7 +138,7 @@ class DonationsScreen extends ConsumerWidget {
                     ],
                     if (suggested.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.s4),
-                      const Eyebrow('Vorschläge von Kund*innen'),
+                      const Eyebrow('Vorschläge aus der Kundschaft'),
                       const SizedBox(height: AppSpacing.s2),
                       for (final c in suggested)
                         Padding(
@@ -151,7 +155,7 @@ class DonationsScreen extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.lightbulb_outline,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                   size: 20,
                 ),
                 SizedBox(width: 6),
@@ -167,11 +171,11 @@ class DonationsScreen extends ConsumerWidget {
   }
 
   Widget _errorCard(String message) => AppCard(
-        color: const Color(0xFFF7DBDB),
+        color: AppColors.statusCriticalTint,
         borderColor: AppColors.statusCritical,
         child: Text(
           message,
-          style: AppTypography.body(size: 13, color: AppColors.ink),
+          style: AppTypography.body(size: 13, color: AppColors.textStrong),
         ),
       );
 }
@@ -196,7 +200,7 @@ class _SummaryCard extends StatelessWidget {
             alignment: Alignment.center,
             child: const Icon(
               Icons.volunteer_activism,
-              color: AppColors.ink,
+              color: AppColors.onBrand,
               size: 32,
             ),
           ),
@@ -205,12 +209,13 @@ class _SummaryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  Formatters.euro(summary.totalDonated),
+                CountUp(
+                  value: summary.totalDonated,
+                  format: Formatters.euro,
                   style: AppTypography.display(
                     size: 28,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 Text(
@@ -260,7 +265,7 @@ class _PoolCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.groups_outlined,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                   size: 22,
                 ),
               ),
@@ -270,19 +275,20 @@ class _PoolCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Gesamt aller Kunden',
+                      'Spendentopf gesamt',
                       style: AppTypography.body(
                         size: 12,
                         weight: FontWeight.w800,
                         color: AppColors.textMuted,
                       ).copyWith(letterSpacing: 0.3),
                     ),
-                    Text(
-                      Formatters.euro(pool.totalPool),
+                    CountUp(
+                      value: pool.totalPool,
+                      format: Formatters.euro,
                       style: AppTypography.display(
                         size: 22,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                   ],
@@ -292,9 +298,8 @@ class _PoolCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           Text(
-            'Enthält Automaten-Umsätze (${Formatters.euro(pool.nonAppGross)} '
-            'brutto der letzten 90 Tage) von Kunden ohne App. Datenquelle: '
-            'Nayax → Bördesnack24-Backend.',
+            'Enthält auch Käufe am Automaten ohne App: '
+            '${Formatters.euro(pool.nonAppGross)} brutto in den letzten 90 Tagen.',
             style: AppTypography.body(size: 11, color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.s4),
@@ -378,7 +383,7 @@ class _DistributionExplainerCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.balance, color: AppColors.ink, size: 20),
+              const Icon(Icons.balance, color: AppColors.textStrong, size: 20),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -386,7 +391,7 @@ class _DistributionExplainerCard extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -402,7 +407,7 @@ class _DistributionExplainerCard extends StatelessWidget {
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w600,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ).copyWith(height: 1.4),
           ),
           const SizedBox(height: AppSpacing.s3),
@@ -446,7 +451,7 @@ class _MiniStat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            label,
             style: AppTypography.body(
               size: 10,
               weight: FontWeight.w800,
@@ -459,7 +464,7 @@ class _MiniStat extends StatelessWidget {
             style: AppTypography.display(
               size: 18,
               weight: FontWeight.w800,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ],
@@ -515,14 +520,14 @@ class _VoteStatusChip extends StatelessWidget {
       height: 30,
       decoration: BoxDecoration(
         color: voted ? AppColors.brand : AppColors.surfaceCard,
-        border: Border.all(color: AppColors.ink, width: 1.2),
+        border: Border.all(color: AppColors.textStrong, width: 1.2),
         borderRadius: BorderRadius.circular(15),
       ),
       alignment: Alignment.center,
       child: Icon(
         voted ? Icons.favorite : Icons.favorite_border,
         size: 16,
-        color: voted ? AppColors.statusCritical : AppColors.textMuted,
+        color: voted ? AppColors.onBrand : AppColors.textMuted,
       ),
     );
   }
@@ -628,7 +633,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                   style: AppTypography.display(
                     size: 18,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 if (c.description != null && c.description!.isNotEmpty) ...[
@@ -681,7 +686,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                           style: AppTypography.body(
                             size: 10,
                             weight: FontWeight.w800,
-                            color: AppColors.ink,
+                            color: AppColors.textStrong,
                           ),
                         ),
                       ),
@@ -690,10 +695,12 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                     FilledButton(
                       onPressed: _busy ? null : _toggle,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            c.votedByMe ? AppColors.ink : AppColors.brand,
-                        foregroundColor:
-                            c.votedByMe ? AppColors.onDark : AppColors.ink,
+                        backgroundColor: c.votedByMe
+                            ? AppColors.surfaceAlt
+                            : AppColors.brand,
+                        foregroundColor: c.votedByMe
+                            ? AppColors.textStrong
+                            : AppColors.onBrand,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.s3,
                           vertical: 10,
@@ -705,7 +712,7 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.onDark,
+                                color: AppColors.textStrong,
                               ),
                             )
                           : Text(
@@ -713,6 +720,9 @@ class _CauseCardState extends ConsumerState<_CauseCard> {
                               style: AppTypography.body(
                                 size: 12,
                                 weight: FontWeight.w800,
+                                color: c.votedByMe
+                                    ? AppColors.textStrong
+                                    : AppColors.onBrand,
                               ),
                             ),
                     ),
@@ -746,7 +756,7 @@ class _ExpectedShare extends StatelessWidget {
           style: AppTypography.display(
             size: 20,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
         ),
         const SizedBox(width: 6),
@@ -806,7 +816,7 @@ class _SuggestFormState extends ConsumerState<_SuggestForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Vorschlag eingereicht — er erscheint jetzt unter „Vorschläge".',
+              'Vorschlag eingereicht. Er erscheint jetzt unter „Vorschläge".',
             ),
           ),
         );
@@ -856,14 +866,14 @@ class _SuggestFormState extends ConsumerState<_SuggestForm> {
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.ink,
+                      color: AppColors.textStrong,
                     ),
                   )
                 : const Icon(Icons.send_outlined, size: 18),
             label: const Text('Vorschlag einreichen'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onBrand,
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),

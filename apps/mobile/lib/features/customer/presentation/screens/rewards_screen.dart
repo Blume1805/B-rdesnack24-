@@ -5,12 +5,13 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
+import '../../../../core/widgets/motion/motion.dart';
 import '../controllers/customer_providers.dart';
 
 /// „Status & Belohnungen" — Gamification-Übersicht für Kund:innen.
 /// Zeigt die kumulative Status-Stufe (Bronze/Silber/Gold) mit Fortschritt
 /// zur nächsten Stufe, den lebenslangen Status-Rabatt (zusätzlich zu den
-/// 5 % Abo-Rabatt), laufende Challenges mit Fortschritt und die Sammel-
+/// 5 % Grundrabatt), laufende Challenges mit Fortschritt und die Sammel-
 /// Badges. Alle Werte kommen aus der RPC my_gamification_status
 /// (Berechnung serverseitig aus der Kaufhistorie).
 class RewardsScreen extends ConsumerWidget {
@@ -58,7 +59,7 @@ class RewardsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(myGamificationProvider);
     return Scaffold(
-      backgroundColor: AppColors.surfaceAlt,
+      backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Status & Belohnungen')),
       body: async.when(
         loading: () => const Center(
@@ -69,7 +70,7 @@ class RewardsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.s5),
             child: Text(
               'Konnte nicht geladen werden: $e',
-              style: AppTypography.body(size: 13, color: AppColors.ink),
+              style: AppTypography.body(size: 13, color: AppColors.textStrong),
             ),
           ),
         ),
@@ -79,9 +80,9 @@ class RewardsScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.s4),
             children: [
-              _TierCard(data: data),
+              Reveal(child: _TierCard(data: data)),
               const SizedBox(height: AppSpacing.s4),
-              _DiscountCard(data: data),
+              Reveal(index: 1, child: _DiscountCard(data: data)),
               const SizedBox(height: AppSpacing.s5),
               const _SectionTitle(
                 eyebrow: 'Dauerrabatt',
@@ -103,9 +104,12 @@ class RewardsScreen extends ConsumerWidget {
                   in (data['challenges'] as List? ?? const []).indexed)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.s3),
-                  child: _ChallengeCard(
-                    c: Map<String, dynamic>.from(c as Map),
-                    tierColor: _challengeTierColors[i % 3],
+                  child: Reveal(
+                    index: i,
+                    child: _ChallengeCard(
+                      c: Map<String, dynamic>.from(c as Map),
+                      tierColor: _challengeTierColors[i % 3],
+                    ),
                   ),
                 ),
               const SizedBox(height: AppSpacing.s2),
@@ -146,7 +150,7 @@ class _SectionTitle extends StatelessWidget {
           style: AppTypography.display(
             size: 18,
             weight: FontWeight.w800,
-            color: AppColors.ink,
+            color: AppColors.textStrong,
           ),
         ),
       ],
@@ -168,7 +172,9 @@ class _TierCard extends StatelessWidget {
     final nextLabel = tier['next_label'] as String?;
     final nextMin = ((tier['next_min_eur'] as num?) ?? 0).toDouble();
     final gross = ((data['lifetime_gross'] as num?) ?? 0).toDouble();
-    final totalPct = ((tier['total_discount_pct'] as num?) ?? 5).toDouble();
+    final basePct = ((data['base_discount_pct'] as num?) ?? 5).toDouble();
+    final totalPct =
+        ((tier['total_discount_pct'] as num?) ?? basePct).toDouble();
     final toNext = (nextMin - gross).clamp(0, double.infinity).toDouble();
 
     return AppCard(
@@ -198,11 +204,11 @@ class _TierCard extends StatelessWidget {
                       style: AppTypography.display(
                         size: 20,
                         weight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: AppColors.textStrong,
                       ),
                     ),
                     Text(
-                      'Gesamtumsatz ${Formatters.euro(gross)} · '
+                      'Gesamtumsatz ${Formatters.euro(gross)}, '
                       '${_fmtPct(totalPct)} % Dauerrabatt',
                       style: AppTypography.body(
                         size: 12,
@@ -227,9 +233,9 @@ class _TierCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.s2),
           Text(
             nextLabel == null
-                ? 'Höchste Stufe erreicht — danke für deine Treue!'
+                ? 'Höchste Stufe erreicht, danke für Deine Treue!'
                 : 'Noch ${Formatters.euro(toNext)} bis $nextLabel '
-                    '(${_fmtPct(5 + ((tier['next_discount_pct'] as num?) ?? 0).toDouble())} % Rabatt).',
+                    '(${_fmtPct(basePct + ((tier['next_discount_pct'] as num?) ?? 0).toDouble())} % Rabatt).',
             style: AppTypography.body(
               size: 12,
               weight: FontWeight.w700,
@@ -247,8 +253,8 @@ String _fmtPct(double pct) => pct % 1 == 0
     ? pct.toStringAsFixed(0)
     : pct.toStringAsFixed(1).replaceAll('.', ',');
 
-/// Dauerrabatt-Karte: zeigt den effektiven App-Rabatt (5 % Abo + Status-
-/// Zusatzrabatt) als große Zahl, mit Aufschlüsselung Abo + Status.
+/// Dauerrabatt-Karte: zeigt den effektiven App-Rabatt (5 % Grundrabatt +
+/// Status-Zusatzrabatt) als große Zahl, mit Aufschlüsselung.
 class _DiscountCard extends StatelessWidget {
   const _DiscountCard({required this.data});
   final Map<String, dynamic> data;
@@ -261,7 +267,7 @@ class _DiscountCard extends StatelessWidget {
     final totalPct =
         ((tier['total_discount_pct'] as num?) ?? basePct).toDouble();
     return AppCard(
-      color: AppColors.ink,
+      color: AppColors.surfaceInverse,
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Row(
         children: [
@@ -279,8 +285,10 @@ class _DiscountCard extends StatelessWidget {
                     color: AppColors.brand,
                   ),
                 ),
-                Text(
-                  '${_fmtPct(totalPct)} %',
+                CountUp(
+                  value: totalPct,
+                  format: (v) =>
+                      '${_fmtPct(double.parse(v.toStringAsFixed(1)))} %',
                   style: AppTypography.display(
                     size: 28,
                     weight: FontWeight.w800,
@@ -290,9 +298,9 @@ class _DiscountCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   bonusPct > 0
-                      ? '${_fmtPct(basePct)} % Abo-Rabatt + ${_fmtPct(bonusPct)} % Status — '
-                          'auf jeden Einkauf im Abo, lebenslang.'
-                      : '${_fmtPct(basePct)} % Abo-Rabatt auf jeden Einkauf. Ab 150 € '
+                      ? '${_fmtPct(basePct)} % Grundrabatt + ${_fmtPct(bonusPct)} % Status. '
+                          'Auf jeden Einkauf, lebenslang.'
+                      : '${_fmtPct(basePct)} % Grundrabatt auf jeden Einkauf. Ab 150 € '
                           'Gesamtumsatz kommt der lebenslange Status-Rabatt dazu.',
                   style: AppTypography.body(
                     size: 11,
@@ -341,7 +349,7 @@ class _ChallengeCard extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -459,7 +467,7 @@ class _BadgeTile extends StatelessWidget {
               style: AppTypography.body(
                 size: 10,
                 weight: FontWeight.w700,
-                color: earned ? AppColors.ink : AppColors.textMuted,
+                color: earned ? AppColors.textStrong : AppColors.textMuted,
               ).copyWith(height: 1.2),
             ),
           ],

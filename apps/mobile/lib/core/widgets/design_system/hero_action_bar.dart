@@ -99,7 +99,7 @@ class _HeroActionTile extends StatelessWidget {
                 : Icon(
                     action.icon,
                     size: 20,
-                    color: action.iconColor ?? AppColors.ink,
+                    color: action.iconColor ?? AppColors.textStrong,
                   ),
           ),
         ),

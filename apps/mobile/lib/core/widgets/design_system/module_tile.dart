@@ -54,7 +54,11 @@ class ModuleTile extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon, size: 22, color: iconColor ?? AppColors.ink),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: iconColor ?? AppColors.textStrong,
+                ),
               ),
               const Spacer(),
               if (badge != null)
@@ -69,7 +73,7 @@ class ModuleTile extends StatelessWidget {
             style: AppTypography.body(
               size: 15,
               weight: FontWeight.w700,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

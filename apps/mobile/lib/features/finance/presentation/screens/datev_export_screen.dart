@@ -202,7 +202,7 @@ class _DatevExportScreenState extends ConsumerState<DatevExportScreen> {
                   onPressed: _busy ? null : _export,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.brand,
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.onBrand,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   icon: _busy
@@ -211,7 +211,7 @@ class _DatevExportScreenState extends ConsumerState<DatevExportScreen> {
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: AppColors.ink,
+                            color: AppColors.textStrong,
                           ),
                         )
                       : const Icon(Icons.download_outlined),
