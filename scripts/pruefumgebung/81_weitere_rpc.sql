@@ -8,7 +8,11 @@
 --
 -- Ergebnis der ersten Ausfuehrung am 02.09.2026: alle weisen ab oder liefern
 -- nachweislich nichts. Kein Befund. Dieses Skript haelt den Stand fest.
-delete from pruef.ergebnis where gruppe = 'Vertikal-RPC-Nachtrag';
+-- Korrektur 26.09.2026: auch die eigenen Gegenproben entfernen. Vorher
+-- verdoppelten sie sich bei jedem Lauf (34 → 36 Urteile ohne jede Aenderung).
+delete from pruef.ergebnis
+ where gruppe = 'Vertikal-RPC-Nachtrag'
+    or (gruppe = 'Gegenprobe' and ziel in ('email_log_list', 'email_log_stats'));
 do $$
 declare
   A uuid := '11111111-1111-1111-1111-111111111111';   -- normaler Kunde
@@ -43,9 +47,15 @@ begin
     -- naemlich lauter Nullen. Die Zeilenzahl allein wuerde das als Treffer
     -- lesen, deshalb wird der Inhalt geprueft: enthaelt er ausser 0, null,
     -- Klammern und Kommas nichts, ist nichts drin.
-    leer := inhalt is null
-            or inhalt in ('[]','{}','[null]','[{}]')
-            or regexp_replace(inhalt, '[\[\]\(\)\{\},"0 :nul]', '', 'g') = '';
+    -- Korrektur 26.09.2026: „leer" gilt nur fuer einen Aufruf, der
+    -- tatsaechlich lief. Vorher war `inhalt` bei JEDEM Fehler null und damit
+    -- „leer" — ein Abbruch an einer fehlenden Testvoraussetzung (23502 bei
+    -- dev_add_demo_purchase) zaehlte als bestandene Abweisung, obwohl die
+    -- Funktion fuer Kunden offen war (Befund B-1).
+    leer := w like 'ROWS:%'
+            and (inhalt is null
+                 or inhalt in ('[]','{}','[null]','[{}]')
+                 or regexp_replace(inhalt, '[\[\]\(\)\{\},"0 :nul]', '', 'g') = '');
 
     insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok,notiz)
     values ('Vertikal-RPC-Nachtrag', f.proname, 'Kunde A', 'Verwaltungsfunktion',

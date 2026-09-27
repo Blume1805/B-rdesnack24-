@@ -163,6 +163,8 @@ brauchen davor einen Neubau.
 | `105_automat_bezahlung.sql` | MHD-Preisstufen, Unveränderbarkeit und Hashkette der Terminal-Ereignisse, Einmaligkeit der Freigabecodes, Lückenerkennung, Auszahlungsabgleich, Kassensturz bar, Preisausspielung — 28 Urteile, **nicht wiederholbar** |
 | `106_automat_isolation.sql` | IDOR/BOLA über die fünf neuen Tabellen mit zwei echten Kundenkonten: Lesen, ID-Tausch, Ändern, Löschen, direkter Zugriff — plus Gegenprobe auf eigene Daten. 22 Urteile. Hat den Befund S-25 erzeugt (Supabase-Standardrechte für `authenticated`) |
 | `96_loeschprozess.sql` | wer löschen darf, was gelöscht wird, was bleibt, dass ein unbeteiligtes Konto unberührt bleibt — und seit S-23/S-24, dass das Änderungsprotokoll die Löschung nicht zurückträgt und die Frist erst mit dem Ende des Vorgangs beginnt |
+| `108_scheinkauf_und_bargeld.sql` | Befunde B-1 bis B-3 der Backend-Prüfung vom 26.09.2026: kein Scheinkauf aus einem Kundenkonto (gemessen am gespeicherten Zustand, nicht am Fehlercode), keine fremden Kaufbeträge, Bargeld-Soll nur mit `cash.collect` oder `finance.view`. 10 Urteile, wiederholbar. Setzt `20260926120000` voraus |
+| `109_terminal_webhook_weg.sql` | Befunde B-4/B-5: der Weg des Terminal-Webhooks als `service_role` über `public.vend_freigabe_einloesen` bis zum Kauf mit `source = 'machine'`. 5 Urteile, wiederholbar. Setzt `105` und `20260926121000` voraus |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

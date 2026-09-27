@@ -104,3 +104,18 @@ from supabase_migrations.schema_migrations order by version;
 
 Die MD5-Summe muss dem Inhalt der zugehörigen Datei ohne abschließenden
 Zeilenumbruch entsprechen.
+
+## Im Repository, in der Produktion ausstehend (Stand 27.09.2026)
+
+Zwei Dateien stehen hier, **bevor** sie auf der Produktion gelaufen sind. Bis
+zum Ausrollen fehlen sie im Register der Live-Datenbank; das ist keine
+Abweichung vom Spiegel, sondern der offene Schritt.
+
+| Datei | Wirkung | Ausrollen |
+|---|---|---|
+| `20260926120000_scheinkaeufe_sperren.sql` | B-1 bis B-3: Scheinkäufe gesperrt, fremde Kaufbeträge und Bargeld-Soll geschützt | Runbook L (`docs/OPERATIONS.md` im Arbeitszweig) sperrt B-1 sofort per SQL-Editor; danach diese Migration regulär ausrollen, damit sie im Register steht |
+| `20260926121000_terminal_webhook_anbindung.sql` | B-4/B-5: Webhook findet die Einlösefunktion, Enum-Wert `machine` | vor dem ersten Automaten mit Terminal |
+
+Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10) und `109` (5/5),
+zuletzt am 27.09.2026. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
+`claude/bordesnack24-app-strategy-sf5yzy`.

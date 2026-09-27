@@ -156,10 +156,15 @@ begin
   w := pruef.schreibe(format('select public.business_update(%L, ''{"billing_city":"Wanzleben"}''::jsonb)', F1), A1);
   r := pruef.wahrheit(format('select coalesce(billing_city,''-'') from public.businesses where id=%L', F1));
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Gegenprobe','business_update eigene Firma','Admin Firma 1','Firma 1','uebernommen', w||' / '||r, r='Wanzleben');
+   -- Korrektur 26.09.2026: `business_update` ist bewusst rein intern
+   -- (docs/SECURITY.md, „Das Rollenmodell, das die Gegenprobe sichtbar
+   -- gemacht hat"). Die Erwartung „uebernommen" war die alte, falsche
+   -- Annahme; sie blieb im Skript stehen und meldete bei jedem Lauf ROT.
+   -- Die positive Gegenprobe (Gesellschafter darf) steht in 93.
+   values ('Stufentrennung','business_update eigene Firma','Admin Firma 1','Firma 1','42501, Stammdaten unveraendert', w||' / '||r, w like 'ERR:42501%' and r <> 'Wanzleben');
 
   w := pruef.schreibe(format('select public.advertising_campaign_status(%L,''paused'')', 'c1000000-0000-0000-0000-0000000000f1'::uuid), A1);
   r := pruef.wahrheit('select status::text from public.advertising_campaigns where id=''c1000000-0000-0000-0000-0000000000f1''');
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Gegenprobe','eigene Kampagne pausieren','Admin Firma 1','Kampagne Firma 1','paused', w||' / '||r, r='paused');
+   values ('Stufentrennung','eigene Kampagne pausieren','Admin Firma 1','Kampagne Firma 1','42501, Kampagne bleibt active', w||' / '||r, w like 'ERR:42501%' and r = 'active');
 end $$;

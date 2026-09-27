@@ -26,9 +26,26 @@ begin
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('Vertikal','finance_bookings lesen','Kunde A','Buchhaltung','0 oder Fehler', n::text, n<=0);
 
-  n := pruef.zaehle('select 1 from public.invoices', A);
-  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Vertikal','invoices lesen (alle)','Kunde A','Rechnungen','nur eigene', n::text, null);
+  -- Korrektur 26.09.2026: Ohne Rechnung im Pruefbestand war „0" kein
+  -- Nachweis (ok = null). Jetzt je eine Rechnung fuer A und B in einer
+  -- Untertransaktion, die zurueckgerollt wird; gemessen wird, dass A genau
+  -- die eigene sieht und der Gesellschafter beide.
+  declare na int; nb int; ng int;
+  begin
+    insert into public.invoices(purchase_id, customer_id, invoice_number, total_gross)
+    values ('a1000000-0000-0000-0000-000000000001', A,  'PRUEF-70-A', 3.50),
+           ('b1000000-0000-0000-0000-000000000001', Bb, 'PRUEF-70-B', 4.50);
+    na := pruef.zaehle('select 1 from public.invoices where invoice_number like ''PRUEF-70-%''', A);
+    nb := pruef.zaehle('select 1 from public.invoices where invoice_number = ''PRUEF-70-B''', A);
+    ng := pruef.zaehle('select 1 from public.invoices where invoice_number like ''PRUEF-70-%''', G);
+    raise exception using errcode = 'P0070', message = 'zurueckrollen';
+  exception when sqlstate 'P0070' then
+    insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+     values ('Vertikal','invoices lesen (alle)','Kunde A','Rechnungen',
+             'nur eigene: 1 von 2, fremde 0, Gesellschafter 2',
+             format('A sieht %s, davon fremd %s; G sieht %s', na, nb, ng),
+             na = 1 and nb = 0 and ng = 2);
+  end;
 
   n := pruef.zaehle('select 1 from public.inventory_movements', A);
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)

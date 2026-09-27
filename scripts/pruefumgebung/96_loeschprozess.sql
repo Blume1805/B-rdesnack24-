@@ -176,9 +176,13 @@ begin
 
   -- GEGENPROBE 1: Protokollzeilen ueber aufbewahrungspflichtige Tabellen
   -- behalten ihren Inhalt. Sie sind Teil des Belegs, nicht des Geloeschten.
+  -- Korrektur 26.09.2026: Ein Kauf, der nie geaendert wurde, steht im
+  -- Protokoll nur als INSERT — mit Inhalt in new_data, old_data ist null.
+  -- Die Pruefung las nur old_data und fand deshalb im Neubau nie etwas.
   select count(*) into n from public.audit_log
-   where old_data->>'customer_id' = L::text and table_name = 'purchases'
-     and old_data->>'total_gross' is not null;
+   where table_name = 'purchases'
+     and (old_data->>'customer_id' = L::text or new_data->>'customer_id' = L::text)
+     and coalesce(old_data->>'total_gross', new_data->>'total_gross') is not null;
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('Gegenprobe','Beleg-Protokoll bleibt inhaltlich','System','audit_log/purchases',
            'mehr als 0 Zeilen mit Betrag', n::text, n>0);

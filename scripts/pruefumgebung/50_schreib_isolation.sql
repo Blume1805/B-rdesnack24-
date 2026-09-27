@@ -1,6 +1,7 @@
 truncate pruef.ergebnis restart identity;
 do $$
 declare
+  r0 text; r2 text; w2 text; w3 text;
   A uuid := '11111111-1111-1111-1111-111111111111';
   Bb uuid := '22222222-2222-2222-2222-222222222222';
   r text; w text;
@@ -102,8 +103,22 @@ begin
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('Mass Assignment','profiles.email (frei setzbar?)','Kunde A','eigenes Profil','soll scheitern', w||' / gespeichert='||r, r <> 'opfer@example.invalid');
 
+  -- Zwei Schritte statt einem (Korrektur 26.09.2026): Vorher stand hier kein
+  -- Urteil (ok = null), weil das Ergebnis vom Ausgangszustand abhing. Jetzt
+  -- wird der Ausgangszustand gelesen und beide Regeln werden geprueft: die
+  -- Erstsetzung ist erlaubt, jede spaetere Aenderung nicht — auch nicht
+  -- zurueck auf null. Der Geburtstag steuert die Altersschranke beim Abo.
+  r0 := pruef.wahrheit(format('select coalesce(birth_date::text,''<null>'') from public.profiles where id=%L', A));
   w := pruef.schreibe(format('update public.profiles set birth_date=''2000-01-01'' where id=%L', A), A);
   r := pruef.wahrheit(format('select coalesce(birth_date::text,''<null>'') from public.profiles where id=%L', A));
+  w2 := pruef.schreibe(format('update public.profiles set birth_date=''1980-01-01'' where id=%L', A), A);
+  w3 := pruef.schreibe(format('update public.profiles set birth_date=null where id=%L', A), A);
+  r2 := pruef.wahrheit(format('select coalesce(birth_date::text,''<null>'') from public.profiles where id=%L', A));
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
-   values ('Mass Assignment','profiles.birth_date','Kunde A','eigenes Profil','Erstsetzung erlaubt, spaetere Aenderung nicht', w||' / gespeichert='||r, null);
+   values ('Mass Assignment','profiles.birth_date','Kunde A','eigenes Profil',
+           'Erstsetzung erlaubt, spaetere Aenderung nicht',
+           'vorher='||r0||' / erst: '||w||' -> '||r||' / aendern: '||w2||' / null: '||w3||' / gespeichert='||r2,
+           ((r0 = '<null>' and w = 'ROWS:1' and r = '2000-01-01')
+             or (r0 <> '<null>' and r = r0))
+           and w2 like 'ERR%' and w3 like 'ERR%' and r2 = r);
 end $$;
