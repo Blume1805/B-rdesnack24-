@@ -1212,6 +1212,14 @@ Rechtsberatung.
 * Weder Katalog noch Code noch Dokumentation regeln den Pfand. Die App zeigt
   heute Preise für Getränke in Pfandflaschen und Dosen ohne Pfandhinweis
   (z. B. Wochenangebote).
+* **Auskunft des Gesellschafters, 27.09.2026: Der Pfand ist in den
+  Katalogpreisen enthalten.** Die Tabelle `products` hat kein Feld für den
+  Pfand. Zwölf Serverfunktionen rechnen Rabatte, Coupons, Tages- und
+  Wochenangebote auf den Preis einschließlich Pfand (`automatenpreis`,
+  `generate_daily_offers`, `generate_weekly_offers`,
+  `generate_personal_offer`, `bundle_*`, `product_detail`,
+  `search_products`, `top_products_by_category`, `grant_loyalty_bonuses`,
+  `wildcard_product`; gemessen am Produktions-Nachbau).
 
 ### Rechtliche Würdigung
 
@@ -1221,11 +1229,25 @@ Rechtsberatung.
   Normtexte selbst sind aus der Arbeitsumgebung gesperrt. Ob die Ausnahme auch
   die Werbung auf der Website für diese Waren erfasst, ist nicht abschließend
   geprüft; die Landingpage nennt deshalb nur Kategorie-„ab"-Preise.
-* **§ 7 PAngV (Pfand):** Der Pfandbetrag wird neben dem Preis angegeben und
-  nicht eingerechnet (EuGH, 29.06.2023, C-543/21). Solange unklar ist, ob die
-  Katalogpreise den Pfand enthalten, nennt die Landingpage keinen Preis eines
-  Getränks in Pfandflasche oder Dose. **Die App ist davon schon heute
-  betroffen.**
+* **§ 7 PAngV (Pfand):** „Wer neben dem Gesamtpreis … einen Pfandbetrag
+  fordert, hat deren Höhe neben dem Gesamtpreis anzugeben und nicht in diesen
+  einzubeziehen." Ein Preis einschließlich Pfand (z. B. Coca-Cola 0,5 l
+  „2,30 €") ist deshalb **nicht zulässig**; richtig wäre „2,05 € zzgl. 0,25 €
+  Pfand". Der Betrag, den der Kunde am Automaten zahlt, ändert sich dadurch
+  nicht. Betroffen: App (Angebote, Produktdetail, Suche, Belege), Kassenbon
+  (`receipt-pdf`) und die Preisschilder am Automaten.
+* **Pflichtpfand:** Auf Einweggetränkeverpackungen mindestens 0,25 €
+  einschließlich Umsatzsteuer; Getränkekartons (Block-, Giebel-,
+  Zylinderpackung) sind ausgenommen (bis 11.08.2026 § 31 VerpackG; die
+  Nachfolgeregelung seit Geltung der EU-Verpackungsverordnung ist **nicht
+  verifiziert**). Rabatte und Coupons, die auf den Preis einschließlich Pfand
+  rechnen, kürzen rechnerisch den Pfand. Sie müssen auf den Preis ohne Pfand
+  rechnen.
+* **Nettoerlös und Spende:** Der Pfand ist wirtschaftlich ein durchlaufender
+  Betrag (beim Einkauf gezahlt, beim Verkauf erhoben). Ob er im „Nettoerlös"
+  steckt, von dem 5 % gespendet werden, ist offen. Umsatzsteuerlich teilt der
+  Pfand das Schicksal des Getränks (Abschnitt 10.1 Abs. 8 UStAE, nicht
+  verifiziert); das ändert sich durch die getrennte Anzeige nicht.
 * **§ 5 UWG:** „ab"-Preise sind zulässig, wenn das günstigste Produkt zum
   genannten Preis tatsächlich im Sortiment ist. Der Hinweis „Startpreise am
   Automaten. Nicht jeder Automat führt jedes Produkt." verhindert den Eindruck,
@@ -1253,12 +1275,19 @@ keine Rechtsberatung.
 
 ### Ergebnis / Handlungsbedarf
 
-* [ ] **Klärung P-1:** Enthalten die Katalogpreise für Getränke den Pfand?
-  — Philipp — **04.10.2026**.
+* [x] **Klärung P-1:** Pfand ist in den Katalogpreisen enthalten (Auskunft
+  27.09.2026).
+* [ ] **Pfand je Produkt bestätigen** (Vorschlag im Chat vom 27.09.2026) —
+  Philipp — **04.10.2026**.
+* [ ] **Entscheidung:** Rabatte nur auf den Preis ohne Pfand; Pfand nicht im
+  Nettoerlös für die Spende (Steuerbüro bestätigen) — Philipp — **04.10.2026**.
+* [ ] **Umsetzung:** Feld für den Pfand je Produkt, Anzeige „… zzgl. … Pfand"
+  in App und Kassenbon, Rabattberechnung ohne Pfand, beide Migrationslinien,
+  Tests — Claude, nach Freigabe.
+* [ ] **Preisschilder am Automaten** nach demselben Muster — Philipp, vor
+  Inbetriebnahme.
 * [ ] **Klärung P-2:** Ist „Durstlöscher 0,5 l" pfandfrei (Karton)? — Philipp
   — **04.10.2026**.
-* [ ] **Danach, App:** Pfandhinweis neben jedem Getränkepreis, wenn die Preise
-  ohne Pfand sind; sonst Preise im Katalog um den Pfand bereinigen. — Claude.
 * [ ] **Auftrag an Lovable** senden, nach Freigabe. — Claude.
 
 **Status: 🔴** — Pfandfrage offen; die Landingpage ist so formuliert, dass sie

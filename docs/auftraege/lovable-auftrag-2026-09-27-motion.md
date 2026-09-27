@@ -188,7 +188,7 @@ Preise deutsch formatieren: „ab 0,80 €", „ab 1,50 €", „ab 1,30 €", �
 - Unter den Panels, als Hinweiskasten: „Startpreise am Automaten. Nicht jeder Automat führt jedes Produkt. Mit kostenlosem Konto in der App 5 % günstiger."
 - Schaltfläche je Panel: „In der App ansehen", Link auf `https://app.boerdesnack24.de`.
 
-**Keine Einzelpreise für Getränke und keine Pfandangabe.** Die „ab"-Preise beziehen sich auf Produkte ohne Pfand (Kaltgetränke: Durstlöscher im Karton). Wie der Pfand in den Katalogpreisen behandelt ist, klärt der Gesellschafter noch. Bis dahin erscheint kein Preis eines Getränks in Pfandflasche oder Dose.
+**Keine Einzelpreise für Getränke und keine Pfandangabe.** Die „ab"-Preise beziehen sich auf Produkte ohne Pfand (Kaltgetränke: Durstlöscher im Karton). Die Katalogpreise enthalten den Pfand; nach § 7 PAngV muss er aber neben dem Preis stehen, nicht darin. Bis der Katalog getrennte Pfandbeträge führt, erscheint deshalb kein Preis eines Getränks in Pfandflasche oder Dose.
 
 **Aufbau.** Vier Panels nebeneinander, volle Höhe (mindestens 520 px). Oben links der Name der Kategorie (Bricolage 800), darunter „ab …". Mittig ein großes `lucide`-Symbol, **kein Bild und kein Platzhalter**: `Cookie`, `CupSoda`, `Coffee`, `IceCreamCone`, jeweils `aria-hidden`. Farben, alle gemessen:
 

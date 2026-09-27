@@ -55,7 +55,7 @@ dürfen sie so nicht erscheinen:
 
 | Nr. | Frage | Warum es zählt | Wer, bis wann |
 |---|---|---|---|
-| P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand, oder kommt er dazu? | Nach § 7 PAngV wird der Pfand neben dem Preis angegeben und nicht in ihn eingerechnet (EuGH C-543/21 vom 29.06.2023). Die App zeigt heute Getränkepreise ohne Pfandhinweis. Die Landingpage nennt deshalb nur Startpreise von pfandfreien Produkten. | Philipp, 04.10.2026 |
+| P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand? | **Beantwortet 27.09.2026: ja, der Pfand ist enthalten.** Das widerspricht § 7 PAngV (Pfand neben dem Preis angeben, nicht einbeziehen). Betroffen: App, Kassenbon, Preisschilder am Automaten, Rabattberechnung. Die Landingpage ist nicht betroffen, weil ihre „ab"-Preise von pfandfreien Produkten stammen. Weiter in `docs/COMPLIANCE.md`, V-016 | Umsetzung offen, siehe V-016 |
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | Der Startpreis „Kaltgetränke ab 1,50 €" stützt sich darauf. | Philipp, 04.10.2026 |
 
 ## U. Umsetzungsstand
