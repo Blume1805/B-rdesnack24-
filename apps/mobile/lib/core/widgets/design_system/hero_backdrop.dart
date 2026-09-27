@@ -9,8 +9,9 @@ import '../../theme/app_typography.dart';
 /// Bildschirmbreite und rendert das Motiv immer vollständig (BoxFit.contain).
 ///
 /// [showTaglineOverlay] blendet den Slogan noch einmal als eigene Text-Zeile
-/// unter dem Bild ein (nützlich für den Login, wo der Slogan „Immer da, wenn
-/// der Hunger kommt." ergänzend zum Bild erscheinen soll).
+/// unter dem Bild ein (nützlich für den Login, wo der Claim „Versorgung vor
+/// Ort. Wert für den Ort." ergänzend zum Bild erscheinen soll). Der frühere
+/// Claim ist seit dem 27.09.2026 auch aus dem Bild selbst retuschiert.
 class HeroBackdrop extends StatelessWidget {
   const HeroBackdrop({
     super.key,

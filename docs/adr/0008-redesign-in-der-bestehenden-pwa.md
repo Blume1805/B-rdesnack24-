@@ -119,5 +119,9 @@ vorliegen, wird das Ergebnis dagegen abgeglichen.
 * **Nachweis:** Kontrasttest mit 54 Paaren, Bildschirmfotos mit
   Kontrastmessung jedes Textes (`tool/screens/screens_test.dart`, läuft
   nicht in der CI, weil es Bilder erzeugt), `flutter test` 144/144.
-* **Offen:** Auslieferung nach `main` (Freigabe), Kopfbild mit altem Claim,
-  echte Produktfotos (Muster 12 und 14).
+* **Claim:** „Immer da, wenn der Hunger kommt." ist entfernt (Entscheidung
+  vom 27.09.2026), in Texten ersetzt durch „Versorgung vor Ort. Wert für den
+  Ort.", aus den App-Bildern retuschiert.
+* **Offen:** Auslieferung nach `main` (Freigabe nach Sichtprüfung),
+  Landingpage-Kopfbild (Retusche bei Lovable), echte Produktfotos
+  (Muster 12 und 14).

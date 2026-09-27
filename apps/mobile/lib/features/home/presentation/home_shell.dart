@@ -549,7 +549,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       children: [
                         // Slogan zweizeilig, ohne Punkt-Präfix.
                         Text(
-                          'immer da, wenn der',
+                          'Versorgung vor Ort.',
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w700,
@@ -559,7 +559,7 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Hunger kommt',
+                          'Wert für den Ort.',
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w700,

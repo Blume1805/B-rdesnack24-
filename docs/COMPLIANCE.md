@@ -1176,9 +1176,15 @@ Rechtsberatung.
   144/144, Bildschirmfotos ohne Kontrastbefund.
 * [ ] **Auslieferung:** nach `main` erst mit Freigabe des Gesellschafters —
   Philipp — **30.09.2026**.
-* [ ] **Entscheidung:** alter Claim „Immer da, wenn der Hunger kommt." im
-  Kopfbild (`brand_hero_wide.webp`) und im Ladebildschirm (`web/index.html`) —
-  Philipp — **30.09.2026**.
+* [x] **Entscheidung:** alter Claim „Immer da, wenn der Hunger kommt." wird
+  entfernt (Gesellschafter, 27.09.2026). Ersetzt durch den Claim der
+  Landingpage „Versorgung vor Ort. Wert für den Ort." an allen fünf
+  Fundstellen im Code (Anmeldung, Kopf des internen Bereichs, Ladebildschirm,
+  Briefvorlage `brief_docx.ts`, ruhender Store-Text). Aus beiden App-Bildern
+  (`brand_hero_wide.webp`, `brand_hero.jpg`) herausretuschiert, ohne das Motiv
+  neu zu erzeugen.
+* [ ] **Landingpage-Kopfbild:** Retusche bei Lovable beauftragt am 27.09.2026 —
+  Claude — **28.09.2026**.
 
 ### Optimierungsvorschläge
 

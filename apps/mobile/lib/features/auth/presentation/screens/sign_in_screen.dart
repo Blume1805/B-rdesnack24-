@@ -68,7 +68,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const HeroBackdrop(
-                      tagline: 'Immer da, wenn der Hunger kommt.',
+                      tagline: 'Versorgung vor Ort. Wert für den Ort.',
                     ),
                     _FormPanel(
                       formKey: _formKey,
