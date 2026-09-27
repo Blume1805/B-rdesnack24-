@@ -5,9 +5,9 @@ Grundlage: `motion/MOTION.md`, `motion/motion-tokens.css`, `motion/ABWEICHUNGEN.
 (Repository `B-rdesnack24-`, Stand `9e1dbbe`), Projektwissen vom 26.09.2026,
 Code-Stand bei Lovable `1c030fb`.
 
-**Status:** erstellt, noch nicht gesendet. Nach dem Senden hier `message_id`
-und Datum eintragen und das Projektwissen nachziehen (Abschnitt „Nach dem
-Auftrag" unten).
+**Status:** gesendet am 27.09.2026, `message_id` `umsg_01m3j91ycyeyjb0wahkzhyw2p0`.
+Das Projektwissen wurde vorher am selben Tag nachgezogen (Abschnitt „Nach dem
+Auftrag" unten ist damit erledigt).
 
 ---
 

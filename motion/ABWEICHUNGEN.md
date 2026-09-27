@@ -25,7 +25,7 @@ dürfen sie so nicht erscheinen:
 | Nr. | Stelle | Problem | Bis dahin |
 |---|---|---|---|
 | R-1 | M08 „Schwebende Bewertungs-Karten" | Es gibt noch keine Kundschaft und keine Bewertungen. Erfundene Bewertungen sind nach UWG Anhang Nr. 23b/23c stets unlauter; für echte gilt die Angabe, ob und wie sie geprüft wurden (§ 5b Abs. 3 UWG). | **gesperrt**, bis echte, geprüfte Bewertungen vorliegen |
-| R-2 | M03 Meta „ab 1,50 €" und Sortiments-Panels | Beispielpreis ohne Quelle. **Erledigt 27.09.2026:** Der Gesellschafter gibt das Sortiment frei; Quelle ist der Produktkatalog (Migration `product_catalog_price_list`, 28.07.2026). Startpreise je Kategorie: Snacks & Süßes ab 0,80 €, Kaltgetränke ab 1,50 €, Heißgetränke ab 1,30 €, Eis ab 1,00 €. Die Liste `docs/marketing/preisliste_2026-03.csv` ist eine ältere Kalkulation mit Einkaufspreisen und nicht die Quelle. | Beauftragt mit `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`, Teil H. Offen: P-1 |
+| R-2 | M03 Meta „ab 1,50 €" und Sortiments-Panels | Beispielpreis ohne Quelle. **Erledigt 27.09.2026:** Der Gesellschafter gibt das Sortiment frei; Quelle ist der Produktkatalog (Migration `product_catalog_price_list`, 28.07.2026). Startpreise je Kategorie: Snacks & Süßes ab 0,80 €, Kaltgetränke ab 1,50 €, Heißgetränke ab 1,30 €, Eis ab 1,00 €. Die Liste `docs/marketing/preisliste_2026-03.csv` ist eine ältere Kalkulation mit Einkaufspreisen und nicht die Quelle. | Beauftragt mit `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`, Teil H. P-1 und P-2 beantwortet |
 | R-3 | M05 Beispieltext „Außer dem Automaten am Bahnhof. Frisch befüllt, mitten in der Börde." | Behauptet einen laufenden Automaten an einem Standort, den es nicht gibt (§ 5 UWG). | Text aus bestehenden, wahren Aussagen, z. B. „5 % des Nettoerlöses bleiben in der Region. Du entscheidest mit, wer sie bekommt." |
 | R-4 | M07 „Heute beliebt." | „Beliebt" braucht Verkaufsdaten; ohne Automat gibt es keine. | **App, 27.09.2026:** umgesetzt als „Eure Favoriten" (Grundlage: Bewertungen). Landingpage: nicht vorgesehen |
 | R-5 | M09 Ticker „Wanzleben · Oschersleben · Haldensleben · Eilsleben" | Nennt Standorte, an denen kein Automat steht. Die Landingpage nennt „Osterweddingen und Umgebung". | Ticker nur mit tatsächlich vereinbarten Standorten |
@@ -56,7 +56,7 @@ dürfen sie so nicht erscheinen:
 | Nr. | Frage | Warum es zählt | Wer, bis wann |
 |---|---|---|---|
 | P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand? | **Beantwortet 27.09.2026: ja, der Pfand ist enthalten.** Das widerspricht § 7 PAngV (Pfand neben dem Preis angeben, nicht einbeziehen). Betroffen: App, Kassenbon, Preisschilder am Automaten, Rabattberechnung. Die Landingpage ist nicht betroffen, weil ihre „ab"-Preise von pfandfreien Produkten stammen. Weiter in `docs/COMPLIANCE.md`, V-016 | Umsetzung offen, siehe V-016 |
-| P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | Der Startpreis „Kaltgetränke ab 1,50 €" stützt sich darauf. | Philipp, 04.10.2026 |
+| P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
 
 ## U. Umsetzungsstand
 

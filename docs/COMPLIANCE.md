@@ -1266,7 +1266,7 @@ keine Rechtsberatung.
 
 | Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
 |---|---|---|---|---|
-| Preisangaben (PAngV) | ✓ | Grundpreis nach § 4 Abs. 3 entbehrlich; Pfand ungeklärt | Ja: Pfandfrage (P-1), danach ggf. App-Anzeige | Philipp, 04.10.2026 |
+| Preisangaben (PAngV) | ✓ | Grundpreis nach § 4 Abs. 3 entbehrlich; Pfand im Katalogpreis enthalten, verstößt gegen § 7 | Ja: Pfand getrennt führen und anzeigen (App, Kassenbon, Automat) | Claude (Code), Philipp (Automat), 04.10.2026 |
 | UWG / Werbung | ✓ | „ab"-Preise mit Quelle, Hinweis auf Standortabhängigkeit | Nein | |
 | Jugendschutz | ✓ | kein Alkohol | Nein | |
 | Lebensmittelrecht (LMIV) | ✓ | Landingpage nicht betroffen; App offen wie bisher | Nein (hier) | |
@@ -1277,18 +1277,23 @@ keine Rechtsberatung.
 
 * [x] **Klärung P-1:** Pfand ist in den Katalogpreisen enthalten (Auskunft
   27.09.2026).
-* [ ] **Pfand je Produkt bestätigen** (Vorschlag im Chat vom 27.09.2026) —
-  Philipp — **04.10.2026**.
-* [ ] **Entscheidung:** Rabatte nur auf den Preis ohne Pfand; Pfand nicht im
-  Nettoerlös für die Spende (Steuerbüro bestätigen) — Philipp — **04.10.2026**.
+* [x] **Pfand je Produkt bestätigt** (27.09.2026): 0,25 € für Müllermilch
+  (PET), Vio still und medium 0,5 l, Lift Apfelschorle 1 l, Paulaner Limo und
+  Spezi (PET), Red Bull (3), Arizona (2), Coca-Cola, Coca-Cola Zero, Fanta
+  0,5 l, GÖNRGY (4). Alle übrigen Produkte ohne Pfand.
+* [x] **Entscheidung** (27.09.2026): Rabatte nur auf den Preis ohne Pfand;
+  Pfand nicht im Nettoerlös für die Spende. Offen: Bestätigung durch das
+  Steuerbüro, dass der Pfand als durchlaufender Posten neben dem Entgelt
+  behandelt wird — Philipp — **04.10.2026**.
 * [ ] **Umsetzung:** Feld für den Pfand je Produkt, Anzeige „… zzgl. … Pfand"
   in App und Kassenbon, Rabattberechnung ohne Pfand, beide Migrationslinien,
-  Tests — Claude, nach Freigabe.
+  Tests — Claude, in Arbeit.
 * [ ] **Preisschilder am Automaten** nach demselben Muster — Philipp, vor
   Inbetriebnahme.
-* [ ] **Klärung P-2:** Ist „Durstlöscher 0,5 l" pfandfrei (Karton)? — Philipp
-  — **04.10.2026**.
-* [ ] **Auftrag an Lovable** senden, nach Freigabe. — Claude.
+* [x] **Klärung P-2:** „Durstlöscher 0,5 l" ist im Karton, also pfandfrei
+  (Auskunft 27.09.2026). Der Startpreis „Kaltgetränke ab 1,50 €" ist damit
+  belegt.
+* [x] **Auftrag an Lovable** gesendet 27.09.2026.
 
-**Status: 🔴** — Pfandfrage offen; die Landingpage ist so formuliert, dass sie
-unabhängig von der Antwort stimmt, die App nicht.
+**Status: 🔴** — Pfand je Produkt geklärt, Umsetzung in App, Kassenbon und
+Datenbank offen. Die Landingpage ist nicht betroffen (pfandfreie Startpreise).
