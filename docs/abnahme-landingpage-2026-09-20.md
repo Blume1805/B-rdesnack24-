@@ -321,5 +321,30 @@ Schriftzug retuschiert wird. Vorgelegt am 26.09.2026.
 ## Noch offen
 
 * 🟡 Sichtprüfung der Vorschau in 390 und 1280 Pixel Breite durch Philipp
-  (die Vorschauadresse ist aus der Arbeitsumgebung nicht erreichbar).
-* 🟡 Veröffentlichungssperre unverändert (V-006, V-010, V-012).
+  (die Vorschauadresse ist aus der Arbeitsumgebung nicht erreichbar) —
+  Philipp — fällig 30.09.2026.
+* 🟡 Veröffentlichungssperre unverändert (V-006, V-010, V-012) —
+  Philipp — Wiedervorlage mit dem ersten Automaten in Betrieb.
+
+## Durchlauf 6 (27.09.2026): Auftrag vom 26.09.2026 am Code geprüft
+
+Lovable hat den Auftrag (`docs/auftraege/lovable-auftrag-2026-09-26-redesign.md`)
+abgeschlossen: Commit `eaaf8ef`, 4,2 Guthaben. Geprüft wurden nicht Lovables
+Bericht, sondern die Dateien `src/routes/index.tsx` und
+`src/components/bs24/ShareBar.tsx` auf diesem Stand:
+
+| Punkt | Befund |
+|---|---|
+| B.1 Kopf, drei Hinweise mit Symbol | 🟢 wörtlich, Symbole `aria-hidden` |
+| B.3 Der Anteil, vier Zeilen und Satz | 🟢 wörtlich; `TextHighlight` genau einmal |
+| B.4 Acht Vorteile, ein Block | 🟢 wörtlich, `Reveal` einmal um die Karte, kein Versatz je Zeile |
+| B.5 Unternehmen, B.6 Wer dahintersteht | 🟢 wörtlich |
+| C Text-Highlight | 🟢 Grundfarbe Gold; nur bei Bewegung „an" sind noch nicht erreichte Wörter hell (`#e9e5de`), also nie unlesbar |
+| E Bildplätze | 🟢 `site.bilder` mit `null`; ohne Foto unveränderte KI-Zeichnung samt Kennzeichnung |
+| A Du groß, keine Gedankenstriche | 🟢 in beiden Dateien kein Treffer im sichtbaren Text |
+| Eigene Zusatzänderung Lovables | Frage in `PhysicalDigital` „Wohin sollen 5 % gehen?" → „Wohin geht die Spende?"; keine neue Aussage, übernommen |
+
+**Hinweis für die nächste Runde:** „5 % des Nettoerlöses" steht jetzt zweimal
+direkt untereinander (Balkenbeschriftung und erste Zeile). Vorschlag: erste
+Zeile auf „Vom Nettoerlös" kürzen oder die Balkenbeschriftung streichen.
+Kein Fehler, nur doppelt.
