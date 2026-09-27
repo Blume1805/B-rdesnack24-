@@ -5,10 +5,12 @@ Stand: 22.09.2026. Diese Datei ist die verbindliche Vorgabe für **welche**
 wird Lovable als Projektwissen übergeben, damit die Bausteine nicht bei
 jedem Umbau erneut verlorengehen.
 
-Die technische Umsetzung — **wie** ein Muster implementiert wird, mit
-welchem Werkzeug und welchen Zahlenwerten — steht seit dem 27.09.2026 in
-`motion/MOTION.md` und `motion/motion-tokens.css` (Repo-Root). Diese Datei
-bleibt die einzige Quelle für den Musterkatalog selbst.
+**Seit dem 27.09.2026 gilt zusätzlich `motion/MOTION.md`** (Motion & Scroll
+System v1.0, Patterns M01–M11, aus Claude Design) mit den Werten in
+`motion/motion-tokens.css`. Neue Bewegungen werden nach dieser Spezifikation
+gebaut. Die hier umgesetzten Muster bleiben bestehen. Wo sich beide
+widersprechen (Zahl der Muster je Seite, Werte der bestehenden
+App-Bausteine), steht der Punkt offen in `motion/ABWEICHUNGEN.md`.
 
 **Der Anlass:** Beim Umbau am 20.09.2026 wurde die Seite auf schlichte
 Abschnitte reduziert. Die Bewegungsbausteine blieben im Projekt liegen und

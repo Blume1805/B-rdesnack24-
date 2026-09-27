@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
@@ -694,51 +693,29 @@ class _PersonalActivationFooter extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Einlöse-Code',
-                      style: AppTypography.body(
-                        size: 12,
-                        weight: FontWeight.w700,
-                        color: AppColors.brand,
-                      ).copyWith(letterSpacing: 0.6),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _PersonalOfferCard._formatCode(offer.redemptionCode),
-                      style: AppTypography.display(
-                        size: 28,
-                        weight: FontWeight.w800,
-                        color: AppColors.onDark,
-                      ).copyWith(letterSpacing: 3),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Code kopieren',
-                icon: const Icon(Icons.copy_outlined, color: AppColors.brand),
-                onPressed: () async {
-                  await Clipboard.setData(
-                    ClipboardData(text: offer.redemptionCode),
-                  );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Code kopiert.')),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(width: 4),
-              _RedeemButton(code: offer.redemptionCode),
-            ],
+          Text(
+            'Einlöse-Code',
+            style: AppTypography.body(
+              size: 12,
+              weight: FontWeight.w700,
+              color: AppColors.brand,
+            ).copyWith(letterSpacing: 0.6),
           ),
+          const SizedBox(height: AppSpacing.s2),
+          // Muster M11 (motion/MOTION.md): Kopieren mit Bestätigung in der
+          // Pill statt Symbol-Schaltfläche und Hinweisleiste.
+          CopyPill(
+            value: _PersonalOfferCard._formatCode(offer.redemptionCode),
+            copyText: offer.redemptionCode,
+            semanticLabel: 'Einlöse-Code',
+            valueStyle: AppTypography.display(
+              size: 26,
+              weight: FontWeight.w800,
+              color: AppColors.onDark,
+            ).copyWith(letterSpacing: 3),
+          ),
+          const SizedBox(height: AppSpacing.s3),
+          _RedeemButton(code: offer.redemptionCode),
           const SizedBox(height: AppSpacing.s3),
           FilledButton.icon(
             onPressed: busy

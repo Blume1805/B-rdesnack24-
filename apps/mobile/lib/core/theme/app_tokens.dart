@@ -142,11 +142,28 @@ abstract final class AppShadows {
   ];
 }
 
-/// Motion.
+/// Bewegungswerte. Spiegel von `motion/motion-tokens.css` (Motion & Scroll
+/// System v1.0, seit 27.09.2026). Werte dort ändern, dann hier nachziehen;
+/// keine eigenen Dauern oder Kurven im Widget-Code.
 abstract final class AppMotion {
-  static const Duration fast = Duration(milliseconds: 150);
-  static const Duration base = Duration(milliseconds: 250);
-  static const Duration slow = Duration(milliseconds: 350);
-  static const Curve easeOut = Curves.easeOutCubic;
-  static const Curve easeInOut = Curves.easeInOutCubic;
+  /// `--dur-fast`: Druck, Farbe.
+  static const Duration fast = Duration(milliseconds: 140);
+
+  /// `--dur-base`: Hover, Umschalten, Beschriftungswechsel.
+  static const Duration base = Duration(milliseconds: 220);
+
+  /// `--dur-slow`: Flächen, Karten.
+  static const Duration slow = Duration(milliseconds: 420);
+
+  /// `--ease-out`: Standard.
+  static const Curve easeOut = Cubic(0.22, 1, 0.36, 1);
+
+  /// `--ease-in-out`: Szenenwechsel, Farbflächen.
+  static const Curve easeInOut = Cubic(0.65, 0, 0.35, 1);
+
+  /// `--ease-bounce`: Bestätigungen, Pops. Schwingt kurz über 1 hinaus.
+  static const Curve easeBounce = Cubic(0.34, 1.56, 0.64, 1);
+
+  /// `--press-scale`.
+  static const double pressScale = 0.96;
 }

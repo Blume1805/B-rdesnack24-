@@ -75,6 +75,10 @@ class _FakeRepo implements CustomerRepository {
             offerPriceNet: 1.50 * (1 - pct / 100),
             discountPercent: pct,
             redemptionCode: '48213$i',
+            // Der erste Coupon ist aktiviert, damit Einlöse-Code und
+            // Copy-Pill (M11) im Bildschirmfoto und in der Kontrastmessung
+            // vorkommen.
+            activatedAt: i == 0 ? _now : null,
             validFrom: _now,
             validTo: _now.add(const Duration(days: 14)),
             source: PersonalOfferSource.values.first,

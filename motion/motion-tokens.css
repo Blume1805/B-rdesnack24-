@@ -1,107 +1,51 @@
-/*
- * Bördesnack24 — Motion-Tokens (portable Referenz)
- *
- * Diese Datei wird in KEINEM Build hier im Repo eingebunden — es gibt hier
- * keine Next.js-/Web-Codebase (siehe motion/MOTION.md, Abschnitt 0). Sie ist
- * die eine Quelle für Bewegungswerte (Dauern, Kurven, Scroll-Konstanten),
- * die
- *   1. dem Landingpage-Projekt bei Lovable (React + Vite) als Auftragstext
- *      mitgegeben bzw. dort unter `:root` ergänzt wird, und
- *   2. in der Flutter-App als Dart-Konstanten gespiegelt ist
- *      (`apps/mobile/lib/core/theme/app_tokens.dart`, `AppMotion`, und
- *      `apps/mobile/lib/core/widgets/motion/motion.dart`).
- *
- * Nur Bewegungswerte. Farben und Radien kommen aus dem Design System
- * (`boerdesnack24-design`-Skill, `app_tokens.dart` bzw. Lovables
- * `src/styles.css`) — hier nicht duplizieren.
- *
- * Jeder Wert unten ist an einer bestehenden Stelle im Code belegt (Zitat in
- * der Zeile). Nichts hier ist neu erfunden — mit einer einzigen, ausdrücklich
- * markierten Ausnahme (--motion-lerp), die als neue Konvention eingeführt
- * wird und ab jetzt genauso verbindlich ist wie die übrigen.
- */
-
+/* ============================================================
+   Bördesnack24 — Motion Tokens (Erweiterung zu tokens/spacing.css)
+   Bestehende Tokens (--ease-out, --ease-in-out, --ease-bounce,
+   --dur-fast 140, --dur-base 220, --dur-slow 420) bleiben gültig.
+   Spezifikation & Prompts: motion/MOTION.md
+   ============================================================ */
 :root {
-  /* ── Dauern ────────────────────────────────────────────────────────── */
-  /* Mikrointeraktion (Muster 05): Lovable src/styles.css .btn-Transition
-     "0.15s ease"; Flutter AppMotion.fast (app_tokens.dart:147). */
-  --motion-duration-fast: 150ms;
+  /* Easing */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);    /* Standard: rein, weich auslaufend */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);    /* Szenenwechsel, Farbflächen */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* Add-Buttons, Toasts, Pops */
+  --ease-snap:   cubic-bezier(0.2, 0.9, 0.1, 1);    /* Nav-Indikator, Pill-Morph */
 
-  /* Karten-Hover/Reveal-Nachbarwirkungen: Lovable .card-Transition
-     "0.18s ease" (styles.css); nächstliegender Flutter-Wert AppMotion.base
-     (app_tokens.dart:148, 250ms) — Web und App weichen hier bewusst leicht
-     ab (Hover gibt es nur auf dem Desktop, Touch nutzt --motion-duration-fast). */
-  --motion-duration-base: 250ms;
+  /* Dauer */
+  --dur-fast:    140ms;   /* Press, Farbe */
+  --dur-base:    220ms;   /* Hover, Toggle */
+  --dur-slow:    420ms;   /* Panels, Cards */
+  --dur-reveal:  700ms;   /* Headline-/Wort-Reveal */
+  --dur-hero:    1200ms;  /* Intro-Wortmarke (einmalig) */
 
-  /* Layer-/Produktkarten-Übergänge (Muster 13): Lovable .layer/.product-card
-     "0.45s ease" bzw. "0.6s ease" (styles.css) liegen zwischen slow und einem
-     eigenen Wert; für neue Web-Komponenten gilt slow als Obergrenze. */
-  --motion-duration-slow: 350ms;
+  /* Stagger */
+  --stagger-letter: 35ms;
+  --stagger-word:   60ms;
+  --stagger-item:   80ms;
 
-  /* Zähler (Muster 03): Flutter CountUp, 900ms (motion.dart, TweenAnimationBuilder). */
-  --motion-duration-count: 900ms;
+  /* Scroll */
+  --scroll-lerp:      0.12;  /* Glättung pro Frame für Scroll-Progress (0..1) */
+  --scroll-pin-short: 200vh; /* Höhe einer Pinned-Section mit 1–2 Beats */
+  --scroll-pin-long:  400vh; /* Pinned-Section mit 3–4 Szenen */
 
-  /* Maskenreveal (Muster 12, gesperrt bis echtes Foto vorliegt): Lovable
-     .machine-photo-reveal clip-path-Transition "0.8s ease" (styles.css). */
-  --motion-duration-reveal-mask: 800ms;
+  /* Distanzen & Stärken */
+  --reveal-y:        24px;
+  --hover-lift:      -3px;
+  --press-scale:     0.96;
+  --press-scale-add: 0.9;
+  --tilt-max:        8deg;   /* Karussell / Floating Cards */
+  --skew-max:        6deg;   /* Scroll-Velocity-Skew */
+  --magnet-strength: 0.35;   /* Anteil der Cursor-Distanz */
+  --magnet-radius:   120px;
 
-  /* Reveal-Basisdauer (Muster 01): Lovable .reveal opacity/transform
-     "0.5s cubic-bezier(...)" (styles.css); Flutter _RevealState._c,
-     Duration(milliseconds: 500) (motion.dart). Web und App stimmen überein. */
-  --motion-duration-reveal: 500ms;
+  /* Loops (nur dekorativ, pausierbar) */
+  --marquee-duration: 38s;
+}
 
-  /* ── Kurven ────────────────────────────────────────────────────────── */
-  /* Einblend-Kurve (Muster 01/02): Lovable .reveal
-     "cubic-bezier(0.16, 1, 0.3, 1)" (styles.css); Flutter kRevealCurve,
-     Cubic(0.16, 1, 0.3, 1) (motion.dart:27). Identisch auf beiden Seiten —
-     nicht verändern, ohne beide Seiten neu abzugleichen. */
-  --motion-ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* Allgemeine Ein-/Ausblendungen ohne eigene Kurve (Hover, Fokus):
-     Flutter AppMotion.easeOut = Curves.easeOutCubic (app_tokens.dart:150),
-     Web-Äquivalent für dieselbe Kurvenform. */
-  --motion-ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
-
-  /* ── Scroll-Zeitgesetz (scrollcraft-Kanon, docs/scrolling-funktionen.md) ─
-     Ein Fortschritt 0…1 je Section: beginnt beim Hereinscrollen (ENTRY),
-     hält am Ende (TAIL). Lovable src/lib/scroll.ts, Funktion prog():
-     "const ENTRY = 0.62, TAIL = 0.26". Flutter _ScrollLinkedState.progress(),
-     "const entry = 0.62, tail = 0.26" (motion.dart:223). Identisch. */
-  --motion-scroll-entry: 0.62;
-  --motion-scroll-tail: 0.26;
-
-  /* Verteilung diskreter Zustände auf die ersten `spread` des Fortschritts
-     (Lovable phase(p, n, spread), Default 0.56, src/lib/scroll.ts). */
-  --motion-scroll-spread: 0.56;
-
-  /* Glättungsfaktor für useScrollProgress (motion/MOTION.md, Abschnitt 2):
-     NEU eingeführt mit diesem Auftrag (27.09.2026), nicht aus Bestandscode
-     zitiert. Gilt ab sofort verbindlich für jede neue kontinuierliche
-     Scroll-Bindung; bestehende Bausteine (ShareScene, ParallaxLayer, …)
-     werden nicht rückwirkend umgebaut, nur weil dieser Wert dazukommt. */
-  --motion-lerp: 0.12;
-
-  /* ── Staffelung (Muster 02) ────────────────────────────────────────── */
-  /* Schrittweite: Lovable Reveal.tsx "Math.min(delay, 8) * 60" (ms) und
-     Flutter _RevealState "60 * math.min(widget.index, 4)" (motion.dart:64) —
-     beide 60 ms Schrittweite, siehe motion/MOTION.md Abschnitt 6 für die
-     Web/App-Abweichung bei der Obergrenze. */
-  --motion-stagger-step: 60ms;
-  --motion-stagger-max-steps-web: 8; /* Lovable Reveal.tsx, Kommentar „bis zu acht“ */
-  --motion-stagger-max-steps-app: 4; /* Flutter motion.dart:64, math.min(index, 4) → 5 Stufen */
-
-  /* ── Mikrointeraktion (Muster 05) ──────────────────────────────────── */
-  /* Skalierung beim Drücken: Lovable .btn/.card ":active { transform:
-     scale(0.98) }" (styles.css); Flutter Pressable, "scale: _down ? 0.98 : 1"
-     (motion.dart). Identisch. */
-  --motion-press-scale: 0.98;
-
-  /* Anheben bei Maus-Hover (nur Desktop, styles.css @media (hover: hover)):
-     "transform: translateY(-2px)". Kein App-Äquivalent (kein Mauszeiger). */
-  --motion-hover-lift: -2px;
-
-  /* ── Parallax (Muster 11) ──────────────────────────────────────────── */
-  /* Amplitude mobil: Flutter ParallaxLayer, 210px × depth, depth 0.06–0.62
-     laut Kanon (motion.dart, Kommentar Zeile 400). */
-  --motion-parallax-amplitude: 210px;
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-reveal: 0ms; --dur-hero: 0ms; --dur-slow: 0ms;
+    --stagger-letter: 0ms; --stagger-word: 0ms; --stagger-item: 0ms;
+    --reveal-y: 0px; --tilt-max: 0deg; --skew-max: 0deg; --magnet-strength: 0;
+  }
 }
