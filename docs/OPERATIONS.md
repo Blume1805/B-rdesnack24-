@@ -1369,3 +1369,128 @@ nicht mehr geht), genügt diese eine Zeile im SQL Editor:
 Technischer Hintergrund: Migration `0070_scheinkaeufe_sperren.sql`, Test
 `supabase/tests/scheinkauf_test.sql`, Prüfbericht
 `docs/audit/AUDIT-2026-09-BACKEND.md` (Befunde B-1 bis B-3), COMPLIANCE V-014.
+
+## Runbook M: Pfand getrennt vom Preis führen
+
+**Zeitbedarf:** 15 Minuten in Supabase, dazu die Preisschilder am Automaten.
+
+**Dringlichkeit:** vor dem ersten Automaten in Betrieb. **Reihenfolge
+beachten:** erst muss das App-Update live sein (ich sage Dir Bescheid), dann
+dieses Runbook. Andersherum zeigt die alte App kurzzeitig 2,05 € für eine Cola
+ohne den Hinweis auf den Pfand.
+
+### Warum das gemacht werden soll
+
+In unserer Preisliste steckt bei 18 Getränken (Flaschen und Dosen) der Pfand
+von 0,25 € im Preis. Das Gesetz verlangt, den Pfand **neben** dem Preis zu
+nennen, nicht darin (§ 7 Preisangabenverordnung). Dazu kamen zwei Folgefehler:
+
+* **Rabatte auf den Pfand.** Jeder Rabatt (5 % in der App, Tagesangebote,
+  Coupons, MHD-Abschlag) wurde auch auf die 0,25 € gewährt.
+* **Spende auf den Pfand.** Die 5 % für die Region wurden auch vom Pfand
+  gerechnet. Entschieden ist am 27.09.2026: ohne Pfand.
+
+Beim Prüfen sind zwei weitere Fehler aufgefallen, die diese Änderung gleich
+mit behebt:
+
+* Die Bezahlung per App am Automaten („Freigabe") brach bei **jedem** Versuch
+  mit einem Fehler ab. Bisher hat das niemand gemerkt, weil noch kein Automat
+  läuft.
+* Bei Automatenkäufen wurde die Spende mit 7 % Umsatzsteuer gerechnet, auch
+  bei Getränken, für die 19 % gelten. Die Spende fiel dadurch zu hoch aus.
+
+### Was dabei passiert — und was nicht
+
+* **Der Kunde zahlt am Automaten genau so viel wie vorher.** Aus „Cola 2,30 €"
+  wird „Cola 2,05 € zzgl. 0,25 € Pfand". Die Datenbank prüft das beim
+  Einspielen selbst für jedes Produkt und bricht ab, wenn auch nur ein Cent
+  nicht stimmt.
+* Rabatte gelten danach nur noch für die Ware. Beispiel mit 5 % App-Rabatt:
+  vorher 2,18 €, jetzt 2,05 € − 0,10 € + 0,25 € = 2,20 €.
+* Die Spende wird ohne Pfand gerechnet. **Umsatzsteuer, Rechnungen und
+  Buchhaltung bleiben unverändert**: Für das Finanzamt gehört der Pfand zum
+  Verkaufspreis und wird mit versteuert.
+* Es wird nichts gelöscht. Offene Angebote werden auf den Preis ohne Pfand
+  umgerechnet, abgelaufene und eingelöste bleiben, wie sie waren.
+
+### Schritt für Schritt
+
+Die beiden Texte zum Einfügen sind lang. Du kopierst sie jeweils als Ganzes
+von GitHub.
+
+1. Öffne `https://supabase.com/dashboard`, melde Dich an und klicke auf Dein
+   Projekt (die Adresse endet auf `nnfsyuglkqycwenwxmuw`).
+2. Klicke links auf **SQL Editor** und oben auf **New query**.
+3. Öffne in einem zweiten Browser-Tab diese Adresse:
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260926121000_terminal_webhook_anbindung.sql`
+4. Klicke dort rechts oben über dem Text auf das Symbol **Copy raw file**
+   (zwei überlappende Rechtecke). Der ganze Text ist jetzt kopiert.
+5. Zurück im SQL Editor: ins leere Feld klicken, **Strg+V**, dann unten
+   rechts **Run**. Unten erscheint „Success. No rows returned".
+6. Feld leeren (Strg+A, Entf). Dann dasselbe mit dieser Datei:
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260927200000_pfand_getrennt.sql`
+   → **Copy raw file** → Strg+V → **Run**. Das dauert einige Sekunden.
+7. Feld leeren und diesen Text einfügen. Er trägt beide Änderungen in die
+   Liste der eingespielten Änderungen ein, damit sie später nicht noch
+   einmal laufen:
+
+   ```sql
+   insert into supabase_migrations.schema_migrations (version, name)
+   values ('20260926121000', 'terminal_webhook_anbindung'),
+          ('20260927200000', 'pfand_getrennt')
+   on conflict (version) do nothing;
+   ```
+
+   → **Run**.
+8. **Kontrolle.** Feld leeren, diesen Text einfügen, **Run**. Er liest nur:
+
+   ```sql
+   select
+     (select count(*) from public.products where deposit > 0) as produkte_mit_pfand,
+     (select round(list_price_net * (1 + tax_rate / 100), 2)
+        from public.products where sku = 'BS-004') as cola_ware,
+     (select deposit from public.products where sku = 'BS-004') as cola_pfand,
+     (select deposit from public.products where sku = 'BS-006') as durstloescher_pfand;
+   ```
+
+9. **Preisschilder am Automaten**, bevor er in Betrieb geht: je Getränk mit
+   Pfand der Warenpreis und daneben der Pfand, zum Beispiel
+   **„Coca-Cola 0,5 l  2,05 €  zzgl. 0,25 € Pfand"**. Der Preis, den Du im
+   Automaten selbst einstellst, bleibt der **Gesamtbetrag** (2,30 €): Der
+   Automat kassiert Ware und Pfand zusammen. Die aktuelle Liste liefert der
+   Text aus Schritt 8, wenn Du `where sku = 'BS-004'` weglässt; oder frag mich
+   nach einer fertigen Druckvorlage.
+
+### So sieht Erfolg aus
+
+Nach Schritt 8 steht in der Tabelle:
+
+| Spalte | richtig ist |
+| --- | --- |
+| `produkte_mit_pfand` | `18` |
+| `cola_ware` | `2.05` |
+| `cola_pfand` | `0.25` |
+| `durstloescher_pfand` | `0.00` |
+
+In der App steht danach bei der Cola „2,05 €" und darunter „zzgl. 0,25 €
+Pfand"; auf dem Kassenbon steht der Pfand als eigene Zeile.
+
+### Wenn etwas schiefgeht
+
+* **Rote Meldung in Schritt 5 oder 6:** Es ist **nichts** verändert worden.
+  Die Änderung läuft ganz oder gar nicht. Schick mir ein Bildschirmfoto.
+  Zwei Meldungen sind gewollt und harmlos:
+  * „Zuerst 20260926121000 … ausrollen": Schritt 5 fehlt, bitte nachholen.
+  * „Pfand-Migration ist bereits angewandt": Sie ist schon drin. Weiter mit
+    Schritt 7.
+* **Etwas anderes als in der Erfolgstabelle:** nicht weitermachen, Foto an
+  mich.
+* Rückgängig machen bitte **nicht selbst**: Das hieße Spalten zu entfernen, und
+  das mache ich mit Dir gemeinsam. Es eilt dabei nie; der Kunde zahlt in jedem
+  Fall den richtigen Betrag.
+
+Technischer Hintergrund: Migration
+`20260927200000_pfand_getrennt.sql` (Produktionslinie, Zweig
+`claude/bordesnack24-audit-architecture-7xd3d6`), Nachweis
+`scripts/pruefumgebung/110_pfand.sql` (23 Fälle) und Neuaufbau mit allen
+Prüfskripten, COMPLIANCE V-016.

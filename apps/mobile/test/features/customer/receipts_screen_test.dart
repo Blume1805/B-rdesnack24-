@@ -76,4 +76,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('1 Belege'), findsOneWidget);
   });
+
+  testWidgets('Beleg zeigt Ware ohne Pfand und den Pfand als eigene Zeile',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final beleg = Receipt(
+      id: 'p1',
+      purchasedAt: DateTime(2026, 9, 27, 12),
+      totalGross: 2.30,
+      source: 'machine',
+      category: 'Getränke',
+      itemCount: 1,
+      machineName: 'Automat Mitte',
+      depositTotal: 0.25,
+      items: const [
+        ReceiptItem(
+          label: 'Coca-Cola 0,5 l',
+          quantity: 1,
+          unitPrice: 2.30,
+          lineGross: 2.30,
+          category: 'Getränke',
+          unitDeposit: 0.25,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          myReceiptsProvider.overrideWith((ref) async => [beleg]),
+        ],
+        child: const MaterialApp(home: ReceiptsScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('2,30').last);
+    await tester.pumpAndSettle();
+
+    // § 7 PAngV: Ware 2,05 €, Pfand 0,25 € getrennt; Gesamt bleibt 2,30 €.
+    expect(find.text('Coca-Cola 0,5 l'), findsOneWidget);
+    expect(find.textContaining('2,05'), findsOneWidget);
+    expect(find.text('Pfand'), findsOneWidget);
+    expect(find.textContaining('0,25'), findsOneWidget);
+    expect(find.text('Gesamt'), findsOneWidget);
+  });
 }

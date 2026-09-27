@@ -310,7 +310,9 @@ Nachtrag zum Motion-Auftrag vom 27.09.2026. A bis E sind da, danke. Bitte jetzt 
    - in src/styles.css keine Übergänge oder Animationen auf width, height, top, left
    - Bildschirmfotos 390 px und 1440 px, je mit Bewegung an und aus: Kopf, Standortgeber, Anteil, Sortiment, Fußbereich.
 
-Am Ende je Punkt 1a bis 5 eine Zeile, was geändert wurde. Nicht Umgesetztes ausdrücklich nennen.
+6. Der Anteil (ShareBar): Die Spende wird seit 27.09.2026 ohne Pfand gerechnet. Den Satz „Nettoerlös heißt: Umsatz ohne Umsatzsteuer." ändern zu „Nettoerlös heißt: Umsatz ohne Umsatzsteuer und ohne Pfand." Sonst nichts an diesem Abschnitt ändern.
+
+Am Ende je Punkt 1a bis 6 eine Zeile, was geändert wurde. Nicht Umgesetztes ausdrücklich nennen.
 ```
 
 ### Für Philipp: Nachtrag an Lovable schicken
@@ -328,6 +330,10 @@ Am Ende je Punkt 1a bis 5 eine Zeile, was geändert wurde. Nicht Umgesetztes aus
       Nachtrag dann selbst und prüfe das Ergebnis.
    3. Alternativ: Öffne das Projekt „Bördesnack24 Landingpage", füge den
       Text aus dem grauen Kasten oben ins Chatfeld ein und schicke ihn ab.
-4. **Erfolg:** Lovable antwortet mit einer Zeile je Punkt 1a bis 5.
+4. **Erfolg:** Lovable antwortet mit einer Zeile je Punkt 1a bis 6.
 5. **Wenn etwas schiefgeht:** Nicht veröffentlichen. Es eilt nicht; die
    veröffentlichte Seite ist vom Umbau nicht betroffen.
+6. **Reihenfolge:** Punkt 6 (Satz „… und ohne Pfand") stimmt erst, wenn die
+   Datenbank den Pfand aus der Spende herausrechnet (Runbook M in
+   `docs/OPERATIONS.md`). Die Vorschau darf ihn vorher enthalten,
+   **veröffentlicht wird erst nach Runbook M**.

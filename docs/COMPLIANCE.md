@@ -1243,11 +1243,28 @@ Rechtsberatung.
   verifiziert**). Rabatte und Coupons, die auf den Preis einschließlich Pfand
   rechnen, kürzen rechnerisch den Pfand. Sie müssen auf den Preis ohne Pfand
   rechnen.
-* **Nettoerlös und Spende:** Der Pfand ist wirtschaftlich ein durchlaufender
-  Betrag (beim Einkauf gezahlt, beim Verkauf erhoben). Ob er im „Nettoerlös"
-  steckt, von dem 5 % gespendet werden, ist offen. Umsatzsteuerlich teilt der
-  Pfand das Schicksal des Getränks (Abschnitt 10.1 Abs. 8 UStAE, nicht
-  verifiziert); das ändert sich durch die getrennte Anzeige nicht.
+* **Umsatzsteuer auf den Pfand (verifiziert 27.09.2026):** Pfandgeld für eine
+  Warenumschließung ist **Teil des Entgelts** für die Lieferung des Getränks
+  und trägt dessen Steuersatz; die Rückzahlung bei Rückgabe mindert das
+  Entgelt (Abschn. 10.1 Abs. 8 UStAE; Quelle: BMF, Amtliche
+  Umsatzsteuer-Handausgabe, zu § 10 UStG). Der Pfand ist also **kein
+  durchlaufender Posten**. Eine frühere Fassung dieses Abschnitts (Nachfrage
+  an das Steuerbüro „als durchlaufender Posten") ist damit überholt. Folge für
+  den Code: Umsatz, Rechnung, DATEV-Export und Kassenbon-USt rechnen weiter
+  **mit** Pfand.
+* **Nettoerlös und Spende:** Entscheidung vom 27.09.2026: Die Spende wird ohne
+  Pfand gerechnet. Das ist eine zulässige **eigene Definition** der
+  Spendenbasis, steuerlich aber nicht „Umsatz ohne Umsatzsteuer". Nach § 5
+  Abs. 1, § 5a UWG muss die öffentliche Aussage deshalb lauten: „Nettoerlös
+  heißt: Umsatz ohne Umsatzsteuer **und ohne Pfand**." Die Landingpage sagt
+  heute nur „ohne Umsatzsteuer"; die Änderung steht im Lovable-Nachtrag
+  (Punkt 6) und darf erst **mit** der Datenbankänderung veröffentlicht werden.
+* **§ 3 PAngV (Gesamtpreis) — Befund 27.09.2026:** Tagesangebote,
+  Wochenangebote und persönliche Coupons zeigten in der App den
+  **Nettopreis** als Preis (Coca-Cola „1,74 € statt 1,93 €", tatsächlich
+  2,30 €). Gegenüber Verbrauchern ist der Gesamtpreis einschließlich
+  Umsatzsteuer anzugeben; zugleich ist ein zu niedrig angezeigter Preis eine
+  Irreführung nach § 5 UWG. Behoben in der App (unten).
 * **§ 5 UWG:** „ab"-Preise sind zulässig, wenn das günstigste Produkt zum
   genannten Preis tatsächlich im Sortiment ist. Der Hinweis „Startpreise am
   Automaten. Nicht jeder Automat führt jedes Produkt." verhindert den Eindruck,
@@ -1266,8 +1283,8 @@ keine Rechtsberatung.
 
 | Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
 |---|---|---|---|---|
-| Preisangaben (PAngV) | ✓ | Grundpreis nach § 4 Abs. 3 entbehrlich; Pfand im Katalogpreis enthalten, verstößt gegen § 7 | Ja: Pfand getrennt führen und anzeigen (App, Kassenbon, Automat) | Claude (Code), Philipp (Automat), 04.10.2026 |
-| UWG / Werbung | ✓ | „ab"-Preise mit Quelle, Hinweis auf Standortabhängigkeit | Nein | |
+| Preisangaben (PAngV) | ✓ | § 4 Abs. 3: Grundpreis entbehrlich. § 7: Pfand jetzt getrennt (Code fertig, nicht ausgerollt). § 3: Angebote zeigten Nettopreise, behoben | Ja: Ausrollen (Runbook M), Preisschilder | Philipp, vor Inbetriebnahme |
+| UWG / Werbung | ✓ | „ab"-Preise mit Quelle. Nettoerlös-Definition muss „und ohne Pfand" nennen (§ 5a). „Echtzeit-Bestand" derzeit für Kunden nicht einlösbar (V-016-d) | Ja: Landingpage-Satz, V-016-d | Philipp, 04.10.2026 |
 | Jugendschutz | ✓ | kein Alkohol | Nein | |
 | Lebensmittelrecht (LMIV) | ✓ | Landingpage nicht betroffen; App offen wie bisher | Nein (hier) | |
 | Datenschutz | ✓ | keine Datenerhebung | Nein | |
@@ -1282,18 +1299,62 @@ keine Rechtsberatung.
   Spezi (PET), Red Bull (3), Arizona (2), Coca-Cola, Coca-Cola Zero, Fanta
   0,5 l, GÖNRGY (4). Alle übrigen Produkte ohne Pfand.
 * [x] **Entscheidung** (27.09.2026): Rabatte nur auf den Preis ohne Pfand;
-  Pfand nicht im Nettoerlös für die Spende. Offen: Bestätigung durch das
-  Steuerbüro, dass der Pfand als durchlaufender Posten neben dem Entgelt
-  behandelt wird — Philipp — **04.10.2026**.
-* [ ] **Umsetzung:** Feld für den Pfand je Produkt, Anzeige „… zzgl. … Pfand"
-  in App und Kassenbon, Rabattberechnung ohne Pfand, beide Migrationslinien,
-  Tests — Claude, in Arbeit.
-* [ ] **Preisschilder am Automaten** nach demselben Muster — Philipp, vor
-  Inbetriebnahme.
+  Pfand nicht im Nettoerlös für die Spende. Die frühere Nachfrage „Pfand als
+  durchlaufender Posten" entfällt: Umsatzsteuerlich gehört der Pfand zum
+  Entgelt (siehe Würdigung); die Spendenbasis ist eine eigene Definition und
+  wird öffentlich so benannt.
+* [x] **Umsetzung Datenbank** (27.09.2026, Produktionslinie): Migration
+  `20260927200000_pfand_getrennt.sql` im Zweig
+  `claude/bordesnack24-audit-architecture-7xd3d6`. `products.deposit`,
+  Listen- und Fachpreise ohne Pfand (Warenpreis + Pfand = bisheriger Preis,
+  von der Migration selbst centgenau geprüft), Pfand je Kaufposition und je
+  Automatenkauf serverseitig aus den Stammdaten, Rabatte nur auf die Ware,
+  Spendenbasis ohne Pfand, Pfand in allen Katalog-Schnittstellen.
+  **Numerierte Linie (0001–0070): bewusst nicht**, sie führt einen anderen
+  Katalog (dort ist BS-004 Red Bull); die Migration bricht dort ohne Änderung
+  ab (nachgewiesen).
+* [x] **Nachweis Datenbank:** `scripts/pruefumgebung/110_pfand.sql` 23/23,
+  zweimal hintereinander; Umrechnung des Bestands 7/7 (Fachpreis, offenes und
+  eingelöstes Coupon, Tagesangebot, Kombiangebot, alter Kauf, Preisverlauf);
+  Neuaufbau 236 Migrationen, alle 27 Prüfskripte ohne Fehler; Rechte-
+  Fingerabdrücke gegenüber dem Stand ohne Migration gleich bis auf die zwei
+  neuen Triggerfunktionen (nur `service_role`) und das Leserecht auf
+  `products.deposit` (nur `authenticated`).
+* [x] **Umsetzung App** (Zweig `claude/bordesnack24-app-strategy-sf5yzy`):
+  „zzgl. 0,25 € Pfand" bei Produktdetail, Verfügbarkeit, Wochen- und
+  Tagesangeboten und persönlichen Coupons; Beleg mit Pfand als eigener Zeile.
+  Angebote zeigen jetzt den **Bruttopreis** (§ 3 PAngV); ohne Steuersatz
+  zeigt die App keinen Preis statt eines Nettopreises. Nachweis: `flutter
+  analyze` ohne Befund, `flutter test` 165/165 (neu: `prices_test`,
+  `deposit_note_test`, Belegtest mit Pfand), Bildschirmfotos 8/8 ohne
+  Kontrastbefund.
+* [x] **Umsetzung Kassenbon** (`receipt-pdf`, beide Kopien): Ware ohne Pfand,
+  Pfand als eigene Zeile, USt-Ausweis unverändert mit Pfand. Nachweis: `deno
+  lint` und `deno check` ohne Befund; Beleg mit Ersatz-Datenbank erzeugt und
+  ausgelesen (nach der Migration: „Coca-Cola 2,05 EUR", „Pfand 0,25 EUR",
+  Gesamt 3,95 EUR; vor der Migration: bisheriges Bild ohne Fehler).
+* [ ] **Ausrollen** in dieser Reihenfolge: App-Update (Freigabe main-Deploy
+  offen), dann Runbook M (`docs/OPERATIONS.md`), dann `receipt-pdf` — Philipp,
+  vor dem ersten Automaten. Bis dahin gilt in der Produktion der alte Stand.
+* [ ] **Landingpage-Satz „ohne Umsatzsteuer und ohne Pfand"** (Lovable-
+  Nachtrag Punkt 6) — erst mit Runbook M veröffentlichen — Philipp.
+* [ ] **Preisschilder am Automaten** nach demselben Muster (Runbook M,
+  Schritt 9) — Philipp, vor Inbetriebnahme.
 * [x] **Klärung P-2:** „Durstlöscher 0,5 l" ist im Karton, also pfandfrei
   (Auskunft 27.09.2026). Der Startpreis „Kaltgetränke ab 1,50 €" ist damit
   belegt.
 * [x] **Auftrag an Lovable** gesendet 27.09.2026.
 
-**Status: 🔴** — Pfand je Produkt geklärt, Umsetzung in App, Kassenbon und
-Datenbank offen. Die Landingpage ist nicht betroffen (pfandfreie Startpreise).
+**Status: 🔴 ⏸ EXTERN (Freigabe Ausrollen)** — Umsetzung und Nachweise
+vollständig; offen sind nur Ausrollen, Landingpage-Satz und Preisschilder.
+
+### Beim Nachweis gefundene Abweichungen (27.09.2026)
+
+| # | Befund | Stand |
+|---|---|---|
+| V-016-a | `vend_freigabe_anlegen` brach bei **jedem** Aufruf mit 42702 ab (Spalte `gueltig_bis` mehrdeutig). Die Bezahlung per App am Automaten hätte nie funktioniert; die Prüfskripte 105/106 legten Freigaben von Hand an und sahen es nicht. | 🟢 behoben in derselben Migration, Nachweis `110` B1 |
+| V-016-b | Automatenkäufe ohne Positionen: Spendenbasis pauschal mit 7 % USt, auch bei Getränken zu 19 % → Spende zu hoch. | 🟢 behoben (Steuersatz des Produkts der Freigabe), Nachweis `110` B3 |
+| V-016-c | App zeigte bei Angeboten Nettopreise als Endpreis (§ 3 PAngV, § 5 UWG). | 🟢 behoben in der App, Nachweis `prices_test` |
+| V-016-d | Die Verfügbarkeitsanzeige der Kunden-App liest `machine_stock`; `inventory` ist nur intern lesbar. Kunden sehen dort **keinen Bestand**, die Landingpage wirbt mit „Echtzeit-Bestand". | 🔴 offen: Grundsatzfrage, ob Kunden Bestände sehen dürfen (Folge: RLS-Änderung) oder der Werbesatz geändert wird — Philipp, 04.10.2026 |
+| V-016-e | Der Arbeitsstand der Produktionslinie lag in einer veralteten Kopie (`2632d3b` statt `437dadb`); der erste Neuaufbau scheiterte daran. | 🟢 auf `437dadb` umgestellt, Neuaufbau wiederholt |
+| V-016-f | Treuestufen zählen den Umsatz einschließlich Pfand („ab 150 € Gesamtumsatz"). Nicht falsch, aber nicht entschieden. | 🔴 offen: mit oder ohne Pfand zählen — Philipp, 04.10.2026 |

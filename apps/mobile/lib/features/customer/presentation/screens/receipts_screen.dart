@@ -684,8 +684,38 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
                       ),
                     ),
                   ),
+                  // Ware ohne Pfand; der Pfand steht als eigene Zeile
+                  // darunter (§ 7 PAngV, V-016). Die Summe bleibt gleich.
                   Text(
-                    Formatters.euro(it.lineGross),
+                    Formatters.euro(
+                      it.lineGross - it.quantity * it.unitDeposit,
+                    ),
+                    style: AppTypography.body(
+                      size: 13,
+                      weight: FontWeight.w700,
+                      color: AppColors.textStrong,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (r.depositTotal > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Pfand',
+                      style: AppTypography.body(
+                        size: 13,
+                        weight: FontWeight.w600,
+                        color: AppColors.textStrong,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    Formatters.euro(r.depositTotal),
                     style: AppTypography.body(
                       size: 13,
                       weight: FontWeight.w700,

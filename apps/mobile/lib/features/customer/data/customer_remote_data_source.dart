@@ -17,12 +17,58 @@ class CustomerRemoteDataSource {
         .eq('status', 'active')
         .or('valid_to.is.null,valid_to.gte.$today')
         .order('valid_from', ascending: false);
-    return (rows as List).cast<Map<String, dynamic>>();
+    return _withProductPricing((rows as List).cast<Map<String, dynamic>>());
   }
 
   Future<Map<String, dynamic>?> myActivePersonalOffer() async {
     final row = await _client.rpc('my_active_personal_offer').maybeSingle();
-    return row;
+    if (row == null) return null;
+    return (await _withProductPricing([row])).first;
+  }
+
+  /// Ergänzt Angebotszeilen um Steuersatz und Pfand des Produkts.
+  ///
+  /// Angebote speichern Nettopreise. Angezeigt werden muss der Bruttopreis
+  /// (§ 3 PAngV) und der Pfand daneben (§ 7 PAngV) — beides steht nur am
+  /// Produkt. Ohne Steuersatz zeigt die App keinen Preis statt eines
+  /// Nettopreises.
+  ///
+  /// Fehlt die Spalte `deposit` noch (App vor der Migration
+  /// 20260927200000_pfand_getrennt ausgeliefert), wird ohne sie gelesen.
+  Future<List<Map<String, dynamic>>> _withProductPricing(
+    List<Map<String, dynamic>> rows,
+  ) async {
+    final ids = {
+      for (final r in rows)
+        if (r['product_id'] is String) r['product_id'] as String,
+    }.toList();
+    if (ids.isEmpty) return rows;
+    List<dynamic> products;
+    try {
+      products = await _client
+          .from('products')
+          .select('id, tax_rate, deposit')
+          .inFilter('id', ids);
+    } on PostgrestException {
+      products = await _client
+          .from('products')
+          .select('id, tax_rate')
+          .inFilter('id', ids);
+    }
+    final byId = {
+      for (final p in products.cast<Map<String, dynamic>>())
+        p['id'] as String: p,
+    };
+    return [
+      for (final r in rows)
+        {
+          ...r,
+          if (byId[r['product_id']] case final p?) ...{
+            'tax_rate': p['tax_rate'],
+            'deposit': p['deposit'] ?? 0,
+          },
+        },
+    ];
   }
 
   Future<List<Map<String, dynamic>>> myActivePersonalOffers() async {
@@ -31,7 +77,9 @@ class CustomerRemoteDataSource {
       await _client.rpc('ensure_my_special_offers');
     } catch (_) {}
     final rows = await _client.rpc('my_active_personal_offers');
-    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    if (rows is List) {
+      return _withProductPricing(rows.cast<Map<String, dynamic>>());
+    }
     return const [];
   }
 

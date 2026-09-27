@@ -6,6 +6,7 @@ import '../../../../core/pricing/pricing.dart';
 import '../../../../core/services/install_prompt.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/prices.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../../../core/widgets/motion/motion.dart';
 import '../../../../core/utils/formatters.dart';
@@ -236,7 +237,10 @@ class OffersTab extends ConsumerWidget {
                       AppTypography.body(size: 13, color: AppColors.textStrong),
                 ),
               ),
-              data: (list) {
+              data: (alle) {
+                // Nur Angebote mit Bruttopreis; ein Nettopreis sähe aus wie
+                // ein Endpreis (§ 3 PAngV).
+                final list = alle.where((o) => o.hasPrice).toList();
                 if (list.isEmpty) {
                   return AppCard(
                     color: AppColors.surfaceAlt,
@@ -249,8 +253,10 @@ class OffersTab extends ConsumerWidget {
                     ),
                   );
                 }
+                // 460 statt 440: Platz für die Pfandzeile unter dem Preis
+                // (V-016), ohne dass die Karte abgeschnitten wird.
                 return FocusCarousel(
-                  height: 440,
+                  height: 460,
                   itemExtent: 260 + AppSpacing.s3,
                   itemCount: list.length,
                   itemBuilder: (context, i) => _WeeklyOfferSlot(offer: list[i]),
@@ -556,11 +562,14 @@ class _PersonalOfferCard extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.s4),
-                if (isWildcard)
+                // Ohne Steuersatz kein Preis: lieber nur der Rabatt als ein
+                // Nettopreis, der wie ein Endpreis aussieht (§ 3 PAngV).
+                if (isWildcard || !offer.hasPrice)
                   Row(
                     children: [
                       Text(
-                        '-${offer.discountPercent.toStringAsFixed(0)} % *',
+                        '-${offer.discountPercent.toStringAsFixed(0)} %'
+                        '${isWildcard ? ' *' : ''}',
                         style: AppTypography.display(
                           size: 40,
                           weight: FontWeight.w800,
@@ -582,9 +591,10 @@ class _PersonalOfferCard extends ConsumerWidget {
                   )
                 else
                   _DarkPriceRow(
-                    regular: offer.regularPriceNet,
-                    discounted: offer.offerPriceNet,
+                    regular: offer.regularGross!,
+                    discounted: offer.offerGross!,
                     percent: offer.discountPercent,
+                    depositNote: Prices.depositNote(offer.deposit),
                   ),
               ],
             ),
@@ -815,13 +825,17 @@ class _DarkPriceRow extends StatelessWidget {
     required this.regular,
     required this.discounted,
     required this.percent,
+    this.depositNote,
   });
   final double regular;
   final double discounted;
   final double percent;
+
+  /// „zzgl. 0,25 € Pfand" (§ 7 PAngV), sonst `null`.
+  final String? depositNote;
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final row = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
@@ -847,6 +861,23 @@ class _DarkPriceRow extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.s3),
         DiscountBadge(percent: percent),
+      ],
+    );
+    if (depositNote == null) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        row,
+        const SizedBox(height: AppSpacing.s1),
+        Text(
+          depositNote!,
+          style: AppTypography.body(
+            size: 13,
+            weight: FontWeight.w600,
+            color: AppColors.brandPale,
+          ),
+        ),
       ],
     );
   }
@@ -1145,8 +1176,9 @@ class _WeeklyOfferSlot extends ConsumerWidget {
 
     return OfferCard(
       title: offer.title,
-      regularPrice: offer.regularPriceNet ?? 0,
-      offerPrice: offer.offerPriceNet ?? 0,
+      regularPrice: offer.regularGross ?? 0,
+      offerPrice: offer.offerGross ?? 0,
+      depositNote: Prices.depositNote(offer.deposit),
       discountPercent: offer.discountPercent ?? 10,
       imageUrl: offer.imageUrl,
       validUntil: offer.validTo,

@@ -12,6 +12,7 @@ class StockItem extends Equatable {
     this.imageUrl,
     this.listPriceNet,
     this.taxRate,
+    this.deposit = 0,
   });
 
   final String machineId;
@@ -27,7 +28,11 @@ class StockItem extends Equatable {
   /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
   final double? taxRate;
 
-  /// Automatenpreis brutto (Listenpreis netto + USt).
+  /// Pfand je Stück, brutto. Steht nach § 7 PAngV neben dem Preis und ist in
+  /// [grossPrice] nicht enthalten (V-016).
+  final double deposit;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt), ohne Pfand.
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
@@ -45,6 +50,7 @@ class StockItem extends Equatable {
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
         taxRate: (j['tax_rate'] as num?)?.toDouble(),
+        deposit: (j['deposit'] as num?)?.toDouble() ?? 0,
       );
 
   @override
@@ -57,5 +63,6 @@ class StockItem extends Equatable {
         imageUrl,
         listPriceNet,
         taxRate,
+        deposit,
       ];
 }

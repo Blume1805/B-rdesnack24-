@@ -223,6 +223,7 @@ class _StockRow extends StatelessWidget {
               gross: item.grossPrice!,
               hasSubscription: hasSubscription,
             ),
+            DepositNote(item.deposit),
           ],
           const SizedBox(height: AppSpacing.s3),
           Row(

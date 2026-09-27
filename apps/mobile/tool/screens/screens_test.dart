@@ -52,6 +52,8 @@ class _FakeRepo implements CustomerRepository {
           regularPriceNet: 1.68,
           offerPriceNet: 1.51,
           discountPercent: 10,
+          taxRate: 19,
+          deposit: 0.25,
         ),
         Offer(
           id: 'o2',
@@ -62,6 +64,7 @@ class _FakeRepo implements CustomerRepository {
           regularPriceNet: 1.12,
           offerPriceNet: 1.01,
           discountPercent: 10,
+          taxRate: 7,
         ),
       ];
 
@@ -82,6 +85,9 @@ class _FakeRepo implements CustomerRepository {
             validFrom: _now,
             validTo: _now.add(const Duration(days: 14)),
             source: PersonalOfferSource.values.first,
+            taxRate: [19.0, 7.0, 19.0][i],
+            // Eistee in der Pfandflasche: zeigt „zzgl. 0,25 € Pfand".
+            deposit: i == 0 ? 0.25 : 0,
           ),
       ];
 

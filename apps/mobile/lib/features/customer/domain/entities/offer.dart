@@ -1,9 +1,16 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/prices.dart';
+
 /// Marketing-Angebot (Wochen-/Tages-/Sonderaktion).  Enthält jetzt auch die
 /// Preisdaten für den Rabattausweis (alter Preis durchgestrichen +
 /// prozentualer Rabatt).  `regularPriceNet` / `offerPriceNet` sind
 /// optional, weil ältere Datensätze ggf. noch keine Preise haben.
+///
+/// Angezeigt werden nie die Nettopreise, sondern [regularGross] und
+/// [offerGross] (§ 3 PAngV), der Pfand daneben ([deposit], § 7 PAngV).
+/// Steuersatz und Pfand kommen aus dem Produkt; fehlt der Steuersatz, gibt
+/// es keinen Preis ([hasPrice] ist dann `false`).
 class Offer extends Equatable {
   const Offer({
     required this.id,
@@ -16,6 +23,8 @@ class Offer extends Equatable {
     this.regularPriceNet,
     this.offerPriceNet,
     this.discountPercent,
+    this.taxRate,
+    this.deposit = 0,
   });
 
   final String id;
@@ -34,7 +43,19 @@ class Offer extends Equatable {
   final double? offerPriceNet;
   final double? discountPercent;
 
-  bool get hasPrice => regularPriceNet != null && offerPriceNet != null;
+  /// USt-Satz des Produkts in Prozent.
+  final double? taxRate;
+
+  /// Pfand je Stück, brutto; nicht rabattiert und nicht im Preis enthalten.
+  final double deposit;
+
+  bool get hasPrice =>
+      regularPriceNet != null && offerPriceNet != null && taxRate != null;
+
+  double? get regularGross =>
+      hasPrice ? Prices.gross(regularPriceNet!, taxRate!) : null;
+  double? get offerGross =>
+      hasPrice ? Prices.gross(offerPriceNet!, taxRate!) : null;
 
   factory Offer.fromJson(Map<String, dynamic> j) => Offer(
         id: j['id'] as String,
@@ -49,6 +70,8 @@ class Offer extends Equatable {
         regularPriceNet: (j['regular_price_net'] as num?)?.toDouble(),
         offerPriceNet: (j['offer_price_net'] as num?)?.toDouble(),
         discountPercent: (j['discount_percent'] as num?)?.toDouble(),
+        taxRate: (j['tax_rate'] as num?)?.toDouble(),
+        deposit: (j['deposit'] as num?)?.toDouble() ?? 0,
       );
 
   @override
@@ -107,6 +130,9 @@ class PersonalOffer extends Equatable {
     this.redeemedAt,
     this.activatedAt,
     this.imageUrl,
+    this.productId,
+    this.taxRate,
+    this.deposit = 0,
   });
 
   final String id;
@@ -121,6 +147,20 @@ class PersonalOffer extends Equatable {
   final DateTime? activatedAt;
   final String? imageUrl;
   final PersonalOfferSource source;
+
+  final String? productId;
+
+  /// USt-Satz des Produkts in Prozent; ohne ihn wird kein Preis gezeigt.
+  final double? taxRate;
+
+  /// Pfand je Stück, brutto; nicht rabattiert und nicht im Preis enthalten.
+  final double deposit;
+
+  bool get hasPrice => taxRate != null;
+  double? get regularGross =>
+      hasPrice ? Prices.gross(regularPriceNet, taxRate!) : null;
+  double? get offerGross =>
+      hasPrice ? Prices.gross(offerPriceNet, taxRate!) : null;
 
   bool get isRedeemed => redeemedAt != null;
   bool get isActivated => activatedAt != null;
@@ -144,6 +184,9 @@ class PersonalOffer extends Equatable {
         'activated_at': activatedAt?.toIso8601String(),
         'image_url': imageUrl,
         'source': source.name,
+        'product_id': productId,
+        'tax_rate': taxRate,
+        'deposit': deposit,
       };
 
   factory PersonalOffer.fromJson(Map<String, dynamic> j) => PersonalOffer(
@@ -165,6 +208,9 @@ class PersonalOffer extends Equatable {
             : null,
         imageUrl: j['image_url'] as String?,
         source: PersonalOfferSource.fromString(j['source'] as String?),
+        productId: j['product_id'] as String?,
+        taxRate: (j['tax_rate'] as num?)?.toDouble(),
+        deposit: (j['deposit'] as num?)?.toDouble() ?? 0,
       );
 
   @override

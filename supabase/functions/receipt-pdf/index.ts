@@ -77,10 +77,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { data: items } = await caller
+    // Pfand je Position (§ 7 PAngV, COMPLIANCE V-016; Migration
+    // 20260927200000_pfand_getrennt). Fehlt die Spalte noch, weil diese
+    // Funktion vor der Migration ausgerollt wurde, wird ohne sie gelesen:
+    // dann ein Beleg ohne Pfandzeile statt gar keines Belegs.
+    const mitPfand = await caller
       .from("purchase_items")
-      .select("product_label, quantity, unit_price, product:products(name, tax_rate)")
+      .select("product_label, quantity, unit_price, unit_deposit, product:products(name, tax_rate)")
       .eq("purchase_id", purchaseId);
+    let items: unknown[] | null = mitPfand.data;
+    if (mitPfand.error) {
+      const ohnePfand = await caller
+        .from("purchase_items")
+        .select("product_label, quantity, unit_price, product:products(name, tax_rate)")
+        .eq("purchase_id", purchaseId);
+      items = ohnePfand.data;
+    }
+    // Pfand eines Automatenkaufs ohne Positionen; eigene Abfrage aus demselben
+    // Grund (Spalte erst mit der Migration).
+    const { data: dep } = await caller
+      .from("purchases").select("deposit_gross").eq("id", purchaseId).maybeSingle();
+    const purchaseDeposit = Number(
+      (dep as { deposit_gross?: number } | null)?.deposit_gross ?? 0,
+    );
 
     let machineLabel = "";
     if (purchase.machine_id) {
@@ -152,11 +171,13 @@ Deno.serve(async (req) => {
     y -= 18;
 
     let sumGross = 0;
+    let depositSum = 0, depositQty = 0;
     let net7 = 0, net19 = 0, tax7 = 0, tax19 = 0;
     let zebra = false;
     for (const raw of (items ?? [])) {
       const it = raw as {
         product_label?: string; quantity?: number; unit_price?: number;
+        unit_deposit?: number;
         product?: { name?: string; tax_rate?: number } | null;
       };
       const label = (it.product_label ?? it.product?.name ?? "Artikel").substring(0, 48);
@@ -164,8 +185,14 @@ Deno.serve(async (req) => {
       const unit = Number(it.unit_price ?? 0);
       const gross = qty * unit;
       sumGross += gross;
+      // Die Position zeigt die Ware; der Pfand steht als eigene Zeile darunter.
+      const unitDeposit = Number(it.unit_deposit ?? 0);
+      const goodsUnit = unit - unitDeposit;
+      if (unitDeposit > 0) { depositSum += qty * unitDeposit; depositQty += qty; }
       // USt-Aufteilung nach hinterlegtem Steuersatz (7 % / 19 %); Preise
-      // am Automaten sind Bruttopreise.
+      // am Automaten sind Bruttopreise. Der Pfand bleibt darin: Er ist Teil
+      // des Entgelts und trägt den Steuersatz der Ware (Abschn. 10.1 Abs. 8
+      // UStAE).
       const rate = Number(it.product?.tax_rate ?? 19);
       const net = gross / (1 + rate / 100);
       if (Math.round(rate) === 7) { net7 += net; tax7 += gross - net; }
@@ -177,8 +204,27 @@ Deno.serve(async (req) => {
       zebra = !zebra;
       page.drawText(label, { x: 44, y, size: 10, font, color: INK });
       const cells: Array<[number, string]> = [
-        [1, `${qty}x`], [2, eur(unit)], [3, eur(gross)],
+        [1, `${qty}x`], [2, eur(goodsUnit)], [3, eur(qty * goodsUnit)],
       ];
+      for (const [i, text] of cells) {
+        const c = cols[i];
+        page.drawText(text, {
+          x: c.x + c.w - 6 - font.widthOfTextAtSize(text, 10),
+          y, size: 10, font, color: INK,
+        });
+      }
+      y -= 14;
+    }
+
+    if (depositSum === 0 && (items ?? []).length === 0) depositSum = purchaseDeposit;
+    if (depositSum > 0) {
+      if (zebra) {
+        page.drawRectangle({ x: 40, y: y - 3.5, width: 515, height: 14, color: CREAM });
+      }
+      page.drawText("Pfand", { x: 44, y, size: 10, font, color: INK });
+      const cells: Array<[number, string]> = depositQty > 0
+        ? [[1, `${depositQty}x`], [3, eur(depositSum)]]
+        : [[3, eur(depositSum)]];
       for (const [i, text] of cells) {
         const c = cols[i];
         page.drawText(text, {

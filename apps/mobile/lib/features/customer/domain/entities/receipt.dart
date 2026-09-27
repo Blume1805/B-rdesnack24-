@@ -8,6 +8,7 @@ class ReceiptItem extends Equatable {
     required this.unitPrice,
     required this.lineGross,
     required this.category,
+    this.unitDeposit = 0,
   });
 
   final String label;
@@ -16,16 +17,21 @@ class ReceiptItem extends Equatable {
   final double lineGross;
   final String category;
 
+  /// Pfand je Stück, in [unitPrice] enthalten (my_receipts, V-016).
+  final double unitDeposit;
+
   factory ReceiptItem.fromJson(Map<String, dynamic> j) => ReceiptItem(
         label: j['label']?.toString() ?? 'Artikel',
         quantity: (j['quantity'] as num?)?.toInt() ?? 1,
         unitPrice: (j['unit_price'] as num?)?.toDouble() ?? 0,
         lineGross: (j['line_gross'] as num?)?.toDouble() ?? 0,
         category: j['category']?.toString() ?? 'Sonstiges',
+        unitDeposit: (j['unit_deposit'] as num?)?.toDouble() ?? 0,
       );
 
   @override
-  List<Object?> get props => [label, quantity, unitPrice, lineGross, category];
+  List<Object?> get props =>
+      [label, quantity, unitPrice, lineGross, category, unitDeposit];
 }
 
 /// Ein strukturierter, durchsuchbarer Beleg (aus RPC my_receipts).
@@ -40,6 +46,7 @@ class Receipt extends Equatable {
     required this.items,
     this.machineName,
     this.warrantyUntil,
+    this.depositTotal = 0,
   });
 
   final String id;
@@ -51,6 +58,9 @@ class Receipt extends Equatable {
   final List<ReceiptItem> items;
   final String? machineName;
   final DateTime? warrantyUntil;
+
+  /// Pfand des ganzen Kaufs, in [totalGross] enthalten.
+  final double depositTotal;
 
   factory Receipt.fromJson(Map<String, dynamic> j) => Receipt(
         id: j['id'] as String,
@@ -65,6 +75,7 @@ class Receipt extends Equatable {
         warrantyUntil: j['warranty_until'] == null
             ? null
             : DateTime.tryParse(j['warranty_until'].toString())?.toLocal(),
+        depositTotal: (j['deposit_total'] as num?)?.toDouble() ?? 0,
         items: ((j['items'] as List?) ?? const []).map((e) {
           return ReceiptItem.fromJson(Map<String, dynamic>.from(e as Map));
         }).toList(),

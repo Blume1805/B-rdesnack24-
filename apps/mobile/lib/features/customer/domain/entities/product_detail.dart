@@ -11,6 +11,7 @@ class RankedProduct extends Equatable {
     this.imageUrl,
     this.listPriceNet,
     this.taxRate,
+    this.deposit = 0,
   });
 
   final String id;
@@ -24,7 +25,11 @@ class RankedProduct extends Equatable {
   /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
   final double? taxRate;
 
-  /// Automatenpreis brutto (Listenpreis netto + USt).
+  /// Pfand je Stück, brutto. Steht nach § 7 PAngV neben dem Preis und ist in
+  /// [grossPrice] nicht enthalten (V-016).
+  final double deposit;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt), ohne Pfand.
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
@@ -38,6 +43,7 @@ class RankedProduct extends Equatable {
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
         taxRate: (j['tax_rate'] as num?)?.toDouble(),
+        deposit: (j['deposit'] as num?)?.toDouble() ?? 0,
         avgRating: (j['avg_rating'] as num?)?.toDouble() ?? 0,
         reviewCount: (j['review_count'] as num?)?.toInt() ?? 0,
       );
@@ -57,6 +63,7 @@ class ProductDetail extends Equatable {
     this.imageUrl,
     this.listPriceNet,
     this.taxRate,
+    this.deposit = 0,
     this.energyKcal,
     this.fatG,
     this.saturatedFatG,
@@ -77,7 +84,11 @@ class ProductDetail extends Equatable {
   /// USt-Satz in Prozent (7/19) — für die Brutto-Berechnung im Client.
   final double? taxRate;
 
-  /// Automatenpreis brutto (Listenpreis netto + USt).
+  /// Pfand je Stück, brutto. Steht nach § 7 PAngV neben dem Preis und ist in
+  /// [grossPrice] nicht enthalten (V-016).
+  final double deposit;
+
+  /// Automatenpreis brutto (Listenpreis netto + USt), ohne Pfand.
   double? get grossPrice => listPriceNet == null
       ? null
       : double.parse(
@@ -102,6 +113,7 @@ class ProductDetail extends Equatable {
         imageUrl: j['image_url'] as String?,
         listPriceNet: (j['list_price_net'] as num?)?.toDouble(),
         taxRate: (j['tax_rate'] as num?)?.toDouble(),
+        deposit: (j['deposit'] as num?)?.toDouble() ?? 0,
         energyKcal: (j['energy_kcal'] as num?)?.toDouble(),
         fatG: (j['fat_g'] as num?)?.toDouble(),
         saturatedFatG: (j['saturated_fat_g'] as num?)?.toDouble(),

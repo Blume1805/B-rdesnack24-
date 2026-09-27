@@ -90,7 +90,7 @@ class ProductDetailScreen extends ConsumerWidget {
               if (p.grossPrice != null) ...[
                 const Eyebrow('Preis'),
                 const SizedBox(height: AppSpacing.s3),
-                _PriceCard(gross: p.grossPrice!),
+                _PriceCard(gross: p.grossPrice!, deposit: p.deposit),
                 const SizedBox(height: AppSpacing.s5),
               ],
 
@@ -150,8 +150,11 @@ class ProductDetailScreen extends ConsumerWidget {
 /// durchgestrichenem Automatenpreis. Der App-Preis gilt seit dem
 /// 2026-09-16 für alle registrierten Kunden.
 class _PriceCard extends ConsumerWidget {
-  const _PriceCard({required this.gross});
+  const _PriceCard({required this.gross, this.deposit = 0});
   final double gross;
+
+  /// Pfand je Stück; nicht rabattiert, steht neben dem Preis (V-016).
+  final double deposit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -242,6 +245,7 @@ class _PriceCard extends ConsumerWidget {
               ),
             ),
           ],
+          DepositNote(deposit),
         ],
       ),
     );

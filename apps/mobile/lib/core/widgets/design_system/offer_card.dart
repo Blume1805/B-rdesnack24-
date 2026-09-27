@@ -37,6 +37,7 @@ class OfferCard extends StatelessWidget {
     this.footer,
     this.rating,
     this.reviewCount,
+    this.depositNote,
   });
 
   final String title;
@@ -55,6 +56,9 @@ class OfferCard extends StatelessWidget {
   /// unter dem Titel eingeblendet („★ 4,3 (127)").
   final double? rating;
   final int? reviewCount;
+
+  /// „zzgl. 0,25 € Pfand" unter dem Preis (§ 7 PAngV), sonst `null`.
+  final String? depositNote;
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +137,18 @@ class OfferCard extends StatelessWidget {
                         color: AppColors.onBrand,
                       ).copyWith(height: 1),
                     ),
+                    if (depositNote != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.s1),
+                        child: Text(
+                          depositNote!,
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w700,
+                            color: AppColors.onBrand,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

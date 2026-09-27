@@ -5,6 +5,7 @@ export 'ai_badge.dart';
 export 'app_card.dart';
 export 'brand_marks.dart';
 export 'copy_pill.dart';
+export 'deposit_note.dart';
 export 'eyebrow.dart';
 export 'hero_app_bar.dart';
 export 'hero_action_bar.dart';
