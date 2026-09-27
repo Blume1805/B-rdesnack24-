@@ -66,6 +66,7 @@ dürfen sie so nicht erscheinen:
 | 27.09.2026 | Tokens (App) | `AppMotion` in `app_tokens.dart` spiegelt `motion-tokens.css`: 140/220/420 ms, `--ease-out`, `--ease-in-out`, `--ease-bounce`, `--press-scale` | wie oben |
 | 27.09.2026 | M07 Geneigtes Karussell (App) | `FocusCarousel(tilt: true)` in `lib/core/widgets/motion/motion.dart`, eingesetzt als ein Karussell „Eure Favoriten" über Getränke, Snacks, **Süßwaren** und Eis. Süßwaren fehlten vorher in den Favoriten, obwohl der Katalog 13 davon führt. | `test/core/widgets/focus_carousel_test.dart` (4 Tests); Bildschirmfoto `01c_favoriten` ohne Kontrastbefund |
 | 27.09.2026 | Sterne der Bewertung (App) | Leere Sterne jetzt `textMuted` statt `borderSubtle` (1,66:1 → 6,3:1). Betrifft auch die Sterne-Eingabe beim Bewerten, dort sind sie Bedienelemente. | Bildschirmfoto `01c_favoriten` |
+| 27.09.2026 | Web A–E (Lovable, Commit `bb47899`) | Tokens, `useScrollProgress`, M01 `HeroClaim`, M06 `Stage`, M02 `SectionNav`. F, G, H nicht umgesetzt. | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: A, C, I 🟢; B, D, E 🔴 (Bewegung ohne Bewegung, eigene Farbe, toter Link `#sortiment`). Nachtrag geschrieben, wartet auf Lovable-Credits |
 
 M11 im Web (Kontakt-Pill im Fußbereich) ist noch offen: Der Fußbereich der
 Landingpage ist laut Lovable-Auftrag vom 26.09.2026 unverändert zu lassen, und

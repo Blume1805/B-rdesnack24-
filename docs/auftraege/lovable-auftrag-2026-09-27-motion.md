@@ -5,7 +5,7 @@ Grundlage: `motion/MOTION.md`, `motion/motion-tokens.css`, `motion/ABWEICHUNGEN.
 (Repository `B-rdesnack24-`, Stand `9e1dbbe`), Projektwissen vom 26.09.2026,
 Code-Stand bei Lovable `1c030fb`.
 
-**Status:** gesendet am 27.09.2026, `message_id` `umsg_01m3j91ycyeyjb0wahkzhyw2p0`.
+**Status:** gesendet am 27.09.2026, `message_id` `umsg_01m3j91ycyeyjb0wahkzhyw2p0`. Teilweise umgesetzt (A–E mit Regressionen), Abnahme und Nachtrag am Ende dieser Datei; Nachtrag wartet auf Lovable-Credits.
 Das Projektwissen wurde vorher am selben Tag nachgezogen (Abschnitt „Nach dem
 Auftrag" unten ist damit erledigt).
 
@@ -259,3 +259,75 @@ diesen laufen:
   Getränkepreis mit Pfand, bis die Pfandfrage geklärt ist."
 * `ProductFocus`/`ProductCards` (Muster 13, „ungenutzt bis ein Automat bestückt
   ist"): durch M03 ersetzt; die Zeile in der Bausteintabelle anpassen.
+
+---
+
+## Abnahme 27.09.2026 (Claude Code, gegen den Code geprüft)
+
+Geprüft: Antwort `umsg_01m3j91ycyeyjb0wahkzhyw2p0` (Commit `bb47899`), Diff
+aller zwölf geänderten Dateien, aktueller Stand von `index.tsx`,
+`SceneMotion.tsx`, `ShareBar.tsx`, `MotionToggle.tsx`, Vorschau-Bildschirmfoto
+1920 px. Lovable meldet selbst: A bis E umgesetzt, F bis H offen, Abnahme
+nicht durchgeführt.
+
+| Teil | Befund | Status |
+|---|---|---|
+| A Tokens | `src/styles/motion-tokens.css` wertgleich mit `motion/motion-tokens.css` (Diff ohne Kommentare: nur zusätzlicher Block `html[data-motion="off"]`, wie beauftragt). Bestehende Übergänge auf Tokens umgestellt. | 🟢 |
+| B `useScrollProgress` | Hängt an `subscribe()`, kein zweiter Scroll-Listener, lerp aus `--scroll-lerp`. **Fehler:** Ohne Bewegung liefert er den rohen Scroll-Fortschritt statt 1. Folge: `PhysicalDigital` (App-Hälfte je nach Scrollstelle verdeckt) und `SceneColorTransition` hängen auch ohne Bewegung am Scrollen; vorher galt ohne Bewegung der Endzustand. | 🔴 Regression |
+| C M01 | `HeroClaim` je Wort, einmal pro Seitenaufruf (Modulvariable, nichts gespeichert), `aria-label` am `h1`. | 🟢 |
+| D M06 | Szenen Gold → Gold-hell → Creme, Schrift Ink, Kleben nur wenn Inhalt ≤ Bildschirmhöhe, 400vh/300vh. **Fehler:** `.stage__art-motion` dreht auch ohne Bewegung; `.stage { background: #fff }` ist eine eigene Farbe. | 🔴 |
+| E M02 | Sechs Links, `IntersectionObserver` statt Scroll-Listener, Indikator über `motion`. **Fehler:** „Standortgeber" ist schon im Kopfbereich aktiv; `#sortiment` zeigt ins Leere (Teil H fehlt). | 🔴 |
+| F M05 | Nicht umgesetzt. Satz lautet weiter „entscheidest Du." Zusätzlich beim Umbau die `.hl`-Stile entfernt und die Farbe der hervorgehobenen Wörter auf Creme gesetzt. | 🔴 |
+| G M10, M11 | Nicht umgesetzt. | 🔴 |
+| H M03 | Nicht umgesetzt. `ProductFocus`/`ProductCards` mit Artikelzahlen noch im Code (derzeit nicht eingebunden). | 🔴 |
+| I | Keine ausgeschlossenen Muster angelegt. | 🟢 |
+
+Der Nachtrag steht unten. **Nicht gesendet:** Der Lovable-Arbeitsbereich hat
+am 27.09.2026 keine Credits mehr („Your workspace is out of credits").
+
+### Nachtrag (Text zum Einfügen in Lovable)
+
+```
+Nachtrag zum Motion-Auftrag vom 27.09.2026. A bis E sind da, danke. Bitte jetzt in dieser Reihenfolge, ohne Rückfrage:
+
+1. Regressionen aus A bis E beheben (vor allem anderen):
+   a) PhysicalDigital und SceneColorTransition: Ist die Bewegung aus (data-motion ungleich "on" oder prefers-reduced-motion), muss der Endzustand gelten, also --digital 100 % und --transition 100 %, wie vor dem Umbau. Derzeit hängen beide auch ohne Bewegung am Scroll-Fortschritt. Am besten in useScrollProgress: ohne Bewegung onFrame(1) bzw. --p = 1 liefern, dann gilt es für alle Verbraucher.
+   b) Stage: .stage__art-motion dreht und verschiebt über --p auch ohne Bewegung. Die Transformation nur unter html[data-motion="on"] setzen.
+   c) Stage: `.stage { background: #fff }` ist eine eigene Farbe. Bitte eine vorhandene Farbvariable verwenden (Creme).
+   d) SectionNav: Solange der Kopfbereich sichtbar ist, ist kein Link aktiv (kein aria-current, kein Indikator).
+   e) SectionNav verlinkt #sortiment, das es noch nicht gibt. Wird mit Punkt 4 behoben; bis dahin keinen toten Link ausliefern.
+
+2. Teil F (M05): Satz ändern zu „Wer das Geld bekommt, entscheidest Du mit." (auch HIGHLIGHT_WORDS). Die Hervorhebung wurde beim Umbau entfernt (.hl-Stile gelöscht, .text-highlight span jetzt Creme). Bitte gemäß Auftrag Teil F umsetzen; Kontrast der nicht hervorgehobenen Wörter auf Nacht mindestens 4,5:1, auch in Zwischenstufen.
+
+3. Teil G (M10 Nach oben, M11 Copy-Pill im Fußbereich) laut Auftrag.
+
+4. Teil H (M03 Sortiment) laut Auftrag: src/data/sortiment.ts mit genau diesen Startpreisen: Snacks & Süßes ab 0,80 €, Kaltgetränke ab 1,50 €, Heißgetränke ab 1,30 €, Eis ab 1,00 €. Abschnitt mit id="sortiment". Keine Einzelpreise, kein Preis eines Getränks in Pfandflasche oder Dose. ProductFocus/ProductCards (GROUPS mit Artikelzahlen) entfernen, damit es nur ein Sortiment gibt.
+
+5. Abnahme, bitte wirklich ausführen und im Bericht zitieren:
+   - rg -n "addEventListener\(\s*['\"]scroll" src   (erwartet: nur src/lib/scroll.ts)
+   - rg -n "entscheidest Du\." src   (erwartet: keine Treffer)
+   - rg -n "localStorage|sessionStorage|document.cookie" src   (erwartet: nur MotionToggle)
+   - in src/styles.css keine Übergänge oder Animationen auf width, height, top, left
+   - Bildschirmfotos 390 px und 1440 px, je mit Bewegung an und aus: Kopf, Standortgeber, Anteil, Sortiment, Fußbereich.
+
+Am Ende je Punkt 1a bis 5 eine Zeile, was geändert wurde. Nicht Umgesetztes ausdrücklich nennen.
+```
+
+### Für Philipp: Nachtrag an Lovable schicken
+
+1. **Warum:** Lovable hat die Hälfte des Auftrags erledigt und dabei drei
+   Dinge verschlechtert, die ohne Bewegung sichtbar sind. Solange der Nachtrag
+   nicht läuft, darf die Vorschau nicht veröffentlicht werden.
+2. **Was passiert:** Lovable repariert die drei Fehler und baut Sortiment,
+   Hervorhebung und Fußbereich. Es kostet Lovable-Credits; an der
+   veröffentlichten Seite ändert sich nichts, bis Du veröffentlichst.
+3. **Schritt für Schritt:**
+   1. Öffne https://lovable.dev/settings/billing und lade Credits nach
+      (oder wechsle den Tarif).
+   2. Sag mir hier im Chat „Lovable hat wieder Credits". Ich schicke den
+      Nachtrag dann selbst und prüfe das Ergebnis.
+   3. Alternativ: Öffne das Projekt „Bördesnack24 Landingpage", füge den
+      Text aus dem grauen Kasten oben ins Chatfeld ein und schicke ihn ab.
+4. **Erfolg:** Lovable antwortet mit einer Zeile je Punkt 1a bis 5.
+5. **Wenn etwas schiefgeht:** Nicht veröffentlichen. Es eilt nicht; die
+   veröffentlichte Seite ist vom Umbau nicht betroffen.
