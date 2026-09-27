@@ -454,6 +454,27 @@ void main() {
     (t) => _shot(t, '01b_start_lang', const CustomerScreen(), height: 2600),
   );
   testWidgets(
+    '01c Favoriten',
+    (t) => _shot(
+      t,
+      '01c_favoriten',
+      const CustomerScreen(),
+      before: (t) async {
+        // Bis zum Karussell „Eure Favoriten" (M07) scrollen und einmal
+        // weiterwischen, damit die Neigung der Nachbarkarten sichtbar ist.
+        await t.scrollUntilVisible(
+          find.text('Eure Favoriten'),
+          400,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await t.drag(find.byType(Scrollable).first, const Offset(0, -260));
+        for (var i = 0; i < 10; i++) {
+          await t.pump(const Duration(milliseconds: 100));
+        }
+      },
+    ),
+  );
+  testWidgets(
     '02 Meine Spenden',
     (t) => _shot(
       t,

@@ -1195,3 +1195,71 @@ Rechtsberatung.
   wieder auseinanderlaufen.
 
 **Status: 🔴** — im Code nachgewiesen, Auslieferung und Claim-Entscheidung offen.
+
+## V-016 · Startpreise auf der Landingpage, Pfand in der Preisangabe (2026-09-27) — OFFEN
+
+### Sachverhalt
+
+* Der Gesellschafter gibt am 27.09.2026 das Sortiment für die Landingpage frei
+  (Muster M03). Beauftragt sind vier Kategorien mit „ab"-Preis, Quelle ist
+  der Produktkatalog (Migration `product_catalog_price_list`, 28.07.2026):
+  Snacks & Süßes ab 0,80 €, Kaltgetränke ab 1,50 €, Heißgetränke ab 1,30 €,
+  Eis ab 1,00 €. Auftrag: `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`,
+  Teil H (noch nicht gesendet).
+* `docs/marketing/preisliste_2026-03.csv` ist eine ältere Kalkulation (114
+  Artikel, mit Einkaufspreisen und vier alkoholischen Getränken). Sie ist nicht
+  die Quelle und darf nicht veröffentlicht werden.
+* Weder Katalog noch Code noch Dokumentation regeln den Pfand. Die App zeigt
+  heute Preise für Getränke in Pfandflaschen und Dosen ohne Pfandhinweis
+  (z. B. Wochenangebote).
+
+### Rechtliche Würdigung
+
+* **§ 4 PAngV (Grundpreis):** Nach Abs. 3 ist die Grundpreisangabe für Waren
+  nicht erforderlich, die in Getränke- und Verpflegungsautomaten angeboten
+  werden. Stand der Prüfung: Wortlaut über Suchergebnisse bestätigt, die
+  Normtexte selbst sind aus der Arbeitsumgebung gesperrt. Ob die Ausnahme auch
+  die Werbung auf der Website für diese Waren erfasst, ist nicht abschließend
+  geprüft; die Landingpage nennt deshalb nur Kategorie-„ab"-Preise.
+* **§ 7 PAngV (Pfand):** Der Pfandbetrag wird neben dem Preis angegeben und
+  nicht eingerechnet (EuGH, 29.06.2023, C-543/21). Solange unklar ist, ob die
+  Katalogpreise den Pfand enthalten, nennt die Landingpage keinen Preis eines
+  Getränks in Pfandflasche oder Dose. **Die App ist davon schon heute
+  betroffen.**
+* **§ 5 UWG:** „ab"-Preise sind zulässig, wenn das günstigste Produkt zum
+  genannten Preis tatsächlich im Sortiment ist. Der Hinweis „Startpreise am
+  Automaten. Nicht jeder Automat führt jedes Produkt." verhindert den Eindruck,
+  jedes Produkt sei überall erhältlich. Betriebsstatus `vorbereitung`: kein
+  Präsens über laufende Automaten.
+* **Jugendschutz:** Keine alkoholischen Getränke in Beispielen oder Preisen;
+  der Katalog führt keine.
+* **LMIV:** Die Landingpage verkauft nicht (kein Fernabsatz); die offenen
+  Nährwert- und Allergenangaben (65 Produkte) betreffen die App.
+
+Quellen: Suchergebnisse zu § 4 Abs. 3 und § 7 PAngV (IHK, Verbraucherzentrale,
+Kanzleiveröffentlichungen zu EuGH C-543/21), Stand 27.09.2026. **Vorbehalt:**
+keine Rechtsberatung.
+
+### Legal Impact Matrix
+
+| Bereich | Geprüft | Ergebnis | Anpassung nötig | Verantwortlich |
+|---|---|---|---|---|
+| Preisangaben (PAngV) | ✓ | Grundpreis nach § 4 Abs. 3 entbehrlich; Pfand ungeklärt | Ja: Pfandfrage (P-1), danach ggf. App-Anzeige | Philipp, 04.10.2026 |
+| UWG / Werbung | ✓ | „ab"-Preise mit Quelle, Hinweis auf Standortabhängigkeit | Nein | |
+| Jugendschutz | ✓ | kein Alkohol | Nein | |
+| Lebensmittelrecht (LMIV) | ✓ | Landingpage nicht betroffen; App offen wie bisher | Nein (hier) | |
+| Datenschutz | ✓ | keine Datenerhebung | Nein | |
+| Übrige Bereiche | ✓ | nicht betroffen | Nein | |
+
+### Ergebnis / Handlungsbedarf
+
+* [ ] **Klärung P-1:** Enthalten die Katalogpreise für Getränke den Pfand?
+  — Philipp — **04.10.2026**.
+* [ ] **Klärung P-2:** Ist „Durstlöscher 0,5 l" pfandfrei (Karton)? — Philipp
+  — **04.10.2026**.
+* [ ] **Danach, App:** Pfandhinweis neben jedem Getränkepreis, wenn die Preise
+  ohne Pfand sind; sonst Preise im Katalog um den Pfand bereinigen. — Claude.
+* [ ] **Auftrag an Lovable** senden, nach Freigabe. — Claude.
+
+**Status: 🔴** — Pfandfrage offen; die Landingpage ist so formuliert, dass sie
+unabhängig von der Antwort stimmt, die App nicht.

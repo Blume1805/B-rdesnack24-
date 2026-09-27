@@ -45,6 +45,7 @@ class OffersTab extends ConsumerWidget {
           ..invalidate(hasSubscriptionProvider)
           ..invalidate(topProductsProvider('Getränke'))
           ..invalidate(topProductsProvider('Snacks'))
+          ..invalidate(topProductsProvider('Süßwaren'))
           ..invalidate(topProductsProvider('Eis'));
       },
       color: AppColors.brand,
@@ -272,20 +273,7 @@ class OffersTab extends ConsumerWidget {
             title: 'Eure Favoriten',
           ),
           const SizedBox(height: AppSpacing.s4),
-          const Reveal(
-            index: 0,
-            child: _FavoritesSection(category: 'Getränke'),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          const Reveal(
-            index: 1,
-            child: _FavoritesSection(category: 'Snacks'),
-          ),
-          const SizedBox(height: AppSpacing.s4),
-          const Reveal(
-            index: 2,
-            child: _FavoritesSection(category: 'Eis'),
-          ),
+          const Reveal(child: _FavoritesCarousel()),
         ],
       ),
     );
@@ -1272,89 +1260,86 @@ class _ActivationButton extends StatelessWidget {
 }
 
 /// Eure-Favoriten-Sektion pro Kategorie — Top 3 als horizontaler Slider.
-class _FavoritesSection extends ConsumerWidget {
-  const _FavoritesSection({required this.category});
-  final String category;
+/// „Eure Favoriten": die bestbewerteten Produkte je Kategorie in einem
+/// Karussell, Muster M07 aus `motion/MOTION.md` (geneigte Nachbarkarten).
+///
+/// Vorher drei getrennte Reihen für Getränke, Snacks und Eis; Süßwaren
+/// fehlten, obwohl der Katalog 13 davon führt (Befund 27.09.2026). Die
+/// Überschrift bleibt „Eure Favoriten", nicht „Heute beliebt": Grundlage
+/// sind Bewertungen, keine Verkaufszahlen (motion/ABWEICHUNGEN.md, R-4).
+class _FavoritesCarousel extends ConsumerWidget {
+  const _FavoritesCarousel();
+
+  static const _categories = ['Getränke', 'Snacks', 'Süßwaren', 'Eis'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final top = ref.watch(topProductsProvider(category));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(_iconFor(category), size: 18, color: AppColors.brand),
-            const SizedBox(width: 6),
-            Text(
-              category,
-              style: AppTypography.body(
-                size: 16,
-                weight: FontWeight.w800,
-                color: AppColors.textStrong,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s2),
-        top.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.brand),
-            ),
+    final lists = [
+      for (final c in _categories) (c, ref.watch(topProductsProvider(c))),
+    ];
+    final favorites = [
+      for (final (category, list) in lists)
+        for (final (i, p)
+            in (list.valueOrNull ?? const <RankedProduct>[]).indexed)
+          (product: p, rank: i + 1, category: category),
+    ];
+    if (favorites.isEmpty) {
+      if (lists.any((l) => l.$2.isLoading)) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.s4),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.brand),
           ),
-          error: (_, __) => const SizedBox.shrink(),
-          data: (list) => list.isEmpty
-              ? AppCard(
-                  color: AppColors.surfaceAlt,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s4,
-                    vertical: AppSpacing.s3,
-                  ),
-                  child: Text(
-                    'Noch keine Bewertungen in dieser Kategorie.',
-                    style: AppTypography.body(
-                      size: 13,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                )
-              : SizedBox(
-                  height: 220,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.s3),
-                    itemBuilder: (context, i) => _FavoriteCard(
-                      product: list[i],
-                      rank: i + 1,
-                    ),
-                  ),
-                ),
+        );
+      }
+      return AppCard(
+        color: AppColors.surfaceAlt,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.s4,
+          vertical: AppSpacing.s3,
         ),
-      ],
+        child: Text(
+          'Noch keine Bewertungen.',
+          style: AppTypography.body(size: 13, color: AppColors.textMuted),
+        ),
+      );
+    }
+    return FocusCarousel(
+      tilt: true,
+      // Karte 200 px plus Abstand; Seitenanteil am Telefon etwa 0,62 wie in
+      // der Spezifikation. Die Höhe lässt Platz für die geneigten Ecken.
+      itemExtent: 212,
+      height: 290,
+      itemCount: favorites.length,
+      itemBuilder: (context, i) => _FavoriteCard(
+        product: favorites[i].product,
+        rank: favorites[i].rank,
+        category: favorites[i].category,
+      ),
+      labelFor: (i) => favorites[i].product.name,
+      labelStyle: AppTypography.body(
+        size: 14,
+        weight: FontWeight.w800,
+        color: AppColors.textStrong,
+      ),
     );
   }
-
-  IconData _iconFor(String c) => switch (c) {
-        'Getränke' => Icons.local_drink_outlined,
-        'Snacks' => Icons.cookie_outlined,
-        'Eis' => Icons.icecream_outlined,
-        _ => Icons.category_outlined,
-      };
 }
 
 class _FavoriteCard extends StatelessWidget {
-  const _FavoriteCard({required this.product, required this.rank});
+  const _FavoriteCard({
+    required this.product,
+    required this.rank,
+    required this.category,
+  });
   final int rank;
   final RankedProduct product;
+  final String category;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 180,
+      width: 200,
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: () => Navigator.of(context).push(
@@ -1364,6 +1349,9 @@ class _FavoriteCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Nur so hoch wie der Inhalt; das Karussell ist höher, damit die
+          // geneigten Ecken Platz haben.
+          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               children: [
@@ -1402,6 +1390,15 @@ class _FavoriteCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    'Platz $rank, $category',
+                    style: AppTypography.body(
+                      size: 11,
+                      weight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
                   Text(
                     product.name,
                     style: AppTypography.body(

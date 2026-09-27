@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../theme/app_tokens.dart';
 
@@ -435,6 +436,7 @@ class FocusCarousel extends StatefulWidget {
     required this.height,
     required this.itemExtent,
     required this.labelStyle,
+    this.tilt = false,
   });
 
   final int itemCount;
@@ -448,14 +450,52 @@ class FocusCarousel extends StatefulWidget {
   final double itemExtent;
   final TextStyle labelStyle;
 
+  /// Pattern M07 „Geneigtes Produkt-Karussell" (`motion/MOTION.md`): Die
+  /// Karte im Fokus steht gerade, die Nachbarn neigen sich um bis zu
+  /// [AppMotion.tiltMaxDeg]. Schnelles Wischen schert die Karten zusätzlich
+  /// (höchstens [AppMotion.skewMaxDeg]); nach dem Wischen läuft die Scherung
+  /// je Frame mit [AppMotion.scrollLerp] auf null zurück. Nur `transform`.
+  final bool tilt;
+
   @override
   State<FocusCarousel> createState() => _FocusCarouselState();
 }
 
-class _FocusCarouselState extends State<FocusCarousel> {
+class _FocusCarouselState extends State<FocusCarousel>
+    with SingleTickerProviderStateMixin {
   PageController? _c;
   double _fraction = 0;
   int _page = 0;
+
+  /// Aktuelle Scherung in Grad (M07).
+  double _skewDeg = 0;
+
+  /// Lässt die Scherung nach dem Wischen je Frame zurücklaufen.
+  late final Ticker _settle = createTicker((_) {
+    final next = _skewDeg * (1 - AppMotion.scrollLerp);
+    if (next.abs() < 0.01) {
+      _settle.stop();
+      setState(() => _skewDeg = 0);
+      return;
+    }
+    setState(() => _skewDeg = next);
+  });
+
+  static double _rad(double deg) => deg * math.pi / 180;
+
+  bool _onScroll(ScrollNotification n) {
+    if (!widget.tilt || n.depth != 0) return false;
+    if (n is ScrollUpdateNotification && n.scrollDelta != null) {
+      if (_settle.isActive) _settle.stop();
+      // Scherung aus der Geschwindigkeit in px je Frame: v × 0,02°, begrenzt.
+      final target = (n.scrollDelta! * 0.02)
+          .clamp(-AppMotion.skewMaxDeg, AppMotion.skewMaxDeg);
+      setState(() => _skewDeg = target);
+    } else if (n is ScrollEndNotification && _skewDeg != 0) {
+      if (!_settle.isActive) _settle.start();
+    }
+    return false;
+  }
 
   PageController _controllerFor(double width) {
     final fraction = (widget.itemExtent / width).clamp(0.2, 1.0);
@@ -472,6 +512,7 @@ class _FocusCarouselState extends State<FocusCarousel> {
 
   @override
   void dispose() {
+    _settle.dispose();
     _c?.dispose();
     super.dispose();
   }
@@ -479,6 +520,7 @@ class _FocusCarouselState extends State<FocusCarousel> {
   @override
   Widget build(BuildContext context) {
     final moving = motionAllowed(context);
+    final tilting = widget.tilt && moving;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -487,7 +529,7 @@ class _FocusCarouselState extends State<FocusCarousel> {
           child: LayoutBuilder(
             builder: (context, box) {
               final c = _controllerFor(box.maxWidth);
-              return PageView.builder(
+              final pages = PageView.builder(
                 controller: c,
                 padEnds: false,
                 itemCount: widget.itemCount,
@@ -503,20 +545,36 @@ class _FocusCarouselState extends State<FocusCarousel> {
                     final page = c.hasClients && c.position.haveDimensions
                         ? (c.page ?? 0)
                         : _page.toDouble();
-                    final d = (page - i).abs().clamp(0.0, 1.0);
-                    // Nur Größe und leichte Abblendung. Die Nachbarn bleiben
-                    // lesbar (Kontrast bei d = 1 weiter über 4,5:1).
-                    return Opacity(
-                      opacity: 1 - 0.2 * d,
-                      child: Transform.scale(
-                        scale: 1 - 0.06 * d,
-                        alignment: Alignment.centerLeft,
-                        child: child,
-                      ),
+                    final signed = (page - i).clamp(-1.0, 1.0);
+                    final d = signed.abs();
+                    // Größe, leichte Abblendung und bei M07 Neigung. Die
+                    // Nachbarn bleiben lesbar (Kontrast bei d = 1 weiter
+                    // über 4,5:1).
+                    Widget out = Transform.scale(
+                      scale: 1 - 0.06 * d,
+                      alignment:
+                          tilting ? Alignment.center : Alignment.centerLeft,
+                      child: child,
                     );
+                    if (tilting) {
+                      out = Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.rotationZ(
+                          _rad(signed * AppMotion.tiltMaxDeg),
+                        )..multiply(Matrix4.skewX(_rad(_skewDeg))),
+                        child: out,
+                      );
+                    }
+                    return Opacity(opacity: 1 - 0.2 * d, child: out);
                   },
                 ),
               );
+              return tilting
+                  ? NotificationListener<ScrollNotification>(
+                      onNotification: _onScroll,
+                      child: pages,
+                    )
+                  : pages;
             },
           ),
         ),

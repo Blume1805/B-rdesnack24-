@@ -166,4 +166,13 @@ abstract final class AppMotion {
 
   /// `--press-scale`.
   static const double pressScale = 0.96;
+
+  /// `--tilt-max` in Grad: Neigung der Karten im Karussell (M07).
+  static const double tiltMaxDeg = 8;
+
+  /// `--skew-max` in Grad: Scherung aus der Wischgeschwindigkeit (M07).
+  static const double skewMaxDeg = 6;
+
+  /// `--scroll-lerp`: Glättung je Frame.
+  static const double scrollLerp = 0.12;
 }

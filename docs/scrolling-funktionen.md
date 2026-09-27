@@ -131,7 +131,7 @@ verändert die Scrollposition.
 | 07 | `ScrollLinkedStrip`, zusätzlich von Hand wischbar | Stufenkacheln Bronze → Silber → Gold (`TierTiles`) |
 | 08 | `CardStack`, höchstens vier Karten, sonst normale Liste | persönliche Coupons (Sonderangebote, Bonus, Dein Angebot) |
 | 11 | `ParallaxLayer`, Amplitude 210 px × 0,14 | Börde-Umriss hinter der Punktekarte, rein dekorativ |
-| 13 · 15 | `FocusCarousel` | Wochenangebote; Name und „X von N" unter dem Karussell |
+| 13 · 15 | `FocusCarousel` | Wochenangebote; Name und „X von N" unter dem Karussell. Seit 27.09.2026 mit Option `tilt` (M07 aus `motion/MOTION.md`) zusätzlich „Eure Favoriten" |
 
 **Muster je Bildschirm:** Startseite 01, 02, 03, 05, 08, 11, 13, 15, also
 genau acht. Belohnungen 01, 02, 03, 05, 07. Spenden 01, 02, 03, 05.

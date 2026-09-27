@@ -25,9 +25,9 @@ dürfen sie so nicht erscheinen:
 | Nr. | Stelle | Problem | Bis dahin |
 |---|---|---|---|
 | R-1 | M08 „Schwebende Bewertungs-Karten" | Es gibt noch keine Kundschaft und keine Bewertungen. Erfundene Bewertungen sind nach UWG Anhang Nr. 23b/23c stets unlauter; für echte gilt die Angabe, ob und wie sie geprüft wurden (§ 5b Abs. 3 UWG). | **gesperrt**, bis echte, geprüfte Bewertungen vorliegen |
-| R-2 | M03 Meta „ab 1,50 €" und Sortiments-Panels | Preisangabe ohne festgelegtes Sortiment und ohne laufenden Automaten. Ein Sortiment wird laut `docs/scrolling-funktionen.md` erst gezeigt, wenn ein Automat bestückt ist. | Kategorien ohne Preis; Kennzeichnung „geplantes Sortiment" |
+| R-2 | M03 Meta „ab 1,50 €" und Sortiments-Panels | Beispielpreis ohne Quelle. **Erledigt 27.09.2026:** Der Gesellschafter gibt das Sortiment frei; Quelle ist der Produktkatalog (Migration `product_catalog_price_list`, 28.07.2026). Startpreise je Kategorie: Snacks & Süßes ab 0,80 €, Kaltgetränke ab 1,50 €, Heißgetränke ab 1,30 €, Eis ab 1,00 €. Die Liste `docs/marketing/preisliste_2026-03.csv` ist eine ältere Kalkulation mit Einkaufspreisen und nicht die Quelle. | Beauftragt mit `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`, Teil H. Offen: P-1 |
 | R-3 | M05 Beispieltext „Außer dem Automaten am Bahnhof. Frisch befüllt, mitten in der Börde." | Behauptet einen laufenden Automaten an einem Standort, den es nicht gibt (§ 5 UWG). | Text aus bestehenden, wahren Aussagen, z. B. „5 % des Nettoerlöses bleiben in der Region. Du entscheidest mit, wer sie bekommt." |
-| R-4 | M07 „Heute beliebt." | „Beliebt" braucht Verkaufsdaten; ohne Automat gibt es keine. | In der App auf die Wochenangebote aus der Datenbank beschränkt (so schon umgesetzt, `FocusCarousel`); auf der Landingpage gesperrt |
+| R-4 | M07 „Heute beliebt." | „Beliebt" braucht Verkaufsdaten; ohne Automat gibt es keine. | **App, 27.09.2026:** umgesetzt als „Eure Favoriten" (Grundlage: Bewertungen). Landingpage: nicht vorgesehen |
 | R-5 | M09 Ticker „Wanzleben · Oschersleben · Haldensleben · Eilsleben" | Nennt Standorte, an denen kein Automat steht. Die Landingpage nennt „Osterweddingen und Umgebung". | Ticker nur mit tatsächlich vereinbarten Standorten |
 | R-6 | Alter Claim „Immer da, wenn der Hunger kommt." in M01, M04, M09 | Am 27.09.2026 vom Gesellschafter abgelöst. | **In `MOTION.md` ersetzt** durch „Versorgung vor Ort. Wert für den Ort." (27.09.2026) |
 | R-7 | M11 Beispieladresse `hallo@boerdesnack24.de` | Auf der Landingpage steht `kontakt@boerdesnack24.de`. | **In `MOTION.md` ersetzt** (27.09.2026) |
@@ -47,6 +47,16 @@ dürfen sie so nicht erscheinen:
 | T-8 | M06 Szenenfarben Gold → Gold-100 → Creme → Ink | Beim Überblenden von Ink auf eine helle Fläche wechselt auch die Schrift von hell auf dunkel; für einen Moment liegt helle auf heller oder dunkle auf dunkler Fläche, der Kontrast fällt unter 4,5:1. Das Projektwissen verlangt 4,5:1 auch in Zwischenstufen. | Landingpage: Gold → Gold-hell `#FEE7A0` → Creme, Schrift durchgehend Ink; schlechtester Zwischenwert 9,67:1 (gemessen 27.09.2026) |
 | T-9 | M05 „Section 200vh sticky" | Auf der Landingpage ist der Text ein einzelner Satz. Zwei Bildschirmhöhen Kleben für eine Zeile wären Leerlauf und belegten den zweiten von höchstens zwei klebenden Abschnitten auf dem Telefon. | Landingpage: nicht gepinnt, Wortaktivierung über `useScrollProgress` am Satz |
 | T-10 | M01 Buchstabenstaffel | Gedacht für eine kurze Wortmarke. Die Überschrift der Landingpage ist ein Satz mit 37 Zeichen; die Buchstabenstaffel ließe sie fast zwei Sekunden unvollständig. | Landingpage: Staffel je Wort (`--stagger-word`), Ende nach 1 060 ms, innerhalb `--dur-hero` |
+| T-11 | M03 „Panel wächst (1fr → 1.6fr)" | `grid-template-columns` zu animieren verstößt gegen Regel 1 und verschiebt bei jedem Überfahren die Nachbarpanels; Hover zählt für CLS nicht als Eingabe, CLS wäre größer als 0. | Landingpage: Panel behält seine Breite; Symbol, Chips und Schaltfläche bewegen sich nur über `transform`/`opacity`, alles ist immer im Layout |
+| T-12 | M03 „Touch: 1. Tap öffnet, 2. Tap navigiert"; M03 „aktives Panel per Scroll-Position" (mobil) | Ein zweistufiger Tap verbirgt Inhalt hinter einer Geste; Aktivierung per Scroll-Position wäre ein neuntes Muster. | Ohne Hover und unter 768 px sind Chips und Schaltfläche immer sichtbar |
+| T-13 | M07 App „PageView viewportFraction 0.62, Grundneigung abwechselnd ±8°" | Eine Grundneigung auch der Fokuskarte erschwert Lesen und Tippen. | App: Fokuskarte gerade, Nachbarn bis ±8° je nach Abstand; Seitenanteil über die Kartenbreite (212 px, am Telefon rund 0,6) |
+
+## P. Offene Punkte mit Verantwortlichem
+
+| Nr. | Frage | Warum es zählt | Wer, bis wann |
+|---|---|---|---|
+| P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand, oder kommt er dazu? | Nach § 7 PAngV wird der Pfand neben dem Preis angegeben und nicht in ihn eingerechnet (EuGH C-543/21 vom 29.06.2023). Die App zeigt heute Getränkepreise ohne Pfandhinweis. Die Landingpage nennt deshalb nur Startpreise von pfandfreien Produkten. | Philipp, 04.10.2026 |
+| P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | Der Startpreis „Kaltgetränke ab 1,50 €" stützt sich darauf. | Philipp, 04.10.2026 |
 
 ## U. Umsetzungsstand
 
@@ -54,6 +64,8 @@ dürfen sie so nicht erscheinen:
 |---|---|---|---|
 | 27.09.2026 | M11 Copy-Pill (App) | `lib/core/widgets/design_system/copy_pill.dart`, eingesetzt beim Einlöse-Code aktivierter Coupons (`offers_tab.dart`). Ersetzt die bisherige Symbol-Schaltfläche mit Hinweisleiste | `test/core/widgets/copy_pill_test.dart` (5 Tests: Kopieren, Haptik, Ansage, Rückkehr nach 1,8 s, feste Breite, „Bewegung reduzieren", gesperrte Zwischenablage, Bildschirmleser); `flutter test` 149/149; Bildschirmfotos ohne Kontrastbefund |
 | 27.09.2026 | Tokens (App) | `AppMotion` in `app_tokens.dart` spiegelt `motion-tokens.css`: 140/220/420 ms, `--ease-out`, `--ease-in-out`, `--ease-bounce`, `--press-scale` | wie oben |
+| 27.09.2026 | M07 Geneigtes Karussell (App) | `FocusCarousel(tilt: true)` in `lib/core/widgets/motion/motion.dart`, eingesetzt als ein Karussell „Eure Favoriten" über Getränke, Snacks, **Süßwaren** und Eis. Süßwaren fehlten vorher in den Favoriten, obwohl der Katalog 13 davon führt. | `test/core/widgets/focus_carousel_test.dart` (4 Tests); Bildschirmfoto `01c_favoriten` ohne Kontrastbefund |
+| 27.09.2026 | Sterne der Bewertung (App) | Leere Sterne jetzt `textMuted` statt `borderSubtle` (1,66:1 → 6,3:1). Betrifft auch die Sterne-Eingabe beim Bewerten, dort sind sie Bedienelemente. | Bildschirmfoto `01c_favoriten` |
 
 M11 im Web (Kontakt-Pill im Fußbereich) ist noch offen: Der Fußbereich der
 Landingpage ist laut Lovable-Auftrag vom 26.09.2026 unverändert zu lassen, und

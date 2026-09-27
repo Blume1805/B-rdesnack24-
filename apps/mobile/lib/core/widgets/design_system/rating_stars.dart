@@ -4,7 +4,8 @@ import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
 
 /// Kompakte Anzeige einer Durchschnittsbewertung: gefüllte Marken-Gold-
-/// Sterne (leer = borderSubtle), rechts der Durchschnittswert und in
+/// Sterne (leer = textMuted; der Randton borderSubtle erreichte auf dem
+/// Seitengrund nur 1,66:1, Befund 27.09.2026), rechts der Durchschnittswert und in
 /// Klammern die Anzahl der Bewertungen — Format wie in Handels-Apps
 /// üblich (z. B. „★ 4,3 (127)").
 class RatingStars extends StatelessWidget {
@@ -38,7 +39,7 @@ class RatingStars extends StatelessWidget {
             size: size,
             color: i < full || (i == full && half)
                 ? AppColors.brand
-                : AppColors.borderSubtle,
+                : AppColors.textMuted,
           ),
         if (showText) ...[
           const SizedBox(width: 4),
@@ -91,8 +92,7 @@ class RatingInput extends StatelessWidget {
                   ? Icons.star_rounded
                   : Icons.star_outline_rounded,
               size: size,
-              color:
-                  (value ?? 0) >= i ? AppColors.brand : AppColors.borderSubtle,
+              color: (value ?? 0) >= i ? AppColors.brand : AppColors.textMuted,
             ),
             onPressed: () => onChanged(i),
           ),

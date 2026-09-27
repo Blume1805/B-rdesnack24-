@@ -11,15 +11,16 @@ Auftrag" unten).
 
 ---
 
-Motion-System einbauen: Tokens, ein gemeinsamer Scroll-Fortschritt und sechs Patterns aus der Motion-Spezifikation (M01, M02, M05, M06, M10, M11). Inhalt und Rechtstexte bleiben, bis auf die ausdrücklich genannten Stellen. Arbeite die Teile in der Reihenfolge A bis H ab und prüfe nach jedem Teil, dass die Seite baut.
+Motion-System einbauen: Tokens, ein gemeinsamer Scroll-Fortschritt und sieben Patterns aus der Motion-Spezifikation (M01, M02, M03, M05, M06, M10, M11). Neu ist ein Abschnitt „Sortiment" mit echten Startpreisen. Inhalt und Rechtstexte bleiben sonst, bis auf die ausdrücklich genannten Stellen. Arbeite die Teile in der Reihenfolge A bis I ab und prüfe nach jedem Teil, dass die Seite baut.
 
 ## Vorrang vor dem Projektwissen
 
 Für diesen Auftrag und danach gilt, abweichend vom Projektwissen:
 
 1. Das npm-Paket **`motion`** (Framer Motion) ist erlaubt, **nur** für Layout-Animationen (Teil E, Nav-Indikator). Nicht für Scroll, nicht für Einblendungen. Mit `LazyMotion` und `domMax` einbinden, damit nur das Nötige ausgeliefert wird.
-2. Klebende Abschnitte haben feste Höhen: 3 Szenen = `400vh`, unter 768 px Breite `300vh`. Die Sicherung bleibt: **Ist der klebende Inhalt höher als der Bildschirm, wird nicht geklebt**, dann erscheinen die Szenen untereinander.
-3. Unverändert: höchstens acht aktive Muster auf der Startseite, höchstens zwei klebende Abschnitte auf dem Telefon, **ein einziger** `scroll`-Listener (`src/lib/scroll.ts`), Kontrast mindestens 4,5:1 auch in Zwischenstufen, keine Cookies, kein Tracking.
+2. **Preise:** Der Gesellschafter beauftragt am 27.09.2026 die Startpreise des Sortiments (Teil H). Sie stehen ausschließlich in `src/data/sortiment.ts` und nirgends sonst auf der Seite. Alle übrigen Regeln zu Preisen gelten weiter.
+3. Klebende Abschnitte haben feste Höhen: 3 Szenen = `400vh`, unter 768 px Breite `300vh`. Die Sicherung bleibt: **Ist der klebende Inhalt höher als der Bildschirm, wird nicht geklebt**, dann erscheinen die Szenen untereinander.
+4. Unverändert: höchstens acht aktive Muster auf der Startseite, höchstens zwei klebende Abschnitte auf dem Telefon, **ein einziger** `scroll`-Listener (`src/lib/scroll.ts`), Kontrast mindestens 4,5:1 auch in Zwischenstufen, keine Cookies, kein Tracking.
 
 ## A. Tokens
 
@@ -123,7 +124,7 @@ Das bestehende `Stage` + `Sequence` wird umgebaut, **nicht** daneben ein zweiter
 ## E. M02 Navigation mit Scroll-Spy
 
 - Feste Pill-Navigation oben mittig: `top: 16px`, Hintergrund `rgba(251,248,244,.8)` mit `backdrop-filter: blur(12px)`; ohne Unterstützung `rgba(251,248,244,.96)`. Radius 999 px, weicher Schatten.
-- Fünf Links zu den bestehenden Abschnitten: **„Standortgeber"**, **„Der Anteil"**, **„Vorteile"**, **„Werbung"**, **„Wer wir sind"**. Groß- und Kleinschreibung wie hier, ohne Punkt. Die Abschnitte bekommen `id`s und `scroll-margin-top`, damit die Navigation keine Überschrift verdeckt.
+- Sechs Links zu den Abschnitten: **„Standortgeber"**, **„Der Anteil"**, **„Sortiment"** (Teil H), **„Vorteile"**, **„Werbung"**, **„Wer wir sind"**. Groß- und Kleinschreibung wie hier, ohne Punkt. Die Abschnitte bekommen `id`s und `scroll-margin-top`, damit die Navigation keine Überschrift verdeckt.
 - Aktiver Abschnitt über `IntersectionObserver` (`rootMargin: "-45% 0px -50% 0px"`), kein Scroll-Listener.
 - **Ein** Ink-Indikator (`#202321`, Linkschrift auf dem aktiven Link Creme) gleitet mit `motion` `layoutId` zum aktiven Link: `var(--dur-slow)`, `var(--ease-snap)`. Bei „Bewegung aus" springt er.
 - Klick scrollt weich zum Abschnitt (bei „Bewegung aus" ohne Weichzeichnung), `aria-current="true"` am aktiven Link, `nav` mit `aria-label="Seitenbereiche"`.
@@ -159,29 +160,82 @@ Wortlaut, Links und Reihenfolge des Fußbereichs bleiben. Neu kommen nur diese b
 - **Hover und Fokus:** Gold `#FDC102` wächst als `clip-path: circle()` von unten, der Pfeil läuft einmal oben hinaus und unten wieder herein.
 - Klick: `scrollTo({ top: 0 })`, weich nur bei „Bewegung an".
 
-## H. Nicht umsetzen
+## H. M03 Sortiment mit Startpreisen (neuer Abschnitt)
+
+Neuer Abschnitt **zwischen „Der Anteil" und „Für Kundinnen und Kunden"**, `id="sortiment"`.
+
+**Daten.** Neue Datei `src/data/sortiment.ts`, genau diese Werte, keine anderen:
+
+```ts
+/**
+ * Sortiment zum Start. Quelle: Produktkatalog der App (Supabase `products`,
+ * Migration `product_catalog_price_list` vom 28.07.2026), geprüft am 27.09.2026.
+ * `ab` = niedrigster Verkaufspreis der Kategorie am Automaten, brutto in Euro.
+ * Bei einer Preisänderung im Katalog hier nachziehen. Keine Einzelpreise.
+ */
+export const sortiment = [
+  { id: "snacks", name: "Snacks & Süßes", ab: 0.8, beispiele: ["Kinderriegel", "Haribo Goldbären", "BiFi XXL"] },
+  { id: "kalt", name: "Kaltgetränke", ab: 1.5, beispiele: ["Durstlöscher", "Vio Wasser", "Paulaner Spezi"] },
+  { id: "heiss", name: "Heißgetränke", ab: 1.3, beispiele: ["Espresso", "Cappuccino", "Latte Macchiato"] },
+  { id: "eis", name: "Eis", ab: 1.0, beispiele: ["Calippo", "Magnum", "Cornetto"] },
+] as const;
+```
+
+Preise deutsch formatieren: „ab 0,80 €", „ab 1,50 €", „ab 1,30 €", „ab 1,00 €".
+
+**Texte** (wörtlich):
+- Überzeile „Sortiment", Überschrift „Das kommt in die Automaten."
+- Unter den Panels, als Hinweiskasten: „Startpreise am Automaten. Nicht jeder Automat führt jedes Produkt. Mit kostenlosem Konto in der App 5 % günstiger."
+- Schaltfläche je Panel: „In der App ansehen", Link auf `https://app.boerdesnack24.de`.
+
+**Keine Einzelpreise für Getränke und keine Pfandangabe.** Die „ab"-Preise beziehen sich auf Produkte ohne Pfand (Kaltgetränke: Durstlöscher im Karton). Wie der Pfand in den Katalogpreisen behandelt ist, klärt der Gesellschafter noch. Bis dahin erscheint kein Preis eines Getränks in Pfandflasche oder Dose.
+
+**Aufbau.** Vier Panels nebeneinander, volle Höhe (mindestens 520 px). Oben links der Name der Kategorie (Bricolage 800), darunter „ab …". Mittig ein großes `lucide`-Symbol, **kein Bild und kein Platzhalter**: `Cookie`, `CupSoda`, `Coffee`, `IceCreamCone`, jeweils `aria-hidden`. Farben, alle gemessen:
+
+| Panel | Fläche | Schrift | Schaltfläche |
+|---|---|---|---|
+| Snacks & Süßes | Gold `#FDC102` | Ink (9,7:1) | Ink, Schrift Creme |
+| Kaltgetränke | Ink `#202321` | Creme (15:1) | Gold, Schrift Ink |
+| Heißgetränke | Gold-hell `#FEE7A0` (`--gold-soft`) | Ink (13:1) | Ink, Schrift Creme |
+| Eis | Grün `#5C9A3F` | **Ink (4,65:1)** | Ink, Schrift Creme |
+
+Auf Grün **Ink statt Creme**: Creme erreicht dort nur 3,23:1. Statt `#FFEDAF` aus der Spezifikation wird `--gold-soft` verwendet, das es im Designsystem schon gibt. Fokusring je Fläche sichtbar: Ink auf Gold, Gold-hell und Grün, Gold auf Ink.
+
+**Bewegung, bei Hover und bei `focus-within`:**
+- Symbol `scale(1.06) rotate(-3deg)`, `var(--dur-slow)`, `var(--ease-out)`.
+- Die drei Beispiele erscheinen als kleine Chips um das Symbol: von `scale(0)` und `opacity 0` auf 1, `var(--ease-bounce)`, Versatz `var(--stagger-item)`.
+- Die Schaltfläche fährt von `translateY(16px)` und `opacity 0` ein, `var(--dur-slow)`.
+- **Das Panel wächst nicht**, abweichend von M03. `grid-template-columns` zu animieren verstößt gegen Regel 1, und die Nachbarpanels würden bei jedem Überfahren umbrechen: Das ist Layout-Verschiebung ohne Eingabe, CLS größer als 0. Chips und Schaltfläche sind immer im Layout, nur unsichtbar; nichts verschiebt sich.
+- Kein runder „+"-Knopf: Es gibt nichts in einen Warenkorb zu legen.
+
+**Touch, Tastatur, ohne Bewegung:**
+- Auf Geräten ohne Hover (`@media (hover: none)`) und unter 768 px sind Chips und Schaltfläche **immer sichtbar**. So gibt es keinen Inhalt, der nur per Hover erreichbar ist. Unter 768 px stehen die Panels untereinander.
+- Per Tab erreichbar: `focus-within` zeigt dasselbe wie Hover.
+- Bei „Bewegung aus": Chips und Schaltfläche sofort sichtbar, kein Skalieren, kein Einfahren.
+
+## I. Nicht umsetzen
 
 Diese Patterns aus der Spezifikation **nicht** bauen und auch keine Platzhalter dafür anlegen:
 
 | Pattern | Grund |
 |---|---|
-| M03 Sortiments-Panels | Es gibt noch kein Sortiment und keinen Preis. „ab 1,50 €" wäre eine Preisangabe ohne Grundlage. |
 | M04 Text auf Pfad | Wäre der dritte klebende Abschnitt auf dem Telefon und das neunte Muster. |
-| M07 Geneigtes Karussell „Heute beliebt." | „Beliebt" braucht Verkaufsdaten, ohne Automaten gibt es keine. |
+| M07 Geneigtes Karussell | Wird in der App umgesetzt („Eure Favoriten"), nicht auf der Landingpage. |
 | M08 Bewertungs-Karten | Es gibt keine Bewertungen. Erfundene Bewertungen sind nach UWG stets unlauter. |
 | M09 Marquee | Rein dekorativ; die Grenze von acht Mustern ist erreicht. Der Ticker nennt zudem Orte ohne Automaten. |
 
 ## Am Ende
 
-Je Teil A bis H eine Zeile, was geändert wurde. Wird ein Punkt nicht oder anders umgesetzt, das ausdrücklich sagen. Dazu ausführen und die Ausgabe nennen:
+Je Teil A bis I eine Zeile, was geändert wurde. Wird ein Punkt nicht oder anders umgesetzt, das ausdrücklich sagen. Dazu ausführen und die Ausgabe nennen:
 
 1. `rg -n 'addEventListener\("scroll"' src`: erwartet genau ein Treffer, in `src/lib/scroll.ts`.
 2. `rg -n "transition[^;]*\b(width|height|top|left)\b" src/styles.css`: erwartet keine Treffer.
 3. `rg -n "sessionStorage|Hunger kommt|hallo@" src`: erwartet keine Treffer.
 4. `rg -n "—|–| · " src/routes/index.tsx src/components/bs24/*.tsx`: nur Code-Kommentare.
 5. `rg -n "\b(du|dich|dir|dein|deine)\b" src/routes/index.tsx src/components/bs24/*.tsx`: keine Treffer im sichtbaren Text.
-6. Browser bei 390 × 844 und 1280 × 800, jeweils mit Bewegung an und aus: kein waagrechter Überlauf, kein Konsolenfehler, alle Texte vollständig. Bildschirmfotos von Kopf, Standortgeber-Bühne (Szene 1 und 3), „Der Anteil" und Fußbereich.
-7. Liste der aktiven Muster auf der Startseite. Erwartet acht: 01 (mit M01), 04 (jetzt M05), 05 (mit M02, M10, M11), 06 (jetzt M06), 09, 10, 17, 18.
+6. Browser bei 390 × 844 und 1280 × 800, jeweils mit Bewegung an und aus: kein waagrechter Überlauf, kein Konsolenfehler, alle Texte vollständig. Bildschirmfotos von Kopf, Standortgeber-Bühne (Szene 1 und 3), „Der Anteil", Sortiment (ein Panel geöffnet) und Fußbereich.
+7. Liste der aktiven Muster auf der Startseite. Erwartet acht: 01 (mit M01), 04 (jetzt M05), 05 (mit M02, M03, M10, M11), 06 (jetzt M06), 09, 10, 17, 18. M03 zählt als Mikrointeraktion, weil es nur auf Hover und Fokus reagiert, nicht auf Scrollen.
+8. `rg -n "[0-9],[0-9]{2} €" src --glob '!src/data/sortiment.ts'`: erwartet keine festen Preise außerhalb von `sortiment.ts` (die Anzeige liest nur aus der Datei).
 
 ---
 
@@ -200,3 +254,8 @@ diesen laufen:
   ergänzen; Verweis auf `motion/MOTION.md` und `motion/ABWEICHUNGEN.md`.
 * Neue Regel: „Nichts auf dem Gerät des Besuchers speichern, was er nicht
   selbst eingestellt hat (§ 25 TDDDG). Erlaubt ist nur der Bewegungsschalter."
+* Regel „keine Preise": ergänzen um „außer den Startpreisen in
+  `src/data/sortiment.ts` (beauftragt 27.09.2026). Keine Einzelpreise, kein
+  Getränkepreis mit Pfand, bis die Pfandfrage geklärt ist."
+* `ProductFocus`/`ProductCards` (Muster 13, „ungenutzt bis ein Automat bestückt
+  ist"): durch M03 ersetzt; die Zeile in der Bausteintabelle anpassen.
