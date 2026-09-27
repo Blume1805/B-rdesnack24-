@@ -318,10 +318,18 @@ gezeichneten Automaten im Markenbild (`boerdesnack24-logo.png`) steht klein
 Bild bleibt auf Entscheidung des Gesellschafters; offen ist nur, ob der kleine
 Schriftzug retuschiert wird. Vorgelegt am 26.09.2026.
 
+**Entschieden am 27.09.2026: entfernen.** Lovable hat den Schriftzug
+herausgefüllt, ohne das Motiv neu zu erzeugen (Commit `1c030fb`, neues Asset
+`9cbc89bf…`; das alte Asset `eeb13724…` bleibt als Rückweg). Der Code-Stand ist
+geprüft: nur der Asset-Verweis hat sich geändert. Das Bild selbst ist aus der
+Arbeitsumgebung nicht abrufbar → Teil der Sichtprüfung unten.
+
 ## Noch offen
 
 * 🟡 Sichtprüfung der Vorschau in 390 und 1280 Pixel Breite durch Philipp
-  (die Vorschauadresse ist aus der Arbeitsumgebung nicht erreichbar) —
+  (die Vorschauadresse ist aus der Arbeitsumgebung nicht erreichbar),
+  einschließlich Kopfbild: Auf der Seitenwand des Automaten darf kein Satz
+  mehr stehen, und an der Stelle darf kein Fleck zu sehen sein —
   Philipp — fällig 30.09.2026.
 * 🟡 Veröffentlichungssperre unverändert (V-006, V-010, V-012) —
   Philipp — Wiedervorlage mit dem ersten Automaten in Betrieb.

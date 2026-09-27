@@ -1183,8 +1183,10 @@ Rechtsberatung.
   Briefvorlage `brief_docx.ts`, ruhender Store-Text). Aus beiden App-Bildern
   (`brand_hero_wide.webp`, `brand_hero.jpg`) herausretuschiert, ohne das Motiv
   neu zu erzeugen.
-* [ ] **Landingpage-Kopfbild:** Retusche bei Lovable beauftragt am 27.09.2026 —
-  Claude — **28.09.2026**.
+* [x] **Landingpage-Kopfbild:** von Lovable retuschiert am 27.09.2026 (Commit
+  `1c030fb`, neues Asset `9cbc89bf…`, altes Asset `eeb13724…` bleibt als
+  Rückweg). Laut Lovable stand nur der kleine Satz auf dem Automaten im Bild.
+  Aus der Arbeitsumgebung nicht sichtbar prüfbar; Teil der Sichtprüfung.
 
 ### Optimierungsvorschläge
 
