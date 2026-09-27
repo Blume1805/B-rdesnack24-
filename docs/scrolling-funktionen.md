@@ -1,9 +1,14 @@
 # Scroll-Funktionen der Landingpage — vollständige Übergabedatei
 
-Stand: 22.09.2026. Diese Datei ist die verbindliche Vorgabe für alle
-scrollgeführten Bewegungen auf `boerdesnack24.de`. Sie wird Lovable als
-Projektwissen übergeben, damit die Bausteine nicht bei jedem Umbau erneut
-verlorengehen.
+Stand: 22.09.2026. Diese Datei ist die verbindliche Vorgabe für **welche**
+18 Muster es gibt, wo sie eingesetzt werden und welche Grenzen gelten. Sie
+wird Lovable als Projektwissen übergeben, damit die Bausteine nicht bei
+jedem Umbau erneut verlorengehen.
+
+Die technische Umsetzung — **wie** ein Muster implementiert wird, mit
+welchem Werkzeug und welchen Zahlenwerten — steht seit dem 27.09.2026 in
+`motion/MOTION.md` und `motion/motion-tokens.css` (Repo-Root). Diese Datei
+bleibt die einzige Quelle für den Musterkatalog selbst.
 
 **Der Anlass:** Beim Umbau am 20.09.2026 wurde die Seite auf schlichte
 Abschnitte reduziert. Die Bewegungsbausteine blieben im Projekt liegen und
