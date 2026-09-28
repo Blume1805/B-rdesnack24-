@@ -282,8 +282,11 @@ nicht durchgeführt.
 | H M03 | Nicht umgesetzt. `ProductFocus`/`ProductCards` mit Artikelzahlen noch im Code (derzeit nicht eingebunden). | 🔴 |
 | I | Keine ausgeschlossenen Muster angelegt. | 🟢 |
 
-Der Nachtrag steht unten. **Nicht gesendet:** Der Lovable-Arbeitsbereich hat
-am 27.09.2026 keine Credits mehr („Your workspace is out of credits").
+Der Nachtrag steht unten. Am 27.09.2026 nicht sendbar (keine Credits);
+**gesendet am 28.09.2026**, `message_id` `umsg_01m3k51ewte8d9fszwm14knadn`,
+zusammen mit dem Projektwissen aus `lovable-projektwissen.md` (Zeile
+„… und ohne Pfand"). Punkt 6 in der Vorschau, veröffentlicht wird erst nach
+Runbook M.
 
 ### Nachtrag (Text zum Einfügen in Lovable)
 
@@ -310,7 +313,7 @@ Nachtrag zum Motion-Auftrag vom 27.09.2026. A bis E sind da, danke. Bitte jetzt 
    - in src/styles.css keine Übergänge oder Animationen auf width, height, top, left
    - Bildschirmfotos 390 px und 1440 px, je mit Bewegung an und aus: Kopf, Standortgeber, Anteil, Sortiment, Fußbereich.
 
-6. Der Anteil (ShareBar): Die Spende wird seit 27.09.2026 ohne Pfand gerechnet. Den Satz „Nettoerlös heißt: Umsatz ohne Umsatzsteuer." ändern zu „Nettoerlös heißt: Umsatz ohne Umsatzsteuer und ohne Pfand." Sonst nichts an diesem Abschnitt ändern.
+6. Der Anteil (ShareBar): Die Spende wird künftig ohne Pfand gerechnet (Freigabe 27.09.2026). Den Satz „Nettoerlös heißt: Umsatz ohne Umsatzsteuer." ändern zu „Nettoerlös heißt: Umsatz ohne Umsatzsteuer und ohne Pfand." Sonst nichts an diesem Abschnitt ändern.
 
 Am Ende je Punkt 1a bis 6 eine Zeile, was geändert wurde. Nicht Umgesetztes ausdrücklich nennen.
 ```

@@ -1,6 +1,5 @@
 <!-- Projektwissen des Lovable-Projekts „Bördesnack24 Landingpage" (0c068d85-…). Stand 27.09.2026.
-     Zuletzt an Lovable übertragen: 27.09.2026 ohne die Zeile „… und ohne Pfand" (Zeile Vollständigkeit).
-     Diese Fassung wird zusammen mit dem Nachtrag aus lovable-auftrag-2026-09-27-motion.md übertragen. -->
+     Zuletzt an Lovable übertragen: 28.09.2026 (diese Fassung, zusammen mit dem Nachtrag). -->
 
 # Bördesnack24 Landingpage — Dauerregeln
 
