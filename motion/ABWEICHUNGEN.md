@@ -57,6 +57,7 @@ dürfen sie so nicht erscheinen:
 |---|---|---|---|
 | P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand? | **Beantwortet 27.09.2026: ja, der Pfand ist enthalten.** Das widerspricht § 7 PAngV (Pfand neben dem Preis angeben, nicht einbeziehen). Betroffen: App, Kassenbon, Preisschilder am Automaten, Rabattberechnung. Die Landingpage ist nicht betroffen, weil ihre „ab"-Preise von pfandfreien Produkten stammen. Weiter in `docs/COMPLIANCE.md`, V-016 | Umsetzung offen, siehe V-016 |
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
+| P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | Nach Runbook M kosten Vio Wasser und Müllermilch 1,25 € zzgl. 0,25 € Pfand. „ab 1,50 €" ist dann nicht mehr der niedrigste Preis. Entweder „ab 1,25 € zzgl. Pfand" (§ 7 PAngV: Pfand daneben) oder bei „ab 1,50 €" bleiben und den Hinweis „Startpreis ohne Pfandgetränke" ergänzen. | Philipp, zusammen mit Runbook M |
 
 ## U. Umsetzungsstand
 
@@ -67,6 +68,7 @@ dürfen sie so nicht erscheinen:
 | 27.09.2026 | M07 Geneigtes Karussell (App) | `FocusCarousel(tilt: true)` in `lib/core/widgets/motion/motion.dart`, eingesetzt als ein Karussell „Eure Favoriten" über Getränke, Snacks, **Süßwaren** und Eis. Süßwaren fehlten vorher in den Favoriten, obwohl der Katalog 13 davon führt. | `test/core/widgets/focus_carousel_test.dart` (4 Tests); Bildschirmfoto `01c_favoriten` ohne Kontrastbefund |
 | 27.09.2026 | Sterne der Bewertung (App) | Leere Sterne jetzt `textMuted` statt `borderSubtle` (1,66:1 → 6,3:1). Betrifft auch die Sterne-Eingabe beim Bewerten, dort sind sie Bedienelemente. | Bildschirmfoto `01c_favoriten` |
 | 27.09.2026 | Web A–E (Lovable, Commit `bb47899`) | Tokens, `useScrollProgress`, M01 `HeroClaim`, M06 `Stage`, M02 `SectionNav`. F, G, H nicht umgesetzt. | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: A, C, I 🟢; B, D, E 🔴 (Bewegung ohne Bewegung, eigene Farbe, toter Link `#sortiment`). Nachtrag geschrieben, wartet auf Lovable-Credits |
+| 28.09.2026 | Web Nachtrag (Lovable, Commit `b759d0a`) | Regressionen 1a–1e behoben; M05 mit „entscheidest Du mit.“, M10 „Nach oben“, M11 Copy-Pill im Fußbereich, M03 Sortiment mit Startpreisen; Nettoerlös-Satz „… und ohne Pfand“ | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: alle Punkte 🟢 am Code; Sichtprüfung durch Philipp in der Vorschau; Nettoerlös-Satz erst nach Runbook M veröffentlichen |
 
 M11 im Web (Kontakt-Pill im Fußbereich) ist noch offen: Der Fußbereich der
 Landingpage ist laut Lovable-Auftrag vom 26.09.2026 unverändert zu lassen, und

@@ -340,3 +340,37 @@ Am Ende je Punkt 1a bis 6 eine Zeile, was geändert wurde. Nicht Umgesetztes aus
    Datenbank den Pfand aus der Spende herausrechnet (Runbook M in
    `docs/OPERATIONS.md`). Die Vorschau darf ihn vorher enthalten,
    **veröffentlicht wird erst nach Runbook M**.
+
+## Abnahme des Nachtrags 28.09.2026 (Claude Code, gegen den Code geprüft)
+
+Geprüft: Antwort `umsg_01m3k51ewte8d9fszwm14knadn` (Commit `b759d0a`, 5 Credits),
+Diff aller elf geänderten Dateien, vollständige `src/styles.css`, `src/lib/scroll.ts`,
+`Stage.tsx`, `SiteFooter.tsx`, `Reveal.tsx`, `LegalPage.tsx`, `__root.tsx`,
+`use-mobile.tsx`, `error-capture.ts`, `lovable-error-reporting.ts`; Beispielprodukte
+und Startpreise gegen den Produktkatalog (Produktions-Nachbau); Kontrast nach WCAG
+berechnet. **Nicht selbst geprüft:** das Aussehen im Browser. Die Vorschau ist aus
+der Arbeitsumgebung gesperrt (Proxy 403); Lovable meldet Bildschirmfotos 390/1440 px
+mit Bewegung an und aus ohne Überlauf und ohne Seitenfehler.
+
+| Punkt | Befund am Code | Status |
+|---|---|---|
+| 1a | `useScrollProgress` liefert ohne Bewegung (Schalter aus **oder** `prefers-reduced-motion`) `p = 1`; reagiert auch auf eine Änderung der Systemeinstellung. Gilt für alle Verbraucher. | 🟢 |
+| 1b | Drehung der Bühne nur unter `html[data-motion="on"]`, zusätzlich aus bei `prefers-reduced-motion`. | 🟢 |
+| 1c | `.stage` nutzt `var(--cream)`. | 🟢 |
+| 1d | Startzustand ohne aktiven Link; der Kopfbereich wird beobachtet und setzt „kein Link". | 🟢 |
+| 1e | `#sortiment` existiert (neuer Abschnitt). | 🟢 |
+| 2 M05 | Satz „Wer das Geld bekommt, entscheidest Du mit."; „Du" in Gold. Kontrast gedimmt 6,34:1, hell 14,98:1, Gold 9,67:1 auf Nacht; Zwischenstufen liegen dazwischen. | 🟢 |
+| 3 M10/M11 | Kopieren mit Rückfall ohne Clipboard-API, 1,8 s Rückmeldung, feste Breite, Statusansage für Bildschirmleser, 44 px. „Nach oben" 96/56 px, Magnet nur mit Maus und Bewegung, sonst ohne Animation. Keine Speicherung. | 🟢 |
+| 4 M03 | `src/data/sortiment.ts`: 0,80 / 1,50 / 1,30 / 1,00 € — stimmen mit dem Katalog. Alle zwölf Beispielprodukte existieren im Katalog. Alte Artikelzahlen und `ProductFocus`/`ProductCards` entfernt. Kontrast der Tafeln ≥ 4,65:1 (Eis, Ink auf Grün, knapp über 4,5). Ohne Hover (Telefon, Tastatur, Bewegung aus) sind Beispiele und Link immer sichtbar. | 🟢 |
+| 5 Abnahme | Von Lovable nicht vollständig wiederholt. Selbst nachgeprüft: genau **ein** `scroll`-Listener (`src/lib/scroll.ts`); Speicherung nur im Bewegungsschalter (`localStorage`), den Cookie-Schreiber in `sidebar.tsx` hat Lovable entfernt; `entscheidest Du.` kommt nicht mehr vor; keine Übergänge auf `width`, `height`, `top`, `left`. Sichtprüfung siehe oben. | 🟢 Code, Sicht durch Philipp |
+| 6 | „Nettoerlös heißt: Umsatz ohne Umsatzsteuer und ohne Pfand." | 🟢, **erst nach Runbook M veröffentlichen** |
+
+Nebenbefunde (keine Nacharbeit beauftragt):
+
+* `Sequence.tsx` wird nicht mehr verwendet (die Bühne baut die Zusagen selbst).
+  Totes Bauteil; das Projektwissen nennt es noch.
+* Der Anteilsbalken steht im ausgelieferten HTML voll und springt beim Laden mit
+  Bewegung auf 5 %, bevor er wächst. Nur `transform`, kein Layoutsprung (CLS 0).
+* **P-3 (neu):** Nach Runbook M kostet Vio Wasser 1,25 € zzgl. 0,25 € Pfand.
+  „Kaltgetränke ab 1,50 €" ist dann nicht mehr der niedrigste Preis. Siehe
+  `motion/ABWEICHUNGEN.md`.
