@@ -29,6 +29,27 @@ Auftrag 29.09.2026: Aufräumen, Barrierefreiheit, Stabilität. Keine Textänderu
    Je Punkt 1a, 2, 3: was gemessen wurde (Zahlen vorher und nachher), was geändert wurde, was offen bleibt. Die axe-Ergebnisse als Tabelle: Regel, Stufe, Anzahl vorher, Anzahl nachher.
 ```
 
-## Abnahme
+## Abnahme 29.09.2026 (Claude Code, gegen den Code geprüft)
 
-(folgt nach Eingang der Antwort)
+Geprüft: Antwort `umsg_01m3p5t4esf17t2zszs4rgbgrr` (Commit `7d3bfad`, 4,8 Credits),
+Diff aller sieben geänderten Dateien; Kontrast der neuen Fokusringe nach WCAG
+berechnet. **Nicht selbst geprüft:** axe-, CLS- und Tastaturläufe im Browser. Die
+Vorschau ist aus der Arbeitsumgebung gesperrt (Proxy 403); die Zahlen unten sind
+Lovables Messung.
+
+| Punkt | Befund am Code | Status |
+|---|---|---|
+| Rahmen | Keine Textänderung außer dem beauftragten Sprunglink „Zum Inhalt"; `package.json` unverändert; Prüfwerkzeug nur in `/tmp`. | 🟢 |
+| 1a | `Sequence.tsx` gelöscht; entfernt sind nur `.location-sequence*`, die `.sequence-title`-Anteile und ein zugehöriger Mobil-Eintrag. `.icon-heading` bleibt. | 🟢 |
+| 2 Kontrast | `.prose a` gilt nicht mehr für Schaltflächen (`:not(.btn)`): goldene Schaltfläche auf /kuendigung wieder Ink auf Gold (9,67:1). Lovable: 4 → 0. | 🟢 |
+| 2 Scrollbereich | Zusagentitel am Telefon brechen um statt waagrecht zu scrollen (`flex-wrap`), damit kein nicht fokussierbarer Scrollbereich mehr. Lovable: 2 → 0. | 🟢 |
+| 2 Sprunglink | Erstes Element der Seite, `href="#inhalt"`; `<main id="inhalt" tabIndex={-1}>` auf Start- und Rechtsseiten. Ohne Fokus aus dem Bild geschoben (`transform`), nie `display: none`. Fokusring `#856A00` auf Nacht 3,07:1 plus heller Innenrand 14,98:1. | 🟢 |
+| 2 Fokus | Kaltgetränke-Feld: Fokusring jetzt Gold auf Ink (9,67:1); vorher Ink auf Ink (1:1), weil die spezifischere Regel der Grundtafel gewann. | 🟢 |
+| 2 Überschriften | Unverändert: je Seite ein h1 (Lovable-Messung). | 🟢 |
+| 3 CLS | Ursache Schriftwechsel; beide Hauptschriften per `preload` von der eigenen Adresse (keine externe Adresse). Lovable: 0,0087 / 0,0004 → 0 in allen vier Läufen. | 🟢 |
+| 3 Fehler | Lovable: 0 Konsolen- und Seitenfehler in allen Läufen. | 🟢 (Lovable-Messung) |
+| Zusatz | Ein `scroll`-Listener (`src/lib/scroll.ts`), Speicherung nur `MotionToggle`, „entscheidest Du." ohne Treffer — deckt sich mit der eigenen Prüfung vom 28.09. | 🟢 |
+
+Offen: Sichtprüfung der Vorschau durch Philipp (wie beim Nachtrag). Projektwissen
+bei Lovable angepasst (Bausteintabelle ohne `Sequence`, mit `Sortiment`,
+`FooterActions`, Sprunglink).

@@ -1,5 +1,5 @@
 <!-- Projektwissen des Lovable-Projekts „Bördesnack24 Landingpage" (0c068d85-…). Stand 27.09.2026.
-     Zuletzt an Lovable übertragen: 28.09.2026 (diese Fassung, zusammen mit dem Nachtrag). -->
+     Zuletzt an Lovable übertragen: 29.09.2026 (diese Fassung). -->
 
 # Bördesnack24 Landingpage — Dauerregeln
 
@@ -38,13 +38,13 @@ Verbindlich: `motion/MOTION.md` (Repository B-rdesnack24-, Patterns M01–M11) m
 | `prog`, `phase`, `subscribe` | `src/lib/scroll.ts` | **Ein einziger** globaler Scroll-Handler |
 | `useScrollProgress` | `src/hooks/useScrollProgress.ts` | Geglätteter Fortschritt (lerp 0.12) über `subscribe`, schreibt `--p` |
 | `Reveal` | `Reveal.tsx` | 01 Einblenden; Kopf-Überschrift M01 (je Wort, einmal pro Seitenaufruf) |
-| `Stage` + `Sequence` | `Stage.tsx`, `Sequence.tsx` | 06, jetzt M06 (drei Szenen Gold → Gold-hell → Creme, Schrift Ink) |
+| `Stage` | `Stage.tsx` | 06, jetzt M06 (drei Szenen Gold → Gold-hell → Creme, Schrift Ink) |
 | `SceneColorTransition` | `SceneMotion.tsx` | 09 Creme → Nacht |
 | `ShareScene` | `ShareBar.tsx` | 18 Anteilsbalken (`scaleX`, nicht `width`) |
 | Text-Hervorhebung | `SceneMotion.tsx` | 04, jetzt M05: „Wer das Geld bekommt, entscheidest Du mit." genau einmal |
 | `PhysicalDigital` | `SceneMotion.tsx` | 17 |
 | `MachineZoom` | `SceneMotion.tsx` | 10 |
-| Navigation, Sortiment, Nach oben, Copy-Pill, Karten, Schaltflächen | — | 05 Mikrointeraktion (M02, M03, M10, M11) |
+| `SectionNav`, `Sortiment` (Preise nur aus `src/data/sortiment.ts`), `FooterActions` (`BackToTop`, `CopyPill`), Karten, Schaltflächen | `SectionNav.tsx`, `Sortiment.tsx`, `FooterActions.tsx` | 05 Mikrointeraktion (M02, M03, M10, M11) |
 | `MotionToggle` | `MotionToggle.tsx` | Schalter „Bewegung", setzt `data-motion` |
 
 **Höchstens acht aktive Muster:** 01, 04, 05, 06, 09, 10, 17, 18. Wer ein Muster hinzufügt, nimmt ein anderes heraus.
@@ -59,7 +59,8 @@ Verbindlich: `motion/MOTION.md` (Repository B-rdesnack24-, Patterns M01–M11) m
 - **Auf dem Telefon höchstens zwei klebende Abschnitte.**
 - **Ein Scroll-Handler.** Kein zweiter `scroll`-Listener. Einzige zusätzliche Bibliothek: `motion`, nur für Layout-Animationen (Nav-Indikator).
 - Kontrast Fließtext mindestens 4,5:1, auch in Zwischenstufen. Fokusring auf hellen Flächen `#856A00` oder Ink, nie Gold auf Creme.
-- Hover-Inhalte ohne Hover immer sichtbar. Alles per Tastatur erreichbar.
+- Hover-Inhalte ohne Hover immer sichtbar. Alles per Tastatur erreichbar. Sprunglink „Zum Inhalt" bleibt erstes Element, Ziel `<main id="inhalt">`.
+- Schriften werden per `preload` von der eigenen Adresse geladen (CLS 0).
 
 ## Technik und Datenschutz
 
