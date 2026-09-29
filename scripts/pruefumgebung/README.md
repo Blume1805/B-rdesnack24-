@@ -132,7 +132,7 @@ Der Durchlauf in der Reihenfolge, in der er gemeint ist:
 
 ```bash
 for f in 40 50 60 70 80 81 90 91 92 93 94 95 96 97 98 99 \
-         100 101 102 103 104 105 106 107 108 109 110; do
+         100 101 102 103 104 105 106 107 108 109 110 111; do
   d=$(ls ${f}_*.sql | head -1)
   psql -h $BASE/run -p 55432 -U postgres -d bs24 -q -f "$d"
 done
@@ -166,6 +166,7 @@ brauchen davor einen Neubau.
 | `108_scheinkauf_und_bargeld.sql` | Befunde B-1 bis B-3 der Backend-Prüfung vom 26.09.2026: kein Scheinkauf aus einem Kundenkonto (gemessen am gespeicherten Zustand, nicht am Fehlercode), keine fremden Kaufbeträge, Bargeld-Soll nur mit `cash.collect` oder `finance.view`. 10 Urteile, wiederholbar. Setzt `20260926120000` voraus |
 | `109_terminal_webhook_weg.sql` | Befunde B-4/B-5: der Weg des Terminal-Webhooks als `service_role` über `public.vend_freigabe_einloesen` bis zum Kauf mit `source = 'machine'`. 5 Urteile, wiederholbar. Setzt `105` und `20260926121000` voraus |
 | `110_pfand.sql` | Pfand getrennt vom Preis (V-016): Zahlbetrag = Ware + Pfand, Dauerrabatt und MHD-Abschlag nur auf die Ware, Pfand an Freigabe und Automatenkauf vom Server (ein vom Aufrufer mitgegebener Pfand wird überschrieben), Spendenbasis ohne Pfand mit dem Steuersatz des Produkts, Pfand in allen Katalog-Schnittstellen, kein Kunde kann den Pfand setzen oder fremde Belege sehen. 23 Urteile, wiederholbar. Setzt `20260926121000` und `20260927200000` voraus |
+| `111_verfuegbarkeit.sql` | Verfügbarkeit für Kunden (V-016-d): drei Zustände, Preis ohne Pfand mit Pfand daneben, keine Stückzahlen in der Rückgabe, inaktiver Automat und inaktives Produkt fallen heraus, anon ohne Recht, ohne Anmeldung leer, `inventory` und `machine_stock` für Kunden weiter gesperrt, Gegenprobe intern. 12 Urteile, wiederholbar. Setzt `20260929100000` voraus |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.

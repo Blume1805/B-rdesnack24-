@@ -107,7 +107,7 @@ Zeilenumbruch entsprechen.
 
 ## Im Repository, in der Produktion ausstehend (Stand 27.09.2026)
 
-Drei Dateien stehen hier, **bevor** sie auf der Produktion gelaufen sind. Bis
+Vier Dateien stehen hier, **bevor** sie auf der Produktion gelaufen sind. Bis
 zum Ausrollen fehlen sie im Register der Live-Datenbank; das ist keine
 Abweichung vom Spiegel, sondern der offene Schritt.
 
@@ -116,8 +116,9 @@ Abweichung vom Spiegel, sondern der offene Schritt.
 | `20260926120000_scheinkaeufe_sperren.sql` | B-1 bis B-3: Scheinkäufe gesperrt, fremde Kaufbeträge und Bargeld-Soll geschützt | Runbook L (`docs/OPERATIONS.md` im Arbeitszweig) sperrt B-1 sofort per SQL-Editor; danach diese Migration regulär ausrollen, damit sie im Register steht |
 | `20260926121000_terminal_webhook_anbindung.sql` | B-4/B-5: Webhook findet die Einlösefunktion, Enum-Wert `machine` | vor dem ersten Automaten mit Terminal |
 | `20260927200000_pfand_getrennt.sql` | Pfand getrennt vom Preis (§ 7 PAngV, V-016), Rabatte und Spende ohne Pfand; behebt zudem `vend_freigabe_anlegen` (42702) und die 7-%-Pauschale der Spendenbasis | Runbook M (`docs/OPERATIONS.md` im Arbeitszweig): **nach** `…121000` und **nach** dem App-Update; bricht sonst bzw. im falschen Katalog ohne Änderung ab |
+| `20260929100000_verfuegbarkeit_fuer_kunden.sql` | V-016-d: `machine_availability` zeigt Kunden je Produkt nur verfügbar/bald leer/ausverkauft, Preis und Pfand; `inventory` bleibt intern | Runbook M, **nach** `…200000`; bricht sonst ohne Änderung ab |
 
 Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10), `109` (5/5) und
-`110` (23/23, Pfand), zuletzt am 27.09.2026 nach einem Neuaufbau aus allen
-236 Migrationen, alle 27 Prüfskripte ohne Fehler. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
+`110` (23/23, Pfand) und `111` (12/12, Verfügbarkeit), zuletzt am 29.09.2026
+nach einem Neuaufbau aus allen 237 Migrationen, alle 28 Prüfskripte ohne Fehler. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
 `claude/bordesnack24-app-strategy-sf5yzy`.
