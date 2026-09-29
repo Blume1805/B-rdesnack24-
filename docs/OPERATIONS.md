@@ -1430,14 +1430,19 @@ von GitHub.
 6. Feld leeren (Strg+A, Entf). Dann dasselbe mit dieser Datei:
    `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260927200000_pfand_getrennt.sql`
    → **Copy raw file** → Strg+V → **Run**. Das dauert einige Sekunden.
-7. Feld leeren und diesen Text einfügen. Er trägt beide Änderungen in die
-   Liste der eingespielten Änderungen ein, damit sie später nicht noch
+6b. Feld leeren. Dasselbe mit der dritten Datei, die Kunden im
+   Automatenfinder zeigt, ob ein Produkt da ist (ohne Stückzahlen):
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql`
+   → **Copy raw file** → Strg+V → **Run**.
+7. Feld leeren und diesen Text einfügen. Er trägt alle drei Änderungen in
+   die Liste der eingespielten Änderungen ein, damit sie später nicht noch
    einmal laufen:
 
    ```sql
    insert into supabase_migrations.schema_migrations (version, name)
    values ('20260926121000', 'terminal_webhook_anbindung'),
-          ('20260927200000', 'pfand_getrennt')
+          ('20260927200000', 'pfand_getrennt'),
+          ('20260929100000', 'verfuegbarkeit_fuer_kunden')
    on conflict (version) do nothing;
    ```
 
@@ -1460,6 +1465,11 @@ von GitHub.
    Automat kassiert Ware und Pfand zusammen. Die aktuelle Liste liefert der
    Text aus Schritt 8, wenn Du `where sku = 'BS-004'` weglässt; oder frag mich
    nach einer fertigen Druckvorlage.
+10. **Landingpage umschalten.** Sag mir hier im Chat „Runbook M ist durch".
+    Ich lege dann bei Lovable den Schalter `pfandGetrennt` um. Danach zeigt die
+    Seite „Kaltgetränke ab 1,25 € zzgl. 0,25 € Pfand", den Hinweis „Rabatte
+    gelten nicht für den Pfand." und „Nettoerlös heißt: Umsatz ohne
+    Umsatzsteuer und ohne Pfand." Erst danach veröffentlichen.
 
 ### So sieht Erfolg aus
 

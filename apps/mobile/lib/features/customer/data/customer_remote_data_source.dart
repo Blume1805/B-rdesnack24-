@@ -167,6 +167,19 @@ class CustomerRemoteDataSource {
     return const [];
   }
 
+  /// Verfügbarkeit je Produkt eines Automaten für Kunden, ohne Stückzahlen
+  /// (RPC `machine_availability`, V-016-d).
+  Future<List<Map<String, dynamic>>> machineAvailability(
+    String machineId,
+  ) async {
+    final rows = await _client.rpc(
+      'machine_availability',
+      params: {'p_machine': machineId},
+    );
+    if (rows is List) return rows.cast<Map<String, dynamic>>();
+    return const [];
+  }
+
   // Spenden + News --------------------------------------------------------
 
   Future<Map<String, dynamic>?> myDonationSummary() async {

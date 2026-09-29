@@ -1,21 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/di/providers.dart';
 import '../../../../core/pricing/pricing.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/domain/entities/stock_item.dart';
-import '../../../management/presentation/controllers/management_providers.dart';
+import '../../domain/entities/machine_availability.dart';
 import '../controllers/customer_providers.dart';
 
-/// Echtzeit-Produktverfügbarkeit für Kunden (read-only). Abonniert die
-/// Inventur-Tabelle und zeigt jeden Artikel mit konkreter Stückzahl und
-/// Status-Badge — die Zahl wird durch die Nayax-Sales-Webhooks laufend
-/// aktualisiert (siehe supabase/functions/nayax-webhook).
+/// Verfügbarkeit eines Automaten für Kunden (nur lesen).
+///
+/// Zeigt je Produkt „verfügbar", „bald leer" oder „ausverkauft", dazu Preis
+/// und Pfand, **keine Stückzahlen** (RPC `machine_availability`, V-016-d,
+/// Entscheidung 29.09.2026). Die frühere Fassung las die interne Sicht
+/// `machine_stock` und abonnierte `inventory` per Realtime; beides ist für
+/// Kunden gesperrt, der Bildschirm blieb deshalb leer.
+///
+/// Aktualisiert wird beim Öffnen, per Ziehen nach unten und jede Minute.
 class AvailabilityScreen extends ConsumerStatefulWidget {
   const AvailabilityScreen({
     required this.machineId,
@@ -31,40 +35,27 @@ class AvailabilityScreen extends ConsumerStatefulWidget {
 }
 
 class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
-  RealtimeChannel? _channel;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _channel = ref
-        .read(supabaseClientProvider)
-        .channel('avail:${widget.machineId}')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: 'public',
-          table: 'inventory',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq,
-            column: 'machine_id',
-            value: widget.machineId,
-          ),
-          callback: (_) {
-            if (mounted) ref.invalidate(machineStockProvider(widget.machineId));
-          },
-        )
-        .subscribe();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) {
+        ref.invalidate(machineAvailabilityProvider(widget.machineId));
+      }
+    });
   }
 
   @override
   void dispose() {
-    final ch = _channel;
-    if (ch != null) ref.read(supabaseClientProvider).removeChannel(ch);
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final stock = ref.watch(machineStockProvider(widget.machineId));
+    final stock = ref.watch(machineAvailabilityProvider(widget.machineId));
     final hasSub = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
     // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
     final effRate = ref.watch(myEffectiveDiscountProvider);
@@ -82,7 +73,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
         ),
         data: (items) => RefreshIndicator(
           onRefresh: () async =>
-              ref.invalidate(machineStockProvider(widget.machineId)),
+              ref.invalidate(machineAvailabilityProvider(widget.machineId)),
           color: AppColors.brand,
           child: items.isEmpty
               ? ListView(
@@ -116,7 +107,8 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s2),
                     Text(
-                      'Bestand wird laufend über die Verkaufsdaten der Automaten aktualisiert.',
+                      'Der Stand kommt aus den Verkaufsdaten des Automaten und '
+                      'aktualisiert sich jede Minute.',
                       style: AppTypography.body(
                         size: 13,
                         color: AppColors.textMuted,
@@ -124,7 +116,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s5),
                     for (final s in items) ...[
-                      _StockRow(
+                      _AvailabilityRow(
                         item: s,
                         hasSubscription: hasSub,
                         effectiveRate: effRate,
@@ -139,13 +131,13 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
   }
 }
 
-class _StockRow extends StatelessWidget {
-  const _StockRow({
+class _AvailabilityRow extends StatelessWidget {
+  const _AvailabilityRow({
     required this.item,
     required this.hasSubscription,
     required this.effectiveRate,
   });
-  final StockItem item;
+  final MachineAvailability item;
   final bool hasSubscription;
   final double effectiveRate;
 
@@ -175,12 +167,6 @@ class _StockRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = _status();
-    // Total = Kapazität des Slots (100 % voll). parLevel ist die
-    // Nachfüllschwelle und bleibt nur für die Status-Bewertung.
-    final total = item.capacity > 0 ? item.capacity : item.parLevel;
-    final qty = item.quantity;
-    final ratio = total > 0 ? (qty / total).clamp(0.0, 1.0) : 0.0;
-
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.s4),
       child: Column(
@@ -216,66 +202,14 @@ class _StockRow extends StatelessWidget {
               ),
             ],
           ),
-          if (item.grossPrice != null) ...[
+          if (item.priceGross != null) ...[
             const SizedBox(height: AppSpacing.s3),
             _PriceLine(
               effectiveRate: effectiveRate,
-              gross: item.grossPrice!,
+              gross: item.priceGross!,
               hasSubscription: hasSubscription,
             ),
             DepositNote(item.deposit),
-          ],
-          const SizedBox(height: AppSpacing.s3),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$qty',
-                style: AppTypography.display(
-                  size: 28,
-                  weight: FontWeight.w800,
-                  color: AppColors.textStrong,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                qty == 1 ? 'Stück' : 'Stück',
-                style: AppTypography.body(
-                  size: 13,
-                  weight: FontWeight.w600,
-                  color: AppColors.textMuted,
-                ),
-              ),
-              if (total > 0) ...[
-                const SizedBox(width: AppSpacing.s3),
-                Text(
-                  'von $total',
-                  style: AppTypography.body(
-                    size: 13,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (total > 0) ...[
-            const SizedBox(height: AppSpacing.s3),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadii.pill),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 6,
-                backgroundColor: AppColors.borderSubtle,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ratio < 0.15
-                      ? AppColors.statusCritical
-                      : ratio < 0.35
-                          ? AppColors.statusWarning
-                          : AppColors.brand,
-                ),
-              ),
-            ),
           ],
         ],
       ),

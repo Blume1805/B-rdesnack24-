@@ -1,0 +1,279 @@
+From 2182a5e6a0328030c3b6cce75a80e2f9f5f5fdb5 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 29 Sep 2026 09:52:40 +0000
+Subject: [PATCH] =?UTF-8?q?Verf=C3=BCgbarkeit=20f=C3=BCr=20Kunden=20(V-016?=
+ =?UTF-8?q?-d):=20machine=5Favailability=20ohne=20St=C3=BCckzahlen?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Kunden sahen im Automatenfinder keinen Bestand, weil inventory nur intern
+lesbar ist. Neue Funktion liefert je Produkt eines aktiven Automaten nur
+verfügbar/bald leer/ausverkauft, Warenpreis und Pfand. inventory und
+machine_stock bleiben für Kunden gesperrt.
+
+Nachweis: 111_verfuegbarkeit 12/12 (zweimal), Neuaufbau 237 Migrationen,
+alle 28 Prüfskripte ohne Fehler.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012uyiL6JjSwBHFW5epQoxkW
+---
+ scripts/pruefumgebung/111_verfuegbarkeit.sql  | 115 ++++++++++++++++++
+ scripts/pruefumgebung/README.md               |   3 +-
+ ...60929100000_verfuegbarkeit_fuer_kunden.sql |  75 ++++++++++++
+ supabase/migrations/README.md                 |   7 +-
+ 4 files changed, 196 insertions(+), 4 deletions(-)
+ create mode 100644 scripts/pruefumgebung/111_verfuegbarkeit.sql
+ create mode 100644 supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql
+
+diff --git a/scripts/pruefumgebung/111_verfuegbarkeit.sql b/scripts/pruefumgebung/111_verfuegbarkeit.sql
+new file mode 100644
+index 0000000..1ac550f
+--- /dev/null
++++ b/scripts/pruefumgebung/111_verfuegbarkeit.sql
+@@ -0,0 +1,115 @@
++-- Nachweis: Verfügbarkeit für Kunden (Migration 20260929100000, V-016-d).
++--
++-- Kunden sehen je Produkt eines aktiven Automaten nur „verfügbar", „bald
++-- leer" oder „ausverkauft", dazu Preis und Pfand — nie Stückzahlen. Die
++-- Tabelle inventory bleibt für Kunden gesperrt. Geprüft am Ergebnis und an
++-- den Rechten, nicht an der Absicht.
++--
++-- Läuft gegen die lokale Prüfumgebung, nie gegen die Produktion. Wiederholbar.
++\set ON_ERROR_STOP on
++\pset pager off
++
++\set aktiv   '\'cccc0000-0000-4000-8000-000000000111\''
++\set inaktiv '\'cccc0000-0000-4000-8000-000000000112\''
++\set kunde   '\'55555555-5555-5555-5555-555555555555\''
++\set intern  '\'33333333-3333-3333-3333-333333333333\''
++
++create temporary table verf_ergebnis (fall text, gemessen text, erwartet text, ok boolean);
++
++insert into public.machines (id, code, name, status) values
++  (:aktiv,   'VERF-M1', 'Verfügbarkeit aktiv',   'active'),
++  (:inaktiv, 'VERF-M2', 'Verfügbarkeit inaktiv', 'inactive')
++on conflict (id) do update set status = excluded.status, deleted_at = null;
++
++select id as cola  from public.products where sku = 'BS-004' \gset
++select id as durst from public.products where sku = 'BS-006' \gset
++select id as bifi  from public.products where sku = 'BS-047' \gset
++
++delete from public.inventory where machine_id in (:aktiv, :inaktiv);
++insert into public.inventory (machine_id, product_id, quantity, par_level) values
++  (:aktiv, :'cola', 10, 2),
++  (:aktiv, :'durst', 1, 2),
++  (:aktiv, :'bifi', 0, 2),
++  (:inaktiv, :'cola', 10, 2);
++
++-- ── Zustände und Preis ────────────────────────────────────────────────
++insert into verf_ergebnis
++select 'V1 drei Zustände', r, 'BiFi Carazza=out|Coca-Cola 0,5 l=available|Durstlöscher=low', r = 'BiFi Carazza=out|Coca-Cola 0,5 l=available|Durstlöscher=low'
++  from (select pruef.lies(format(
++          'select string_agg(product_name || ''='' || availability, ''|'' order by product_name) from public.machine_availability(%L::uuid)',
++          :aktiv), :kunde) as r) x;
++
++insert into verf_ergebnis
++select 'V2 Preis ohne Pfand, Pfand daneben', r, '2.05/0.25', r = '2.05/0.25'
++  from (select pruef.lies(format(
++          'select price_gross || ''/'' || deposit from public.machine_availability(%L::uuid) where product_id = %L::uuid',
++          :aktiv, :'cola'), :kunde) as r) x;
++
++-- ── Datenminimierung ──────────────────────────────────────────────────
++insert into verf_ergebnis
++select 'V3 keine Stückzahlen in der Rückgabe', string_agg(a, ','), '(keine)', count(*) = 0
++  from (select unnest(proargnames) as a
++          from pg_proc where oid = 'public.machine_availability(uuid)'::regprocedure) n
++ where a in ('quantity', 'capacity', 'par_level', 'menge', 'bestand');
++
++-- ── Abgrenzung ────────────────────────────────────────────────────────
++insert into verf_ergebnis
++select 'V4 inaktiver Automat', r, '0', r = '0'
++  from (select pruef.lies(format(
++          'select count(*)::text from public.machine_availability(%L::uuid)', :inaktiv), :kunde) as r) x;
++
++update public.products set status = 'inactive' where id = :'bifi';
++insert into verf_ergebnis
++select 'V5 inaktives Produkt fällt heraus', r, '2', r = '2'
++  from (select pruef.lies(format(
++          'select count(*)::text from public.machine_availability(%L::uuid)', :aktiv), :kunde) as r) x;
++update public.products set status = 'active' where id = :'bifi';
++
++-- ── Rechte ────────────────────────────────────────────────────────────
++insert into verf_ergebnis
++select 'V6 anon darf nicht aufrufen', r, 'ERR:42501', r = 'ERR:42501'
++  from (select pruef.lies(format(
++          'select count(*)::text from public.machine_availability(%L::uuid)', :aktiv), null, 'anon') as r) x;
++
++insert into verf_ergebnis
++select 'V7 ohne Anmeldung keine Zeile', count(*)::text, '0', count(*) = 0
++  from public.machine_availability(:aktiv);
++
++insert into verf_ergebnis
++select 'V8 Kunde liest inventory weiterhin nicht', r, '0', r = '0'
++  from (select pruef.zaehle(format(
++          'select * from public.inventory where machine_id = %L::uuid', :aktiv), :kunde)::text as r) x;
++
++insert into verf_ergebnis
++select 'V9 Kunde liest machine_stock weiterhin nicht', r, '0', r = '0'
++  from (select pruef.zaehle(format(
++          'select * from public.machine_stock where machine_id = %L::uuid', :aktiv), :kunde)::text as r) x;
++
++insert into verf_ergebnis
++select 'V10 Gegenprobe intern: machine_stock mit Stückzahl', r, '10', r = '10'
++  from (select pruef.lies(format(
++          'select quantity::text from public.machine_stock where machine_id = %L::uuid and product_id = %L::uuid',
++          :aktiv, :'cola'), :intern) as r) x;
++
++insert into verf_ergebnis
++select 'V11 Kunde kann Bestand nicht ändern', r, 'ERR oder ROWS:0', r like 'ERR:%' or r = 'ROWS:0'
++  from (select pruef.schreibe(format(
++          'update public.inventory set quantity = 99 where machine_id = %L::uuid', :aktiv), :kunde) as r) x;
++
++insert into verf_ergebnis
++select 'V11b Wahrheit danach', quantity::text, '10', quantity = 10
++  from public.inventory where machine_id = :aktiv and product_id = :'cola';
++
++-- ── Ergebnis ──────────────────────────────────────────────────────────
++select fall, gemessen, erwartet, case when ok then 'OK' else 'FEHLER' end as urteil
++  from verf_ergebnis order by fall;
++
++do $$
++declare n integer;
++begin
++  select count(*) into n from verf_ergebnis where ok is not true;
++  if n > 0 then
++    raise exception '111_verfuegbarkeit: % Fälle FEHLER', n;
++  end if;
++  raise notice '111_verfuegbarkeit: alle % Fälle OK', (select count(*) from verf_ergebnis);
++end $$;
+diff --git a/scripts/pruefumgebung/README.md b/scripts/pruefumgebung/README.md
+index 2444573..5bcfdf9 100644
+--- a/scripts/pruefumgebung/README.md
++++ b/scripts/pruefumgebung/README.md
+@@ -132,7 +132,7 @@ Der Durchlauf in der Reihenfolge, in der er gemeint ist:
+ 
+ ```bash
+ for f in 40 50 60 70 80 81 90 91 92 93 94 95 96 97 98 99 \
+-         100 101 102 103 104 105 106 107 108 109 110; do
++         100 101 102 103 104 105 106 107 108 109 110 111; do
+   d=$(ls ${f}_*.sql | head -1)
+   psql -h $BASE/run -p 55432 -U postgres -d bs24 -q -f "$d"
+ done
+@@ -166,6 +166,7 @@ brauchen davor einen Neubau.
+ | `108_scheinkauf_und_bargeld.sql` | Befunde B-1 bis B-3 der Backend-Prüfung vom 26.09.2026: kein Scheinkauf aus einem Kundenkonto (gemessen am gespeicherten Zustand, nicht am Fehlercode), keine fremden Kaufbeträge, Bargeld-Soll nur mit `cash.collect` oder `finance.view`. 10 Urteile, wiederholbar. Setzt `20260926120000` voraus |
+ | `109_terminal_webhook_weg.sql` | Befunde B-4/B-5: der Weg des Terminal-Webhooks als `service_role` über `public.vend_freigabe_einloesen` bis zum Kauf mit `source = 'machine'`. 5 Urteile, wiederholbar. Setzt `105` und `20260926121000` voraus |
+ | `110_pfand.sql` | Pfand getrennt vom Preis (V-016): Zahlbetrag = Ware + Pfand, Dauerrabatt und MHD-Abschlag nur auf die Ware, Pfand an Freigabe und Automatenkauf vom Server (ein vom Aufrufer mitgegebener Pfand wird überschrieben), Spendenbasis ohne Pfand mit dem Steuersatz des Produkts, Pfand in allen Katalog-Schnittstellen, kein Kunde kann den Pfand setzen oder fremde Belege sehen. 23 Urteile, wiederholbar. Setzt `20260926121000` und `20260927200000` voraus |
++| `111_verfuegbarkeit.sql` | Verfügbarkeit für Kunden (V-016-d): drei Zustände, Preis ohne Pfand mit Pfand daneben, keine Stückzahlen in der Rückgabe, inaktiver Automat und inaktives Produkt fallen heraus, anon ohne Recht, ohne Anmeldung leer, `inventory` und `machine_stock` für Kunden weiter gesperrt, Gegenprobe intern. 12 Urteile, wiederholbar. Setzt `20260929100000` voraus |
+ 
+ Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
+ `/docs/SECURITY.md`.
+diff --git a/supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql b/supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql
+new file mode 100644
+index 0000000..47a07ab
+--- /dev/null
++++ b/supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql
+@@ -0,0 +1,75 @@
++-- ============================================================================
++-- Verfügbarkeit für Kunden (COMPLIANCE V-016-d)
++--
++-- Befund 27.09.2026: Die Kunden-App wirbt mit „Echtzeit-Bestand" (auch die
++-- Landingpage), liest dafür aber `machine_stock`. Die Sicht läuft mit den
++-- Rechten des Aufrufers, und `inventory` ist nur intern lesbar
++-- (inventory_read: is_internal()). Kunden sahen deshalb keinen einzigen
++-- Artikel.
++--
++-- Entscheidung des Gesellschafters vom 29.09.2026: Bestand für Kunden öffnen,
++-- aber nur als Zustand je Produkt und Automat — verfügbar, bald leer,
++-- ausverkauft. Keine Stückzahlen, keine Kapazität, keine Nachfüllschwelle:
++-- Das sind Betriebsdaten (Absatz, Befüllrhythmus) und gehen Kunden nichts an.
++--
++-- Die Tabelle `inventory` bleibt unverändert nur intern lesbar. Kunden
++-- bekommen eine eigene Funktion, die genau die drei Zustände, den Preis am
++-- Automaten und den Pfand liefert.
++--
++-- Setzt 20260927200000_pfand_getrennt voraus (Spalte pfand in automatenpreis).
++-- Nachweis: scripts/pruefumgebung/111_verfuegbarkeit.sql
++-- ============================================================================
++
++do $$
++begin
++  if not exists (select 1 from information_schema.columns
++                  where table_schema = 'public' and table_name = 'products'
++                    and column_name = 'deposit') then
++    raise exception 'Zuerst 20260927200000_pfand_getrennt ausrollen. Abbruch ohne Änderung.';
++  end if;
++end $$;
++
++create or replace function public.machine_availability(p_machine uuid)
++returns table(product_id uuid, product_name text, image_url text,
++              availability text, price_gross numeric, deposit numeric,
++              mhd_discount_percent numeric)
++language sql
++stable security definer
++set search_path = public, app
++as $$
++  -- availability: 'available' | 'low' | 'out'. Die Schwelle für „bald leer"
++  -- ist dieselbe wie in machine_stock (Menge ≤ Nachfüllschwelle), damit
++  -- Kunden- und Betriebsansicht nie widersprechen.
++  -- price_gross ist der Warenpreis am Automaten nach MHD-Abschlag, ohne
++  -- Pfand; deposit steht daneben (§ 7 PAngV).
++  select p.id,
++         p.name,
++         p.image_url,
++         case when i.quantity <= 0 then 'out'
++              when i.quantity <= i.par_level then 'low'
++              else 'available'
++         end,
++         a.brutto,
++         a.pfand,
++         a.mhd_abschlag_prozent
++    from public.inventory i
++    join public.machines m on m.id = i.machine_id
++    join public.products p on p.id = i.product_id
++    left join lateral public.automatenpreis(i.machine_id, i.product_id) a on true
++   where i.machine_id = p_machine
++     and auth.uid() is not null
++     and m.deleted_at is null
++     and m.status = 'active'
++     and p.deleted_at is null
++     and p.status = 'active'
++     and coalesce(p.sku, '') <> 'WILDCARD'
++   order by case when i.quantity <= 0 then 1 else 0 end, p.name;
++$$;
++
++comment on function public.machine_availability(uuid) is
++  'Verfügbarkeit je Produkt eines aktiven Automaten für angemeldete Kunden: '
++  'nur verfügbar/bald leer/ausverkauft, Warenpreis am Automaten und Pfand. '
++  'Keine Stückzahlen (V-016-d, Entscheidung 29.09.2026).';
++
++revoke all on function public.machine_availability(uuid) from public, anon;
++grant execute on function public.machine_availability(uuid) to authenticated, service_role;
+diff --git a/supabase/migrations/README.md b/supabase/migrations/README.md
+index 1f0ff31..03a7db7 100644
+--- a/supabase/migrations/README.md
++++ b/supabase/migrations/README.md
+@@ -107,7 +107,7 @@ Zeilenumbruch entsprechen.
+ 
+ ## Im Repository, in der Produktion ausstehend (Stand 27.09.2026)
+ 
+-Drei Dateien stehen hier, **bevor** sie auf der Produktion gelaufen sind. Bis
++Vier Dateien stehen hier, **bevor** sie auf der Produktion gelaufen sind. Bis
+ zum Ausrollen fehlen sie im Register der Live-Datenbank; das ist keine
+ Abweichung vom Spiegel, sondern der offene Schritt.
+ 
+@@ -116,8 +116,9 @@ Abweichung vom Spiegel, sondern der offene Schritt.
+ | `20260926120000_scheinkaeufe_sperren.sql` | B-1 bis B-3: Scheinkäufe gesperrt, fremde Kaufbeträge und Bargeld-Soll geschützt | Runbook L (`docs/OPERATIONS.md` im Arbeitszweig) sperrt B-1 sofort per SQL-Editor; danach diese Migration regulär ausrollen, damit sie im Register steht |
+ | `20260926121000_terminal_webhook_anbindung.sql` | B-4/B-5: Webhook findet die Einlösefunktion, Enum-Wert `machine` | vor dem ersten Automaten mit Terminal |
+ | `20260927200000_pfand_getrennt.sql` | Pfand getrennt vom Preis (§ 7 PAngV, V-016), Rabatte und Spende ohne Pfand; behebt zudem `vend_freigabe_anlegen` (42702) und die 7-%-Pauschale der Spendenbasis | Runbook M (`docs/OPERATIONS.md` im Arbeitszweig): **nach** `…121000` und **nach** dem App-Update; bricht sonst bzw. im falschen Katalog ohne Änderung ab |
++| `20260929100000_verfuegbarkeit_fuer_kunden.sql` | V-016-d: `machine_availability` zeigt Kunden je Produkt nur verfügbar/bald leer/ausverkauft, Preis und Pfand; `inventory` bleibt intern | Runbook M, **nach** `…200000`; bricht sonst ohne Änderung ab |
+ 
+ Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10), `109` (5/5) und
+-`110` (23/23, Pfand), zuletzt am 27.09.2026 nach einem Neuaufbau aus allen
+-236 Migrationen, alle 27 Prüfskripte ohne Fehler. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
++`110` (23/23, Pfand) und `111` (12/12, Verfügbarkeit), zuletzt am 29.09.2026
++nach einem Neuaufbau aus allen 237 Migrationen, alle 28 Prüfskripte ohne Fehler. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
+ `claude/bordesnack24-app-strategy-sf5yzy`.
+-- 
+2.43.0
+

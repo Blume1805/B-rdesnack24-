@@ -3,6 +3,7 @@ import '../entities/donations_news.dart';
 import '../entities/invoice.dart';
 import '../entities/notification.dart';
 import '../entities/loyalty_status.dart';
+import '../entities/machine_availability.dart';
 import '../entities/offer.dart';
 import '../entities/product_detail.dart';
 
@@ -46,6 +47,9 @@ abstract interface class CustomerRepository {
 
   /// Produkt-Detailansicht inkl. Nährwerte, Allergene und meiner Bewertung.
   Future<ProductDetail?> productDetail(String productId);
+
+  /// Verfügbarkeit je Produkt eines Automaten, ohne Stückzahlen.
+  Future<List<MachineAvailability>> machineAvailability(String machineId);
 
   /// Produkt bewerten (1-5 Sterne).  Setzt oder aktualisiert die bestehende
   /// Bewertung des aktuellen Kunden.

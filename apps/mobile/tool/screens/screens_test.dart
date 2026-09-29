@@ -18,12 +18,14 @@ import 'package:boerdesnack24/core/theme/app_tokens.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/customer_models.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/donations_news.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/loyalty_status.dart';
+import 'package:boerdesnack24/features/customer/domain/entities/machine_availability.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/offer.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/product_detail.dart';
 import 'package:boerdesnack24/features/customer/domain/entities/receipt.dart';
 import 'package:boerdesnack24/features/customer/domain/repositories/customer_repository.dart';
 import 'package:boerdesnack24/features/customer/presentation/controllers/customer_providers.dart';
 import 'package:boerdesnack24/features/customer/presentation/customer_screen.dart';
+import 'package:boerdesnack24/features/customer/presentation/screens/availability_screen.dart';
 import 'package:boerdesnack24/features/customer/presentation/screens/donations_screen.dart';
 import 'package:boerdesnack24/features/customer/presentation/screens/receipts_screen.dart';
 import 'package:boerdesnack24/features/customer/presentation/screens/rewards_screen.dart';
@@ -123,6 +125,32 @@ class _FakeRepo implements CustomerRepository {
             listPriceNet: 1.4 + i * 0.2,
             taxRate: 19,
           ),
+      ];
+
+  @override
+  Future<List<MachineAvailability>> machineAvailability(
+    String machineId,
+  ) async =>
+      const [
+        MachineAvailability(
+          productId: 'a1',
+          productName: 'Coca-Cola 0,5 l',
+          availability: 'available',
+          priceGross: 2.05,
+          deposit: 0.25,
+        ),
+        MachineAvailability(
+          productId: 'a2',
+          productName: 'Durstlöscher',
+          availability: 'low',
+          priceGross: 1.50,
+        ),
+        MachineAvailability(
+          productId: 'a3',
+          productName: 'BiFi Carazza',
+          availability: 'out',
+          priceGross: 1.65,
+        ),
       ];
 
   @override
@@ -506,6 +534,14 @@ void main() {
   testWidgets(
     '05 Belege',
     (t) => _shot(t, '05_belege', const ReceiptsScreen(), height: 1400),
+  );
+  testWidgets(
+    '06b Verfügbarkeit',
+    (t) => _shot(
+      t,
+      '06b_verfuegbarkeit',
+      const AvailabilityScreen(machineId: 'm1', title: 'Automat Mitte'),
+    ),
   );
   testWidgets(
     '06 Automaten',

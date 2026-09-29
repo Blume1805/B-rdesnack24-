@@ -57,7 +57,7 @@ dürfen sie so nicht erscheinen:
 |---|---|---|---|
 | P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand? | **Beantwortet 27.09.2026: ja, der Pfand ist enthalten.** Das widerspricht § 7 PAngV (Pfand neben dem Preis angeben, nicht einbeziehen). Betroffen: App, Kassenbon, Preisschilder am Automaten, Rabattberechnung. Die Landingpage ist nicht betroffen, weil ihre „ab"-Preise von pfandfreien Produkten stammen. Weiter in `docs/COMPLIANCE.md`, V-016 | Umsetzung offen, siehe V-016 |
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
-| P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | Nach Runbook M kosten Vio Wasser und Müllermilch 1,25 € zzgl. 0,25 € Pfand. „ab 1,50 €" ist dann nicht mehr der niedrigste Preis. Entweder „ab 1,25 € zzgl. Pfand" (§ 7 PAngV: Pfand daneben) oder bei „ab 1,50 €" bleiben und den Hinweis „Startpreis ohne Pfandgetränke" ergänzen. | Philipp, zusammen mit Runbook M |
+| P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | **Entschieden 29.09.2026: „ab 1,25 € zzgl. 0,25 € Pfand".** Umgesetzt über den Schalter `pfandGetrennt` (`docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`); umgelegt nach Runbook M. | Schalter nach Runbook M |
 
 ## U. Umsetzungsstand
 

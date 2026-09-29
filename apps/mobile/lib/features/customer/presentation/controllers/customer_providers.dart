@@ -10,6 +10,7 @@ import '../../domain/entities/donations_news.dart';
 import '../../domain/entities/invoice.dart';
 import '../../domain/entities/notification.dart';
 import '../../domain/entities/loyalty_status.dart';
+import '../../domain/entities/machine_availability.dart';
 import '../../domain/entities/offer.dart';
 import '../../domain/entities/product_detail.dart';
 import '../../domain/entities/receipt.dart';
@@ -166,6 +167,13 @@ final productDetailProvider =
     FutureProvider.autoDispose.family<ProductDetail?, String>(
   (ref, productId) =>
       ref.watch(customerRepositoryProvider).productDetail(productId),
+);
+
+/// Verfügbarkeit je Produkt eines Automaten für Kunden (ohne Stückzahlen).
+final machineAvailabilityProvider =
+    FutureProvider.autoDispose.family<List<MachineAvailability>, String>(
+  (ref, machineId) =>
+      ref.watch(customerRepositoryProvider).machineAvailability(machineId),
 );
 
 /// Aktionen rund um das persönliche Angebot: Einlösen per Zahlencode.

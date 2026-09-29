@@ -6,6 +6,7 @@ import '../domain/entities/donations_news.dart';
 import '../domain/entities/invoice.dart';
 import '../domain/entities/notification.dart';
 import '../domain/entities/loyalty_status.dart';
+import '../domain/entities/machine_availability.dart';
 import '../domain/entities/offer.dart';
 import '../domain/entities/product_detail.dart';
 import '../domain/repositories/customer_repository.dart';
@@ -111,6 +112,13 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<ProductDetail?> productDetail(String productId) => _guard(() async {
         final row = await _remote.productDetail(productId);
         return row == null ? null : ProductDetail.fromJson(row);
+      });
+
+  @override
+  Future<List<MachineAvailability>> machineAvailability(String machineId) =>
+      _guard(() async {
+        final rows = await _remote.machineAvailability(machineId);
+        return rows.map(MachineAvailability.fromJson).toList();
       });
 
   @override
