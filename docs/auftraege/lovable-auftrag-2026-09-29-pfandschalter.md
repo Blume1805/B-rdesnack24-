@@ -1,6 +1,6 @@
 # Lovable-Auftrag 29.09.2026: Pfand-Schalter für die Landingpage
 
-**Status:** 1. Versand 29.09.2026 (`umsg_01m3p8z5q0e6j82ktvtpc9wykb`): Lovable brach nach dem Lesen ab, **keine Änderung**, 0,2 Credits. 2. Versand mit genauen Dateiangaben (Text unten, „Wiederholung") **nicht möglich: Arbeitsbereich ohne Credits** (29.09.2026). Wartet auf Credits.
+**Status:** 1. Versand 29.09.2026 (`umsg_01m3p8z5q0e6j82ktvtpc9wykb`): Lovable brach nach dem Lesen ab, **keine Änderung**, 0,2 Credits. 2. Versand mit genauen Dateiangaben (Text unten, „Wiederholung") am 29.09. mangels Credits nicht möglich; **gesendet am 30.09.2026**, `umsg_01m3r9hrx8fm98wbvmdbxg1jmf`.
 **Entscheidungen Philipp, 29.09.2026:** P-3 → „ab 1,25 € zzgl. Pfand"; Hinweis
 „Rabatte gelten nicht für den Pfand" → ja; Automatenfinder → Bestand für Kunden
 öffnen (Satz „Echtzeit-Bestand" bleibt, Umsetzung in App und Datenbank).
