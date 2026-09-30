@@ -1,5 +1,5 @@
 <!-- Projektwissen des Lovable-Projekts „Bördesnack24 Landingpage" (0c068d85-…). Stand 27.09.2026.
-     Zuletzt an Lovable übertragen: 29.09.2026 (diese Fassung). -->
+     Zuletzt an Lovable übertragen: 30.09.2026 (diese Fassung). -->
 
 # Bördesnack24 Landingpage — Dauerregeln
 
@@ -13,7 +13,7 @@ Diese Regeln gelten für jeden Auftrag in diesem Projekt, auch wenn die einzelne
 - Kurz: prägnante Überschriften, kurze Sätze, Symbole statt Absätze. Überschriften enden mit einem Punkt. Keine Emoji, keine Ausrufezeichen, keine Superlative.
 - **Betriebsstand:** `src/data/site.ts`, `betriebsstatus`. Bei `vorbereitung` nirgends im Präsens von laufenden Automaten, Umsätzen, Auszahlungen oder Reichweite sprechen.
 - Es wird nichts erfunden: keine Nutzungszahlen, keine Reichweiten, keine Bewertungen, keine Prozentsätze außer den beauftragten.
-- **Preise:** nur die Startpreise in `src/data/sortiment.ts` (beauftragt 27.09.2026, Quelle Produktkatalog). Keine Einzelpreise. **Kein Preis eines Getränks in Pfandflasche oder Dose**: Der Katalog enthält den Pfand im Preis, § 7 PAngV verlangt ihn getrennt daneben.
+- **Preise:** nur die Startpreise in `src/data/sortiment.ts` (beauftragt 27.09.2026, Quelle Produktkatalog). Keine Einzelpreise. Pfand-Aussagen hängen **ausschließlich** am Schalter `site.pfandGetrennt` (Kaltgetränke-Startpreis mit „zzgl. 0,25 € Pfand", Rabatt-Hinweis, Nettoerlös-Definition). Solange er `false` ist, kein Preis eines Getränks in Pfandflasche oder Dose. Den Schalter nur auf ausdrücklichen Auftrag umlegen.
 - Claim: „Versorgung vor Ort. Wert für den Ort." Der frühere Claim ist abgelöst.
 
 ## Wortwahl beim Geld
@@ -27,7 +27,7 @@ Beides ist getrennt. Der Standortgeber bekommt nichts aus den 5 %. Die Empfänge
 
 **Auszahlung:** einmal im Jahr, nach Abschluss des Kalenderjahres, zu gleichen Teilen an die drei Zwecke mit den meisten Stimmen.
 
-**Vollständigkeit (§ 5 UWG):** Die vollständige Aussage (5 %, Nettoerlös = Umsatz ohne Umsatzsteuer und ohne Pfand, drei Zwecke mit den meisten Stimmen, einmal im Jahr) steht im Abschnitt „Der Anteil". Jede andere Erwähnung mit Zahl nennt mindestens „5 % des Nettoerlöses". Höhe von Miete oder Umsatzbeteiligung wird nie genannt.
+**Vollständigkeit (§ 5 UWG):** Die vollständige Aussage (5 %, Nettoerlös = Umsatz ohne Umsatzsteuer, bei `pfandGetrennt` zusätzlich „und ohne Pfand", drei Zwecke mit den meisten Stimmen, einmal im Jahr) steht im Abschnitt „Der Anteil". Jede andere Erwähnung mit Zahl nennt mindestens „5 % des Nettoerlöses". Höhe von Miete oder Umsatzbeteiligung wird nie genannt.
 
 ## Bewegung
 

@@ -46,10 +46,21 @@ Auftrag 29.09.2026: Pfand-Schalter. Nur die unten genannten Texte, sonst keine �
 Am Ende je Punkt 1, 2a, 2b, 2c, 3 eine Zeile, was geändert wurde. Endzustand: pfandGetrennt = false.
 ```
 
-**Wichtig bis dahin:** Die Vorschau enthält seit dem 28.09. fest den Satz
-„… und ohne Pfand". Solange der Schalter fehlt, die Seite **nicht
-veröffentlichen** (oder erst nach Runbook M).
+## Abnahme 30.09.2026 (Claude Code, gegen den Code geprüft)
 
-## Abnahme
+Geprüft: Antwort `umsg_01m3r9hrx8fm98wbvmdbxg1jmf` (Commit `f5c82e5`, 2 Credits),
+Diff aller fünf geänderten Dateien, `site.ts` und `Sortiment.tsx` im Endstand.
+Bildschirmfotos und CLS-Messung sind Lovables Messung (Vorschau aus der
+Arbeitsumgebung gesperrt).
 
-(folgt nach Eingang der Antwort)
+| Punkt | Befund am Code | Status |
+|---|---|---|
+| 1 | `site.pfandGetrennt: false` mit dem vorgegebenen Kommentar. **Endstand false.** | 🟢 |
+| 2a | Nur „kalt": `ab 1.5`, `abPfandGetrennt 1.25`, `pfand 0.25` in `sortiment.ts`; Anzeige nur bei true „ab 1,25 €" plus Zeile „zzgl. 0,25 € Pfand" (Creme auf Ink, 14,98:1). Andere Kategorien unverändert. | 🟢 |
+| 2b | Satz „ Rabatte gelten nicht für den Pfand." nur bei true (bei false rendert React nichts). | 🟢 |
+| 2c | Bei false „Nettoerlös heißt: Umsatz ohne Umsatzsteuer.", bei true „… und ohne Pfand." — damit ist der seit 28.09. fest eingebaute Satz wieder an den Schalter gebunden. | 🟢 |
+| 3 | Lovable: beide Stellungen bei 390/1440 px, CLS 0, keine Fehler, kein neues Paket (Diff bestätigt: `package.json` unverändert). | 🟢 |
+
+**Folge:** Die Seite ist in der Stellung `false` in allen Aussagen wahr und
+kann veröffentlicht werden. Nach Runbook M legt Claude Code den Schalter
+auf `true` (Runbook M, Schritt 10).

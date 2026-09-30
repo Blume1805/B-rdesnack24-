@@ -340,6 +340,7 @@ Am Ende je Punkt 1a bis 6 eine Zeile, was geändert wurde. Nicht Umgesetztes aus
    Datenbank den Pfand aus der Spende herausrechnet (Runbook M in
    `docs/OPERATIONS.md`). Die Vorschau darf ihn vorher enthalten,
    **veröffentlicht wird erst nach Runbook M**.
+   *Nachtrag 30.09.2026:* Erledigt durch den Pfand-Schalter (`lovable-auftrag-2026-09-29-pfandschalter.md`); der Satz hängt jetzt an `site.pfandGetrennt` und ist bis Runbook M abgeschaltet. Veröffentlichen ist damit unabhängig von Runbook M möglich.
 
 ## Abnahme des Nachtrags 28.09.2026 (Claude Code, gegen den Code geprüft)
 
