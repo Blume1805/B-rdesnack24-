@@ -61,6 +61,7 @@ dürfen sie so nicht erscheinen:
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
 | P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | **Entschieden 29.09.2026: „ab 1,25 € zzgl. 0,25 € Pfand".** Umgesetzt über den Schalter `pfandGetrennt` (`docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`); umgelegt nach Runbook M. | Schalter nach Runbook M |
 | P-4 | Wer trägt den Strom am Standort? | Entscheidet, ob „Was es Sie kostet. Nichts." auf der Landingpage wahr ist (R-9), und geht in jede Standortverhandlung ein (Finanzrechnung: 25 € je Monat). | Gesellschafter, vor dem ersten Standortgespräch |
+| P-5 | Löst „Genießen. Geben. Gutes tun." den Claim „Versorgung vor Ort. Wert für den Ort." überall ab? | Der Erklärfilm endet auf Wunsch von Philipp (01.10.2026) mit dem Slogan, die Landingpage (`HeroClaim`) und das Projektwissen nennen den Claim vom 27.09.2026. Zwei Leitsätze nebeneinander schwächen beide. | Philipp |
 
 ## U. Umsetzungsstand
 
@@ -74,6 +75,7 @@ dürfen sie so nicht erscheinen:
 | 28.09.2026 | Web Nachtrag (Lovable, Commit `b759d0a`) | Regressionen 1a–1e behoben; M05 mit „entscheidest Du mit.“, M10 „Nach oben“, M11 Copy-Pill im Fußbereich, M03 Sortiment mit Startpreisen; Nettoerlös-Satz „… und ohne Pfand“ | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: alle Punkte 🟢 am Code; Sichtprüfung durch Philipp in der Vorschau; Nettoerlös-Satz erst nach Runbook M veröffentlichen |
 | 30.09.2026 | Web Pfand-Schalter (Lovable, Commit `f5c82e5`) | `site.pfandGetrennt` (Endstand `false`) steuert Kaltgetränke-Startpreis „ab 1,25 € zzgl. 0,25 € Pfand", Rabatt-Hinweis und Nettoerlös-Satz | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`: alle Punkte 🟢. Seite ist in Stellung `false` wahr und veröffentlichbar; Umlegen nach Runbook M |
 | 01.10.2026 | Erklärfilm „Für Standortgeber" | `motion/video/standortgeber/` (16:9 und 9:16, 39 s, ohne Ton). Kurven und Farben aus `motion-tokens.css`, Inhalte nur aus `Stage.tsx`, ADR 0007 und Projektwissen; Quellen je Aussage in der README | Bild-für-Bild-Kontrolle beider Formate; Kontraste gemessen (Ink/Creme 14,98:1, Ink/Gold 9,67:1, Muted/Creme 6,47:1). Einbau in Lovable wartet auf Sichtfreigabe |
+| 01.10.2026 | Erklärfilm, Fassung 2 | Vorgaben Philipp: höchstens 20 s, Automat aus dem Markenbild (`brand_hero_wide.webp`, freigestellt, „24" vor der Scheibe entfernt), Bilder statt Zeichnungen, Slogan „Genießen. Geben. Gutes tun." am Ende. Gegenstände als 3D-Aufnahmen, weil Fotodatenbanken aus der Arbeitsumgebung gesperrt sind; echte Fotos ersetzen sie per Dateiname (README) | Bild-für-Bild-Kontrolle beider Formate (20,0 s); Kontraste gemessen (Creme/Nacht 18,7:1, Hinweis 7,9:1); KI-Hinweis im Bild |
 
 M11 im Web (Kontakt-Pill im Fußbereich) ist noch offen: Der Fußbereich der
 Landingpage ist laut Lovable-Auftrag vom 26.09.2026 unverändert zu lassen, und

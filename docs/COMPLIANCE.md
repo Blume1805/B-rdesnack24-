@@ -1393,7 +1393,8 @@ vollständig; offen sind nur Ausrollen, Landingpage-Satz und Preisschilder.
 
 | # | Punkt | Stand |
 |---|---|---|
-| V-017-a | Erklärfilm „Für Standortgeber" ohne „Nichts." und ohne Vergütungshöhe (`motion/video/standortgeber/`) | 🟢 Inhalte je Aussage gegen Quellen geprüft (README des Films) |
+| V-017-a | Erklärfilm „Für Standortgeber" ohne „Nichts." und ohne Vergütungshöhe (`motion/video/standortgeber/`) | 🟢 Inhalte je Aussage gegen Quellen geprüft (README des Films); Fassung 2 vom 01.10.2026 ebenso |
+| V-017-d | Fassung 2 zeigt den KI-generierten Automaten aus dem Markenbild fotorealistisch. Ohne Hinweis hält man ihn für das echte Gerät (Art. 50 Abs. 4 KI-Verordnung, § 5 UWG). | 🟢 Hinweis „Darstellung. Automat mit KI visualisiert." im Bild, durchgehend, in beiden Formaten |
 | V-017-b | Wer trägt den Strom? Danach „Nichts." auf der Landingpage halten (bei Erstattung) oder streichen | 🔴 offen: Gesellschafter, vor dem ersten Standortgespräch (`motion/ABWEICHUNGEN.md` P-4) |
 | V-017-c | Referenzvideo nicht auf der Seite einbinden | 🔴 gesperrt (`motion/ABWEICHUNGEN.md` R-10); Asset in Lovable bleibt bis zur Löschfreigabe liegen |
 

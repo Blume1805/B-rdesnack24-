@@ -3,7 +3,7 @@
 // Benötigt: Playwright (Chromium) und ffmpeg im PATH oder FFMPEG=/pfad/zu/ffmpeg.
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -18,7 +18,10 @@ const FFMPEG = process.env.FFMPEG || "ffmpeg";
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined, args: ["--allow-file-access-from-files"] });
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
-await page.goto(pathToFileURL(resolve(here, "index.html")).href + `?f=${fmt}`);
+// Echte Fotos (media/<name>.jpg) ersetzen automatisch die 3D-Aufnahmen gleichen Namens
+const fotos = ["flaeche", "steckdose", "schluessel", "vertrag", "muenzen"].filter((n) => existsSync(resolve(here, "media", `${n}.jpg`)));
+if (fotos.length) console.log("echte Fotos:", fotos.join(", "));
+await page.goto(pathToFileURL(resolve(here, "index.html")).href + `?f=${fmt}&foto=${fotos.join(",")}`);
 await page.evaluate(() => window.ready);
 const duration = await page.evaluate(() => window.DURATION);
 const stage = page.locator("#stage");

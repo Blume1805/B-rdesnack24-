@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Produktaufnahmen</title>
+<!--
+  Fotorealistische 3D-Aufnahmen für den Standortgeber-Film (Platzhalter, bis echte Fotos vorliegen).
+  ?s=schluessel|steckdose|vertrag|flaeche|muenzen  &size=2048
+  Wird über einen lokalen Webserver geladen (Module), siehe render-objects.mjs.
+-->
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">
+{ "imports": { "three": "./three/build/three.module.js", "three/addons/": "./three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+
+const q = new URLSearchParams(location.search);
+const SCENE = q.get("s") || "schluessel";
+const SIZE = +(q.get("size") || 2048);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(SIZE, SIZE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.45;
+scene.background = new THREE.Color("#0b0a08");
+
+// ── Hilfen ─────────────────────────────────────────────
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+function canvasTex(w, h, draw, srgb = true, repeat = 1) {
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  draw(c.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat);
+  return t;
+}
+function noise(ctx, w, h, base, spread, n, rmin = 1, rmax = 3, alpha = 0.08) {
+  ctx.fillStyle = base; ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < n; i++) {
+    const v = Math.floor(rnd() * spread);
+    ctx.fillStyle = `rgba(${v},${v},${v},${alpha})`;
+    ctx.beginPath(); ctx.arc(rnd() * w, rnd() * h, rmin + rnd() * (rmax - rmin), 0, 7); ctx.fill();
+  }
+}
+function surface({ color = "#1b1a17", size = 40, rough = 0.75, repeat = 14 } = {}) {
+  const bump = canvasTex(1024, 1024, (c, w, h) => noise(c, w, h, "#808080", 255, 120000, 0.4, 1.2, 0.12), false, repeat);
+  const rm = canvasTex(1024, 1024, (c, w, h) => noise(c, w, h, "#b4b4b4", 255, 30000, 1, 6, 0.08), false, repeat);
+  const m = new THREE.MeshStandardMaterial({ color, roughness: rough, roughnessMap: rm, bumpMap: bump, bumpScale: 0.35 });
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(size, size), m);
+  p.rotation.x = -Math.PI / 2; p.receiveShadow = true;
+  return p;
+}
+function spot(color, intensity, pos, target = [0, 0, 0], angle = 0.5, penumbra = 0.8, shadow = true) {
+  const l = new THREE.SpotLight(color, intensity, 0, angle, penumbra, 2);
+  l.position.set(...pos); l.target.position.set(...target);
+  if (shadow) { l.castShadow = true; l.shadow.mapSize.set(4096, 4096); l.shadow.bias = -0.0002; l.shadow.radius = 6; l.shadow.camera.near = 0.5; l.shadow.camera.far = 60; }
+  scene.add(l, l.target);
+  return l;
+}
+const cast = (o) => { o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; };
+let camera = new THREE.PerspectiveCamera(30, 1, 0.05, 200);
+const look = (pos, at, fov = 30) => { camera.fov = fov; camera.position.set(...pos); camera.lookAt(...at); camera.updateProjectionMatrix(); };
+
+// ── Schlüsselbund ──────────────────────────────────────
+function buildKey(material, teethSeed) {
+  seed = teethSeed;
+  const g = new THREE.Group();
+  const ext = { depth: 0.11, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.022, bevelSegments: 4, curveSegments: 64 };
+  const bow = new THREE.Shape();
+  bow.moveTo(-1.0, 0);
+  bow.absellipse(0, 0, 1.0, 0.86, 0, Math.PI * 2, false, 0);
+  const hole = new THREE.Path(); hole.absarc(-0.52, 0, 0.2, 0, Math.PI * 2, true); bow.holes.push(hole);
+  g.add(new THREE.Mesh(new THREE.ExtrudeGeometry(bow, ext), material));
+  const blade = new THREE.Shape();
+  blade.moveTo(0.8, 0.32); blade.lineTo(1.25, 0.42); blade.lineTo(1.25, 0.3); blade.lineTo(4.0, 0.3); blade.lineTo(4.28, 0.1); blade.lineTo(4.28, -0.12);
+  let x = 4.05;
+  while (x > 1.55) { const d = 0.05 + rnd() * 0.13; blade.lineTo(x - 0.04, -0.12 - d); x -= 0.1; blade.lineTo(x - 0.04, -0.12 - d); x -= 0.08; blade.lineTo(x, -0.12); x -= 0.05; }
+  blade.lineTo(1.25, -0.3); blade.lineTo(1.25, -0.42); blade.lineTo(0.8, -0.32); blade.lineTo(0.8, 0.32);
+  g.add(new THREE.Mesh(new THREE.ExtrudeGeometry(blade, ext), material));
+  // Fräsrille
+  const groove = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 0.02), new THREE.MeshStandardMaterial({ color: material.color.clone().multiplyScalar(0.55), metalness: 1, roughness: 0.45 }));
+  groove.position.set(2.65, 0.1, 0.14); g.add(groove);
+  return cast(g);
+}
+function sceneSchluessel() {
+  scene.add(surface({ color: "#1c1a17" }));
+  const brass = new THREE.MeshStandardMaterial({ color: "#caa250", metalness: 1, roughness: 0.3 });
+  const nickel = new THREE.MeshStandardMaterial({ color: "#d4d6d8", metalness: 1, roughness: 0.24 });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.05, 32, 160), new THREE.MeshStandardMaterial({ color: "#cfd1d3", metalness: 1, roughness: 0.2 }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(-1.4, 0.06, 0.2); cast(ring); scene.add(ring);
+  const place = (key, ang, lift, tilt) => {
+    // Loch des Schlüssels sitzt auf dem Ring
+    const hx = -1.4 + Math.cos(ang) * 0.85, hz = 0.2 - Math.sin(ang) * 0.85;
+    const pivot = new THREE.Group(); pivot.position.set(hx, lift, hz); pivot.rotation.y = ang;
+    key.rotation.x = -Math.PI / 2 + tilt; key.position.set(0.52, 0, 0);
+    pivot.add(key); scene.add(pivot);
+  };
+  place(buildKey(brass, 11), -0.12, 0.13, 0.04);
+  place(buildKey(nickel, 23), 0.55, 0.2, -0.05);
+  spot("#ffe0b0", 900, [-5, 9, 4], [0.5, 0, 0], 0.42, 0.9);
+  spot("#ffc65a", 420, [7, 3, -6], [0.5, 0, 0], 0.35, 0.8, false);
+  spot("#9fb4ff", 60, [4, 6, 8], [0, 0, 0], 0.6, 1, false);
+  look([0.9, 8.6, 6.8], [0.7, 0, 0.3], 34);
+}
+
+// ── Steckdose mit Stecker ──────────────────────────────
+function sceneSteckdose() {
+  const wallBump = canvasTex(1024, 1024, (c, w, h) => noise(c, w, h, "#808080", 255, 90000, 0.6, 3, 0.2), false, 3);
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: "#bdb4a6", roughness: 0.95, bumpMap: wallBump, bumpScale: 1.0 }));
+  wall.receiveShadow = true; scene.add(wall);
+  const plastic = new THREE.MeshPhysicalMaterial({ color: "#f3f1ec", roughness: 0.32, clearcoat: 0.3, clearcoatRoughness: 0.4 });
+  const sh = new THREE.Shape();
+  const r = 0.36, s = 1.25;
+  sh.moveTo(-s + r, -s); sh.lineTo(s - r, -s); sh.quadraticCurveTo(s, -s, s, -s + r); sh.lineTo(s, s - r); sh.quadraticCurveTo(s, s, s - r, s);
+  sh.lineTo(-s + r, s); sh.quadraticCurveTo(-s, s, -s, s - r); sh.lineTo(-s, -s + r); sh.quadraticCurveTo(-s, -s, -s + r, -s);
+  const hole = new THREE.Path(); hole.absarc(0, 0, 0.8, 0, Math.PI * 2, true); sh.holes.push(hole);
+  const plate = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.22, bevelEnabled: true, bevelThickness: 0.07, bevelSize: 0.07, bevelSegments: 6, curveSegments: 96 }), plastic);
+  scene.add(cast(plate));
+  const well = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 96, 1, true), new THREE.MeshStandardMaterial({ color: "#e9e6df", roughness: 0.5, side: THREE.DoubleSide }));
+  well.rotation.x = Math.PI / 2; well.position.z = 0.04; scene.add(cast(well));
+  const metal = new THREE.MeshStandardMaterial({ color: "#c9ccce", metalness: 1, roughness: 0.25 });
+  [0.74, -0.74].forEach((y) => { const c = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.07, 0.36), metal); c.position.set(0, y, 0.12); scene.add(cast(c)); });
+  // Stecker
+  const rubber = new THREE.MeshStandardMaterial({ color: "#1d1e20", roughness: 0.62 });
+  const prof = [[0, 0], [0.74, 0], [0.76, 0.04], [0.76, 0.62], [0.74, 0.7], [0.62, 0.78], [0.5, 0.86], [0.46, 1.0], [0.3, 1.18], [0.21, 1.35], [0.2, 2.0], [0, 2.0]].map(([x, y]) => new THREE.Vector2(x, y));
+  const plug = new THREE.Mesh(new THREE.LatheGeometry(prof, 128), rubber);
+  plug.rotation.x = Math.PI / 2; plug.position.z = 0.08; scene.add(cast(plug));
+  for (let i = 0; i < 6; i++) { const rib = new THREE.Mesh(new THREE.TorusGeometry(0.765, 0.016, 12, 128), rubber); rib.position.z = 0.16 + i * 0.08; scene.add(cast(rib)); }
+  const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 1.9), new THREE.Vector3(0, -0.1, 2.5), new THREE.Vector3(0.1, -1.0, 2.75), new THREE.Vector3(0.35, -2.6, 2.7), new THREE.Vector3(0.6, -6, 2.5)]);
+  scene.add(cast(new THREE.Mesh(new THREE.TubeGeometry(curve, 200, 0.16, 32, false), rubber)));
+  spot("#ffe6c4", 650, [-6, 7, 9], [0, 0, 0], 0.32, 0.85);
+  spot("#ffc65a", 280, [8, -1, 4], [0, 0, 1], 0.35, 0.9, false);
+  look([3.4, 1.4, 7.6], [0.1, -0.35, 0.8], 30);
+}
+
+// ── Vertrag mit Stift ──────────────────────────────────
+function contractTexture() {
+  return canvasTex(1654, 2339, (c, w, h) => {
+    c.fillStyle = "#fbfaf6"; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { c.fillStyle = `rgba(0,0,0,${rnd() * 0.025})`; c.fillRect(rnd() * w, rnd() * h, 2, 2); }
+    const L = 150; let y = 190;
+    c.strokeStyle = "#FDC102"; c.lineWidth = 14; c.beginPath(); c.arc(L + 34, y - 10, 34, 0, 7); c.stroke();
+    c.fillStyle = "#202321"; c.fillRect(L + 22, y - 32, 24, 40);
+    c.font = "700 40px Hanken, Arial"; c.fillText("Bördesnack24 GbR", L + 96, y + 4);
+    c.font = "400 28px Hanken, Arial"; c.fillStyle = "#555"; c.fillText("Osterweddingen", L + 96, y + 44);
+    y += 190; c.fillStyle = "#202321"; c.font = "800 78px Bricolage, Arial"; c.fillText("Standortvereinbarung", L, y);
+    y += 70; c.font = "400 32px Hanken, Arial"; c.fillStyle = "#3a3a3a";
+    c.fillText("zwischen Bördesnack24 GbR und dem Standortgeber", L, y);
+    const para = (head, lines) => {
+      y += 92; c.font = "700 36px Hanken, Arial"; c.fillStyle = "#202321"; c.fillText(head, L, y);
+      c.font = "400 31px Hanken, Arial"; c.fillStyle = "#3a3a3a";
+      lines.forEach((l) => { y += 50; c.fillText(l, L, y); });
+    };
+    para("§ 1 Gegenstand", ["Der Standortgeber stellt eine Fläche für einen Verkaufsautomaten", "zur Verfügung. Aufstellung, Befüllung und Wartung übernimmt", "Bördesnack24."]);
+    para("§ 2 Vergütung", []);
+    y += 64; c.strokeStyle = "#202321"; c.lineWidth = 4;
+    c.strokeRect(L, y - 34, 40, 40); c.fillText("Feste Miete", L + 64, y);
+    c.strokeRect(L + 520, y - 34, 40, 40); c.fillText("Umsatzbeteiligung", L + 584, y);
+    para("§ 3 Strom und Zugang", ["Der Standortgeber ermöglicht den Stromanschluss und den Zugang", "zum Befüllen zu vereinbarten Zeiten."]);
+    para("§ 4 Laufzeit", ["Die Vereinbarung beginnt mit der Aufstellung des Automaten.", "Änderungen bedürfen der Textform."]);
+    y = h - 330; c.strokeStyle = "#8a8a8a"; c.lineWidth = 3;
+    [[L, "Ort, Datum"], [L + 720, "Unterschrift Standortgeber"]].forEach(([x, t]) => {
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + 600, y); c.stroke(); c.font = "400 26px Hanken, Arial"; c.fillStyle = "#777"; c.fillText(t, x, y + 40);
+    });
+    c.font = "400 34px Hanken, Arial"; c.fillStyle = "#2b3f8f"; c.fillText("Osterweddingen,", L + 10, y - 18);
+  });
+}
+function bentPlane(w, h, curl) {
+  const g = new THREE.PlaneGeometry(w, h, 40, 40);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, curl * Math.pow((x + w / 2) / w, 3) * 0.6 + curl * 0.15 * Math.sin((y / h) * Math.PI)); }
+  g.computeVertexNormals(); return g;
+}
+function sceneVertrag() {
+  scene.add(surface({ color: "#2a211a", rough: 0.6 }));
+  const tex = contractTexture();
+  const paper = new THREE.Mesh(bentPlane(2.1, 2.97, 0.06), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }));
+  paper.rotation.x = -Math.PI / 2; paper.rotation.z = 0.06; paper.position.set(0, 0.012, 0); scene.add(cast(paper));
+  const under = new THREE.Mesh(bentPlane(2.1, 2.97, 0.03), new THREE.MeshStandardMaterial({ color: "#efece4", roughness: 0.95 }));
+  under.rotation.x = -Math.PI / 2; under.rotation.z = -0.1; under.position.set(0.18, 0.004, 0.1); scene.add(cast(under));
+  // Füller
+  const pen = new THREE.Group();
+  const lacquer = new THREE.MeshPhysicalMaterial({ color: "#111214", roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const gold = new THREE.MeshStandardMaterial({ color: "#d8b25a", metalness: 1, roughness: 0.22 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 1.25, 64), lacquer); body.position.y = 0.1; pen.add(body);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.62, 64), lacquer); cap.position.y = 1.03; pen.add(cap);
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.05, 64), gold); band.position.y = 0.72; pen.add(band);
+  const end = new THREE.Mesh(new THREE.SphereGeometry(0.07, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2), lacquer); end.position.y = 1.34; pen.add(end);
+  const clip = new THREE.Mesh(new RoundedBoxGeometry(0.035, 0.5, 0.03, 3, 0.012), gold); clip.position.set(0, 1.07, 0.085); pen.add(clip);
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.045, 0.22, 64), lacquer); grip.position.y = -0.62; pen.add(grip);
+  const nib = new THREE.Mesh(new THREE.ConeGeometry(0.043, 0.16, 64), gold); nib.position.y = -0.81; nib.rotation.x = Math.PI; pen.add(nib);
+  pen.rotation.z = Math.PI / 2; pen.rotation.y = 0.6; pen.position.set(0.55, 0.075, 1.05);
+  scene.add(cast(pen));
+  spot("#ffe3bb", 1100, [-4.5, 8, 3], [0, 0, 0.2], 0.42, 0.9);
+  spot("#ffc65a", 260, [6, 3, -5], [0, 0, 0], 0.4, 0.9, false);
+  look([0.45, 4.9, 2.6], [0.05, 0, -0.1], 32);
+}
+
+// ── Stellfläche ────────────────────────────────────────
+function sceneFlaeche() {
+  scene.background = new THREE.Color("#0e0d0b");
+  const tiles = canvasTex(2048, 2048, (c, w, h) => {
+    const n = 8, s = w / n;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const v = 178 + Math.floor(rnd() * 18); c.fillStyle = `rgb(${v},${v - 4},${v - 10})`; c.fillRect(i * s, j * s, s, s);
+      for (let k = 0; k < 900; k++) { c.fillStyle = `rgba(0,0,0,${rnd() * 0.05})`; c.fillRect(i * s + rnd() * s, j * s + rnd() * s, 3, 3); }
+    }
+    c.strokeStyle = "#6f6a62"; c.lineWidth = 8;
+    for (let i = 0; i <= n; i++) { c.beginPath(); c.moveTo(i * s, 0); c.lineTo(i * s, h); c.stroke(); c.beginPath(); c.moveTo(0, i * s); c.lineTo(w, i * s); c.stroke(); }
+  }, true, 1);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 4.8), new THREE.MeshStandardMaterial({ map: tiles, roughness: 0.38 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  const wallMat = new THREE.MeshStandardMaterial({ color: "#d9d2c6", roughness: 0.9 });
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 3), wallMat); back.position.set(0, 1.5, -1.2); back.receiveShadow = true; scene.add(back);
+  const side = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 3), wallMat); side.rotation.y = Math.PI / 2; side.position.set(-1.3, 1.5, 0); side.receiveShadow = true; scene.add(side);
+  const skirt = new THREE.MeshStandardMaterial({ color: "#3c3a37", roughness: 0.6 });
+  const b1 = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.08, 0.015), skirt); b1.position.set(0, 0.04, -1.192); scene.add(cast(b1));
+  const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.08, 4.8), skirt); b2.position.set(-1.292, 0.04, 0); scene.add(cast(b2));
+  // Markierung der Aufstellfläche
+  const tape = new THREE.MeshStandardMaterial({ color: "#FDC102", roughness: 0.55 });
+  const W = 0.95, D = 0.85, x0 = -0.95, z0 = -1.12, t = 0.05;
+  [[x0 + W / 2, z0, W, t], [x0 + W / 2, z0 + D, W, t], [x0, z0 + D / 2, t, D], [x0 + W, z0 + D / 2, t, D]].forEach(([x, z, w, d]) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.003, d), tape); m.position.set(x, 0.0015, z); m.receiveShadow = true; scene.add(m);
+  });
+  // Steckdose an der Wand
+  const plate = new THREE.Mesh(new RoundedBoxGeometry(0.085, 0.085, 0.012, 4, 0.012), new THREE.MeshStandardMaterial({ color: "#f3f1ec", roughness: 0.35 }));
+  plate.position.set(-0.2, 0.32, -1.192); scene.add(cast(plate));
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.004, 48), new THREE.MeshStandardMaterial({ color: "#d9d6cf", roughness: 0.5 }));
+  cup.rotation.x = Math.PI / 2; cup.position.set(-0.2, 0.32, -1.184); scene.add(cup);
+  const sun = new THREE.DirectionalLight("#ffe2b8", 2.2); sun.position.set(4, 4.5, 2.5); sun.target.position.set(-0.5, 0, -0.7);
+  sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 4; sun.shadow.camera.bottom = -4; sun.shadow.radius = 8; sun.shadow.bias = -0.0003;
+  scene.add(sun, sun.target);
+
+  scene.environmentIntensity = 0.55;
+  look([1.35, 1.55, 1.75], [-0.45, 0.15, -0.75], 42);
+}
+
+// ── Münzen ─────────────────────────────────────────────
+function sceneMuenzen() {
+  scene.add(surface({ color: "#1c1a17" }));
+  const face = canvasTex(512, 512, (c, w, h) => {
+    c.fillStyle = "#808080"; c.fillRect(0, 0, w, h);
+    c.strokeStyle = "#e6e6e6"; c.lineWidth = 26; c.beginPath(); c.arc(256, 256, 236, 0, 7); c.stroke();
+    c.fillStyle = "#e0e0e0"; c.font = "800 230px Bricolage, Arial"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("1", 256, 262);
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; c.beginPath(); c.arc(256 + Math.cos(a) * 190, 256 + Math.sin(a) * 190, 11, 0, 7); c.fill(); }
+  }, false);
+  const reed = canvasTex(1024, 64, (c, w, h) => { for (let x = 0; x < w; x += 8) { c.fillStyle = x % 16 ? "#c8c8c8" : "#5a5a5a"; c.fillRect(x, 0, 8, h); } }, false);
+  const gold = (bump) => new THREE.MeshStandardMaterial({ color: "#d5a845", metalness: 1, roughness: 0.28, bumpMap: bump, bumpScale: 2.5 });
+  const mats = [gold(reed), gold(face), gold(face)];
+  const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.085, 128);
+  const coin = (x, y, z, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(geo, mats); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); scene.add(cast(m)); return m; };
+  seed = 5;
+  for (let i = 0; i < 9; i++) coin(0.6 + (rnd() - 0.5) * 0.05, 0.043 + i * 0.087, -0.3 + (rnd() - 0.5) * 0.05, 0, rnd() * 6, 0);
+  for (let i = 0; i < 5; i++) coin(-0.75 + (rnd() - 0.5) * 0.06, 0.043 + i * 0.087, 0.15 + (rnd() - 0.5) * 0.06, 0, rnd() * 6, 0);
+  [[-1.7, 0.9], [-0.3, 1.25], [1.6, 0.7], [1.9, -0.6], [-1.6, -0.6], [0.45, 1.9]].forEach(([x, z]) => coin(x, 0.05, z, (rnd() - 0.5) * 0.08, rnd() * 6, (rnd() - 0.5) * 0.08));
+  coin(-0.05, 0.42, 0.25, 0.25, 0.3, 1.05);
+  spot("#ffe0b0", 900, [-5, 8, 5], [0, 0, 0], 0.42, 0.9);
+  spot("#ffc65a", 520, [6, 3, -6], [0, 0.3, 0], 0.4, 0.8, false);
+  look([0.2, 4.6, 5.4], [0.05, 0.25, 0.1], 32);
+}
+
+const SCENES = { schluessel: sceneSchluessel, steckdose: sceneSteckdose, vertrag: sceneVertrag, flaeche: sceneFlaeche, muenzen: sceneMuenzen };
+await document.fonts.load("800 40px Bricolage"); await document.fonts.load("400 30px Hanken");
+SCENES[SCENE]();
+renderer.render(scene, camera);
+window.done = true;
+</script>
+<style>
+@font-face { font-family: "Bricolage"; font-weight: 800; src: url("./fonts/BricolageGrotesque-ExtraBold.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 400; src: url("./fonts/HankenGrotesk-Regular.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 700; src: url("./fonts/HankenGrotesk-Bold.ttf"); }
+</style>
+</body>
+</html>
