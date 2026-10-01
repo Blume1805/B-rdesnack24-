@@ -125,7 +125,7 @@ h1, h2 { font-family: "Bricolage"; font-weight: 800; letter-spacing: -0.03em; li
   <div class="scene" id="s2">
     <div class="txt top" id="t2"><h2 data-split>Was wir brauchen.</h2></div>
     <div class="photo" id="p2a"><img data-media="flaeche" class="grade bright" alt=""><div class="shade"></div><div class="lbl"><span class="check"></span>Stellfläche</div></div>
-    <div class="photo" id="p2b"><img data-media="steckdose" class="grade bright" alt=""><div class="shade"></div><div class="lbl"><span class="check"></span>Strom</div></div>
+    <div class="photo" id="p2b"><img data-media="steckdose" class="grade bright" alt=""><div class="shade"></div><div class="lbl"><span class="check"></span>Stromanschluss</div></div>
     <div class="photo" id="p2c"><img data-media="schluessel" class="grade" alt=""><div class="shade"></div><div class="lbl"><span class="check"></span>Zugang zum Befüllen</div></div>
   </div>
 
@@ -143,6 +143,7 @@ h1, h2 { font-family: "Bricolage"; font-weight: 800; letter-spacing: -0.03em; li
         <div class="item"><span class="check"></span>Anschaffung</div>
         <div class="item"><span class="check"></span>Wartung</div>
         <div class="item"><span class="check"></span>Befüllung</div>
+        <div class="item"><span class="check"></span>Stromkosten</div>
       </div>
     </div>
   </div>
@@ -276,7 +277,7 @@ function render(t) {
   { const [a, b] = S.s4; const p = k(t, a - X, b - a + 2 * X, E.lin);
     $("m4").style.transform = `scale(${lerp(1.0, 1.05, p)})`;
     words($("t4"), t, a + 0.1, 0.07);
-    $("t4").querySelectorAll(".item").forEach((it, i) => rise(it, t, a + 0.75 + i * 0.28, 0.55, 18)); }
+    $("t4").querySelectorAll(".item").forEach((it, i) => rise(it, t, a + 0.7 + i * 0.24, 0.55, 18)); }
 
   // S5: Münzen
   { const [a, b] = S.s5; const p = k(t, a - X, b - a + 2 * X, E.lin);

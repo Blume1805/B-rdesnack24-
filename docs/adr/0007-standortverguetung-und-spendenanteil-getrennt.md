@@ -135,3 +135,21 @@ dieselbe Seite weiter unten an der KI-Zeichnung sagt, Fotos von Automaten gebe
 es noch nicht; der Hinweis zum Betriebsstand direkt unter dem Kopf („Noch ist
 kein Automat in Betrieb") steht weiterhin und löst den Eindruck eines laufenden
 Betriebs auf.
+
+## Nachtrag 01.10.2026 — Stromkosten trägt Bördesnack24
+
+> „Den Strom zahlen wir." (Gesellschafter, 01.10.2026)
+
+* Der Standortgeber stellt den Stromanschluss, die Kosten des Verbrauchs trägt
+  Bördesnack24. Im Standortvertrag ist dafür eine Erstattung zu regeln
+  (pauschal oder nach Zwischenzähler), sonst trägt der Standortgeber die Kosten
+  faktisch doch.
+* Wirtschaftlich ändert sich an den Tabellen oben nichts: Die Finanzrechnung
+  vom 15.09.2026 (Abschnitt 7.3) setzt Strom bereits mit 25 € je Monat und
+  Automat als Kosten von Bördesnack24 an. Die Verhandlungsobergrenzen für Miete
+  und Umsatzbeteiligung gelten deshalb unverändert. Der Vermerk „entfällt, wenn
+  Standort trägt" ist damit gegenstandslos.
+* Außendarstellung: „Was es Sie kostet. Nichts." auf der Landingpage ist damit
+  wahr (`docs/COMPLIANCE.md` V-017-b). Damit „Strom" unter „Was wir brauchen"
+  nicht als Kostenposten gelesen wird, heißt es dort künftig „Stromanschluss",
+  und die Erstattung wird ausdrücklich genannt.

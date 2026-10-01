@@ -1,5 +1,5 @@
-<!-- Projektwissen des Lovable-Projekts „Bördesnack24 Landingpage" (0c068d85-…). Stand 27.09.2026.
-     Zuletzt an Lovable übertragen: 30.09.2026 (diese Fassung). -->
+<!-- Projektwissen des Lovable-Projekts „Bördesnack24 Landingpage" (0c068d85-…). Stand 01.10.2026.
+     Zuletzt an Lovable übertragen: 01.10.2026 (diese Fassung; Strom, Referenzvideo). -->
 
 # Bördesnack24 Landingpage — Dauerregeln
 
@@ -28,6 +28,10 @@ Beides ist getrennt. Der Standortgeber bekommt nichts aus den 5 %. Die Empfänge
 **Auszahlung:** einmal im Jahr, nach Abschluss des Kalenderjahres, zu gleichen Teilen an die drei Zwecke mit den meisten Stimmen.
 
 **Vollständigkeit (§ 5 UWG):** Die vollständige Aussage (5 %, Nettoerlös = Umsatz ohne Umsatzsteuer, bei `pfandGetrennt` zusätzlich „und ohne Pfand", drei Zwecke mit den meisten Stimmen, einmal im Jahr) steht im Abschnitt „Der Anteil". Jede andere Erwähnung mit Zahl nennt mindestens „5 % des Nettoerlöses". Höhe von Miete oder Umsatzbeteiligung wird nie genannt.
+
+**Strom:** Den Strom am Standort zahlt Bördesnack24 (Entscheidung 01.10.2026). Der Standortgeber stellt nur den Stromanschluss. Nie so formulieren, als trage der Standortgeber Stromkosten.
+
+**Referenzvideo** `src/assets/videos/standortgeber-referenz.mp4`: höchstens als Stilvorlage. Inhalte nie übernehmen, es nennt „Anteil an den Standortgeber 5 %" (falsch, siehe oben), „Bahnhof" (kein solcher Standort) und „Mietvertrag" (bei Umsatzbeteiligung nicht zwingend). Nicht auf der Seite einbinden. KI-generierte oder fotorealistische Bilder und Filme von Automaten bekommen einen sichtbaren Hinweis, dass sie mit KI erstellt sind.
 
 ## Bewegung
 

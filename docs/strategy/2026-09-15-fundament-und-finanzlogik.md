@@ -205,7 +205,7 @@ ANNAHME, soweit nicht anders bezeichnet.
 | **Rohertrag** | **375,00** | **508,93** | **642,86** |
 | − Zahlungsgebühren 2,5 % brutto (ZU VERIFIZIEREN) | −17,50 | −23,75 | −30,00 |
 | − Telemetrie/Software (ZU VERIFIZIEREN) | −20,00 | −20,00 | −20,00 |
-| − Strom (entfällt, wenn Standort trägt) | −25,00 | −25,00 | −25,00 |
+| − Strom (trägt Bördesnack24, Entscheidung 01.10.2026, ADR 0007) | −25,00 | −25,00 | −25,00 |
 | − Wartungsrückstellung 3 % netto | −18,75 | −25,45 | −32,14 |
 | − Versicherung, Vandalismus | −10,00 | −10,00 | −10,00 |
 | − Warenverlust 3 % vom Wareneinsatz | −7,50 | −10,18 | −12,86 |

@@ -49,3 +49,20 @@ Am Ende je Punkt 1 bis 4 eine Zeile, was geändert wurde.
 | 3 | Bewegung aus → kein Autoplay, Poster sichtbar | offen |
 | 4 | KI-Bildunterschrift sichtbar | offen |
 | 5 | CLS 0, ein Video je Breite geladen | offen |
+
+## Teil B: Strom-Texte im Abschnitt „Für Standortgeber" (01.10.2026)
+
+**Anlass:** Entscheidung des Gesellschafters vom 01.10.2026, „Den Strom zahlen
+wir." (ADR 0007, Nachtrag). Kann allein oder zusammen mit Teil A gesendet
+werden. **Nicht gesendet.** Philipp wartet zuerst auf das Ergebnis seines
+eigenen Video-Auftrags an Lovable vom 01.10.2026, 18:34 Uhr. Dieser Lauf endete
+um 18:37 Uhr ohne Änderung am Code (geprüft am Commit `6f58a32`).
+
+```
+Auftrag 01.10.2026, Teil B: zwei Texte in src/components/bs24/Stage.tsx, Array `promises`. Sonst nichts ändern.
+
+1. "Was es Sie kostet.": text = "Nichts. Kein Kaufpreis, keine Wartung, keine Befüllung, kein Strom."
+2. "Was wir brauchen.": text = "Stellfläche, Stromanschluss und Zugang zum Befüllen. Den Strom zahlen wir."
+
+Am Ende je Punkt eine Zeile, was geändert wurde.
+```

@@ -1395,7 +1395,7 @@ vollständig; offen sind nur Ausrollen, Landingpage-Satz und Preisschilder.
 |---|---|---|
 | V-017-a | Erklärfilm „Für Standortgeber" ohne „Nichts." und ohne Vergütungshöhe (`motion/video/standortgeber/`) | 🟢 Inhalte je Aussage gegen Quellen geprüft (README des Films); Fassung 2 vom 01.10.2026 ebenso |
 | V-017-d | Fassung 2 zeigt den KI-generierten Automaten aus dem Markenbild fotorealistisch. Ohne Hinweis hält man ihn für das echte Gerät (Art. 50 Abs. 4 KI-Verordnung, § 5 UWG). | 🟢 Hinweis „Darstellung. Automat mit KI visualisiert." im Bild, durchgehend, in beiden Formaten |
-| V-017-b | Wer trägt den Strom? Danach „Nichts." auf der Landingpage halten (bei Erstattung) oder streichen | 🔴 offen: Gesellschafter, vor dem ersten Standortgespräch (`motion/ABWEICHUNGEN.md` P-4) |
+| V-017-b | Wer trägt den Strom? Danach „Nichts." auf der Landingpage halten (bei Erstattung) oder streichen | **Entschieden 01.10.2026: Bördesnack24 zahlt den Strom** (ADR 0007, Nachtrag). „Nichts." ist wahr, sobald die Erstattung im Standortvertrag steht. 🔴 offen: Erstattungsklausel im Standortvertrag; Landingpage „Stromanschluss" statt „Strom" (Lovable, nicht gesendet) |
 | V-017-c | Referenzvideo nicht auf der Seite einbinden | 🔴 gesperrt (`motion/ABWEICHUNGEN.md` R-10); Asset in Lovable bleibt bis zur Löschfreigabe liegen |
 
 ### Optimierungsvorschlag
@@ -1405,4 +1405,4 @@ und ist in der Verhandlung ein einfaches Argument. Kosten laut Finanzrechnung
 25 € im Monat je Automat, die bei Standorten unter 950 € Monatsumsatz nicht
 gedeckt sind (ADR 0007).
 
-**Status: 🔴 OFFEN** (V-017-b, V-017-c)
+**Status: 🔴 OFFEN** (V-017-b Vertragsklausel und Seitentext, V-017-c)

@@ -33,9 +33,9 @@ Länge 20,0 s, 30 Bilder/s, ohne Tonspur.
 | Zeit | Bild | Text im Bild |
 |---|---|---|
 | 0,0–3,2 s | Automat taucht aus dem Dunkel auf | „Für Standortgeber" · „Sie stellen die Fläche." |
-| 3,2–7,2 s | Drei Bilder: Fläche, Steckdose, Schlüssel | „Was wir brauchen." · Stellfläche · Strom · Zugang zum Befüllen |
+| 3,2–7,2 s | Drei Bilder: Fläche, Steckdose, Schlüssel | „Was wir brauchen." · Stellfläche · Stromanschluss · Zugang zum Befüllen |
 | 7,2–10,6 s | Vertrag mit Füller | „Was Sie bekommen" · „Feste Miete oder Anteil am Umsatz." · „Was passt, klären wir im Gespräch." |
-| 10,6–13,6 s | Automat | „Wir tragen den Rest." · Anschaffung · Wartung · Befüllung |
+| 10,6–13,6 s | Automat | „Wir tragen den Rest." · Anschaffung · Wartung · Befüllung · Stromkosten |
 | 13,6–16,8 s | Münzen | „Gut zu wissen" · „5 % des Nettoerlöses spenden wir an Vereine der Region." · „Ihre Vergütung bleibt davon unberührt." |
 | 16,8–20,0 s | Markenbild | „Genießen. Geben. Gutes tun." · „Gespräch vereinbaren" · kontakt@boerdesnack24.de |
 
@@ -81,6 +81,7 @@ keine echten Euro-Münzmotive (die Münzen tragen nur eine „1").
 | „Stellfläche, Strom, Zugang zum Befüllen" | `Stage.tsx` |
 | „Feste Miete oder Anteil am Umsatz. Was passt, klären wir im Gespräch." | `Stage.tsx` und ADR 0007 |
 | Anschaffung, Wartung, Befüllung | `Stage.tsx`: „Kein Kaufpreis, keine Wartung, keine Befüllung." |
+| Stromanschluss (Standort) und Stromkosten (Bördesnack24) | Entscheidung Philipp, 01.10.2026: „Den Strom zahlen wir." (ADR 0007, Nachtrag) |
 | „5 % des Nettoerlöses spenden wir an Vereine der Region." | Landingpage `index.tsx` (Einleitung) und Projektwissen (Vollständigkeit nach § 5 UWG) |
 | „Ihre Vergütung bleibt davon unberührt." | `Stage.tsx` und ADR 0007 |
 | „Genießen. Geben. Gutes tun." | **Vorgabe Philipp, 01.10.2026**, für diesen Film. Auf der Landingpage steht weiter der Claim „Versorgung vor Ort. Wert für den Ort." (Projektwissen, 27.09.2026). Ob der Slogan den Claim überall ablöst, ist offen (`motion/ABWEICHUNGEN.md` P-5) |
@@ -99,10 +100,10 @@ Keine laufenden Automaten, Umsätze oder Auszahlungen im Präsens
 (`betriebsstatus = "vorbereitung"`), kein Pfand, keine Preise. Anrede „Sie".
 Keine Gedankenstriche oder Mittelpunkte im Bild.
 
-**Offener Punkt S-1 (Strom):** Die Landingpage sagt „Was es Sie kostet.
-Nichts.", verlangt aber Strom vom Standort. Der Film vermeidet „Nichts." und
-zeigt nur, wer was trägt. Geführt in `motion/ABWEICHUNGEN.md` R-9 / P-4 und
-`docs/COMPLIANCE.md` V-017.
+**Strom (S-1, entschieden 01.10.2026):** Bördesnack24 zahlt den Strom. Der
+Film zeigt deshalb „Stromanschluss" bei dem, was wir brauchen, und
+„Stromkosten" bei dem, was wir tragen. Die Erstattung muss noch in den
+Standortvertrag (`docs/COMPLIANCE.md` V-017-b).
 
 ## KI-Kennzeichnung (Art. 50 Abs. 4 KI-Verordnung)
 
