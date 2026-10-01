@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Standortgeber-Film</title>
+<!--
+  Bördesnack24 · Erklärfilm für Standortgeber (Landingpage, Abschnitt „Für Standortgeber").
+  Deterministisch: window.render(t) zeichnet den Zustand zur Sekunde t. render.mjs
+  ruft das Bild für Bild auf und kodiert mit ffmpeg. ?f=16x9 (Standard) oder ?f=9x16.
+  ?t=12.3 zeigt ein Standbild, ?play=1 spielt in Echtzeit ab (Vorschau im Browser).
+  Inhalte nur aus wahren, beschlossenen Aussagen (README.md, Abschnitt Inhalte).
+-->
+<style>
+@font-face { font-family: "Bricolage"; font-weight: 700; src: url("../../../apps/mobile/assets/fonts/BricolageGrotesque-Bold.ttf"); }
+@font-face { font-family: "Bricolage"; font-weight: 800; src: url("../../../apps/mobile/assets/fonts/BricolageGrotesque-ExtraBold.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 400; src: url("../../../apps/mobile/assets/fonts/HankenGrotesk-Regular.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 600; src: url("../../../apps/mobile/assets/fonts/HankenGrotesk-SemiBold.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 700; src: url("../../../apps/mobile/assets/fonts/HankenGrotesk-Bold.ttf"); }
+@font-face { font-family: "Hanken"; font-weight: 800; src: url("../../../apps/mobile/assets/fonts/HankenGrotesk-ExtraBold.ttf"); }
+
+:root {
+  --ink: #202321; --gold: #FDC102; --cream: #FBF8F4; --grey: #DCD8D3;
+  --green: #5C9A3F; --muted: #5E5A54; --gold-text: #856A00;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #111; overflow: hidden; }
+#stage {
+  position: relative; overflow: hidden; background: var(--cream);
+  font-family: "Hanken", sans-serif; color: var(--ink);
+  transform-origin: 0 0;
+}
+.f16x9 #stage { width: 1920px; height: 1080px; }
+.f9x16 #stage { width: 1080px; height: 1920px; }
+
+/* Hintergrund: Bördekarte als ruhiges Raster, bewegt sich langsam */
+#grain { position: absolute; inset: 0; pointer-events: none; }
+
+/* Kopfzeile */
+#brandbar { position: absolute; display: flex; align-items: center; gap: 16px; }
+.f16x9 #brandbar { left: 130px; top: 70px; }
+.f9x16 #brandbar { left: 90px; top: 110px; }
+#brandbar .name { font-family: "Bricolage"; font-weight: 800; font-size: 30px; letter-spacing: -0.02em; }
+#brandbar .sep { width: 2px; height: 26px; background: var(--grey); }
+#brandbar .aud { font-weight: 600; font-size: 24px; color: var(--muted); }
+
+/* Kapitel-Fortschritt */
+#progress { position: absolute; display: flex; gap: 14px; }
+.f16x9 #progress { left: 130px; top: 970px; }
+.f9x16 #progress { left: 90px; top: 1790px; }
+.seg { width: 120px; }
+.seg .bar { height: 6px; border-radius: 3px; background: var(--grey); overflow: hidden; }
+.seg .fill { height: 100%; width: 100%; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); }
+.seg .lbl { margin-top: 12px; font-weight: 700; font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Textblöcke je Szene */
+.txt { position: absolute; }
+.f16x9 .txt { left: 130px; width: 720px; top: 540px; transform: translateY(-50%); }
+.f9x16 .txt { left: 90px; width: 900px; top: 250px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 12px; height: 52px; padding: 0 22px 0 8px;
+  border-radius: 26px; background: var(--ink); color: var(--cream);
+  font-weight: 700; font-size: 24px; margin-bottom: 30px;
+}
+.chip b { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 19px;
+  background: var(--gold); color: var(--ink); font-family: "Bricolage"; font-weight: 800; font-size: 20px; }
+.chip.plain { padding: 0 22px; }
+h1, h2 { font-family: "Bricolage"; font-weight: 800; letter-spacing: -0.03em; line-height: 0.98; }
+.f16x9 h1 { font-size: 104px; } .f9x16 h1 { font-size: 112px; }
+.f16x9 h2 { font-size: 92px; }  .f9x16 h2 { font-size: 100px; }
+.sub { margin-top: 30px; font-weight: 400; line-height: 1.32; color: #3B3A37; }
+.f16x9 .sub { font-size: 36px; } .f9x16 .sub { font-size: 42px; }
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.wi { display: inline-block; will-change: transform; }
+.mark { position: relative; }
+.mark::after { content: ""; position: absolute; left: -0.04em; right: -0.04em; bottom: 0.06em; height: 0.2em;
+  background: var(--gold); z-index: -1; transform-origin: 0 50%; transform: scaleX(var(--m, 0)); }
+
+/* Illustration */
+#art { position: absolute; overflow: visible; }
+.f16x9 #art { left: 900px; top: 60px; width: 960px; height: 960px; }
+.f9x16 #art { left: 40px; top: 790px; width: 1000px; height: 1000px; }
+svg text { font-family: "Hanken"; }
+
+/* Abschluss */
+#endbg { position: absolute; inset: 0; background: var(--ink); clip-path: circle(0px at 50% 50%); }
+#end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--cream); }
+#end svg { width: 250px; height: 250px; }
+.f9x16 #end svg { width: 300px; height: 300px; }
+#end .wordmark { font-family: "Bricolage"; font-weight: 800; letter-spacing: -0.03em; margin-top: 36px; }
+.f16x9 #end .wordmark { font-size: 120px; } .f9x16 #end .wordmark { font-size: 132px; }
+#end .claim { margin-top: 20px; font-weight: 600; color: #E9E4DC; }
+.f16x9 #end .claim { font-size: 44px; } .f9x16 #end .claim { font-size: 50px; max-width: 860px; }
+#end .cta { margin-top: 56px; display: inline-flex; align-items: center; height: 92px; padding: 0 48px; border-radius: 46px;
+  background: var(--gold); color: var(--ink); font-weight: 800; font-size: 36px; }
+#end .mail { margin-top: 24px; font-weight: 600; font-size: 30px; color: #CFC9C0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="grain" aria-hidden="true"></svg>
+
+  <div id="brandbar">
+    <svg width="44" height="44" viewBox="-60 -60 120 120" aria-hidden="true">
+      <circle r="50" fill="none" stroke="#FDC102" stroke-width="12"/>
+      <rect x="-20" y="-30" width="40" height="58" rx="6" fill="none" stroke="#202321" stroke-width="7"/>
+      <rect x="-11" y="-20" width="22" height="22" rx="2" fill="#FDC102"/>
+    </svg>
+    <span class="name">Bördesnack24</span><span class="sep"></span><span class="aud">Für Standortgeber</span>
+  </div>
+
+  <div id="texts"></div>
+
+  <svg id="art" viewBox="0 0 1000 1000" aria-hidden="true">
+    <defs>
+      <filter id="blur40" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#202321" flood-opacity=".12"/></filter>
+    </defs>
+
+    <!-- S0 Logo -->
+    <g id="logo" transform="translate(500 500)">
+      <circle id="logoRing" r="300" fill="none" stroke="#FDC102" stroke-width="46" stroke-linecap="round" transform="rotate(-90)"/>
+      <g id="logoMachine">
+        <rect x="-112" y="-178" width="224" height="340" rx="28" fill="none" stroke="#FDC102" stroke-width="28"/>
+        <g id="logoCells" fill="#FDC102"></g>
+        <rect x="-62" y="98" width="124" height="24" rx="12" fill="none" stroke="#FDC102" stroke-width="14"/>
+      </g>
+    </g>
+
+    <!-- S1 Orte -->
+    <g id="places"></g>
+    <g id="s1extra">
+      <path id="dropLine" d="M500 395 V520" stroke="#202321" stroke-width="5" stroke-dasharray="4 14" stroke-linecap="round" fill="none"/>
+      <g id="pinS1" transform="translate(500 470)">
+        <path d="M0 0 C-30 -36 -40 -50 -40 -70 A40 40 0 1 1 40 -70 C40 -50 30 -36 0 0 Z" fill="#FDC102" stroke="#202321" stroke-width="6"/>
+        <circle cy="-70" r="14" fill="#202321"/>
+      </g>
+      <g id="pillS1" transform="translate(790 700)">
+        <rect x="-150" y="-38" width="300" height="76" rx="38" fill="#FDC102" filter="url(#soft)"/>
+        <text text-anchor="middle" y="12" font-weight="800" font-size="32" fill="#202321">Wir stellen auf.</text>
+      </g>
+    </g>
+
+    <!-- S2 Was wir brauchen -->
+    <g id="s2">
+      <path id="floor" d="M330 735 L670 735 L760 815 L240 815 Z" fill="#FFF1C2" stroke="#202321" stroke-width="5" stroke-linejoin="round"/>
+      <g id="dim">
+        <path id="dimLine" d="M240 850 H760" stroke="#202321" stroke-width="4" fill="none"/>
+        <path d="M240 836 V864 M760 836 V864" stroke="#202321" stroke-width="4"/>
+      </g>
+      <path id="cable" d="M612 690 C700 700 740 610 800 600 S860 560 868 548" stroke="#202321" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <g id="socket" transform="translate(880 520)">
+        <rect x="-52" y="-52" width="104" height="104" rx="22" fill="#fff" stroke="#202321" stroke-width="6"/>
+        <circle cx="-15" r="7" fill="#202321"/><circle cx="15" r="7" fill="#202321"/>
+      </g>
+      <g id="plug" transform="translate(868 548)">
+        <rect x="-16" y="-34" width="32" height="40" rx="8" fill="#202321" transform="rotate(-38)"/>
+      </g>
+      <g id="spark" transform="translate(880 520)" stroke="#FDC102" stroke-width="9" stroke-linecap="round"></g>
+      <g id="key" transform="translate(130 520)">
+        <g id="keyRot">
+          <circle r="40" fill="#fff" stroke="#202321" stroke-width="9"/>
+          <circle r="12" fill="#FDC102"/>
+          <path d="M40 0 H140 M108 0 V26 M128 0 V20" stroke="#202321" stroke-width="10" stroke-linecap="round" fill="none"/>
+        </g>
+      </g>
+      <g id="lbls2" font-weight="700" font-size="30" fill="#202321" text-anchor="middle">
+        <g id="l2a" transform="translate(500 905)"><text>Stellfläche</text></g>
+        <g id="l2b" transform="translate(880 640)"><text>Strom</text></g>
+        <g id="l2c" transform="translate(185 640)"><text>Zugang</text></g>
+      </g>
+      <g id="checks2"></g>
+    </g>
+
+    <!-- S3 Vertrag -->
+    <g id="s3">
+      <g id="contract" filter="url(#soft)">
+        <rect x="470" y="150" width="470" height="690" rx="26" fill="#fff" stroke="#202321" stroke-width="6"/>
+      </g>
+      <g id="contractIn">
+        <text x="520" y="235" font-family="Bricolage" font-weight="800" font-size="46" fill="#202321">Vertrag.</text>
+        <rect id="cl1" x="520" y="272" width="330" height="12" rx="6" fill="#DCD8D3"/>
+        <rect id="cl2" x="520" y="302" width="280" height="12" rx="6" fill="#DCD8D3"/>
+        <rect id="hl" x="500" y="368" width="410" height="96" rx="18" fill="#FFF1C2"/>
+        <g id="opt1" transform="translate(520 416)">
+          <rect id="cb1" x="0" y="-24" width="48" height="48" rx="12" fill="#fff" stroke="#202321" stroke-width="5"/>
+          <path id="ck1" d="M11 0 L21 11 L38 -11" stroke="#202321" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="72" y="12" font-weight="700" font-size="36" fill="#202321">Feste Miete</text>
+        </g>
+        <text x="705" y="514" text-anchor="middle" font-weight="600" font-size="28" fill="#5E5A54">oder</text>
+        <g id="opt2" transform="translate(520 586)">
+          <rect id="cb2" x="0" y="-24" width="48" height="48" rx="12" fill="#fff" stroke="#202321" stroke-width="5"/>
+          <path id="ck2" d="M11 0 L21 11 L38 -11" stroke="#202321" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="72" y="12" font-weight="700" font-size="36" fill="#202321">Anteil am Umsatz</text>
+        </g>
+        <path d="M520 760 H890" stroke="#DCD8D3" stroke-width="5"/>
+        <path id="sig" d="M532 742 C552 700 570 700 566 732 C562 760 590 712 610 716 C628 720 612 748 640 736 C664 726 676 702 700 724 C716 738 740 728 770 716" stroke="#202321" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <g id="talk" transform="translate(860 712)">
+          <path d="M-38 -30 H38 A14 14 0 0 1 52 -16 V20 A14 14 0 0 1 38 34 H-6 L-26 52 V34 H-38 A14 14 0 0 1 -52 20 V-16 A14 14 0 0 1 -38 -30 Z" fill="#FDC102" stroke="#202321" stroke-width="5" stroke-linejoin="round"/>
+          <circle cx="-18" cy="2" r="6" fill="#202321"/><circle cx="0" cy="2" r="6" fill="#202321"/><circle cx="18" cy="2" r="6" fill="#202321"/>
+        </g>
+      </g>
+      <g id="coins3"></g>
+    </g>
+
+    <!-- S4 Sie | Wir -->
+    <g id="s4">
+      <g id="colSie">
+        <text x="120" y="190" font-family="Bricolage" font-weight="800" font-size="56" fill="#202321">Sie.</text>
+        <g id="sieItems"></g>
+      </g>
+      <path id="s4div" d="M500 150 V860" stroke="#DCD8D3" stroke-width="5" stroke-dasharray="2 14" stroke-linecap="round"/>
+      <g id="colWir">
+        <text x="560" y="190" font-family="Bricolage" font-weight="800" font-size="56" fill="#202321">Wir.</text>
+        <g id="wirItems"></g>
+      </g>
+    </g>
+
+    <!-- S5 Spende getrennt -->
+    <g id="s5">
+      <g id="cardA" filter="url(#soft)">
+        <rect x="440" y="120" width="500" height="290" rx="26" fill="#fff" stroke="#202321" stroke-width="6"/>
+        <text x="490" y="205" font-family="Bricolage" font-weight="800" font-size="44" fill="#202321">Ihre Vergütung.</text>
+        <text x="490" y="258" font-weight="600" font-size="32" fill="#3B3A37">Miete oder Umsatzanteil.</text>
+        <g id="lockA" transform="translate(490 330)">
+          <rect x="0" y="-22" width="300" height="52" rx="26" fill="#E7F0E1"/>
+          <circle cx="26" cy="4" r="14" fill="#5C9A3F"/>
+          <path d="M19 4 L24 9 L33 -1" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="52" y="14" font-weight="700" font-size="27" fill="#2F5420">Bleibt unberührt.</text>
+        </g>
+      </g>
+      <g id="cardB" filter="url(#soft)">
+        <rect x="440" y="470" width="500" height="390" rx="26" fill="#202321"/>
+        <text x="490" y="560" font-family="Bricolage" font-weight="800" font-size="44" fill="#FBF8F4">Spende.</text>
+        <text x="490" y="614" font-weight="700" font-size="32" fill="#FDC102">5 % des Nettoerlöses</text>
+        <text x="490" y="656" font-weight="600" font-size="30" fill="#E9E4DC">an Vereine der Region.</text>
+        <text x="490" y="698" font-weight="600" font-size="30" fill="#E9E4DC">Die Kundschaft entscheidet mit.</text>
+        <g id="jar" transform="translate(850 790)">
+          <rect x="-62" y="-44" width="124" height="96" rx="18" fill="#2E3230" stroke="#FDC102" stroke-width="6"/>
+          <rect x="-30" y="-50" width="60" height="12" rx="6" fill="#FDC102"/>
+          <path id="heart" d="M0 30 C-34 8 -36 -14 -20 -22 C-10 -27 -2 -20 0 -14 C2 -20 10 -27 20 -22 C36 -14 34 8 0 30 Z" fill="#FDC102"/>
+        </g>
+      </g>
+      <g id="coins5"></g>
+    </g>
+
+    <!-- Hauptfigur: der Automat -->
+    <g id="m">
+      <rect id="mGlow" x="-170" y="-470" width="340" height="470" rx="60" fill="#FDC102" filter="url(#blur40)" opacity="0"/>
+      <ellipse id="mShadow" cx="0" cy="6" rx="150" ry="18" fill="#202321" opacity=".16"/>
+      <g id="mBody">
+        <rect x="-120" y="-420" width="240" height="420" rx="24" fill="#202321"/>
+        <rect id="mHead" x="-104" y="-404" width="208" height="46" rx="12" fill="#FDC102"/>
+        <text x="0" y="-372" text-anchor="middle" font-family="Bricolage" font-weight="800" font-size="21" fill="#202321" letter-spacing="1">BÖRDESNACK24</text>
+        <rect x="-104" y="-344" width="152" height="214" rx="12" fill="#2E3230"/>
+        <g id="mCells"></g>
+        <rect id="mDisp" x="58" y="-344" width="46" height="30" rx="6" fill="#3A3F3C"/>
+        <g id="mKeys" fill="#6B706C"></g>
+        <rect x="58" y="-196" width="46" height="40" rx="6" fill="#3A3F3C"/>
+        <rect x="70" y="-180" width="22" height="6" rx="3" fill="#202321"/>
+        <rect x="-104" y="-112" width="208" height="54" rx="10" fill="#2E3230"/>
+        <rect x="-90" y="-100" width="180" height="8" rx="4" fill="#3A3F3C"/>
+        <rect x="-100" y="-4" width="34" height="10" rx="3" fill="#202321"/>
+        <rect x="66" y="-4" width="34" height="10" rx="3" fill="#202321"/>
+      </g>
+    </g>
+  </svg>
+
+  <div id="progress"></div>
+
+  <div id="endbg"></div>
+  <div id="end">
+    <svg viewBox="-360 -360 720 720" aria-hidden="true">
+      <circle id="endRing" r="300" fill="none" stroke="#FDC102" stroke-width="46" stroke-linecap="round" transform="rotate(-90)"/>
+      <g id="endMachine">
+        <rect x="-112" y="-178" width="224" height="340" rx="28" fill="none" stroke="#FDC102" stroke-width="28"/>
+        <g id="endCells" fill="#FDC102"></g>
+        <rect x="-62" y="98" width="124" height="24" rx="12" fill="none" stroke="#FDC102" stroke-width="14"/>
+      </g>
+    </svg>
+    <div class="wordmark" id="endWord">Bördesnack24</div>
+    <div class="claim" id="endClaim">Versorgung vor Ort. Wert für den Ort.</div>
+    <div class="cta" id="endCta">Gespräch vereinbaren</div>
+    <div class="mail" id="endMail">kontakt@boerdesnack24.de</div>
+  </div>
+</div>
+
+<script>
+// ───────────────────────── Grundlagen ─────────────────────────
+const q = new URLSearchParams(location.search);
+const FMT = q.get("f") === "9x16" ? "9x16" : "16x9";
+document.documentElement.className = "f" + FMT;
+const PORTRAIT = FMT === "9x16";
+const $ = (id) => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs, parent) => {
+  const el = document.createElementNS(NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(el);
+  return el;
+};
+
+// Kurven aus motion/motion-tokens.css (keine eigenen erfinden)
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = (t) => ((ax * t + bx) * t + cx) * t;
+  const sy = (t) => ((ay * t + by) * t + cy) * t;
+  const dsx = (t) => (3 * ax * t + 2 * bx) * t + cx;
+  return (x) => {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) { const d = dsx(t); if (Math.abs(d) < 1e-6) break; t -= (sx(t) - x) / d; }
+    t = Math.min(1, Math.max(0, t));
+    return sy(t);
+  };
+}
+const E = {
+  out: bezier(0.22, 1, 0.36, 1),
+  inout: bezier(0.65, 0, 0.35, 1),
+  bounce: bezier(0.34, 1.56, 0.64, 1),
+  snap: bezier(0.2, 0.9, 0.1, 1),
+  lin: (x) => Math.min(1, Math.max(0, x)),
+};
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const k = (t, start, dur, ease = E.out) => ease(clamp((t - start) / dur));
+const lerp = (a, b, p) => a + (b - a) * p;
+const set = (el, attrs) => { for (const a in attrs) el.setAttribute(a, attrs[a]); };
+
+// ───────────────────────── Dramaturgie ─────────────────────────
+// Szenen [Start, Ende] in Sekunden. Gesamtlänge = END.
+const S = {
+  intro:   [0.0, 4.6],
+  ort:     [4.6, 10.0],
+  brauchen:[10.0, 16.2],
+  bekommen:[16.2, 22.4],
+  tragen:  [22.4, 27.8],
+  spende:  [27.8, 33.4],
+  ende:    [33.4, 39.0],
+};
+const DURATION = 39.0;
+const CHAPTERS = ["ort", "brauchen", "bekommen", "tragen"];
+
+const TEXT = {
+  intro:    { chip: null, eyebrow: "Für Standortgeber", h: "Sie stellen die Fläche. Wir tragen den Rest.", sub: "Wir suchen Standorte in Osterweddingen und den Nachbarorten.", tag: "h1", mark: "Fläche." },
+  ort:      { chip: "01", eyebrow: "Der Ort", h: "Der passende Ort.", sub: "Betrieb, Sporthalle oder Treffpunkt im Ort. Wir stellen den Automaten auf." },
+  brauchen: { chip: "02", eyebrow: "Was wir brauchen", h: "Was wir brauchen.", sub: "Stellfläche, Strom und Zugang zum Befüllen." },
+  bekommen: { chip: "03", eyebrow: "Was Sie bekommen", h: "Was Sie bekommen.", sub: "Feste Miete oder Anteil am Umsatz. Was passt, klären wir im Gespräch." },
+  tragen:   { chip: "04", eyebrow: "Was wir übernehmen", h: "Wir tragen den Rest.", sub: "Anschaffung, Wartung und Befüllung liegen bei uns.", mark: "Rest." },
+  spende:   { chip: null, eyebrow: "Gut zu wissen", h: "Die Spende an die Region zahlen wir.", sub: "Ihre Vergütung bleibt davon unberührt." },
+};
+
+// ───────────────────────── Aufbau ─────────────────────────
+const textBlocks = {};
+for (const key in TEXT) {
+  const d = TEXT[key];
+  const box = document.createElement("div");
+  box.className = "txt";
+  const chip = document.createElement("div");
+  chip.className = "chip" + (d.chip ? "" : " plain");
+  chip.innerHTML = (d.chip ? `<b>${d.chip}</b>` : "") + d.eyebrow;
+  box.appendChild(chip);
+  const h = document.createElement(d.tag || "h2");
+  const words = [];
+  d.h.split(" ").forEach((w, i, arr) => {
+    const outer = document.createElement("span"); outer.className = "w";
+    const inner = document.createElement("span"); inner.className = "wi";
+    inner.textContent = w;
+    if (d.mark && w === d.mark) inner.classList.add("mark");
+    outer.appendChild(inner); h.appendChild(outer);
+    if (i < arr.length - 1) h.appendChild(document.createTextNode(" "));
+    words.push(inner);
+  });
+  box.appendChild(h);
+  const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = d.sub;
+  box.appendChild(sub);
+  $("texts").appendChild(box);
+  textBlocks[key] = { box, chip, words, sub, mark: box.querySelector(".mark") };
+}
+
+// Kapitelanzeige
+const segs = CHAPTERS.map((c, i) => {
+  const s = document.createElement("div"); s.className = "seg";
+  s.innerHTML = `<div class="bar"><div class="fill"></div></div><div class="lbl">0${i + 1}</div>`;
+  $("progress").appendChild(s);
+  return { fill: s.querySelector(".fill"), lbl: s.querySelector(".lbl") };
+});
+
+// Hintergrund: feines Punktraster
+(() => {
+  const g = $("grain");
+  const W = PORTRAIT ? 1080 : 1920, H = PORTRAIT ? 1920 : 1080;
+  set(g, { width: W, height: H, viewBox: `0 0 ${W} ${H}` });
+  const pat = svgEl("pattern", { id: "dots", width: 36, height: 36, patternUnits: "userSpaceOnUse" }, svgEl("defs", {}, g));
+  svgEl("circle", { cx: 2, cy: 2, r: 1.6, fill: "#202321", opacity: 0.07 }, pat);
+  svgEl("rect", { id: "dotsRect", x: -36, y: -36, width: W + 72, height: H + 72, fill: "url(#dots)" }, g);
+})();
+
+// Logozellen
+function cells(parent, size, gap, x0, y0) {
+  const out = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+    out.push(svgEl("rect", { x: x0 + c * (size + gap), y: y0 + r * (size + gap), width: size, height: size, rx: 6 }, parent));
+  return out;
+}
+const logoCells = cells($("logoCells"), 44, 18, -75, -132);
+const endCells = cells($("endCells"), 44, 18, -75, -132);
+
+// Automat: Fächer und Tasten
+const mCells = [];
+for (let r = 0; r < 3; r++) {
+  for (let c = 0; c < 3; c++)
+    mCells.push(svgEl("rect", { x: -92 + c * 46, y: -330 + r * 66, width: 36, height: 40, rx: 6, fill: "#4A4F4B" }, $("mCells")));
+  svgEl("rect", { x: -98, y: -284 + r * 66, width: 140, height: 5, rx: 2.5, fill: "#3A3F3C" }, $("mCells"));
+}
+for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++)
+  svgEl("circle", { cx: 66 + c * 15, cy: -296 + r * 18, r: 4.5 }, $("mKeys"));
+
+// S1: drei Orte
+const PLACE_ICONS = {
+  betrieb: `<path d="M30 200 V112 L80 140 V112 L130 140 V112 L180 140 V200 Z" fill="#fff" stroke="#202321" stroke-width="7" stroke-linejoin="round"/>
+            <rect x="160" y="62" width="26" height="70" fill="#202321"/>
+            <rect x="52" y="160" width="26" height="40" rx="3" fill="#FDC102"/><rect x="102" y="160" width="26" height="22" rx="3" fill="#DCD8D3"/><rect x="146" y="160" width="22" height="22" rx="3" fill="#DCD8D3"/>`,
+  halle: `<path d="M24 200 V128 Q105 50 186 128 V200 Z" fill="#fff" stroke="#202321" stroke-width="7" stroke-linejoin="round"/>
+          <rect x="84" y="150" width="42" height="50" rx="4" fill="#202321"/>
+          <circle cx="150" cy="170" r="16" fill="#FDC102" stroke="#202321" stroke-width="5"/>`,
+  treff: `<path d="M30 200 V122 L105 64 L180 122 V200 Z" fill="#fff" stroke="#202321" stroke-width="7" stroke-linejoin="round"/>
+          <circle cx="105" cy="120" r="18" fill="#FDC102" stroke="#202321" stroke-width="5"/>
+          <rect x="88" y="152" width="34" height="48" rx="4" fill="#202321"/>
+          <path d="M196 200 V150" stroke="#202321" stroke-width="6"/><circle cx="196" cy="138" r="22" fill="#5C9A3F"/>`,
+};
+const places = [
+  { key: "betrieb", label: "Betrieb", x: 190 },
+  { key: "halle", label: "Sporthalle", x: 500 },
+  { key: "treff", label: "Treffpunkt", x: 810 },
+].map((p) => {
+  const g = svgEl("g", {}, $("places"));
+  const inner = svgEl("g", {}, g);
+  const frame = svgEl("rect", { x: -130, y: 0, width: 260, height: 300, rx: 26, fill: "#fff", stroke: "#202321", "stroke-width": 6 }, inner);
+  const icon = svgEl("g", { transform: "translate(-105 10)" }, inner);
+  icon.innerHTML = PLACE_ICONS[p.key];
+  const label = svgEl("text", { x: 0, y: 262, "text-anchor": "middle", "font-weight": 700, "font-size": 30, fill: "#202321" }, inner);
+  label.textContent = p.label;
+  return { ...p, g, inner, frame };
+});
+
+// S2: Haken an den drei Anforderungen
+const checks2 = [[500, 905, 120], [880, 640, 72], [185, 640, 86]].map(([x, y, off]) => {
+  const g = svgEl("g", {}, $("checks2"));
+  g.dataset.x = x + off; g.dataset.y = y - 11;
+  svgEl("circle", { r: 20, fill: "#5C9A3F" }, g);
+  svgEl("path", { d: "M-9 0 L-3 7 L10 -7", stroke: "#fff", "stroke-width": 5, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, g);
+  return g;
+});
+// Funken
+const sparks = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+  const a = (i / 8) * Math.PI * 2;
+  return { a, el: svgEl("line", { x1: 0, y1: 0, x2: 0, y2: 0 }, $("spark")) };
+});
+
+// S4: Spalten
+const SIE = ["Stellfläche", "Strom", "Zugang"];
+const WIR = ["Anschaffung", "Wartung", "Befüllung"];
+function itemRow(parent, x, y, label, dark) {
+  const g = svgEl("g", { transform: `translate(${x} ${y})` }, parent);
+  const inner = svgEl("g", {}, g);
+  svgEl("rect", { x: 0, y: -40, width: 340, height: 80, rx: 40, fill: dark ? "#202321" : "#fff", stroke: "#202321", "stroke-width": 5 }, inner);
+  svgEl("circle", { cx: 40, cy: 0, r: 20, fill: dark ? "#FDC102" : "#5C9A3F" }, inner);
+  svgEl("path", { d: "M31 0 L37 7 L50 -7", stroke: dark ? "#202321" : "#fff", "stroke-width": 5, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, inner);
+  const tx = svgEl("text", { x: 76, y: 11, "font-weight": 700, "font-size": 32, fill: dark ? "#FBF8F4" : "#202321" }, inner);
+  tx.textContent = label;
+  return { g, inner };
+}
+const sieRows = SIE.map((l, i) => itemRow($("sieItems"), 110, 300 + i * 120, l, false));
+const wirRows = WIR.map((l, i) => itemRow($("wirItems"), 550, 300 + i * 120, l, true));
+// Spalten in 16:9 etwas schmaler setzen (Text links braucht Raum): Breite passt in 1000er Fläche
+
+// Münzen
+function coin(parent) {
+  const g = svgEl("g", {}, parent);
+  svgEl("circle", { r: 26, fill: "#FDC102", stroke: "#202321", "stroke-width": 5 }, g);
+  const t = svgEl("text", { y: 10, "text-anchor": "middle", "font-weight": 800, "font-size": 28, fill: "#202321" }, g);
+  t.textContent = "€";
+  return g;
+}
+const coins5 = [0, 1, 2, 3, 4].map(() => coin($("coins5")));
+
+// Strichlängen für Zeichen-Animationen
+const lenOf = (el) => el.getTotalLength();
+const DASH = {};
+for (const id of ["logoRing", "endRing", "cable", "sig", "dimLine", "ck1", "ck2", "floor"]) {
+  const el = $(id); DASH[id] = lenOf(el); set(el, { "stroke-dasharray": DASH[id] });
+}
+const draw = (id, p) => set($(id), { "stroke-dashoffset": DASH[id] * (1 - p) });
+
+// ───────────────────────── Zeichnen je Zeitpunkt ─────────────────────────
+const vis = (el, o) => { el.style.opacity = o; el.setAttribute && el.setAttribute("opacity", o); };
+const show = (el, on) => { el.style.display = on ? "" : "none"; };
+const tr = (el, x, y, s = 1, r = 0) => el.setAttribute("transform", `translate(${x} ${y}) rotate(${r}) scale(${s})`);
+
+function renderText(key, t) {
+  const [a, b] = S[key];
+  const tb = textBlocks[key];
+  const active = t >= a - 0.01 && t < b + 0.01;
+  tb.box.style.display = active ? "" : "none";
+  if (!active) return;
+  const pIn = k(t, a + 0.1, 0.5);
+  tb.chip.style.opacity = pIn;
+  tb.chip.style.transform = `translateY(${(1 - pIn) * 16}px)`;
+  tb.words.forEach((w, i) => {
+    const p = k(t, a + 0.25 + i * 0.07, 0.75);
+    w.style.transform = `translateY(${(1 - p) * 105}%)`;
+  });
+  const n = tb.words.length;
+  const ps = k(t, a + 0.45 + n * 0.07, 0.7);
+  tb.sub.style.opacity = ps;
+  tb.sub.style.transform = `translateY(${(1 - ps) * 18}px)`;
+  if (tb.mark) tb.mark.style.setProperty("--m", k(t, a + 0.6 + n * 0.07, 0.6, E.inout));
+  const pOut = k(t, b - 0.45, 0.42, E.inout);
+  const base = PORTRAIT ? "" : "translateY(-50%) ";
+  tb.box.style.transform = base + `translateY(${-pOut * 36}px)`;
+  tb.box.style.opacity = 1 - pOut;
+}
+
+function render(t) {
+  for (const key in TEXT) renderText(key, t);
+
+  // Kopfzeile und Kapitel
+  const pBar = k(t, S.ort[0] - 0.2, 0.6) * (1 - k(t, S.ende[0] - 0.3, 0.4));
+  $("brandbar").style.opacity = pBar;
+  $("progress").style.opacity = pBar;
+  CHAPTERS.forEach((c, i) => {
+    const [a, b] = S[c];
+    segs[i].fill.style.transform = `scaleX(${clamp((t - a) / (b - a))})`;
+    segs[i].lbl.style.color = t >= a && t < b ? "#202321" : "#5E5A54";
+  });
+  set($("dotsRect"), { transform: `translate(${(t * 6) % 36} ${(t * 3) % 36})` });
+
+  // ── S0 Logo ──
+  {
+    const [a, b] = S.intro;
+    const on = t < b + 0.1; show($("logo"), on);
+    if (on) {
+      draw("logoRing", k(t, a + 0.1, 1.3, E.inout));
+      const pm = k(t, a + 0.45, 0.9, E.bounce);
+      tr($("logoMachine"), 0, (1 - pm) * 40, lerp(0.6, 1, pm));
+      vis($("logoMachine"), k(t, a + 0.45, 0.3));
+      logoCells.forEach((c, i) => vis(c, k(t, a + 0.9 + i * 0.06, 0.25)));
+      const pOut = k(t, b - 0.6, 0.6, E.inout);
+      tr($("logo"), 500, 500 - pOut * 40, 1 + pOut * 0.25, pOut * 25);
+      vis($("logo"), 1 - pOut);
+    }
+  }
+
+  // ── Automat (Hauptfigur) ──
+  // Zielpositionen je Szene; Übergänge mit ease-in-out
+  const M = machineState(t);
+  tr($("m"), M.x, M.y, M.s);
+  vis($("m"), M.o);
+  $("mBody").setAttribute("transform", `translate(0 0) scale(${M.sx} ${M.sy})`);
+  vis($("mShadow"), 0.16 * M.shadow);
+  set($("mShadow"), { rx: 150 * (0.4 + 0.6 * M.shadow) });
+  // Licht an ab Strom
+  const tLight = S.brauchen[0] + 3.0;
+  mCells.forEach((c, i) => {
+    const p = k(t, tLight + i * 0.05, 0.25, E.lin);
+    c.setAttribute("fill", p > 0.5 ? "#FDC102" : "#4A4F4B");
+  });
+  const pg = k(t, tLight, 0.6);
+  vis($("mGlow"), 0.32 * pg);
+  $("mDisp").setAttribute("fill", pg > 0.5 ? "#5C9A3F" : "#3A3F3C");
+
+  // ── S1 Orte ──
+  {
+    const [a, b] = S.ort;
+    const on = t > a - 0.1 && t < b + 0.1;
+    show($("places"), on); show($("s1extra"), on);
+    if (on) {
+      const pOut = k(t, b - 0.6, 0.55, E.inout);
+      // Auswahl wandert über die Karten und bleibt in der Mitte
+      const hops = [a + 1.3, a + 1.75, a + 2.2];
+      const order = [0, 2, 1];
+      let sel = -1;
+      hops.forEach((h, i) => { if (t >= h) sel = order[i]; });
+      places.forEach((p, i) => {
+        const pi = k(t, a + 0.2 + i * 0.12, 0.7);
+        const isSel = sel === i;
+        const lift = isSel ? k(t, hops[order.indexOf(i)], 0.35, E.bounce) : 0;
+        const others = sel === 1 && i !== 1 ? k(t, hops[2] + 0.3, 0.5) : 0;
+        tr(p.g, p.x, 70 + (1 - pi) * 60 - pOut * 40, 1);
+        vis(p.g, pi * (1 - 0.55 * others) * (1 - pOut));
+        tr(p.inner, 0, -lift * 14, 1 + lift * 0.05);
+        set(p.frame, { fill: isSel ? "#FFF1C2" : "#fff", "stroke-width": isSel ? 8 : 6 });
+      });
+      const pLine = k(t, a + 2.6, 0.4);
+      set($("dropLine"), { opacity: pLine * (1 - pOut) });
+      const pPin = k(t, a + 2.5, 0.5, E.bounce);
+      tr($("pinS1"), 500, 470, pPin);
+      vis($("pinS1"), (pPin > 0 ? 1 : 0) * (1 - pOut));
+      const pPill = k(t, a + 3.55, 0.5, E.bounce);
+      tr($("pillS1"), 790, 700, lerp(0.6, 1, pPill));
+      vis($("pillS1"), k(t, a + 3.55, 0.2) * (1 - pOut));
+    }
+  }
+
+  // ── S2 Was wir brauchen ──
+  {
+    const [a, b] = S.brauchen;
+    const on = t > a - 0.1 && t < b + 0.1; show($("s2"), on);
+    if (on) {
+      const pOut = k(t, b - 0.6, 0.55, E.inout);
+      vis($("s2"), 1 - pOut);
+      // Stellfläche
+      const pf = k(t, a + 0.5, 0.7, E.inout);
+      draw("floor", pf); set($("floor"), { "fill-opacity": k(t, a + 0.9, 0.4) });
+      draw("dimLine", k(t, a + 0.9, 0.5, E.inout)); vis($("dim"), k(t, a + 0.9, 0.2));
+      vis($("l2a"), k(t, a + 1.1, 0.4));
+      // Zugang: Schlüssel dreht
+      const pk = k(t, a + 1.2, 0.4);
+      tr($("key"), 130, 520 + (1 - pk) * 30, 1); vis($("key"), pk);
+      tr($("keyRot"), 0, 0, 1, -90 * k(t, a + 1.7, 0.6, E.bounce));
+      vis($("l2c"), k(t, a + 1.5, 0.4));
+      // Strom: Kabel läuft zur Dose
+      const ps = k(t, a + 1.6, 0.4); vis($("socket"), ps); vis($("l2b"), k(t, a + 1.8, 0.4));
+      draw("cable", k(t, a + 2.0, 0.9, E.inout));
+      const pp = k(t, a + 2.75, 0.3, E.bounce);
+      vis($("plug"), k(t, a + 2.7, 0.1)); tr($("plug"), 868 + (1 - pp) * -16, 548 + (1 - pp) * 16, 1);
+      const pk2 = clamp((t - (a + 3.0)) / 0.45);
+      sparks.forEach(({ a: ang, el }) => {
+        const r1 = 62 + pk2 * 30, r2 = r1 + 26 * (1 - pk2);
+        set(el, { x1: Math.cos(ang) * r1, y1: Math.sin(ang) * r1, x2: Math.cos(ang) * r2, y2: Math.sin(ang) * r2, opacity: pk2 > 0 && pk2 < 1 ? 1 - pk2 : 0 });
+      });
+      // Haken
+      [a + 1.3, a + 3.2, a + 2.1].forEach((tc, i) => {
+        const g = checks2[i]; const p = k(t, tc, 0.45, E.bounce);
+        tr(g, +g.dataset.x, +g.dataset.y, p); vis(g, p > 0 ? 1 : 0);
+      });
+    }
+  }
+
+  // ── S3 Was Sie bekommen ──
+  {
+    const [a, b] = S.bekommen;
+    const on = t > a - 0.1 && t < b + 0.1; show($("s3"), on);
+    if (on) {
+      const pOut = k(t, b - 0.6, 0.55, E.inout);
+      const pc = k(t, a + 0.35, 0.8);
+      tr($("s3"), 0, (1 - pc) * 50 - pOut * 30); vis($("s3"), Math.min(pc, 1 - pOut));
+      vis($("cl1"), k(t, a + 0.7, 0.3)); vis($("cl2"), k(t, a + 0.8, 0.3));
+      // Auswahl pendelt: Miete, Umsatz, Miete … dann Gespräch
+      const t1 = a + 1.2, t2 = a + 2.2, t3 = a + 3.1;
+      const y1 = 368, y2 = 538;
+      let hy = y1, hv = k(t, t1, 0.3);
+      hy = lerp(y1, y2, k(t, t2, 0.45, E.snap));
+      hy = lerp(hy, y1, k(t, t3, 0.45, E.snap));
+      const pHide = k(t, a + 3.9, 0.4, E.inout);
+      set($("hl"), { y: hy, opacity: hv * (1 - pHide) });
+      const c1 = (t >= t1 && t < t2 + 0.2) || (t >= t3 + 0.2 && t < a + 3.9);
+      const c2 = t >= t2 + 0.2 && t < t3 + 0.2;
+      draw("ck1", c1 ? k(t, t >= t3 ? t3 + 0.2 : t1, 0.3) : 0);
+      draw("ck2", c2 ? k(t, t2 + 0.2, 0.3) : 0);
+      set($("cb1"), { fill: c1 ? "#FDC102" : "#fff" }); set($("cb2"), { fill: c2 ? "#FDC102" : "#fff" });
+      // Gespräch, dann Unterschrift
+      const pt = k(t, a + 3.9, 0.5, E.bounce);
+      tr($("talk"), 860, 712, pt); vis($("talk"), pt > 0 ? 1 : 0);
+      draw("sig", k(t, a + 4.3, 1.0, E.inout));
+    }
+  }
+
+  // ── S4 Sie | Wir ──
+  {
+    const [a, b] = S.tragen;
+    const on = t > a - 0.1 && t < b + 0.1; show($("s4"), on);
+    if (on) {
+      const pOut = k(t, b - 0.6, 0.55, E.inout);
+      vis($("s4"), 1 - pOut);
+      vis($("colSie"), k(t, a + 0.3, 0.5));
+      sieRows.forEach((r, i) => { const p = k(t, a + 0.5 + i * 0.12, 0.6); tr(r.inner, (1 - p) * -30, 0); vis(r.g, p); });
+      vis($("s4div"), k(t, a + 0.6, 0.5));
+      vis($("colWir"), k(t, a + 1.2, 0.5));
+      wirRows.forEach((r, i) => { const p = k(t, a + 1.5 + i * 0.32, 0.55, E.bounce); tr(r.inner, (1 - p) * 40, 0, lerp(0.85, 1, p)); vis(r.g, k(t, a + 1.5 + i * 0.32, 0.2)); });
+    }
+  }
+
+  // ── S5 Spende ──
+  {
+    const [a, b] = S.spende;
+    const on = t > a - 0.1 && t < b + 0.1; show($("s5"), on);
+    if (on) {
+      const pA = k(t, a + 0.35, 0.7); tr($("cardA"), (1 - pA) * 40, 0); vis($("cardA"), pA);
+      const pB = k(t, a + 0.6, 0.7); tr($("cardB"), (1 - pB) * 40, 0); vis($("cardB"), pB);
+      const pL = k(t, a + 3.4, 0.45, E.bounce); tr($("lockA"), 490, 330, lerp(0.8, 1, pL)); vis($("lockA"), pL > 0 ? 1 : 0);
+      // Münzen fallen nur in die Spende
+      coins5.forEach((c, i) => {
+        const t0 = a + 1.4 + i * 0.32;
+        const p = clamp((t - t0) / 0.75);
+        const x0 = 300, y0 = 790, x1 = 850, y1 = 772;
+        const x = lerp(x0, x1, E.inout(p));
+        const y = lerp(y0, y1, p) - Math.sin(p * Math.PI) * 30;
+        tr(c, x, y, p < 0.5 ? lerp(0.7, 1, p * 2) : lerp(1, 0.55, (p - 0.5) * 2), p * 200);
+        vis(c, p > 0 && p < 1 ? 1 : 0);
+      });
+      // Herz schlägt bei jeder Münze
+      let beat = 0;
+      for (let i = 0; i < 5; i++) { const tc = a + 1.4 + i * 0.32 + 0.75; const d = t - tc; if (d > 0 && d < 0.3) beat = Math.max(beat, Math.sin((d / 0.3) * Math.PI)); }
+      $("heart").setAttribute("transform", `scale(${1 + beat * 0.18})`);
+      vis($("s5"), 1 - k(t, b - 0.5, 0.45, E.inout));
+    }
+  }
+
+  // ── Abschluss ──
+  {
+    const [a] = S.ende;
+    const on = t > a - 0.6; show($("endbg"), on); show($("end"), on);
+    if (on) {
+      const W = PORTRAIT ? 1080 : 1920, H = PORTRAIT ? 1920 : 1080;
+      const pw = k(t, a - 0.5, 1.0, E.inout);
+      const cx = W / 2, cy = H / 2;
+      $("endbg").style.clipPath = `circle(${pw * Math.hypot(W, H) * 0.6}px at ${cx}px ${cy}px)`;
+      draw("endRing", k(t, a + 0.2, 1.2, E.inout));
+      const pm = k(t, a + 0.5, 0.8, E.bounce);
+      tr($("endMachine"), 0, (1 - pm) * 30, lerp(0.6, 1, pm)); vis($("endMachine"), k(t, a + 0.5, 0.25));
+      endCells.forEach((c, i) => vis(c, k(t, a + 0.85 + i * 0.05, 0.25)));
+      [["endWord", 0.9], ["endClaim", 1.3], ["endCta", 1.8], ["endMail", 2.1]].forEach(([id, d]) => {
+        const p = k(t, a + d, 0.7);
+        $(id).style.opacity = p; $(id).style.transform = `translateY(${(1 - p) * 24}px)`;
+      });
+      const pulse = t > a + 2.6 ? 1 + 0.025 * Math.sin((t - a - 2.6) * Math.PI * 1.4) : 1;
+      $("endCta").style.transform += ` scale(${pulse})`;
+    }
+  }
+}
+
+// Position des Automaten über alle Szenen
+function machineState(t) {
+  // Keyframes: [Zeit, x, y, s, o]
+  const KF = [
+    [S.ort[0] + 1.9, 500, -500, 0.9, 1],
+    [S.ort[0] + 2.9, 500, 940, 0.9, 1],       // fällt in den Ort
+    [S.brauchen[0], 500, 940, 0.9, 1],
+    [S.brauchen[0] + 0.55, 500, 760, 0.95, 1], // steht auf der Stellfläche
+    [S.bekommen[0], 500, 760, 0.95, 1],
+    [S.bekommen[0] + 0.7, 245, 840, 0.82, 1],
+    [S.tragen[0] - 0.05, 245, 840, 0.82, 1],
+    [S.tragen[0] + 0.5, 245, 1100, 0.82, 0],   // tritt ab
+    [S.spende[0], 245, 1100, 0.82, 0],
+    [S.spende[0] + 0.7, 245, 860, 0.82, 1],
+    [S.spende[1] - 0.4, 245, 860, 0.82, 1],
+    [S.spende[1] + 0.2, 245, 860, 0.82, 0],
+  ];
+  let st = { x: 500, y: -600, s: 0.9, o: 0 };
+  if (t < KF[0][0]) return { ...st, sx: 1, sy: 1, shadow: 0 };
+  let i = 0;
+  while (i < KF.length - 1 && t >= KF[i + 1][0]) i++;
+  const A = KF[i], B = KF[Math.min(i + 1, KF.length - 1)];
+  const isDrop = i === 0;
+  let p = B[0] === A[0] ? 1 : clamp((t - A[0]) / (B[0] - A[0]));
+  p = isDrop ? p * p : E.inout(p); // freier Fall, sonst weich
+  st = { x: lerp(A[1], B[1], p), y: lerp(A[2], B[2], p), s: lerp(A[3], B[3], p), o: lerp(A[4], B[4], p) };
+  // Aufsetzen: kurz stauchen
+  const land = S.ort[0] + 2.9;
+  const q1 = clamp((t - land) / 0.45);
+  const squash = t >= land ? Math.sin(q1 * Math.PI) * (1 - q1) * 0.16 : 0;
+  const shadow = t < land ? clamp(1 - (land - t) / 0.9) : 1;
+  return { ...st, sx: 1 + squash, sy: 1 - squash, shadow };
+}
+
+window.DURATION = DURATION;
+window.render = render;
+window.ready = document.fonts.ready.then(() => { render(+(q.get("t") || 0)); return true; });
+
+if (q.get("play")) {
+  // Vorschau: Bühne an Fenster anpassen und in Echtzeit abspielen
+  const fit = () => {
+    const W = PORTRAIT ? 1080 : 1920, H = PORTRAIT ? 1920 : 1080;
+    const s = Math.min(innerWidth / W, innerHeight / H);
+    $("stage").style.transform = `scale(${s})`;
+  };
+  fit(); addEventListener("resize", fit);
+  const t0 = performance.now();
+  const loop = () => { render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+  window.ready.then(loop);
+}
+</script>
+</body>
+</html>

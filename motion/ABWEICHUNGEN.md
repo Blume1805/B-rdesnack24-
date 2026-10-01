@@ -32,6 +32,8 @@ dürfen sie so nicht erscheinen:
 | R-6 | Alter Claim „Immer da, wenn der Hunger kommt." in M01, M04, M09 | Am 27.09.2026 vom Gesellschafter abgelöst. | **In `MOTION.md` ersetzt** durch „Versorgung vor Ort. Wert für den Ort." (27.09.2026) |
 | R-7 | M11 Beispieladresse `hallo@boerdesnack24.de` | Auf der Landingpage steht `kontakt@boerdesnack24.de`. | **In `MOTION.md` ersetzt** (27.09.2026) |
 | R-8 | Satz der Text-Hervorhebung „Wer das Geld bekommt, entscheidest Du." (Landingpage, Muster 04 / M05) | Überzeichnet den Einfluss des Einzelnen: Die Kundschaft stimmt gemeinsam ab, die drei Zwecke mit den meisten Stimmen bekommen den Topf (§ 5 UWG). In der App am 27.09.2026 gleichartig korrigiert. | „Wer das Geld bekommt, entscheidest Du mit." — beauftragt mit `docs/auftraege/lovable-auftrag-2026-09-27-motion.md` |
+| R-9 | Landingpage `Stage.tsx`: „Was es Sie kostet. Nichts." neben „Was wir brauchen: Stellfläche, Strom und Zugang" (geprüft 01.10.2026) | Liegt der Strom beim Standort, kostet der Automat den Standortgeber Geld. Die Finanzrechnung (`docs/strategy/2026-09-15-fundament-und-finanzlogik.md`, „Strom (entfällt, wenn Standort trägt)") sieht genau das vor. Dann ist „Nichts." irreführend (§ 5 UWG). | Erklärfilm vermeidet die Aussage („Wir tragen den Rest.", Sie/Wir-Gegenüberstellung). Landingpage nach P-4 anpassen: entweder Strom erstatten oder „Kein Kaufpreis, keine Wartung, keine Befüllung." ohne „Nichts." |
+| R-10 | Referenzvideo `standortgeber-referenz.mp4` (Lovable-Asset seit 01.10.2026, auf der Seite noch nicht eingebunden) | Zeigt „Anteil an den Standortgeber 5 %" und „Mietvertrag" sowie „Bahnhof". Widerspricht ADR 0007 (die 5 % sind die Spende, Höhe der Vergütung wird nie genannt) und R-3. | **gesperrt.** Ersetzt durch den eigenen Erklärfilm `motion/video/standortgeber/` (01.10.2026) |
 
 ## T. Technik
 
@@ -58,6 +60,7 @@ dürfen sie so nicht erscheinen:
 | P-1 | Enthalten die Katalogpreise für Getränke in Pfandflasche oder Dose den Pfand? | **Beantwortet 27.09.2026: ja, der Pfand ist enthalten.** Das widerspricht § 7 PAngV (Pfand neben dem Preis angeben, nicht einbeziehen). Betroffen: App, Kassenbon, Preisschilder am Automaten, Rabattberechnung. Die Landingpage ist nicht betroffen, weil ihre „ab"-Preise von pfandfreien Produkten stammen. Weiter in `docs/COMPLIANCE.md`, V-016 | Umsetzung offen, siehe V-016 |
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
 | P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | **Entschieden 29.09.2026: „ab 1,25 € zzgl. 0,25 € Pfand".** Umgesetzt über den Schalter `pfandGetrennt` (`docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`); umgelegt nach Runbook M. | Schalter nach Runbook M |
+| P-4 | Wer trägt den Strom am Standort? | Entscheidet, ob „Was es Sie kostet. Nichts." auf der Landingpage wahr ist (R-9), und geht in jede Standortverhandlung ein (Finanzrechnung: 25 € je Monat). | Gesellschafter, vor dem ersten Standortgespräch |
 
 ## U. Umsetzungsstand
 
@@ -70,6 +73,7 @@ dürfen sie so nicht erscheinen:
 | 27.09.2026 | Web A–E (Lovable, Commit `bb47899`) | Tokens, `useScrollProgress`, M01 `HeroClaim`, M06 `Stage`, M02 `SectionNav`. F, G, H nicht umgesetzt. | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: A, C, I 🟢; B, D, E 🔴 (Bewegung ohne Bewegung, eigene Farbe, toter Link `#sortiment`). Nachtrag geschrieben, wartet auf Lovable-Credits |
 | 28.09.2026 | Web Nachtrag (Lovable, Commit `b759d0a`) | Regressionen 1a–1e behoben; M05 mit „entscheidest Du mit.“, M10 „Nach oben“, M11 Copy-Pill im Fußbereich, M03 Sortiment mit Startpreisen; Nettoerlös-Satz „… und ohne Pfand“ | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-27-motion.md`: alle Punkte 🟢 am Code; Sichtprüfung durch Philipp in der Vorschau; Nettoerlös-Satz erst nach Runbook M veröffentlichen |
 | 30.09.2026 | Web Pfand-Schalter (Lovable, Commit `f5c82e5`) | `site.pfandGetrennt` (Endstand `false`) steuert Kaltgetränke-Startpreis „ab 1,25 € zzgl. 0,25 € Pfand", Rabatt-Hinweis und Nettoerlös-Satz | Abnahme in `docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`: alle Punkte 🟢. Seite ist in Stellung `false` wahr und veröffentlichbar; Umlegen nach Runbook M |
+| 01.10.2026 | Erklärfilm „Für Standortgeber" | `motion/video/standortgeber/` (16:9 und 9:16, 39 s, ohne Ton). Kurven und Farben aus `motion-tokens.css`, Inhalte nur aus `Stage.tsx`, ADR 0007 und Projektwissen; Quellen je Aussage in der README | Bild-für-Bild-Kontrolle beider Formate; Kontraste gemessen (Ink/Creme 14,98:1, Ink/Gold 9,67:1, Muted/Creme 6,47:1). Einbau in Lovable wartet auf Sichtfreigabe |
 
 M11 im Web (Kontakt-Pill im Fußbereich) ist noch offen: Der Fußbereich der
 Landingpage ist laut Lovable-Auftrag vom 26.09.2026 unverändert zu lassen, und

@@ -1359,3 +1359,49 @@ vollständig; offen sind nur Ausrollen, Landingpage-Satz und Preisschilder.
 | V-016-e | Der Arbeitsstand der Produktionslinie lag in einer veralteten Kopie (`2632d3b` statt `437dadb`); der erste Neuaufbau scheiterte daran. | 🟢 auf `437dadb` umgestellt, Neuaufbau wiederholt |
 | V-016-f | Treuestufen zählen den Umsatz einschließlich Pfand („ab 150 € Gesamtumsatz"). Nicht falsch, aber nicht entschieden. | 🔴 offen: mit oder ohne Pfand zählen — Philipp, 04.10.2026 |
 | V-016-g | Landingpage-Aussagen zum Pfand (Startpreis Kaltgetränke, Rabatt-Hinweis, Nettoerlös-Definition) stimmen erst nach Runbook M. | **Entschieden 29.09.2026:** „ab 1,25 € zzgl. Pfand" und „Rabatte gelten nicht für den Pfand." Umsetzung über einen Schalter `pfandGetrennt` (Lovable-Auftrag 29.09.2026), der alle drei Aussagen gemeinsam umlegt; bis Runbook M zeigt die Seite den heute wahren Stand und kann veröffentlicht werden. **Umgesetzt und abgenommen 30.09.2026** (Lovable `f5c82e5`, Stellung `false`). Offen: Umlegen nach Runbook M |
+
+## V-017 · Standortgeber-Aussagen: „Nichts." trotz Strom, Referenzvideo mit „5 %" (2026-10-01) — OFFEN
+
+### Sachverhalt
+
+* Landingpage, Abschnitt „Für Standortgeber" (`src/components/bs24/Stage.tsx`,
+  Lovable, geprüft am 01.10.2026): „Was es Sie kostet. Nichts. Kein Kaufpreis,
+  keine Wartung, keine Befüllung." Im selben Abschnitt: „Was wir brauchen.
+  Stellfläche, Strom und Zugang zum Befüllen."
+* Die Finanzrechnung (`docs/strategy/2026-09-15-fundament-und-finanzlogik.md`)
+  führt Strom mit 25 € im Monat und dem Vermerk „entfällt, wenn Standort
+  trägt". Wer den Strom trägt, ist nicht entschieden.
+* Am 01.10.2026 liegt im Lovable-Projekt ein Video
+  `src/assets/videos/standortgeber-referenz.mp4` (noch nirgends eingebunden).
+  Es zeigt „Anteil an den Standortgeber 5 % (Beispiel)", „Mietvertrag" und
+  „Bahnhof".
+
+### Rechtliche Würdigung
+
+* Trägt der Standortgeber den Strom, entstehen ihm laufende Kosten. „Nichts."
+  ist dann eine unwahre Angabe über die Kosten des Angebots gegenüber einem
+  Unternehmer (§ 5 Abs. 1, Abs. 2 Nr. 2 UWG). Gegenüber Unternehmern ist der
+  Maßstab etwas weniger streng als gegenüber Verbrauchern, aber eine absolute
+  Aussage wie „Nichts." lässt keinen Auslegungsspielraum.
+* Das Referenzvideo verknüpft „5 %" mit dem Standortgeber. Das widerspricht
+  ADR 0007 (die 5 % des Nettoerlöses sind die Spende, der Standortgeber bekommt
+  daraus nichts) und würde beim Standortgeber eine konkrete Vergütungshöhe als
+  Erwartung setzen, die ADR 0007 für Standorte unter etwa 950 € Monatsumsatz
+  wirtschaftlich ausschließt.
+
+### Ergebnis
+
+| # | Punkt | Stand |
+|---|---|---|
+| V-017-a | Erklärfilm „Für Standortgeber" ohne „Nichts." und ohne Vergütungshöhe (`motion/video/standortgeber/`) | 🟢 Inhalte je Aussage gegen Quellen geprüft (README des Films) |
+| V-017-b | Wer trägt den Strom? Danach „Nichts." auf der Landingpage halten (bei Erstattung) oder streichen | 🔴 offen: Gesellschafter, vor dem ersten Standortgespräch (`motion/ABWEICHUNGEN.md` P-4) |
+| V-017-c | Referenzvideo nicht auf der Seite einbinden | 🔴 gesperrt (`motion/ABWEICHUNGEN.md` R-10); Asset in Lovable bleibt bis zur Löschfreigabe liegen |
+
+### Optimierungsvorschlag
+
+Strom pauschal erstatten (z. B. als fester Teil der Miete) macht „Nichts." wahr
+und ist in der Verhandlung ein einfaches Argument. Kosten laut Finanzrechnung
+25 € im Monat je Automat, die bei Standorten unter 950 € Monatsumsatz nicht
+gedeckt sind (ADR 0007).
+
+**Status: 🔴 OFFEN** (V-017-b, V-017-c)
