@@ -61,7 +61,7 @@ dürfen sie so nicht erscheinen:
 | P-2 | Ist „Durstlöscher 0,5 l" im Karton (ohne Pfand)? | **Beantwortet 27.09.2026: ja, Karton, kein Pfand.** Der Startpreis „Kaltgetränke ab 1,50 €" ist damit belegt. | Erledigt |
 | P-3 | Startpreis Kaltgetränke nach der Pfand-Trennung | **Entschieden 29.09.2026: „ab 1,25 € zzgl. 0,25 € Pfand".** Umgesetzt über den Schalter `pfandGetrennt` (`docs/auftraege/lovable-auftrag-2026-09-29-pfandschalter.md`); umgelegt nach Runbook M. | Schalter nach Runbook M |
 | P-4 | Wer trägt den Strom am Standort? | **Beantwortet 01.10.2026: Bördesnack24 zahlt den Strom.** Festgehalten in ADR 0007 (Nachtrag). Im Standortvertrag eine Erstattung regeln. | Erledigt; Vertragsklausel offen |
-| P-5 | Löst „Genießen. Geben. Gutes tun." den Claim „Versorgung vor Ort. Wert für den Ort." überall ab? | Der Erklärfilm endet auf Wunsch von Philipp (01.10.2026) mit dem Slogan, die Landingpage (`HeroClaim`) und das Projektwissen nennen den Claim vom 27.09.2026. Zwei Leitsätze nebeneinander schwächen beide. | Philipp |
+| P-5 | Löst „Genießen. Geben. Gutes tun." den Claim „Versorgung vor Ort. Wert für den Ort." überall ab? | **Entschieden 03.11.2026: ja, überall.** Umgestellt: Landingpage (Lovable, 07.10.2026), App (Anmeldung, Startseite, Ladebildschirm `web/index.html`), Briefvorlage `brief_docx.ts`, Store-Text, `MOTION.md`, Lovable-Projektwissen | Erledigt |
 
 ## U. Umsetzungsstand
 

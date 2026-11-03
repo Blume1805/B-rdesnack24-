@@ -1441,9 +1441,12 @@ läuft. Vor der Veröffentlichung aber zwingend zu beheben.
 
 | # | Punkt | Stand |
 |---|---|---|
-| V-018-a | Freischaltung der Vorteile für alle auf die Produktionslinie übertragen (Gegenstück zu `0065`), Abo-Zeiträume für Monat und Jahr schließen | 🔴 offen, Migration für die Produktionslinie zu schreiben, Ausrollen über Runbook |
-| V-018-b | Video: Push-Meldung ersetzen, z. B. Einblendung „Danke. 5 % des Nettoerlöses gehen an die Region." | 🔴 offen, Lovable-Auftrag |
-| V-018-c | „Echtzeit-Bestand" erst nach Runbook M (V-016-d) | 🔴 offen |
+| V-018-a | Freischaltung der Vorteile für alle auf die Produktionslinie übertragen (Gegenstück zu `0065`), Abo-Zeiträume für Monat und Jahr schließen | 🔴 offen bis zum Ausrollen. Migration `20261103100000_vorteile_ohne_abo` geschrieben und lokal nachgewiesen (03.11.2026: `112_vorteile_ohne_abo` 21/21, Neuaufbau mit allen Prüfskripten ohne Regression; gesichert in `docs/audit/2026-11-03-vorteile/`). Ausrollen: Runbook N (Philipp), nach Runbook M |
+| V-018-b | Video: Push-Meldung ersetzen, z. B. Einblendung „Danke. 5 % des Nettoerlöses gehen an die Region." | ✅ im Code erledigt (Lovable `2c98578`, 03.11.2026). Sichtprüfung des Videobilds durch Philipp offen, weil die Lovable-Adressen aus der Arbeitsumgebung gesperrt sind |
+| V-018-c | „Echtzeit-Bestand" erst nach Runbook M (V-016-d) | ✅ erledigt: Schalter `site.bestandLive = false`, Karte „Standorte, Nährwerte und Allergene." (Lovable `2c98578`). Umlegen erst nach Runbook M |
+| V-018-d | Kontolöschung scheitert bei Kunden mit Treuebonus (Fremdschlüssel `loyalty_bonus_grants_offer_id_fkey` ohne Löschregel), entdeckt 03.11.2026 beim Nachweis zu V-018-a | 🔴 offen bis zum Ausrollen. Bisher latent, weil ohne Abo niemand Treueboni bekam; mit V-018-a wäre jede Löschanfrage eines solchen Kunden gescheitert (Art. 17 DSGVO, Recht auf Löschung). Behoben in Abschnitt 4 derselben Migration (`on delete set null`), nachgewiesen durch `96`/`97` und `112` F1/F2. main-Linie (`0016`): derselbe Fremdschlüssel ohne Löschregel. Dort löscht die Kundenlöschung Angebote und Boni über dieselbe Kaskade in einer Anweisung, deshalb ist kein Fehler zu erwarten. Das ist aus dem Code gelesen, nicht ausgeführt, und bleibt deshalb als Prüfpunkt offen |
+| V-018-e | Datenschutzerklärung der Landingpage nennt den Hoster nicht (Art. 13 DSGVO) | ✅ Abschnitt „Hosting" (Hostinger International Ltd., Larnaca) ergänzt, Lovable `2c98578`. Der Auftragsverarbeitungsvertrag mit Hostinger selbst bleibt als Nachweis abzulegen |
+| V-018-f | Video läuft automatisch länger als 5 s ohne Pause-Möglichkeit (WCAG 2.2.2, BFSG) | ✅ Pause-Knopf, Pause bleibt beim Scrollen (Lovable `2c98578`). Nacharbeit: `aria-pressed` am Pause-Knopf streichen (Entwurf `docs/auftraege/lovable-auftrag-2026-11-03-nacharbeit.md`, nicht gesendet) |
 
 Abgleich mit allen Befunden: `docs/abgleich-landingpage-backend-2026-11-03.md`.
 

@@ -156,7 +156,7 @@ function footerXml(): string {
 function documentXml(): string {
   const body = [
     heading("Bördesnack24 GbR"),
-    subtitle("Versorgung vor Ort. Wert für den Ort."),
+    subtitle("Genießen. Geben. Gutes tun."),
     blank(),
     para("Bördesnack24 GbR · Sülldorfer Str. 3A · 39171 Sülzetal", {
       size: 16, color: MUTED_HEX,

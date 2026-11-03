@@ -20,7 +20,7 @@ Alles wird in Gold / Ink / Creme / Grün übersetzt (keine Blau-/Lila-Verläufe)
 > **Vor jeder Umsetzung `motion/ABWEICHUNGEN.md` lesen** (Stand 27.09.2026). Dort stehen
 > Kontrastwerte, die WCAG verfehlen, Beispieltexte mit Aussagen, die es noch nicht gibt, und
 > gesperrte Patterns. Ein ⚠️ in einem Prompt verweist auf den jeweiligen Punkt. Geändert wurde
-> in dieser Datei nur: der alte Claim (Entscheidung vom 27.09.2026) und die Kontaktadresse.
+> in dieser Datei nur: der alte Claim (Entscheidung vom 27.09.2026, seit 03.11.2026 ersetzt durch den Slogan „Genießen. Geben. Gutes tun.") und die Kontaktadresse.
 
 ---
 
@@ -152,7 +152,7 @@ Legende Einsatz: **W** = Website · **A** = App · **W+A** = beide.
 ### M01 — Kinetische Wortmarke · W+A
 **Referenz:** große Headline, deren Buchstaben einzeln einlaufen und die beim Scrollen
 auf volle Breite wächst („FLAVO → FLAVORS"), Name hinter organischer Blob-Maske.
-**Einsatz:** Website-Hero („Bördesnack24" / „Versorgung vor Ort. Wert für den Ort."), App-Splash.
+**Einsatz:** Website-Hero („Bördesnack24" / „Genießen. Geben. Gutes tun."), App-Splash.
 **Spezifikation:**
 - Text in Buchstaben-Spans splitten (`aria-label` am Wrapper, Spans `aria-hidden`).
 - Intro: jeder Buchstabe `translateY(110%) rotate(6deg) → 0`, `--dur-reveal`,
@@ -237,7 +237,7 @@ Reduced motion: nur Farbwechsel/Opacity, kein Wachsen und kein Pop.
 ### M04 — Text auf Pfad · W
 **Referenz:** Satz läuft auf einer geschwungenen Linie durchs Bild und wandert mit dem
 Scroll („You would drink it every day").
-**Einsatz:** Übergang zwischen Sortiment und App-Teaser, z. B. „Versorgung vor Ort. Wert für den Ort."
+**Einsatz:** Übergang zwischen Sortiment und App-Teaser, z. B. „Genießen. Geben. Gutes tun."
 **Spezifikation:**
 - SVG `<path>` (weiche S-Kurve, volle Breite) + `<textPath>`; Pfad selbst unsichtbar.
 - `startOffset` = `100% - p * 140%` (Text läuft von rechts nach links durch).
@@ -250,7 +250,7 @@ Scroll („You would drink it every day").
 ⚠️ Vor Umsetzung motion/ABWEICHUNGEN.md, Punkt A-1 beachten.
 Pattern M04 „Text auf Pfad" aus motion/MOTION.md umsetzen.
 Sticky Section (200vh, Creme #FBF8F4). Vollbreites SVG mit unsichtbarer S-Kurve
-(viewBox 0 0 1440 600) und <textPath>: "Versorgung vor Ort. Wert für den Ort. Versorgung vor Ort. Wert für den Ort."
+(viewBox 0 0 1440 600) und <textPath>: "Genießen. Geben. Gutes tun. Genießen. Geben. Gutes tun."
 in Bricolage Grotesque 800, ca. 8vw, Wörter abwechselnd #202321 und #DBA200.
 startOffset per useScrollProgress: (100 - p*140)%. Glättung lerp 0.12.
 SVG aria-hidden, Satz zusätzlich als sr-only <p>. Mobile: flachere Kurve, 12vw.
@@ -364,7 +364,7 @@ Mobile <768px: horizontale scroll-snap-Liste ohne Parallax. Reduced motion: stat
 ### M09 — Marquee-Wortmarke im Footer · W (A: Ticker)
 **Referenz:** riesige Wortmarke läuft endlos durch den Footer, getrennt durch einen
 weißen Punkt/Blob; Laufband mit Claims zwischen Sektionen.
-**Einsatz:** Footer „Bördesnack24 ● Versorgung vor Ort ●", Ticker mit Standorten.
+**Einsatz:** Footer „Bördesnack24 ● Genießen. Geben. Gutes tun. ●", Ticker mit Standorten.
 **Spezifikation:**
 - Zwei identische Tracks hintereinander, `translateX(0 → -50%)`, linear, `--marquee-duration`.
 - Richtung und Tempo reagieren auf Scroll: Scroll nach oben kehrt Richtung um,
@@ -381,7 +381,7 @@ weißen Punkt/Blob; Laufband mit Claims zwischen Sektionen.
 Pattern M09 „Marquee-Wortmarke" aus motion/MOTION.md umsetzen.
 Footer auf Ink (#202321). Oben: Kontakt-Headline "Fragen, Wünsche, neuer Standort?"
 und E-Mail als Copy-Pill (Pattern M11). Unten: endlose Marquee
-"Bördesnack24 ● Versorgung vor Ort. Wert für den Ort. ●" in Bricolage 800, clamp(80px,14vw,220px),
+"Bördesnack24 ● Genießen. Geben. Gutes tun. ●" in Bricolage 800, clamp(80px,14vw,220px),
 Creme, "●" in #FDC102. Zwei identische Tracks, translateX 0 → -50%, linear, 38s.
 Scroll-Richtung nach oben kehrt die Laufrichtung um, Scroll-Tempo beschleunigt kurz (max 3×,
 lerp zurück). Hover verlangsamt auf 0.3×; Pause bei focus-within und document.hidden.

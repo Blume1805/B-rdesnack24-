@@ -1428,11 +1428,11 @@ von GitHub.
 5. Zurück im SQL Editor: ins leere Feld klicken, **Strg+V**, dann unten
    rechts **Run**. Unten erscheint „Success. No rows returned".
 6. Feld leeren (Strg+A, Entf). Dann dasselbe mit dieser Datei:
-   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260927200000_pfand_getrennt.sql`
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-app-strategy-sf5yzy/docs/audit/2026-09-27-pfand/20260927200000_pfand_getrennt.sql`
    → **Copy raw file** → Strg+V → **Run**. Das dauert einige Sekunden.
 6b. Feld leeren. Dasselbe mit der dritten Datei, die Kunden im
    Automatenfinder zeigt, ob ein Produkt da ist (ohne Stückzahlen):
-   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-audit-architecture-7xd3d6/supabase/migrations/20260929100000_verfuegbarkeit_fuer_kunden.sql`
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-app-strategy-sf5yzy/docs/audit/2026-09-29-verfuegbarkeit/20260929100000_verfuegbarkeit_fuer_kunden.sql`
    → **Copy raw file** → Strg+V → **Run**.
 7. Feld leeren und diesen Text einfügen. Er trägt alle drei Änderungen in
    die Liste der eingespielten Änderungen ein, damit sie später nicht noch
@@ -1504,3 +1504,105 @@ Technischer Hintergrund: Migration
 `claude/bordesnack24-audit-architecture-7xd3d6`), Nachweis
 `scripts/pruefumgebung/110_pfand.sql` (23 Fälle) und Neuaufbau mit allen
 Prüfskripten, COMPLIANCE V-016.
+
+## Runbook N: App-Vorteile für jedes kostenlose Konto freischalten
+
+**Zeitbedarf:** 10 Minuten in Supabase.
+
+**Dringlichkeit:** vor der Veröffentlichung der Landingpage und vor dem ersten
+Automaten in Betrieb. **Reihenfolge:** erst Runbook M, dann dieses Runbook.
+Andersherum bricht es ohne Änderung ab und sagt das auch.
+
+### Warum das gemacht werden soll
+
+Die Landingpage und unsere Nutzungsbedingungen versprechen: Wer ein
+kostenloses Konto hat, bekommt 5 % Rabatt, Coupons und Treueboni. In der
+echten Datenbank hängen diese Vorteile aber noch am alten Abo. Ein neuer Kunde
+bekäme heute also nichts davon, könnte aber ein Abo abschließen, das es laut
+Seite gar nicht mehr gibt. Das ist irreführende Werbung (§ 5 UWG, das Gesetz
+gegen unlauteren Wettbewerb) und widerspricht unseren eigenen Bedingungen.
+
+Die Freischaltung vom 16.09.2026 war nur in der Testdatenbank angekommen,
+nicht in der echten.
+
+### Was dabei passiert und was nicht
+
+* Jedes **angemeldete** Konto bekommt die Vorteile: 5 % Dauerrabatt, Coupons
+  aktivieren, Treueboni, Statusstufen. Wer nicht angemeldet ist, bekommt
+  weiter nichts.
+* Monats- und Jahresabo lassen sich **nicht mehr neu abschließen**. Es wird
+  dabei nichts gelöscht, die Angebotszeiträume werden nur beendet.
+* Wer schon einen Abo-Eintrag hat, behält ihn. Die Kontrolle in Schritt 6
+  zählt, wie viele das sind.
+* Nebenbei behoben: Ein Kunde mit Treuebonus konnte sein Konto nicht löschen,
+  weil die Datenbank das daran hängende Angebot nicht freigab. Das fiel bisher
+  nicht auf, weil ohne Abo niemand Treueboni bekam.
+* Die App muss nicht neu veröffentlicht werden. Sie ist schon auf
+  „Vorteile für alle" eingestellt.
+
+### Schritt für Schritt
+
+1. Öffne `https://supabase.com/dashboard`, melde Dich an und klicke auf Dein
+   Projekt (die Adresse endet auf `nnfsyuglkqycwenwxmuw`).
+2. Klicke links auf **SQL Editor** und oben auf **New query**.
+3. Öffne in einem zweiten Browser-Tab diese Adresse:
+   `https://github.com/Blume1805/B-rdesnack24-/blob/claude/bordesnack24-app-strategy-sf5yzy/docs/audit/2026-11-03-vorteile/20261103100000_vorteile_ohne_abo.sql`
+4. Klicke dort rechts oben über dem Text auf das Symbol **Copy raw file**
+   (zwei überlappende Rechtecke). Der ganze Text ist jetzt kopiert.
+5. Zurück im SQL Editor: ins leere Feld klicken, **Strg+V**, dann unten
+   rechts **Run**. Unten erscheint „Success. No rows returned".
+6. Feld leeren (Strg+A, Entf) und diesen Text einfügen. Er trägt die Änderung
+   in die Liste der eingespielten Änderungen ein und liest danach nur:
+
+   ```sql
+   insert into supabase_migrations.schema_migrations (version, name)
+   values ('20261103100000', 'vorteile_ohne_abo')
+   on conflict (version) do nothing;
+
+   select
+     app.benefits_free_for_all()          as vorteile_fuer_alle,
+     app.abo_wird_angeboten('monthly')    as monatsabo_angeboten,
+     app.abo_wird_angeboten('yearly')     as jahresabo_angeboten,
+     (select confdeltype from pg_constraint
+       where conname = 'loyalty_bonus_grants_offer_id_fkey') as loeschregel,
+     (select count(distinct customer_id)
+        from public.customer_subscriptions) as konten_mit_abo_eintrag;
+   ```
+
+   → **Run**.
+
+### So sieht Erfolg aus
+
+| Spalte | richtig ist |
+| --- | --- |
+| `vorteile_fuer_alle` | `true` |
+| `monatsabo_angeboten` | `false` |
+| `jahresabo_angeboten` | `false` |
+| `loeschregel` | `n` |
+| `konten_mit_abo_eintrag` | eine Zahl, bitte mir nennen |
+
+Steht bei `konten_mit_abo_eintrag` mehr als `0`, sag es mir. Dann klären wir
+gemeinsam, ob diese Konten schon etwas bezahlt haben und eine Erstattung
+fällig ist. Das ist eine Entscheidung für Dich, nicht für die Technik.
+
+In der App lässt sich danach mit einem frisch angelegten Konto im Tab
+„Angebote" ein Coupon mit **Aktivieren** freischalten. Vorher kam dabei die
+Meldung „Abo erforderlich".
+
+### Wenn etwas schiefgeht
+
+* **Rote Meldung in Schritt 5:** Es ist **nichts** verändert worden. Die
+  Änderung läuft ganz oder gar nicht. Schick mir ein Bildschirmfoto.
+  Eine Meldung ist gewollt und harmlos: „Zuerst Runbook M … ausrollen. Abbruch
+  ohne Änderung." Dann bitte erst Runbook M.
+* **Etwas anderes als in der Erfolgstabelle:** nicht weitermachen, Foto an
+  mich.
+* **Zurückstellen** geht ohne Datenverlust: Mit einem einzigen Satz in der
+  Datenbank gilt wieder die alte Abo-Regel. Den schreibe ich Dir, falls nötig.
+  Es eilt dabei nie.
+* Schritt 5 zweimal ausgeführt? Harmlos, die Änderung ist wiederholbar.
+
+Technischer Hintergrund: Migration `20261103100000_vorteile_ohne_abo.sql`
+(Produktionslinie, gesichert in `docs/audit/2026-11-03-vorteile/`), Nachweis
+`112_vorteile_ohne_abo.sql` (21 Fälle) und Neuaufbau mit allen Prüfskripten,
+COMPLIANCE V-018-a.

@@ -61,11 +61,30 @@ Alle Änderungen beauftragte Philipp direkt in Lovable, vom 07. bis 08.10.2026:
 | Impressum, Nutzungsbedingungen, Widerruf, Konto beenden | wortgleich mit Fassung v4 in `docs/legal/` (Stichproben in allen Ziffern) |
 | Digitale Belege, Kundenkarte, Coupons, wöchentliche Angebote, Bewertungen | in Produktion und App vorhanden |
 
-## Folgen für andere Dokumente (Stand 03.11.2026, noch nicht nachgezogen)
+## Stand der Befunde (nachgetragen 03.11.2026, abends)
+
+| Nr. | Stand |
+|---|---|
+| B-1 | Migration für die Produktionslinie geschrieben und lokal nachgewiesen (`docs/audit/2026-11-03-vorteile/`). Wirksam erst mit Runbook N. COMPLIANCE V-018-a, Nebenbefund V-018-d |
+| B-2 | im Code erledigt, Lovable `2c98578`. Videobild nicht selbst gesehen (Adresse gesperrt) |
+| B-3 | erledigt, Schalter `bestandLive = false` |
+| B-4 | Entscheidung P-5: überall umstellen. Erledigt in App (Anmeldung, Startseite, Web-Ladebild), Briefvorlage `brief_docx.ts`, Store-Text, `MOTION.md` und Projektwissen. Offen: der PDF-Skill `boerdesnack24-pdf`. Er ist ein synchronisierter Skill und lässt sich aus dem Repository nicht ändern |
+| B-5 | unverändert, durch den Hinweis gedeckt |
+| B-6 | unverändert, vor dem Verkauf im Werbekatalog anlegen |
+| B-7 | erledigt, Pause-Knopf. Nacharbeit `aria-pressed` (Abnahme A-1) |
+| B-8 | erledigt, Abschnitt „Hosting". Der AV-Vertrag als Beleg bleibt abzulegen |
+| B-9 | offen, Löschentscheidung bei Philipp |
+| B-10 | Gestaltung, keine Maßnahme |
+
+## Folgen für andere Dokumente (Stand 03.11.2026, inzwischen nachgezogen)
 
 * `docs/auftraege/lovable-projektwissen.md` und das Projektwissen in Lovable:
   Claim, `SectionNav`, `MotionToggle`, `Stage` als M06 und die Liste der
-  aktiven Muster stimmen nicht mehr. Nachziehen erst nach Entscheidung P-5.
+  aktiven Muster stimmen nicht mehr. **Nachgezogen am 03.11.2026** (Lovable und Spiegel im Repository).
 * `docs/auftraege/lovable-auftrag-2026-10-01-erklaerfilm.md`: überholt, weil
   Philipp in Lovable ein eigenes Video beauftragt hat.
 * `motion/ABWEICHUNGEN.md` R-9: Der Satz „Nichts." steht nicht mehr auf der Seite.
+* `docs/OPERATIONS.md` Runbook M: Die Links in Schritt 6 und 6b zeigten auf
+  Dateien, die auf GitHub nicht liegen (Produktionszweig nicht gepusht).
+  **Korrigiert am 03.11.2026** auf die Sicherungen unter `docs/audit/`, Dateien
+  byte-gleich geprüft.
