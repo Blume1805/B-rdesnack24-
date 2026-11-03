@@ -1406,3 +1406,45 @@ und ist in der Verhandlung ein einfaches Argument. Kosten laut Finanzrechnung
 gedeckt sind (ADR 0007).
 
 **Status: 🔴 OFFEN** (V-017-b Vertragsklausel und Seitentext, V-017-c)
+
+## V-018 · Landingpage verspricht Vorteile ohne Abo, die Produktion verlangt eines; Video schreibt die Spende der Kundschaft zu (2026-11-03) — OFFEN
+
+### Sachverhalt
+
+* Landingpage (Lovable `a9905a6`): „5 % Dauerrabatt. Auf jeden Kauf, kostenloses
+  Konto genügt.", „Mit kostenlosem Konto in der App 5 % günstiger.",
+  Nutzungsbedingungen v4 Ziffer 5 und 6: App unentgeltlich, Dauerrabatt, Coupons,
+  Meilensteine und Statusstufen für alle Registrierten.
+* Produktionslinie (`437dadb`): `activate_offer` wirft ohne Abo „Abo
+  erforderlich", `app.grant_loyalty_bonuses` gibt ohne Abo 0 zurück,
+  `my_subscription_benefits` und `card_entitlements` gewähren den Dauerrabatt nur
+  mit Abo. Monats- und Jahresabo stehen in `app.abo_angebotszeitraeume` als
+  „Dauerangebot" offen. Die Freischaltung `0065_free_benefits_for_all` vom
+  16.09.2026 (V-007) existiert nur in der main-Linie, die nicht die Produktion
+  ist (`docs/audit/AUDIT-2026-09-BACKEND.md`, Abschnitt 1.1).
+* Video der Landingpage (`business-teaser`, 08.10.2026): Push-Meldung „Danke für
+  deine 5%." Die App hat keine Push-Benachrichtigungen (Nutzungsbedingungen
+  Ziffer 2), und die 5 % spendet Bördesnack24 aus dem Nettoerlös (ADR 0007).
+
+### Rechtliche Würdigung
+
+Wer der Seite folgt und ein kostenloses Konto anlegt, erhält keinen der
+beworbenen Vorteile und kann ein Abo abschließen, das nach Seite und
+Nutzungsbedingungen nicht mehr existiert. Das ist eine irreführende Angabe über
+die Bedingungen einer Vergünstigung (§ 5 Abs. 1, Abs. 2 Nr. 2 UWG) und ein
+Widerspruch zu den eigenen Vertragsbedingungen. Die Push-Meldung im Video
+stellt eine nicht vorhandene Funktion dar und ordnet die Spende falsch zu
+(§ 5 UWG). Nicht akut, solange die Seite unveröffentlicht ist und kein Automat
+läuft. Vor der Veröffentlichung aber zwingend zu beheben.
+
+### Ergebnis
+
+| # | Punkt | Stand |
+|---|---|---|
+| V-018-a | Freischaltung der Vorteile für alle auf die Produktionslinie übertragen (Gegenstück zu `0065`), Abo-Zeiträume für Monat und Jahr schließen | 🔴 offen, Migration für die Produktionslinie zu schreiben, Ausrollen über Runbook |
+| V-018-b | Video: Push-Meldung ersetzen, z. B. Einblendung „Danke. 5 % des Nettoerlöses gehen an die Region." | 🔴 offen, Lovable-Auftrag |
+| V-018-c | „Echtzeit-Bestand" erst nach Runbook M (V-016-d) | 🔴 offen |
+
+Abgleich mit allen Befunden: `docs/abgleich-landingpage-backend-2026-11-03.md`.
+
+**Status: 🔴 OFFEN**

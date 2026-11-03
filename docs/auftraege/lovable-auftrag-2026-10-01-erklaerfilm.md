@@ -1,6 +1,8 @@
 # Lovable-Auftrag 01.10.2026: Erklärfilm im Abschnitt „Für Standortgeber"
 
-**Status:** Entwurf, **nicht gesendet**. Fassung 2 (20 s, Markenbild-Automat, Slogan
+**Status: überholt (03.11.2026).** Philipp hat am 07. und 08.10.2026 in Lovable einen eigenen Film beauftragt (`business-teaser`) und die drei Zusagen entfernt; Teil A und B werden nicht mehr gesendet. Abgleich: `docs/abgleich-landingpage-backend-2026-11-03.md`.
+
+Ursprünglicher Status: Entwurf, **nicht gesendet**. Fassung 2 (20 s, Markenbild-Automat, Slogan
 „Genießen. Geben. Gutes tun.") liegt vor. Wartet auf die Sichtfreigabe durch Philipp. Danach werden die vier Filmdateien und zwei Poster an die
 Nachricht gehängt und der Text unten gesendet.
 
