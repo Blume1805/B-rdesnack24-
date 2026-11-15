@@ -1141,6 +1141,14 @@ Technischer Hintergrund: Migration `0069_demo_news_ausblenden.sql`, Test
 
 ## Runbook L: Erfundene Käufe und zwei Sicherheitslücken in der Datenbank sperren
 
+> **✅ Erledigt am 15.11.2026.** Die Sperre ist in der echten Datenbank
+> eingespielt und nachgemessen (Scheinkauf, fremde Kaufbeträge, fremde
+> Spendenbeträge: alle „gesperrt"; 0 Käufe, es ist nie etwas erfunden worden).
+> Du musst hier nichts mehr tun. Nachweis: `docs/audit/2026-11-15-runbook-l/`.
+> Der Teil zum Bargeld (`bar_soll`) betrifft eine Funktion, die es in der
+> echten Datenbank noch nicht gibt; er wird mit den übrigen Änderungen
+> ausgerollt.
+
 **Zeitbedarf:** 10 Minuten.
 
 **Dringlichkeit:** hoch — bitte **heute oder morgen**. Solange es nicht gemacht

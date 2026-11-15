@@ -252,7 +252,7 @@ Projekt `boerdesnack24-app` (`nnfsyuglkqycwenwxmuw`), Region `eu-central-1`
 | Nr. | Feststellung |
 |---|---|
 | P1-10 🔴 | **Runbook M und N sind so, wie sie geschrieben waren, nicht ausführbar.** Sie setzten voraus, dass die Produktion dem Zweig `…audit-architecture-7xd3d6` entspricht. Tatsächlich fehlen 11 Migrationen davor. Beide Runbooks tragen seit dem 15.11.2026 einen Warnhinweis. Fehler in meiner Annahme vom 27.09. und 03.11.2026 |
-| P1-11 🔴 | Zwei Sicherheitslücken (B-1, B-2) sind in der Produktion offen, während die App mit freier Registrierung erreichbar ist. Bisher kein Schaden (0 Käufe). Schließen ist ein kleiner, umkehrbarer Eingriff (Rechte entziehen) |
+| P1-11 ✅ | Zwei Sicherheitslücken (B-1, B-2) waren in der Produktion offen, während die App mit freier Registrierung erreichbar ist. Kein Schaden (0 Käufe). **Am 15.11.2026 geschlossen** (Freigabe Philipp), Nachweis `docs/audit/2026-11-15-runbook-l/`. Rest: Test-Schaltfläche in der App entfernen (Phase 4) |
 | P1-12 🟡 | Tarif Free: Nach meinem Kenntnisstand gibt es dort keine automatischen Sicherungen zum Zurückspielen, und ein Projekt wird nach einer Woche ohne Zugriffe pausiert. In Phase 2 gegen die aktuellen Supabase-Bedingungen zu prüfen |
 | P1-13 🟡 | Die lokale Prüfumgebung läuft mit PostgreSQL 16, die Produktion mit 17.6. Vor dem Ausrollen einmal auf 17 gegenprüfen |
 | P1-14 🟡 | Der „Produktionszweig" ist nicht die Produktion. Es gibt damit drei Stände: main-Linie, Produktionszweig, echte Produktion |
