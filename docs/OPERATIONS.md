@@ -1372,6 +1372,13 @@ Technischer Hintergrund: Migration `0070_scheinkaeufe_sperren.sql`, Test
 
 ## Runbook M: Pfand getrennt vom Preis führen
 
+> **⚠️ Stand 15.11.2026: Bitte noch nicht ausführen.** Eine Messung an der
+> echten Datenbank hat gezeigt, dass dort 11 frühere Änderungen fehlen (Stand
+> der Datenbank: 10.09.2026). Dieses Runbook baut darauf auf und würde mit einer
+> roten Meldung abbrechen. Es wird neu geschrieben, sobald die Reihenfolge für
+> alle 14 offenen Schritte getestet ist. Einzelheiten:
+> `docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 5.
+
 **Zeitbedarf:** 15 Minuten in Supabase, dazu die Preisschilder am Automaten.
 
 **Dringlichkeit:** vor dem ersten Automaten in Betrieb. **Reihenfolge
@@ -1506,6 +1513,13 @@ Technischer Hintergrund: Migration
 Prüfskripten, COMPLIANCE V-016.
 
 ## Runbook N: App-Vorteile für jedes kostenlose Konto freischalten
+
+> **⚠️ Stand 15.11.2026: Bitte noch nicht ausführen.** Eine Messung an der
+> echten Datenbank hat gezeigt, dass dort 11 frühere Änderungen fehlen (Stand
+> der Datenbank: 10.09.2026). Dieses Runbook baut darauf auf und würde mit einer
+> roten Meldung abbrechen. Es wird neu geschrieben, sobald die Reihenfolge für
+> alle 14 offenen Schritte getestet ist. Einzelheiten:
+> `docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 5.
 
 **Zeitbedarf:** 10 Minuten in Supabase.
 

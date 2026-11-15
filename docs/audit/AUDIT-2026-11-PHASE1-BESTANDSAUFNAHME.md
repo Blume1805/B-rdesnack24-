@@ -197,3 +197,62 @@ Siehe Rückfragen im Bericht an Philipp vom 15.11.2026. Kurzfassung:
    Auftragsverarbeitung vorliegen.
 8. Ob in der Produktion schon echte Kundendaten liegen.
 9. GitHub-Zugriff wiederherstellen.
+
+---
+
+## 5. Antworten von Philipp und gemessener Stand der Produktion (15.11.2026)
+
+Philipp hat am 15.11.2026 den Lesezugang freigegeben („Ja, ohne Kundendaten":
+Aufbau, Einstellungen und reine Zählungen, keine Namen, E-Mails oder Käufe).
+Gelesen wurde über die Supabase-Anbindung; **geändert wurde nichts.**
+
+### 5.1 Antworten
+
+| Frage | Antwort |
+|---|---|
+| Landingpage online | als Dateien zu Hostinger. Der Hosting-Absatz (Hostinger) passt dann; offen ist, ob sich die Lovable-Seite als reine Dateien ausliefern lässt (A-2 wird damit 🟡) |
+| Echte Kundendaten | nur Test- und eigene Konten |
+| Genutzte Dienste | sevDesk, DocuSign, CleverPay (Kartenterminal). **Nicht** Nayax, **nicht** Sentry oder PostHog |
+
+### 5.2 Gemessener Stand der Produktion
+
+Projekt `boerdesnack24-app` (`nnfsyuglkqycwenwxmuw`), Region `eu-central-1`
+(Frankfurt), PostgreSQL 17.6, Tarif **Free**, Zustand „healthy".
+
+| Punkt | Messwert | Folge |
+|---|---|---|
+| Eingespielte Migrationen | 234, letzte `sortiment_popcorn_premium_caramel` (10.09.2026) | Die Produktion steht auf dem Stand vom 10.09.2026 |
+| Fehlende Migrationen der Produktionslinie | 11: `popcorn_zutaten_naehrwerte_ek`, `popcorn_verkaufspreis`, `bundles`, `rabattdeckel_generatoren`, `bundle_verwaltung`, `bundle_coupon_darstellung`, `automat_bezahlung_und_dynamische_preise`, `bargeld_und_preisausspielung`, `abo_angebotszeitraeume`, `scheinkaeufe_sperren`, `terminal_webhook_anbindung` | dazu die 3 vorbereiteten (Pfand, Verfügbarkeit, Vorteile ohne Abo): **14 Schritte offen** |
+| Runbook K (Beispiel-Nachrichten) | 0 sichtbar | erledigt oder nie vorhanden |
+| Runbook L, Scheinkauf (`dev_add_demo_purchase`) | **OFFEN**: jedes angemeldete Konto darf die Funktion aufrufen | 🔴 Befund B-1 vom September ist in der Produktion nicht geschlossen |
+| Runbook L, fremde Kaufbeträge (`purchase_net_items`) | **OFFEN** | 🔴 Befund B-2 nicht geschlossen |
+| Runbook L, Bargeld (`bar_soll`) | Funktion nicht vorhanden | B-3 kann in der Produktion nicht auftreten |
+| Runbook M (Pfand, Verfügbarkeit) | nicht eingespielt | |
+| Runbook N (Vorteile ohne Abo) | nicht eingespielt; `app.abo_angebotszeitraeume` gibt es in der Produktion noch nicht | |
+| Konten | 6 gesamt: 2 Kundenkonten, 4 interne | deckt sich mit „nur Test- und eigene Konten" |
+| Käufe, Demo-Käufe, Rechnungen | 0 / 0 / 0 | Die offenen Lücken wurden nicht ausgenutzt; kein Vorfall nach Art. 33 DSGVO |
+| Abo-Einträge | 7 Einträge, 1 Konto | Testkonto; bei Runbook N zu beachten |
+| Automaten (Stammdaten) | 4 | |
+| Ausgelieferte Server-Funktionen | 26. Nicht ausgeliefert: `terminal-webhook`, `nayax-webhook`, `send-push` | Push läuft tatsächlich nicht (P1-4 entschärft); Nayax ist toter Code |
+| Server-Funktionen ohne Anmeldeprüfung durch Supabase (`verify_jwt = false`) | `iot-webhook`, `subscription-cancel`, `weather-sync`, `auth-email-hook`, `email-inbound` | Jede braucht eine eigene Prüfung im Code. Bei `weather-sync` war in der Bestandsaufnahme keine zu erkennen: Prüfpunkt Phase 2 |
+
+### 5.3 Sicherheitshinweise von Supabase (Advisor, alle 6 Einträge gelesen)
+
+| Stufe | Hinweis | Einordnung |
+|---|---|---|
+| Fehler | Sicht `public.product_rating_summary` läuft mit Eigentümerrechten | Phase 2 |
+| Warnung | Schutz vor bekannten, geleakten Passwörtern ist **ausgeschaltet** | Einstellung im Dashboard, ein Klick |
+| Warnung | Erweiterung `pg_net` liegt im Schema `public` | Phase 2 |
+| Warnung | 7 Funktionen mit Eigentümerrechten ohne Anmeldung aufrufbar | gewollt (Werbeanfrage, Abmeldung, Tarife), einzeln zu prüfen |
+| Warnung | 145 Funktionen mit Eigentümerrechten für jedes angemeldete Konto | Prüfschwerpunkt Phase 2; darunter die beiden offenen aus Runbook L |
+| Hinweis | 8 Tabellen mit Zeilenschutz ohne Regel (alles gesperrt, Zugriff nur über Funktionen) | voraussichtlich gewollt |
+
+### 5.4 Was sich dadurch an der Bestandsaufnahme ändert
+
+| Nr. | Feststellung |
+|---|---|
+| P1-10 🔴 | **Runbook M und N sind so, wie sie geschrieben waren, nicht ausführbar.** Sie setzten voraus, dass die Produktion dem Zweig `…audit-architecture-7xd3d6` entspricht. Tatsächlich fehlen 11 Migrationen davor. Beide Runbooks tragen seit dem 15.11.2026 einen Warnhinweis. Fehler in meiner Annahme vom 27.09. und 03.11.2026 |
+| P1-11 🔴 | Zwei Sicherheitslücken (B-1, B-2) sind in der Produktion offen, während die App mit freier Registrierung erreichbar ist. Bisher kein Schaden (0 Käufe). Schließen ist ein kleiner, umkehrbarer Eingriff (Rechte entziehen) |
+| P1-12 🟡 | Tarif Free: Nach meinem Kenntnisstand gibt es dort keine automatischen Sicherungen zum Zurückspielen, und ein Projekt wird nach einer Woche ohne Zugriffe pausiert. In Phase 2 gegen die aktuellen Supabase-Bedingungen zu prüfen |
+| P1-13 🟡 | Die lokale Prüfumgebung läuft mit PostgreSQL 16, die Produktion mit 17.6. Vor dem Ausrollen einmal auf 17 gegenprüfen |
+| P1-14 🟡 | Der „Produktionszweig" ist nicht die Produktion. Es gibt damit drei Stände: main-Linie, Produktionszweig, echte Produktion |
