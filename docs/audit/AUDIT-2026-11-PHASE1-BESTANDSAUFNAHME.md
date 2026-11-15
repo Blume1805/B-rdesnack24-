@@ -267,3 +267,11 @@ in keinem Repository-Stand vorkommen (Befunde N-1 bis N-4). Die 14 offenen
 Migrationen laufen auf diesem Stand fehlerfrei und sind mit der ausgelieferten
 App verträglich. Einzelheiten und Vorgehen:
 `docs/audit/2026-11-15-ausrollplan/README.md`.
+
+### 5.6 Abweichungen gleichgezogen (15.11.2026)
+
+N-1 bis N-3 sind erledigt: Das Repository bildet die Produktion jetzt ab, und
+die eine echte Schwäche (Upload in `employee-signatures` für jedes Konto) ist
+in der Produktion geschlossen. Fünf Fingerabdrücke identisch. Offen bleibt als
+bewusst hingenommene Abweichung, dass 8 Funktionen in der Produktion ohne
+Kommentare stehen. Nachweis: `docs/audit/2026-11-15-nachzug/README.md`.

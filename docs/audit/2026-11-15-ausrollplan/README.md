@@ -1,5 +1,9 @@
 # Ausrollplan für die 14 offenen Änderungen (Stand 15.11.2026)
 
+> **Nachtrag vom selben Tag:** Die Abweichungen N-1 bis N-3 sind gleichgezogen
+> (`docs/audit/2026-11-15-nachzug/`). Nachbau und Produktion stimmen seitdem in
+> allen geprüften Merkmalen überein; der Abschnitt 1 beschreibt den Stand davor.
+
 **Status: getestet, nicht ausgerollt.** Das Ausrollen braucht die ausdrückliche
 Freigabe von Philipp. Grundlage: Messung an der Produktion vom 15.11.2026
 (`docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 5).
