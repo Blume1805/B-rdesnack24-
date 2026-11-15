@@ -96,3 +96,27 @@ Spalten entfernen und Preise zurückrechnen und ist nur gemeinsam mit Philipp
 vorgesehen. Im Tarif Free gibt es keine Sicherung zum Zurückspielen; vor dem
 Ausrollen werden deshalb die betroffenen Preisspalten als Kopie in eine
 Hilfstabelle gesichert.
+
+## 5. Ausrollen: Stand (15.11.2026, Freigabe Philipp „Ja, alle 14 ausrollen")
+
+**Verfahren, wie tatsächlich angewandt.** Jede Migration wird zuerst als Text in
+`ausrollen_20261115.migration` in der Produktion abgelegt. Dort wird ihre
+Prüfsumme mit der Datei im Repository verglichen (`pruefsummen.txt`). Erst wenn
+sie stimmt, führt ein kurzer Block genau diesen Text aus, als Ganzes: Geht ein
+Befehl darin schief, bleibt nichts zurück. Das Schema ist nicht über die API
+erreichbar und trägt keine Rechte für `anon` oder `authenticated`. Es enthält
+außerdem `products_vorher`, die Sicherung der Produktpreise vor allen Schritten.
+
+Vorab am Nachbau geprüft: Blockweise eingespielt ergibt denselben
+Fingerabdruck wie Befehl für Befehl, alle 29 Prüfskripte bestehen. In der
+Produktion liegen 90 Angebote, alle abgelaufen und archiviert; der
+Pfand-Schritt rechnet davon keines um. Der Produktkatalog (Artikelnummer, Preis,
+Steuersatz) ist in Produktion und Nachbau gleich.
+
+| # | Migration | Stand |
+|---|---|---|
+| 0 | `ausrollen_20261115_hilfsschema` | ✅ eingespielt |
+| 1 | `popcorn_zutaten_naehrwerte_ek` | ✅ eingespielt, Prüfsumme stimmte |
+| 2 | `popcorn_verkaufspreis` | ✅ eingespielt, Prüfsumme stimmte |
+| 3 | `bundles` | ⏸ Ablegen des Textes wartet auf eine Bestätigung von Philipp in der Supabase-Verbindung (Rückfrage lief nach 60 Sekunden ab) |
+| 4 bis 14 | | offen |
