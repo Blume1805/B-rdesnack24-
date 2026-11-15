@@ -121,6 +121,7 @@ Abweichung vom Spiegel, sondern der offene Schritt.
 | `20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql` | Runbook L für den Stand der Produktion vom 10.09.2026: Aufrufrechte für `dev_add_demo_purchase`, `purchase_net_items`, `purchase_donation_for` entzogen (B-1, B-2). In der Produktion am 15.11.2026 **vor** den Migrationen ab `20260910190000` eingespielt; wiederholbar |
 | `20261115100000_nachzug_produktionsstand.sql` | Übernimmt, was nur in der Produktion stand (zwei Funktionen, 8 Regeln auf Telemetrie-Tabellen, Speicherbereich `employee-signatures`); Upload dort nur noch für interne Konten |
 | `20261115110000_unterschrift_erneut_hochladen.sql` | Regel zum Ändern im Bereich `employee-signatures`, damit ein zweiter Upload derselben Unterschrift gelingt |
+| `20261115120000_suchpfad_fuenf_funktionen.sql` | Fester Suchpfad für fünf Funktionen im Schema `app` (Hinweis von Supabase nach dem Ausrollen); Rumpf und Rechte unverändert |
 
 Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10), `109` (5/5) und
 `110` (23/23, Pfand) und `111` (12/12, Verfügbarkeit), zuletzt am 29.09.2026
@@ -129,7 +130,7 @@ nach einem Neuaufbau aus allen 237 Migrationen, alle 28 Prüfskripte ohne Fehler
 
 ## Stand der Produktion (15.11.2026)
 
-Die Produktion entspricht diesem Verzeichnis: Ein Neuaufbau aus allen 241
+Die Produktion entspricht diesem Verzeichnis: Ein Neuaufbau aus allen 242
 Migrationen ergibt denselben Fingerabdruck wie die Produktion
 (`scripts/pruefumgebung/fingerabdruck.sql`, sechs Merkmale). Die Versionsnummern
 in `supabase_migrations.schema_migrations` der Produktion sind die Zeitpunkte
