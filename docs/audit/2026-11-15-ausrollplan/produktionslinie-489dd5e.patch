@@ -1,0 +1,913 @@
+From 489dd5ec42ef7fb70d284ecd101ed91e3d6e586c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 15 Nov 2026 12:40:52 +0000
+Subject: [PATCH] Produktionslinie auf den Stand der Produktion vom 15.11.2026
+ gebracht
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 20261103100000_vorteile_ohne_abo mit Prüfskript 112; 90 und 110 prüfen den
+  jeweils geltenden Stand.
+- 20261115090000 Sperre Scheinkauf und fremde Kaufbeträge (Runbook L).
+- 20261115100000 Nachzug: was nur in der Produktion stand (N-1 bis N-3).
+- 20261115110000 Unterschrift erneut hochladen.
+- scripts/pruefumgebung/fingerabdruck.sql.
+
+Nachweis: Neuaufbau aus allen 241 Migrationen ergibt in sechs Merkmalen den
+Fingerabdruck der Produktion. Alle Migrationen sind dort eingespielt.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012uyiL6JjSwBHFW5epQoxkW
+---
+ scripts/pruefumgebung/110_pfand.sql           |  14 +-
+ .../pruefumgebung/112_vorteile_ohne_abo.sql   | 170 ++++++++
+ .../pruefumgebung/90_nachweis_korrekturen.sql |   9 +-
+ scripts/pruefumgebung/README.md               |   2 +
+ scripts/pruefumgebung/fingerabdruck.sql       |  13 +
+ .../20261103100000_vorteile_ohne_abo.sql      | 371 ++++++++++++++++++
+ ...k_l_sperre_scheinkauf_und_kaufbetraege.sql |  17 +
+ ...0261115100000_nachzug_produktionsstand.sql | 154 ++++++++
+ ...15110000_unterschrift_erneut_hochladen.sql |  23 ++
+ supabase/migrations/README.md                 |  15 +
+ 10 files changed, 784 insertions(+), 4 deletions(-)
+ create mode 100644 scripts/pruefumgebung/112_vorteile_ohne_abo.sql
+ create mode 100644 scripts/pruefumgebung/fingerabdruck.sql
+ create mode 100644 supabase/migrations/20261103100000_vorteile_ohne_abo.sql
+ create mode 100644 supabase/migrations/20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql
+ create mode 100644 supabase/migrations/20261115100000_nachzug_produktionsstand.sql
+ create mode 100644 supabase/migrations/20261115110000_unterschrift_erneut_hochladen.sql
+
+diff --git a/scripts/pruefumgebung/110_pfand.sql b/scripts/pruefumgebung/110_pfand.sql
+index 635b5b5..23ec17a 100644
+--- a/scripts/pruefumgebung/110_pfand.sql
++++ b/scripts/pruefumgebung/110_pfand.sql
+@@ -45,9 +45,17 @@ select 'A1 Stammdaten Cola', deposit || ' / ' || round(list_price_net * (1 + tax
+ -- kundenpreis prüft auth.uid(): Die Abfrage läuft mit der Kennung des
+ -- jeweiligen Kunden, wie aus der App.
+ select set_config('request.jwt.claims', json_build_object('sub', :ohne)::text, false);
+-insert into pfand_ergebnis
+-select 'A2 ohne Abo', endpreis || ' = ' || warenpreis || ' + ' || pfand, '2.30 = 2.05 + 0.25',
+-       endpreis = 2.30 and warenpreis = 2.05 and pfand = 0.25 and dauerrabatt_betrag = 0
++-- Ab 20261103100000_vorteile_ohne_abo (V-018-a) bekommt jedes registrierte
++-- Konto den Dauerrabatt, auch ohne Abo. Vorher nur mit Abo. Der Fall prüft
++-- den jeweils geltenden Stand; der Pfand bleibt in beiden rabattfrei.
++select (to_regprocedure('app.benefits_free_for_all()') is not null) as vorteile_fuer_alle \gset
++insert into pfand_ergebnis
++select 'A2 ohne Abo' || case when :'vorteile_fuer_alle' = 't' then ' (Vorteile für alle)' else '' end,
++       endpreis || ' = ' || warenpreis || ' + ' || pfand,
++       case when :'vorteile_fuer_alle' = 't' then '2.20 = 1.95 + 0.25' else '2.30 = 2.05 + 0.25' end,
++       case when :'vorteile_fuer_alle' = 't'
++            then endpreis = 2.20 and warenpreis = 1.95 and pfand = 0.25 and dauerrabatt_betrag = 0.10
++            else endpreis = 2.30 and warenpreis = 2.05 and pfand = 0.25 and dauerrabatt_betrag = 0 end
+   from public.kundenpreis(:maschine, :'cola', :ohne);
+ 
+ -- Dauerrabatt 5 % auf 2,05 € = 0,10 €. Auf 2,30 € (mit Pfand) wären es
+diff --git a/scripts/pruefumgebung/112_vorteile_ohne_abo.sql b/scripts/pruefumgebung/112_vorteile_ohne_abo.sql
+new file mode 100644
+index 0000000..823d8fe
+--- /dev/null
++++ b/scripts/pruefumgebung/112_vorteile_ohne_abo.sql
+@@ -0,0 +1,170 @@
++-- Nachweis: Vorteile ohne Abo (Migration 20261103100000_vorteile_ohne_abo,
++-- COMPLIANCE V-018-a).
++--
++-- Geprüft am gespeicherten Zustand und an den Rechten, nicht an der Absicht:
++--   A  Gate: registriertes Konto ja, kein Konto nein, Abo-Auskunft bleibt wahr
++--   B  die fünf Vorteile für ein Konto ohne Abo: Coupon, Preis, Kundenkarte,
++--      Anzeige, Treuebonus
++--   C  Abo ist nicht mehr abschließbar
++--   D  Gegenprobe: Schalter aus → Abo-Gating wieder da
++--   E  Isolation und Rechte bleiben
++--   F  Kontolöschung mit Treuebonus scheitert nicht mehr am Fremdschlüssel
++--
++-- Läuft gegen die lokale Prüfumgebung, nie gegen die Produktion. Wiederholbar.
++\set ON_ERROR_STOP on
++\pset pager off
++
++\set ohneabo '\'66666666-6666-4666-8666-666666666112\''
++\set fremd   '\'22222222-2222-2222-2222-222222222222\''
++\set maschine '\'cccc0000-0000-4000-8000-000000000112\''
++
++create temporary table vorteil_ergebnis (fall text, gemessen text, erwartet text, ok boolean);
++
++insert into auth.users (id, instance_id, aud, role, email, encrypted_password, created_at, updated_at)
++values (:ohneabo, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
++        'ohne-abo-112@test.invalid', 'x', now(), now())
++on conflict (id) do nothing;
++update public.profiles set birth_date = '1990-01-01' where id = :ohneabo and birth_date is null;
++
++insert into public.machines (id, code, name) values (:maschine, 'VORTEIL-M1', 'Vorteil-Prüfautomat')
++on conflict (id) do nothing;
++select id as cola from public.products where sku = 'BS-004' \gset
++insert into public.machine_slots (machine_id, slot_code, product_id, unit_price_net, capacity)
++select :maschine, 'V1', :'cola', 1.7227, 10
++ where not exists (select 1 from public.machine_slots where machine_id = :maschine and slot_code = 'V1');
++
++insert into public.offers (title, kind, valid_from, valid_to, status)
++values ('Vorteil-Prüfcoupon', 'special', current_date, current_date + 7, 'active')
++returning id as coupon \gset
++insert into public.offers (title, kind, valid_from, valid_to, status)
++values ('Vorteil-Prüfcoupon 2', 'special', current_date, current_date + 7, 'active')
++returning id as coupon2 \gset
++
++-- ── A Gate ──────────────────────────────────────────────────────────────
++insert into vorteil_ergebnis
++select 'A1 Schalter an', app.benefits_free_for_all()::text, 'true', app.benefits_free_for_all();
++insert into vorteil_ergebnis
++select 'A2 Konto ohne Abo hat Vorteile', app.has_app_benefits(:ohneabo)::text, 'true', app.has_app_benefits(:ohneabo);
++insert into vorteil_ergebnis
++select 'A3 Abo-Auskunft bleibt wahr', app.has_subscription(:ohneabo)::text, 'false', not app.has_subscription(:ohneabo);
++insert into vorteil_ergebnis
++select 'A4 ohne Anmeldung keine Vorteile', coalesce(app.has_app_benefits(null)::text, '<null>'), 'false',
++       app.has_app_benefits(null) is false;
++insert into vorteil_ergebnis
++select 'A5 unbekannte Kennung keine Vorteile', app.has_app_benefits(gen_random_uuid())::text, 'false',
++       not app.has_app_benefits(gen_random_uuid());
++
++-- ── B Die fünf Vorteile, Konto ohne Abo ─────────────────────────────────
++insert into vorteil_ergebnis
++select 'B1 Coupon aktivieren', r || ' / gespeichert ' || n, 'ROWS:1 / gespeichert 1',
++       r = 'ROWS:1' and n = '1'
++  from (select pruef.schreibe(format('select public.activate_offer(%L::uuid)', :'coupon'), :ohneabo) as r) a,
++       lateral (select pruef.wahrheit(format(
++         'select count(*)::text from public.offer_activations where customer_id = %L and offer_id = %L',
++         :ohneabo, :'coupon')) as n) b;
++
++insert into vorteil_ergebnis
++select 'B2 Dauerrabatt im Kundenpreis', r, '5', r = '5'
++  from (select pruef.lies(format(
++          'select dauerrabatt_prozent::int::text from public.kundenpreis(%L::uuid, %L::uuid, %L::uuid)',
++          :maschine, :'cola', :ohneabo), :ohneabo) as r) x;
++
++select pruef.lies('select public.my_customer_card()', :ohneabo) as karte \gset
++insert into vorteil_ergebnis
++select 'B3 Kundenkarte am Automaten', coalesce(discount_percent::text, '<keine Zeile>'), '5', discount_percent = 5
++  from (select 1) d left join public.card_entitlements(:'karte') on true;
++
++insert into vorteil_ergebnis
++select 'B4 Anzeige: Vorteil ja, Abo nein', r, '{"active": false, "benefits": true, "discount_percent": 5}',
++       r::jsonb @> '{"active": false, "benefits": true, "discount_percent": 5}'
++  from (select pruef.lies('select public.my_subscription_benefits()::text', :ohneabo) as r) x;
++
++insert into public.purchases (customer_id, total_gross, source)
++values (:ohneabo, 25.00, 'manual');
++-- Der Kauf löst die Vergabe selbst aus (Trigger). Ein zweiter Aufruf darf
++-- nichts doppelt vergeben.
++insert into vorteil_ergebnis
++select 'B5 Treuebonus ohne Abo, nicht doppelt', g || ' Nachweise / zweiter Lauf ' || n, 'mindestens 1 / zweiter Lauf 0',
++       g::int >= 1 and n = 0
++  from (select pruef.wahrheit(format(
++         'select count(*)::text from public.loyalty_bonus_grants where customer_id = %L', :ohneabo)) as g) b,
++       lateral (select app.grant_loyalty_bonuses(:ohneabo) as n) a;
++
++-- ── C Abo nicht mehr abschließbar ───────────────────────────────────────
++insert into vorteil_ergebnis
++select 'C1 Monat und Jahr nicht angeboten',
++       app.abo_wird_angeboten('monthly')::text || ' / ' || app.abo_wird_angeboten('yearly')::text,
++       'false / false',
++       not app.abo_wird_angeboten('monthly') and not app.abo_wird_angeboten('yearly');
++insert into vorteil_ergebnis
++select 'C2 Monat und Jahr nicht wählbar', coalesce(string_agg(plan, ','), '(keins)'), '(keins)', count(*) = 0
++  from public.abo_angebote() where waehlbar and plan in ('monthly', 'yearly');
++insert into vorteil_ergebnis
++select 'C3 Abschluss abgewiesen', r || ' / Abos ' || n, 'ERR / Abos 0', r like 'ERR:%' and n = '0'
++  from (select pruef.schreibe('select public.choose_subscription_plan(''monthly'', true, true)', :ohneabo) as r) a,
++       lateral (select pruef.wahrheit(format(
++         'select count(*)::text from public.customer_subscriptions where customer_id = %L', :ohneabo)) as n) b;
++
++-- ── D Gegenprobe: Schalter aus ──────────────────────────────────────────
++begin;
++create or replace function app.benefits_free_for_all() returns boolean language sql immutable as $$ select false $$;
++select app.has_app_benefits(:ohneabo) as aus_vorteil,
++       pruef.schreibe(format('select public.activate_offer(%L::uuid)', :'coupon2'), :ohneabo) as aus_coupon,
++       pruef.lies(format(
++         'select dauerrabatt_prozent::int::text from public.kundenpreis(%L::uuid, %L::uuid, %L::uuid)',
++         :maschine, :'cola', :ohneabo), :ohneabo) as aus_rabatt
++\gset
++rollback;
++insert into vorteil_ergebnis
++select 'D1 Schalter aus: Gating wieder da', :'aus_vorteil' || ' / ' || :'aus_coupon' || ' / Rabatt ' || :'aus_rabatt',
++       'f / ERR:P0001 / Rabatt 0',
++       :'aus_vorteil' = 'f' and :'aus_coupon' = 'ERR:P0001' and :'aus_rabatt' = '0';
++insert into vorteil_ergebnis
++select 'D2 nach Rollback wieder an', app.benefits_free_for_all()::text, 'true', app.benefits_free_for_all();
++
++-- ── E Isolation und Rechte ──────────────────────────────────────────────
++insert into vorteil_ergebnis
++select 'E1 fremder Kundenpreis gesperrt', r, 'ERR:42501', r = 'ERR:42501'
++  from (select pruef.lies(format(
++          'select endpreis::text from public.kundenpreis(%L::uuid, %L::uuid, %L::uuid)',
++          :maschine, :'cola', :ohneabo), :fremd) as r) x;
++insert into vorteil_ergebnis
++select 'E2 Gate nicht direkt aufrufbar (authenticated)', r, 'ERR:42501', r = 'ERR:42501'
++  from (select pruef.lies(format('select app.has_app_benefits(%L::uuid)::text', :ohneabo), :ohneabo) as r) x;
++insert into vorteil_ergebnis
++select 'E3 Kundenkarte nur für den Automaten', r, 'ERR:42501', r = 'ERR:42501'
++  from (select pruef.lies(format('select discount_percent::text from public.card_entitlements(%L)', :'karte'), :ohneabo) as r) x;
++insert into vorteil_ergebnis
++select 'E4 Coupon nur für sich selbst', n, '0', n = '0'
++  from (select pruef.wahrheit(format(
++          'select count(*)::text from public.offer_activations where customer_id = %L and offer_id = %L',
++          :fremd, :'coupon')) as n) x;
++
++-- ── F Löschung mit Treuebonus ───────────────────────────────────────────
++insert into vorteil_ergebnis
++select 'F1 Verweis auf Angebot wird beim Löschen geleert', confdeltype::text, 'n', confdeltype = 'n'
++  from pg_constraint where conname = 'loyalty_bonus_grants_offer_id_fkey';
++select pruef.wahrheit(format(
++  'select offer_id::text from public.loyalty_bonus_grants where customer_id = %L and offer_id is not null limit 1',
++  :ohneabo)) as bonus_angebot \gset
++begin;
++delete from public.personal_offers where id = :'bonus_angebot';
++select pruef.wahrheit(format(
++  'select count(*)::text from public.loyalty_bonus_grants where customer_id = %L and offer_id is null', :ohneabo)) as nachweis_bleibt \gset
++rollback;
++insert into vorteil_ergebnis
++select 'F2 Angebot löschbar, Nachweis bleibt', :'nachweis_bleibt', 'mindestens 1', :'nachweis_bleibt'::int >= 1;
++
++-- ── Ergebnis ────────────────────────────────────────────────────────────
++select fall, gemessen, erwartet, case when ok then 'OK' else 'FEHLER' end as urteil
++  from vorteil_ergebnis order by fall;
++
++do $$
++declare n integer;
++begin
++  select count(*) into n from vorteil_ergebnis where ok is not true;
++  if n > 0 then
++    raise exception '112_vorteile_ohne_abo: % Fälle FEHLER', n;
++  end if;
++  raise notice '112_vorteile_ohne_abo: alle % Fälle OK', (select count(*) from vorteil_ergebnis);
++end $$;
+diff --git a/scripts/pruefumgebung/90_nachweis_korrekturen.sql b/scripts/pruefumgebung/90_nachweis_korrekturen.sql
+index a388ec7..b0f7a2c 100644
+--- a/scripts/pruefumgebung/90_nachweis_korrekturen.sql
++++ b/scripts/pruefumgebung/90_nachweis_korrekturen.sql
+@@ -29,7 +29,14 @@ begin
+   delete from public.customer_subscriptions where customer_id = Bb;
+   w := pruef.schreibe('select public.choose_subscription_plan(''monthly'', true, true)', Bb);
+   r := pruef.wahrheit(format('select plan::text from public.customer_subscriptions where customer_id=%L order by seq desc limit 1', Bb));
+-  insert into pruef.ergebnis values (default,'S-6','Volljaehriger schliesst ab (Gegenprobe)','Kunde B (1990)','choose_subscription_plan','Abo entsteht', w||' / '||r, r='monthly');
++  -- Seit 20261103100000_vorteile_ohne_abo (V-018-a) ist das Monatsabo nicht
++  -- mehr wählbar. Die Gegenprobe prüft den jeweils geltenden Stand: Ist es
++  -- angeboten, entsteht es; ist es geschlossen, wird es abgewiesen.
++  if app.abo_wird_angeboten('monthly') then
++    insert into pruef.ergebnis values (default,'S-6','Volljaehriger schliesst ab (Gegenprobe)','Kunde B (1990)','choose_subscription_plan','Abo entsteht', w||' / '||r, r='monthly');
++  else
++    insert into pruef.ergebnis values (default,'S-6','Volljaehriger, Abo geschlossen (V-018-a)','Kunde B (1990)','choose_subscription_plan','abgewiesen, kein Abo', w||' / '||r, w='ERR:42501' and r='<null>');
++  end if;
+   -- Negativtest: Konto ohne Geburtsdatum (eigenes Konto, weil das Datum
+   -- nach der ersten Setzung unveraenderlich ist — der Trigger hat den
+   -- ersten Anlauf dieses Tests zu Recht abgewiesen).
+diff --git a/scripts/pruefumgebung/README.md b/scripts/pruefumgebung/README.md
+index 5bcfdf9..5065c46 100644
+--- a/scripts/pruefumgebung/README.md
++++ b/scripts/pruefumgebung/README.md
+@@ -167,6 +167,8 @@ brauchen davor einen Neubau.
+ | `109_terminal_webhook_weg.sql` | Befunde B-4/B-5: der Weg des Terminal-Webhooks als `service_role` über `public.vend_freigabe_einloesen` bis zum Kauf mit `source = 'machine'`. 5 Urteile, wiederholbar. Setzt `105` und `20260926121000` voraus |
+ | `110_pfand.sql` | Pfand getrennt vom Preis (V-016): Zahlbetrag = Ware + Pfand, Dauerrabatt und MHD-Abschlag nur auf die Ware, Pfand an Freigabe und Automatenkauf vom Server (ein vom Aufrufer mitgegebener Pfand wird überschrieben), Spendenbasis ohne Pfand mit dem Steuersatz des Produkts, Pfand in allen Katalog-Schnittstellen, kein Kunde kann den Pfand setzen oder fremde Belege sehen. 23 Urteile, wiederholbar. Setzt `20260926121000` und `20260927200000` voraus |
+ | `111_verfuegbarkeit.sql` | Verfügbarkeit für Kunden (V-016-d): drei Zustände, Preis ohne Pfand mit Pfand daneben, keine Stückzahlen in der Rückgabe, inaktiver Automat und inaktives Produkt fallen heraus, anon ohne Recht, ohne Anmeldung leer, `inventory` und `machine_stock` für Kunden weiter gesperrt, Gegenprobe intern. 12 Urteile, wiederholbar. Setzt `20260929100000` voraus |
++| `112_vorteile_ohne_abo.sql` | Vorteile ohne Abo (V-018-a): Gate, die fünf Vorteile für ein Konto ohne Abo, Abo nicht abschließbar, Gegenprobe mit ausgeschaltetem Schalter, Isolation und Rechte, Löschung mit Treuebonus. 21 Urteile, wiederholbar. Setzt `20261103100000` voraus |
++| `fingerabdruck.sql` | Kein Prüfskript mit Urteilen, sondern der Vergleich Nachbau gegen Produktion: Regeln, Funktionen, Spalten, Auslöser, Produktkatalog, Aufzählungen. Nach jeder Änderung an der Produktion auszuführen |
+ 
+ Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
+ `/docs/SECURITY.md`.
+diff --git a/scripts/pruefumgebung/fingerabdruck.sql b/scripts/pruefumgebung/fingerabdruck.sql
+new file mode 100644
+index 0000000..f0ba66b
+--- /dev/null
++++ b/scripts/pruefumgebung/fingerabdruck.sql
+@@ -0,0 +1,13 @@
++-- Fingerabdruck des Schemas: Zeilenschutz-Regeln (mit Bedingungen), Funktionen
++-- (ohne Kommentare, mit Aufrufrechten), Spalten, Auslöser, Produktkatalog,
++-- Aufzählungen. Sortierung unabhängig von der Spracheinstellung der Datenbank.
++-- Nach JEDER Änderung an der Produktion einmal dort und einmal im frischen
++-- Nachbau ausführen; alle Werte müssen gleich sein. Liest nur den Katalog und
++-- den Produktstamm, keine Kundendaten.
++select
++ (select count(*)||':'||md5(string_agg(schemaname||'.'||tablename||'.'||policyname||':'||cmd||':'||array_to_string(roles,',')||':'||md5(coalesce(qual,''))||md5(coalesce(with_check,'')), '|' order by (schemaname||'.'||tablename||'.'||policyname) collate "C")) from pg_policies where schemaname in ('public','app','storage')) as policies,
++ (select count(*)||':'||md5(string_agg(n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')='||md5(regexp_replace(regexp_replace(p.prosrc,'--[^\n]*','','g'),'\s+','','g'))||p.prosecdef::text||has_function_privilege('authenticated',p.oid,'execute')::text||has_function_privilege('anon',p.oid,'execute')::text, '|' order by (n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')') collate "C")) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','app')) as funktionen,
++ (select count(*)||':'||md5(string_agg(table_schema||'.'||table_name||'.'||column_name||':'||udt_name||':'||is_nullable, '|' order by (table_schema||'.'||table_name||'.'||column_name) collate "C")) from information_schema.columns where table_schema in ('public','app')) as spalten,
++ (select count(*)||':'||md5(string_agg(c.relname||'.'||t.tgname, '|' order by (c.relname||'.'||t.tgname) collate "C")) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','app') and not t.tgisinternal) as ausloeser,
++ (select count(*)||':'||md5(string_agg(sku||':'||list_price_net::text||':'||tax_rate::text||':'||coalesce(cost_price_net::text,'-')||':'||coupon_eligibility||':'||coalesce(array_to_string(allergens,','),'-'), '|' order by sku collate "C")) from public.products where sku is not null) as katalog,
++ (select count(*)||':'||md5(string_agg(t.typname||':'||e.enumlabel, '|' order by (t.typname||':'||e.enumlabel) collate "C")) from pg_enum e join pg_type t on t.oid=e.enumtypid join pg_namespace n on n.oid=t.typnamespace where n.nspname in ('public','app')) as enums;
+diff --git a/supabase/migrations/20261103100000_vorteile_ohne_abo.sql b/supabase/migrations/20261103100000_vorteile_ohne_abo.sql
+new file mode 100644
+index 0000000..e468756
+--- /dev/null
++++ b/supabase/migrations/20261103100000_vorteile_ohne_abo.sql
+@@ -0,0 +1,371 @@
++-- ============================================================================
++-- Vorteile ohne Abo — Produktionslinie (COMPLIANCE V-018-a, Gegenstück zu
++-- main 0065_free_benefits_for_all, Beschluss des Gesellschafters 16.09.2026)
++--
++-- Befund 03.11.2026: Landingpage und Nutzungsbedingungen v4 versprechen
++-- Dauerrabatt, Coupons, Meilensteine und Statusstufen für jedes kostenlose
++-- Konto. In der Produktion hingen genau diese Vorteile weiter an
++-- app.has_subscription(), und Monats- und Jahresabo standen als
++-- „Dauerangebot" in app.abo_angebotszeitraeume. Die Freischaltung aus 0065
++-- war nur in die main-Linie (Testdatenbank) gelangt.
++--
++-- Diese Migration
++--   1. legt den Schalter app.benefits_free_for_all() an (true; Spiegel von
++--      Pricing.benefitsFreeForAll in der App) und das neue Gate
++--      app.has_app_benefits(): registriertes Konto UND (Schalter oder Abo),
++--   2. tauscht in den fünf Funktionen, die Vorteile gewähren, nur die
++--      Abo-Prüfung gegen dieses Gate. Die Rümpfe sind sonst wörtlich die
++--      letzte Fassung (Quellen unten), damit nichts anderes mitwandert,
++--   3. beendet die Angebotszeiträume für Monats- und Jahresabo. Kein
++--      Zeitraum heißt nicht wählbar (107_abo_angebotszeitraum). Umkehrbar
++--      durch einen neuen Zeitraum, keine Zeile wird gelöscht.
++--
++-- app.has_subscription() bleibt unverändert und meldet weiter wahrheitsgemäß,
++-- ob ein Abo gewählt wurde. Kein Tabellen- oder Spaltenwechsel, nichts wird
++-- gelöscht.
++--
++-- Voraussetzung: 20260927200000_pfand_getrennt (kundenpreis in der Fassung
++-- mit Pfand). Rollout: docs/OPERATIONS.md, Runbook N, nach Runbook M.
++-- Nachweis: scripts/pruefumgebung/112_vorteile_ohne_abo.sql
++--
++-- Quellen der Rümpfe:
++--   public.activate_offer            20260718121154_subscription_gating
++--   app.grant_loyalty_bonuses        20260910215000_rabattdeckel_generatoren
++--   public.card_entitlements         20260812075453_kundenkarte_token
++--   public.kundenpreis               20260927200000_pfand_getrennt
++--   public.my_subscription_benefits  20260910230000_bundle_coupon_darstellung
++-- ============================================================================
++
++do $$
++begin
++  if not exists (select 1 from information_schema.columns
++                  where table_schema = 'public' and table_name = 'products'
++                    and column_name = 'deposit') then
++    raise exception 'Zuerst Runbook M (20260927200000_pfand_getrennt) ausrollen. Abbruch ohne Änderung.';
++  end if;
++end $$;
++
++-- ── 1. Schalter und Gate ────────────────────────────────────────────────
++create or replace function app.benefits_free_for_all()
++returns boolean
++language sql
++immutable
++as $$ select true $$;
++
++comment on function app.benefits_free_for_all() is
++  'Schalter: Vorteile (Dauerrabatt, Coupons, Meilensteine, Status) für jedes '
++  'registrierte Konto, ohne Abo. Beschluss 16.09.2026. Spiegel von '
++  'Pricing.benefitsFreeForAll in der App. false stellt das Abo-Gating wieder her.';
++
++create or replace function app.has_app_benefits(p_customer uuid)
++returns boolean
++language sql
++stable
++security definer
++set search_path = public, app
++as $$
++  select p_customer is not null
++     and exists (select 1 from public.customers c where c.id = p_customer)
++     and (app.benefits_free_for_all() or app.has_subscription(p_customer));
++$$;
++
++comment on function app.has_app_benefits(uuid) is
++  'Gate aller Kundenvorteile: registriertes Konto und (Schalter oder Abo). '
++  'Ersetzt app.has_subscription() als Vorteilsprüfung (COMPLIANCE V-018-a).';
++
++revoke all on function app.has_app_benefits(uuid) from public, anon, authenticated;
++revoke all on function app.benefits_free_for_all() from public, anon, authenticated;
++
++-- ── 2. Die fünf Vorteilsfunktionen, nur das Gate getauscht ──────────────
++create or replace function public.activate_offer(p_offer_id uuid)
++returns public.offer_activations
++language plpgsql
++security definer
++set search_path = public, app
++as $$
++declare v_row public.offer_activations;
++begin
++  if not app.has_app_benefits(auth.uid()) then
++    raise exception 'Konto erforderlich: Coupons lassen sich nur mit einem Bördesnack24-Konto aktivieren.'
++      using errcode = 'P0001';
++  end if;
++  insert into public.offer_activations(customer_id, offer_id)
++  values (auth.uid(), p_offer_id)
++  on conflict (customer_id, offer_id) do nothing;
++  select * into v_row from public.offer_activations
++    where customer_id = auth.uid() and offer_id = p_offer_id;
++  return v_row;
++end;
++$$;
++
++
++create or replace function app.grant_loyalty_bonuses(p_customer_id uuid)
++returns integer
++language plpgsql
++security definer
++set search_path to 'public', 'app'
++as $function$
++declare
++  v_month_start date := date_trunc('month', app.heute())::date;
++  v_gross       numeric(12,2);
++  v_pts         int;
++  v_granted     int := 0;
++  v_tier        int;
++  v_offer       public.personal_offers;
++  v_product     public.products%rowtype;
++  v_regular     numeric(12,2);
++  v_discount    numeric(5,2);
++begin
++  if not app.has_app_benefits(p_customer_id) then
++    return 0;
++  end if;
++
++  select coalesce(sum(total_gross), 0) into v_gross
++  from public.purchases
++  where customer_id = p_customer_id
++    and business_id is null
++    and purchased_at >= v_month_start;
++
++  v_pts := floor(v_gross * 100)::int
++         + app.login_points(p_customer_id, v_month_start)
++         + app.challenge_points(p_customer_id, v_month_start);
++
++  foreach v_tier in array app.loyalty_milestones() loop
++    exit when v_pts < v_tier;
++    if exists (
++      select 1 from public.loyalty_bonus_grants
++      where customer_id = p_customer_id
++        and month_start = v_month_start
++        and tier = v_tier
++    ) then
++      continue;
++    end if;
++
++    v_discount := case v_tier
++      when 500  then  5.0
++      when 1200 then 10.0
++      when 2000 then 15.0
++      when 3000 then 25.0
++      else 5.0
++    end;
++
++    select p.* into v_product
++    from public.products p
++    join public.purchase_items pi on pi.product_id = p.id
++    join public.purchases pu       on pu.id = pi.purchase_id
++    where pu.customer_id = p_customer_id
++      and pu.business_id is null
++      and pu.purchased_at > now() - interval '90 days'
++      and p.status = 'active' and p.list_price_net is not null
++      and p.coupon_eligibility = 'normal'
++    group by p.id
++    order by sum(pi.quantity) desc, random()
++    limit 1;
++
++    if not found then
++      select * into v_product
++      from public.products
++      where status = 'active' and list_price_net is not null and list_price_net > 0
++        and coupon_eligibility = 'normal'
++      order by random()
++      limit 1;
++    end if;
++    if not found then continue; end if;
++
++    v_regular := v_product.list_price_net;
++
++    insert into public.personal_offers(
++      customer_id, product_id, title,
++      regular_price_net, offer_price_net, discount_percent,
++      redemption_code, valid_from, valid_to, image_url, source
++    ) values (
++      p_customer_id, v_product.id, v_product.name,
++      v_regular,
++      round(v_regular * (1 - v_discount/100.0), 2),
++      v_discount,
++      app.generate_redemption_code(),
++      now(),
++      now() + interval '14 days',
++      v_product.image_url,
++      'loyalty'
++    )
++    returning * into v_offer;
++
++    insert into public.loyalty_bonus_grants(customer_id, month_start, tier, offer_id)
++    values (p_customer_id, v_month_start, v_tier, v_offer.id)
++    on conflict do nothing;
++
++    v_granted := v_granted + 1;
++  end loop;
++
++  return v_granted;
++end;
++$function$;
++
++
++create or replace function public.card_entitlements(p_token text)
++returns table(customer_number text, discount_percent int)
++language sql
++stable
++security definer
++set search_path = public, app
++as $$
++  select
++    cu.customer_number,
++    case when app.has_app_benefits(c.customer_id) then app.dauerrabatt_prozent()::int else 0 end
++  from public.customer_card c
++  left join public.customers cu on cu.id = c.customer_id
++  where c.token = p_token;
++$$;
++
++
++create or replace function public.kundenpreis(p_machine uuid, p_product uuid, p_customer uuid default null)
++returns table(automatenpreis numeric, dauerrabatt_prozent numeric,
++              dauerrabatt_betrag numeric, coupon_prozent numeric,
++              coupon_betrag numeric, endpreis numeric, herleitung jsonb,
++              warenpreis numeric, pfand numeric)
++language plpgsql
++stable security definer
++set search_path = public, app
++as $$
++declare
++  v_kunde        uuid;
++  v_automat      numeric;
++  v_mhd_prozent  numeric;
++  v_rest         integer;
++  v_pfand        numeric := 0;
++  v_dauer_p      numeric := 0;
++  v_dauer_b      numeric := 0;
++  v_coupon_p     numeric := 0;
++  v_coupon_b     numeric := 0;
++  v_zwischen     numeric;
++  v_ende         numeric;
++  v_hat_abo      boolean := false;
++begin
++  -- Die Kundenkennung IST die Auth-Kennung: public.customers.id verweist auf
++  -- public.profiles.id. Es gibt keine zweite Zuordnung, und es darf auch
++  -- keine geben — sonst entstehen zwei Wahrheiten darüber, wer jemand ist.
++  --
++  -- Fremde Konten sind tabu. Ein Kunde sieht nur den eigenen Preis; Personal
++  -- darf jeden sehen. Ohne diese Prüfung wäre die Funktion ein
++  -- Auskunftsdienst darüber, wer ein Abo hat.
++  v_kunde := coalesce(p_customer, auth.uid());
++
++  if v_kunde is distinct from auth.uid()
++     and not public.auth_has_permission('customers.manage')
++  then
++    raise exception 'Kein Zugriff auf fremde Kundenpreise.'
++      using errcode = '42501';
++  end if;
++
++  select a.brutto, a.mhd_abschlag_prozent, a.rest_tage, a.pfand
++    into v_automat, v_mhd_prozent, v_rest, v_pfand
++    from public.automatenpreis(p_machine, p_product) a;
++
++  if v_automat is null then
++    return;
++  end if;
++
++  -- Genau derselbe Helfer, den my_subscription_benefits benutzt. Eine zweite
++  -- Abo-Prüfung wäre eine zweite Wahrheit darüber, wer Dauerrabatt bekommt.
++  if v_kunde is not null then
++    v_hat_abo := app.has_app_benefits(v_kunde);
++  end if;
++
++  if v_hat_abo then
++    v_dauer_p := app.dauerrabatt_prozent();
++  end if;
++
++  -- Rabatte nur auf den Warenpreis, nie auf den Pfand (V-016).
++  v_dauer_b  := round(v_automat * v_dauer_p / 100, 2);
++  v_zwischen := v_automat - v_dauer_b;
++
++  -- Coupons bleiben in dieser Migration bewusst bei 0: Welcher Coupon am
++  -- Automaten gilt, entscheidet die Einlösung in vend_freigabe_anlegen(),
++  -- nicht die Preisauskunft. Eine Auskunft, die einen Coupon einrechnet,
++  -- den die Einlösung dann ablehnt, ist schlimmer als keine.
++  v_coupon_b := round(v_zwischen * v_coupon_p / 100, 2);
++  v_ende     := v_zwischen - v_coupon_b;
++
++  -- endpreis ist der zu zahlende Betrag (Ware + Pfand) und bleibt damit,
++  -- was vend_freigabe_anlegen als betrag_brutto kassiert. Für die Anzeige
++  -- nach § 7 PAngV: warenpreis und pfand getrennt.
++  return query select
++    v_automat,
++    v_dauer_p,
++    v_dauer_b,
++    v_coupon_p,
++    v_coupon_b,
++    v_ende + v_pfand,
++    jsonb_build_object(
++      'automatenpreis_brutto', v_automat,
++      'mhd_abschlag_prozent',  v_mhd_prozent,
++      'mhd_rest_tage',         v_rest,
++      'dauerrabatt_prozent',   v_dauer_p,
++      'dauerrabatt_betrag',    v_dauer_b,
++      'coupon_prozent',        v_coupon_p,
++      'coupon_betrag',         v_coupon_b,
++      'warenpreis_brutto',     v_ende,
++      'pfand_brutto',          v_pfand,
++      'endpreis_brutto',       v_ende + v_pfand,
++      'berechnet_am',          now()
++    ),
++    v_ende,
++    v_pfand;
++end;
++$$;
++
++
++create or replace function public.my_subscription_benefits()
++returns jsonb
++language sql
++stable
++security definer
++set search_path = public, app
++as $$
++  select jsonb_build_object(
++    'active',           app.has_subscription(auth.uid()),
++    'benefits',         app.has_app_benefits(auth.uid()),
++    'discount_percent', case when app.has_app_benefits(auth.uid())
++                             then app.dauerrabatt_prozent() else 0 end,
++    'period_end',       app.subscription_period_end(auth.uid()),
++    'plan',             (select s.plan::text
++                         from public.customer_subscriptions s
++                         where s.customer_id = auth.uid()
++                         order by s.seq desc
++                         limit 1)
++  );
++$$;
++
++
++comment on function public.card_entitlements(text) is
++  'Automaten-Nachschlag: Kartenkennung → Kundennummer und Rabattsatz. '
++  'Gibt keine Personendaten zurück. Dauerrabatt für jedes registrierte '
++  'Konto (app.has_app_benefits, V-018-a).';
++
++-- ── 3. Abo-Angebot beenden ──────────────────────────────────────────────
++update app.abo_angebotszeitraeume
++   set bis = now()
++ where plan in ('monthly', 'yearly')
++   and von < now()
++   and (bis is null or bis > now());
++
++
++-- ── 4. Kontolöschung darf an Treueboni nicht scheitern ──────────────────
++-- Gefunden beim Nachweis dieser Migration (96_loeschprozess): Die Löschregel
++-- löscht persönliche Angebote (`personal_offers`: loeschen), bewahrt aber den
++-- Nachweis des gewährten Bonus acht Jahre auf (`loyalty_bonus_grants`:
++-- aufbewahren). Der Fremdschlüssel loyalty_bonus_grants.offer_id hatte keine
++-- Löschregel, also brach die Löschung eines Kontos mit Treuebonus ab
++-- (Art. 17 DSGVO). Bisher fiel das nicht auf, weil ohne Abo nie ein Bonus
++-- vergeben wurde. Mit Vorteilen für alle träfe es jedes aktive Konto.
++--
++-- Lösung ohne Datenverlust: Beim Löschen des Angebots bleibt der Nachweis
++-- (Kunde, Monat, Stufe, Zeitpunkt) stehen, nur der Verweis wird leer. Die
++-- Spalte ist bereits nullbar. Der tatsächlich eingelöste Rabatt steht
++-- ohnehin auf dem Kaufbeleg.
++alter table public.loyalty_bonus_grants
++  drop constraint if exists loyalty_bonus_grants_offer_id_fkey;
++alter table public.loyalty_bonus_grants
++  add constraint loyalty_bonus_grants_offer_id_fkey
++  foreign key (offer_id) references public.personal_offers(id) on delete set null;
+diff --git a/supabase/migrations/20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql b/supabase/migrations/20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql
+new file mode 100644
+index 0000000..54dacd6
+--- /dev/null
++++ b/supabase/migrations/20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql
+@@ -0,0 +1,17 @@
++-- Runbook L, Schritt 1, Teil für den Stand der Produktion vom 10.09.2026
++-- (bar_soll existiert dort nicht). Befunde B-1 und B-2 vom 26.09.2026.
++-- Entzieht nur Aufrufrechte. Keine Daten, keine Funktion wird geändert.
++revoke execute on function public.dev_add_demo_purchase(text, numeric)
++  from public, anon, authenticated;
++
++do $$
++begin
++  if to_regprocedure('public.purchase_net_items(uuid, numeric)') is not null then
++    revoke execute on function public.purchase_net_items(uuid, numeric)
++      from public, anon, authenticated;
++  end if;
++  if to_regprocedure('public.purchase_donation_for(uuid, numeric)') is not null then
++    revoke execute on function public.purchase_donation_for(uuid, numeric)
++      from public, anon, authenticated;
++  end if;
++end $$;
+diff --git a/supabase/migrations/20261115100000_nachzug_produktionsstand.sql b/supabase/migrations/20261115100000_nachzug_produktionsstand.sql
+new file mode 100644
+index 0000000..0aa139e
+--- /dev/null
++++ b/supabase/migrations/20261115100000_nachzug_produktionsstand.sql
+@@ -0,0 +1,154 @@
++-- ============================================================================
++-- Nachzug: Was am 15.11.2026 nur in der Produktion stand, kommt ins Repository
++-- (Abgleich per Fingerabdruck, docs/audit/2026-11-15-ausrollplan, N-1 bis N-3).
++--
++-- Die Migration ist so geschrieben, dass sie in der Produktion nur EINE Sache
++-- ändert (Abschnitt 3b, Upload-Regel) und alles andere nur anlegt, wenn es
++-- fehlt. Auf einem frischen Aufbau stellt sie den Stand der Produktion her.
++--
++--   1. N-1: request_document_review und set_document_valid_until in der Fassung
++--      der Produktion (#variable_conflict use_column, Spalten voll benannt).
++--   2. N-2: acht Zeilenschutz-Regeln auf den Telemetrie-Tabellen, die Zugriff
++--      über das Recht inventory.view / inventory.edit geben.
++--   3. N-3: Speicherbereich employee-signatures mit seinen zwei Regeln.
++--      3b. Die Upload-Regel ließ jedes angemeldete Konto hochladen, auch
++--      Kundenkonten. Unterschriften laden nur interne Konten hoch
++--      (my_signature_tasks_screen). Sie verlangt jetzt public.is_internal().
++-- ============================================================================
++
++-- ── 1. N-1 ──────────────────────────────────────────────────────────────
++do $nachzug$
++begin
++  if (select p.prosrc from pg_proc p
++       where p.oid = to_regprocedure('public.request_document_review(uuid)'))
++     not like '%#variable_conflict use_column%' then
++    execute $f$
++create or replace function public.request_document_review(p_document uuid)
++ returns uuid
++ language plpgsql
++ security definer
++ set search_path to 'public', 'app'
++as $body$
++#variable_conflict use_column
++declare
++  v_role app.role_key;
++  v_id   uuid;
++  v_doc  record;
++begin
++  select role into v_role from public.profiles where profiles.id = auth.uid() and profiles.status = 'active' and profiles.deleted_at is null;
++  if v_role is null or v_role not in ('system_admin','shareholder') then
++    raise exception 'Nicht autorisiert';
++  end if;
++  select d.id, d.title, d.category, d.current_version,
++         (select v.file_path from public.document_versions v
++           where v.document_id = d.id and v.version = d.current_version limit 1) as file_path
++    into v_doc
++    from public.documents d where d.id = p_document;
++  if v_doc.id is null then
++    raise exception 'Dokument nicht gefunden';
++  end if;
++  v_id := public.request_document_approval(
++    p_document_kind := 'document_review'::app.document_kind,
++    p_period_from   := current_date,
++    p_period_to     := current_date,
++    p_title         := coalesce(v_doc.title, 'Dokument') || ' (v' || v_doc.current_version || ')',
++    p_snapshot      := jsonb_build_object(
++                         'document_id', v_doc.id,
++                         'category',    v_doc.category,
++                         'version',     v_doc.current_version,
++                         'file_path',   v_doc.file_path
++                       ),
++    p_draft_path    := v_doc.file_path
++  );
++  return v_id;
++end;
++$body$
++    $f$;
++  end if;
++
++  if (select p.prosrc from pg_proc p
++       where p.oid = to_regprocedure('public.set_document_valid_until(uuid, date)'))
++     not like '%#variable_conflict use_column%' then
++    execute $f$
++create or replace function public.set_document_valid_until(p_document uuid, p_valid_until date)
++ returns void
++ language plpgsql
++ security definer
++ set search_path to 'public', 'app'
++as $body$
++#variable_conflict use_column
++declare v_role app.role_key;
++begin
++  select role into v_role from public.profiles where profiles.id = auth.uid() and profiles.status = 'active' and profiles.deleted_at is null;
++  if v_role is null or v_role not in ('system_admin','shareholder') then
++    raise exception 'Nicht autorisiert';
++  end if;
++  update public.documents
++     set valid_until = p_valid_until,
++         updated_at  = now(),
++         updated_by  = auth.uid()
++   where id = p_document;
++end;
++$body$
++    $f$;
++  end if;
++end $nachzug$;
++
++-- ── 2. N-2 ──────────────────────────────────────────────────────────────
++do $nachzug$
++declare
++  r record;
++begin
++  for r in
++    select * from (values
++      ('machine_devices',          'machine_devices_read',          'select', 'inventory.view'),
++      ('machine_devices',          'machine_devices_insert',        'insert', 'inventory.edit'),
++      ('machine_devices',          'machine_devices_update',        'update', 'inventory.edit'),
++      ('machine_health',           'machine_health_read',           'select', 'inventory.view'),
++      ('machine_slots',            'machine_slots_read',            'select', 'inventory.view'),
++      ('machine_slots_history',    'machine_slots_history_read',    'select', 'inventory.view'),
++      ('machine_telemetry_events', 'machine_telemetry_events_read', 'select', 'inventory.view'),
++      ('telemetry_providers',      'telemetry_providers_read',      'select', 'inventory.view')
++    ) as t(tabelle, regel, befehl, recht)
++  loop
++    if not exists (select 1 from pg_policies
++                    where schemaname = 'public' and tablename = r.tabelle and policyname = r.regel) then
++      execute format(
++        'create policy %I on public.%I for %s to authenticated %s',
++        r.regel, r.tabelle, r.befehl,
++        case r.befehl
++          when 'select' then format('using (public.is_admin() or public.auth_has_permission(%L))', r.recht)
++          when 'insert' then format('with check (public.is_admin() or public.auth_has_permission(%L))', r.recht)
++          else format('using (public.is_admin() or public.auth_has_permission(%1$L)) with check (public.is_admin() or public.auth_has_permission(%1$L))', r.recht)
++        end);
++    end if;
++  end loop;
++end $nachzug$;
++
++-- ── 3. N-3 ──────────────────────────────────────────────────────────────
++insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
++values ('employee-signatures', 'employee-signatures', false, 2097152, array['image/png','image/jpeg'])
++on conflict (id) do nothing;
++
++do $nachzug$
++begin
++  if not exists (select 1 from pg_policies
++                  where schemaname = 'storage' and tablename = 'objects' and policyname = 'es_read_own') then
++    create policy es_read_own on storage.objects for select to public
++      using (bucket_id = 'employee-signatures'
++             and (split_part(name, '/', 1) = (auth.uid())::text
++                  or exists (select 1 from public.profiles p
++                              where p.id = auth.uid()
++                                and p.role = any (array['shareholder'::app.role_key, 'system_admin'::app.role_key]))));
++  end if;
++
++  -- 3b. Einzige Änderung an der Produktion: Hochladen nur für interne Konten.
++  if exists (select 1 from pg_policies
++              where schemaname = 'storage' and tablename = 'objects' and policyname = 'es_upload') then
++    drop policy es_upload on storage.objects;
++  end if;
++  create policy es_upload on storage.objects for insert to authenticated
++    with check (bucket_id = 'employee-signatures'
++                and split_part(name, '/', 1) = (auth.uid())::text
++                and public.is_internal());
++end $nachzug$;
+diff --git a/supabase/migrations/20261115110000_unterschrift_erneut_hochladen.sql b/supabase/migrations/20261115110000_unterschrift_erneut_hochladen.sql
+new file mode 100644
+index 0000000..e5853be
+--- /dev/null
++++ b/supabase/migrations/20261115110000_unterschrift_erneut_hochladen.sql
+@@ -0,0 +1,23 @@
++-- Unterschriften erneut hochladen (Beobachtung vom 15.11.2026).
++--
++-- Die App lädt eine Unterschrift mit „überschreiben erlaubt" hoch
++-- (my_signature_tasks_screen, upsert: true). Für den Speicherbereich
++-- employee-signatures gab es eine Regel zum Anlegen und eine zum Lesen, aber
++-- keine zum Ändern. Der erste Upload gelang, ein zweiter für dieselbe Aufgabe
++-- (z. B. nach einem Abbruch) scheiterte am Zeilenschutz.
++--
++-- Die neue Regel erlaubt das Ändern unter denselben Bedingungen wie das
++-- Anlegen: nur interne Konten, nur im eigenen Unterordner.
++do $$
++begin
++  if not exists (select 1 from pg_policies
++                  where schemaname = 'storage' and tablename = 'objects' and policyname = 'es_update_own') then
++    create policy es_update_own on storage.objects for update to authenticated
++      using (bucket_id = 'employee-signatures'
++             and split_part(name, '/', 1) = (auth.uid())::text
++             and public.is_internal())
++      with check (bucket_id = 'employee-signatures'
++                  and split_part(name, '/', 1) = (auth.uid())::text
++                  and public.is_internal());
++  end if;
++end $$;
+diff --git a/supabase/migrations/README.md b/supabase/migrations/README.md
+index 03a7db7..38048d7 100644
+--- a/supabase/migrations/README.md
++++ b/supabase/migrations/README.md
+@@ -117,8 +117,23 @@ Abweichung vom Spiegel, sondern der offene Schritt.
+ | `20260926121000_terminal_webhook_anbindung.sql` | B-4/B-5: Webhook findet die Einlösefunktion, Enum-Wert `machine` | vor dem ersten Automaten mit Terminal |
+ | `20260927200000_pfand_getrennt.sql` | Pfand getrennt vom Preis (§ 7 PAngV, V-016), Rabatte und Spende ohne Pfand; behebt zudem `vend_freigabe_anlegen` (42702) und die 7-%-Pauschale der Spendenbasis | Runbook M (`docs/OPERATIONS.md` im Arbeitszweig): **nach** `…121000` und **nach** dem App-Update; bricht sonst bzw. im falschen Katalog ohne Änderung ab |
+ | `20260929100000_verfuegbarkeit_fuer_kunden.sql` | V-016-d: `machine_availability` zeigt Kunden je Produkt nur verfügbar/bald leer/ausverkauft, Preis und Pfand; `inventory` bleibt intern | Runbook M, **nach** `…200000`; bricht sonst ohne Änderung ab |
++| `20261103100000_vorteile_ohne_abo.sql` | V-018-a: Vorteile (Dauerrabatt, Coupons, Treueboni, Status) für jedes registrierte Konto über `app.has_app_benefits()`; Monats- und Jahresabo nicht mehr wählbar; Löschregel für `loyalty_bonus_grants.offer_id` (V-018-d) |
++| `20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql` | Runbook L für den Stand der Produktion vom 10.09.2026: Aufrufrechte für `dev_add_demo_purchase`, `purchase_net_items`, `purchase_donation_for` entzogen (B-1, B-2). In der Produktion am 15.11.2026 **vor** den Migrationen ab `20260910190000` eingespielt; wiederholbar |
++| `20261115100000_nachzug_produktionsstand.sql` | Übernimmt, was nur in der Produktion stand (zwei Funktionen, 8 Regeln auf Telemetrie-Tabellen, Speicherbereich `employee-signatures`); Upload dort nur noch für interne Konten |
++| `20261115110000_unterschrift_erneut_hochladen.sql` | Regel zum Ändern im Bereich `employee-signatures`, damit ein zweiter Upload derselben Unterschrift gelingt |
+ 
+ Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10), `109` (5/5) und
+ `110` (23/23, Pfand) und `111` (12/12, Verfügbarkeit), zuletzt am 29.09.2026
+ nach einem Neuaufbau aus allen 237 Migrationen, alle 28 Prüfskripte ohne Fehler. Bericht: `docs/audit/AUDIT-2026-09-BACKEND.md` im Zweig
+ `claude/bordesnack24-app-strategy-sf5yzy`.
++
++## Stand der Produktion (15.11.2026)
++
++Die Produktion entspricht diesem Verzeichnis: Ein Neuaufbau aus allen 241
++Migrationen ergibt denselben Fingerabdruck wie die Produktion
++(`scripts/pruefumgebung/fingerabdruck.sql`, sechs Merkmale). Die Versionsnummern
++in `supabase_migrations.schema_migrations` der Produktion sind die Zeitpunkte
++des Einspielens und weichen von den Dateinamen ab; maßgeblich ist der Name.
++In der Produktion gibt es zusätzlich das Hilfsschema `ausrollen_20261115`
++(geprüfte Migrationstexte und Sicherung der Produktpreise vom 15.11.2026). Es
++ist nicht über die API erreichbar und gehört nicht zum fachlichen Schema.
+-- 
+2.43.0
+

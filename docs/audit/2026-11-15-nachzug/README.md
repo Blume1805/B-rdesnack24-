@@ -68,9 +68,24 @@ create policy es_upload on storage.objects for insert to public
               and split_part(name, '/', 1) = (auth.uid())::text);
 ```
 
-## Beobachtung für Phase 2
+## Unterschrift erneut hochladen (15.11.2026, Auftrag Philipp „korrigiere genau diese Punkte")
 
-Die App lädt Unterschriften mit „überschreiben erlaubt" hoch (`upsert: true`).
-Dafür gibt es im Bereich keine Regel zum Ändern. Ein zweiter Versuch für
-dieselbe Aufgabe dürfte deshalb scheitern. Nicht geprüft, nur aus dem Code
-gelesen.
+Die App lädt Unterschriften mit „überschreiben erlaubt" hoch. Im Bereich
+`employee-signatures` fehlte eine Regel zum Ändern.
+
+| Probe am Nachbau | vorher | nachher |
+|---|---|---|
+| internes Konto, erster Upload | gelingt | gelingt |
+| internes Konto, zweiter Upload derselben Datei | `ERR:42501` | gelingt |
+| Kundenkonto, eigene Datei | `ERR:42501` | `ERR:42501` |
+| Kundenkonto ändert Datei eines internen Kontos | 0 Zeilen | 0 Zeilen |
+| internes Konto in fremdem Unterordner | `ERR:42501` | `ERR:42501` |
+
+Migration `20261115110000_unterschrift_erneut_hochladen.sql`, in der Produktion
+als `unterschrift_erneut_hochladen` eingespielt; Prüfsumme der Regel in
+Produktion und Nachbau gleich. Probe: `probe_upsert.sql`. Die Probe bildet das
+Überschreiben als „einfügen, bei Konflikt ändern" nach, so wie es der
+Supabase-Speicherdienst nach dessen Dokumentation tut; mit der echten App
+wurde es nicht ausprobiert (kein Testkonto mit Unterschriftsaufgabe).
+
+Rückweg: `drop policy es_update_own on storage.objects;`

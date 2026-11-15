@@ -87,3 +87,21 @@ ein Fenster mit Dritten abgestimmt werden muss.
 
 Das gilt auch für Runbooks in `/docs/`: Sie werden für den Betreiber
 geschrieben, nicht für einen Entwickler.
+
+## Nach jeder Änderung an der echten Datenbank: Fingerabdruck vergleichen (Pflicht, ohne Nachfrage)
+
+Die echte Datenbank und das Repository sind am 15.11.2026 auseinandergelaufen
+gefunden worden (11 fehlende Migrationen, dazu Änderungen, die nur in der
+Datenbank standen). Damit das nicht wiederkehrt:
+
+* Jede Änderung an der echten Datenbank läuft als Migration der
+  Produktionslinie, wird vorher am lokalen Nachbau getestet und danach in der
+  Datenbank **nachgemessen**. „Eingespielt" ohne Messung gilt als nicht erledigt.
+* Nach jeder Änderung wird der Fingerabdruck
+  (`docs/audit/2026-11-15-ausrollplan/fingerabdruck_sechs_merkmale.sql`, im
+  Produktionszweig `scripts/pruefumgebung/fingerabdruck.sql`) in der Datenbank
+  und im frischen Nachbau ausgeführt. Alle Werte müssen gleich sein; eine
+  Abweichung ist ein 🔴-Befund.
+* Nichts wird direkt im Supabase-Dashboard geändert. Was dort doch geändert
+  wurde, wird als Migration nachgezogen.
+* Änderungen an der echten Datenbank brauchen weiterhin Philipps Freigabe.

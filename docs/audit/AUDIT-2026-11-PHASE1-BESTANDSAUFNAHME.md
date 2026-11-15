@@ -275,3 +275,14 @@ die eine echte Schwäche (Upload in `employee-signatures` für jedes Konto) ist
 in der Produktion geschlossen. Fünf Fingerabdrücke identisch. Offen bleibt als
 bewusst hingenommene Abweichung, dass 8 Funktionen in der Produktion ohne
 Kommentare stehen. Nachweis: `docs/audit/2026-11-15-nachzug/README.md`.
+
+### 5.7 Ausrollen abgeschlossen (15.11.2026)
+
+Alle 14 offenen Migrationen sind in der Produktion, dazu die Regel für den
+erneuten Unterschriften-Upload. Produktion und Neuaufbau aus dem
+Produktionszweig stimmen in sechs Merkmalen überein. Damit sind P1-2 und P1-10
+erledigt und P1-14 entschärft: Der Produktionszweig bildet die Produktion
+wieder ab (lokal eingecheckt; Push auf GitHub wartet auf die ausdrückliche
+Erlaubnis für diesen Zweig). Neu und niedrig: fünf Funktionen ohne festen
+Suchpfad. Einzelheiten: `docs/audit/2026-11-15-ausrollplan/README.md`,
+Abschnitt 5.

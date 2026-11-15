@@ -1380,12 +1380,11 @@ Technischer Hintergrund: Migration `0070_scheinkaeufe_sperren.sql`, Test
 
 ## Runbook M: Pfand getrennt vom Preis führen
 
-> **⚠️ Stand 15.11.2026: Bitte noch nicht ausführen.** Eine Messung an der
-> echten Datenbank hat gezeigt, dass dort 11 frühere Änderungen fehlen (Stand
-> der Datenbank: 10.09.2026). Dieses Runbook baut darauf auf und würde mit einer
-> roten Meldung abbrechen. Es wird neu geschrieben, sobald die Reihenfolge für
-> alle 14 offenen Schritte getestet ist. Einzelheiten:
-> `docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 5.
+> **✅ Erledigt am 15.11.2026.** Alle Schritte dieses Runbooks sind in der
+> echten Datenbank eingespielt und nachgemessen (18 Produkte mit Pfand, Cola
+> 2,05 € + 0,25 €, kein Gesamtpreis verändert). Du musst hier nichts mehr tun,
+> außer die Preisschilder (Schritt 9) vor dem ersten Automaten. Nachweis:
+> `docs/audit/2026-11-15-ausrollplan/README.md`, Abschnitt 5.
 
 **Zeitbedarf:** 15 Minuten in Supabase, dazu die Preisschilder am Automaten.
 
@@ -1522,12 +1521,11 @@ Prüfskripten, COMPLIANCE V-016.
 
 ## Runbook N: App-Vorteile für jedes kostenlose Konto freischalten
 
-> **⚠️ Stand 15.11.2026: Bitte noch nicht ausführen.** Eine Messung an der
-> echten Datenbank hat gezeigt, dass dort 11 frühere Änderungen fehlen (Stand
-> der Datenbank: 10.09.2026). Dieses Runbook baut darauf auf und würde mit einer
-> roten Meldung abbrechen. Es wird neu geschrieben, sobald die Reihenfolge für
-> alle 14 offenen Schritte getestet ist. Einzelheiten:
-> `docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 5.
+> **✅ Erledigt am 15.11.2026.** Die Änderung ist in der echten Datenbank
+> eingespielt und nachgemessen: Vorteile für alle Konten `true`, Monats- und
+> Jahresabo nicht mehr angeboten, Löschregel `n`. Ein Konto hat einen
+> Abo-Eintrag; das ist ein Testkonto. Du musst hier nichts mehr tun. Nachweis:
+> `docs/audit/2026-11-15-ausrollplan/README.md`, Abschnitt 5.
 
 **Zeitbedarf:** 10 Minuten in Supabase.
 

@@ -97,26 +97,74 @@ vorgesehen. Im Tarif Free gibt es keine Sicherung zum Zurückspielen; vor dem
 Ausrollen werden deshalb die betroffenen Preisspalten als Kopie in eine
 Hilfstabelle gesichert.
 
-## 5. Ausrollen: Stand (15.11.2026, Freigabe Philipp „Ja, alle 14 ausrollen")
+## 5. Ausrollen: durchgeführt am 15.11.2026 (Freigabe Philipp „Ja, alle 14 ausrollen")
 
-**Verfahren, wie tatsächlich angewandt.** Jede Migration wird zuerst als Text in
-`ausrollen_20261115.migration` in der Produktion abgelegt. Dort wird ihre
-Prüfsumme mit der Datei im Repository verglichen (`pruefsummen.txt`). Erst wenn
-sie stimmt, führt ein kurzer Block genau diesen Text aus, als Ganzes: Geht ein
-Befehl darin schief, bleibt nichts zurück. Das Schema ist nicht über die API
-erreichbar und trägt keine Rechte für `anon` oder `authenticated`. Es enthält
-außerdem `products_vorher`, die Sicherung der Produktpreise vor allen Schritten.
+**Verfahren, wie tatsächlich angewandt.** Jede Migration wurde zuerst als Text
+in `ausrollen_20261115.migration` in der Produktion abgelegt und dort per
+Prüfsumme mit der Datei im Repository verglichen (`pruefsummen.txt`). Erst
+danach führte ein kurzer Block genau diesen Text aus, als Ganzes. Das Schema
+ist nicht über die API erreichbar und trägt keine Rechte für `anon` oder
+`authenticated`. Es enthält außerdem `products_vorher`, die Sicherung der 67
+Produktpreise vor allen Schritten.
 
-Vorab am Nachbau geprüft: Blockweise eingespielt ergibt denselben
-Fingerabdruck wie Befehl für Befehl, alle 29 Prüfskripte bestehen. In der
-Produktion liegen 90 Angebote, alle abgelaufen und archiviert; der
-Pfand-Schritt rechnet davon keines um. Der Produktkatalog (Artikelnummer, Preis,
-Steuersatz) ist in Produktion und Nachbau gleich.
+**Übertragung der Texte.** Schritt 1 und 2 wurden als Text übergeben. Beim
+dritten lief eine Rückfrage der Supabase-Anbindung an Philipp unbeantwortet ab.
+Die Schritte 3 bis 14 hat die Datenbank deshalb selbst von GitHub geholt
+(`pg_net`, feste Commit-Stände `437dadb…` und `1a94e4d…`, Tabelle
+`ausrollen_20261115.abruf`). Für jede Datei galt dieselbe Bedingung: Ausgeführt
+wurde nur, was per Prüfsumme zeichengleich mit dem getesteten Stand war.
+
+**Vorab am Nachbau geprüft:** Blockweise eingespielt ergibt denselben
+Fingerabdruck wie Befehl für Befehl; alle 29 Prüfskripte bestehen. In der
+Produktion lagen 90 Angebote, alle abgelaufen und archiviert; der Pfand-Schritt
+hat keines umgerechnet.
 
 | # | Migration | Stand |
 |---|---|---|
-| 0 | `ausrollen_20261115_hilfsschema` | ✅ eingespielt |
-| 1 | `popcorn_zutaten_naehrwerte_ek` | ✅ eingespielt, Prüfsumme stimmte |
-| 2 | `popcorn_verkaufspreis` | ✅ eingespielt, Prüfsumme stimmte |
-| 3 | `bundles` | ⏸ Ablegen des Textes wartet auf eine Bestätigung von Philipp in der Supabase-Verbindung (Rückfrage lief nach 60 Sekunden ab) |
-| 4 bis 14 | | offen |
+| 0 | `ausrollen_20261115_hilfsschema` | ✅ |
+| 1 bis 11 | Popcorn, Kombi-Angebote, Rabattdeckel, Automatenbezahlung, Bargeld, Abo-Zeiträume, Rest von Runbook L, Terminal-Anbindung | ✅ Zwischenkontrolle nach Schritt 11: sechs Fingerabdrücke gleich dem Nachbau |
+| 12 | `pfand_getrennt` | ✅ 18 Produkte mit Pfand, Cola 2,05 € + 0,25 €, Durstlöscher 0,00; bei keinem Produkt weicht Ware + Pfand vom gesicherten bisherigen Preis ab; kein Produkt ohne Pfand hat seinen Preis geändert |
+| 13 | `verfuegbarkeit_fuer_kunden` | ✅ |
+| 14 | `vorteile_ohne_abo` | ✅ `vorteile_fuer_alle = true`, Monats- und Jahresabo nicht angeboten, Löschregel `n`, 1 Konto mit Abo-Eintrag (Testkonto) |
+| danach | `unterschrift_erneut_hochladen` | ✅ siehe `docs/audit/2026-11-15-nachzug/` |
+
+### Schlusskontrolle
+
+| Merkmal | Produktion | Neuaufbau aus dem Produktionszweig (241 Migrationen) |
+|---|---|---|
+| Zeilenschutz-Regeln mit Bedingungen | 231 `b8ffbbf5…` | gleich |
+| Funktionen ohne Kommentare, mit Aufrufrechten | 278 `a9644c1f…` | gleich |
+| Spalten | 1379 `82ab5f18…` | gleich |
+| Auslöser | 103 `7b1fc14a…` | gleich |
+| Produktkatalog (Preis, Steuersatz, Einkauf, Rabattfähigkeit, Allergene) | 67 `4ee7d4d2…` | gleich |
+| Aufzählungswerte | 238 `49d57759…` | gleich |
+
+Abfrage: `fingerabdruck_sechs_merkmale.sql`. Weitere Messwerte der Produktion:
+Scheinkauf gesperrt, Bargeld-Anzeige geschützt (B-3), Verfügbarkeit vorhanden,
+0 Käufe, 252 Migrationen verzeichnet.
+
+### Sicherheitshinweise von Supabase nach dem Ausrollen (alle 189 Einzelbefunde gelesen)
+
+| Hinweis | vorher | nachher | Einordnung |
+|---|---|---|---|
+| Funktion ohne festen Suchpfad | 0 | 5: `app.benefits_free_for_all`, `app.darf_bundles_pflegen`, `app.dauerrabatt_prozent`, `app.kassenzaehlung_unveraenderbar`, `app.terminal_ereignis_unveraenderbar` | Niedrig, neu durch das Ausrollen. Keine der fünf läuft mit Eigentümerrechten. Nachziehen in Phase 4 (eine Zeile je Funktion) |
+| Funktionen mit Eigentümerrechten für jedes Konto | 145 | 161 | 19 neue aus den neuen Funktionen, 3 entfallen durch die Sperre. Prüfschwerpunkt Phase 2 |
+| Funktionen mit Eigentümerrechten ohne Anmeldung | 7 | 8 | neu: `abo_angebote` (zeigt, welche Tarife wählbar sind; gewollt) |
+| Tabellen mit Zeilenschutz ohne Regel | 8 | 12 | neu: `app.abo_angebotszeitraeume` und die drei Hilfstabellen; alles gesperrt, gewollt |
+| Sicht mit Eigentümerrechten, `pg_net` in `public`, Passwortschutz aus | je 1 | je 1 | unverändert, Phase 2 |
+
+### Offen nach dem Ausrollen
+
+* **Produktionszweig auf GitHub:** Die drei Commits (`8111917`, `736b1d0`,
+  `489dd5e`) liegen lokal und als Patch hier (`produktionslinie-489dd5e.patch`
+  und die beiden älteren unter `docs/audit/`). Der Push auf
+  `claude/bordesnack24-audit-architecture-7xd3d6` wurde von der
+  Arbeitsumgebung abgelehnt, weil er eine ausdrückliche Erlaubnis von Philipp
+  für genau diesen Zweig braucht.
+* **App-Update:** Die ausgelieferte App (Stand 26.09.2026) zeigt den Pfand
+  nicht getrennt und hat die Verfügbarkeitsanzeige nicht. Das Update liegt auf
+  `claude/bordesnack24-app-strategy-sf5yzy` und braucht die Freigabe für `main`.
+* **Hilfsschema `ausrollen_20261115`:** bleibt als Nachweis und Preissicherung
+  stehen. Entfernen ist ein Löschvorgang und nur mit Freigabe vorgesehen.
+* **Landingpage:** Schalter `pfandGetrennt` kann jetzt auf `true`;
+  `bestandLive` erst, wenn das App-Update ausgeliefert ist.
