@@ -166,5 +166,6 @@ Scheinkauf gesperrt, Bargeld-Anzeige geschützt (B-3), Verfügbarkeit vorhanden,
   `claude/bordesnack24-app-strategy-sf5yzy` und braucht die Freigabe für `main`.
 * **Hilfsschema `ausrollen_20261115`:** bleibt als Nachweis und Preissicherung
   stehen. Entfernen ist ein Löschvorgang und nur mit Freigabe vorgesehen.
-* **Landingpage:** Schalter `pfandGetrennt` kann jetzt auf `true`;
+* **Landingpage:** Schalter `pfandGetrennt` steht seit dem 15.11.2026 auf `true`
+  (Lovable `46aaa80`, `docs/auftraege/lovable-auftrag-2026-11-15-pfandschalter.md`).
   `bestandLive` erst, wenn das App-Update ausgeliefert ist.
