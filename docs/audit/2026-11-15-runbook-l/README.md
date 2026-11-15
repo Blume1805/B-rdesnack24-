@@ -42,9 +42,10 @@ grant execute on function public.purchase_donation_for(uuid, numeric) to authent
 
 ## Offen
 
-* Die App (`apps/mobile`, `customer_remote_data_source.dart`) ruft
-  `dev_add_demo_purchase` noch auf. Wer die Test-Schaltfläche drückt, bekommt
-  jetzt eine Fehlermeldung. Entfernen der Schaltfläche: Phase 4.
+* Die App (`apps/mobile`, `customer_remote_data_source.dart`) enthält den
+  Aufruf von `dev_add_demo_purchase` noch. Die Schaltfläche dazu steht hinter
+  `kDebugMode` und erscheint in der ausgelieferten Fassung nicht. Aufruf und
+  Schaltfläche entfernen: Phase 4.
 * B-3 (`bar_soll`) entsteht erst mit `bargeld_und_preisausspielung`; die
   Korrektur steckt in `scheinkaeufe_sperren` und muss in derselben Reihenfolge
   mit ausgerollt werden.

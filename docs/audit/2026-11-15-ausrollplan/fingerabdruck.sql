@@ -1,0 +1,12 @@
+select
+ (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','app')) as fn_anzahl,
+ (select md5(string_agg(n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')='||md5(p.prosrc)||p.prosecdef::text, '|' order by n.nspname, p.proname, pg_get_function_identity_arguments(p.oid))) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','app')) as fn_md5,
+ (select count(*) from information_schema.columns where table_schema in ('public','app')) as spalten_anzahl,
+ (select md5(string_agg(table_schema||'.'||table_name||'.'||column_name||':'||udt_name||':'||is_nullable, '|' order by table_schema, table_name, column_name)) from information_schema.columns where table_schema in ('public','app')) as spalten_md5,
+ (select count(*) from pg_policies where schemaname in ('public','app','storage')) as policy_anzahl,
+ (select md5(string_agg(schemaname||'.'||tablename||'.'||policyname||':'||cmd||':'||array_to_string(roles,','), '|' order by schemaname, tablename, policyname)) from pg_policies where schemaname in ('public','app')) as policy_namen_md5,
+ (select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','app') and not t.tgisinternal) as trigger_anzahl,
+ (select md5(string_agg(c.relname||'.'||t.tgname, '|' order by c.relname, t.tgname)) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','app') and not t.tgisinternal) as trigger_md5,
+ (select md5(string_agg(n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')', '|' order by 1)) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and has_function_privilege('authenticated', p.oid, 'execute') and p.proname not in ('dev_add_demo_purchase','purchase_net_items','purchase_donation_for')) as auth_rechte_md5,
+ (select md5(string_agg(n.nspname||'.'||p.proname, '|' order by 1)) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and has_function_privilege('anon', p.oid, 'execute')) as anon_rechte_md5,
+ (select md5(string_agg(t.typname||':'||e.enumlabel, '|' order by t.typname, e.enumsortorder)) from pg_enum e join pg_type t on t.oid=e.enumtypid join pg_namespace n on n.oid=t.typnamespace where n.nspname in ('public','app')) as enum_md5;

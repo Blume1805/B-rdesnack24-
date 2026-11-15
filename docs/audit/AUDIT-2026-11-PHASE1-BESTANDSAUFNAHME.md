@@ -256,3 +256,14 @@ Projekt `boerdesnack24-app` (`nnfsyuglkqycwenwxmuw`), Region `eu-central-1`
 | P1-12 🟡 | Tarif Free: Nach meinem Kenntnisstand gibt es dort keine automatischen Sicherungen zum Zurückspielen, und ein Projekt wird nach einer Woche ohne Zugriffe pausiert. In Phase 2 gegen die aktuellen Supabase-Bedingungen zu prüfen |
 | P1-13 🟡 | Die lokale Prüfumgebung läuft mit PostgreSQL 16, die Produktion mit 17.6. Vor dem Ausrollen einmal auf 17 gegenprüfen |
 | P1-14 🟡 | Der „Produktionszweig" ist nicht die Produktion. Es gibt damit drei Stände: main-Linie, Produktionszweig, echte Produktion |
+
+### 5.5 Abgleich Nachbau gegen Produktion und Ausrollplan (15.11.2026)
+
+Der lokale Nachbau entspricht der Produktion in Spalten, Auslösern,
+Aufzählungen und Aufrufrechten vollständig, in den Funktionen bis auf
+Kommentare und zwei Korrekturen, die nur in der Produktion stehen. Die
+Produktion hat zusätzlich 8 Zeilenschutz-Regeln und einen Speicherbereich, die
+in keinem Repository-Stand vorkommen (Befunde N-1 bis N-4). Die 14 offenen
+Migrationen laufen auf diesem Stand fehlerfrei und sind mit der ausgelieferten
+App verträglich. Einzelheiten und Vorgehen:
+`docs/audit/2026-11-15-ausrollplan/README.md`.
