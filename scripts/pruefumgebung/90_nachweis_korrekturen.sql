@@ -29,7 +29,14 @@ begin
   delete from public.customer_subscriptions where customer_id = Bb;
   w := pruef.schreibe('select public.choose_subscription_plan(''monthly'', true, true)', Bb);
   r := pruef.wahrheit(format('select plan::text from public.customer_subscriptions where customer_id=%L order by seq desc limit 1', Bb));
-  insert into pruef.ergebnis values (default,'S-6','Volljaehriger schliesst ab (Gegenprobe)','Kunde B (1990)','choose_subscription_plan','Abo entsteht', w||' / '||r, r='monthly');
+  -- Seit 20261103100000_vorteile_ohne_abo (V-018-a) ist das Monatsabo nicht
+  -- mehr wählbar. Die Gegenprobe prüft den jeweils geltenden Stand: Ist es
+  -- angeboten, entsteht es; ist es geschlossen, wird es abgewiesen.
+  if app.abo_wird_angeboten('monthly') then
+    insert into pruef.ergebnis values (default,'S-6','Volljaehriger schliesst ab (Gegenprobe)','Kunde B (1990)','choose_subscription_plan','Abo entsteht', w||' / '||r, r='monthly');
+  else
+    insert into pruef.ergebnis values (default,'S-6','Volljaehriger, Abo geschlossen (V-018-a)','Kunde B (1990)','choose_subscription_plan','abgewiesen, kein Abo', w||' / '||r, w='ERR:42501' and r='<null>');
+  end if;
   -- Negativtest: Konto ohne Geburtsdatum (eigenes Konto, weil das Datum
   -- nach der ersten Setzung unveraenderlich ist — der Trigger hat den
   -- ersten Anlauf dieses Tests zu Recht abgewiesen).

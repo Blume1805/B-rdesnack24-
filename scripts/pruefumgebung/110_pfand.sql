@@ -45,9 +45,17 @@ select 'A1 Stammdaten Cola', deposit || ' / ' || round(list_price_net * (1 + tax
 -- kundenpreis prüft auth.uid(): Die Abfrage läuft mit der Kennung des
 -- jeweiligen Kunden, wie aus der App.
 select set_config('request.jwt.claims', json_build_object('sub', :ohne)::text, false);
+-- Ab 20261103100000_vorteile_ohne_abo (V-018-a) bekommt jedes registrierte
+-- Konto den Dauerrabatt, auch ohne Abo. Vorher nur mit Abo. Der Fall prüft
+-- den jeweils geltenden Stand; der Pfand bleibt in beiden rabattfrei.
+select (to_regprocedure('app.benefits_free_for_all()') is not null) as vorteile_fuer_alle \gset
 insert into pfand_ergebnis
-select 'A2 ohne Abo', endpreis || ' = ' || warenpreis || ' + ' || pfand, '2.30 = 2.05 + 0.25',
-       endpreis = 2.30 and warenpreis = 2.05 and pfand = 0.25 and dauerrabatt_betrag = 0
+select 'A2 ohne Abo' || case when :'vorteile_fuer_alle' = 't' then ' (Vorteile für alle)' else '' end,
+       endpreis || ' = ' || warenpreis || ' + ' || pfand,
+       case when :'vorteile_fuer_alle' = 't' then '2.20 = 1.95 + 0.25' else '2.30 = 2.05 + 0.25' end,
+       case when :'vorteile_fuer_alle' = 't'
+            then endpreis = 2.20 and warenpreis = 1.95 and pfand = 0.25 and dauerrabatt_betrag = 0.10
+            else endpreis = 2.30 and warenpreis = 2.05 and pfand = 0.25 and dauerrabatt_betrag = 0 end
   from public.kundenpreis(:maschine, :'cola', :ohne);
 
 -- Dauerrabatt 5 % auf 2,05 € = 0,10 €. Auf 2,30 € (mit Pfand) wären es

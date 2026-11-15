@@ -167,6 +167,8 @@ brauchen davor einen Neubau.
 | `109_terminal_webhook_weg.sql` | Befunde B-4/B-5: der Weg des Terminal-Webhooks als `service_role` über `public.vend_freigabe_einloesen` bis zum Kauf mit `source = 'machine'`. 5 Urteile, wiederholbar. Setzt `105` und `20260926121000` voraus |
 | `110_pfand.sql` | Pfand getrennt vom Preis (V-016): Zahlbetrag = Ware + Pfand, Dauerrabatt und MHD-Abschlag nur auf die Ware, Pfand an Freigabe und Automatenkauf vom Server (ein vom Aufrufer mitgegebener Pfand wird überschrieben), Spendenbasis ohne Pfand mit dem Steuersatz des Produkts, Pfand in allen Katalog-Schnittstellen, kein Kunde kann den Pfand setzen oder fremde Belege sehen. 23 Urteile, wiederholbar. Setzt `20260926121000` und `20260927200000` voraus |
 | `111_verfuegbarkeit.sql` | Verfügbarkeit für Kunden (V-016-d): drei Zustände, Preis ohne Pfand mit Pfand daneben, keine Stückzahlen in der Rückgabe, inaktiver Automat und inaktives Produkt fallen heraus, anon ohne Recht, ohne Anmeldung leer, `inventory` und `machine_stock` für Kunden weiter gesperrt, Gegenprobe intern. 12 Urteile, wiederholbar. Setzt `20260929100000` voraus |
+| `112_vorteile_ohne_abo.sql` | Vorteile ohne Abo (V-018-a): Gate, die fünf Vorteile für ein Konto ohne Abo, Abo nicht abschließbar, Gegenprobe mit ausgeschaltetem Schalter, Isolation und Rechte, Löschung mit Treuebonus. 21 Urteile, wiederholbar. Setzt `20261103100000` voraus |
+| `fingerabdruck.sql` | Kein Prüfskript mit Urteilen, sondern der Vergleich Nachbau gegen Produktion: Regeln, Funktionen, Spalten, Auslöser, Produktkatalog, Aufzählungen. Nach jeder Änderung an der Produktion auszuführen |
 
 Ergebnisse stehen in `pruef.ergebnis`. Ausgewertete Läufe:
 `/docs/SECURITY.md`.
