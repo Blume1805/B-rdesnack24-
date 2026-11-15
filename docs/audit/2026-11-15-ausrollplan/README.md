@@ -147,7 +147,7 @@ Scheinkauf gesperrt, Bargeld-Anzeige geschützt (B-3), Verfügbarkeit vorhanden,
 
 | Hinweis | vorher | nachher | Einordnung |
 |---|---|---|---|
-| Funktion ohne festen Suchpfad | 0 | 5: `app.benefits_free_for_all`, `app.darf_bundles_pflegen`, `app.dauerrabatt_prozent`, `app.kassenzaehlung_unveraenderbar`, `app.terminal_ereignis_unveraenderbar` | Niedrig, neu durch das Ausrollen. Keine der fünf läuft mit Eigentümerrechten. Nachziehen in Phase 4 (eine Zeile je Funktion) |
+| Funktion ohne festen Suchpfad | 0 | 5: `app.benefits_free_for_all`, `app.darf_bundles_pflegen`, `app.dauerrabatt_prozent`, `app.kassenzaehlung_unveraenderbar`, `app.terminal_ereignis_unveraenderbar` | Niedrig, neu durch das Ausrollen. ✅ Behoben am selben Tag: Migration `suchpfad_fuenf_funktionen`, in der Produktion 0 Funktionen ohne festen Suchpfad, Fingerabdruck unverändert gleich dem Neuaufbau (242 Migrationen, 29 Prüfskripte ohne Fehlurteil) |
 | Funktionen mit Eigentümerrechten für jedes Konto | 145 | 161 | 19 neue aus den neuen Funktionen, 3 entfallen durch die Sperre. Prüfschwerpunkt Phase 2 |
 | Funktionen mit Eigentümerrechten ohne Anmeldung | 7 | 8 | neu: `abo_angebote` (zeigt, welche Tarife wählbar sind; gewollt) |
 | Tabellen mit Zeilenschutz ohne Regel | 8 | 12 | neu: `app.abo_angebotszeitraeume` und die drei Hilfstabellen; alles gesperrt, gewollt |
@@ -159,8 +159,10 @@ Scheinkauf gesperrt, Bargeld-Anzeige geschützt (B-3), Verfügbarkeit vorhanden,
   `489dd5e`) liegen lokal und als Patch hier (`produktionslinie-489dd5e.patch`
   und die beiden älteren unter `docs/audit/`). Der Push auf
   `claude/bordesnack24-audit-architecture-7xd3d6` wurde von der
-  Arbeitsumgebung abgelehnt, weil er eine ausdrückliche Erlaubnis von Philipp
-  für genau diesen Zweig braucht.
+  Arbeitsumgebung zweimal abgelehnt (zuletzt am 15.11.2026 nach dem Auftrag,
+  alle offenen Punkte zu erledigen). Er braucht eine ausdrückliche Erlaubnis
+  von Philipp für genau diesen Zweig. Inzwischen vier Commits, der vierte
+  (`cb0e373`, Suchpfad) liegt als `produktionslinie-cb0e373.patch` hier.
 * **App-Update:** Die ausgelieferte App (Stand 26.09.2026) zeigt den Pfand
   nicht getrennt und hat die Verfügbarkeitsanzeige nicht. Das Update liegt auf
   `claude/bordesnack24-app-strategy-sf5yzy` und braucht die Freigabe für `main`.

@@ -1,0 +1,64 @@
+From cb0e3737a7e6a8f52199da15fdc2ff8d376e571c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 15 Nov 2026 19:34:56 +0000
+Subject: [PATCH] =?UTF-8?q?Fester=20Suchpfad=20f=C3=BCr=20f=C3=BCnf=20Funk?=
+ =?UTF-8?q?tionen=20im=20Schema=20app?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Hinweis function_search_path_mutable von Supabase nach dem Ausrollen. In der
+Produktion eingespielt und nachgemessen (0 Funktionen ohne festen Suchpfad),
+Neuaufbau aus 242 Migrationen: alle 29 Prüfskripte ohne Fehlurteil,
+Fingerabdruck gleich der Produktion.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012uyiL6JjSwBHFW5epQoxkW
+---
+ .../20261115120000_suchpfad_fuenf_funktionen.sql     | 12 ++++++++++++
+ supabase/migrations/README.md                        |  3 ++-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+ create mode 100644 supabase/migrations/20261115120000_suchpfad_fuenf_funktionen.sql
+
+diff --git a/supabase/migrations/20261115120000_suchpfad_fuenf_funktionen.sql b/supabase/migrations/20261115120000_suchpfad_fuenf_funktionen.sql
+new file mode 100644
+index 0000000..f8d0f76
+--- /dev/null
++++ b/supabase/migrations/20261115120000_suchpfad_fuenf_funktionen.sql
+@@ -0,0 +1,12 @@
++-- Fester Suchpfad für fünf Funktionen (Hinweis „function_search_path_mutable"
++-- von Supabase nach dem Ausrollen am 15.11.2026).
++--
++-- Keine der fünf läuft mit Eigentümerrechten, und alle nennen ihre Objekte mit
++-- Schema. Der feste Suchpfad ist trotzdem Hausregel: Er nimmt einem Aufrufer
++-- die Möglichkeit, über einen eigenen Suchpfad andere Objekte unterzuschieben.
++-- Rumpf, Rechte und Verhalten ändern sich nicht.
++alter function app.benefits_free_for_all()            set search_path = public, app;
++alter function app.darf_bundles_pflegen()             set search_path = public, app;
++alter function app.dauerrabatt_prozent()              set search_path = public, app;
++alter function app.kassenzaehlung_unveraenderbar()    set search_path = public, app;
++alter function app.terminal_ereignis_unveraenderbar() set search_path = public, app;
+diff --git a/supabase/migrations/README.md b/supabase/migrations/README.md
+index 38048d7..69957d8 100644
+--- a/supabase/migrations/README.md
++++ b/supabase/migrations/README.md
+@@ -121,6 +121,7 @@ Abweichung vom Spiegel, sondern der offene Schritt.
+ | `20261115090000_runbook_l_sperre_scheinkauf_und_kaufbetraege.sql` | Runbook L für den Stand der Produktion vom 10.09.2026: Aufrufrechte für `dev_add_demo_purchase`, `purchase_net_items`, `purchase_donation_for` entzogen (B-1, B-2). In der Produktion am 15.11.2026 **vor** den Migrationen ab `20260910190000` eingespielt; wiederholbar |
+ | `20261115100000_nachzug_produktionsstand.sql` | Übernimmt, was nur in der Produktion stand (zwei Funktionen, 8 Regeln auf Telemetrie-Tabellen, Speicherbereich `employee-signatures`); Upload dort nur noch für interne Konten |
+ | `20261115110000_unterschrift_erneut_hochladen.sql` | Regel zum Ändern im Bereich `employee-signatures`, damit ein zweiter Upload derselben Unterschrift gelingt |
++| `20261115120000_suchpfad_fuenf_funktionen.sql` | Fester Suchpfad für fünf Funktionen im Schema `app` (Hinweis von Supabase nach dem Ausrollen); Rumpf und Rechte unverändert |
+ 
+ Nachweis am Produktions-Nachbau: Prüfskripte `108` (10/10), `109` (5/5) und
+ `110` (23/23, Pfand) und `111` (12/12, Verfügbarkeit), zuletzt am 29.09.2026
+@@ -129,7 +130,7 @@ nach einem Neuaufbau aus allen 237 Migrationen, alle 28 Prüfskripte ohne Fehler
+ 
+ ## Stand der Produktion (15.11.2026)
+ 
+-Die Produktion entspricht diesem Verzeichnis: Ein Neuaufbau aus allen 241
++Die Produktion entspricht diesem Verzeichnis: Ein Neuaufbau aus allen 242
+ Migrationen ergibt denselben Fingerabdruck wie die Produktion
+ (`scripts/pruefumgebung/fingerabdruck.sql`, sechs Merkmale). Die Versionsnummern
+ in `supabase_migrations.schema_migrations` der Produktion sind die Zeitpunkte
+-- 
+2.43.0
+

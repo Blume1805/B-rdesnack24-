@@ -1,9 +1,20 @@
 # Lovable-Auftrag 03.11.2026, Nacharbeit: Video-Knöpfe und Anrede im Datenschutz
 
-**Status: Entwurf, nicht gesendet.** Ergibt sich aus der Abnahme von
-`lovable-auftrag-2026-11-03-abgleich.md` (Befunde A-1, A-2, A-4). Senden
-kostet Credits; Philipp entscheidet, ob es jetzt oder mit dem nächsten Auftrag
-mitläuft.
+**Status: gesendet und erledigt am 15.11.2026** (Auftrag Philipp, alle offenen
+Punkte zu erledigen). Lovable-Commit `e4a196d`, 1,2 Credits. Ergibt sich aus der
+Abnahme von `lovable-auftrag-2026-11-03-abgleich.md` (Befunde A-1, A-2, A-4).
+
+Abnahme am Bearbeitungsprotokoll des Agenten (die drei Änderungen sind dort
+wörtlich zu sehen) und an seinen Messwerten:
+
+| # | Prüfung | Ergebnis |
+|---|---|---|
+| 1 | Pause-Knopf ohne `aria-pressed`, Ton-Knopf mit | ✅ `null` bzw. `"false"` |
+| 2 | Knöpfe im Videobild, 12 px vom Rand | ✅ bei 390 px und 1440 px je 12,0 px, 44 × 44 px, keine Layoutverschiebung |
+| 3 | Du-Anrede im Abschnitt „Kontakt per E-Mail" | ✅ „Du", „Deine", „Deiner", „Dein"; sonst kein Wort geändert |
+
+Geändert: `Stage.tsx`, `styles.css`, `datenschutz.tsx`. Das Bild selbst konnte
+ich nicht ansehen (Lovable-Adressen von hier gesperrt).
 
 ## Text an Lovable
 

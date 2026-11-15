@@ -171,7 +171,7 @@ Rechtstext wurde geändert.
 | A-2 🔴 | **Hosting-Absatz der Datenschutzerklärung ist nicht belegt.** Am 03.11.2026 habe ich „Diese Website wird bei der Hostinger International Ltd. betrieben" einsetzen lassen, gestützt auf den DNS-Eintrag (`docs/OPERATIONS.md`, A-Eintrag → `2.57.91.91`). `apps/landing/README.md` (07.09.2026) sagt dagegen, die Domain zeige auf Lovable und Hostinger liefere nur die Domain. Das Lovable-Projekt ist nicht veröffentlicht. Wird die Seite über Lovable veröffentlicht, ist der Absatz falsch (anderer Auftragsverarbeiter) | Entscheidung Philipp: Wie kommt die Seite online? Danach Text anpassen. Bis dahin nicht veröffentlichen |
 | A-3 🟡 | Schalter `pfandGetrennt = false` und `bestandLive = false` passen zum nicht ausgerollten Stand. Nach Runbook M umlegen | ich, nach Meldung „Runbook M ist durch" |
 | A-4 🟡 | Nacharbeit aus der Abnahme vom 03.11.2026 (Screenreader-Angabe am Pause-Knopf, Lage der Knöpfe, „du" klein im Datenschutz) | Entwurf liegt vor, nicht gesendet (kostet Credits) |
-| A-5 ⚪ | Dokumentation nannte den Film mit 20 Sekunden | erledigt in diesem Dokument und im Runway-Auftrag |
+| A-5 ⚪ | Dokumentation nannte den Film mit 20 Sekunden | erledigt in diesem Dokument. Die Überarbeitung des Films in einem externen Videowerkzeug ist am 15.11.2026 auf Wunsch von Philipp gestrichen; der Auftragsentwurf dazu ist entfernt |
 
 Ergebnis: Backend und Landingpage sind **nicht identisch**. Die Abweichungen
 A-1 und A-2 lassen sich nicht von hier aus angleichen: A-1 braucht den
@@ -286,3 +286,8 @@ wieder ab (lokal eingecheckt; Push auf GitHub wartet auf die ausdrückliche
 Erlaubnis für diesen Zweig). Neu und niedrig: fünf Funktionen ohne festen
 Suchpfad. Einzelheiten: `docs/audit/2026-11-15-ausrollplan/README.md`,
 Abschnitt 5.
+
+### 5.8 Fortsetzung
+
+Phase 2 und 3 (Prüfung, Befunde, Wertung, Maßnahmen):
+`docs/audit/AUDIT-2026-11-PHASE2-3-BERICHT.md`.
