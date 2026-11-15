@@ -76,8 +76,12 @@ für `main` die Freigabe von Philipp.
 ## 4. Vorgehen beim Ausrollen (nach Freigabe)
 
 1. Jede Migration einzeln einspielen; nach jeder die Kontrollabfrage.
-2. Bricht eine ab, läuft sie nicht teilweise: Supabase führt eine Migration
-   als Ganzes aus. Dann wird angehalten und berichtet, nicht improvisiert.
+2. Bricht eine ab, wird angehalten und berichtet, nicht improvisiert. Dass
+   eine abgebrochene Migration keine Teiländerung hinterlässt, ist das übliche
+   Verhalten von PostgreSQL bei einem Befehlsblock, für den Weg über die
+   Supabase-Anbindung aber **noch nicht nachgewiesen**. Es wird vor Schritt 1
+   mit einer harmlosen Probe geprüft (Hilfstabelle anlegen, absichtlicher
+   Fehler, nachsehen, ob die Tabelle existiert).
 3. Nach Schritt 14: Kontrollabfragen aus Runbook M und N, Fingerabdruck gegen
    den Nachbau, Sicherheitshinweise von Supabase erneut abrufen.
 4. Danach in Lovable die Schalter `pfandGetrennt` und `bestandLive` umlegen.
