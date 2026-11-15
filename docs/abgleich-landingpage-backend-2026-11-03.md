@@ -88,3 +88,11 @@ Alle Änderungen beauftragte Philipp direkt in Lovable, vom 07. bis 08.10.2026:
   Dateien, die auf GitHub nicht liegen (Produktionszweig nicht gepusht).
   **Korrigiert am 03.11.2026** auf die Sicherungen unter `docs/audit/`, Dateien
   byte-gleich geprüft.
+
+## Nachtrag 15.11.2026
+
+Erneuter Abgleich am Lovable-Commit `5b26574`: seit `2c98578` nur Gestaltung
+(Kartenstapel, Abstände) und Filmlänge 23 Sekunden, keine inhaltliche Änderung.
+B-8 ist **wieder offen**: Der Hosting-Absatz (Hostinger) ist nicht belegt, siehe
+`docs/audit/AUDIT-2026-11-PHASE1-BESTANDSAUFNAHME.md`, Abschnitt 3 (A-2), und
+COMPLIANCE V-018-e. B-1 bleibt offen bis Runbook M und N.
