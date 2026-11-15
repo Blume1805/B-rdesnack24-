@@ -241,7 +241,7 @@ Projekt `boerdesnack24-app` (`nnfsyuglkqycwenwxmuw`), Region `eu-central-1`
 | Stufe | Hinweis | Einordnung |
 |---|---|---|
 | Fehler | Sicht `public.product_rating_summary` läuft mit Eigentümerrechten | Phase 2 |
-| Warnung | Schutz vor bekannten, geleakten Passwörtern ist **ausgeschaltet** | Einstellung im Dashboard, ein Klick |
+| Warnung | Schutz vor bekannten, geleakten Passwörtern ist **ausgeschaltet** | Einstellung im Dashboard. Nach meinem Kenntnisstand nur in bezahlten Tarifen verfügbar; in Phase 2 gegen die Supabase-Dokumentation zu prüfen. Die App prüft Passwörter zusätzlich selbst (`pwned_password_checker`), das ersetzt den Serverschutz nicht |
 | Warnung | Erweiterung `pg_net` liegt im Schema `public` | Phase 2 |
 | Warnung | 7 Funktionen mit Eigentümerrechten ohne Anmeldung aufrufbar | gewollt (Werbeanfrage, Abmeldung, Tarife), einzeln zu prüfen |
 | Warnung | 145 Funktionen mit Eigentümerrechten für jedes angemeldete Konto | Prüfschwerpunkt Phase 2; darunter die beiden offenen aus Runbook L |
