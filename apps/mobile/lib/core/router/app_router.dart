@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/domain/services/zweiter_faktor.dart';
+import '../../features/auth/presentation/screens/mfa_verify_screen.dart';
+
 import '../../features/approvals/presentation/screens/approvals_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/management/presentation/screens/my_signature_tasks_screen.dart';
@@ -20,6 +23,7 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
+  static const mfaVerify = '/security/mfa-pruefen';
   static const approvals = '/finance/approvals';
   static const mySignatureTasks = '/management/my-signatures';
   static const imprint = '/legal/imprint';
@@ -60,6 +64,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (!loggedIn) {
         return _authRoutes.contains(loc) ? null : AppRoutes.signIn;
       }
+      // Zweiter Faktor: Konten mit eingerichtetem Faktor bestätigen ihn nach
+      // jeder Anmeldung, bevor sie weiterkommen. Rechtsseiten bleiben offen.
+      final stufe = ref
+          .read(supabaseClientProvider)
+          .auth
+          .mfa
+          .getAuthenticatorAssuranceLevel();
+      if (brauchtZweitenFaktor(
+        aktuelle: stufe.currentLevel,
+        naechste: stufe.nextLevel,
+      )) {
+        return loc == AppRoutes.mfaVerify ? null : AppRoutes.mfaVerify;
+      }
+      if (loc == AppRoutes.mfaVerify) return AppRoutes.home;
       if (_authRoutes.contains(loc)) return AppRoutes.home;
       return null;
     },
@@ -83,6 +101,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.mfaEnroll,
         builder: (context, state) => const MfaEnrollScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mfaVerify,
+        builder: (context, state) => const MfaVerifyScreen(),
       ),
       GoRoute(
         path: AppRoutes.approvals,
