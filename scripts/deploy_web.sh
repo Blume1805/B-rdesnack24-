@@ -181,6 +181,14 @@ sed -i "s/__BUILD_V__/$TS/g" "$BUILD_DIR/index.html"
 # liegt. flutter_bootstrap.js selbst hat schon ?v= aus dem HTML.
 sed -i "s|\"mainJsPath\":\"main.dart.js\"|\"mainJsPath\":\"main.dart.js?v=$TS\"|g" "$BOOT"
 
+# Nur bauen (16.11.2026, Umzug zu Hostinger): fertige Dateien liegen dann in
+# apps/mobile/build/web, gh-pages bleibt unberührt. Der Ablauf
+# .github/workflows/hostinger-app.yml lädt sie per FTPS hoch.
+if [ "${NUR_BAUEN:-0}" = "1" ]; then
+  echo "✓ Nur gebaut: $BUILD_DIR (gh-pages unverändert)"
+  exit 0
+fi
+
 echo "▶︎ Deploy nach gh-pages"
 
 # Der Bauvorgang fasst gelegentlich verfolgte Dateien an. Oben wurde

@@ -20,7 +20,11 @@ class EmployerBenefitScreen extends StatelessWidget {
   /// mit dem Web-Build ausgeliefert (apps/mobile/web/marketing/), analog
   /// zum Abo-Rechnet-sich-One-Pager.
   static final Uri onePagerPdf = Uri.parse(
-    'https://blume1805.github.io/B-rdesnack24-/marketing/sachbezug-steuerfrei.pdf',
+    // Eigene Adresse statt github.io (16.11.2026): Nach dem Umzug zu
+    // Hostinger und dem Privatstellen des Repositorys gibt es github.io
+    // nicht mehr; app.boerdesnack24.de zeigt heute auf GitHub Pages und
+    // danach auf Hostinger, die Datei liegt in beiden Fällen dort.
+    'https://app.boerdesnack24.de/marketing/sachbezug-steuerfrei.pdf',
   );
 
   @override

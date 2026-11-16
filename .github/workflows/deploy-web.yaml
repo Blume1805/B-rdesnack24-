@@ -29,6 +29,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Feste Version seit 16.11.2026: Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet, und
+          # `flutter analyze` wurde dadurch rot, ohne dass sich Code
+          # geändert hatte. Hochsetzen bewusst in eigenem Commit.
+          flutter-version: 3.47.9
           cache: true
       - name: gh-pages-Branch lokal verfügbar machen
         run: git fetch origin gh-pages && git branch -f gh-pages origin/gh-pages

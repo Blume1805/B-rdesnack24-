@@ -1,0 +1,157 @@
+name: App zu Hostinger ausliefern (von Hand)
+
+# Umzug der Kunden-App von GitHub Pages zu Hostinger (Entscheidung Philipp
+# 16.11.2026, Runbook R). Läuft NUR von Hand: GitHub → Actions → dieser
+# Ablauf → "Run workflow". Baut die App genau wie deploy-web.yaml
+# (scripts/deploy_web.sh mit NUR_BAUEN=1), schreibt die .htaccess mit den
+# Sicherheitsregeln (scripts/hostinger_app_htaccess.py) und spiegelt die
+# fertigen Dateien per FTPS in den Ordner der Subdomain.
+#
+# Zugangsdaten nur aus GitHub-Secrets, nie in Dateien:
+#   APP_FTP_SERVER, APP_FTP_USERNAME, APP_FTP_PASSWORD, APP_FTP_ZIELORDNER
+#   (APP_FTP_ZIELORDNER darf fehlen; Vorgabe "." = Wurzel des FTP-Kontos)
+# Zum Probelauf "nur_bauen" ankreuzen: dann wird nichts hochgeladen.
+
+on:
+  workflow_dispatch:
+    inputs:
+      nur_bauen:
+        description: 'Nur bauen und prüfen, nichts hochladen'
+        type: boolean
+        required: false
+        default: true
+
+concurrency:
+  group: hostinger-app
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ausliefern:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          # Feste Version seit 16.11.2026: Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet, und
+          # `flutter analyze` wurde dadurch rot, ohne dass sich Code
+          # geändert hatte. Hochsetzen bewusst in eigenem Commit.
+          flutter-version: 3.47.9
+          cache: true
+      - name: Dependencies
+        run: flutter pub get
+        working-directory: apps/mobile
+      - name: Build-Konfiguration aus den Repository-Secrets schreiben
+        # apps/mobile/env/*.json ist in .gitignore (dort stehen Zugangsdaten).
+        # In der Werkbank existiert die Datei also nicht, und `deploy_web.sh`
+        # baut ohne sie eine App, die keine Datenbankverbindung kennt:
+        # AppConfig.isValid wird false, der Nutzer sieht "nicht konfiguriert".
+        # Bis zum 17.09.2026 fiel das nicht auf, weil der letzte Deploy
+        # (04.09.2026) von Hand lief, mit einer lokal vorhandenen demo.json.
+        # Der erste Lauf dieses Workflows haette den funktionierenden Stand
+        # durch einen toten ersetzt.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # Vorhandensein allein genuegt nicht, und die Werte kommen aus einem
+          # Kopiervorgang von Hand. Beobachtet am 17.09.2026, in dieser
+          # Reihenfolge:
+          #   Lauf 36 — SUPABASE_URL enthielt einen Schluessel statt einer
+          #             Adresse. Das Paket ging trotzdem raus, ohne nutzbare
+          #             Datenbankverbindung.
+          #   Lauf 39 — Die Adresse stimmte, trug aber einen Zeilenumbruch am
+          #             Ende. Der wanderte ungeprueft in die Uebersetzung:
+          #               dart compile js ... -DSUPABASE_URL=***
+          #                -DSUPABASE_ANON_KEY=***
+          #             und brach sie ab ("Failed to compile application for
+          #             the Web").
+          # Deshalb erst saeubern, dann pruefen. Wer einen Wert mit Leerzeichen
+          # oder Umbruch einfuegt, soll nicht scheitern — das ist kein Fehler,
+          # den ein Mensch sehen kann.
+          SUPABASE_URL="$(printf '%s' "$SUPABASE_URL" | tr -d '\r\n\t' | sed 's/^ *//; s/ *$//; s|/*$||')"
+          SUPABASE_ANON_KEY="$(printf '%s' "$SUPABASE_ANON_KEY" | tr -d '\r\n\t' | sed 's/^ *//; s/ *$//')"
+
+          # [[ =~ ]] vergleicht die gesamte Zeichenkette, nicht Zeile fuer Zeile.
+          # grep haette einen eingebetteten Umbruch durchgelassen — genau das ist
+          # in Lauf 39 passiert.
+          fehler=0
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL ist nicht gesetzt."
+            fehler=1
+          elif [[ ! "$SUPABASE_URL" =~ ^https://[a-z0-9]+\.supabase\.co$ ]]; then
+            echo "::error::SUPABASE_URL hat nicht die erwartete Form https://<kennung>.supabase.co (Laenge nach dem Saeubern: ${#SUPABASE_URL} Zeichen). Eine Projektadresse hat rund 40 Zeichen; ist der Wert deutlich laenger, wurde versehentlich ein Schluessel eingefuegt."
+            fehler=1
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_ANON_KEY ist nicht gesetzt."
+            fehler=1
+          elif [[ ! "$SUPABASE_ANON_KEY" =~ ^(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|sb_publishable_[A-Za-z0-9_-]+)$ ]]; then
+            echo "::error::SUPABASE_ANON_KEY hat nicht die erwartete Form (Laenge nach dem Saeubern: ${#SUPABASE_ANON_KEY} Zeichen). Erwartet wird der Wert anon public aus dem Reiter 'Legacy anon, service_role' — er beginnt mit eyJ und enthaelt zwei Punkte."
+            fehler=1
+          fi
+          if [ "$fehler" = "1" ]; then
+            echo "::error::Abbruch vor dem Bauen. Es wurde nichts veroeffentlicht; der bisherige Stand im Netz bleibt unveraendert."
+            exit 1
+          fi
+          echo "Beide Werte geprueft: Adresse ${#SUPABASE_URL} Zeichen, Schluessel ${#SUPABASE_ANON_KEY} Zeichen."
+          mkdir -p apps/mobile/env
+          jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" \
+            '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key, APP_ENV: "prod",
+              SENTRY_DSN: "", POSTHOG_API_KEY: "",
+              POSTHOG_HOST: "https://eu.posthog.com", GOOGLE_REVIEW_URL: ""}' \
+            > apps/mobile/env/demo.json
+          echo "Konfiguration geschrieben (Werte sind maskiert)."
+      - name: Bauen (ohne gh-pages)
+        env:
+          CUSTOM_DOMAIN: app.boerdesnack24.de
+          NUR_BAUEN: '1'
+        run: bash scripts/deploy_web.sh
+      - name: .htaccess mit Sicherheitsregeln schreiben und prüfen
+        run: |
+          python3 scripts/hostinger_app_htaccess.py apps/mobile/build/web
+          test -f apps/mobile/build/web/.htaccess
+          test -f apps/mobile/build/web/index.html
+          test -f apps/mobile/build/web/marketing/abo-rechnet-sich.pdf
+          # Ein Schlüssel für Server (service_role / sb_secret) darf nie in
+          # der App stehen. Bricht ab, wenn doch.
+          python3 scripts/schluessel_im_bau_suchen.py apps/mobile/build/web
+          du -sh apps/mobile/build/web
+      - name: FTPS-Werkzeug installieren
+        if: ${{ !inputs.nur_bauen }}
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Fertige Dateien per FTPS hochladen
+        if: ${{ !inputs.nur_bauen }}
+        env:
+          FTP_SERVER: ${{ secrets.APP_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.APP_FTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.APP_FTP_PASSWORD }}
+          FTP_ZIELORDNER: ${{ secrets.APP_FTP_ZIELORDNER }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_SERVER" || { echo "::error::APP_FTP_SERVER fehlt"; exit 1; }
+          test -n "$FTP_USERNAME" || { echo "::error::APP_FTP_USERNAME fehlt"; exit 1; }
+          test -n "$LFTP_PASSWORD" || { echo "::error::APP_FTP_PASSWORD fehlt"; exit 1; }
+          [[ "$FTP_SERVER" =~ ^[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || { echo "::error::APP_FTP_SERVER muss ein Hostname sein"; exit 1; }
+          # Vorgabe ".": Das FTP-Konto für die App sieht nur ihren eigenen
+          # Ordner (Runbook R), dessen Wurzel ist das Ziel.
+          ZIEL="${FTP_ZIELORDNER:-.}"
+          case "$ZIEL" in /|..|*..*|*$'\n'*) echo "::error::Ungültiger Zielordner"; exit 1;; esac
+          cat > "$RUNNER_TEMP/app.lftp" <<LFTP
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set net:max-retries 2
+          set net:timeout 30
+          open --env-password --user "$FTP_USERNAME" "ftp://$FTP_SERVER"
+          mirror --reverse --parallel=2 --verbose=1 apps/mobile/build/web "$ZIEL"
+          bye
+          LFTP
+          lftp -f "$RUNNER_TEMP/app.lftp"
+          echo "Hochgeladen nach $ZIEL. Jetzt die Adresse im Browser prüfen (Runbook R)."

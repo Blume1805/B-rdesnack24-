@@ -37,7 +37,9 @@ class SubscriptionValueScreen extends ConsumerWidget {
   /// geändert, muss die HTML-Quelle die Vorlage bleiben — sonst driften
   /// beide auseinander und die Preisangaben werden irreführend (§ 5 UWG).
   static final Uri onePagerPdf = Uri.parse(
-    'https://blume1805.github.io/B-rdesnack24-/marketing/abo-rechnet-sich.pdf',
+    // Eigene Adresse statt github.io (16.11.2026), siehe
+    // employer_benefit_screen.dart.
+    'https://app.boerdesnack24.de/marketing/abo-rechnet-sich.pdf',
   );
 
   @override

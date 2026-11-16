@@ -22,6 +22,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Feste Version seit 16.11.2026: Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet, und
+          # `flutter analyze` wurde dadurch rot, ohne dass sich Code
+          # geändert hatte. Hochsetzen bewusst in eigenem Commit.
+          flutter-version: 3.47.9
           cache: true
       - name: Dependencies
         run: flutter pub get
@@ -84,6 +89,11 @@ jobs:
           sudo apt-get install -y -qq postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get install -y -qq postgresql-17 postgresql-17-pgtap
+          # Auf dem GitHub-Rechner legt das Paket keinen Cluster an
+          # (Lauf 903 am 16.11.2026: "cluster '17 main' does not exist").
+          if ! pg_lsclusters -h | awk '$1 == "17"' | grep -q .; then
+            sudo pg_createcluster 17 main
+          fi
           sudo pg_ctlcluster 17 main start || true
           PORT=$(pg_lsclusters -h | awk '$1 == "17" {print $3}')
           echo "PGPORT=$PORT" >> "$GITHUB_ENV"

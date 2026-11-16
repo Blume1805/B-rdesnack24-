@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -80,6 +81,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       isLoading: isLoading,
                       onSubmit: _submit,
                       onFillDemo: _fillDemo,
+                      // Demo-Zugänge nur außerhalb der Produktion (Befund
+                      // 16.11.2026: sie standen auch in der echten App und
+                      // nannten die Adressen echter Admin-/Gesellschafter-
+                      // Konten der Produktion).
+                      showDemo: !ref.watch(appConfigProvider).isProduction,
                       l10n: l10n,
                     ),
                   ],
@@ -103,6 +109,7 @@ class _FormPanel extends StatelessWidget {
     required this.isLoading,
     required this.onSubmit,
     required this.onFillDemo,
+    required this.showDemo,
     required this.l10n,
   });
 
@@ -114,6 +121,7 @@ class _FormPanel extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onSubmit;
   final void Function(String email, String password) onFillDemo;
+  final bool showDemo;
   final AppLocalizations l10n;
 
   @override
@@ -149,7 +157,9 @@ class _FormPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.s2),
                 Text(
-                  'Melde Dich mit Deinem Konto an oder wähle einen Demo-Zugang.',
+                  showDemo
+                      ? 'Melde Dich mit Deinem Konto an oder wähle einen Demo-Zugang.'
+                      : 'Melde Dich mit Deinem Konto an.',
                   style:
                       AppTypography.body(size: 14, color: AppColors.textMuted),
                 ),
@@ -230,72 +240,75 @@ class _FormPanel extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.s5),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(color: AppColors.borderSubtle),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-                      child: Text(
-                        'Demo-Zugänge',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
+                if (showDemo) ...[
+                  const SizedBox(height: AppSpacing.s5),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: AppColors.borderSubtle),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s3,
+                        ),
+                        child: Text(
+                          'Demo-Zugänge',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ),
-                    ),
-                    const Expanded(
-                      child: Divider(color: AppColors.borderSubtle),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.admin_panel_settings_outlined,
-                        label: 'Admin',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-admin@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
+                      const Expanded(
+                        child: Divider(color: AppColors.borderSubtle),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.s2),
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.badge_outlined,
-                        label: 'Mitarbeiter',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-gs@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.s3),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DemoChip(
+                          icon: Icons.admin_panel_settings_outlined,
+                          label: 'Admin',
+                          onTap: isLoading
+                              ? null
+                              : () => onFillDemo(
+                                    'demo-admin@boerdesnack24.app',
+                                    'Demo!Boerde24',
+                                  ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.s2),
-                    Expanded(
-                      child: _DemoChip(
-                        icon: Icons.storefront_outlined,
-                        label: 'Kunde',
-                        onTap: isLoading
-                            ? null
-                            : () => onFillDemo(
-                                  'demo-kunde@boerdesnack24.app',
-                                  'Demo!Boerde24',
-                                ),
+                      const SizedBox(width: AppSpacing.s2),
+                      Expanded(
+                        child: _DemoChip(
+                          icon: Icons.badge_outlined,
+                          label: 'Mitarbeiter',
+                          onTap: isLoading
+                              ? null
+                              : () => onFillDemo(
+                                    'demo-gs@boerdesnack24.app',
+                                    'Demo!Boerde24',
+                                  ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: AppSpacing.s2),
+                      Expanded(
+                        child: _DemoChip(
+                          icon: Icons.storefront_outlined,
+                          label: 'Kunde',
+                          onTap: isLoading
+                              ? null
+                              : () => onFillDemo(
+                                    'demo-kunde@boerdesnack24.app',
+                                    'Demo!Boerde24',
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.s6),
                 Wrap(
                   alignment: WrapAlignment.center,

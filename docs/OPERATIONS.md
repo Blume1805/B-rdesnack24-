@@ -1818,6 +1818,8 @@ privat, ist die App offline, bis einer dieser Wege umgesetzt ist:
 | B | Ein zweites, öffentliches Repository nur mit der fertig gebauten App (kein Quelltext, keine Unterlagen) | 0 € | 30 Minuten, ich; Philipp legt das Repository an |
 | C | Die App ebenfalls zu Hostinger legen (wie die Landingpage), Ablauf per FTPS wie für die Landingpage | 0 € zusätzlich | 1 Stunde, ich; Philipp trägt eine DNS-Zeile bei Hostinger ein |
 
+> **Entschieden am 16.11.2026: Weg C** (Philipp). Umsetzung: Runbook R.
+
 **Meine Empfehlung: C.** Ihr zahlt Hostinger ohnehin, alles liegt dann an
 einem Ort, und die Sicherheits-Kopfzeilen (CSP, HSTS) stehen in derselben
 `.htaccess` wie bei der Landingpage. Weg A ist der schnellste Notbehelf.
@@ -1833,4 +1835,117 @@ einem Ort, und die Sicherheits-Kopfzeilen (CSP, HSTS) stehen in derselben
 Außerdem holt die echte Datenbank bei Ausrollungen Dateien direkt von GitHub
 (15.11.2026); nach dem Privatstellen geht das nicht mehr ohne Schlüssel. Das
 ist gewollt: künftige Änderungen spiele ich über den Bestätigungsweg ein.
+
+---
+
+## Runbook R: App zu Hostinger umziehen (Weg C aus Runbook Q)
+
+**Zeitbedarf für Dich:** etwa 15 Minuten in Teil 1, 5 Minuten in Teil 3.
+Dazwischen arbeite ich (Teil 2), Du musst nicht warten.
+
+### Warum
+
+Die App unter `app.boerdesnack24.de` kommt heute von GitHub Pages, dem
+kostenlosen Webspeicher von GitHub. Das funktioniert nur, solange das
+Repository öffentlich ist. Damit wir es privat stellen können
+(Businessplan, Finanzen und Sicherheitsberichte sollen nicht mehr
+öffentlich lesbar sein), muss die App vorher woanders liegen: bei Hostinger,
+wo auch die Landingpage liegt.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Die App-Dateien liegen danach bei Hostinger. Die Adresse
+  bleibt `app.boerdesnack24.de`.
+* Es passiert **nicht**: Niemand wird abgemeldet (die Anmeldung hängt an der
+  Adresse, nicht am Server). Konten, Datenbank und Inhalte ändern sich nicht.
+* Bis Teil 3 läuft die alte App unverändert weiter. Wir testen erst unter
+  einer Probe-Adresse `app-neu.boerdesnack24.de`.
+
+### Teil 1 — Du bei Hostinger und GitHub (15 Minuten)
+
+Die Bezeichnungen in hPanel (so heißt die Verwaltungsseite von Hostinger)
+können leicht abweichen; gemeint ist jeweils der sinngemäße Menüpunkt.
+
+**A. Probe-Adresse anlegen**
+
+1. <https://hpanel.hostinger.com> öffnen und anmelden.
+2. Oben **Websites** → bei `boerdesnack24.de` auf **Dashboard**.
+3. Links **Domains** → **Subdomains**.
+4. Ins Feld für den Namen `app-neu` schreiben. Wird ein Ordner angeboten,
+   den Vorschlag stehen lassen. Auf **Create** (Erstellen) klicken.
+5. Den angezeigten Ordner notieren, etwa
+   `public_html/app-neu` oder `domains/app-neu.boerdesnack24.de/public_html`.
+
+**B. Eigenes Hochlade-Konto nur für diesen Ordner**
+
+Ein FTP-Konto ist ein Zugang, über den Dateien hochgeladen werden. Ein
+eigenes Konto nur für die App sorgt dafür, dass es nichts anderes sehen oder
+überschreiben kann — auch nicht die Landingpage.
+
+6. Links **Files** (Dateien) → **FTP Accounts** (FTP-Konten).
+7. Bei **Create a new FTP account**: Benutzername z. B. `app`, ein langes
+   Passwort erzeugen lassen und **sicher notieren** (Passwort-Manager).
+   Als Verzeichnis den Ordner aus Schritt 5 wählen. **Create** klicken.
+8. Oben auf derselben Seite stehen **FTP IP / Hostname** und der vollständige
+   **FTP username** (bei Hostinger oft mit Zahlen davor, z. B.
+   `u123456789.app`). Beides notieren.
+
+**C. Die Werte bei GitHub hinterlegen**
+
+Ein „Secret" ist bei GitHub ein verschlossenes Feld: Der Ablauf kann es
+benutzen, aber niemand kann es danach wieder lesen, auch ich nicht.
+
+9. <https://github.com/Blume1805/B-rdesnack24-> öffnen → oben **Settings**
+   → links **Secrets and variables** → **Actions**.
+10. **New repository secret** — viermal, jeweils Name und Wert genau so:
+
+| Name | Wert |
+|---|---|
+| `APP_FTP_SERVER` | der Hostname aus Schritt 8, ohne `ftp://` |
+| `APP_FTP_USERNAME` | der vollständige Benutzername aus Schritt 8 |
+| `APP_FTP_PASSWORD` | das Passwort aus Schritt 7 |
+| `APP_FTP_ZIELORDNER` | `.` (ein einzelner Punkt) |
+
+11. Mir im Chat schreiben: „Hostinger Teil 1 erledigt". **Das Passwort
+    nicht in den Chat schreiben.**
+
+**So sieht Erfolg aus:** Unter Actions-Secrets stehen vier Einträge mit
+`APP_FTP_…`. Die Probe-Adresse zeigt im Browser eine leere Seite oder eine
+Hostinger-Platzhalterseite — das ist richtig, die App kommt in Teil 2.
+
+### Teil 2 — ich (etwa 1 Stunde, ohne Dich)
+
+* Ablauf **App zu Hostinger ausliefern (von Hand)** einmal mit „nur bauen"
+  starten, dann mit Hochladen.
+* `app-neu.boerdesnack24.de` prüfen: Startseite auf Handy- und
+  Computerbreite, Anmeldung, Unterseiten, Marketing-PDFs, Sicherheitsregeln
+  (am 16.11.2026 lokal bereits ohne einen einzigen Verstoß geprüft).
+* Bericht an Dich mit Bildschirmfotos.
+
+### Teil 3 — Du: die Adresse umstellen (5 Minuten, am besten abends)
+
+12. hPanel → **Domains** → `boerdesnack24.de` → **DNS / Nameservers**
+    (DNS-Einträge sind die Wegweiser, welche Adresse zu welchem Server führt).
+13. Den Eintrag Typ **CNAME**, Name `app`, Ziel `blume1805.github.io`
+    suchen und **löschen** (Papierkorb).
+14. Zurück zu **Websites** → `boerdesnack24.de` → **Domains** →
+    **Subdomains** → neue Subdomain `app` anlegen und **denselben Ordner wie
+    `app-neu`** wählen (Schritt 5).
+15. Warten, bis `https://app.boerdesnack24.de` die App zeigt. Meist wenige
+    Minuten, selten bis zu einigen Stunden; das Sicherheitszertifikat
+    (das Schloss im Browser) stellt Hostinger selbst aus.
+16. Mir schreiben: „Adresse umgestellt". Ich prüfe alles und sage Dir dann,
+    dass Du das Repository privat stellen kannst (Runbook Q, Schritt 2).
+
+**So sieht Erfolg aus:** `app.boerdesnack24.de` zeigt die Anmeldeseite mit
+Schloss-Symbol. Unten in der Seite steht keine Liste „Demo-Zugänge".
+
+### Wenn etwas schiefgeht
+
+* **Teil 1/2:** nichts kann kaputtgehen, die alte App läuft weiter.
+* **Teil 3, die App ist nicht erreichbar:** Subdomain `app` wieder löschen,
+  den CNAME-Eintrag `app` → `blume1805.github.io` neu anlegen. Dann läuft
+  wieder die alte App (bis zu einer Stunde Wartezeit, bis alle Geräte den
+  Wegweiser neu kennen). Mir Bescheid geben; es eilt, weil Kunden die App in
+  der Zeit nicht erreichen.
 

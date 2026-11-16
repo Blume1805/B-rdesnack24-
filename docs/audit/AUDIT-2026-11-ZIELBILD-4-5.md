@@ -41,6 +41,8 @@ verschoben · 🔴 offen
 | S7 | Zweiter Faktor gilt auch in den Server-Funktionen | neu, 16.11. | 🔴 | Vier Funktionen (`documents-init-templates`, `documents-install-branded-set`, `documents-install-haccp-set`, `signature-retouch`) prüfen die Rolle mit dem Dienstschlüssel und gehen an der Datenbank-Prüfung vorbei. Fix zusammen mit dem Abgleich A2-05 |
 | S8 | Geleakte Passwörter serverseitig abweisen | A2-08 | ⏸ | Nur im bezahlten Tarif; kommt mit B1 |
 | S9 | Überflüssige Rechte an Sichten entfernt; Preisaufteilung nur für sichtbare Angebote | A2-12, A2-14 | 🟦 | `20261116110000`, Probe 115 6/6, Gegenprobe am alten Stand schlägt fehl (2 Urteile) |
+| S10 | Keine Demo-Zugänge zu echten Konten in der ausgelieferten App | neu, 16.11. | 🟦 + 🟡 | App blendet sie in der Produktion aus (Test vorhanden). Philipp entscheidet über das Sperren von `demo-admin@…`/`demo-gs@…` in der Produktion (COMPLIANCE V-018-n) |
+| S11 | Repository und Produktion haben dieselben Rechte; Fingerabdruck misst Rechte | neu, 16.11. | ✅ | `telemetry_providers` angeglichen (`20261116130000`), siebtes Merkmal; Produktion `276:268ed099…` = Nachbau |
 
 **Erreichbar: 4,5**, sobald S1–S7 und S9 erledigt sind. S8 hängt am Tarif.
 
@@ -49,7 +51,7 @@ verschoben · 🔴 offen
 | # | Bedingung für 4,5 | Befund | Stand | Nachweis / nächster Schritt |
 |---|---|---|---|---|
 | F1 | Ausgelieferte App entspricht dem Repository | A2-07 | ✅ | `app.boerdesnack24.de` seit 16.11.2026, 05:12 (gh-pages `efb739e`); alle 59 App-Aufrufe gegen die Produktion geprüft |
-| F2 | Server-Funktionen haben Tests, und ein roter Test hält die Auslieferung an | A2-06 | 🔴 | `|| true` in `.github/workflows/ci.yaml` entfernen. Lokal laufen die vorhandenen Tests (16/16 am 16.11. mit Deno 2.1.4) |
+| F2 | Server-Funktionen haben Tests, und ein roter Test hält die Auslieferung an | A2-06 | 🟦 | `|| true` in `.github/workflows/ci.yaml` entfernen. Lokal laufen die vorhandenen Tests (16/16 am 16.11. mit Deno 2.1.4) |
 | F3 | Ein durchgehender Test des Kaufwegs (Anmeldung → Freigabe → Verkauf → Beleg) | — | 🔴 | als Prüfskript gegen den lokalen Nachbau, nicht gegen die Produktion |
 | F4 | Alle Server-Funktionen aus dem Repository ausgeliefert | A2-05 | 🔴 | 15 von 26 vergleichen, Abweichungen ins Repository, dann geordnet ausliefern (braucht Freigabe) |
 
@@ -59,8 +61,8 @@ verschoben · 🔴 offen
 
 | # | Bedingung für 4,5 | Befund | Stand | Nachweis / nächster Schritt |
 |---|---|---|---|---|
-| A1 | Eine einzige Datenbank-Linie | A2-06 | 🟡 | Grundsatzentscheidung: `main`-Linie (0001–0070) stilllegen, Produktionslinie wird führend |
-| A2 | CI baut die Produktionslinie und vergleicht den Fingerabdruck | A2-06 | 🔴 | Produktionslinie liegt seit 16.11.2026 auf GitHub (Zweig `claude/bordesnack24-audit-architecture-7xd3d6`, `cdb28ef`, mit Erlaubnis Philipp). Umstellung der CI folgt mit A1 |
+| A1 | Eine einzige Datenbank-Linie | A2-06 | ✅ | 16.11.2026 stillgelegt (Entscheidung Philipp), `ARCHITECTURE.md` A-13 |
+| A2 | CI baut die Produktionslinie und vergleicht den Fingerabdruck | A2-06 | 🟦 | Produktionslinie liegt seit 16.11.2026 auf GitHub (Zweig `claude/bordesnack24-audit-architecture-7xd3d6`, `cdb28ef`, mit Erlaubnis Philipp). Umstellung der CI folgt mit A1 |
 | A3 | Kein toter Code | A2-13 | 🔴 | `nayax-webhook`, `send-push`, Tabellen `nayax_sales`, `device_tokens`: erst als „nicht in Betrieb" kennzeichnen, Löschen nur mit Freigabe |
 | A4 | Keine Änderung nur in der Produktion | A2-20 | ✅ | Pflicht in `CLAUDE.md`. Am 16.11. noch einen Rest gefunden: die geplante Aufgabe `weather-sync` stand nur in der Produktion; sie ist jetzt Teil von `20261116120000` |
 
