@@ -587,7 +587,7 @@ Deno.serve(async (req) => {
   } else {
     // Unbekannter Typ — nur eine Info-Seite
     const p = pdf.addPage([595, 842]);
-    let y = drawPageHeader(p, ctx,
+    const y = drawPageHeader(p, ctx,
       `Bördesnack24 – ${ctx.approval.title}`,
       `Zeitraum: ${ctx.approval.period_from} bis ${ctx.approval.period_to}`);
     p.drawText(`Dokument-Typ: ${kind}`,

@@ -76,6 +76,9 @@ const safe = (s: string) =>
     .replace(/[–—]/g, "-")
     .replace(/ /g, " ")
     .replace(/€/g, "EUR")
+    // Absicht: Die Standardschrift des PDF kennt nur WinAnsi (Latin-1). Alles
+    // außerhalb von U+0000..U+00FF wird ersetzt, sonst bricht pdf-lib ab.
+    // deno-lint-ignore no-control-regex
     .replace(/[^\x00-\xFF]/g, "?");
 
 type Ctx = {
