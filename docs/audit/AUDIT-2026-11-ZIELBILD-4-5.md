@@ -33,15 +33,15 @@ verschoben · 🔴 offen
 | # | Bedingung für 4,5 | Befund | Stand | Nachweis / nächster Schritt |
 |---|---|---|---|---|
 | S1 | Interne Konten nur mit zweitem Faktor | A2-01 | 🟦 + 🟡 | App fragt den Code nach der Anmeldung ab (live seit 16.11., `mfa_verify_screen.dart`, 4 Tests). Datenbank-Pflicht als Schalter vorbereitet (`20261116090000`, `…090100`, Probe 113). Einspielen braucht Deine Bestätigung im Chat, dann Runbook O (alle vier Konten richten ein, dann Schalter an) |
-| S2 | Keine Server-Funktion ohne Zugangsprüfung | A2-02 | 🟦 | `weather-sync` nur noch mit Einmalmarke aus der Datenbank (`20261116120000`, Probe 116 10/10, Handler-Probe 5/5). Ausrollen: Migration, dann Funktion — beides braucht Deine Freigabe |
+| S2 | Keine Server-Funktion ohne Zugangsprüfung | A2-02 | ✅ | `weather-sync` nur noch mit Einmalmarke aus der Datenbank (`20261116120000`, Probe 116 10/10, Handler-Probe 5/5). Ausrollen: Migration, dann Funktion — beides braucht Deine Freigabe |
 | S3 | Repository nicht öffentlich | A2-03 | 🟡 | Entschieden: privat. Vorher muss die App einen anderen Auslieferungsweg haben (Runbook Q, Empfehlung Weg C: Hostinger) |
 | S4 | Rücksprungadressen nur eigene Domains, E-Mail-Bestätigung an | A2-09 | 🟡 | Runbook P (5 Minuten im Dashboard) |
 | S5 | Server-Funktionen nur für eigene Herkunft | A2-10 | 🔴 | Herkunft auf `app.boerdesnack24.de` und `boerdesnack24.de` begrenzen; geht zusammen mit S7 |
 | S6 | Kunden sehen keine internen Kennungen | A2-11 | 🔴 | Erst prüfen, welche App-Abfragen `select('*')` auf diese Tabellen machen, sonst bricht die App. Dann Spaltenrechte entziehen |
 | S7 | Zweiter Faktor gilt auch in den Server-Funktionen | neu, 16.11. | 🔴 | Vier Funktionen (`documents-init-templates`, `documents-install-branded-set`, `documents-install-haccp-set`, `signature-retouch`) prüfen die Rolle mit dem Dienstschlüssel und gehen an der Datenbank-Prüfung vorbei. Fix zusammen mit dem Abgleich A2-05 |
 | S8 | Geleakte Passwörter serverseitig abweisen | A2-08 | ⏸ | Nur im bezahlten Tarif; kommt mit B1 |
-| S9 | Überflüssige Rechte an Sichten entfernt; Preisaufteilung nur für sichtbare Angebote | A2-12, A2-14 | 🟦 | `20261116110000`, Probe 115 6/6, Gegenprobe am alten Stand schlägt fehl (2 Urteile) |
-| S10 | Keine Demo-Zugänge zu echten Konten in der ausgelieferten App | neu, 16.11. | 🟦 + 🟡 | App blendet sie in der Produktion aus (Test vorhanden). Philipp entscheidet über das Sperren von `demo-admin@…`/`demo-gs@…` in der Produktion (COMPLIANCE V-018-n) |
+| S9 | Überflüssige Rechte an Sichten entfernt; Preisaufteilung nur für sichtbare Angebote | A2-12, A2-14 | ✅ | `20261116110000`, Probe 115 6/6, Gegenprobe am alten Stand schlägt fehl (2 Urteile) |
+| S10 | Keine Demo-Zugänge zu echten Konten in der ausgelieferten App | neu, 16.11. | ✅ | App blendet sie in der Produktion aus (Test vorhanden). Philipp entscheidet über das Sperren von `demo-admin@…`/`demo-gs@…` in der Produktion (COMPLIANCE V-018-n) |
 | S11 | Repository und Produktion haben dieselben Rechte; Fingerabdruck misst Rechte | neu, 16.11. | ✅ | `telemetry_providers` angeglichen (`20261116130000`), siebtes Merkmal; Produktion `276:268ed099…` = Nachbau |
 
 **Erreichbar: 4,5**, sobald S1–S7 und S9 erledigt sind. S8 hängt am Tarif.
@@ -89,7 +89,7 @@ Rechtsgutachten; die technische Seite ist jeweils genannt.
 | # | Bedingung für 4,5 | Befund | Stand | Nachweis / nächster Schritt |
 |---|---|---|---|---|
 | B1 | Zurückspielbare Sicherung, keine Pausierung | A2-04 | ⏸ | Bezahlter Tarif, laut Philipp „wenn echte Kunden kommen" |
-| B2 | Überwachung: tägliche Prüfung, festgehaltenes Ergebnis | A2-15 | 🟦 | `20261116100000` prüft täglich 06:10 UTC fehlgeschlagene Aufgaben, Tabellen ohne Zeilenschutz, Funktionen ohne Suchpfad, überfällige Löschanträge, Stand zweiter Faktor; Probe 114 8/8 |
+| B2 | Überwachung: tägliche Prüfung, festgehaltenes Ergebnis | A2-15 | ✅ | `20261116100000` prüft täglich 06:10 UTC fehlgeschlagene Aufgaben, Tabellen ohne Zeilenschutz, Funktionen ohne Suchpfad, überfällige Löschanträge, Stand zweiter Faktor; Probe 114 8/8 |
 | B3 | Alarm bei schlechtem Ergebnis | A2-15 | 🔴 | Mail über Resend, wenn `gesund = false`. Folgt auf B2 |
 | B4 | Wiederanlauf einmal geübt | — | 🔴 | nach B1: Sicherung in ein Testprojekt zurückspielen, Fingerabdruck vergleichen |
 | B5 | Auslieferung der Landingpage ohne Plattformbindung | V-018-e | 🟦 + 🟡 | Lovable-Auftrag vom 16.11., freigegeben und umgesetzt (Lovable `b4a3e95`): Medien in `public/medien/`, `.htaccess` mit Sicherheits-Kopfzeilen, Ablauf `hostinger.yml` nur von Hand, nicht ausgeführt. Offen: CSP und Dateiliste am fertigen Build prüfen (Lovable kann dort nicht bauen); vor dem ersten Lauf prüfe ich, ob die Seite Dienste außerhalb der eigenen Domain anspricht (`connect-src 'self'`, `form-action 'none'`) |
@@ -159,6 +159,23 @@ R2- und R3-Entwürfe.
 * **A (Einspielen):** wartet auf Philipp am Desktop. Neu dazu kommt
   `20261116130000` (ändert in der Produktion nichts, hält aber den Verlauf
   gleich). Soll nach allem: `fingerabdruck.soll`.
+
+## 4c. Eingespielt am 16.11.2026, 13:05–13:13 UTC (Philipp am Desktop)
+
+| Schritt | Migration | Messung danach |
+|---|---|---|
+| 1 | `20261116090000` Zwei-Faktor vorbereitet | Regeln `236:76769aa3…`, Funktionen `282:137ea0d3…`, Spalten `1383:6794e73c…` = Soll; Schalter aus |
+| 2 | `20261116090100` Prüfung vor jeder Anfrage | `pgrst.db_pre_request=public.pruefe_anfrage` gesetzt; Schnittstelle antwortet 200 (`subscription_plans`) |
+| 3 | `20261116100000` Betriebsprüfung | Funktionen `285:0416b0c8…`, Spalten `1387:3fe4fee3…` = Soll; erster Aufruf meldet einen offenen Löschantrag (Demo-Kundenkonto, seit 09.07.) |
+| 4 | `20261116110000` Kleinbefunde | — |
+| 5 | `20261116120000` Einmalmarke Wetter | — |
+| 6 | `20261116130000` Rechte Telemetrie | **alle sieben Merkmale = `fingerabdruck.soll`** |
+| 7 | `20261116140000` Demo-Konten sperren | 2 Konten gesperrt, 0 Sitzungen; Fingerabdruck unberührt |
+| — | weather-sync Version 9 ausgeliefert | ohne Marke 401, erfundene Marke 401, regulär 200 (4 Tage) |
+
+Damit erledigt: S2 (A2-02), S9 (A2-12, A2-14), S10, B2 (A2-15). S1 (A2-01): Mechanik in
+der Produktion, Schalter aus bis Runbook O. App mit ausgeblendeten Demo-Zugängen seit
+16.11.2026 live (main `c052e6f`, CI und Auslieferung grün).
 
 ## 5. Abweichungen Doku ↔ Code, geprüft am 16.11.2026
 
