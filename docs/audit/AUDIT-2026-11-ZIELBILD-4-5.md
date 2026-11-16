@@ -140,6 +140,26 @@ R2- und R3-Entwürfe.
 * B (Lovable): freigegeben, umgesetzt (siehe B5).
 * Erlaubnis Produktionslinie: erteilt, hochgeladen (`cdb28ef`).
 
+## 4b. Stand nach Philipps Antwort „C ja, E stilllegen" (16.11.2026)
+
+* **E erledigt:** main-Linie stillgelegt (`ARCHITECTURE.md` A-13). CI baut die
+  Produktionslinie auf PostgreSQL 17 (34 Prüfskripte, 8 pgTAP-Dateien,
+  Fingerabdruck gegen `fingerabdruck.soll`); Server-Funktionen: Lint und Tests
+  blockierend und grün.
+* **Dabei gefunden und behoben:** Rechte-Abweichung `telemetry_providers`
+  (Repository weiter als Produktion), Fingerabdruck um Rechte ergänzt,
+  Nachbau der Anmelde-Hilfsfunktionen wie Supabase, `config.toml` ohne die
+  fünf Funktionen ohne Anmeldepflicht, `deploy-functions` mit veralteter
+  Voreinstellung, Flutter-Version nicht festgelegt (CI war schon vorher rot).
+* **C vorbereitet:** Ablauf `hostinger-app.yml`, `.htaccess` mit geprüfter CSP,
+  Schlüsselsuche, Runbook R. Wartet auf Runbook R Teil 1 (Philipp).
+* **Neuer Befund V-018-n:** Demo-Zugänge zu aktiven Produktionskonten in der
+  App sichtbar; Passwort gilt nicht. App-Seite behoben; Sperren der Konten
+  wartet auf Philipp.
+* **A (Einspielen):** wartet auf Philipp am Desktop. Neu dazu kommt
+  `20261116130000` (ändert in der Produktion nichts, hält aber den Verlauf
+  gleich). Soll nach allem: `fingerabdruck.soll`.
+
 ## 5. Abweichungen Doku ↔ Code, geprüft am 16.11.2026
 
 * `docs/OPERATIONS.md` Runbook H: Tabelle, Schlüssel und Schalter-Text
