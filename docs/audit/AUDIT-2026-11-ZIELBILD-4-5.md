@@ -60,7 +60,7 @@ verschoben · 🔴 offen
 | # | Bedingung für 4,5 | Befund | Stand | Nachweis / nächster Schritt |
 |---|---|---|---|---|
 | A1 | Eine einzige Datenbank-Linie | A2-06 | 🟡 | Grundsatzentscheidung: `main`-Linie (0001–0070) stilllegen, Produktionslinie wird führend |
-| A2 | CI baut die Produktionslinie und vergleicht den Fingerabdruck | A2-06 | 🔴 | geht erst, wenn die Produktionslinie im Repository auf GitHub liegt. Sie liegt heute nur lokal und als Patches in `docs/audit/` (das Hochladen in den Zweig `claude/bordesnack24-audit-architecture-7xd3d6` braucht Deine ausdrückliche Erlaubnis) |
+| A2 | CI baut die Produktionslinie und vergleicht den Fingerabdruck | A2-06 | 🔴 | Produktionslinie liegt seit 16.11.2026 auf GitHub (Zweig `claude/bordesnack24-audit-architecture-7xd3d6`, `cdb28ef`, mit Erlaubnis Philipp). Umstellung der CI folgt mit A1 |
 | A3 | Kein toter Code | A2-13 | 🔴 | `nayax-webhook`, `send-push`, Tabellen `nayax_sales`, `device_tokens`: erst als „nicht in Betrieb" kennzeichnen, Löschen nur mit Freigabe |
 | A4 | Keine Änderung nur in der Produktion | A2-20 | ✅ | Pflicht in `CLAUDE.md`. Am 16.11. noch einen Rest gefunden: die geplante Aufgabe `weather-sync` stand nur in der Produktion; sie ist jetzt Teil von `20261116120000` |
 
@@ -90,7 +90,7 @@ Rechtsgutachten; die technische Seite ist jeweils genannt.
 | B2 | Überwachung: tägliche Prüfung, festgehaltenes Ergebnis | A2-15 | 🟦 | `20261116100000` prüft täglich 06:10 UTC fehlgeschlagene Aufgaben, Tabellen ohne Zeilenschutz, Funktionen ohne Suchpfad, überfällige Löschanträge, Stand zweiter Faktor; Probe 114 8/8 |
 | B3 | Alarm bei schlechtem Ergebnis | A2-15 | 🔴 | Mail über Resend, wenn `gesund = false`. Folgt auf B2 |
 | B4 | Wiederanlauf einmal geübt | — | 🔴 | nach B1: Sicherung in ein Testprojekt zurückspielen, Fingerabdruck vergleichen |
-| B5 | Auslieferung der Landingpage ohne Plattformbindung | V-018-e | 🟦 + 🟡 | Lovable-Auftrag vom 16.11.: Medien ins Projekt, `.htaccess` mit Sicherheits-Kopfzeilen, Ablauf nur von Hand auslösbar. Lovable wartet auf Deine Freigabe seines Plans |
+| B5 | Auslieferung der Landingpage ohne Plattformbindung | V-018-e | 🟦 + 🟡 | Lovable-Auftrag vom 16.11., freigegeben und umgesetzt (Lovable `b4a3e95`): Medien in `public/medien/`, `.htaccess` mit Sicherheits-Kopfzeilen, Ablauf `hostinger.yml` nur von Hand, nicht ausgeführt. Offen: CSP und Dateiliste am fertigen Build prüfen (Lovable kann dort nicht bauen); vor dem ersten Lauf prüfe ich, ob die Seite Dienste außerhalb der eigenen Domain anspricht (`connect-src 'self'`, `form-action 'none'`) |
 | B6 | Hilfsschema vom 15.11. entfernt | A2-16 | 🟡 | Löschvorgang, nur mit Freigabe |
 
 **Ehrliche Einschätzung:** Ohne B1 bleibt Betrieb bei höchstens **3,5**. Bis
@@ -124,6 +124,19 @@ Produktionslinie.
 
 **Von mir ohne weitere Freigabe:** S5–S7, F2, F3, A3 (nur Kennzeichnung), B3,
 R2- und R3-Entwürfe.
+
+## 4a. Stand nach Philipps Antwort vom 16.11.2026
+
+* A (Einspielen): zugestimmt. Die Bestätigungsfrage von Supabase lief erneut
+  nach 60 Sekunden ohne Antwort ab; gemessen: nichts eingespielt, Fingerabdruck
+  der Produktion unverändert gleich dem Nachbau aus 242 Migrationen
+  (`231:b8ffbbf5…|278:a9644c1f…|1379:82ab5f18…|103:7b1fc14a…|67:4ee7d4d2…|238:49d57759…`).
+  Sollwerte je Schritt (Nachbau ohne Prüfdaten): nach `090000` →
+  `236:76769aa3…|282:137ea0d3…|1383:6794e73c…`, nach `100000` →
+  `285:0416b0c8…|1387:3fe4fee3…`, nach `110000` → `285:7dfd9bd3…`, nach
+  `120000` → `236:76769aa3…|287:ba9a9072…|1389:d09aa6ef…|103:7b1fc14a…|67:4ee7d4d2…|238:49d57759…`.
+* B (Lovable): freigegeben, umgesetzt (siehe B5).
+* Erlaubnis Produktionslinie: erteilt, hochgeladen (`cdb28ef`).
 
 ## 5. Abweichungen Doku ↔ Code, geprüft am 16.11.2026
 
