@@ -1,3 +1,5 @@
+-- Stillgelegt am 16.11.2026 (main-Datenbanklinie). Ersetzt durch
+-- scripts/pruefumgebung/01_supabase_nachbau.sql. Bleibt nur als Nachweis stehen.
 -- ============================================================================
 -- Supabase-Ersatzteile für eine reine PostgreSQL-Installation.
 --

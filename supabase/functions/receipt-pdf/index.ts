@@ -61,21 +61,10 @@ Deno.serve(async (req) => {
     // Kauf laden — RLS: nur eigener Kauf bzw. Gesellschafter/Systemadmin.
     const { data: purchase, error: pErr } = await caller
       .from("purchases")
-      .select("id, purchased_at, total_gross, payment_method, machine_id, customer_id, source")
+      .select("id, purchased_at, total_gross, payment_method, machine_id, customer_id")
       .eq("id", purchaseId)
       .maybeSingle();
     if (pErr || !purchase) return jsonResponse({ error: "Kauf nicht gefunden" }, 404);
-
-    // Befund B-1 (26.09.2026): Zu einem Demo-Kauf gibt es keinen Beleg. Ein
-    // Kassenbon mit Steuernummer und USt-Ausweis ohne tatsächliche Lieferung
-    // kann die ausgewiesene Steuer nach § 14c Abs. 2 UStG schulden lassen —
-    // und er taugt als gefälschter Spesenbeleg.
-    if (purchase.source === "demo") {
-      return jsonResponse(
-        { error: "Zu einem Demo-Kauf gibt es keinen Beleg." },
-        409,
-      );
-    }
 
     // Pfand je Position (§ 7 PAngV, COMPLIANCE V-016; Migration
     // 20260927200000_pfand_getrennt). Fehlt die Spalte noch, weil diese

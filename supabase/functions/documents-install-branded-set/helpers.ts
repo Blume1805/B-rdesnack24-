@@ -1,5 +1,5 @@
 // Helpers shared between PDF builders.
-import { PDFDocument, PDFPage, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
+import { PDFDocument, PDFPage, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 
 export const ISSUER = {
   name: "Bördesnack24 GbR",

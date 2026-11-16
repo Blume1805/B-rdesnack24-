@@ -60,8 +60,9 @@ function blank(size = 22): string {
   return `<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr><w:r><w:rPr><w:sz w:val="${size}"/></w:rPr><w:t xml:space="preserve"> </w:t></w:r></w:p>`;
 }
 
-// Volle Zeile in fetter Muted-Grau — dezenter Trenner.
-function separator(): string {
+// Volle Zeile in fetter Muted-Grau — dezenter Trenner. Derzeit von keinem
+// Briefbogen genutzt; bleibt als Baustein (Unterstrich: bewusst ungenutzt).
+function _separator(): string {
   return `<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="${MUTED_HEX}"/></w:pBdr></w:pPr></w:p>`;
 }
 
@@ -156,7 +157,7 @@ function footerXml(): string {
 function documentXml(): string {
   const body = [
     heading("Bördesnack24 GbR"),
-    subtitle("Genießen. Geben. Gutes tun."),
+    subtitle("Immer da, wenn der Hunger kommt."),
     blank(),
     para("Bördesnack24 GbR · Sülldorfer Str. 3A · 39171 Sülzetal", {
       size: 16, color: MUTED_HEX,

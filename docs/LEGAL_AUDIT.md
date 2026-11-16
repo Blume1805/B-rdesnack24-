@@ -66,7 +66,7 @@ Legende: ✅ konform · 🟨 fix hinzugefügt (siehe unten) · 🟥 Anwalt erfor
 |---|---|
 | Session-Mgmt (Rotation, Refresh) | ✅ Supabase Auth |
 | Passwort-Anforderungen | 🟨 Länge + Komplexität (Groß/Klein/Ziffer) erzwingen |
-| MFA | 🟨 TOTP vorhanden; die Pflicht für interne Rollen ist seit `0066` serverseitig durchsetzbar (`app.security_settings.require_mfa_internal`), der Schalter steht aber noch auf `false`. Einschalten vor Go-Live: `docs/OPERATIONS.md`, Runbook H. |
+| MFA | 🔴 Stand 16.11.2026: TOTP und Code-Abfrage in der App vorhanden. Die serverseitige Pflicht stand nur in der stillgelegten main-Linie (`0066`), nicht in der Produktion (COMPLIANCE V-018-j). Produktionsfassung vorbereitet (`20261116090000`/`090100`, Schalter aus), noch nicht eingespielt. Danach: `docs/OPERATIONS.md`, Runbook O. |
 | Brute-Force / Rate-Limit | ✅ Supabase Auth Limits + serverseitige RPCs |
 | Verschlüsselung in Übertragung | ✅ TLS |
 | Verschlüsselung sensibler Felder at-rest | 🟥 pgcrypto-Konzept vorhanden; Ausbau optional (Klartextfelder wie Adressen sind nicht besonders schutzwürdig i.S.v. Art. 9) |

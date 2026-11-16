@@ -55,3 +55,28 @@ file_size_limit = "25MiB"
 
 [edge_runtime]
 enabled = true
+
+# Server-Funktionen ohne Anmeldepflicht (verify_jwt = false), Stand der
+# Produktion am 16.11.2026. Ohne diese Einträge setzt `supabase functions
+# deploy` verify_jwt = true, und die Funktionen würden nach dem Ausliefern
+# jeden Aufruf abweisen. Jede prüft selbst:
+#   iot-webhook, email-inbound   Signatur (HMAC bzw. Svix)
+#   auth-email-hook              Signatur des Supabase-Auth-Hooks
+#   weather-sync                 Einmalmarke aus der Datenbank (A2-02)
+#   subscription-cancel          öffentliche Kündigung (§ 312k BGB), prüft
+#                                Angaben selbst, ordnet bei Anmeldung zu
+# Alle übrigen Funktionen verlangen eine Anmeldung (Standard).
+[functions.iot-webhook]
+verify_jwt = false
+
+[functions.email-inbound]
+verify_jwt = false
+
+[functions.auth-email-hook]
+verify_jwt = false
+
+[functions.weather-sync]
+verify_jwt = false
+
+[functions.subscription-cancel]
+verify_jwt = false

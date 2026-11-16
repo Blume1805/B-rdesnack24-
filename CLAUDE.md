@@ -98,10 +98,15 @@ Datenbank standen). Damit das nicht wiederkehrt:
   Produktionslinie, wird vorher am lokalen Nachbau getestet und danach in der
   Datenbank **nachgemessen**. „Eingespielt" ohne Messung gilt als nicht erledigt.
 * Nach jeder Änderung wird der Fingerabdruck
-  (`docs/audit/2026-11-15-ausrollplan/fingerabdruck_sechs_merkmale.sql`, im
-  Produktionszweig `scripts/pruefumgebung/fingerabdruck.sql`) in der Datenbank
+  (`scripts/pruefumgebung/fingerabdruck.sql`, sieben Merkmale seit 16.11.2026,
+  zuletzt dazugekommen: Rechte von anon und authenticated) in der Datenbank
   und im frischen Nachbau ausgeführt. Alle Werte müssen gleich sein; eine
-  Abweichung ist ein 🔴-Befund.
+  Abweichung ist ein 🔴-Befund. Der Sollwert des Nachbaus steht in
+  `scripts/pruefumgebung/fingerabdruck.soll`; wer eine Migration hinzufügt,
+  zieht ihn im selben Commit nach (die CI prüft das).
+* Seit 16.11.2026 gibt es nur noch eine Datenbank-Linie: `supabase/migrations`
+  auf `main` ist die Produktionslinie. Die frühere main-Linie (0001–0070) ist
+  stillgelegt (Verlauf bis `f08e63b`).
 * Nichts wird direkt im Supabase-Dashboard geändert. Was dort doch geändert
   wurde, wird als Migration nachgezogen.
 * Änderungen an der echten Datenbank brauchen weiterhin Philipps Freigabe.

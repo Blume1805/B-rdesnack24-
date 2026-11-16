@@ -55,32 +55,49 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      # Blockierend seit 16.11.2026 (Audit A2-06). Vorher verschluckte
+      # `|| true` jeden Fehler. require-await ist abgeschaltet: elf Funktionen
+      # sind bewusst async, weil die aufrufende Schnittstelle ein Promise
+      # erwartet; das ist Stil, kein Fehler.
       - name: Lint
-        run: deno lint supabase/functions || true
+        run: deno lint --rules-exclude=require-await supabase/functions
       - name: Test
-        run: deno test --allow-all supabase/functions || true
+        run: deno test --allow-all supabase/functions
 
-  migrations:
-    name: Migrations-Lint
-    runs-on: ubuntu-latest
+  datenbank:
+    # Seit 16.11.2026 baut dieser Schritt die Produktionslinie (dieselben
+    # Migrationen wie die echte Datenbank) auf PostgreSQL 17 nach. Die alte
+    # main-Linie (0001–0070) ist stillgelegt; sie steht im Git-Verlauf bis
+    # Commit f08e63b (docs/audit/AUDIT-2026-11-ZIELBILD-4-5.md, A1).
+    # Kein Schritt hier berührt die Produktion.
+    name: Datenbank (Produktionslinie · Prüfskripte · pgTAP · Fingerabdruck)
+    runs-on: ubuntu-24.04
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
-      - name: Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - name: Start DB & Migrationen anwenden
+      - name: PostgreSQL 17 und pgTAP installieren
         run: |
-          supabase db start || supabase start || true
-          # Blockierend seit 2026-09-16: `|| true` verschluckte, dass sich die
-          # Migrationskette aus einer leeren Datenbank gar nicht aufbauen
-          # liess (Befund A-5). Der anschliessende pgTAP-Schritt lief dann
-          # gegen ein unvollstaendiges Schema und meldete Folgefehler statt
-          # der Ursache. Schlaegt dieser Schritt fehl, ist die Kette kaputt —
-          # siehe docs/OPERATIONS.md, Runbook D.
-          supabase db reset --debug
-      - name: RLS-/Permission-Tests (pgTAP)
-        # Blockierend seit 2026-09-16: Die fehlende RLS auf dem IoT-Layer
-        # (Migration 0031) blieb unentdeckt, weil dieser Schritt nicht
-        # fehlschlagen konnte.
-        run: supabase test db
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-17 postgresql-17-pgtap
+          sudo pg_ctlcluster 17 main start || true
+          PORT=$(pg_lsclusters -h | awk '$1 == "17" {print $3}')
+          echo "PGPORT=$PORT" >> "$GITHUB_ENV"
+          sudo -u postgres psql -p "$PORT" -c "alter user postgres password 'postgres';"
+          PGPORT=$PORT psql -d postgres -Atc 'select version()'
+      - name: Aufbau mit Prüfdaten
+        run: scripts/pruefumgebung/aufbauen.sh pruef
+      - name: Prüfskripte (Datenisolation, Rechte, Geschäftsregeln)
+        run: scripts/pruefumgebung/pruefen.sh pruef
+      - name: Aufbau ohne Prüfdaten
+        run: scripts/pruefumgebung/aufbauen.sh tap --ohne-pruefdaten
+      - name: Fingerabdruck gegen Sollwert
+        # Schlägt fehl, wenn eine Migration hinzukam, ohne dass
+        # scripts/pruefumgebung/fingerabdruck.soll nachgezogen wurde.
+        run: scripts/pruefumgebung/fingerabdruck_vergleichen.sh tap
+      - name: pgTAP-Tests
+        run: scripts/pruefumgebung/pgtap.sh tap

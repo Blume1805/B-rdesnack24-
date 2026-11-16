@@ -61,8 +61,8 @@ on:
     inputs:
       functions:
         description: >-
-          Welche Functions? Leer lassen für die fünf offenen. "alle" rollt
-          jede Function im Verzeichnis aus.
+          Welche Functions? Namen mit Leerzeichen getrennt, oder "alle" für
+          jede Function im Verzeichnis. Leer bricht ab (seit 16.11.2026).
         required: false
         default: ''
       dry_run:
@@ -136,10 +136,14 @@ jobs:
           elif [ -n "$EINGABE" ]; then
             LISTE="$EINGABE"
           else
-            # Die fünf, die auf dieses Ausrollen warten: vier Mail-Functions
-            # (DB-Vorlagen + Maskierung von title/preheader in components.ts)
-            # und document-finalize (Finanzzahlen).
-            LISTE="subscription-cancel subscription-choose account-deletion-request auth-email-hook document-finalize"
+            # Seit 16.11.2026 keine Voreinstellung mehr. Die frühere Liste
+            # (fünf Functions vom September) war veraltet; seit dem Stilllegen
+            # der main-Linie liegt hier die Produktionslinie, und welche
+            # Function vom ausgelieferten Stand abweicht, klärt erst der
+            # Abgleich A2-05. Deshalb: ausdrücklich benennen oder "alle".
+            # Gilt auch für das Auslösen per Tag (dort gibt es keine Eingabe).
+            echo "::error::Keine Function benannt. Beim Starten von Hand die Namen eintragen (Leerzeichen getrennt) oder 'alle'."
+            exit 1
           fi
           echo "liste=$LISTE" >> "$GITHUB_OUTPUT"
           echo "Ausgewählt: $LISTE"
@@ -173,11 +177,14 @@ jobs:
               continue
             fi
             echo "── rolle aus: $F"
-            # --no-verify-jwt NICHT pauschal setzen. Die Einstellung je
-            # Function bleibt die, die in Supabase hinterlegt ist; nur
-            # email-inbound und iot-webhook laufen bewusst ohne JWT, weil
-            # ein Webhook sich nicht anmelden kann, und die tragen ihre
-            # Prüfung selbst (HMAC).
+            # --no-verify-jwt NICHT pauschal setzen. Die CLI nimmt die
+            # Einstellung je Function aus supabase/config.toml
+            # ([functions.<name>] verify_jwt); fehlt der Eintrag, gilt
+            # verify_jwt = true. Ohne Anmeldung laufen bewusst fünf:
+            # iot-webhook, email-inbound, auth-email-hook, weather-sync,
+            # subscription-cancel (Begründung in config.toml). Korrigiert
+            # am 16.11.2026: der Kommentar nannte vorher nur zwei, und die
+            # Annahme „bleibt wie in Supabase hinterlegt" traf nicht zu.
             supabase functions deploy "$F" --project-ref "$PROJECT_REF"
           done
 

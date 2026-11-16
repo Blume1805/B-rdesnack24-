@@ -724,7 +724,14 @@ nachvollziehbar bleiben muss.
 
 ### Ergebnis
 
-Behoben durch `supabase/migrations/0066_mfa_gate_and_execute_privileges.sql`
+> **Stand 16.11.2026, gegen den Code geprüft:** `0066` gehörte zur main-Linie,
+> die nie die Produktion war und am 16.11.2026 stillgelegt wurde (Verlauf bis
+> Commit `f08e63b`). In der Produktion galt nichts davon (V-018-j). Ersetzt
+> durch `20261116090000`/`20261116090100` (Prüfung vor jeder Anfrage) und
+> Probe 113; das Ausführungsrecht für `anon` sichert Probe 117 als
+> Freigabeliste. **Bis zum Einspielen in die Produktion bleibt der Punkt 🔴.**
+
+Behoben (nur main-Linie, siehe oben) durch `0066_mfa_gate_and_execute_privileges.sql`
 (17.09.2026):
 
 * Die Zwei-Faktor-Prüfung sitzt in `public.is_admin()`,

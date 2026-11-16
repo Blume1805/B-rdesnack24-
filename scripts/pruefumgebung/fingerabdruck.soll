@@ -1,0 +1,7 @@
+# Sollwert des Fingerabdrucks (fingerabdruck.sql) für einen frischen Aufbau
+# OHNE Prüfdaten: scripts/pruefumgebung/aufbauen.sh <db> --ohne-pruefdaten
+# Merkmale: Regeln | Funktionen | Spalten | Auslöser | Produktkatalog | Aufzählungen | Rechte
+# Wer eine Migration hinzufügt, aktualisiert diese Zeile im selben Commit.
+# Nach dem Einspielen in die Produktion muss die Produktion denselben Wert zeigen
+# (CLAUDE.md, Regel Fingerabdruck). Stand: 16.11.2026, 248 Migrationen.
+236:76769aa328a4866037f112b79e95cd03|287:ba9a90720d6a0eea69dfdace4cb2048a|1389:d09aa6efd31b1deebb433aa43512a169|103:7b1fc14a31e44b402270749bdddd0a3e|67:4ee7d4d20a06977860d182b47304e9f7|238:49d57759c73976c0c5b6aab82810f32d|276:f43d21ad11d29b912c204fadb7b36ae9
