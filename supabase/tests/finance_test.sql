@@ -15,8 +15,15 @@ on conflict (code) do nothing;
 -- Admin-Nutzer (für berechtigten Zugriff) -----------------------------------
 insert into auth.users (id, instance_id, aud, role, email, encrypted_password, created_at, updated_at)
 values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','00000000-0000-0000-0000-000000000000','authenticated','authenticated','admin@test.de','x', now(), now());
+-- Der Waechter trg_profiles_guard laesst Rollenwechsel nur durch einen
+-- Administrator zu (app.guard_profile_update, Migration 0002). Im Test gibt es
+-- zu diesem Zeitpunkt noch keine angemeldete Sitzung, deshalb wird er fuer die
+-- Einrichtung kurz abgeschaltet. Die eigentlichen Zusicherungen laufen danach
+-- wieder mit allen Triggern.
+alter table public.profiles disable trigger trg_profiles_guard;
 update public.profiles set role='system_admin', status='active'
   where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+alter table public.profiles enable trigger trg_profiles_guard;
 
 -- Kunde (ohne finance.view) -------------------------------------------------
 insert into auth.users (id, instance_id, aud, role, email, encrypted_password, created_at, updated_at)

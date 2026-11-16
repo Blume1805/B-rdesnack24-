@@ -55,6 +55,29 @@ Ein Testergebnis von hier gilt damit auch dort — und ein abweichender
 Fingerabdruck ist das Signal, dass die Umgebung neu gebaut werden muss,
 bevor irgendein Ergebnis zählt.
 
+## Kurzweg ab 16.11.2026 (so läuft es auch in den automatischen Tests)
+
+```bash
+# Verbindung über PGHOST, PGPORT, PGUSER auf ein LOKALES PostgreSQL 16/17
+scripts/pruefumgebung/aufbauen.sh pruef                     # alle Migrationen + Prüfdaten
+scripts/pruefumgebung/pruefen.sh pruef                      # alle nummerierten Prüfskripte
+scripts/pruefumgebung/aufbauen.sh tap --ohne-pruefdaten     # Aufbau ohne Prüfdaten
+scripts/pruefumgebung/fingerabdruck_vergleichen.sh tap      # gegen fingerabdruck.soll
+scripts/pruefumgebung/pgtap.sh tap                          # pgTAP-Tests aus supabase/tests
+```
+
+Jedes Skript endet mit Rückgabewert 1, sobald etwas falsch ist. Bekannte
+Einschränkung: 70, 92 und 105 vertragen keinen zweiten Lauf auf derselben
+Datenbank (Prüfdaten werden verändert); immer frisch aufbauen.
+
+**Stand des Abgleichs am 16.11.2026:** Der Fingerabdruck hat sieben Merkmale
+(Regeln, Funktionen, Spalten, Auslöser, Produktkatalog, Aufzählungen, Rechte
+von anon und authenticated). Das Merkmal Rechte fehlte von 15.11. bis 16.11.;
+in dieser Zeit war eine Abweichung unbemerkt (`telemetry_providers`, in der
+Produktion strenger als im Repository, behoben mit `20261116130000`). Die
+Tabelle oben ist der Stand vom 02.09.2026 und gilt als Geschichte, nicht als
+aktueller Wert; der aktuelle Sollwert steht in `fingerabdruck.soll`.
+
 ## Aufbau
 
 ```bash

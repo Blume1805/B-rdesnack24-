@@ -30,9 +30,16 @@ values
   ('33333333-3333-3333-3333-333333333333','00000000-0000-0000-0000-000000000000','authenticated','authenticated','ad@test.de','x', now(), now());
 
 -- Rollen/Status setzen
+-- Der Waechter trg_profiles_guard laesst Rollenwechsel nur durch einen
+-- Administrator zu (app.guard_profile_update, Migration 0002). Im Test gibt es
+-- zu diesem Zeitpunkt noch keine angemeldete Sitzung, deshalb wird er fuer die
+-- Einrichtung kurz abgeschaltet. Die eigentlichen Zusicherungen laufen danach
+-- wieder mit allen Triggern.
+alter table public.profiles disable trigger trg_profiles_guard;
 update public.profiles set role='shareholder', status='active' where id='11111111-1111-1111-1111-111111111111';
 update public.profiles set role='employee',    status='active' where id='22222222-2222-2222-2222-222222222222';
 update public.profiles set role='system_admin', status='active' where id='33333333-3333-3333-3333-333333333333';
+alter table public.profiles enable trigger trg_profiles_guard;
 
 -- 1) Gesellschafter besitzt RBAC-Permission
 select ok(
