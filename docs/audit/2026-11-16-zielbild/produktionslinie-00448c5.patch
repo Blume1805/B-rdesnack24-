@@ -1,0 +1,167 @@
+From 00448c557c941660a8491d3985504c489c4004b1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 16 Nov 2026 05:27:19 +0000
+Subject: [PATCH] =?UTF-8?q?Kombi-Aufteilung=20nur=20f=C3=BCr=20sichtbare?=
+ =?UTF-8?q?=20Angebote;=20machine=5Fstock=20nur=20lesbar?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Audit A2-14 und A2-12. Probe 115: 6 von 6 bestanden; gegen den alten
+Stand schlagen 2 Urteile fehl (Gegenprobe). Volle Suite auf frischem
+Nachbau (246 Migrationen): keine falschen Urteile.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012uyiL6JjSwBHFW5epQoxkW
+---
+ .../115_kombi_aufteilung_sichtbarkeit.sql     | 37 ++++++++
+ ...0261116110000_kleinbefunde_a2_12_a2_14.sql | 93 +++++++++++++++++++
+ 2 files changed, 130 insertions(+)
+ create mode 100644 scripts/pruefumgebung/115_kombi_aufteilung_sichtbarkeit.sql
+ create mode 100644 supabase/migrations/20261116110000_kleinbefunde_a2_12_a2_14.sql
+
+diff --git a/scripts/pruefumgebung/115_kombi_aufteilung_sichtbarkeit.sql b/scripts/pruefumgebung/115_kombi_aufteilung_sichtbarkeit.sql
+new file mode 100644
+index 0000000..fccb2c3
+--- /dev/null
++++ b/scripts/pruefumgebung/115_kombi_aufteilung_sichtbarkeit.sql
+@@ -0,0 +1,37 @@
++-- Probe zu A2-14: Preisaufteilung eines Kombi-Angebots nur für sichtbare Angebote.
++-- Zwei Angebote mit je einem Produkt: eines aktiv, eines inaktiv.
++-- Kunde: aktiv -> Zeilen, inaktiv -> 0. Admin: beide -> Zeilen. anon -> abgewiesen.
++-- Dazu A2-12: machine_stock nur noch lesbar.
++truncate pruef.ergebnis restart identity;
++delete from public.bundle_items where bundle_id in ('b0000000-0000-4000-8000-0000000000a1','b0000000-0000-4000-8000-0000000000a2');
++delete from public.bundles where id in ('b0000000-0000-4000-8000-0000000000a1','b0000000-0000-4000-8000-0000000000a2');
++insert into public.bundles(id, code, title, price_gross, status)
++values ('b0000000-0000-4000-8000-0000000000a1','PROBE-AKTIV','Probe aktiv',2.00,'active'),
++       ('b0000000-0000-4000-8000-0000000000a2','PROBE-ENTWURF','Probe inaktiv',2.00,'inactive');
++insert into public.bundle_items(bundle_id, product_id, quantity, sort_order)
++select b, (select id from public.products where list_price_net is not null and deleted_at is null order by id limit 1), 1, 1
++  from unnest(array['b0000000-0000-4000-8000-0000000000a1','b0000000-0000-4000-8000-0000000000a2']::uuid[]) b;
++do $$
++declare
++  K uuid := '11111111-1111-1111-1111-111111111111';
++  S uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
++  n int; e text;
++begin
++  n := pruef.zaehle($q$select * from public.bundle_split('b0000000-0000-4000-8000-0000000000a1')$q$, K);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-14','Kunde: aktives Angebot','kunde','1',n::text,n=1);
++  n := pruef.zaehle($q$select * from public.bundle_split('b0000000-0000-4000-8000-0000000000a2')$q$, K);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-14','Kunde: inaktiv','kunde','0',n::text,n=0);
++  n := pruef.zaehle($q$select * from public.bundle_split('b0000000-0000-4000-8000-0000000000a2')$q$, S);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-14','Admin: inaktiv','admin','1',n::text,n=1);
++  n := pruef.zaehle($q$select * from public.bundle_split('b0000000-0000-4000-8000-0000000000a1')$q$, null, 'anon');
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-14','anon: aktives Angebot','anon','-1',n::text,n=-1);
++  select string_agg(grantee||':'||privilege_type, ',') into e
++    from information_schema.role_table_grants
++   where table_schema='public' and table_name='machine_stock' and grantee in ('anon','authenticated') and privilege_type <> 'SELECT';
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-12','machine_stock: Rechte außer Lesen','anon/authenticated','keine',coalesce(e,'keine'),e is null);
++  n := pruef.zaehle('select * from public.machine_stock', K);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-12','machine_stock: Kunde liest weiter','kunde','>=0',n::text,n>=0);
++end $$;
++delete from public.bundle_items where bundle_id in ('b0000000-0000-4000-8000-0000000000a1','b0000000-0000-4000-8000-0000000000a2');
++delete from public.bundles where id in ('b0000000-0000-4000-8000-0000000000a1','b0000000-0000-4000-8000-0000000000a2');
++select gruppe, test, erwartet, gemessen, ok from pruef.ergebnis order by id;
+diff --git a/supabase/migrations/20261116110000_kleinbefunde_a2_12_a2_14.sql b/supabase/migrations/20261116110000_kleinbefunde_a2_12_a2_14.sql
+new file mode 100644
+index 0000000..6ad2586
+--- /dev/null
++++ b/supabase/migrations/20261116110000_kleinbefunde_a2_12_a2_14.sql
+@@ -0,0 +1,93 @@
++-- ============================================================================
++-- Zwei Kleinbefunde aus dem Audit vom 15.11.2026
++--
++-- A2-14  bundle_split lieferte die Preisaufteilung auch für Kombi-Angebote,
++--        die nicht aktiv oder gelöscht sind, wenn man die Kennung kannte.
++--        Jetzt gilt dieselbe Sichtbarkeit wie die Leseregel `bundles_read`:
++--        aktiv und nicht gelöscht, oder Admin, oder Recht `offers.manage`.
++-- A2-12  Die Sicht machine_stock trug Schreib-, Lösch- und Leerungsrechte für
++--        anon und authenticated. An der Sicht bewirken sie nichts (sie ist
++--        nicht beschreibbar), sie gehören trotzdem nicht dorthin.
++--        Lesen bleibt unverändert.
++-- Rückweg: Funktion aus 20260910210000_bundles.sql erneut anlegen;
++--          grant insert, update, delete, truncate, references, trigger
++--          on public.machine_stock to anon, authenticated.
++-- ============================================================================
++
++CREATE OR REPLACE FUNCTION public.bundle_split(p_bundle uuid)
++ RETURNS TABLE(product_id uuid, product_name text, image_url text, sort_order smallint, quantity integer, tax_rate numeric, regular_unit_gross numeric, regular_line_gross numeric, share_percent numeric, bundle_line_gross numeric, bundle_unit_gross numeric, bundle_line_net numeric, bundle_line_vat numeric)
++ LANGUAGE sql
++ STABLE SECURITY DEFINER
++ SET search_path TO 'public', 'app'
++AS $function$
++  with b as (
++    select id, price_gross from public.bundles
++     where id = p_bundle
++       and ((deleted_at is null and status = 'active'::app.entity_status)
++            or public.is_admin()
++            or public.auth_has_permission('offers.manage'))
++  ),
++  zeilen as (
++    select bi.product_id,
++           p.name  as product_name,
++           p.image_url,
++           bi.sort_order,
++           bi.quantity,
++           p.tax_rate,
++           round(p.list_price_net * (1 + p.tax_rate / 100), 2) as unit_gross
++      from public.bundle_items bi
++      join public.products p on p.id = bi.product_id
++     where bi.bundle_id = p_bundle
++       and p.list_price_net is not null
++  ),
++  summiert as (
++    select z.*, (z.unit_gross * z.quantity)::numeric(12,2) as line_gross
++      from zeilen z
++  ),
++  verteilt as (
++    select s.*,
++           b.price_gross,
++           -- Schritt 1: Prozentsatz auf zwei Nachkommastellen.
++           round(s.line_gross * 100
++                 / nullif(sum(s.line_gross) over (), 0), 2) as prozent,
++           row_number() over (order by s.sort_order, s.product_id) as rn,
++           count(*) over () as n
++      from summiert s cross join b
++  ),
++  angewandt as (
++    -- Schritt 2: mit genau diesem Prozentsatz multiplizieren.
++    select v.*, round(v.price_gross * v.prozent / 100, 2) as anteil
++      from verteilt v
++  ),
++  korrigiert as (
++    select a.*,
++           case
++             when a.rn < a.n then a.anteil
++             else a.price_gross - coalesce(
++                    sum(a.anteil) over (
++                      order by a.rn
++                      rows between unbounded preceding and 1 preceding
++                    ), 0)
++           end as line_bundle
++      from angewandt a
++  )
++  -- Schritt 3: Netto und Umsatzsteuer je Position, mit dem Steuersatz
++  -- dieses Produkts.
++  select k.product_id, k.product_name, k.image_url, k.sort_order, k.quantity,
++         k.tax_rate,
++         k.unit_gross                         as regular_unit_gross,
++         k.line_gross                         as regular_line_gross,
++         k.prozent                            as share_percent,
++         k.line_bundle::numeric(12,2)         as bundle_line_gross,
++         round(k.line_bundle / k.quantity, 2) as bundle_unit_gross,
++         round(k.line_bundle / (1 + k.tax_rate / 100), 2)
++           as bundle_line_net,
++         (k.line_bundle - round(k.line_bundle / (1 + k.tax_rate / 100), 2))
++           ::numeric(12,2) as bundle_line_vat
++    from korrigiert k
++   order by k.sort_order, k.product_id;
++$function$;
++
++
++revoke insert, update, delete, truncate, references, trigger
++  on public.machine_stock from anon, authenticated;
+-- 
+2.43.0
+

@@ -1,0 +1,322 @@
+From cdb28ef39d78aea29148ee4cb1c7749f84cbc35f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 16 Nov 2026 05:30:28 +0000
+Subject: [PATCH] weather-sync nur mit Einmalmarke aus der Datenbank aufrufbar
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Audit A2-02. Die geplante Aufgabe legt vor jedem Aufruf eine Einmalmarke
+an (gültig 10 Minuten, genau einmal); die Funktion löst sie über
+wetter_marke_einloesen ein (nur Dienstschlüssel). Ohne gültige Marke 401,
+kein Abruf beim Wetterdienst, kein Schreibvorgang. Fehlerantworten nennen
+keine Adresse und keine Datenbankmeldung mehr. Die geplante Aufgabe, die
+bisher nur in der Produktion stand, ist jetzt Teil der Migration.
+
+Nachweis: Probe 116 10/10, marke_test.ts 4/4, Handler-Probe 5/5.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_012uyiL6JjSwBHFW5epQoxkW
+---
+ .../116_wetterabruf_einmalmarke.sql           | 42 ++++++++++
+ supabase/functions/weather-sync/index.ts      | 47 +++++++++---
+ supabase/functions/weather-sync/marke.ts      | 16 ++++
+ supabase/functions/weather-sync/marke_test.ts | 28 +++++++
+ ...1116120000_wetterabruf_mit_einmalmarke.sql | 76 +++++++++++++++++++
+ 5 files changed, 198 insertions(+), 11 deletions(-)
+ create mode 100644 scripts/pruefumgebung/116_wetterabruf_einmalmarke.sql
+ create mode 100644 supabase/functions/weather-sync/marke.ts
+ create mode 100644 supabase/functions/weather-sync/marke_test.ts
+ create mode 100644 supabase/migrations/20261116120000_wetterabruf_mit_einmalmarke.sql
+
+diff --git a/scripts/pruefumgebung/116_wetterabruf_einmalmarke.sql b/scripts/pruefumgebung/116_wetterabruf_einmalmarke.sql
+new file mode 100644
+index 0000000..9700192
+--- /dev/null
++++ b/scripts/pruefumgebung/116_wetterabruf_einmalmarke.sql
+@@ -0,0 +1,42 @@
++-- Probe zu A2-02: weather-sync nur mit Einmalmarke.
++-- Prüft die Datenbankseite: Marke wird angelegt, genau einmal einlösbar,
++-- abgelaufene und erfundene Marken werden abgelehnt, und nur der
++-- Dienstschlüssel darf einlösen. Die Funktion selbst prüft marke_test.ts.
++truncate pruef.ergebnis restart identity;
++delete from app.wetter_abruf_marken;
++do $$
++declare
++  K uuid := '11111111-1111-1111-1111-111111111111';
++  S uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
++  m uuid; alt uuid; n int; b boolean;
++begin
++  perform app.wetter_abruf_ausloesen();
++  select marke into m from app.wetter_abruf_marken order by angelegt desc limit 1;
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','Auslösen legt Marke an','cron','1',(select count(*) from app.wetter_abruf_marken)::text,(select count(*) from app.wetter_abruf_marken)=1);
++
++  b := public.wetter_marke_einloesen(gen_random_uuid());
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','erfundene Marke','service_role','false',b::text,b=false);
++  b := public.wetter_marke_einloesen(m);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','gültige Marke, erstes Einlösen','service_role','true',b::text,b=true);
++  b := public.wetter_marke_einloesen(m);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','dieselbe Marke zweimal','service_role','false',b::text,b=false);
++
++  insert into app.wetter_abruf_marken(angelegt) values (now() - interval '11 minutes') returning marke into alt;
++  b := public.wetter_marke_einloesen(alt);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','abgelaufene Marke (11 min)','service_role','false',b::text,b=false);
++
++  perform app.wetter_abruf_ausloesen();
++  select marke into m from app.wetter_abruf_marken order by angelegt desc limit 1;
++  n := pruef.zaehle(format('select * from public.wetter_marke_einloesen(%L::uuid) x', m), null, 'anon');
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','anon löst ein','anon','-1',n::text,n=-1);
++  n := pruef.zaehle(format('select * from public.wetter_marke_einloesen(%L::uuid) x', m), S);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','Admin löst ein','admin','-1',n::text,n=-1);
++  n := pruef.zaehle('select * from app.wetter_abruf_ausloesen() x', K);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','Kunde löst Abruf aus','kunde','-1',n::text,n=-1);
++  n := pruef.zaehle('select * from app.wetter_abruf_marken', S);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','Admin liest Marken','admin','-1',n::text,n=-1);
++  b := exists (select 1 from app.wetter_abruf_marken where marke = m);
++  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('A2-02','Marke nach abgewiesenen Versuchen noch da','postgres','true',b::text,b);
++end $$;
++select gruppe, test, erwartet, gemessen, ok from pruef.ergebnis order by id;
++select 'geplante Aufgabe: ' || jobname || ' ' || schedule || ' ' || command from cron.job where jobname = 'weather-sync';
+diff --git a/supabase/functions/weather-sync/index.ts b/supabase/functions/weather-sync/index.ts
+index 69f7cce..591ab2a 100644
+--- a/supabase/functions/weather-sync/index.ts
++++ b/supabase/functions/weather-sync/index.ts
+@@ -9,17 +9,23 @@
+ // aus public.weather_config, niemals ein Kundenstandort. Deshalb sind hier
+ // keine personenbezogenen Daten im Spiel.
+ //
+-// Aufruf: per Cron (pg_cron + pg_net) zweimal täglich. Idempotent — ein
+-// erneuter Lauf aktualisiert dieselben Tage.
++// Aufruf: per Cron (pg_cron + pg_net) einmal täglich über
++// app.wetter_abruf_ausloesen(). Idempotent — ein erneuter Lauf aktualisiert
++// dieselben Tage.
++//
++// Zugang (Audit A2-02, 16.11.2026): Jeder Aufruf braucht eine Einmalmarke im
++// Kopf `x-bs24-marke`, die die Datenbank unmittelbar vorher angelegt hat.
++// Ohne gültige Marke: 401, kein Abruf beim Wetterdienst, kein Schreibvorgang.
+ 
+ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
++import { markeAusKopf } from './marke.ts';
+ 
+ // Bewusst inline statt aus ../_shared/cors.ts: der Function-Bundler löst den
+ // Pfad oberhalb des Function-Ordners nicht auf, der Deploy scheitert sonst.
+ const corsHeaders = {
+   'Access-Control-Allow-Origin': '*',
+   'Access-Control-Allow-Headers':
+-    'authorization, x-client-info, apikey, content-type',
++    'authorization, x-client-info, apikey, content-type, x-bs24-marke',
+   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+ };
+ 
+@@ -76,19 +82,35 @@ Deno.serve(async (req) => {
+       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+     });
+ 
++  if (req.method !== 'POST') return json({ ok: false }, 405);
++
+   try {
+     const supabase = createClient(
+       Deno.env.get('SUPABASE_URL')!,
+       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+     );
+ 
++    // Erst die Marke einlösen, dann irgendetwas anderes tun. Fehlt sie oder
++    // ist sie verbraucht, wird weder der Wetterdienst gefragt noch
++    // geschrieben, und die Antwort verrät nichts über den Grund.
++    const marke = markeAusKopf(req.headers);
++    if (!marke) return json({ ok: false }, 401);
++    const { data: gueltig, error: markeErr } = await supabase.rpc(
++      'wetter_marke_einloesen',
++      { p_marke: marke },
++    );
++    if (markeErr || gueltig !== true) return json({ ok: false }, 401);
++
+     const { data: cfg, error: cfgErr } = await supabase
+       .from('weather_config')
+       .select('lat, lng, enabled')
+       .eq('id', 1)
+       .single();
+ 
+-    if (cfgErr) return json({ ok: false, error: cfgErr.message }, 500);
++    if (cfgErr) {
++      console.error(`[weather-sync] weather_config: ${cfgErr.message}`);
++      return json({ ok: false }, 500);
++    }
+     if (!cfg?.enabled) return json({ ok: true, skipped: 'disabled' });
+ 
+     const from = new Date();
+@@ -101,10 +123,9 @@ Deno.serve(async (req) => {
+ 
+     const res = await fetch(url, { headers: { Accept: 'application/json' } });
+     if (!res.ok) {
+-      return json(
+-        { ok: false, error: `Bright Sky ${res.status}`, url },
+-        502,
+-      );
++      // Die abgefragte Adresse bleibt im Protokoll, nicht in der Antwort.
++      console.error(`[weather-sync] Bright Sky ${res.status}: ${url}`);
++      return json({ ok: false, error: `Bright Sky ${res.status}` }, 502);
+     }
+ 
+     const body = await res.json() as { weather?: BrightSkyRecord[] };
+@@ -116,12 +137,16 @@ Deno.serve(async (req) => {
+     const { error: upErr } = await supabase
+       .from('weather_daily')
+       .upsert(rows, { onConflict: 'day' });
+-    if (upErr) return json({ ok: false, error: upErr.message }, 500);
++    if (upErr) {
++      console.error(`[weather-sync] weather_daily: ${upErr.message}`);
++      return json({ ok: false }, 500);
++    }
+ 
+-    return json({ ok: true, days: rows.length, rows });
++    return json({ ok: true, days: rows.length });
+   } catch (e) {
+     // Nie hart scheitern: der Tages-Deal fällt sonst auf die Monatsregel
+     // zurück, das ist besser als ein abgebrochener Cron-Lauf.
+-    return json({ ok: false, error: String(e) }, 500);
++    console.error(`[weather-sync] ${String(e)}`);
++    return json({ ok: false }, 500);
+   }
+ });
+diff --git a/supabase/functions/weather-sync/marke.ts b/supabase/functions/weather-sync/marke.ts
+new file mode 100644
+index 0000000..e9d1150
+--- /dev/null
++++ b/supabase/functions/weather-sync/marke.ts
+@@ -0,0 +1,16 @@
++// Einmalmarke aus dem Aufruf lesen (Audit A2-02).
++//
++// Die Datenbank schickt bei jedem geplanten Aufruf eine zufällige Marke im
++// Kopf `x-bs24-marke` mit (app.wetter_abruf_ausloesen). Hier wird nur das
++// Format geprüft; ob die Marke gültig ist, entscheidet die Datenbank beim
++// Einlösen. Alles, was keine UUID ist, wird gar nicht erst an die Datenbank
++// weitergereicht.
++
++const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
++
++export const MARKEN_KOPF = 'x-bs24-marke';
++
++export function markeAusKopf(headers: Headers): string | null {
++  const wert = headers.get(MARKEN_KOPF)?.trim() ?? '';
++  return UUID.test(wert) ? wert.toLowerCase() : null;
++}
+diff --git a/supabase/functions/weather-sync/marke_test.ts b/supabase/functions/weather-sync/marke_test.ts
+new file mode 100644
+index 0000000..71a3643
+--- /dev/null
++++ b/supabase/functions/weather-sync/marke_test.ts
+@@ -0,0 +1,28 @@
++import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
++import { markeAusKopf, MARKEN_KOPF } from './marke.ts';
++
++const kopf = (w?: string) => {
++  const h = new Headers();
++  if (w !== undefined) h.set(MARKEN_KOPF, w);
++  return h;
++};
++
++Deno.test('ohne Kopf: keine Marke', () => {
++  assertEquals(markeAusKopf(kopf()), null);
++});
++
++Deno.test('leerer Kopf: keine Marke', () => {
++  assertEquals(markeAusKopf(kopf('')), null);
++});
++
++Deno.test('kein UUID-Format: keine Marke', () => {
++  assertEquals(markeAusKopf(kopf("1' or '1'='1")), null);
++  assertEquals(markeAusKopf(kopf('123e4567-e89b-12d3-a456-42661417400')), null);
++});
++
++Deno.test('gültiges Format wird klein geschrieben weitergegeben', () => {
++  assertEquals(
++    markeAusKopf(kopf(' 123E4567-E89B-12D3-A456-426614174000 ')),
++    '123e4567-e89b-12d3-a456-426614174000',
++  );
++});
+diff --git a/supabase/migrations/20261116120000_wetterabruf_mit_einmalmarke.sql b/supabase/migrations/20261116120000_wetterabruf_mit_einmalmarke.sql
+new file mode 100644
+index 0000000..fdac1cd
+--- /dev/null
++++ b/supabase/migrations/20261116120000_wetterabruf_mit_einmalmarke.sql
+@@ -0,0 +1,76 @@
++-- ============================================================================
++-- weather-sync nur noch mit Einmalmarke aufrufbar (Audit A2-02)
++--
++-- Befund: Die Server-Funktion weather-sync war ohne jede Anmeldung aufrufbar
++-- und prüfte selbst nichts. Die geplante Aufgabe `weather-sync` stand nur in
++-- der echten Datenbank (im Dashboard angelegt), nicht im Repository.
++--
++-- Lösung ohne neues Geheimnis: Vor jedem Aufruf legt die Datenbank eine
++-- zufällige Einmalmarke an und schickt sie im Kopf `x-bs24-marke` mit. Die
++-- Funktion löst die Marke über public.wetter_marke_einloesen() ein; das darf
++-- nur der Dienstschlüssel. Eine Marke gilt 10 Minuten und genau einmal.
++-- Wer die Funktion von außen aufruft, hat keine gültige Marke und wird mit
++-- 401 abgewiesen.
++--
++-- Reihenfolge beim Ausrollen: ERST diese Migration, DANN die Funktion. Die
++-- alte Funktion ignoriert den Kopf und läuft weiter; umgekehrt würde der
++-- alte Aufruf ohne Marke abgewiesen (Folge nur: ein Tag ohne Wetterdaten,
++-- der Tages-Deal fällt auf die Monatsregel zurück).
++--
++-- Rückweg: cron.schedule('weather-sync', '40 3 * * *', <alter Befehl ohne
++-- Kopf>) und die vorige Funktionsversion ausliefern.
++-- ============================================================================
++
++create table if not exists app.wetter_abruf_marken (
++  marke    uuid        primary key default gen_random_uuid(),
++  angelegt timestamptz not null default now()
++);
++alter table app.wetter_abruf_marken enable row level security;
++revoke all on app.wetter_abruf_marken from public, anon, authenticated;
++
++create or replace function app.wetter_abruf_ausloesen()
++returns bigint
++language plpgsql security definer
++set search_path = public, app, extensions
++as $$
++declare v_marke uuid;
++begin
++  delete from app.wetter_abruf_marken where angelegt < now() - interval '1 hour';
++  insert into app.wetter_abruf_marken default values returning marke into v_marke;
++  return net.http_post(
++    url     := 'https://nnfsyuglkqycwenwxmuw.supabase.co/functions/v1/weather-sync',
++    body    := '{}'::jsonb,
++    params  := '{}'::jsonb,
++    headers := jsonb_build_object('Content-Type', 'application/json',
++                                  'x-bs24-marke', v_marke::text),
++    timeout_milliseconds := 10000
++  );
++end;
++$$;
++
++create or replace function public.wetter_marke_einloesen(p_marke uuid)
++returns boolean
++language sql volatile security definer
++set search_path = public, app
++as $$
++  with weg as (
++    delete from app.wetter_abruf_marken
++     where marke = p_marke and angelegt > now() - interval '10 minutes'
++    returning 1
++  )
++  select exists (select 1 from weg);
++$$;
++
++revoke all on function app.wetter_abruf_ausloesen()          from public, anon, authenticated;
++revoke all on function public.wetter_marke_einloesen(uuid)   from public, anon, authenticated;
++grant execute on function public.wetter_marke_einloesen(uuid) to service_role;
++
++do $$
++begin
++  if to_regclass('cron.job') is not null then
++    if exists (select 1 from cron.job where jobname = 'weather-sync') then
++      perform cron.unschedule('weather-sync');
++    end if;
++    perform cron.schedule('weather-sync', '40 3 * * *', 'select app.wetter_abruf_ausloesen();');
++  end if;
++end $$;
+-- 
+2.43.0
+

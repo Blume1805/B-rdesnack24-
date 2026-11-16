@@ -773,6 +773,14 @@ es einmal versucht und dann aufgibt.
 
 ## Runbook H: Zwei-Faktor-Anmeldung für Pia und dich einschalten
 
+> **Ersetzt am 16.11.2026 durch Runbook O.** Runbook H war für die frühere
+> Datenbank-Linie (`main`) geschrieben und nennt zwei Personen. In der echten
+> Datenbank gibt es vier interne Konten, und die App fragt den Code inzwischen
+> selbst ab. Geprüft gegen den Code am 16.11.2026: Tabelle, Schlüssel und
+> Schalter-Text unten stimmen mit der Produktionslinie überein; der Verweis auf
+> `supabase/tests/mfa_gate_test.sql` gilt nur für `main`, in der
+> Produktionslinie heißt die Probe `scripts/pruefumgebung/113_zwei_faktor_pflicht.sql`.
+
 **Zeitbedarf:** 20 Minuten, davon 5 Minuten je Person. Beide Personen müssen
 gleichzeitig verfügbar sein.
 
@@ -1626,3 +1634,203 @@ Technischer Hintergrund: Migration `20261103100000_vorteile_ohne_abo.sql`
 (Produktionslinie, gesichert in `docs/audit/2026-11-03-vorteile/`), Nachweis
 `112_vorteile_ohne_abo.sql` (21 Fälle) und Neuaufbau mit allen Prüfskripten,
 COMPLIANCE V-018-a.
+
+---
+
+## Runbook O: Zwei-Faktor-Anmeldung für alle vier internen Konten (Stand 16.11.2026)
+
+**Zeitbedarf:** 5 Minuten je Person, danach 3 Minuten für den Schalter. Die
+vier Personen müssen nicht gleichzeitig da sein, der Schalter aber erst ganz
+am Ende umgelegt werden.
+
+**Dringlichkeit:** vor dem ersten echten Verkauf. Heute ist es der wichtigste
+offene Sicherheitspunkt aus dem Audit (A2-01).
+
+### Warum
+
+Heute reicht ein Passwort, um als Gesellschafter oder Mitarbeiter Umsätze,
+Einkaufspreise, Verträge und Kundendaten zu sehen. Ein zweiter Faktor ist
+eine sechsstellige Zahl aus einer App auf dem Telefon, die sich alle 30
+Sekunden ändert. Ohne das Telefon kommt niemand hinein, auch nicht mit dem
+richtigen Passwort.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Nach dem Einschalten bekommt ein internes Konto ohne die
+  sechsstellige Zahl von der Datenbank keine Daten mehr. Die App fragt die
+  Zahl direkt nach der Anmeldung ab (Bildschirm „Dein Konto ist mit einem
+  zweiten Faktor geschützt …").
+* Es passiert **nicht**: Kunden merken nichts. Sie melden sich weiter nur mit
+  E-Mail und Passwort an. Das ist in der Probe 113 nachgewiesen (Kunde und
+  nicht angemeldete Besucher kommen bei eingeschaltetem Schalter durch).
+* Der Rückweg (Schalter aus) hängt nicht an der App und nicht am Telefon.
+
+### Voraussetzung (erledige ich, Du bestätigst nur)
+
+Die Datenbank-Änderung `20261116090000_zwei_faktor_pflicht_vorbereitet` und
+`20261116090100_zwei_faktor_pruefung_vor_jeder_anfrage` muss in der echten
+Datenbank eingespielt sein. Sie bringt den Schalter mit, der **aus** steht —
+es ändert sich dadurch für niemanden etwas. Beim Einspielen fragt Supabase in
+diesem Chat einmal nach, das bestätigst Du mit einem Klick.
+
+### Schritt für Schritt
+
+**Teil 1 — jede der vier Personen für sich (5 Minuten)**
+
+1. Auf dem Telefon eine Authenticator-App installieren, zum Beispiel
+   „Google Authenticator", „Aegis" (Android) oder auf dem iPhone
+   *Einstellungen → Passwörter*. Alle sind kostenlos.
+2. `https://app.boerdesnack24.de` öffnen und wie gewohnt anmelden.
+3. Oben steht „Konto absichern: Zwei-Faktor-Authentifizierung einrichten."
+   Auf die Schaltfläche daneben tippen. Fehlt der Hinweis, hinter die Adresse
+   `/security/mfa` anhängen, also `https://app.boerdesnack24.de/security/mfa`.
+4. Es erscheint ein QR-Code (ein quadratisches Strichmuster). In der
+   Authenticator-App auf „+" tippen und den QR-Code abfotografieren.
+5. Die sechsstellige Zahl aus der Authenticator-App in das Feld eintippen und
+   bestätigen.
+6. Abmelden und neu anmelden. Nach dem Passwort fragt die App jetzt nach der
+   Zahl. Zahl eingeben — dann ist der Faktor richtig eingerichtet.
+
+**Teil 2 — nachsehen, ob alle vier fertig sind (1 Minute)**
+
+7. Mir im Chat schreiben „Alle vier haben den zweiten Faktor." Ich lese in
+   der Datenbank nach (ohne Kundendaten): Die Zahl muss **4 von 4** sein.
+   Ist sie kleiner, nenne ich Dir, wer noch fehlt — dann **nicht** weiter.
+
+**Teil 3 — den Schalter umlegen (3 Minuten, eine Person)**
+
+8. <https://supabase.com/dashboard> öffnen, Projekt **boerdesnack24-app**
+   wählen.
+9. Links auf **SQL Editor** klicken, dann oben auf **New query**.
+10. Genau diesen Text einfügen:
+
+```sql
+update app.security_settings
+   set enabled = true, updated_at = now()
+ where key = 'require_mfa_internal';
+```
+
+11. Rechts unten auf **Run** klicken.
+
+Alternativ schreibst Du mir „Schalter an" — dann mache ich Schritt 8–11 und
+messe danach nach.
+
+### So sieht Erfolg aus
+
+* Unter dem Feld steht `Success. No rows returned`.
+* Gegenprobe: abmelden, neu anmelden, bei der Zahl auf **Abmelden** statt
+  Bestätigen tippen. Man landet wieder bei der Anmeldung, nicht im
+  Verwaltungsbereich. Mit der Zahl ist alles wieder da.
+
+### Wenn etwas schiefgeht
+
+Telefon weg, App gelöscht oder Zahl wird nicht angenommen: im SQL Editor
+denselben Text mit `false` statt `true` ausführen. Danach ist alles wie
+vorher.
+
+```sql
+update app.security_settings
+   set enabled = false, updated_at = now()
+ where key = 'require_mfa_internal';
+```
+
+Der SQL Editor hängt am Supabase-Konto, nicht an der App. Deshalb muss
+**das Supabase-Konto selbst** ebenfalls einen zweiten Faktor haben
+(Supabase → oben rechts Profilbild → *Account preferences* → *Security*).
+
+Es eilt nicht, solange kein Automat verkauft.
+
+---
+
+## Runbook P: Anmelde-Adressen in Supabase richtig einstellen (5 Minuten)
+
+### Warum
+
+Wenn ein Kunde sich registriert oder sein Passwort vergisst, schickt Supabase
+eine E-Mail mit einem Link. Wohin dieser Link führt, steht in den
+Einstellungen. Auf Deinen Bildschirmfotos vom 16.11.2026 steht dort noch die
+alte Adresse `https://blume1805.github.io/B-rdesnack24-/`, und es sind zwei
+Lovable-Adressen als erlaubtes Ziel eingetragen, die nicht zur App gehören.
+Die App selbst gibt beim Registrieren und beim Passwort-Zurücksetzen kein
+eigenes Ziel an (geprüft im Code am 16.11.2026), sie verlässt sich also
+vollständig auf diese Einstellung.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Bestätigungs- und Passwort-Links führen auf
+  `https://app.boerdesnack24.de`. Fremde Seiten können nicht mehr als Ziel
+  eines Anmelde-Links dienen.
+* Es passiert **nicht**: Niemand wird abgemeldet, kein Konto ändert sich.
+  Links, die schon verschickt wurden, funktionieren weiter bis zum Ablauf.
+
+### Schritt für Schritt
+
+1. <https://supabase.com/dashboard> öffnen, Projekt **boerdesnack24-app**.
+2. Links **Authentication** → **URL Configuration**.
+3. Feld **Site URL**: den Inhalt löschen und genau das einfügen:
+   `https://app.boerdesnack24.de` → **Save**.
+4. Darunter **Redirect URLs** → **Add URL** → einfügen:
+   `https://app.boerdesnack24.de/**` → **Save URLs**.
+5. In derselben Liste bei `https://snack-aid-app.lovable.app/**` rechts auf
+   das Papierkorb-Symbol klicken und bestätigen. Dasselbe bei dem Eintrag,
+   der mit `https://id-preview--d5033021` beginnt.
+6. Den Eintrag `https://blume1805.github.io/B-rdesnack24-/**` **stehen
+   lassen**, bis die alte Adresse abgeschaltet ist.
+7. Links **Authentication** → **Sign In / Providers** → Abschnitt **Email**
+   aufklappen und nachsehen, ob **Confirm email** eingeschaltet ist (Schalter
+   grün). Wenn nicht: einschalten → **Save**. Auf dem Bildschirmfoto war
+   dieser Schalter abgeschnitten.
+
+### So sieht Erfolg aus
+
+Site URL zeigt `https://app.boerdesnack24.de`; in der Liste stehen genau
+zwei Einträge (`app.boerdesnack24.de/**` und `blume1805.github.io/…/**`).
+Probe: mit einer eigenen Zweit-Adresse „Passwort vergessen" auslösen — der
+Link in der E-Mail beginnt mit `https://app.boerdesnack24.de`.
+
+### Wenn etwas schiefgeht
+
+Führt der Link ins Leere, die alte Site URL
+`https://blume1805.github.io/B-rdesnack24-/` wieder eintragen und mir
+Bescheid geben. Es eilt nicht; wichtig ist es vor dem ersten echten Kunden.
+
+---
+
+## Runbook Q: Repository privat stellen — Entscheidung nötig
+
+### Warum
+
+Das Repository (der Ordner auf GitHub, in dem der ganze Code liegt) ist
+öffentlich. Jeder kann Businessplan, Finanzrechnung und die Audit-Berichte
+mit den Sicherheitsbefunden lesen (Audit A2-03). Du hast am 16.11.2026
+entschieden: privat stellen.
+
+### Der Haken
+
+Die App unter `app.boerdesnack24.de` wird heute von **GitHub Pages**
+ausgeliefert, einem kostenlosen Webspeicher von GitHub. Im kostenlosen
+GitHub-Tarif geht das nur aus öffentlichen Repositories. Wird das Repository
+privat, ist die App offline, bis einer dieser Wege umgesetzt ist:
+
+| Weg | Was | Kosten | Aufwand |
+|---|---|---|---|
+| A | GitHub-Tarif „Pro" — GitHub Pages läuft dann auch aus dem privaten Repository | rund 4 US-Dollar im Monat | 5 Minuten, Philipp |
+| B | Ein zweites, öffentliches Repository nur mit der fertig gebauten App (kein Quelltext, keine Unterlagen) | 0 € | 30 Minuten, ich; Philipp legt das Repository an |
+| C | Die App ebenfalls zu Hostinger legen (wie die Landingpage), Ablauf per FTPS wie für die Landingpage | 0 € zusätzlich | 1 Stunde, ich; Philipp trägt eine DNS-Zeile bei Hostinger ein |
+
+**Meine Empfehlung: C.** Ihr zahlt Hostinger ohnehin, alles liegt dann an
+einem Ort, und die Sicherheits-Kopfzeilen (CSP, HSTS) stehen in derselben
+`.htaccess` wie bei der Landingpage. Weg A ist der schnellste Notbehelf.
+
+### Reihenfolge (egal welcher Weg)
+
+1. Erst den neuen Auslieferungsweg einrichten und prüfen.
+2. Dann das Repository privat stellen: GitHub → Repository → **Settings** →
+   ganz unten **Danger Zone** → **Change visibility** → **Make private**.
+3. Danach prüfe ich `app.boerdesnack24.de` und die Landingpage.
+
+**Wichtig:** Schritt 2 nicht vor Schritt 1 — sonst ist die App offline.
+Außerdem holt die echte Datenbank bei Ausrollungen Dateien direkt von GitHub
+(15.11.2026); nach dem Privatstellen geht das nicht mehr ohne Schlüssel. Das
+ist gewollt: künftige Änderungen spiele ich über den Bestätigungsweg ein.
+

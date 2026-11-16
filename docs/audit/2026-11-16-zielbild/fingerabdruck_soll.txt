@@ -1,0 +1,4 @@
+# Fingerabdruck (sechs Merkmale) des Nachbaus aus 247 Migrationen, 16.11.2026
+# Sollwert für die Produktion, nachdem alle Migrationen bis 20261116120000 eingespielt sind.
+# Reihenfolge: Regeln mit Bedingungen | Funktionen | Spalten | Trigger | Produktkatalog | Aufzählungen
+236:76769aa328a4866037f112b79e95cd03|287:ba9a90720d6a0eea69dfdace4cb2048a|1389:d09aa6efd31b1deebb433aa43512a169|103:7b1fc14a31e44b402270749bdddd0a3e|69:f64330f71a8e1a1b7d12234c3ed20a13|238:49d57759c73976c0c5b6aab82810f32d
