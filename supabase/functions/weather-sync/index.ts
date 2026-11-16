@@ -9,17 +9,23 @@
 // aus public.weather_config, niemals ein Kundenstandort. Deshalb sind hier
 // keine personenbezogenen Daten im Spiel.
 //
-// Aufruf: per Cron (pg_cron + pg_net) zweimal täglich. Idempotent — ein
-// erneuter Lauf aktualisiert dieselben Tage.
+// Aufruf: per Cron (pg_cron + pg_net) einmal täglich über
+// app.wetter_abruf_ausloesen(). Idempotent — ein erneuter Lauf aktualisiert
+// dieselben Tage.
+//
+// Zugang (Audit A2-02, 16.11.2026): Jeder Aufruf braucht eine Einmalmarke im
+// Kopf `x-bs24-marke`, die die Datenbank unmittelbar vorher angelegt hat.
+// Ohne gültige Marke: 401, kein Abruf beim Wetterdienst, kein Schreibvorgang.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { markeAusKopf } from './marke.ts';
 
 // Bewusst inline statt aus ../_shared/cors.ts: der Function-Bundler löst den
 // Pfad oberhalb des Function-Ordners nicht auf, der Deploy scheitert sonst.
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
+    'authorization, x-client-info, apikey, content-type, x-bs24-marke',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -76,11 +82,24 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
+  if (req.method !== 'POST') return json({ ok: false }, 405);
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
+
+    // Erst die Marke einlösen, dann irgendetwas anderes tun. Fehlt sie oder
+    // ist sie verbraucht, wird weder der Wetterdienst gefragt noch
+    // geschrieben, und die Antwort verrät nichts über den Grund.
+    const marke = markeAusKopf(req.headers);
+    if (!marke) return json({ ok: false }, 401);
+    const { data: gueltig, error: markeErr } = await supabase.rpc(
+      'wetter_marke_einloesen',
+      { p_marke: marke },
+    );
+    if (markeErr || gueltig !== true) return json({ ok: false }, 401);
 
     const { data: cfg, error: cfgErr } = await supabase
       .from('weather_config')
@@ -88,7 +107,10 @@ Deno.serve(async (req) => {
       .eq('id', 1)
       .single();
 
-    if (cfgErr) return json({ ok: false, error: cfgErr.message }, 500);
+    if (cfgErr) {
+      console.error(`[weather-sync] weather_config: ${cfgErr.message}`);
+      return json({ ok: false }, 500);
+    }
     if (!cfg?.enabled) return json({ ok: true, skipped: 'disabled' });
 
     const from = new Date();
@@ -101,10 +123,9 @@ Deno.serve(async (req) => {
 
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
     if (!res.ok) {
-      return json(
-        { ok: false, error: `Bright Sky ${res.status}`, url },
-        502,
-      );
+      // Die abgefragte Adresse bleibt im Protokoll, nicht in der Antwort.
+      console.error(`[weather-sync] Bright Sky ${res.status}: ${url}`);
+      return json({ ok: false, error: `Bright Sky ${res.status}` }, 502);
     }
 
     const body = await res.json() as { weather?: BrightSkyRecord[] };
@@ -116,12 +137,16 @@ Deno.serve(async (req) => {
     const { error: upErr } = await supabase
       .from('weather_daily')
       .upsert(rows, { onConflict: 'day' });
-    if (upErr) return json({ ok: false, error: upErr.message }, 500);
+    if (upErr) {
+      console.error(`[weather-sync] weather_daily: ${upErr.message}`);
+      return json({ ok: false }, 500);
+    }
 
-    return json({ ok: true, days: rows.length, rows });
+    return json({ ok: true, days: rows.length });
   } catch (e) {
     // Nie hart scheitern: der Tages-Deal fällt sonst auf die Monatsregel
     // zurück, das ist besser als ein abgebrochener Cron-Lauf.
-    return json({ ok: false, error: String(e) }, 500);
+    console.error(`[weather-sync] ${String(e)}`);
+    return json({ ok: false }, 500);
   }
 });
