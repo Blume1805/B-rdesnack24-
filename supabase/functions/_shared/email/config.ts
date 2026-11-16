@@ -4,10 +4,12 @@
 // Template hält eigene URLs. Ändert sich die Domain, reicht hier eine Zeile.
 
 /// Basis der Web-App. Die App läuft mit Hash-Routing, Rechtsseiten hängen
-/// deshalb hinter `#`. Gleiche Basis wie der Empfehlungslink in
-/// `apps/mobile/lib/features/customer/domain/entities/referral.dart`.
+/// deshalb hinter `#`. (Der frühere Verweis auf `referral.dart` stimmte
+/// nicht: die Datei gibt es in apps/mobile nicht, geprüft 16.11.2026.)
+// Vorgabe seit 16.11.2026 die eigene Adresse: github.io entfällt mit dem
+// Umzug zu Hostinger und dem Privatstellen des Repositorys (Runbook R).
 const APP_BASE = Deno.env.get("APP_PUBLIC_URL") ??
-  "https://blume1805.github.io/B-rdesnack24-/";
+  "https://app.boerdesnack24.de/";
 
 function appLink(route: string): string {
   return `${APP_BASE}#${route}`;

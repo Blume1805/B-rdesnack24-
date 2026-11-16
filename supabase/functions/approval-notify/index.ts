@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
           ? `<p>Beide Gesellschafter haben signiert. Das finale, signierte PDF liegt im Archiv.</p>`
           : `<p>Ein Gesellschafter hat abgelehnt. Kommentar in der App einsehen.</p>`}
         <p style="margin-top:16px">
-          <a href="https://blume1805.github.io/B-rdesnack24-/"
+          <a href="https://app.boerdesnack24.de/"
              style="background:#FDC102;color:#14110E;text-decoration:none;
                     padding:10px 16px;border-radius:999px;font-weight:800;">
             In App öffnen
