@@ -1698,12 +1698,19 @@ Telefon kommt niemand hinein, auch nicht mit dem richtigen Passwort.
 **Wichtig:** Telefon nicht verlieren. Wer das Telefon wechselt, richtet den
 Faktor vorher neu ein oder meldet sich, dann setzen wir ihn zurück.
 
+> **Entscheidung 17.11.2026: Schalter ohne Pia einschalten.** Philipp richtet
+> seinen Faktor ein, danach wird eingeschaltet. Pia sieht bis zu ihrer eigenen
+> Einrichtung keine Daten (die Datenbank weist ihr Konto ab), kann sich aber
+> anmelden und unter `https://app.boerdesnack24.de/#/security/mfa` jederzeit
+> den Faktor einrichten: Die Einrichtung läuft über die Anmeldung, nicht über
+> die gesperrte Datenschnittstelle. Danach Schritt 6, dann ist alles da.
+
 ### Teil 2 — mir Bescheid geben (1 Minute)
 
 7. Im Chat schreiben: „Beide haben den zweiten Faktor." Ich messe in der
    Datenbank nach. Erwartet: **2 von 2** internen Konten mit bestätigtem
-   Faktor. Ist die Zahl kleiner, sage ich, wer noch fehlt, und es geht
-   **nicht** weiter.
+   Faktor (seit 17.11. genügt Philipps Konto, siehe Hinweis oben). Ist die
+   Zahl kleiner, sage ich, wer noch fehlt, und es geht **nicht** weiter.
 
 ### Teil 3 — Schalter an (mache ich, 2 Minuten)
 
