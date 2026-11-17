@@ -65,6 +65,11 @@ enabled = true
 #   weather-sync                 Einmalmarke aus der Datenbank (A2-02)
 #   subscription-cancel          öffentliche Kündigung (§ 312k BGB), prüft
 #                                Angaben selbst, ordnet bei Anmeldung zu
+#   verwaltung-mcp               Claude-Verbindung (17.11.2026): muss die
+#                                Anmeldeanleitung (well-known) und die
+#                                401-Antwort ohne Token liefern; prüft das
+#                                Token selbst (auth.getUser) und die Rolle
+#                                in der Datenbank
 # Alle übrigen Funktionen verlangen eine Anmeldung (Standard).
 [functions.iot-webhook]
 verify_jwt = false
@@ -79,4 +84,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.subscription-cancel]
+verify_jwt = false
+
+[functions.verwaltung-mcp]
 verify_jwt = false

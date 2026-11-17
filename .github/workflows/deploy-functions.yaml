@@ -61,8 +61,8 @@ on:
     inputs:
       functions:
         description: >-
-          Welche Functions? Leer lassen für die fünf offenen. "alle" rollt
-          jede Function im Verzeichnis aus.
+          Welche Functions? Namen mit Leerzeichen getrennt, oder "alle" für
+          jede Function im Verzeichnis. Leer bricht ab (seit 16.11.2026).
         required: false
         default: ''
       dry_run:
@@ -136,20 +136,14 @@ jobs:
           elif [ -n "$EINGABE" ]; then
             LISTE="$EINGABE"
           else
-            # Stand 05.09.2026 (Gesamtaudit, H-3): Diese drei tragen die
-            # verschaerfte Berechtigungspruefung aus _shared/auth.ts und sind
-            # nachweislich nicht schwaecher als das, was laeuft.
-            #
-            # ABSICHTLICH NICHT DABEI: documents-init-templates,
-            # documents-install-branded-set, documents-install-haccp-set. Sie
-            # wurden am 03.08.2026 ueber das Dashboard ausgerollt, das
-            # Repository ist aelter. Ein Ausrollen aus dem Repo koennte dort
-            # Aenderungen entfernen, die noch niemand verglichen hat -- genau
-            # dieser Fall ist bei signature-retouch aufgetreten, wo die
-            # laufende Fassung eine Sicherheitspruefung trug, die im
-            # Repository fehlte. Erst vergleichen, dann aufnehmen.
-            # Siehe docs/audit/GESAMTAUDIT-2026-09-05-PHASE2.md
-            LISTE="email-send docusign-fetch-signature signature-retouch"
+            # Seit 16.11.2026 keine Voreinstellung mehr. Die frühere Liste
+            # (fünf Functions vom September) war veraltet; seit dem Stilllegen
+            # der main-Linie liegt hier die Produktionslinie, und welche
+            # Function vom ausgelieferten Stand abweicht, klärt erst der
+            # Abgleich A2-05. Deshalb: ausdrücklich benennen oder "alle".
+            # Gilt auch für das Auslösen per Tag (dort gibt es keine Eingabe).
+            echo "::error::Keine Function benannt. Beim Starten von Hand die Namen eintragen (Leerzeichen getrennt) oder 'alle'."
+            exit 1
           fi
           echo "liste=$LISTE" >> "$GITHUB_OUTPUT"
           echo "Ausgewählt: $LISTE"
@@ -183,11 +177,15 @@ jobs:
               continue
             fi
             echo "── rolle aus: $F"
-            # --no-verify-jwt NICHT pauschal setzen. Die Einstellung je
-            # Function bleibt die, die in Supabase hinterlegt ist; nur
-            # email-inbound und iot-webhook laufen bewusst ohne JWT, weil
-            # ein Webhook sich nicht anmelden kann, und die tragen ihre
-            # Prüfung selbst (HMAC).
+            # --no-verify-jwt NICHT pauschal setzen. Die CLI nimmt die
+            # Einstellung je Function aus supabase/config.toml
+            # ([functions.<name>] verify_jwt); fehlt der Eintrag, gilt
+            # verify_jwt = true. Ohne Anmeldung laufen bewusst sechs:
+            # iot-webhook, email-inbound, auth-email-hook, weather-sync,
+            # subscription-cancel, verwaltung-mcp (Begründung in
+            # config.toml; verwaltung-mcp seit 17.11.2026). Korrigiert
+            # am 16.11.2026: der Kommentar nannte vorher nur zwei, und die
+            # Annahme „bleibt wie in Supabase hinterlegt" traf nicht zu.
             supabase functions deploy "$F" --project-ref "$PROJECT_REF"
           done
 
