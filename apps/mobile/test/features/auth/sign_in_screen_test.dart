@@ -77,4 +77,31 @@ void main() {
     expect(find.text('Mitarbeiter'), findsOneWidget);
     expect(find.text('Kunde'), findsOneWidget);
   });
+
+  // Wunsch 17.11.2026: Passwort in „Passwörter" sichern, Face ID füllt aus.
+  // Voraussetzung: beide Felder in einer AutofillGroup mit passenden Hinweisen.
+  testWidgets('Anmeldefelder sind für den Passwortspeicher vorbereitet', (
+    tester,
+  ) async {
+    _hoch(tester);
+    await tester.pumpWidget(_app(umgebung: 'prod'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AutofillGroup), findsOneWidget);
+    final felder = tester
+        .widgetList<TextField>(find.byType(TextField))
+        .map((f) => f.autofillHints?.toList() ?? const <String>[])
+        .toList();
+    expect(felder, hasLength(2));
+    expect(felder[0], contains(AutofillHints.username));
+    expect(felder[0], contains(AutofillHints.email));
+    expect(felder[1], [AutofillHints.password]);
+    expect(
+      find.descendant(
+        of: find.byType(AutofillGroup),
+        matching: find.byType(TextField),
+      ),
+      findsNWidgets(2),
+    );
+  });
 }

@@ -92,6 +92,7 @@ class _MfaEnrollScreenState extends ConsumerState<MfaEnrollScreen> {
                   TextField(
                     controller: _codeCtrl,
                     keyboardType: TextInputType.number,
+                    autofillHints: const [AutofillHints.oneTimeCode],
                     maxLength: 6,
                     decoration: InputDecoration(labelText: l10n.mfaCode),
                   ),

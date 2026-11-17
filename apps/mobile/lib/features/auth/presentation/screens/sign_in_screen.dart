@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,6 +43,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final ok = await ref
         .read(authControllerProvider.notifier)
         .signIn(_emailCtrl.text, _passwordCtrl.text);
+    if (ok) {
+      // Schließt das Formular für den Passwortspeicher ab: Safari bzw. iOS
+      // fragt jetzt, ob das Passwort gesichert werden soll.
+      TextInput.finishAutofillContext();
+    }
     if (!ok && mounted) {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -143,116 +149,196 @@ class _FormPanel extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Eyebrow('Willkommen zurück'),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  l10n.signInTitle,
-                  style:
-                      AppTypography.display(size: 28, weight: FontWeight.w800),
-                ),
-                const SizedBox(height: AppSpacing.s2),
-                Text(
-                  showDemo
-                      ? 'Melde Dich mit Deinem Konto an oder wähle einen Demo-Zugang.'
-                      : 'Melde Dich mit Deinem Konto an.',
-                  style:
-                      AppTypography.body(size: 14, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: AppSpacing.s6),
-                TextFormField(
-                  controller: emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: const [AutofillHints.email],
-                  decoration: InputDecoration(
-                    labelText: l10n.email,
-                    prefixIcon: const Icon(Icons.mail_outline, size: 20),
+          // AutofillGroup: iOS/Safari erkennt E-Mail und Passwort als ein
+          // Anmeldeformular, bietet „Passwort sichern" an und füllt beim
+          // nächsten Mal per Face ID aus (Wunsch Philipp 17.11.2026).
+          child: AutofillGroup(
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Eyebrow('Willkommen zurück'),
+                  const SizedBox(height: AppSpacing.s2),
+                  Text(
+                    l10n.signInTitle,
+                    style: AppTypography.display(
+                      size: 28,
+                      weight: FontWeight.w800,
+                    ),
                   ),
-                  validator: (v) => switch (Validators.email(v)) {
-                    'required' => l10n.fieldRequired,
-                    'invalid' => l10n.emailInvalid,
-                    _ => null,
-                  },
-                ),
-                const SizedBox(height: AppSpacing.s4),
-                TextFormField(
-                  controller: passwordCtrl,
-                  obscureText: obscure,
-                  autofillHints: const [AutofillHints.password],
-                  decoration: InputDecoration(
-                    labelText: l10n.password,
-                    prefixIcon: const Icon(Icons.lock_outline, size: 20),
-                    suffixIcon: IconButton(
-                      tooltip:
-                          obscure ? 'Passwort anzeigen' : 'Passwort verbergen',
-                      onPressed: onToggleObscure,
-                      icon: Icon(
-                        obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        size: 20,
+                  const SizedBox(height: AppSpacing.s2),
+                  Text(
+                    showDemo
+                        ? 'Melde Dich mit Deinem Konto an oder wähle einen Demo-Zugang.'
+                        : 'Melde Dich mit Deinem Konto an.',
+                    style: AppTypography.body(
+                      size: 14,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.s6),
+                  TextFormField(
+                    controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [
+                      AutofillHints.username,
+                      AutofillHints.email,
+                    ],
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.mail_outline, size: 20),
+                    ),
+                    validator: (v) => switch (Validators.email(v)) {
+                      'required' => l10n.fieldRequired,
+                      'invalid' => l10n.emailInvalid,
+                      _ => null,
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.s4),
+                  TextFormField(
+                    controller: passwordCtrl,
+                    obscureText: obscure,
+                    autofillHints: const [AutofillHints.password],
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      labelText: l10n.password,
+                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                      suffixIcon: IconButton(
+                        tooltip: obscure
+                            ? 'Passwort anzeigen'
+                            : 'Passwort verbergen',
+                        onPressed: onToggleObscure,
+                        icon: Icon(
+                          obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                        ),
                       ),
                     ),
+                    onFieldSubmitted: (_) => onSubmit(),
+                    validator: (v) => switch (Validators.password(v)) {
+                      'required' => l10n.fieldRequired,
+                      'tooShort' => l10n.passwordTooShort,
+                      _ => null,
+                    },
                   ),
-                  onFieldSubmitted: (_) => onSubmit(),
-                  validator: (v) => switch (Validators.password(v)) {
-                    'required' => l10n.fieldRequired,
-                    'tooShort' => l10n.passwordTooShort,
-                    _ => null,
-                  },
-                ),
-                const SizedBox(height: AppSpacing.s5),
-                FilledButton(
-                  onPressed: isLoading ? null : onSubmit,
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textStrong,
+                  const SizedBox(height: AppSpacing.s5),
+                  FilledButton(
+                    onPressed: isLoading ? null : onSubmit,
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.textStrong,
+                            ),
+                          )
+                        : Text(l10n.signIn),
+                  ),
+                  const SizedBox(height: AppSpacing.s3),
+                  // Wrap statt Row: bei schmalen Panels brechen die beiden
+                  // Links untereinander um, statt rechts zu überlaufen.
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => context.go(AppRoutes.forgotPassword),
+                        child: Text(l10n.forgotPassword),
+                      ),
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => context.go(AppRoutes.register),
+                        child: Text(l10n.register),
+                      ),
+                    ],
+                  ),
+                  if (showDemo) ...[
+                    const SizedBox(height: AppSpacing.s5),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Divider(color: AppColors.borderSubtle),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.s3,
                           ),
-                        )
-                      : Text(l10n.signIn),
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                // Wrap statt Row: bei schmalen Panels brechen die beiden
-                // Links untereinander um, statt rechts zu überlaufen.
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => context.go(AppRoutes.forgotPassword),
-                      child: Text(l10n.forgotPassword),
+                          child: Text(
+                            'Demo-Zugänge',
+                            style: AppTypography.body(
+                              size: 12,
+                              weight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ),
+                        const Expanded(
+                          child: Divider(color: AppColors.borderSubtle),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => context.go(AppRoutes.register),
-                      child: Text(l10n.register),
+                    const SizedBox(height: AppSpacing.s3),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DemoChip(
+                            icon: Icons.admin_panel_settings_outlined,
+                            label: 'Admin',
+                            onTap: isLoading
+                                ? null
+                                : () => onFillDemo(
+                                      'demo-admin@boerdesnack24.app',
+                                      'Demo!Boerde24',
+                                    ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s2),
+                        Expanded(
+                          child: _DemoChip(
+                            icon: Icons.badge_outlined,
+                            label: 'Mitarbeiter',
+                            onTap: isLoading
+                                ? null
+                                : () => onFillDemo(
+                                      'demo-gs@boerdesnack24.app',
+                                      'Demo!Boerde24',
+                                    ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s2),
+                        Expanded(
+                          child: _DemoChip(
+                            icon: Icons.storefront_outlined,
+                            label: 'Kunde',
+                            onTap: isLoading
+                                ? null
+                                : () => onFillDemo(
+                                      'demo-kunde@boerdesnack24.app',
+                                      'Demo!Boerde24',
+                                    ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-                if (showDemo) ...[
-                  const SizedBox(height: AppSpacing.s5),
-                  Row(
+                  const SizedBox(height: AppSpacing.s6),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 4,
                     children: [
-                      const Expanded(
-                        child: Divider(color: AppColors.borderSubtle),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.s3,
-                        ),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.imprint),
                         child: Text(
-                          'Demo-Zugänge',
+                          'Impressum',
                           style: AppTypography.body(
                             size: 12,
                             weight: FontWeight.w600,
@@ -260,131 +346,66 @@ class _FormPanel extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Expanded(
-                        child: Divider(color: AppColors.borderSubtle),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.s3),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _DemoChip(
-                          icon: Icons.admin_panel_settings_outlined,
-                          label: 'Admin',
-                          onTap: isLoading
-                              ? null
-                              : () => onFillDemo(
-                                    'demo-admin@boerdesnack24.app',
-                                    'Demo!Boerde24',
-                                  ),
+                      Text(
+                        '·',
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s2),
-                      Expanded(
-                        child: _DemoChip(
-                          icon: Icons.badge_outlined,
-                          label: 'Mitarbeiter',
-                          onTap: isLoading
-                              ? null
-                              : () => onFillDemo(
-                                    'demo-gs@boerdesnack24.app',
-                                    'Demo!Boerde24',
-                                  ),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.privacy),
+                        child: Text(
+                          'Datenschutz',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s2),
-                      Expanded(
-                        child: _DemoChip(
-                          icon: Icons.storefront_outlined,
-                          label: 'Kunde',
-                          onTap: isLoading
-                              ? null
-                              : () => onFillDemo(
-                                    'demo-kunde@boerdesnack24.app',
-                                    'Demo!Boerde24',
-                                  ),
+                      Text(
+                        '·',
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      // § 312k BGB: Kündigungsschaltfläche muss ständig
+                      // verfügbar, gut lesbar und eindeutig beschriftet sein.
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.cancellation),
+                        child: Text(
+                          'Verträge hier kündigen',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '·',
+                        style: AppTypography.body(
+                          size: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push(AppRoutes.terms),
+                        child: Text(
+                          'AGB',
+                          style: AppTypography.body(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
-                const SizedBox(height: AppSpacing.s6),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  children: [
-                    TextButton(
-                      onPressed: () => context.push(AppRoutes.imprint),
-                      child: Text(
-                        'Impressum',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '·',
-                      style: AppTypography.body(
-                        size: 12,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.push(AppRoutes.privacy),
-                      child: Text(
-                        'Datenschutz',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '·',
-                      style: AppTypography.body(
-                        size: 12,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    // § 312k BGB: Kündigungsschaltfläche muss ständig
-                    // verfügbar, gut lesbar und eindeutig beschriftet sein.
-                    TextButton(
-                      onPressed: () => context.push(AppRoutes.cancellation),
-                      child: Text(
-                        'Verträge hier kündigen',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '·',
-                      style: AppTypography.body(
-                        size: 12,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.push(AppRoutes.terms),
-                      child: Text(
-                        'AGB',
-                        style: AppTypography.body(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),
