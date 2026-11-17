@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/services/zweiter_faktor.dart';
 import '../dtos/profile_dto.dart';
 
 /// Kapselt alle Supabase-Aufrufe der Authentifizierung.
@@ -94,8 +95,21 @@ class AuthRemoteDataSource {
   }
 
   // ── MFA (TOTP) ────────────────────────────────────────────────────────
-  Future<AuthMFAEnrollResponse> enrollTotp() {
-    return _auth.mfa.enroll(factorType: FactorType.totp);
+  Future<AuthMFAEnrollResponse> enrollTotp() async {
+    // Reste abgebrochener Versuche entfernen (sonst Namenskonflikt, Befund
+    // 17.11.2026). Gelingt das Entfernen nicht, versucht die Einrichtung es
+    // trotzdem — der eindeutige Name unten verhindert den Konflikt ohnehin.
+    final reste = liegengebliebeneFaktoren(_auth.currentUser?.factors ?? []);
+    for (final id in reste) {
+      try {
+        await _auth.mfa.unenroll(id);
+      } catch (_) {}
+    }
+    return _auth.mfa.enroll(
+      factorType: FactorType.totp,
+      issuer: 'Bördesnack24',
+      friendlyName: neuerFaktorName(DateTime.now()),
+    );
   }
 
   /// True, wenn der Nutzer mindestens einen bestätigten TOTP-Faktor hat.

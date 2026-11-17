@@ -15,3 +15,27 @@ bool brauchtZweitenFaktor({
 }) =>
     naechste == AuthenticatorAssuranceLevels.aal2 &&
     aktuelle != AuthenticatorAssuranceLevels.aal2;
+
+/// Kennungen liegengebliebener TOTP-Faktoren: angelegt, aber nie bestätigt.
+///
+/// Befund 17.11.2026: Supabase verlangt je Konto eindeutige Namen für
+/// Faktoren. Ein abgebrochener Einrichtungsversuch hinterließ einen
+/// unbestätigten Faktor ohne Namen, und jeder weitere Versuch scheiterte mit
+/// `mfa_factor_name_conflict` („Es ist ein Fehler aufgetreten."). Vor einer
+/// neuen Einrichtung werden diese Reste entfernt; bestätigte Faktoren bleiben
+/// unberührt.
+List<String> liegengebliebeneFaktoren(List<Factor> faktoren) => [
+      for (final f in faktoren)
+        if (f.factorType == FactorType.totp &&
+            f.status == FactorStatus.unverified)
+          f.id,
+    ];
+
+/// Eindeutiger Name für einen neuen Faktor, damit nie zwei gleich heißen.
+/// Erscheint so auch in der Authenticator-App.
+String neuerFaktorName(DateTime jetzt) {
+  String zwei(int n) => n.toString().padLeft(2, '0');
+  final t = jetzt.toLocal();
+  return 'Bördesnack24 ${t.year}-${zwei(t.month)}-${zwei(t.day)} '
+      '${zwei(t.hour)}:${zwei(t.minute)}:${zwei(t.second)}';
+}
