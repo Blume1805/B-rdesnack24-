@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/services/zweiter_faktor.dart';
+import '../../features/claude/domain/zustimmung.dart';
+import '../../features/claude/presentation/oauth_zustimmung_screen.dart';
 import '../../features/auth/presentation/screens/mfa_verify_screen.dart';
 
 import '../../features/approvals/presentation/screens/approvals_screen.dart';
@@ -24,6 +26,7 @@ abstract final class AppRoutes {
   static const home = '/';
   static const mfaEnroll = '/security/mfa';
   static const mfaVerify = '/security/mfa-pruefen';
+  static const oauthConsent = '/oauth/consent';
   static const approvals = '/finance/approvals';
   static const mySignatureTasks = '/management/my-signatures';
   static const imprint = '/legal/imprint';
@@ -77,11 +80,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       )) {
         return loc == AppRoutes.mfaVerify ? null : AppRoutes.mfaVerify;
       }
+      // Offene Zustimmung zur Claude-Verbindung (Runbook S): nach Anmeldung
+      // und zweitem Faktor direkt dorthin.
+      if (AusstehendeZustimmung.kennung != null &&
+          loc != AppRoutes.oauthConsent) {
+        return AppRoutes.oauthConsent;
+      }
       if (loc == AppRoutes.mfaVerify) return AppRoutes.home;
       if (_authRoutes.contains(loc)) return AppRoutes.home;
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.oauthConsent,
+        builder: (context, state) => const OAuthZustimmungScreen(),
+      ),
       GoRoute(
         path: AppRoutes.signIn,
         builder: (context, state) => const SignInScreen(),

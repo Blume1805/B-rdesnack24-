@@ -1466,3 +1466,100 @@ läuft. Vor der Veröffentlichung aber zwingend zu beheben.
 Abgleich mit allen Befunden: `docs/abgleich-landingpage-backend-2026-11-03.md`.
 
 **Status: 🔴 OFFEN**
+
+---
+
+## V-019 · Claude-Verbindung zur Verwaltung (MCP) ohne Beschäftigtendaten (2026-11-17) — OFFEN
+
+### Sachverhalt
+
+Philipp möchte Protokolle und offene Vorgänge über Claude abrufen, ohne sich in
+die Verwaltung einzuloggen. Vorgabe vom 17.11.2026: Claude darf keine Daten von
+Beschäftigten einsehen, damit kein Vertrag zur Auftragsverarbeitung mit
+Anthropic nötig ist.
+
+Gebaut (im Repository, noch nicht in der Produktion):
+
+* Dienst `supabase/functions/verwaltung-mcp` mit zwei Werkzeugen:
+  `protokoll_pdf` (sechs Protokollarten, ohne Schulungen; Zeitraum höchstens
+  366 Tage, nicht in der Zukunft) und `offene_vorgaenge`.
+* Anmeldung über den OAuth-Server von Supabase. Die Zustimmung erteilt Philipp
+  in der App (`/oauth/consent`). Der Dienst prüft das Token selbst und fragt
+  die Datenbank mit Philipps Token ab, also mit Zeilenschutz.
+* `public.mcp_offene_vorgaenge()` (Migration `20261117120000`): nur aktive
+  system_admin/shareholder. Liefert Titel, Art, Zeitraum, eigene Entscheidung
+  und Anzahlen, keine Personen-IDs, Namen, E-Mails oder Freitexte. Nachweis:
+  Prüfskript `118_claude_verbindung.sql`, 14/14 bestanden, mit Gegenprobe
+  „Erika Mitarbeiterin" (Name und Adresse erscheinen nicht). Kunde,
+  Beschäftigte und anonyme Aufrufer erhalten eine Abweisung.
+* PDF-Inhalte gehen nicht an Claude. Das PDF liegt im gesperrten Bucket
+  `mcp-exporte` (nur PDF, höchstens 10 MB, nicht öffentlich). Claude bekommt
+  einen 24-Stunden-Link im Antwortteil mit der Kennzeichnung `audience: user`
+  und die Anweisung, ihn nicht zu öffnen. Abgelaufene Exporte löscht der
+  Dienst beim nächsten Export.
+* Jeder Aufruf steht in `audit_log` (`table_name = 'claude_verbindung'`).
+* Eintrag im KI-Register: `claude_verwaltung_mcp`, ohne Personenbezug.
+
+### Rechtliche Würdigung
+
+* **DSGVO Art. 28:** Ohne Beschäftigtendaten bei Anthropic gibt es insoweit
+  keine Auftragsverarbeitung. Es bleiben zwei Restrisiken:
+  1. **Titel sind Freitext.** Steht ein Name im Titel eines Dokuments oder
+     einer Freigabe, geht er an Claude. Gegenmaßnahme: organisatorische Regel
+     (Runbook S); technisch nicht erzwungen.
+  2. **Der Link.** Öffnet Claude den Link trotz Anweisung, verarbeitet
+     Anthropic den PDF-Inhalt, z. B. Namen in Reinigungsprotokollen. Die
+     Kennzeichnung `audience: user` und die Anweisung senken das Risiko; sie
+     schließen es nicht aus.
+
+  Philipps eigene Anmeldedaten verarbeitet Anthropic nach seinen eigenen
+  Bedingungen mit Philipp als Nutzer. Das ist kein Beschäftigtendatum.
+* **Art. 32 DSGVO:**
+  * Gleiche Rechte wie in der App, kein Dienstschlüssel für Datenabfragen.
+  * Nur lesende Werkzeuge.
+  * Befristete Links, Ablage begrenzt, Protokollierung.
+* **EU AI Act:**
+  * Claude ist ein KI-System mit allgemeinem Verwendungszweck. Bördesnack24
+    setzt es intern ein und ist dafür Betreiber.
+  * Art. 50 (Kennzeichnung gegenüber Dritten): nicht betroffen, weil die
+    Ausgabe nur an Philipp geht.
+  * Anhang III Nr. 4 (Beschäftigung): nicht berührt, weil keine Bewertung
+    oder Überwachung einzelner Beschäftigter stattfindet. Es gibt nur Anzahlen
+    je Dokument.
+  * Art. 4 (KI-Kompetenz) gilt seit 02.02.2025. Runbook S erklärt, was Claude
+    sieht und was nicht.
+* **GoBD:** Die PDFs sind Auszüge, keine Originalbelege. Das Original bleibt
+  in der Datenbank, und die Exporte werden nicht aufbewahrt.
+
+### Legal Impact Matrix
+
+| Bereich | Betroffen | Bewertung | Handlungsbedarf | Status |
+|---|---|---|---|---|
+| DSGVO Art. 28 | ✓ | kein AVV, solange keine Namen in Titeln und der Link nicht von Claude geöffnet wird | Regel in Runbook S | 🟡 |
+| DSGVO Art. 32 | ✓ | Nutzerrechte, nur lesen, Protokoll, befristete Links | Live-Test nach Einspielen | 🔴 bis Live-Test |
+| EU AI Act | ✓ | Betreiber eines KI-Systems, keine Außenwirkung, kein Hochrisiko | KI-Register-Eintrag vorhanden | 🟢 im Repository |
+| GoBD | ✓ | Exporte sind Auszüge, keine Aufbewahrung | — | 🟢 |
+
+### Ergebnis / Handlungsbedarf
+
+1. Einspielen und Ausliefern, wenn Philipp am Desktop ist (Runbook S, Teil 1).
+2. Live-Test:
+   * Zustimmung, beide Werkzeuge, Abweisung ohne Token (401).
+   * Klären, ob OAuth-Token den zweiten Faktor (aal2) tragen. Wenn nicht,
+     weist die Zwei-Faktor-Pflicht (`require_mfa_internal`) die Abfragen ab.
+     Dann ist zu entscheiden, ob die Verbindung trotzdem zugelassen wird.
+     Das ist eine Grundsatzentscheidung, keine Technikfrage.
+3. Titel bestehender Dokumente und Freigaben auf Personennamen durchsehen.
+   Philipp sieht sie selbst in der Verwaltung; Claude prüft sie nicht, damit
+   keine Namen abgefragt werden.
+
+### Optimierungsvorschläge
+
+* Datenbankseitige Prüfung der Titel auf typische Namensmuster ist
+  unzuverlässig und wird nicht empfohlen. Wirksamer: feste Titel-Vorlagen in
+  der App („Reinigungsplan Automat <Nr.>").
+* Sobald mehrere Personen die Verbindung nutzen sollen (z. B. Pia), einen
+  geschäftlichen Claude-Tarif mit DPA erwägen. Dann darf die Verbindung auch
+  mehr zeigen.
+
+**Status: 🔴 OFFEN** (nicht in der Produktion; Live-Test ausstehend)

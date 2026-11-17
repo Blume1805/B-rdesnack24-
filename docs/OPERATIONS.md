@@ -1962,3 +1962,106 @@ Schloss-Symbol. Unten in der Seite steht keine Liste „Demo-Zugänge".
   Wegweiser neu kennen). Mir Bescheid geben; es eilt, weil Kunden die App in
   der Zeit nicht erreichen.
 
+
+---
+
+## Runbook S: Claude mit der Verwaltung verbinden (Stand 17.11.2026)
+
+**Zeitbedarf für Dich:** etwa 20 Minuten, am Desktop. Vorher muss Runbook P
+erledigt sein (Site URL `https://app.boerdesnack24.de`).
+
+### Warum
+
+Du möchtest Claude sagen können „Schick mir das Reinigungsprotokoll für
+Oktober" oder „Was muss ich noch freigeben?", ohne Dich selbst in die
+Verwaltung einzuloggen. Dafür gibt es jetzt eine Verbindung (MCP, das ist
+eine Steckdose, über die Claude mit einer fremden App sprechen darf). Ohne
+diese Einrichtung bleibt alles wie bisher: Du holst Protokolle selbst in der App.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Claude bekommt **zwei** Werkzeuge.
+  1. **Protokoll als PDF** für einen Zeitraum (höchstens ein Jahr, nichts in
+     der Zukunft): Temperatur, Reinigung, Vernichtung, Befüllung, Wartung,
+     Geldentnahme. Claude bekommt nur einen **Link**, der 24 Stunden gilt.
+     Den Link öffnest Du; Claude ist angewiesen, ihn nicht selbst zu öffnen.
+  2. **Offene Vorgänge:** welche Freigaben noch auf Dich oder Pia warten (Titel,
+     Zeitraum, Deine Entscheidung, Anzahl Zustimmungen), bei welchen
+     Dokumenten Unterschriften fehlen (**nur die Anzahl**, keine Namen), und
+     welche Dokumente in den nächsten 60 Tagen ablaufen.
+* Es passiert **nicht**: Claude sieht keine Namen, E-Mail-Adressen oder
+  Kennungen von Beschäftigten, keine Schulungsnachweise, keine Kundendaten,
+  keine Zahlen aus Einkauf und Umsatz. Claude kann nichts freigeben,
+  unterschreiben, ändern oder löschen. Es gilt dieselbe Rechteprüfung wie in
+  der App: Claude arbeitet mit **Deinen** Rechten, nicht mit mehr.
+* Jeder Aufruf wird im Änderungsprotokoll festgehalten (Werkzeug, Zeitraum).
+* Die PDFs liegen in einem gesperrten Ablageort und werden gelöscht, sobald
+  ihr Link abgelaufen ist (beim nächsten Export).
+* **Deine Regel dafür:** In Titel von Dokumenten und Freigaben keine Namen von
+  Personen schreiben („Reinigungsplan Automat 2", nicht „Reinigung Erika").
+  Titel sind das Einzige, was Claude im Klartext sieht.
+
+### Schritt für Schritt
+
+**Teil 1 — mit mir zusammen, am Desktop (5 Minuten):**
+
+1. Mir schreiben: „Claude-Verbindung einspielen, bin am Desktop".
+2. Ich spiele die Datenbank-Änderung `20261117120000_claude_verbindung` ein
+   und liefere den Dienst `verwaltung-mcp` aus. Du bekommst dafür zwei
+   Bestätigungsfragen auf dem Bildschirm, jeweils innerhalb einer Minute auf
+   **Erlauben** klicken. Danach messe ich nach (Fingerabdruck, siehe CLAUDE.md).
+
+**Teil 2 — in Supabase (5 Minuten):**
+
+3. <https://supabase.com/dashboard> öffnen, Projekt **boerdesnack24-app**.
+4. Links **Authentication** → **OAuth Server** (falls der Punkt fehlt: unter
+   **Authentication** → **Settings** nach „OAuth Server" suchen).
+5. Schalter **Enable the Supabase OAuth Server** einschalten.
+6. Feld **Authorization Path**: genau das eintragen: `/oauth/consent`
+7. Schalter **Allow Dynamic OAuth Apps** einschalten (damit darf sich Claude
+   selbst als App anmelden; ohne ihn müsstest Du Schlüssel von Hand
+   übertragen).
+8. **Save**.
+
+**Teil 3 — in Claude (10 Minuten):**
+
+9. In Claude (claude.ai im Browser oder Desktop-App) links unten auf Deinen
+   Namen → **Einstellungen** → **Konnektoren** (englisch „Connectors").
+10. **Benutzerdefinierten Konnektor hinzufügen** („Add custom connector").
+11. Name: `Bördesnack24 Verwaltung`
+    Adresse (URL): `https://nnfsyuglkqycwenwxmuw.supabase.co/functions/v1/verwaltung-mcp`
+    → **Hinzufügen**.
+12. Auf **Verbinden** klicken. Es öffnet sich die Verwaltungs-App. Dort mit
+    E-Mail, Passwort und dem 6-stelligen Code aus Deiner Authentifizierungs-App
+    anmelden.
+13. Die Seite „Claude möchte auf die Verwaltung zugreifen" zeigt, was Claude
+    darf und was nicht. Auf **Erlauben** tippen. Du landest wieder in Claude.
+14. In Claude unter **Einstellungen** → **Datenschutz** den Schalter „Claude
+    verbessern helfen" (Nutzung Deiner Chats zum Training) **ausschalten**,
+    falls er an ist. Das ist keine Pflicht, aber für Firmeninhalte sinnvoll.
+
+### So sieht Erfolg aus
+
+* In einem neuen Chat: „Welche Freigaben sind in der Verwaltung offen?" —
+  Claude nennt Titel und Zustand, keine Namen.
+* „Erstelle das Temperaturprotokoll vom 1. bis 31. Oktober 2026 als PDF" —
+  Claude gibt einen Link zurück; der Link öffnet ein PDF, das so aussieht wie
+  der Export in der App.
+
+### Wenn etwas schiefgeht
+
+* **Nach „Verbinden" erscheint eine Fehlerseite statt der Anmeldung:**
+  Runbook P prüfen (Site URL). Mir ein Bildschirmfoto schicken; es eilt nicht.
+* **Claude meldet „Zwei-Faktor nötig" oder „keine Berechtigung":** Noch
+  ungeklärt ist, ob die Anmeldung über Claude den zweiten Faktor mitnimmt.
+  Mir Bescheid geben; ich passe dann die Prüfung an. Die Verbindung kann
+  nichts kaputt machen, sie liest nur.
+* **Verbindung beenden:** In Claude → **Einstellungen** → **Konnektoren** →
+  `Bördesnack24 Verwaltung` → **Trennen**. Zusätzlich in Supabase
+  (Schritt 5) den Schalter wieder ausschalten. Danach kann Claude nichts mehr
+  abrufen, alle bisher verschickten Links laufen nach 24 Stunden ab. Die
+  PDFs selbst löscht der Dienst bei jedem neuen Export, sobald ihr Link
+  abgelaufen ist; nach dem Trennen bleiben die letzten liegen — mir sagen,
+  dann räume ich den Ordner `mcp-exporte` leer.
+* **Rückweg in der Datenbank:** steht im Kopf der Migration
+  `20261117120000_claude_verbindung.sql`; nur nach Absprache.

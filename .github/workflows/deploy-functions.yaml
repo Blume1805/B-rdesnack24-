@@ -180,9 +180,10 @@ jobs:
             # --no-verify-jwt NICHT pauschal setzen. Die CLI nimmt die
             # Einstellung je Function aus supabase/config.toml
             # ([functions.<name>] verify_jwt); fehlt der Eintrag, gilt
-            # verify_jwt = true. Ohne Anmeldung laufen bewusst fünf:
+            # verify_jwt = true. Ohne Anmeldung laufen bewusst sechs:
             # iot-webhook, email-inbound, auth-email-hook, weather-sync,
-            # subscription-cancel (Begründung in config.toml). Korrigiert
+            # subscription-cancel, verwaltung-mcp (Begründung in
+            # config.toml; verwaltung-mcp seit 17.11.2026). Korrigiert
             # am 16.11.2026: der Kommentar nannte vorher nur zwei, und die
             # Annahme „bleibt wie in Supabase hinterlegt" traf nicht zu.
             supabase functions deploy "$F" --project-ref "$PROJECT_REF"

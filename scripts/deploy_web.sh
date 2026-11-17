@@ -227,6 +227,12 @@ if [ -z "$SUBPATH" ]; then
   cp -r "$STAGE/." "$ROOT/"
   # Cache-Buster über eine sichtbare Version-Datei:
   echo "$TS" > "$ROOT/version.txt"
+  # Rückfallseite für echte Pfade (17.11.2026): Die Zustimmungsseite der
+  # Claude-Verbindung wird von Supabase als /oauth/consent?authorization_id=…
+  # aufgerufen, nicht als #-Route. GitHub Pages liefert für unbekannte Pfade
+  # 404.html aus; ist das die App, startet sie trotzdem (base href "/").
+  # Bei Hostinger übernimmt das die .htaccess (scripts/hostinger_app_htaccess.py).
+  cp "$ROOT/index.html" "$ROOT/404.html"
   # Eigene Domain: CNAME bei JEDEM Deploy neu schreiben. Sie liegt im
   # gh-pages-Branch und wird von den Aufraeumschritten oben sonst geloescht,
   # womit die Domain nach dem naechsten Deploy stillschweigend ausfiele.

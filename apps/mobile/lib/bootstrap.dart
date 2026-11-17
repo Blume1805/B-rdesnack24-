@@ -9,6 +9,7 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/di/providers.dart';
 import 'core/services/install_prompt.dart';
+import 'features/claude/domain/zustimmung.dart';
 
 /// Initialisiert Infrastruktur und startet die App.
 ///
@@ -33,6 +34,10 @@ Future<void> bootstrap() async {
     label: 'initializeDateFormatting',
     timeoutSeconds: 3,
   );
+
+  // Zustimmungsanfrage der Claude-Verbindung aus der Startadresse merken
+  // (…/oauth/consent?authorization_id=…), bevor das Hash-Routing übernimmt.
+  AusstehendeZustimmung.kennung = zustimmungsKennung(Uri.base);
 
   final config = AppConfig.fromEnvironment();
   if (!config.isValid) {

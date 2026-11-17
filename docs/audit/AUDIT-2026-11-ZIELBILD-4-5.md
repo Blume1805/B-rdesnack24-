@@ -177,6 +177,30 @@ Damit erledigt: S2 (A2-02), S9 (A2-12, A2-14), S10, B2 (A2-15). S1 (A2-01): Mech
 der Produktion, Schalter aus bis Runbook O. App mit ausgeblendeten Demo-Zugängen seit
 16.11.2026 live (main `c052e6f`, CI und Auslieferung grün).
 
+## 4d. Vorbereitet am 17.11.2026, noch nicht in der Produktion
+
+| Migration | Inhalt | Nachweis lokal |
+|---|---|---|
+| `20261117090000` | Betriebsprüfung: meldet sich nicht mehr selbst als „läuft", zählt gesperrte Konten nicht mit | Prüfskript 114 |
+| `20261117100000` | Löschantrag Demo-Kundenkonto ausführen (Freigabe Philipp 17.11.) | Antrag „ausgefuehrt", Konto anonymisiert und gesperrt |
+| `20261117110000` | Zwei-Faktor-Pflicht an (Runbook O ohne Pia) | ganze Prüfumgebung grün |
+| `20261117120000` | Claude-Verbindung (V-019, Runbook S) | Prüfskript 118, 14/14 |
+
+Gesamtlauf am 17.11.2026 auf frischem Aufbau: 35 Prüfskripte, 0 Fehler; 8 pgTAP-Dateien, 0 Fehler;
+Fingerabdruck = `fingerabdruck.soll` (Funktionen `289:ec753394…`). Server-Funktionen: 44 Tests,
+Lint sauber. App: 183 Tests, Analyse ohne Befund.
+
+Beim Bau gefunden und behoben:
+
+* Der neue Bucket hatte keine Dateityp-Grenze (Prüfskript 90, S-10). Jetzt nur PDF, höchstens 10 MB.
+* GitHub Pages hatte keine Rückfallseite für echte Pfade. `/oauth/consent` hätte die Fehlerseite
+  gezeigt; `deploy_web.sh` legt jetzt `404.html` an.
+* Exportierte PDFs wären unbegrenzt liegen geblieben. Jetzt löscht jeder Export die abgelaufenen.
+
+Reihenfolge beim Einspielen (Philipp am Desktop): 090000 → 100000 → 110000 → 120000, nach jedem
+Schritt Fingerabdruck; danach `verwaltung-mcp` ausliefern. Nach 110000 Gegenprobe Philipp
+(Anmeldung mit Code).
+
 ## 5. Abweichungen Doku ↔ Code, geprüft am 16.11.2026
 
 * `docs/OPERATIONS.md` Runbook H: Tabelle, Schlüssel und Schalter-Text
