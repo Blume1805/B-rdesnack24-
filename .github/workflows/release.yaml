@@ -18,6 +18,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Feste Version wie auf main (16.11.2026): Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet; analyze wird rot.
+          flutter-version: 3.47.9
           cache: true
       - name: Lokalisierung im Kern erzeugen
         run: flutter pub get && flutter gen-l10n
@@ -63,6 +66,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Feste Version wie auf main (16.11.2026): Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet; analyze wird rot.
+          flutter-version: 3.47.9
           cache: true
       - name: Lokalisierung im Kern erzeugen
         run: flutter pub get && flutter gen-l10n
@@ -92,6 +98,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # Feste Version wie auf main (16.11.2026): Die nächste stabile Version
+          # markiert package:flutter/material.dart als veraltet; analyze wird rot.
+          flutter-version: 3.47.9
           cache: true
       - name: Lokalisierung im Kern erzeugen
         run: flutter pub get && flutter gen-l10n

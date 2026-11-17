@@ -54,7 +54,8 @@ void main() {
   test('bei einem Fehler gilt vorStart', () async {
     final c = ProviderContainer(
       overrides: [
-        machinesProvider.overrideWith((ref) async => throw Exception('offline')),
+        machinesProvider
+            .overrideWith((ref) async => throw Exception('offline')),
       ],
     );
     addTearDown(c.dispose);
