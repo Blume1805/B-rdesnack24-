@@ -6,6 +6,11 @@
 -- Konten mit Berechtigung lesen den letzten Stand. Kunden sehen nichts,
 -- anon und authenticated erreichen die Prüffunktion und das Protokoll nicht.
 truncate pruef.ergebnis restart identity;
+-- Grundzustand: jede geplante Aufgabe ist zuletzt erfolgreich gelaufen
+-- (der Nachbau kennt seit 17.11.2026 das Laufprotokoll).
+delete from cron.job_run_details;
+insert into cron.job_run_details(jobid, status, start_time)
+select jobid, 'succeeded', now() - interval '1 hour' from cron.job;
 select app.betriebszustand_festhalten();
 do $$
 declare
@@ -31,5 +36,30 @@ begin
   insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('betrieb','Gesellschafter ruft Prüffunktion direkt','gesellschafter','-1',n::text,n=-1);
   n := pruef.zaehle('select * from app.betriebsprotokoll', S);
   insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values ('betrieb','Admin liest Protokolltabelle direkt','admin','-1',n::text,n=-1);
+
+  -- Korrektur 17.11.2026 (20261117090000):
+  -- (a) Die Prüfung meldet ihren eigenen laufenden Lauf nicht als Fehler.
+  delete from cron.job_run_details;
+  insert into cron.job_run_details(jobid, status, start_time)
+  select jobid, 'running', now() from cron.job where jobname = 'betriebszustand';
+  insert into cron.job_run_details(jobid, status, start_time)
+  select jobid, 'succeeded', now() - interval '1 hour' from cron.job where jobname <> 'betriebszustand';
+  v := app.betriebszustand();
+  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values
+   ('betrieb','eigener laufender Lauf zählt nicht als Fehler','postgres','[]', v->>'aufgaben_auffaellig', jsonb_array_length(v->'aufgaben_auffaellig') = 0);
+  -- (b) Gegenprobe: eine fehlgeschlagene andere Aufgabe wird gemeldet.
+  update cron.job_run_details set status = 'failed'
+   where jobid = (select jobid from cron.job where jobname <> 'betriebszustand' order by jobid limit 1);
+  v := app.betriebszustand();
+  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values
+   ('betrieb','fehlgeschlagene Aufgabe wird gemeldet','postgres','1', jsonb_array_length(v->'aufgaben_auffaellig')::text, jsonb_array_length(v->'aufgaben_auffaellig') = 1 and (v->>'gesund')::boolean = false);
+  delete from cron.job_run_details;
+  -- (c) Gesperrte interne Konten zählen nicht mit.
+  n := (app.betriebszustand()->>'interne_konten')::int;
+  update auth.users set banned_until = 'infinity' where id = G;
+  v := app.betriebszustand();
+  insert into pruef.ergebnis(gruppe,test,akteur,erwartet,gemessen,ok) values
+   ('betrieb','gesperrtes internes Konto zählt nicht','postgres',(n-1)::text, v->>'interne_konten', (v->>'interne_konten')::int = n - 1);
+  update auth.users set banned_until = null where id = G;
 end $$;
 select gruppe, test, erwartet, gemessen, ok from pruef.ergebnis order by id;

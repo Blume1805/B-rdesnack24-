@@ -165,6 +165,12 @@ declare v bigint; begin
 end $$;
 create or replace function cron.unschedule(job_name text) returns boolean language plpgsql as $$
 begin delete from cron.job where jobname = job_name; return true; end $$;
+-- Laufprotokoll wie im echten pg_cron (Spalten, die die Betriebsprüfung
+-- liest). Seit 17.11.2026, damit Probe 114 die Aufgabenprüfung abdeckt.
+create table if not exists cron.job_run_details (
+  runid bigserial primary key, jobid bigint, status text, return_message text,
+  start_time timestamptz, end_time timestamptz
+);
 
 -- pg_net-Nachbau: protokolliert statt zu senden.
 create table if not exists net.calls (id bigserial primary key, kind text, url text, at timestamptz default now());
