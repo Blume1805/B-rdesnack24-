@@ -51,6 +51,13 @@ begin
   on conflict do nothing;
   insert into public.consents(profile_id,type,granted) values (L,'analytics',true),(U,'analytics',true);
   insert into public.account_deletion_requests(profile_id, reason) values (L,'Testlauf');
+  -- Anmeldeidentität und Sitzung wie bei einem echten Konto (17.11.2026).
+  insert into auth.identities(user_id, provider, identity_data)
+    values (L, 'email', jsonb_build_object('email', 'loeschen@example.invalid'));
+  insert into auth.sessions(user_id) values (L);
+  insert into auth.identities(user_id, provider, identity_data)
+    values (U, 'email', jsonb_build_object('email', 'bleibt@example.invalid'));
+  update auth.users set raw_user_meta_data = jsonb_build_object('full_name', 'Lotte Loeschen') where id = L;
 
   -- 1) Ein Kunde darf das nicht
   w := pruef.schreibe(format('select public.execute_account_deletion(%L)', L), A);
@@ -98,6 +105,20 @@ begin
   r := pruef.wahrheit(format('select coalesce(banned_until::text,''nicht gesperrt'') from auth.users where id=%L', L));
   insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
    values ('Loeschprozess','Anmeldung gesperrt','System','auth.users','gesperrt', r, r <> 'nicht gesperrt');
+
+  -- 7b) Auch die Anmeldedaten sind weg (Befund 17.11.2026: vorher blieben
+  --     Adresse, Name und Identitaet in auth.* stehen)
+  r := pruef.wahrheit(format(
+    'select coalesce(email,''-'')||'' | ''||coalesce(raw_user_meta_data::text,''-'')||'' | ''||'
+    '(select count(*) from auth.identities where user_id=%L)||'' | ''||'
+    '(select count(*) from auth.sessions where user_id=%L) from auth.users where id=%L', L, L, L));
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Loeschprozess','Anmeldedaten entfernt','System','auth.users/identities/sessions',
+           'Adresse @invalid, Metadaten leer, 0 Identitaeten, 0 Sitzungen', r,
+           r like 'geloescht+%@invalid | {} | 0 | 0');
+  r := pruef.wahrheit(format('select count(*) from auth.identities where user_id=%L', U));
+  insert into pruef.ergebnis(gruppe,test,akteur,ziel,erwartet,gemessen,ok)
+   values ('Gegenprobe','Anmeldedaten des unbeteiligten Kontos','System','Konto U','1 Identitaet', r, r = '1');
 
   -- 8) Der Antrag ist als ausgefuehrt vermerkt
   r := pruef.wahrheit(format('select status from public.account_deletion_requests where profile_id=%L order by requested_at desc limit 1', L));

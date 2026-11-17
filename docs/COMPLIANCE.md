@@ -1563,3 +1563,58 @@ Gebaut (im Repository, noch nicht in der Produktion):
   mehr zeigen.
 
 **Status: 🔴 OFFEN** (nicht in der Produktion; Live-Test ausstehend)
+
+---
+
+## V-020 · Kontolöschung ließ Anmeldedaten stehen (2026-11-17) — OFFEN
+
+### Sachverhalt
+
+Beim Löschen des Demo-Kundenkontos am 17.11.2026 (Migration `20261117100000`,
+Freigabe Philipp; ausgeführt über den normalen Löschweg
+`public.execute_account_deletion`) zeigte die Nachmessung in der Produktion:
+
+* Profil anonymisiert, Antrag „ausgefuehrt", Konto gesperrt.
+* In `auth.users` standen aber noch die Anmeldeadresse und die
+  Anmelde-Metadaten (zwei Einträge), dazu eine Anmeldeidentität, die die
+  Adresse erneut enthält.
+
+Ursache im Code: Die Funktion setzte in `auth.users` nur `banned_until`. Dort
+bleibt die Adresse unbegrenzt gespeichert. Das Prüfskript 96 prüfte nur
+`profiles`, deshalb fiel es nicht auf.
+
+Betroffen: nur das Demo-Kundenkonto. Es war der erste und einzige Löschantrag
+überhaupt (gemessen am 17.11.2026: 1 Antrag gesamt). Keine echte Person
+betroffen, kein Datenschutzvorfall.
+
+Die Datenschutzerklärung (`docs/legal/datenschutzerklaerung.md`, Z. 66)
+verspricht Löschung nach Art. 17 über „Kontolöschung beantragen". Der Code
+erfüllte das nicht vollständig. Die Doku bleibt so, der Code wird korrigiert
+(CLAUDE.md).
+
+### Rechtliche Würdigung
+
+* **Art. 17 DSGVO:** Die Anmeldeadresse ist ein personenbezogenes Datum ohne
+  Aufbewahrungspflicht. Sie hätte gelöscht oder anonymisiert werden müssen.
+  Sperren genügt nicht.
+* **Art. 5 Abs. 1 lit. e DSGVO:** Speicherbegrenzung.
+* Da keine echte Person betroffen war, liegt **kein Fall der Art. 33/34** vor.
+
+### Ergebnis / Handlungsbedarf
+
+1. Migration `20261117130000_loeschung_anmeldedaten`:
+   * `app.anmeldedaten_entfernen` anonymisiert `auth.users` (Adresse, Telefon,
+     Metadaten, Passwort-Hash, offene Codes).
+   * Sie löscht Identitäten, Sitzungen, Auffrischungs-Token, Faktoren,
+     Einmal-Codes und OAuth-Zustimmungen.
+   * `execute_account_deletion` ruft sie auf.
+   * Bereits gelöschte Konten werden nachgezogen (nur das Demo-Konto).
+2. Nachweis lokal: Prüfskript 96 neu mit Test 7b und Gegenprobe.
+   * Ohne die Korrektur schlägt es fehl („loeschkandidat@… | {"full_name": …} | 1 | 1").
+   * Mit der Korrektur: 27/27 bestanden.
+   * Gesamtlauf: 35 Prüfskripte und 8 pgTAP-Dateien ohne Fehler.
+3. 🔴 Einspielen in die Produktion mit Philipps Bestätigung. Danach
+   nachmessen: Demo-Adresse in `auth.users` = 0, Identitäten = 0, Fingerabdruck.
+4. **Vor dem ersten echten Löschantrag zwingend.**
+
+**Status: 🔴 OFFEN** (Korrektur im Repository, nicht in der Produktion)
