@@ -1637,96 +1637,97 @@ COMPLIANCE V-018-a.
 
 ---
 
-## Runbook O: Zwei-Faktor-Anmeldung für alle vier internen Konten (Stand 16.11.2026)
+## Runbook O: Zwei-Faktor-Anmeldung für die internen Konten (Stand 17.11.2026)
 
-**Zeitbedarf:** 5 Minuten je Person, danach 3 Minuten für den Schalter. Die
-vier Personen müssen nicht gleichzeitig da sein, der Schalter aber erst ganz
-am Ende umgelegt werden.
+**Zeitbedarf:** 5 Minuten je Person. Danach schalte ich die Pflicht ein
+(2 Minuten). Ihr müsst nicht gleichzeitig da sein.
 
-**Dringlichkeit:** vor dem ersten echten Verkauf. Heute ist es der wichtigste
-offene Sicherheitspunkt aus dem Audit (A2-01).
+**Dringlichkeit:** vor dem ersten echten Verkauf (Audit A2-01, wichtigster
+offener Sicherheitspunkt).
+
+### Lage am 17.11.2026 (gemessen, ohne persönliche Daten)
+
+* Es gibt **zwei** interne Konten, die sich anmelden können: ein
+  Administrator (Philipp) und eine Gesellschafterin (Pia). Die beiden
+  Demo-Konten mit internen Rollen sind seit 16.11. gesperrt und zählen nicht
+  mehr.
+* Keines der beiden Konten hat einen bestätigten zweiten Faktor.
+* Philipps Konto hat eine früher **abgebrochene** Einrichtung. Das stört
+  nicht: Die App legt beim nächsten Versuch einen neuen Faktor an.
+* Pias Konto war **noch nie angemeldet**. Sie setzt zuerst ein Passwort
+  (Schritt 2 unten).
 
 ### Warum
 
-Heute reicht ein Passwort, um als Gesellschafter oder Mitarbeiter Umsätze,
-Einkaufspreise, Verträge und Kundendaten zu sehen. Ein zweiter Faktor ist
-eine sechsstellige Zahl aus einer App auf dem Telefon, die sich alle 30
-Sekunden ändert. Ohne das Telefon kommt niemand hinein, auch nicht mit dem
-richtigen Passwort.
+Heute reicht ein Passwort, um Umsätze, Einkaufspreise, Verträge und
+Kundendaten zu sehen. Ein zweiter Faktor ist eine sechsstellige Zahl aus
+einer App auf dem Telefon, die sich alle 30 Sekunden ändert. Ohne das
+Telefon kommt niemand hinein, auch nicht mit dem richtigen Passwort.
 
 ### Was passiert dabei — und was nicht
 
 * Es passiert: Nach dem Einschalten bekommt ein internes Konto ohne die
-  sechsstellige Zahl von der Datenbank keine Daten mehr. Die App fragt die
-  Zahl direkt nach der Anmeldung ab (Bildschirm „Dein Konto ist mit einem
-  zweiten Faktor geschützt …").
-* Es passiert **nicht**: Kunden merken nichts. Sie melden sich weiter nur mit
-  E-Mail und Passwort an. Das ist in der Probe 113 nachgewiesen (Kunde und
-  nicht angemeldete Besucher kommen bei eingeschaltetem Schalter durch).
+  sechsstellige Zahl keine Daten mehr. Die App fragt die Zahl direkt nach
+  dem Passwort ab.
+* Es passiert **nicht**: Kunden merken nichts. Das ist mit Prüfskript 113
+  nachgewiesen.
 * Der Rückweg (Schalter aus) hängt nicht an der App und nicht am Telefon.
 
-### Voraussetzung (erledige ich, Du bestätigst nur)
+### Teil 1 — jede Person für sich (5 Minuten)
 
-Die Datenbank-Änderung `20261116090000_zwei_faktor_pflicht_vorbereitet` und
-`20261116090100_zwei_faktor_pruefung_vor_jeder_anfrage` muss in der echten
-Datenbank eingespielt sein. Sie bringt den Schalter mit, der **aus** steht —
-es ändert sich dadurch für niemanden etwas. Beim Einspielen fragt Supabase in
-diesem Chat einmal nach, das bestätigst Du mit einem Klick.
-
-### Schritt für Schritt
-
-**Teil 1 — jede der vier Personen für sich (5 Minuten)**
-
-1. Auf dem Telefon eine Authenticator-App installieren, zum Beispiel
-   „Google Authenticator", „Aegis" (Android) oder auf dem iPhone
-   *Einstellungen → Passwörter*. Alle sind kostenlos.
-2. `https://app.boerdesnack24.de` öffnen und wie gewohnt anmelden.
-3. Oben steht „Konto absichern: Zwei-Faktor-Authentifizierung einrichten."
-   Auf die Schaltfläche daneben tippen. Fehlt der Hinweis, hinter die Adresse
-   `/security/mfa` anhängen, also `https://app.boerdesnack24.de/security/mfa`.
+1. Auf dem Telefon eine Authenticator-App installieren: „Google
+   Authenticator" oder „Aegis" (Android), auf dem iPhone geht auch
+   *Einstellungen → Passwörter*. Alle kostenlos.
+2. **Nur Pia, beim ersten Mal:** `https://app.boerdesnack24.de` öffnen →
+   **Passwort vergessen?** → ihre E-Mail-Adresse eingeben → Link in der
+   E-Mail öffnen → neues Passwort festlegen. (Kommt keine E-Mail, im
+   Spam-Ordner nachsehen; sonst Philipp Bescheid geben.)
+3. `https://app.boerdesnack24.de/#/security/mfa` öffnen und anmelden. Oder
+   nach der Anmeldung oben auf „Konto absichern: Zwei-Faktor-Authentifizierung
+   einrichten" tippen.
 4. Es erscheint ein QR-Code (ein quadratisches Strichmuster). In der
-   Authenticator-App auf „+" tippen und den QR-Code abfotografieren.
-5. Die sechsstellige Zahl aus der Authenticator-App in das Feld eintippen und
-   bestätigen.
+   Authenticator-App auf „+" tippen und den QR-Code abfotografieren. Ein
+   Telefon kann sich nicht selbst fotografieren: Dann unter dem QR-Code den
+   angezeigten Schlüssel abtippen („Schlüssel eingeben" in der
+   Authenticator-App).
+5. Die sechsstellige Zahl aus der Authenticator-App in das Feld eintippen →
+   **Bestätigen**.
 6. Abmelden und neu anmelden. Nach dem Passwort fragt die App jetzt nach der
-   Zahl. Zahl eingeben — dann ist der Faktor richtig eingerichtet.
+   Zahl → Zahl eingeben. Klappt das, ist der Faktor richtig eingerichtet.
 
-**Teil 2 — nachsehen, ob alle vier fertig sind (1 Minute)**
+**Wichtig:** Telefon nicht verlieren. Wer das Telefon wechselt, richtet den
+Faktor vorher neu ein oder meldet sich, dann setzen wir ihn zurück.
 
-7. Mir im Chat schreiben „Alle vier haben den zweiten Faktor." Ich lese in
-   der Datenbank nach (ohne Kundendaten): Die Zahl muss **4 von 4** sein.
-   Ist sie kleiner, nenne ich Dir, wer noch fehlt — dann **nicht** weiter.
+### Teil 2 — mir Bescheid geben (1 Minute)
 
-**Teil 3 — den Schalter umlegen (3 Minuten, eine Person)**
+7. Im Chat schreiben: „Beide haben den zweiten Faktor." Ich messe in der
+   Datenbank nach. Erwartet: **2 von 2** internen Konten mit bestätigtem
+   Faktor. Ist die Zahl kleiner, sage ich, wer noch fehlt, und es geht
+   **nicht** weiter.
 
-8. <https://supabase.com/dashboard> öffnen, Projekt **boerdesnack24-app**
-   wählen.
-9. Links auf **SQL Editor** klicken, dann oben auf **New query**.
-10. Genau diesen Text einfügen:
+### Teil 3 — Schalter an (mache ich, 2 Minuten)
 
-```sql
-update app.security_settings
-   set enabled = true, updated_at = now()
- where key = 'require_mfa_internal';
-```
-
-11. Rechts unten auf **Run** klicken.
-
-Alternativ schreibst Du mir „Schalter an" — dann mache ich Schritt 8–11 und
-messe danach nach.
+8. Ich schalte die Pflicht ein (eine Datenbank-Änderung, die Du im Chat mit
+   einem Klick bestätigst) und messe danach:
+   * Schalter steht auf an,
+   * die Schnittstelle antwortet für nicht angemeldete Besucher normal,
+   * der Fingerabdruck ist unverändert (der Schalter ist ein Datenwert, kein
+     Teil des Schemas).
+9. Gegenprobe durch Dich: abmelden, neu anmelden, bei der Zahl auf
+   **Abmelden** tippen statt Bestätigen. Man landet wieder bei der
+   Anmeldung, nicht im Verwaltungsbereich. Mit der Zahl ist alles da.
 
 ### So sieht Erfolg aus
 
-* Unter dem Feld steht `Success. No rows returned`.
-* Gegenprobe: abmelden, neu anmelden, bei der Zahl auf **Abmelden** statt
-  Bestätigen tippen. Man landet wieder bei der Anmeldung, nicht im
-  Verwaltungsbereich. Mit der Zahl ist alles wieder da.
+Beim Anmelden fragt die App nach Passwort **und** Zahl. Die tägliche
+Betriebsprüfung zeigt „Zwei-Faktor-Pflicht: an" und „interne Konten mit
+Faktor: 2 von 2".
 
 ### Wenn etwas schiefgeht
 
-Telefon weg, App gelöscht oder Zahl wird nicht angenommen: im SQL Editor
-denselben Text mit `false` statt `true` ausführen. Danach ist alles wie
-vorher.
+Telefon weg oder Zahl wird nicht angenommen: Mir schreiben, ich schalte die
+Pflicht sofort ab. Ohne mich: <https://supabase.com/dashboard> → Projekt
+**boerdesnack24-app** → **SQL Editor** → **New query** → einfügen → **Run**:
 
 ```sql
 update app.security_settings
@@ -1734,11 +1735,16 @@ update app.security_settings
  where key = 'require_mfa_internal';
 ```
 
-Der SQL Editor hängt am Supabase-Konto, nicht an der App. Deshalb muss
-**das Supabase-Konto selbst** ebenfalls einen zweiten Faktor haben
-(Supabase → oben rechts Profilbild → *Account preferences* → *Security*).
+Danach ist alles wie vorher. Das Supabase-Konto selbst braucht deshalb
+ebenfalls einen zweiten Faktor (Supabase → Profilbild oben rechts →
+*Account preferences* → *Security*), sonst ist der Rückweg die
+Schwachstelle.
 
-Es eilt nicht, solange kein Automat verkauft.
+Ausstehende Server-Lücke (Zielbild S7): Vier Funktionen zur
+Dokumentenverwaltung prüfen die Rolle selbst und gehen an der Pflicht
+vorbei. Sie werden mit dem Abgleich der Server-Funktionen (A2-05)
+angepasst; bis dahin schützt der Schalter Daten und Dateien, nicht diese
+vier Aktionen.
 
 ---
 
