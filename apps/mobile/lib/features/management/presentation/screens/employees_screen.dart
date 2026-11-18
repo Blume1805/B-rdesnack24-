@@ -17,6 +17,24 @@ const _assignablePermissions = <String, String>{
   'documents.view': 'Dokumente ansehen',
 };
 
+/// Rollen, die in der Mitarbeiterliste erscheinen.
+const internalRoles = ['system_admin', 'shareholder', 'employee'];
+
+/// Lesbare Bezeichnungen für Rolle und Status.
+String roleLabel(String? role) => switch (role) {
+      'system_admin' => 'Administration',
+      'shareholder' => 'Gesellschafter',
+      'employee' => 'Mitarbeiter',
+      _ => role ?? '',
+    };
+
+String statusLabel(String? status) => switch (status) {
+      'active' => 'aktiv',
+      'invited' => 'eingeladen',
+      'deactivated' => 'deaktiviert',
+      _ => status ?? '',
+    };
+
 final _profilesProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   (ref) async {
@@ -24,6 +42,11 @@ final _profilesProvider =
         .read(supabaseClientProvider)
         .from('profiles')
         .select('id, email, full_name, role, status')
+        // Nur interne Konten (Befund Philipp 18.11.2026): Vorher standen hier
+        // auch Kundenkonten und gelöschte Konten mit ihrer Adresse.
+        .inFilter('role', internalRoles)
+        .neq('status', 'archived')
+        .isFilter('deleted_at', null)
         .order('created_at');
     return (rows as List).cast<Map<String, dynamic>>();
   },
@@ -54,8 +77,12 @@ class EmployeesScreen extends ConsumerWidget {
             final p = list[i];
             return ListTile(
               title: Text(p['full_name'] as String? ?? p['email'] as String),
-              subtitle: Text('${p['email']} · ${p['role']}'),
-              trailing: Chip(label: Text('${p['status']}')),
+              subtitle: Text(
+                '${p['email']} · ${roleLabel(p['role'] as String?)}',
+              ),
+              trailing: Chip(
+                label: Text(statusLabel(p['status'] as String?)),
+              ),
             );
           },
         ),

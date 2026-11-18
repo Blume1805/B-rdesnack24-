@@ -19,6 +19,7 @@ import 'screens/inventory_report_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/maintenance_screen.dart';
 import 'screens/my_signature_tasks_screen.dart';
+import 'screens/anlagen_screen.dart';
 import 'screens/approvals_screen.dart';
 import 'screens/telemetry_hub_screen.dart';
 import 'screens/temperature_screen.dart';
@@ -137,6 +138,15 @@ class ManagementScreen extends ConsumerWidget {
         iconBackgroundColor: AppColors.statusPositive.withValues(alpha: 0.12),
         iconBorderColor: AppColors.statusPositive.withValues(alpha: 0.4),
         badge: const _DatevBadge(),
+      ),
+      // Wiederhergestellt am 18.11.2026: lag nur auf dem Zweig
+      // claude/stand-2026-08-22-ji5pkh und fehlte seither in der App.
+      _Module(
+        'Anlagen',
+        'PKW-Kosten · Nutzungseinlage',
+        Icons.directions_car_outlined,
+        const AnlagenScreen(),
+        visible: p.contains('finance.view'),
       ),
       _Module(
         'Inventur',
