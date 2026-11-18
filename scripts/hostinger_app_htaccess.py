@@ -83,13 +83,21 @@ Header always set Content-Security-Policy "{policy}"
 AddType application/wasm .wasm
 AddType application/manifest+json .webmanifest
 
+# Schriften, Bilder, Programmteile und canvaskit heißen nach jeder Auslieferung gleich,
+# ändern sich aber (Befund 18.11.2026: neues Symbol blieb leer, weil die alte
+# Symbolschrift aus dem Zwischenspeicher kam). Deshalb nicht 7 Tage behalten,
+# sondern jedes Mal kurz nachfragen; unverändert antwortet der Server mit
+# 304 ohne Inhalt.
+<FilesMatch "\\.(?:woff2?|ttf|otf|png|jpe?g|webp|svg|ico|wasm|json|js|bin|mjs)$">
+  Header always set Cache-Control "no-cache"
+</FilesMatch>
+
+# Danach, damit diese Regel für die Startdateien gewinnt:
 # Startdateien nie zwischenspeichern, sonst sehen Nutzer alte Versionen.
 <FilesMatch "^(index\\.html|flutter_bootstrap\\.js|flutter_service_worker\\.js|version\\.json|manifest\\.json)$">
   Header always set Cache-Control "no-cache, no-store, must-revalidate"
 </FilesMatch>
-<FilesMatch "\\.(?:woff2?|ttf|otf|png|jpe?g|webp|svg|ico|wasm)$">
-  Header always set Cache-Control "public, max-age=604800"
-</FilesMatch>
+
 """
 
 

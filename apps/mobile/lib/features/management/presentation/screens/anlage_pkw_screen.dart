@@ -404,7 +404,7 @@ class _FahrzeugKarte extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 16,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -464,22 +464,21 @@ class _FahrzeugKarte extends ConsumerWidget {
           // der Hinweis oben sagt bereits, warum.
           if (!gesperrt) ...[
             const SizedBox(height: AppSpacing.s3),
-            Row(
+            // Untereinander statt nebeneinander (Befund 18.11.2026): Auf
+            // Telefonbreite brach „Kilometerstände" mitten im Wort um.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: AppSpacing.s2,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _kilometerstaende(context, ref),
-                    icon: const Icon(Icons.speed_outlined, size: 18),
-                    label: const Text('Kilometerstände'),
-                  ),
+                OutlinedButton.icon(
+                  onPressed: () => _kilometerstaende(context, ref),
+                  icon: const Icon(Icons.speed_outlined, size: 18),
+                  label: const Text('Kilometerstände'),
                 ),
-                const SizedBox(width: AppSpacing.s2),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _kostenErfassen(context, ref),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Kosten'),
-                  ),
+                OutlinedButton.icon(
+                  onPressed: () => _kostenErfassen(context, ref),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Kosten erfassen'),
                 ),
               ],
             ),
@@ -514,6 +513,7 @@ class _FahrzeugKarte extends ConsumerWidget {
           title: const Text('Kostenposition korrigieren'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.s4,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: art,
@@ -605,16 +605,23 @@ class _FahrzeugKarte extends ConsumerWidget {
         title: Text('Kilometerstände $jahr'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: AppSpacing.s4,
           children: [
             TextField(
               controller: anfang,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Stand am 01.01.'),
+              decoration: const InputDecoration(
+                labelText: 'Kilometerstand am 01.01.',
+                suffixText: 'km',
+              ),
             ),
             TextField(
               controller: ende,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Stand am 31.12.'),
+              decoration: const InputDecoration(
+                labelText: 'Kilometerstand am 31.12.',
+                suffixText: 'km',
+              ),
             ),
           ],
         ),
@@ -672,6 +679,7 @@ class _FahrzeugKarte extends ConsumerWidget {
           title: Text('Kosten ${fahrzeug['kennzeichen']}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.s4,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: art,
@@ -852,7 +860,7 @@ class _FahrtenTabelle extends ConsumerWidget {
                   style: AppTypography.body(
                     size: 15,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
               ),
@@ -861,7 +869,7 @@ class _FahrtenTabelle extends ConsumerWidget {
                 style: AppTypography.body(
                   size: 17,
                   weight: FontWeight.w800,
-                  color: AppColors.ink,
+                  color: AppColors.textStrong,
                 ),
               ),
             ],
@@ -906,6 +914,7 @@ class _FahrtenTabelle extends ConsumerWidget {
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.s4,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OutlinedButton.icon(
@@ -1017,6 +1026,7 @@ class _FahrtenTabelle extends ConsumerWidget {
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.s4,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OutlinedButton.icon(
@@ -1131,7 +1141,7 @@ class _Unterschriften extends StatelessWidget {
                     children: [
                       Container(
                         height: 1,
-                        color: AppColors.ink,
+                        color: AppColors.textMuted,
                         margin: const EdgeInsets.only(bottom: 6, top: 28),
                       ),
                       Text(
@@ -1139,7 +1149,7 @@ class _Unterschriften extends StatelessWidget {
                         style: AppTypography.body(
                           size: 13,
                           weight: FontWeight.w700,
-                          color: AppColors.ink,
+                          color: AppColors.textStrong,
                         ),
                       ),
                       Text(
@@ -1264,7 +1274,7 @@ class _KostenZeile extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: FontWeight.w600,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
           if (!gesperrt) ...[
@@ -1319,7 +1329,7 @@ class _Sperrhinweis extends StatelessWidget {
                   style: AppTypography.body(
                     size: 14,
                     weight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: AppColors.textStrong,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1374,7 +1384,7 @@ class _Zeile extends StatelessWidget {
               style: AppTypography.body(
                 size: 13,
                 weight: fett ? FontWeight.w700 : FontWeight.w400,
-                color: fett ? AppColors.ink : AppColors.textDefault,
+                color: fett ? AppColors.textStrong : AppColors.textDefault,
               ),
             ),
           ),
@@ -1383,7 +1393,7 @@ class _Zeile extends StatelessWidget {
             style: AppTypography.body(
               size: 13,
               weight: fett ? FontWeight.w800 : FontWeight.w600,
-              color: AppColors.ink,
+              color: AppColors.textStrong,
             ),
           ),
         ],
@@ -1451,7 +1461,7 @@ class _Hinweis extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: AppTypography.body(size: 14, color: AppColors.ink),
+              style: AppTypography.body(size: 14, color: AppColors.textStrong),
             ),
           ),
         ],
