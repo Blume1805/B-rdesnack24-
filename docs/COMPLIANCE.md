@@ -1668,7 +1668,8 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
 2. Philipp und Pia erfassen echte Unterschriften in der App.
 3. Die fünf oben genannten Dokumente werden neu freigegeben, durch beide
    Gesellschafter.
-4. Klären, ob auf der Unterschrift „Pia Blume" oder „Pia Schu" stehen soll
-   (Philipp).
+4. ✅ Name auf der Unterschrift: „Pia Blume" (Entscheidung Philipp 18.11.2026),
+   bleibt unverändert. Das Konto heißt weiterhin „Pia Schu"; Angleichung nur
+   auf Wunsch.
 
 **Status: 🔴 OFFEN**
