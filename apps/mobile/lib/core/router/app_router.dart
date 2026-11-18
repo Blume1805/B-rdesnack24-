@@ -53,43 +53,52 @@ const _openRoutes = {
   AppRoutes.cancellation,
 };
 
+/// Weiterleitungsregel des Routers, eigenständig testbar.
+@visibleForTesting
+String? anmeldeWeiterleitung(Ref ref, String loc) {
+  // Direkt beim Client nachsehen, nicht über currentSessionProvider
+  // (Befund 18.11.2026): Im Browser läuft diese Weiterleitung noch
+  // innerhalb der Auth-Benachrichtigung. currentSessionProvider ist in
+  // dem Moment noch nicht neu berechnet und liefert die alte Sitzung —
+  // nach dem Abmelden drehte sich deshalb nur der Ladekreis, bis man die
+  // App neu lud.
+  final session = ref.read(supabaseClientProvider).auth.currentSession;
+  final loggedIn = session != null;
+
+  if (_openRoutes.contains(loc)) return null;
+  if (!loggedIn) {
+    return _authRoutes.contains(loc) ? null : AppRoutes.signIn;
+  }
+  // Zweiter Faktor: Konten mit eingerichtetem Faktor bestätigen ihn nach
+  // jeder Anmeldung, bevor sie weiterkommen. Rechtsseiten bleiben offen.
+  final stufe = ref
+      .read(supabaseClientProvider)
+      .auth
+      .mfa
+      .getAuthenticatorAssuranceLevel();
+  if (brauchtZweitenFaktor(
+    aktuelle: stufe.currentLevel,
+    naechste: stufe.nextLevel,
+  )) {
+    return loc == AppRoutes.mfaVerify ? null : AppRoutes.mfaVerify;
+  }
+  // Offene Zustimmung zur Claude-Verbindung (Runbook S): nach Anmeldung
+  // und zweitem Faktor direkt dorthin.
+  if (AusstehendeZustimmung.kennung != null && loc != AppRoutes.oauthConsent) {
+    return AppRoutes.oauthConsent;
+  }
+  if (loc == AppRoutes.mfaVerify) return AppRoutes.home;
+  if (_authRoutes.contains(loc)) return AppRoutes.home;
+  return null;
+}
+
 /// go_router mit Auth-Guard: nicht angemeldete Nutzer landen auf /signin.
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.home,
     refreshListenable: _AuthRefresh(ref),
-    redirect: (context, state) {
-      final session = ref.read(currentSessionProvider);
-      final loggedIn = session != null;
-      final loc = state.matchedLocation;
-
-      if (_openRoutes.contains(loc)) return null;
-      if (!loggedIn) {
-        return _authRoutes.contains(loc) ? null : AppRoutes.signIn;
-      }
-      // Zweiter Faktor: Konten mit eingerichtetem Faktor bestätigen ihn nach
-      // jeder Anmeldung, bevor sie weiterkommen. Rechtsseiten bleiben offen.
-      final stufe = ref
-          .read(supabaseClientProvider)
-          .auth
-          .mfa
-          .getAuthenticatorAssuranceLevel();
-      if (brauchtZweitenFaktor(
-        aktuelle: stufe.currentLevel,
-        naechste: stufe.nextLevel,
-      )) {
-        return loc == AppRoutes.mfaVerify ? null : AppRoutes.mfaVerify;
-      }
-      // Offene Zustimmung zur Claude-Verbindung (Runbook S): nach Anmeldung
-      // und zweitem Faktor direkt dorthin.
-      if (AusstehendeZustimmung.kennung != null &&
-          loc != AppRoutes.oauthConsent) {
-        return AppRoutes.oauthConsent;
-      }
-      if (loc == AppRoutes.mfaVerify) return AppRoutes.home;
-      if (_authRoutes.contains(loc)) return AppRoutes.home;
-      return null;
-    },
+    redirect: (context, state) =>
+        anmeldeWeiterleitung(ref, state.matchedLocation),
     routes: [
       GoRoute(
         path: AppRoutes.oauthConsent,
