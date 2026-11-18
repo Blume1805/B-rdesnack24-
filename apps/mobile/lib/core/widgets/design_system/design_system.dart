@@ -16,6 +16,7 @@ export 'loyalty_meter.dart';
 export 'module_tile.dart';
 export 'offer_card.dart';
 export 'price_row.dart';
+export 'marken_kopf_bild.dart';
 export 'product_image.dart';
 export 'rating_stars.dart';
 export 'section_header.dart';

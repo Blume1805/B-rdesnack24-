@@ -108,6 +108,9 @@ final Map<String, Object?> pkwAnlage = {
   'freigabe': null,
 };
 
+/// Rolle des Testkontos (für Seiten, die je Rolle anders aussehen).
+String testRolle = 'system_admin';
+
 SupabaseClient testClient() => SupabaseClient(
       'https://test.invalid',
       'anon',
@@ -120,7 +123,7 @@ SupabaseClient testClient() => SupabaseClient(
               'id': _uid,
               'email': 'philipp@example.invalid',
               'full_name': 'Philipp Blume',
-              'role': 'system_admin',
+              'role': testRolle,
               'status': 'active',
             },
           ];

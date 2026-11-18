@@ -1190,6 +1190,11 @@ Rechtsberatung.
   Briefvorlage `brief_docx.ts`, ruhender Store-Text). Aus beiden App-Bildern
   (`brand_hero_wide.webp`, `brand_hero.jpg`) herausretuschiert, ohne das Motiv
   neu zu erzeugen.
+  Nachtrag 18.11.2026: Neues Kopfbild mit Slogan „Genießen. Geben. Gutes tun."
+  (`brand_header_slogan.webp`, Vorlage Philipp) trug den alten Claim erneut
+  klein auf der Seitenwand des Automaten; vor dem Einbau ebenso
+  herausretuschiert (Zeile durch die darunterliegende Seitenwand ersetzt,
+  sonst unverändert).
 * [x] **Landingpage-Kopfbild:** von Lovable retuschiert am 27.09.2026 (Commit
   `1c030fb`, neues Asset `9cbc89bf…`, altes Asset `eeb13724…` bleibt als
   Rückweg). Laut Lovable stand nur der kleine Satz auf dem Automaten im Bild.

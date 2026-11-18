@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
 import '../../theme/app_typography.dart';
+import 'marken_kopf_bild.dart';
 
 /// Ink-farbener „Hero"-Bereich mit Marken-Foto (Automat + leuchtender
 /// Bördekreis-Umriss + Wortmarke + Slogan). Das Foto liegt als Asset unter
-/// `assets/images/brand_hero_wide.webp`. Der Container wächst mit der
+/// `assets/images/brand_header_slogan.webp` (seit 18.11.2026, mit Slogan im
+/// Bild; siehe [MarkenKopfBild]). Der Container wächst mit der
 /// Bildschirmbreite und rendert das Motiv immer vollständig (BoxFit.contain).
 ///
 /// [showTaglineOverlay] blendet den Slogan noch einmal als eigene Text-Zeile
@@ -19,7 +21,7 @@ class HeroBackdrop extends StatelessWidget {
     this.tagline,
     this.minHeight = 220,
     this.maxHeight = 360,
-    this.imageAspectRatio = 1500 / 1000,
+    this.imageAspectRatio = 768 / 512,
     this.showTaglineOverlay = false,
   });
 
@@ -38,19 +40,19 @@ class HeroBackdrop extends StatelessWidget {
         final target = naturalHeight.clamp(minHeight, maxHeight);
         return Container(
           width: width,
-          color: AppColors.surfaceInverse,
+          color: AppColors.canvas,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 width: width,
                 height: target,
-                child: Image.asset(
-                  'assets/images/brand_hero_wide.webp',
-                  semanticLabel:
-                      'Bördesnack24: Snackautomat mit Umrisskarte des Bördekreises',
-                  fit: BoxFit.contain,
-                  alignment: Alignment.center,
+                // Markenbild mit Slogan (18.11.2026), Schwarz an die
+                // App-Grundfarbe angeglichen, über die volle Breite.
+                child: const MarkenKopfBild(
+                  abdunkeln: 0,
+                  semanticLabel: 'Bördesnack24: Genießen. Geben. Gutes tun. '
+                      'Snackautomat mit Umrisskarte des Bördekreises',
                 ),
               ),
               if (showTaglineOverlay && tagline != null) ...[
