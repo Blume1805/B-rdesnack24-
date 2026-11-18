@@ -105,7 +105,7 @@ class _DatevExportScreenState extends ConsumerState<DatevExportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('DATEV-Export')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s5),

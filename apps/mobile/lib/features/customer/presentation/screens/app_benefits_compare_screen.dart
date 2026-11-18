@@ -72,7 +72,7 @@ class AppBenefitsCompareScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Dein kostenloses Konto')),
       body: ListView(

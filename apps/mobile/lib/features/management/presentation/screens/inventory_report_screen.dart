@@ -167,7 +167,7 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(
         title: Text('Inventur — FIFO-Bewegungsreport'),
       ),

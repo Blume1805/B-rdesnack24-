@@ -439,7 +439,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     // erhalten, ist aber nicht mehr erreichbar; stattdessen wird erklärt, dass
     // alle Vorteile ohne Zahlung gelten.
     if (Pricing.benefitsFreeForAll) {
-      return Scaffold(
+      return MarkenScaffold(
         backgroundColor: AppColors.canvas,
         appBar: const HeroAppBar(title: Text('Deine Vorteile')),
         body: ListView(
@@ -470,7 +470,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         ),
       );
     }
-    return Scaffold(
+    return MarkenScaffold(
       backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Mein Abo')),
       body: _loading

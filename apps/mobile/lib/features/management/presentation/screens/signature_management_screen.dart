@@ -124,7 +124,7 @@ class _SignatureManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Signaturen')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetch(),

@@ -98,7 +98,7 @@ class _ReceiptsScreenState extends ConsumerState<ReceiptsScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(myReceiptsProvider);
-    return Scaffold(
+    return MarkenScaffold(
       backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Belegarchiv')),
       body: async.when(

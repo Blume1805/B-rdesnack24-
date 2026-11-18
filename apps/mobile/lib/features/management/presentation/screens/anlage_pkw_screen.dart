@@ -117,7 +117,7 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Anlage PKW-Kosten')),
       body: RefreshIndicator(
         onRefresh: _laden,

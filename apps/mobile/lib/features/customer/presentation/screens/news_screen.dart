@@ -15,7 +15,7 @@ class NewsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final news = ref.watch(newsProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('News')),
       body: RefreshIndicator(
         color: AppColors.brand,

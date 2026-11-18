@@ -29,7 +29,7 @@ class EmployerBenefitScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Steuerfreier Zuschuss')),
       body: ListView(

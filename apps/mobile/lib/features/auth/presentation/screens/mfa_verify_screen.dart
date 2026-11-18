@@ -74,7 +74,7 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(l10n.mfaTitle)),
       body: Center(
         child: ConstrainedBox(

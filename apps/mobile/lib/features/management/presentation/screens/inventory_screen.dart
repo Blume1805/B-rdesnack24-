@@ -12,7 +12,7 @@ class InventoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final machines = ref.watch(machinesProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Inventur')),
       body: machines.when(
         loading: () => const Center(child: CircularProgressIndicator()),

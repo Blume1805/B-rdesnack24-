@@ -8,6 +8,7 @@ export 'copy_pill.dart';
 export 'deposit_note.dart';
 export 'eyebrow.dart';
 export 'hero_app_bar.dart';
+export 'kopf_kachel.dart';
 export 'hero_action_bar.dart';
 export 'hero_backdrop.dart';
 export 'install_hint_card.dart';

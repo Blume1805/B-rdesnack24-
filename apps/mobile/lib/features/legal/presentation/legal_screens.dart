@@ -13,7 +13,7 @@ class _LegalTextScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(title)),
       body: SafeArea(
         child: Semantics(

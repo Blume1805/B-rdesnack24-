@@ -132,7 +132,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           data: (p) => p.contains('documents.edit'),
           orElse: () => false,
         );
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Dokumente')),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(

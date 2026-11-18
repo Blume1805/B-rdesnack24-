@@ -7,7 +7,7 @@ void main() {
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
+        home: MarkenScaffold(
           appBar: HeroAppBar(
             title: const Text('Testseite'),
             actions: [
@@ -36,7 +36,7 @@ void main() {
               child: FilledButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const Scaffold(
+                    builder: (_) => const MarkenScaffold(
                       appBar: HeroAppBar(title: Text('Unterseite')),
                       body: SizedBox.shrink(),
                     ),
@@ -67,7 +67,7 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
+        home: MarkenScaffold(
           appBar: HeroAppBar(title: Text('Golden-Titel')),
           body: SizedBox.shrink(),
         ),
@@ -78,7 +78,7 @@ void main() {
     final ctx = tester.element(find.byType(HeroAppBar));
     await tester.runAsync(
       () => precacheImage(
-        const AssetImage('assets/images/brand_hero_wide.webp'),
+        const AssetImage(MarkenKopfBild.asset),
         ctx,
       ),
     );

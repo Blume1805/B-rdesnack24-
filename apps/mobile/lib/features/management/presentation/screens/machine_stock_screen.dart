@@ -73,7 +73,7 @@ class _MachineStockScreenState extends ConsumerState<MachineStockScreen> {
   @override
   Widget build(BuildContext context) {
     final stock = ref.watch(machineStockProvider(widget.machineId));
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
         loading: () => const Center(child: CircularProgressIndicator()),

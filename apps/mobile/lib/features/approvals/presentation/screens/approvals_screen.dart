@@ -16,7 +16,7 @@ class ApprovalsScreen extends ConsumerWidget {
     final approvals = ref.watch(pendingApprovalsProvider);
     final busy = ref.watch(approvalsActionProvider).isLoading;
 
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Gesellschafter-Freigaben')),
       body: approvals.when(
         loading: () => const Center(child: CircularProgressIndicator()),

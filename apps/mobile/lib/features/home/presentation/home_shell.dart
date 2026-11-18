@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/design_system/brand_marks.dart';
+import '../../../../core/widgets/design_system/hero_app_bar.dart';
+import '../../../../core/widgets/design_system/kopf_kachel.dart';
 import '../../../../core/widgets/design_system/marken_kopf_bild.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
@@ -62,7 +63,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         final tabs = _tabsForRole(user.role, l10n);
         final safeIndex = _index.clamp(0, tabs.length - 1).toInt();
 
-        return Scaffold(
+        return MarkenScaffold(
           appBar: _BrandAppBar(
             user: user,
             onSignOut: () =>
@@ -259,9 +260,10 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final AppUser user;
   final VoidCallback onSignOut;
 
+  /// Nur nominal: Der Kopf steht in [MarkenScaffold] und rollt mit dem
+  /// Inhalt weg; seine Höhe ergibt sich aus Bild und Kachel.
   @override
-  Size get preferredSize =>
-      Size.fromHeight(user.role == UserRole.customer ? 250 : 236);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   // Rollen-Labels für die UI: intern bleiben shareholder und employee als
   // getrennte Berechtigungsstufen (nur shareholder darf Finanzen sehen),
@@ -279,229 +281,65 @@ class _BrandAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return fullName.trim().split(RegExp(r'\s+')).first;
   }
 
+  /// Kopf nach Referenzbild Philipp 18.11.2026: Markenbild über die volle
+  /// Breite, darunter die Kachel mit Markenzeichen, Rolle, Name und
+  /// E-Mail-Adresse; rechts Abmelden (intern) bzw. Benachrichtigungen
+  /// (Kunden).
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCustomer = user.role == UserRole.customer;
-    String? customerNumber;
-    if (isCustomer) {
-      final row = ref.watch(myCustomerProvider).valueOrNull;
-      customerNumber = row?['customer_number'] as String?;
-    }
+    final oben = MediaQuery.paddingOf(context).top;
 
-    // Kunden bekommen einen 3-Spalten-Header (Anrede + Markenbild + Bell/
-    // Spende); interne Nutzer den alten „Mein Konto"-Card-Header.
-    if (isCustomer) {
-      return _customerHeader(context, customerNumber);
-    }
-    // Interne Nutzer: gleiche Hero-Komposition wie im Kunden-Header
-    // (Markenbild rechts, Verschmelzungs-Gradient, Konto-Zeile unten links).
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(236),
-      // Markenbild über die volle Breite (18.11.2026), auch hinter der
-      // Statusleiste; Schwarz an die App-Grundfarbe angeglichen.
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: MarkenKopfBild(ausrichtung: Alignment.topCenter),
-          ),
-          SafeArea(
-            bottom: false,
-            child: SizedBox(
-              height: 236,
-              child: Stack(
-                children: [
-                  // Bodennebel für die Lesbarkeit der Konto-Zeile.
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 84,
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [Color(0xD9151716), Color(0x00151716)],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.s5,
-                          0,
-                          AppSpacing.s2,
-                          AppSpacing.s3,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: AppColors.brand,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadii.md),
-                              ),
-                              child: const BrandIcon(
-                                size: 40,
-                                color: AppColors.onBrand,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.s3),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _roleLabel(user.role),
-                                    style: AppTypography.body(
-                                      size: 13,
-                                      weight: FontWeight.w800,
-                                      color: AppColors.brand,
-                                    ).copyWith(letterSpacing: 0.3),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    user.fullName ?? user.email,
-                                    style: AppTypography.display(
-                                      size: 20,
-                                      weight: FontWeight.w800,
-                                      color: AppColors.onDark,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    user.email,
-                                    style: AppTypography.body(
-                                      size: 12,
-                                      weight: FontWeight.w600,
-                                      color: AppColors.brandPale,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: AppLocalizations.of(context).signOut,
-                              icon: const Icon(
-                                Icons.logout,
-                                size: 22,
-                                color: AppColors.onDark,
-                              ),
-                              onPressed: onSignOut,
-                            ),
-                            const SizedBox(width: AppSpacing.s2),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    final kachel = isCustomer
+        ? KopfKachel(
+            symbol: KopfSymbol.marke(),
+            titel: Text('Moin, ${_firstName(user.fullName) ?? 'Kunde'}.'),
+            unterzeile: const Text(
+              'Snack gefällig?',
+              style: TextStyle(color: AppColors.brandPale),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            aktionen: const [_NotificationBell()],
+          )
+        : KopfKachel(
+            symbol: KopfSymbol.marke(),
+            etikett: _roleLabel(user.role),
+            titel: Text(user.fullName ?? user.email),
+            unterzeile: Row(
+              children: [
+                const Icon(
+                  Icons.mail,
+                  size: 16,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    user.email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            aktionen: [
+              IconButton(
+                tooltip: AppLocalizations.of(context).signOut,
+                icon: const Icon(Icons.logout, size: 26),
+                onPressed: onSignOut,
+              ),
+            ],
+          );
 
-  /// Header für Kunden: Bördesnack24-Marken-Hero füllt die linke bis
-  /// mittlere Fläche, rechts sitzt ausschließlich die Notification-Bell.
-  /// Abmelden ist im Profil-Tab; Kundennummer und Spendenstand ebenfalls.
-  Widget _customerHeader(BuildContext context, String? customerNumber) {
-    final firstName = _firstName(user.fullName) ?? 'Kunde';
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(250),
-      // Markenbild über die volle Breite (18.11.2026), auch hinter der
-      // Statusleiste; Schwarz an die App-Grundfarbe angeglichen.
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: MarkenKopfBild(ausrichtung: Alignment.topCenter),
-          ),
-          SafeArea(
-            bottom: false,
-            child: SizedBox(
-              height: 250,
-              child: Stack(
-                children: [
-                  // Bodennebel für die Lesbarkeit der Anrede.
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 90,
-                    child: IgnorePointer(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [Color(0xD9151716), Color(0x00151716)],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Anrede unten links, unter Logo und Slogan des Bildes
-                  // (18.11.2026: der Slogan steht jetzt im Bild, nicht mehr
-                  // zusätzlich als Text).
-                  Positioned(
-                    left: AppSpacing.s5,
-                    right: AppSpacing.s5,
-                    bottom: AppSpacing.s3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Moin, $firstName.',
-                          style: AppTypography.display(
-                            size: 22,
-                            weight: FontWeight.w800,
-                            color: AppColors.onDark,
-                          ).copyWith(height: 1.1),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Snack gefällig?',
-                          style: AppTypography.body(
-                            size: 13,
-                            weight: FontWeight.w600,
-                            color: AppColors.brandPale,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Notification-Bell oben rechts.
-                  const Positioned(
-                    top: 4,
-                    right: 4,
-                    child: _NotificationBell(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(height: oben, color: AppColors.canvas),
+        const MarkenKopfBild(),
+        const SizedBox(height: AppSpacing.s2),
+        kachel,
+        const SizedBox(height: AppSpacing.s3),
+      ],
     );
   }
 }

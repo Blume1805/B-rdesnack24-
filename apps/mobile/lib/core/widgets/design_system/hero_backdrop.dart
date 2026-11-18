@@ -36,24 +36,17 @@ class HeroBackdrop extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final naturalHeight = width / imageAspectRatio;
-        final target = naturalHeight.clamp(minHeight, maxHeight);
         return Container(
           width: width,
           color: AppColors.canvas,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: width,
-                height: target,
-                // Markenbild mit Slogan (18.11.2026), Schwarz an die
-                // App-Grundfarbe angeglichen, über die volle Breite.
-                child: const MarkenKopfBild(
-                  abdunkeln: 0,
-                  semanticLabel: 'Bördesnack24: Genießen. Geben. Gutes tun. '
-                      'Snackautomat mit Umrisskarte des Bördekreises',
-                ),
+              // Markenbild mit Slogan (18.11.2026), vollständig über die
+              // volle Breite, Schwarz an die App-Grundfarbe angeglichen.
+              const MarkenKopfBild(
+                semanticLabel: 'Bördesnack24: Genießen. Geben. Gutes tun. '
+                    'Snackautomat mit Umrisskarte des Bördekreises',
               ),
               if (showTaglineOverlay && tagline != null) ...[
                 Padding(

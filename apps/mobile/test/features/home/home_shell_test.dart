@@ -47,8 +47,8 @@ void main() {
     await tester.pumpWidget(shell());
     await tester.pumpAndSettle();
 
-    // Konto-Header (Rolle + Name) über dem Hero-Hintergrund.
-    expect(find.text('Mitarbeiter'), findsOneWidget);
+    // Kopfkachel: Rolle als Etikett (Großbuchstaben) und Name.
+    expect(find.text('MITARBEITER'), findsOneWidget);
     expect(find.text('Max Muster'), findsOneWidget);
 
     // MFA-Erinnerung sichtbar, solange kein Faktor bestätigt ist.

@@ -33,7 +33,7 @@ class DocumentApprovalsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final approvals = ref.watch(_approvalsListProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Freigaben')),
       body: approvals.when(
         loading: () => const Center(

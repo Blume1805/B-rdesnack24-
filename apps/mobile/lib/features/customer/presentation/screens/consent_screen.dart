@@ -69,7 +69,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Einwilligungen')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(

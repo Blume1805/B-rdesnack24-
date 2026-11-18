@@ -30,7 +30,7 @@ class MasterDataScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(myCustomerProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Stammdaten')),
       body: data.when(
         loading: () => const Center(
@@ -500,7 +500,7 @@ class _EditBusinessDataScreenState
             ],
           ),
         );
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Unternehmensangaben')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.s5),

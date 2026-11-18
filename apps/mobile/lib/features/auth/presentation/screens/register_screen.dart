@@ -210,7 +210,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final l10n = AppLocalizations.of(context);
     final isLoading = ref.watch(authControllerProvider).isLoading;
 
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(l10n.registerTitle)),
       body: Center(
         child: ConstrainedBox(

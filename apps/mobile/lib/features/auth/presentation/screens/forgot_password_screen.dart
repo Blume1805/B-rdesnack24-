@@ -49,7 +49,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(l10n.resetTitle)),
       body: Center(
         child: ConstrainedBox(

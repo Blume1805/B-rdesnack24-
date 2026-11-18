@@ -20,7 +20,7 @@ class DonationsScreen extends ConsumerWidget {
     final pool = ref.watch(donationPoolSummaryProvider);
     final causes = ref.watch(donationCausesProvider);
 
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Meine Spenden')),
       body: RefreshIndicator(
         color: AppColors.brand,

@@ -16,7 +16,7 @@ class AnlagenScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Anlagen')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(

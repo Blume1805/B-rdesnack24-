@@ -18,7 +18,7 @@ class ProductDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(productDetailProvider(productId));
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(
         title: Text(
           detail.valueOrNull?.name ?? 'Produkt',

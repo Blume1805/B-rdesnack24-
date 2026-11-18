@@ -59,7 +59,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     final hasSub = ref.watch(hasBenefitsProvider).valueOrNull ?? false;
     // Effektiver Rabatt = 5 % Abo + lebenslanger Status-Zusatzrabatt.
     final effRate = ref.watch(myEffectiveDiscountProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(widget.title)),
       body: stock.when(
         loading: () => const Center(

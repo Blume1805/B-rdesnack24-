@@ -28,7 +28,7 @@ class MySignatureTasksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(_mySignatureTasksProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Zu signieren')),
       body: tasks.when(
         loading: () => const Center(

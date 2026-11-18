@@ -60,7 +60,7 @@ class EmployeesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profiles = ref.watch(_profilesProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Mitarbeiter')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _invite(context, ref),

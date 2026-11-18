@@ -60,7 +60,7 @@ class _MfaEnrollScreenState extends ConsumerState<MfaEnrollScreen> {
     final l10n = AppLocalizations.of(context);
     final enrollment = ref.watch(_enrollmentProvider);
 
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(title: Text(l10n.mfaTitle)),
       body: enrollment.when(
         loading: () => const Center(child: CircularProgressIndicator()),

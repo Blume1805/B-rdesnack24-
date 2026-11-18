@@ -16,7 +16,7 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(myNotificationsProvider);
-    return Scaffold(
+    return MarkenScaffold(
       appBar: HeroAppBar(
         title: const Text('Benachrichtigungen'),
         actions: [

@@ -175,8 +175,32 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
   @override
   Widget build(BuildContext context) {
     final list = ref.watch(protocolListProvider(_query));
-    return Scaffold(
-      appBar: HeroAppBar(title: Text(widget.title)),
+    return MarkenScaffold(
+      // Freigabe und PDF rechts in der Kopfkachel (Referenzbild Philipp
+      // 18.11.2026) statt in einer eigenen Zeile darunter.
+      appBar: HeroAppBar(
+        title: Text(widget.title),
+        actions: widget.exportKind == null
+            ? null
+            : [
+                IconButton(
+                  tooltip: 'Freigabe anfordern',
+                  icon: const Icon(
+                    Icons.rule_folder_outlined,
+                    color: AppColors.brand,
+                  ),
+                  onPressed: _requestApproval,
+                ),
+                IconButton(
+                  tooltip: 'PDF-Nachweis',
+                  icon: const Icon(
+                    Icons.picture_as_pdf,
+                    color: AppColors.statusCritical,
+                  ),
+                  onPressed: _export,
+                ),
+              ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _create,
         icon: const Icon(Icons.add),
@@ -184,24 +208,6 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
       ),
       body: Column(
         children: [
-          if (widget.exportKind != null)
-            HeroActionBar(
-              actions: [
-                HeroAction(
-                  icon: Icons.rule_folder_outlined,
-                  tooltip: 'Freigabe anfordern',
-                  iconColor: AppColors.brand,
-                  onTap: _requestApproval,
-                ),
-                HeroAction(
-                  icon: Icons.picture_as_pdf,
-                  tooltip: 'PDF-Nachweis',
-                  iconColor: AppColors.statusCritical,
-                  borderColor: AppColors.statusCritical,
-                  onTap: _export,
-                ),
-              ],
-            ),
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(

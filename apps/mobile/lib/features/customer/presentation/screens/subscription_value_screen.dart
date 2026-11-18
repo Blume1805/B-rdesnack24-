@@ -54,7 +54,7 @@ class SubscriptionValueScreen extends ConsumerWidget {
     // Ersparnis — nicht der Überschuss über eine Gebühr.
     const spendSteps = <double>[10, 20, 40];
 
-    return Scaffold(
+    return MarkenScaffold(
       appBar: const HeroAppBar(title: Text('Was Du sparst')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(

@@ -125,7 +125,7 @@ class _ComplaintsScreenState extends ConsumerState<ComplaintsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MarkenScaffold(
       backgroundColor: AppColors.canvas,
       appBar: const HeroAppBar(title: Text('Reklamationen')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
