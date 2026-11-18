@@ -1623,3 +1623,52 @@ erfüllte das nicht vollständig. Die Doku bleibt so, der Code wird korrigiert
 4. **Vor dem ersten echten Löschantrag zwingend.**
 
 **Status: 🔴 OFFEN** (Korrektur im Repository, nicht in der Produktion)
+
+---
+
+## V-021 · Freigaben und Partner-Unterschriften an Demo-Konten (2026-11-18) — OFFEN
+
+### Sachverhalt
+
+Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Konten:
+
+* **Partner-Unterschriften:** „Philipp Blume / Gesellschafter" hing am Konto
+  des Demo-Gesellschafters. Hinterlegt ist dort ein **Demo-Bild**
+  (`captured_via = demo`), keine echte Unterschrift. „Pia Blume /
+  Gesellschafterin" hing am Demo-Admin, **ohne Bild**. Beide erscheinen auf
+  freigegebenen PDFs.
+* **Abgeschlossene Freigaben vom 14./15.07.2026**, entschieden vom
+  Demo-Gesellschafter:
+  * Hygienekonzept v1
+  * Belehrung § 43 IfSG v1
+  * Inventur 15.04.–14.07.2026
+  * Wartung Juli 2026
+  * Vernichtung Juli 2026
+* **Offene Freigaben:** 4, seit Juli, angefordert von Demo-Konten.
+* Die Anzeige im Namen „Pia Blume" weicht vom Kontonamen „Pia Schu" ab.
+
+### Rechtliche Würdigung
+
+* **HACCP / VO (EG) 852/2004, § 43 IfSG:** Die Nachweise sind inhaltlich
+  vorhanden. Die Freigabe durch ein Testkonto mit Demo-Unterschrift ist aber
+  kein belastbarer Verantwortungsnachweis der Gesellschafter.
+* **GoBD (Unveränderbarkeit):** Abgeschlossene Freigaben werden nicht
+  umgeschrieben. Die Korrektur erfolgt durch neue Freigaben mit echten
+  Konten.
+
+### Ergebnis / Handlungsbedarf
+
+1. Migration `20261118090000_demokonten_aufloesen` (Freigabe Philipp
+   18.11.2026). Prüfskript 119 besteht 6/6; nicht in der Produktion. Sie
+   * hängt die Unterschriften auf die echten Konten um,
+   * setzt die 4 offenen Demo-Freigaben auf „abgelehnt" mit Vermerk,
+   * löscht Demo-Admin, Demo-Gesellschafter und ein Testkundenkonto.
+
+   Voraussetzung ist `20261117130000`. Einspielen am 19.11.2026 mit Philipp.
+2. Philipp und Pia erfassen echte Unterschriften in der App.
+3. Die fünf oben genannten Dokumente werden neu freigegeben, durch beide
+   Gesellschafter.
+4. Klären, ob auf der Unterschrift „Pia Blume" oder „Pia Schu" stehen soll
+   (Philipp).
+
+**Status: 🔴 OFFEN**
