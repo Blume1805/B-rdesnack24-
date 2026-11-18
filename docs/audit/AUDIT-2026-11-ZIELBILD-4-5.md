@@ -187,6 +187,7 @@ der Produktion, Schalter aus bis Runbook O. App mit ausgeblendeten Demo-Zugänge
 | `20261117120000` | Claude-Verbindung (V-019, Runbook S) | Prüfskript 118, 14/14 |
 | `20261117130000` | Kontolöschung entfernt auch Anmeldedaten (V-020) | Prüfskript 96 Test 7b: ohne Korrektur rot, mit 27/27 |
 | `20261118090000` | Demo-Konten auflösen: Unterschriften umhängen, offene Demo-Freigaben ablehnen, 3 Konten löschen (V-021, Freigabe Philipp 18.11.) | Prüfskript 119, 6/6 |
+| `20261118100000` | Kontoname der Gesellschafterin wie Unterschrift (V-021) | lokal: ändert einmal, zweiter Lauf nichts |
 
 Gesamtlauf am 17.11.2026 auf frischem Aufbau: 35 Prüfskripte, 0 Fehler; 8 pgTAP-Dateien, 0 Fehler;
 Fingerabdruck = `fingerabdruck.soll` (Funktionen `291:698c4c58…`). Server-Funktionen: 44 Tests,
@@ -199,7 +200,7 @@ Beim Bau gefunden und behoben:
   gezeigt; `deploy_web.sh` legt jetzt `404.html` an.
 * Exportierte PDFs wären unbegrenzt liegen geblieben. Jetzt löscht jeder Export die abgelaufenen.
 
-Reihenfolge beim Einspielen (Philipp am Desktop, geplant 19.11.2026): 130000 → 20261118090000 → 090000 → 110000 (Zwei-Faktor-Pflicht an, Gegenprobe Philipp) → 120000, nach jedem
+Reihenfolge beim Einspielen (Philipp am Desktop, geplant 19.11.2026): 130000 → 20261118090000 → 20261118100000 → 090000 → 110000 (Zwei-Faktor-Pflicht an, Gegenprobe Philipp) → 120000, nach jedem
 Schritt Fingerabdruck; danach `verwaltung-mcp` ausliefern. Nach 110000 Gegenprobe Philipp
 (Anmeldung mit Code).
 

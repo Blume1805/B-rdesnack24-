@@ -1669,7 +1669,9 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
 3. Die fünf oben genannten Dokumente werden neu freigegeben, durch beide
    Gesellschafter.
 4. ✅ Name auf der Unterschrift: „Pia Blume" (Entscheidung Philipp 18.11.2026),
-   bleibt unverändert. Das Konto heißt weiterhin „Pia Schu"; Angleichung nur
-   auf Wunsch.
+   bleibt unverändert. Kontoname wird angeglichen (Philipp: „Ja angleichen"),
+   Migration `20261118100000_name_wie_unterschrift` übernimmt den Namen der
+   zugeordneten Unterschrift; lokal geprüft (ändert einmal, zweiter Lauf
+   nichts). Einspielen nach `20261118090000`.
 
 **Status: 🔴 OFFEN**
