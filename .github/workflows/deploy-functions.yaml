@@ -193,7 +193,11 @@ jobs:
             # config.toml; verwaltung-mcp seit 17.11.2026). Korrigiert
             # am 16.11.2026: der Kommentar nannte vorher nur zwei, und die
             # Annahme „bleibt wie in Supabase hinterlegt" traf nicht zu.
-            supabase functions deploy "$F" --project-ref "$PROJECT_REF"
+            # --yes: Neuere CLI-Versionen fragen vor dem Ausrollen nach und
+            # brechen ohne Terminal ab („Confirmation required … Nothing was
+            # changed", Lauf 29 am 19.11.2026). Die bewusste Entscheidung ist
+            # hier das Starten des Ablaufs (Knopf oder Tag), siehe oben.
+            supabase functions deploy "$F" --project-ref "$PROJECT_REF" --yes
           done
 
       - name: Ergebnis
