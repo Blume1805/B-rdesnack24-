@@ -10,6 +10,8 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, PDFPage, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { seitenAufteilen } from "../_shared/seiten.ts";
+import { datumDe, umbrechen, winAnsi, zeitDe, zelle } from "../_shared/pdf_format.ts";
 
 const ISSUER = {
   name: "Bördesnack24 GbR",
@@ -25,13 +27,11 @@ const MUTED = rgb(0.44, 0.42, 0.35);
 const POSITIVE = rgb(0.36, 0.60, 0.25);
 
 // ── Hilfsformatierer ──────────────────────────────────────────────
-const fmt = (v: unknown): string => {
-  if (v === null || v === undefined) return "";
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-  if (typeof v === "string" && v.length > 19 && v.includes("T")) {
-    return v.replace("T", " ").substring(0, 16);
-  }
-  return String(v);
+// Deutsch formatiert (_shared/pdf_format.ts). Vorher wurde jeder Freitext
+// mit großem „T" als Zeitstempel verstümmelt (Befund 19.11.2026).
+const fmt = (v: unknown): string => winAnsi(zelle(v));
+const VORGANG: Record<string, string> = {
+  refill: "Zugang", sale: "Verkauf", disposal: "Vernichtung", correction: "Korrektur",
 };
 const fmtEur = (n: number | null | undefined): string =>
   n === null || n === undefined
@@ -87,10 +87,10 @@ function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: strin
   page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
 
   let ty = 842 - 104;
-  page.drawText(title, { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
+  page.drawText(winAnsi(title), { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
   ty -= 18;
   if (subtitle) {
-    page.drawText(subtitle, { x: 40, y: ty, size: 10, font: ctx.font, color: INK });
+    page.drawText(winAnsi(subtitle), { x: 40, y: ty, size: 10, font: ctx.font, color: INK });
     ty -= 12;
   }
   page.drawLine({
@@ -104,28 +104,39 @@ function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: strin
 }
 
 // ── Generisch: Tabelle mit Header-Wiederholung über mehrere Seiten ──
+// Befund 19.11.2026: Zellen wurden nach `maxChars` hart abgeschnitten
+// (Produktnamen, Korrekturmaßnahmen), Seiten nach festem Fußrand
+// gewechselt. Jetzt bricht Text innerhalb der Spalte um, und die Zeilen
+// werden mit seitenAufteilen() verteilt: Auf der letzten Seite stehen
+// mindestens drei Zeilen, und für einen anschließenden Block
+// (`platzDanach`, z. B. die Bilanz) ist Platz.
+// `maxChars` bleibt in der Spaltendefinition nur als Hinweis auf die
+// erwartete Breite; abgeschnitten wird nichts mehr.
 interface TableColumn { label: string; x: number; maxChars: number; align?: "right" }
 function drawTable(
   ctx: Ctx,
   title: string,
   subtitle: string,
   columns: TableColumn[],
-  rows: (string | number | null | undefined)[][],
-): void {
-  const FOOT_Y_LIMIT = 100;
+  rows: unknown[][],
+  platzDanach = 0,
+): { page: PDFPage; y: number } {
+  const FOOT_Y = 60;
+  const SIZE = 8;
+  const LINE_H = 10;
   let page = ctx.pdf.addPage([595, 842]);
   let y = drawPageHeader(page, ctx, title, subtitle);
 
   // Tabellenkopf als Ink-Band mit Cream-Text + Zebra-Zeilen (One-Pager).
   const CREAM = rgb(0.98, 0.96, 0.92);
+  const rechts = (i: number) => columns[i + 1]?.x ?? 555;
   const drawColumnHeaders = (p: PDFPage, yPos: number) => {
     p.drawRectangle({ x: 40, y: yPos - 4, width: 515, height: 16, color: INK });
     for (let i = 0; i < columns.length; i++) {
       const c = columns[i];
       if (c.align === "right") {
-        const nextX = columns[i + 1]?.x ?? 555;
         const w = ctx.bold.widthOfTextAtSize(c.label, 8.5);
-        p.drawText(c.label, { x: nextX - 8 - w, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
+        p.drawText(c.label, { x: rechts(i) - 8 - w, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
       } else {
         p.drawText(c.label, { x: c.x + 4, y: yPos, size: 8.5, font: ctx.bold, color: CREAM });
       }
@@ -134,38 +145,49 @@ function drawTable(
 
   drawColumnHeaders(page, y);
   y -= 18;
-  let zebra = false;
+  if (rows.length === 0) {
+    page.drawText("Keine Datensätze im Zeitraum.",
+      { x: 44, y: y - 4, size: 9, font: ctx.italic, color: MUTED });
+    return { page, y: y - 20 };
+  }
 
-  for (const row of rows) {
-    if (y < FOOT_Y_LIMIT) {
+  const gemessen = rows.map((row) => {
+    const zellen = columns.map((c, i) => umbrechen(fmt(row[i]), rechts(i) - c.x - 8, ctx.font, SIZE));
+    const n = Math.max(1, ...zellen.map((z) => z.length));
+    return { zellen, n, hoehe: 13 + (n - 1) * LINE_H };
+  });
+  const platz = y - FOOT_Y; // Folgeseiten haben denselben Kopf
+  const { seiten } = seitenAufteilen(gemessen.map((g) => g.hoehe), {
+    platzErste: platz, platzFolge: platz, schluss: platzDanach,
+  });
+
+  for (let s = 0; s < seiten.length; s++) {
+    if (s > 0) {
       page = ctx.pdf.addPage([595, 842]);
       y = drawPageHeader(page, ctx, title, subtitle);
       drawColumnHeaders(page, y);
       y -= 18;
-      zebra = false;
     }
-    if (zebra) {
-      page.drawRectangle({ x: 40, y: y - 3.5, width: 515, height: 13, color: CREAM });
-    }
-    zebra = !zebra;
-    for (let i = 0; i < columns.length; i++) {
-      const c = columns[i];
-      const text = fmt(row[i]).substring(0, c.maxChars);
-      if (c.align === "right") {
-        const nextX = columns[i + 1]?.x ?? 555;
-        const w = ctx.font.widthOfTextAtSize(text, 8);
-        page.drawText(text, { x: nextX - 8 - w, y, size: 8, font: ctx.font, color: INK });
-      } else {
-        page.drawText(text, { x: c.x + 4, y, size: 8, font: ctx.font, color: INK });
+    let zebra = false;
+    for (const idx of seiten[s]) {
+      const { zellen, n, hoehe } = gemessen[idx];
+      if (zebra) {
+        page.drawRectangle({ x: 40, y: y - 3.5 - (n - 1) * LINE_H, width: 515, height: hoehe, color: CREAM });
       }
+      zebra = !zebra;
+      for (let i = 0; i < columns.length; i++) {
+        const c = columns[i];
+        zellen[i].forEach((zeile, li) => {
+          const x = c.align === "right"
+            ? rechts(i) - 8 - ctx.font.widthOfTextAtSize(zeile, SIZE)
+            : c.x + 4;
+          page.drawText(zeile, { x, y: y - li * LINE_H, size: SIZE, font: ctx.font, color: INK });
+        });
+      }
+      y -= hoehe;
     }
-    y -= 13;
   }
-
-  if (rows.length === 0) {
-    page.drawText("Keine Datensätze im Zeitraum.",
-      { x: 40, y: y - 4, size: 9, font: ctx.italic, color: MUTED });
-  }
+  return { page, y };
 }
 
 // ── Renderer: Inventur (FIFO-Lots aus dem Snapshot) ────────────────
@@ -175,7 +197,7 @@ function renderInventoryFifo(ctx: Ctx): void {
   const movements = (snapshot.movements as Array<Record<string, unknown>>) ?? [];
 
   const subtitle =
-    `Zeitraum: ${ctx.approval.period_from} bis ${ctx.approval.period_to} · ` +
+    `Zeitraum: ${datumDe(ctx.approval.period_from)} bis ${datumDe(ctx.approval.period_to)} · ` +
     `${lots.length} Lots · ${movements.length} Bewegungen`;
 
   // Seite 1: FIFO-Lot-Bestand
@@ -192,34 +214,65 @@ function renderInventoryFifo(ctx: Ctx): void {
     (l.product_name as string) ?? "",
     (l.invoice_number as string) ?? "",
     fmtEur(l.unit_cost as number),
-    (l.lot_expiry as string) ?? "",
+    l.lot_expiry ?? "",
     l.remaining_qty ?? "",
     l.mhd_pct !== null && l.mhd_pct !== undefined ? `${l.mhd_pct}%` : "0%",
     fmtEur(l.lot_net as number),
   ]);
-  drawTable(ctx,
+  const totalNet = lots.reduce(
+    (s, l) => s + (Number(l.lot_net) || 0), 0);
+  const totalGross = lots.reduce(
+    (s, l) => s + (Number(l.lot_gross) || 0), 0);
+  const totalDiscount = lots.reduce(
+    (s, l) => s + (Number(l.lot_discount) || 0), 0);
+
+  // Bilanz direkt unter dem Bestand (vorher eine eigene, fast leere Seite
+  // mit vier Zeilen). Die Aufteilung hält dafür Platz frei.
+  const BILANZ_H = 110;
+  const lotEnde = drawTable(ctx,
     "Bördesnack24 – Inventur (FIFO-Bestand)",
     subtitle,
     lotCols,
     lotRows,
+    lots.length > 0 ? BILANZ_H : 0,
   );
+  if (lots.length > 0) {
+    const page = lotEnde.page;
+    let y = lotEnde.y - 18;
+    page.drawText("Bilanz-Zusammenfassung", { x: 40, y, size: 11, font: ctx.bold, color: INK });
+    page.drawLine({ start: { x: 40, y: y - 5 }, end: { x: 555, y: y - 5 }, thickness: 1, color: GOLD });
+    y -= 22;
+    const bilanz: Array<[string, string]> = [
+      ["Anschaffungskosten (Brutto)", fmtEur(totalGross) + " EUR"],
+      ["MHD-Abschlag",                fmtEur(totalDiscount) + " EUR"],
+      ["Bilanz-Netto (§253 HGB)",     fmtEur(totalNet) + " EUR"],
+      ["Anzahl Lots",                 String(lots.length)],
+    ];
+    for (const [k, v] of bilanz) {
+      page.drawText(k, { x: 40, y, size: 10, font: ctx.bold, color: INK });
+      page.drawText(v, { x: 555 - ctx.font.widthOfTextAtSize(v, 10), y, size: 10, font: ctx.font, color: INK });
+      y -= 16;
+    }
+  }
 
   // Optionale zweite Sektion: Bewegungen im Zeitraum
   if (movements.length > 0) {
     const moveCols: TableColumn[] = [
+      // Breiten nach Inhalt (19.11.2026): „Vernichtung" brach in der alten,
+      // 42 pt schmalen Typ-Spalte mitten im Wort um.
       { label: "Zeitpunkt",   x: 40,  maxChars: 16 },
-      { label: "Produkt",     x: 140, maxChars: 20 },
-      { label: "Automat",     x: 265, maxChars: 10 },
-      { label: "Typ",         x: 335, maxChars: 8 },
-      { label: "Menge",       x: 385, maxChars: 6, align: "right" },
-      { label: "EK",          x: 425, maxChars: 8, align: "right" },
-      { label: "Rechnung",    x: 480, maxChars: 12 },
+      { label: "Produkt",     x: 125, maxChars: 24 },
+      { label: "Automat",     x: 245, maxChars: 8 },
+      { label: "Typ",         x: 290, maxChars: 11 },
+      { label: "Menge",       x: 360, maxChars: 6, align: "right" },
+      { label: "EK",          x: 410, maxChars: 8, align: "right" },
+      { label: "Rechnung",    x: 470, maxChars: 14 },
     ];
     const moveRows = movements.map((m) => [
-      (m.occurred_at as string) ?? "",
+      m.occurred_at as string ?? "",
       (m.product_name as string) ?? "",
       (m.machine_code as string) ?? "",
-      (m.type as string) ?? "",
+      VORGANG[m.type as string] ?? (m.type as string) ?? "",
       m.quantity_delta ?? "",
       fmtEur(m.unit_cost as number),
       (m.invoice_number as string) ?? "",
@@ -232,36 +285,6 @@ function renderInventoryFifo(ctx: Ctx): void {
     );
   }
 
-  // Bilanz-Summenzeile am Fuß der Lot-Seite (kompakt am Ende)
-  const totalNet = lots.reduce(
-    (s, l) => s + (Number(l.lot_net) || 0), 0);
-  const totalGross = lots.reduce(
-    (s, l) => s + (Number(l.lot_gross) || 0), 0);
-  const totalDiscount = lots.reduce(
-    (s, l) => s + (Number(l.lot_discount) || 0), 0);
-
-  // Bilanz-Zusammenfassung als eigene Seite (wenn Zahlen vorliegen)
-  if (lots.length > 0) {
-    const bilanzTitle = "Bördesnack24 – Bilanz-Zusammenfassung";
-    let page = ctx.pdf.addPage([595, 842]);
-    let y = drawPageHeader(page, ctx, bilanzTitle, subtitle);
-    const rows: Array<[string, string]> = [
-      ["Anschaffungskosten (Brutto)", fmtEur(totalGross) + " EUR"],
-      ["MHD-Abschlag",                fmtEur(totalDiscount) + " EUR"],
-      ["Bilanz-Netto (§253 HGB)",     fmtEur(totalNet) + " EUR"],
-      ["Anzahl Lots",                 String(lots.length)],
-    ];
-    const FOOT_Y_LIMIT = 100;
-    for (const [k, v] of rows) {
-      if (y < FOOT_Y_LIMIT) {
-        page = ctx.pdf.addPage([595, 842]);
-        y = drawPageHeader(page, ctx, bilanzTitle, subtitle);
-      }
-      page.drawText(k, { x: 40, y, size: 11, font: ctx.bold, color: INK });
-      page.drawText(v, { x: 400, y, size: 11, font: ctx.font, color: INK });
-      y -= 20;
-    }
-  }
 }
 
 // ── Renderer: HACCP-Protokoll ──────────────────────────────────────
@@ -358,7 +381,7 @@ async function renderHaccp(ctx: Ctx): Promise<void> {
     .lte(def.dateCol, `${to}T23:59:59`)
     .order(def.dateCol, { ascending: true });
 
-  const subtitle = `Zeitraum: ${from} bis ${to} · ${(rows ?? []).length} Einträge`;
+  const subtitle = `Zeitraum: ${datumDe(from)} bis ${datumDe(to)} · ${(rows ?? []).length} Einträge`;
   const cols: TableColumn[] = def.columns.map((c) =>
     ({ label: c.label, x: c.x, maxChars: c.maxChars, align: c.align }));
   const tableRows = (rows ?? []).map((r: Record<string, unknown>) =>
@@ -426,13 +449,13 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
   page.drawText("Beide Gesellschafter haben nach Prüfung digital signiert.",
     { x: 55, y: y - 40, size: 9, font: ctx.font, color: INK });
 
-  const approvedAt = new Date().toISOString().substring(0, 10);
+  const approvedAt = datumDe(new Date().toISOString().substring(0, 10));
   let lineY = y - 60;
   for (const d of ctx.decisions) {
-    const name = d.approver?.full_name ?? "?";
+    const name = winAnsi(d.approver?.full_name ?? "?");
     const dec = d.decision === "approved" ? "freigegeben" : "abgelehnt";
-    const decidedAt = d.decided_at
-      ? String(d.decided_at).substring(0, 10) : approvedAt;
+    // Deutsche Zeit, deutsches Format (vorher UTC-Datum im ISO-Format).
+    const decidedAt = d.decided_at ? zeitDe(String(d.decided_at)).substring(0, 10) : approvedAt;
     page.drawText(`- ${name}: ${dec}  (${decidedAt})`,
       { x: 55, y: lineY, size: 9, font: ctx.font, color: INK });
     lineY -= 12;
@@ -452,9 +475,9 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
       sy = drawPageHeader(page, ctx, stampTitle, `${stampSubtitle} (Fortsetzung)`);
     }
 
-    const name = d.approver?.full_name ?? "?";
-    const decidedAt = d.decided_at
-      ? String(d.decided_at).substring(0, 10) : approvedAt;
+    const name = winAnsi(d.approver?.full_name ?? "?");
+    // Deutsche Zeit, deutsches Format (vorher UTC-Datum im ISO-Format).
+    const decidedAt = d.decided_at ? zeitDe(String(d.decided_at)).substring(0, 10) : approvedAt;
     const sigUrl = d.signature_url;
 
     page.drawRectangle({
@@ -498,7 +521,9 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
     }
 
     page.drawText(name, { x: 60, y: sy - 100, size: 10, font: ctx.bold, color: INK });
-    page.drawText(`Gesellschafter – freigegeben am ${decidedAt}`,
+    // Ohne fest eingetragene Rolle: Sie stand als „Gesellschafter" auch bei
+    // der Gesellschafterin. Der Name steht darüber.
+    page.drawText(`Freigegeben am ${decidedAt}`,
       { x: 60, y: sy - 114, size: 8, font: ctx.font, color: MUTED });
 
     sy -= CARD_GAP;
@@ -571,7 +596,7 @@ Deno.serve(async (req) => {
   const ctx: Ctx = {
     pdf, font, bold, italic,
     approval: approval as Approval,
-    decisions: (decisions ?? []) as Decision[],
+    decisions: (decisions ?? []) as unknown as Decision[],
     caller,
     headerDrawn: false,
   };
@@ -589,7 +614,7 @@ Deno.serve(async (req) => {
     const p = pdf.addPage([595, 842]);
     const y = drawPageHeader(p, ctx,
       `Bördesnack24 – ${ctx.approval.title}`,
-      `Zeitraum: ${ctx.approval.period_from} bis ${ctx.approval.period_to}`);
+      `Zeitraum: ${datumDe(ctx.approval.period_from)} bis ${datumDe(ctx.approval.period_to)}`);
     p.drawText(`Dokument-Typ: ${kind}`,
       { x: 40, y, size: 10, font, color: INK });
   }

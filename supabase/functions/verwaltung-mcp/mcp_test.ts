@@ -98,3 +98,21 @@ Deno.test("abgelaufeneExporte: nur Exporte älter als 24 h, fremde Namen bleiben
     [`${alt}_a.pdf`],
   );
 });
+
+Deno.test("PDF-Anfrage trägt das Feld, das protocol-export-pdf liest", async () => {
+  const { pdfAnfrage, PROTOKOLLARTEN } = await import("./mcp.ts");
+  const quelle = await Deno.readTextFile(new URL("../protocol-export-pdf/index.ts", import.meta.url));
+  // protocol-export-pdf liest body.protocol, body.from, body.to.
+  for (const feld of ["protocol", "from", "to"]) {
+    if (!quelle.includes(`body.${feld}`)) throw new Error(`protocol-export-pdf liest body.${feld} nicht mehr`);
+  }
+  const a = pdfAnfrage("cleaning", "2026-10-01", "2026-10-31");
+  if (JSON.stringify(a) !== JSON.stringify({ protocol: "cleaning", from: "2026-10-01", to: "2026-10-31" })) {
+    throw new Error(JSON.stringify(a));
+  }
+  // Jede Protokollart, die Claude anbietet, kennt protocol-export-pdf.
+  for (const { kind } of Object.values(PROTOKOLLARTEN)) {
+    if (!new RegExp(`\\b${kind}: \\{ table:`).test(quelle)) throw new Error(`Art ${kind} fehlt in protocol-export-pdf`);
+  }
+});
+

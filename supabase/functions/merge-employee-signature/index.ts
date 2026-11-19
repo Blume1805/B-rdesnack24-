@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { winAnsi, zeitDe } from "../_shared/pdf_format.ts";
 
 const ISSUER = {
   name: "Bördesnack24 GbR",
@@ -137,23 +138,22 @@ Deno.serve(async (req) => {
   page.drawLine({ start: { x: 40, y }, end: { x: 555, y },
     thickness: 1.4, color: GOLD });
   y -= 14;
-  page.drawText(`Dokument: ${doc?.title ?? "?"}` +
+  page.drawText(winAnsi(`Dokument: ${doc?.title ?? "?"}` +
     `${doc?.category ? " · Kategorie: " + doc.category : ""}` +
-    ` · Version ${task.document_version}`,
+    ` · Version ${task.document_version}`),
     { x: 40, y, size: 10, font, color: INK });
   y -= 14;
   page.drawLine({ start: { x: 40, y }, end: { x: 555, y },
     thickness: 0.8, color: INK });
   y -= 20;
 
-  const empName = (task.employee as { full_name?: string } | null)?.full_name ?? "?";
-  const empMail = (task.employee as { email?: string } | null)?.email ?? "";
-  const signedAt = task.signed_at
-    ? String(task.signed_at).substring(0, 19).replace("T", " ")
-    : new Date().toISOString().substring(0, 19).replace("T", " ");
-  const invitedAt = task.invited_at
-    ? String(task.invited_at).substring(0, 19).replace("T", " ")
-    : "?";
+  // WinAnsi-sicher (ein Name mit z. B. „Ł" brach sonst die PDF-Erzeugung
+  // ab) und deutsche Zeit mit Sekunden statt unbezeichneter UTC-Zeit
+  // (Befund 19.11.2026).
+  const empName = winAnsi((task.employee as { full_name?: string } | null)?.full_name ?? "?");
+  const empMail = winAnsi((task.employee as { email?: string } | null)?.email ?? "");
+  const signedAt = `${zeitDe(task.signed_at ? String(task.signed_at) : new Date().toISOString(), true)} (deutsche Zeit)`;
+  const invitedAt = task.invited_at ? `${zeitDe(String(task.invited_at), true)} (deutsche Zeit)` : "?";
 
   const rows: Array<[string, string]> = [
     ["Unterzeichner",   empName],

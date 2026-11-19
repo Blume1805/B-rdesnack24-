@@ -66,6 +66,13 @@ export function abgelaufeneExporte(namen: string[], jetzt: number, maxAlterMs = 
   });
 }
 
+/** Anfrage an protocol-export-pdf. Das Feld heißt dort `protocol` (wie in
+ *  der App, management_remote_data_source.dart). Befund 19.11.2026: Hier
+ *  stand `kind`, jede PDF-Anfrage über Claude wäre mit 400 gescheitert. */
+export function pdfAnfrage(kind: string, von: string, bis: string): { protocol: string; from: string; to: string } {
+  return { protocol: kind, from: von, to: bis };
+}
+
 export interface Werkzeugbank {
   protokollPdf(kind: string, von: string, bis: string, titel: string): Promise<{ link: string; dateiname: string }>;
   offeneVorgaenge(): Promise<unknown>;
