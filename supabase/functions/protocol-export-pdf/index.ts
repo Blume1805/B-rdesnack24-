@@ -10,6 +10,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { seitenAufteilen } from "../_shared/seiten.ts";
+import { datumDe, zelle } from "../_shared/pdf_format.ts";
 
 interface ProtocolDef {
   table: string;
@@ -68,12 +70,11 @@ const winAnsiSafe = (s: string): string => {
   return out;
 };
 
-const fmt = (v: unknown): string => {
-  if (v === null || v === undefined) return "";
-  if (typeof v === "boolean") return v ? "Ja" : "Nein";
-  if (typeof v === "string" && v.length > 19 && v.includes("T")) return winAnsiSafe(v.replace("T", " ").substring(0, 16));
-  return winAnsiSafe(String(v));
-};
+// Zelleninhalt deutsch formatiert (_shared/pdf_format.ts). Vorher wurde
+// jeder Freitext mit großem „T" als Zeitstempel verstümmelt (Befund
+// 19.11.2026), Uhrzeiten standen in UTC.
+const GELD = new Set(["amount_gross", "change_amount", "net_amount"]);
+const fmt = (v: unknown, key = ""): string => winAnsiSafe(zelle(v, GELD.has(key)));
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -165,12 +166,14 @@ Deno.serve(async (req) => {
     return lines.length ? lines : [""];
   };
 
-  // Räume auf jeder Seite: Header (Aussteller + Titel + Zeitraum +
-  // Spaltenköpfe) 800 -> ~720; Fußraum für "Eintraege" + Signatur-Block:
-  // Signaturen ab y=170, "Eintraege" bei y=40. Ab y < FOOT_Y_LIMIT muss
-  // eine neue Seite beginnen, damit die letzte Zeile nicht im Signatur-
-  // Bereich landet.
-  const FOOT_Y_LIMIT = 220;
+  // Seitenränder unten: Zeilen dürfen bis ROW_Y_LIMIT laufen (darunter die
+  // Fußzeile ab y=52). Nur die LETZTE Seite hält zusätzlich den Bereich
+  // ab SIG_Y_TOP für die Unterschriften frei. Bis 19.11.2026 galt die
+  // Unterschriften-Grenze auf jeder Seite (ein Viertel jeder Folgeseite
+  // blieb leer), und reichte der Platz nicht, stand der Unterschriftenblock
+  // allein auf einer neuen Seite. Die Aufteilung macht seitenAufteilen().
+  const ROW_Y_LIMIT = 70;
+  const SIG_Y_TOP = 220;
 
   // Tabellenkopf als Ink-Band mit Cream-Text (wie im One-Pager). Wird auf
   // jeder Seite (auch Folgeseiten) wiederholt, damit der Spaltenbezug beim
@@ -211,7 +214,7 @@ Deno.serve(async (req) => {
     let ty = 842 - 104;
     p.drawText(winAnsiSafe(def.title), { x: 40, y: ty, size: 15, font: bold, color: gold });
     ty -= 18;
-    p.drawText(`Zeitraum: ${from} bis ${to}`, { x: 40, y: ty, size: 10, font, color: ink });
+    p.drawText(`Zeitraum: ${datumDe(from)} bis ${datumDe(to)}`, { x: 40, y: ty, size: 10, font, color: ink });
     ty -= 10;
     p.drawLine({
       start: { x: 40, y: ty }, end: { x: 555, y: ty },
@@ -237,53 +240,64 @@ Deno.serve(async (req) => {
   const ROW_SIZE = 7.5;
   const ROW_LINE_H = 11;
 
-  for (const row of (rows ?? [])) {
-    const cells = def.columns.map((c) => fmt((row as Record<string, unknown>)[c.key]));
+  // Zeilen vorab umbrechen und messen, dann auf Seiten verteilen.
+  const LEER = [{ __leer: true }];
+  const quelle: Record<string, unknown>[] = (rows ?? []).length ? (rows as Record<string, unknown>[]) : LEER;
+  const gemessen = quelle.map((row) => {
+    const cells = row.__leer
+      ? def.columns.map((_, i) => (i === 0 ? "Keine Einträge im Zeitraum." : ""))
+      : def.columns.map((c) => fmt(row[c.key], c.key));
     const cellLines = cells.map((text, i) => {
-      const availWidth = colWidths[i] - 8;
+      // Die Leer-Zeile läuft über die ganze Breite.
+      const availWidth = (row.__leer && i === 0 ? TABLE_W : colWidths[i]) - 8;
       return font.widthOfTextAtSize(text, ROW_SIZE) <= availWidth
         ? [text]
         : wrapText(text, availWidth, font, ROW_SIZE);
     });
     const lineCount = Math.max(1, ...cellLines.map((l) => l.length));
-    const rowHeight = 13 + (lineCount - 1) * ROW_LINE_H;
+    return { cellLines, lineCount, rowHeight: 13 + (lineCount - 1) * ROW_LINE_H, leer: Boolean(row.__leer) };
+  });
+  const startFolge = 842 - 34 - 20; // drawContinuationHeader(): Kopf bei 842-34, dann -20
+  const { seiten } = seitenAufteilen(gemessen.map((g) => g.rowHeight), {
+    platzErste: y - ROW_Y_LIMIT,
+    platzFolge: startFolge - ROW_Y_LIMIT,
+    schluss: SIG_Y_TOP - ROW_Y_LIMIT,
+  });
 
-    // Vor jeder Zeile prüfen: reicht der Platz oberhalb des Footer-Bereichs?
-    // Wenn nicht, neue Seite + Folgeseiten-Header wiederholen. Damit steht
-    // nie eine einzelne Zeile am Seitenanfang und der Signatur-Block wird
-    // nie überschrieben.
-    if (y - rowHeight < FOOT_Y_LIMIT) {
+  for (let s = 0; s < seiten.length; s++) {
+    if (s > 0) {
       page = pdf.addPage([595, 842]);
       y = drawContinuationHeader(page);
       zebra = false;
     }
-    if (zebra) {
-      page.drawRectangle({
-        x: TABLE_X, y: y - 3.5 - (lineCount - 1) * ROW_LINE_H, width: TABLE_W, height: rowHeight, color: cream,
+    for (const idx of seiten[s]) {
+      const { cellLines, lineCount, rowHeight, leer } = gemessen[idx];
+      if (zebra) {
+        page.drawRectangle({
+          x: TABLE_X, y: y - 3.5 - (lineCount - 1) * ROW_LINE_H, width: TABLE_W, height: rowHeight, color: cream,
+        });
+      }
+      zebra = !zebra;
+      cellLines.forEach((lines, i) => {
+        const numeric = NUMERIC_KEYS.has(def.columns[i].key);
+        lines.forEach((line, li) => {
+          const tx = numeric
+            ? colX[i] + colWidths[i] - 6 - font.widthOfTextAtSize(line, ROW_SIZE)
+            : colX[i] + 4;
+          page.drawText(line, {
+            x: tx, y: y - li * ROW_LINE_H, size: ROW_SIZE,
+            font: leer ? italic : font, color: leer ? muted : ink,
+          });
+        });
       });
+      y -= rowHeight;
     }
-    zebra = !zebra;
-    cellLines.forEach((lines, i) => {
-      const numeric = NUMERIC_KEYS.has(def.columns[i].key);
-      lines.forEach((line, li) => {
-        const tx = numeric
-          ? colX[i] + colWidths[i] - 6 - font.widthOfTextAtSize(line, ROW_SIZE)
-          : colX[i] + 4;
-        page.drawText(line, { x: tx, y: y - li * ROW_LINE_H, size: ROW_SIZE, font, color: ink });
-      });
-    });
-    y -= rowHeight;
   }
 
-  // Signatur-Block: braucht ca. 100 pt Höhe (Überschrift + Linie + Name +
-  // Datum). Wenn nicht mehr genug Platz auf der aktuellen Seite ist,
-  // wird eine neue Seite mit Folgeseiten-Header angelegt — die letzte
-  // Datenzeile bleibt aber auf ihrer Ursprungs-Seite.
+  // Signatur-Block am Fuß der letzten Seite (ab SIG_Y_TOP). Die Aufteilung
+  // oben garantiert, dass er dort Platz hat und nie allein auf einer Seite
+  // steht.
   const { data: sigs } = await caller.from("partner_signatures").select("full_name,role_label,image_url").order("sort_order", { ascending: true });
-  if (y < FOOT_Y_LIMIT) {
-    page = pdf.addPage([595, 842]);
-    y = drawContinuationHeader(page);
-  }
   const sigY = 120;
   const slotW = 260;
   let sx = 40;
@@ -295,7 +309,7 @@ Deno.serve(async (req) => {
     start: { x: 40, y: sigLabelY - 6 }, end: { x: 190, y: sigLabelY - 6 },
     thickness: 1, color: gold,
   });
-  const today = new Date().toISOString().substring(0, 10);
+  const today = datumDe(new Date().toISOString().substring(0, 10));
   for (const s of (sigs ?? [])) {
     page.drawLine({ start: { x: sx, y: sigY + 22 }, end: { x: sx + slotW - 30, y: sigY + 22 }, thickness: 0.5, color: ink });
     const nm = winAnsiSafe(String((s as { full_name?: unknown }).full_name ?? ""));
@@ -313,7 +327,7 @@ Deno.serve(async (req) => {
 
   // Footer auf JEDER Seite: Trennlinie + Stammdaten + Eintragszahl + Seitenzahl.
   const totalEntries = (rows ?? []).length;
-  const createdOn = new Date().toISOString().substring(0, 10);
+  const createdOn = datumDe(new Date().toISOString().substring(0, 10));
   const pages = pdf.getPages();
   pages.forEach((pg, i) => {
     pg.drawLine({ start: { x: 40, y: 52 }, end: { x: 555, y: 52 }, thickness: 0.5, color: muted });

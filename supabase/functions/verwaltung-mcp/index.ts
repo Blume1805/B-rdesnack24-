@@ -13,7 +13,7 @@
 // An Claude gehen nie Daten von Beschäftigten (siehe mcp.ts).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { abgelaufeneExporte, bearbeite, kurz, type Werkzeugbank } from "./mcp.ts";
+import { abgelaufeneExporte, bearbeite, kurz, pdfAnfrage, type Werkzeugbank } from "./mcp.ts";
 
 const URL_BASIS = Deno.env.get("SUPABASE_URL")!;
 const RESSOURCE = `${URL_BASIS}/functions/v1/verwaltung-mcp`;
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       const res = await fetch(`${URL_BASIS}/functions/v1/protocol-export-pdf`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, apikey: anon, "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, from: von, to: bis }),
+        body: JSON.stringify(pdfAnfrage(kind, von, bis)),
       });
       if (!res.ok) throw new Error(`PDF-Erzeugung meldet ${res.status}`);
       const pdf = await res.json() as { filename?: string; base64?: string };
