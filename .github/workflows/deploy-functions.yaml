@@ -101,6 +101,13 @@ jobs:
         with:
           version: latest
 
+      # Deno für die Prüfung vor dem Ausrollen. Fehlte bis 19.11.2026: Der
+      # Lauf brach mit „deno: command not found" ab, bevor etwas ausgerollt
+      # wurde. Gleiche Version wie in ci.yaml.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: Modus bestimmen
         id: modus
         # Tag-Name und Eingaben laufen über die Umgebung, nicht direkt in den
