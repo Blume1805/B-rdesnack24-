@@ -1679,17 +1679,29 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    3 Konten sind gelöscht, keine alte Adresse mehr vorhanden. Es bleiben 2
    interne Konten.
 2. Philipp und Pia erfassen echte Unterschriften in der App.
-3. Die fünf oben genannten Dokumente werden neu freigegeben, durch beide
-   Gesellschafter.
+3. ~~Die fünf oben genannten Dokumente werden neu freigegeben.~~ Entfällt
+   (Entscheidung Philipp 19.11.2026): „Das waren alles nur Test-Dokumente, die
+   freigegeben werden sollten. Die ursprünglichen Dokumente bleiben erhalten,
+   müssen aber nicht freigegeben werden."
+   Migration `20261119110000_juli_testfreigaben_loeschen` löscht die 9
+   Test-Freigaben vom 14./15.07.2026 samt 9 Entscheidungen. Sie greift nur über
+   feste Kennungen und nur bei abgeschlossenem Status vor August.
+   Lokal geprüft: eine offene Freigabe mit gelisteter Kennung und eine fremde
+   Juli-Freigabe bleiben stehen, keine Entscheidung bleibt verwaist,
+   Fingerabdruck unverändert. Dokumente und ihre Dateien bleiben (zwei
+   Entwurfspfade zeigen auf Originale in `documents`). Die 5 unterschriebenen
+   Test-PDFs in `signed-documents` löscht Philipp über den Speicherdienst
+   (Runbook U). Rechtlich: HACCP (VO (EG) 852/2004) verlangt ein angewandtes
+   Eigenkontrollkonzept, keine interne Zweitfreigabe. Die Freigabe ist eine
+   freiwillige Kontrolle.
 4. ✅ Name auf der Unterschrift: „Pia Blume" (Entscheidung Philipp 18.11.2026),
    bleibt unverändert. Kontoname wird angeglichen (Philipp: „Ja angleichen"),
    Migration `20261118100000_name_wie_unterschrift` übernimmt den Namen der
    zugeordneten Unterschrift; lokal geprüft (ändert einmal, zweiter Lauf
    nichts). ✅ Am 19.11.2026 eingespielt; der Kontoname lautet „Pia Blume".
 
-**Status: 🔴 OFFEN** (Datenbankteil erledigt 19.11.2026; offen: Punkte 2 und 3,
-echte Unterschriften und Neufreigabe der fünf Dokumente, verantwortlich Philipp
-und Pia)
+**Status: 🔴 OFFEN** (Datenbankteil erledigt 19.11.2026; Punkt 3 entfällt; offen:
+Punkt 2, echte Unterschriften, verantwortlich Philipp und Pia; dazu Runbook U)
 
 ---
 

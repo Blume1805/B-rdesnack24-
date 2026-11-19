@@ -2137,3 +2137,44 @@ Kachel eine Freigabe an; Philipps Handy zeigt innerhalb weniger Sekunden
   kommt in jedem Fall.
 * **Abschalten:** iPhone → Einstellungen → Mitteilungen → Bördesnack24 →
   aus. Nichts eilt.
+
+## Runbook U: Fünf Test-PDFs aus dem Speicher löschen (Stand 19.11.2026)
+
+**Zeitbedarf:** 3 Minuten, am Desktop. **Eilt nicht.**
+
+### Warum
+
+Die Test-Freigaben vom Juli sind aus der Datenbank gelöscht. Dazu gehörten
+fünf unterschriebene PDFs. Supabase lässt Dateien aus Sicherheitsgründen nicht
+per Datenbank-Befehl löschen, nur über seine Oberfläche. Ohne diesen Schritt
+liegen die fünf Dateien nutzlos im Speicher. In der App sind sie nicht mehr
+erreichbar.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Der Speicherbereich **signed-documents** wird geleert. Darin
+  liegen genau diese fünf Dateien und sonst nichts (gemessen am 19.11.2026).
+  Ihre Namen sind lange Zeichenketten, die mit `.pdf` enden.
+* Es passiert **nicht**: Dokumente, Vorlagen, Unterschriften und der Bereich
+  **documents** bleiben unberührt. Dort liegen die Originale.
+
+### Schritt für Schritt
+
+1. Im Browser <https://supabase.com/dashboard/project/nnfsyuglkqycwenwxmuw/storage/buckets>
+   öffnen und anmelden.
+2. Links in der Liste auf **signed-documents** klicken.
+3. Es erscheinen fünf Dateien, die mit `.pdf` enden. Oben links das
+   Kästchen zum Auswählen aller Einträge anklicken.
+4. Auf **Delete** (Papierkorb) klicken und mit **Delete** bestätigen.
+
+### So sieht Erfolg aus
+
+Der Bereich **signed-documents** ist leer. Mir „Speicher geleert" schreiben;
+ich messe nach.
+
+### Wenn etwas schiefgeht
+
+Stehen dort mehr als fünf Dateien, oder heißt der Bereich anders: nichts
+löschen, mir ein Bildschirmfoto schicken. Versehentlich in einem anderen
+Bereich gelöscht: sofort melden. Gelöschte Dateien lassen sich nicht
+wiederherstellen.
