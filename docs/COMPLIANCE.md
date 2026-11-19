@@ -1474,7 +1474,7 @@ Abgleich mit allen Befunden: `docs/abgleich-landingpage-backend-2026-11-03.md`.
 
 ---
 
-## V-019 · Claude-Verbindung zur Verwaltung (MCP) ohne Beschäftigtendaten (2026-11-17) — OFFEN
+## V-019 · Claude-Verbindung zur Verwaltung (MCP) ohne Beschäftigtendaten (2026-11-17) — OFFEN (Live-Test)
 
 ### Sachverhalt
 
@@ -1567,11 +1567,19 @@ Gebaut (im Repository, noch nicht in der Produktion):
   geschäftlichen Claude-Tarif mit DPA erwägen. Dann darf die Verbindung auch
   mehr zeigen.
 
-**Status: 🔴 OFFEN** (nicht in der Produktion; Live-Test ausstehend)
+**Stand 19.11.2026 (gemessen):** Migration `20261117120000` ist in der Produktion.
+Der Bucket `mcp-exporte` ist privat, nimmt nur PDF bis 10 MB an und hat keine Regeln auf
+`storage.objects`. Beide Funktionen haben einen festen Suchpfad und kein
+anon-Ausführungsrecht. Der KI-Register-Eintrag ist grün und aktiv. Der Dienst
+`verwaltung-mcp` (v1, `verify_jwt=false`) ist ausgeliefert. Von außen geprüft:
+Entdeckung 200; ohne Token 401 mit `WWW-Authenticate`; gefälschtes Token 401,
+keine Daten. Offen bleiben Runbook S (Teil 2/3) und der Live-Test (Punkt 2).
+
+**Status: 🔴 OFFEN** (in der Produktion; Live-Test mit Claude ausstehend)
 
 ---
 
-## V-020 · Kontolöschung ließ Anmeldedaten stehen (2026-11-17) — OFFEN
+## V-020 · Kontolöschung ließ Anmeldedaten stehen (2026-11-17) — ERLEDIGT
 
 ### Sachverhalt
 
@@ -1618,15 +1626,16 @@ erfüllte das nicht vollständig. Die Doku bleibt so, der Code wird korrigiert
    * Ohne die Korrektur schlägt es fehl („loeschkandidat@… | {"full_name": …} | 1 | 1").
    * Mit der Korrektur: 27/27 bestanden.
    * Gesamtlauf: 35 Prüfskripte und 8 pgTAP-Dateien ohne Fehler.
-3. 🔴 Einspielen in die Produktion mit Philipps Bestätigung. Danach
-   nachmessen: Demo-Adresse in `auth.users` = 0, Identitäten = 0, Fingerabdruck.
+3. ✅ Am 19.11.2026 mit Philipps Bestätigung in die Produktion eingespielt.
+   Nachgemessen: Demo-Adresse in `auth.users` = 0, Identitäten = 0.
+   Fingerabdruck der Produktion = Sollwert (alle sieben Merkmale).
 4. **Vor dem ersten echten Löschantrag zwingend.**
 
-**Status: 🔴 OFFEN** (Korrektur im Repository, nicht in der Produktion)
+**Status: 🟢 ERLEDIGT** (19.11.2026, in der Produktion nachgemessen)
 
 ---
 
-## V-021 · Freigaben und Partner-Unterschriften an Demo-Konten (2026-11-18) — OFFEN
+## V-021 · Freigaben und Partner-Unterschriften an Demo-Konten (2026-11-18) — OFFEN (Philipp/Pia)
 
 ### Sachverhalt
 
@@ -1664,7 +1673,11 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    * setzt die 4 offenen Demo-Freigaben auf „abgelehnt" mit Vermerk,
    * löscht Demo-Admin, Demo-Gesellschafter und ein Testkundenkonto.
 
-   Voraussetzung ist `20261117130000`. Einspielen am 19.11.2026 mit Philipp.
+   Voraussetzung ist `20261117130000`. ✅ Am 19.11.2026 eingespielt und
+   nachgemessen. Unterschriften: Pia → Gesellschafterin, Philipp → Administrator.
+   Offene Freigaben: 0. Die 4 Demo-Freigaben sind mit Vermerk abgelehnt.
+   3 Konten sind gelöscht, keine alte Adresse mehr vorhanden. Es bleiben 2
+   interne Konten.
 2. Philipp und Pia erfassen echte Unterschriften in der App.
 3. Die fünf oben genannten Dokumente werden neu freigegeben, durch beide
    Gesellschafter.
@@ -1672,9 +1685,11 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    bleibt unverändert. Kontoname wird angeglichen (Philipp: „Ja angleichen"),
    Migration `20261118100000_name_wie_unterschrift` übernimmt den Namen der
    zugeordneten Unterschrift; lokal geprüft (ändert einmal, zweiter Lauf
-   nichts). Einspielen nach `20261118090000`.
+   nichts). ✅ Am 19.11.2026 eingespielt; der Kontoname lautet „Pia Blume".
 
-**Status: 🔴 OFFEN**
+**Status: 🔴 OFFEN** (Datenbankteil erledigt 19.11.2026; offen: Punkte 2 und 3,
+echte Unterschriften und Neufreigabe der fünf Dokumente, verantwortlich Philipp
+und Pia)
 
 ---
 
@@ -1721,9 +1736,14 @@ Umsetzung (im Repository, nicht ausgeliefert):
 
 ### Ergebnis / Handlungsbedarf
 
-1. VAPID-Schlüssel als Geheimnisse hinterlegen und `approval-notify`
-   ausliefern. Beides mit Philipps Bestätigung (Runbook T, Teil 1).
+1. `approval-notify` v10 ist am 19.11.2026 ausgeliefert (`verify_jwt=true` wie
+   bisher). Gemessen: GET ohne Schlüssel 503 „Push nicht eingerichtet“; POST
+   ohne Token 401; unbekannte Freigabe 404, nichts versendet. Der App-Teil
+   ist mit Commit `0897ee4` auf `main` veröffentlicht. 🔴 Noch offen: die
+   VAPID-Schlüssel als Geheimnisse hinterlegen. Das Eingabefeld des
+   Supabase-Werkzeugs erschien zweimal nicht; Philipp trägt sie selbst im
+   Dashboard ein (Runbook T, Teil 1).
 2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
    Probe.
 
-**Status: 🔴 OFFEN** (nicht ausgeliefert)
+**Status: 🔴 OFFEN** (ausgeliefert; Schlüssel und Einschalten am Handy ausstehend)

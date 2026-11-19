@@ -1714,6 +1714,13 @@ Faktor vorher neu ein oder meldet sich, dann setzen wir ihn zurück.
 
 ### Teil 3 — Schalter an (mache ich, 2 Minuten)
 
+**Erledigt am 19.11.2026.** Gemessen: Schalter an
+(`app.require_mfa_internal()` = true); die Schnittstelle antwortet nicht
+angemeldeten Besuchern mit 200; Fingerabdruck der Produktion = Sollwert. Bei
+der Messung hatte nur Philipps Konto einen Faktor (1 von 2). Pia richtet ihren
+Faktor nach Teil 2 ein. Bis dahin sieht ihr Konto keine Daten (so beschlossen
+am 17.11.2026).
+
 8. Ich schalte die Pflicht ein (eine Datenbank-Änderung, die Du im Chat mit
    einem Klick bestätigst) und messe danach:
    * Schalter steht auf an,
@@ -2090,14 +2097,37 @@ an die Firmenadresse.
 * Es passiert **nicht**: Kunden bekommen keine solche Mitteilung. Die
   E-Mail an die Firmenadresse bleibt wie bisher.
 
-### Teil 1 — mit mir am Desktop (einmalig)
+### Teil 1 — Schlüssel hinterlegen (einmalig, am Desktop, 5 Minuten)
 
-1. Mir „nochmal" schreiben (gehört zum Durchgang mit den Datenbank-Schritten).
-2. Ich erzeuge die beiden Push-Schlüssel und hinterlege sie als Geheimnisse
-   bei den Server-Funktionen (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_D`). Du
-   bekommst eine Bestätigungsfrage → **Erlauben**. Den privaten Schlüssel
-   sieht dabei niemand im Chat.
-3. Ich liefere die Server-Funktion `approval-notify` neu aus → **Erlauben**.
+Stand 19.11.2026: Die Server-Funktion `approval-notify` ist schon neu
+ausgeliefert. Es fehlen nur noch die beiden Schlüssel. Sie sind so etwas wie
+der Absenderausweis, mit dem Apple und Google eine Mitteilung als echt
+erkennen. Ich habe sie erzeugt und Dir als Datei
+`push_schluessel_eintragen.txt` in den Chat gelegt. Supabase lässt Werte für
+solche Geheimnisse nur über die eigene Oberfläche eintragen; das
+Eingabefenster im Chat erschien bei uns nicht. Deshalb trägst Du sie selbst ein:
+
+1. Im Browser <https://supabase.com/dashboard/project/nnfsyuglkqycwenwxmuw/functions/secrets>
+   öffnen und anmelden. Das ist die Seite **Edge Functions → Secrets** des
+   Projekts **boerdesnack24-app**.
+2. Im Formular zum Hinzufügen bei **Name** (bzw. „Key") genau
+   `VAPID_PUBLIC_KEY` eintragen. Bei **Value** die ganze Zeile unter „Feld 1"
+   aus der Datei einfügen.
+3. Falls es ein zweites leeres Zeilenpaar gibt, dort weitermachen, sonst
+   zuerst **Save** und dann erneut hinzufügen: **Name** `VAPID_PRIVATE_D`,
+   **Value** die ganze Zeile unter „Feld 2".
+4. **Save** klicken.
+5. Mir „Schlüssel eingetragen" schreiben. Ich prüfe dann, ob die Funktion den
+   öffentlichen Schlüssel ausgibt, und lösche die Datei bei mir.
+
+**So sieht Erfolg aus:** In der Liste stehen `VAPID_PUBLIC_KEY` und
+`VAPID_PRIVATE_D` (Supabase zeigt nur gekürzte Prüfwerte, nicht den Inhalt).
+
+**Wenn etwas schiefgeht:** Ein vertippter Wert schadet nicht. Die Funktion
+schickt dann keine Push, die E-Mail an die Firmenadresse kommt weiter. Einfach
+denselben Namen noch einmal mit dem richtigen Wert speichern; er wird
+überschrieben. Nichts eilt. Den Wert aus „Feld 2" nirgendwo sonst einfügen und
+die Datei danach löschen.
 
 ### Teil 2 — jeder an seinem iPhone
 
