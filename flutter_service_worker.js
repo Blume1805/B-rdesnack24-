@@ -1,5 +1,5 @@
-// Bördesnack24 Web — Offline-Cache v1795038002 (generiert von deploy_web.sh).
-const CACHE = 'bs24-1795038002';
+// Bördesnack24 Web — Offline-Cache v1795075838 (generiert von deploy_web.sh).
+const CACHE = 'bs24-1795075838';
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
@@ -70,5 +70,27 @@ self.addEventListener('fetch', (event) => {
       } catch (_) {}
       return fetch(req);
     }
+  })());
+});
+// Push-Benachrichtigungen (19.11.2026): Freigabe angefordert. Der Inhalt
+// kommt verschlüsselt vom Server (approval-notify/webpush.ts).
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (_) {}
+  event.waitUntil(self.registration.showNotification(d.titel || 'Bördesnack24', {
+    body: d.text || '',
+    tag: d.tag || undefined,
+    icon: 'icons/Icon-192.png',
+    badge: 'icons/Icon-192.png',
+    data: { url: d.url || './' },
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const ziel = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil((async () => {
+    const fenster = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const f of fenster) { if ('focus' in f) return f.focus(); }
+    return self.clients.openWindow(ziel);
   })());
 });
