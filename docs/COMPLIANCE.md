@@ -1736,8 +1736,8 @@ Umsetzung (im Repository, nicht ausgeliefert):
 
 ### Ergebnis / Handlungsbedarf
 
-1. `approval-notify` v10 ist am 19.11.2026 ausgeliefert (`verify_jwt=true` wie
-   bisher). Gemessen: GET ohne Schlüssel 503 „Push nicht eingerichtet“; POST
+1. `approval-notify` ist am 19.11.2026 ausgeliefert (v10; v11 mit den Typangaben
+   aus Commit `5f6d2f9`, gleich Repository; `verify_jwt=true` wie bisher). Gemessen: GET ohne Schlüssel 503 „Push nicht eingerichtet“; POST
    ohne Token 401; unbekannte Freigabe 404, nichts versendet. Der App-Teil
    ist mit Commit `0897ee4` auf `main` veröffentlicht. 🔴 Noch offen: die
    VAPID-Schlüssel als Geheimnisse hinterlegen. Das Eingabefeld des
