@@ -1804,6 +1804,14 @@ Umsetzung (im Repository, nicht ausgeliefert):
      offenen Eintrag, keine Doppelzustellung), insgesamt 15/15 in
      `approval-notify`, Typprüfung und Lint (CI-Regeln) sauber.
    * Bedienung: Runbook V in `OPERATIONS.md`.
+   * **Live, 19.11.2026** (Freigabe Philipp „Ja, alles"): `approval-notify` v13
+     über den Workflow ausgeliefert (Lauf 32, byte-genau aus `e78ce39`).
+     Gegenprobe ohne Eintrag: 200, 0 Proben, nichts gesendet. Testmitteilung
+     an Philipp („Freigabe angefordert (Test)", Text im Namen von Pia, als Test
+     gekennzeichnet): 1 Gerät, vom Apple-Push-Dienst angenommen (2xx). Der
+     Eintrag trägt `gesendet`, `zugestellt: 1`, `geraete: 1`. Ein zweiter Aufruf
+     stellte nichts erneut zu. Ob die Mitteilung auf dem Sperrbildschirm
+     erschien, bestätigt Philipp.
 
 **Status: 🔴 OFFEN** (ausgeliefert, Schlüssel vom Server erzeugt; offen: Pia schaltet Push ein,
 Runbook T Teil 2; Ergebnis der Testmitteilung an Philipp siehe Runbook V)
@@ -1947,6 +1955,9 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
    * Die HTML-Druckansichten (`*_print_web.dart`, `*_print.dart`, `*_html.dart`)
      werden nicht mehr aufgerufen. Sie bleiben vorerst stehen, weil Löschen von
      Code freigabepflichtig ist (CLAUDE.md, K4). Rückfrage an Philipp.
+   * ✅ Ausgeliefert am 19.11.2026 mit Philipps Freigabe („Ja, alles"): `main`
+     auf `e78ce39`, „Deploy Web-Demo" Lauf 84 und CI Lauf 986 grün. Offen:
+     Probe auf dem iPhone durch Philipp.
 4. Offen, nicht Teil dieses Auftrags:
    * ✅ `merge-employee-signature`: 17 Typfehler aus der Abfrage (schon vorher
      vorhanden) behoben; sonst hätte die Typprüfung im Auslieferungs-Workflow
