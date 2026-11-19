@@ -6,7 +6,9 @@ Berechtigungen** (ABAC). Alle Protokolle sind **revisionssicher**: kein UPDATE/D
 
 ## Datenmodell (Migrationen 0006–0009)
 
-- **Stammdaten:** `machines` (Automaten/Standorte, `nayax_terminal_id`), `products` (Sortiment).
+- **Stammdaten:** `machines` (Automaten, `nayax_terminal_id`), `locations` (Standorte, seit
+  Migration `20260821203014`; `machines.location_id`), `products` (Sortiment). Geprüft gegen das
+  Schema am 19.11.2026: Die Doku nannte bis dahin `machines` als Ort der Standorte.
 - **Inventur:** `inventory` (Bestand je Automat+Produkt), `inventory_movements` (append-only;
   Trigger `apply_inventory_movement` schreibt den Bestand fort), View `machine_stock`
   (`available` / `low` / `out`). `nayax_sales` (Roh-Telemetrie, dedupliziert).
@@ -21,6 +23,28 @@ Berechtigungen** (ABAC). Alle Protokolle sind **revisionssicher**: kein UPDATE/D
 `inventory.view/edit`, `haccp.fill/temperature/cleaning/disposal/maintenance`, `cash.collect`,
 `documents.view/edit`, `employees.manage`. Gesellschafter besitzen alle; Mitarbeiter nur die
 individuell zugewiesenen. UI-Gating via RPC `my_permissions()` (Autorisierung bleibt in der RLS).
+
+## Automaten und Standorte pflegen (seit 19.11.2026)
+
+Inventur → Bestand je Automat, für alle mit `inventory.edit`:
+
+* **＋** oben rechts legt einen Automaten an (Name, Kennung, Art, gekühlt, Standort,
+  Betrieb). Die Kennung wird als nächste freie „A…"-Nummer vorgeschlagen.
+* **⋮** je Automat: *Bearbeiten* (auch Umbenennen und Standort wechseln), *Stilllegen*
+  bzw. *Wieder in Betrieb nehmen*. Stilllegen setzt `status = 'inactive'`; der Automat
+  verschwindet aus dem Kunden-Finder, Bestand, Protokolle und Verkäufe bleiben.
+* **Standort:** aus der Liste wählen oder „Neuen Standort anlegen" (Name, Straße, PLZ,
+  Ort, Zugang; Kennung `STO-nnn` automatisch). „Adresse dieses Standorts ändern" gilt für
+  alle Automaten an diesem Standort. Die Adresse wird auf `machines` gespiegelt
+  (`location_name`, `street`, `zip`, `city`, `access_hours`), weil Liste, Finder und
+  Belege sie dort lesen.
+* **Löschen gibt es nicht** (Migration `20261119120000`: Regeln `machines_insert/_update`,
+  `locations_insert/_update`, kein DELETE-Recht für anon/authenticated). Am Automaten
+  hängen Aufzeichnungen nach § 147 AO; einige Tabellen löschten kaskadierend mit.
+* Code: `features/management/data/automaten_verwaltung.dart`,
+  `presentation/widgets/automat_formular.dart`, `presentation/screens/inventory_screen.dart`.
+  Nachweis: Prüfskript `121_automaten_verwalten.sql` (24 Urteile), App-Test
+  `test/features/management/automaten_verwalten_test.dart` (12 Fälle).
 
 ## Echtzeit-Inventur (Nayax)
 

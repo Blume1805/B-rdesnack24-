@@ -29,7 +29,12 @@ class MachineDropdown extends ConsumerWidget {
         decoration: InputDecoration(labelText: label),
         items: [
           for (final Machine m in list)
-            DropdownMenuItem(value: m.id, child: Text('${m.code} · ${m.name}')),
+            DropdownMenuItem(
+              value: m.id,
+              child: Text(
+                '${m.code} · ${m.name}${m.inBetrieb ? '' : ' (stillgelegt)'}',
+              ),
+            ),
         ],
         onChanged: onChanged,
         validator: (v) => v == null ? 'Pflichtfeld' : null,

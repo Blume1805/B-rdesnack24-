@@ -10,6 +10,10 @@ class Machine extends Equatable {
     this.city,
     this.status = 'active',
     this.imageUrl,
+    this.locationId,
+    this.locationName,
+    this.street,
+    this.zip,
   });
 
   final String id;
@@ -24,6 +28,17 @@ class Machine extends Equatable {
   /// gepflegt ist, ersetzt Image.network den Platzhalter automatisch).
   final String? imageUrl;
 
+  /// Standort (`locations`), dazu die auf dem Automaten gespiegelte Adresse,
+  /// die Liste, Finder und Belege anzeigen.
+  final String? locationId;
+  final String? locationName;
+  final String? street;
+  final String? zip;
+
+  /// In Betrieb: für Kunden im Automaten-Finder sichtbar. Alles andere
+  /// (stillgelegt, archiviert) ist für Kunden ausgeblendet.
+  bool get inBetrieb => status == 'active';
+
   factory Machine.fromJson(Map<String, dynamic> j) => Machine(
         id: j['id'] as String,
         code: j['code'] as String,
@@ -33,8 +48,13 @@ class Machine extends Equatable {
         city: j['city'] as String?,
         status: j['status'] as String? ?? 'active',
         imageUrl: j['image_url'] as String?,
+        locationId: j['location_id'] as String?,
+        locationName: j['location_name'] as String?,
+        street: j['street'] as String?,
+        zip: j['zip'] as String?,
       );
 
   @override
-  List<Object?> get props => [id, code, imageUrl];
+  List<Object?> get props =>
+      [id, code, name, type, isCooled, city, status, imageUrl, locationId];
 }

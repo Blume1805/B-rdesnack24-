@@ -1822,6 +1822,63 @@ bekommt eine Testmitteilung, Runbook T Teil 2 und Runbook V, verantwortlich Pia)
 
 ---
 
+## V-024 · Automaten in der App verwalten; Löschen gesperrt (2026-11-19) — OFFEN (Einspielen)
+
+### Sachverhalt
+
+Wunsch Philipp vom 19.11.2026: In der Inventur Automaten bearbeiten, umbenennen,
+den Standort ändern, neue anlegen und kaputte stilllegen. Dabei gemessen (nur
+gelesen):
+
+* In der Produktion steht **kein echter Automat**. Die vier Einträge der
+  Inventur-Liste (A1–A4) sind die Testvorlagen vom Sommer, seit 10.09.2026
+  archiviert und als gelöscht markiert (`20260910120000`). Admins sahen sie
+  trotzdem, weil die Schreibregel `machines_write` (`for all`) auch das Lesen
+  gelöschter Zeilen erlaubte. Sie belegen die Kennungen A1–A4.
+* Vier Platzhalter-Standorte „… (ANPASSEN)" sind aktiv.
+* `machines_write` und `locations_write` erlaubten Berechtigten auch **DELETE**.
+  Gegenprobe im Nachbau: Ein Gesellschafter konnte einen Automaten endgültig
+  löschen (`ROWS:1`); Fächer, Tagesumsätze, Gerätezuordnung und Werbeflächen
+  löschen kaskadierend mit.
+
+### Rechtliche Würdigung
+
+* **§ 147 AO, GoBD (Unveränderbarkeit, Aufbewahrung):** Am Automaten hängen
+  Bestandsbewegungen, Verkäufe und Protokolle. Ein Stammdatum, auf das
+  Aufzeichnungen verweisen, darf nicht aus der Anwendung heraus gelöscht
+  werden. Stilllegen ist ein Statuswechsel und erhält alles.
+* **§ 5 UWG:** Im Kunden-Finder dürfen nur Automaten stehen, die in Betrieb
+  sind. Stillgelegte sind dort jetzt ausgeblendet; die Testvorlagen bleiben
+  gelöscht.
+* **DSGVO:** Keine personenbezogenen Daten betroffen (Standorte sind
+  Geschäftsadressen; `created_by/updated_by` sind interne Konten und stehen
+  im Prüfprotokoll `trg_audit`).
+* **EU AI Act Art. 50:** nicht betroffen (keine algorithmische Auswahl).
+
+### Ergebnis / Handlungsbedarf
+
+1. Umgesetzt im Repository (19.11.2026):
+   * Migration `20261119120000_automaten_verwalten`: Testvorlagen heißen
+     `VORLAGE-A1` … `VORLAGE-A4`; Platzhalter-Standorte archiviert; Regeln je
+     Einfügen und Ändern statt `for all`; kein DELETE-Recht für
+     anon/authenticated.
+   * App: Inventur mit ＋, ⋮ (Bearbeiten, Stilllegen, Wieder in Betrieb),
+     Standortauswahl und -anlage; Kunden-Finder nur Automaten in Betrieb;
+     Automatenauswahl in Protokollen kennzeichnet stillgelegte.
+   * Nachweise: Prüfskript 121 mit 24/24, Gegenprobe gegen den alten Stand
+     schlägt 7-mal an; alle 38 Prüfskripte grün; Fingerabdruck des Nachbaus
+     neu (Regeln und Rechte), `fingerabdruck.soll` nachgezogen; 258 App-Tests
+     (12 neu), Analyse sauber; Sichtprüfung in Telefongröße.
+2. 🔴 Offen: Migration in die Produktion (Freigabe Philipp), danach
+   Fingerabdruck messen; App veröffentlichen.
+3. Hinweis: Vor dem ersten echten Verkauf gilt die Checkliste
+   `docs/betrieb/AUTOMAT-INBETRIEBNAHME.md` (Audit-Zweig): Terminal,
+   Erstbefüllung als Zugang, Belegpflichten.
+
+**Status: 🔴 OFFEN** (Einspielen und Veröffentlichen, verantwortlich Philipp)
+
+---
+
 ## V-023 · PDF-Belege: verstümmelte Freitexte, UTC-Zeiten, Seitenumbrüche (2026-11-19) — OFFEN (Sichtprüfung)
 
 ### Sachverhalt

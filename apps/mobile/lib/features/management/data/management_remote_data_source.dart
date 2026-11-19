@@ -12,7 +12,13 @@ class ManagementRemoteDataSource {
   Future<List<Map<String, dynamic>>> machines() async {
     final rows = await _client
         .from('machines')
-        .select('id, code, name, type, is_cooled, city, status, image_url')
+        .select(
+          'id, code, name, type, is_cooled, city, status, image_url, '
+          'location_id, location_name, street, zip',
+        )
+        // Gelöschte Zeilen (Testvorlagen vom Sommer) gehören nirgends hin.
+        // Admins sahen sie bis 19.11.2026 über die Schreibregel.
+        .isFilter('deleted_at', null)
         .order('code');
     return (rows as List).cast<Map<String, dynamic>>();
   }

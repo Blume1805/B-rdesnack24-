@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/services/outbox_service.dart';
+import '../../data/automaten_verwaltung.dart';
 import '../../data/management_remote_data_source.dart';
 import '../../data/management_repository_impl.dart';
 import '../../domain/entities/machine.dart';
@@ -18,6 +19,15 @@ final managementRepositoryProvider = Provider<ManagementRepository>(
 
 final machinesProvider = FutureProvider<List<Machine>>(
   (ref) => ref.watch(managementRepositoryProvider).machines(),
+);
+
+/// Automaten und Standorte pflegen (Inventur → Bestand je Automat).
+final automatenVerwaltungProvider = Provider<AutomatenVerwaltung>(
+  (ref) => AutomatenVerwaltung(ref.watch(supabaseClientProvider)),
+);
+
+final standorteProvider = FutureProvider.autoDispose<List<Standort>>(
+  (ref) => ref.watch(automatenVerwaltungProvider).standorte(),
 );
 
 final productsProvider = FutureProvider<List<Map<String, dynamic>>>(

@@ -35,68 +35,75 @@ class _FinderTabState extends ConsumerState<FinderTab> {
           child: Text('$e', style: AppTypography.body(size: 14)),
         ),
       ),
-      data: (list) => RefreshIndicator(
-        onRefresh: () async => ref.invalidate(machinesProvider),
-        color: AppColors.brand,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.s5,
-            AppSpacing.s5,
-            AppSpacing.s5,
-            AppSpacing.s8,
-          ),
-          children: [
-            const SectionHeader(
-              eyebrow: 'Unsere Standorte',
-              title: 'Automaten in der Börde',
+      // Nur Automaten in Betrieb; stillgelegte sind für Kunden ausgeblendet
+      // (Inventur → Automat stilllegen, 19.11.2026).
+      data: (alle) {
+        final list = alle.where((m) => m.inBetrieb).toList();
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(machinesProvider),
+          color: AppColors.brand,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.s5,
+              AppSpacing.s5,
+              AppSpacing.s5,
+              AppSpacing.s8,
             ),
-            const SizedBox(height: AppSpacing.s4),
-            // Toggle Liste ↔ Karte
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(
-                  value: false,
-                  icon: Icon(Icons.list),
-                  label: Text('Liste'),
-                ),
-                ButtonSegment(
-                  value: true,
-                  icon: Icon(Icons.map_outlined),
-                  label: Text('Karte'),
-                ),
-              ],
-              selected: {_mapMode},
-              onSelectionChanged: (s) => setState(() => _mapMode = s.first),
-            ),
-            const SizedBox(height: AppSpacing.s5),
-            if (_mapMode)
-              _MapPreview(machines: list)
-            else if (list.isEmpty)
-              AppCard(
-                color: AppColors.surfaceAlt,
-                child: Text(
-                  'Aktuell sind keine Automaten hinterlegt.',
-                  style:
-                      AppTypography.body(size: 14, color: AppColors.textMuted),
-                ),
-              )
-            else
-              for (final m in list) ...[
-                _MachineLocationCard(
-                  machine: m,
-                  onOpen: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          AvailabilityScreen(machineId: m.id, title: m.name),
+            children: [
+              const SectionHeader(
+                eyebrow: 'Unsere Standorte',
+                title: 'Automaten in der Börde',
+              ),
+              const SizedBox(height: AppSpacing.s4),
+              // Toggle Liste ↔ Karte
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(
+                    value: false,
+                    icon: Icon(Icons.list),
+                    label: Text('Liste'),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    icon: Icon(Icons.map_outlined),
+                    label: Text('Karte'),
+                  ),
+                ],
+                selected: {_mapMode},
+                onSelectionChanged: (s) => setState(() => _mapMode = s.first),
+              ),
+              const SizedBox(height: AppSpacing.s5),
+              if (_mapMode)
+                _MapPreview(machines: list)
+              else if (list.isEmpty)
+                AppCard(
+                  color: AppColors.surfaceAlt,
+                  child: Text(
+                    'Aktuell sind keine Automaten hinterlegt.',
+                    style: AppTypography.body(
+                      size: 14,
+                      color: AppColors.textMuted,
                     ),
                   ),
-                  onNavigate: () => _navigate(m.name, m.city),
-                ),
-                const SizedBox(height: AppSpacing.s4),
-              ],
-          ],
-        ),
-      ),
+                )
+              else
+                for (final m in list) ...[
+                  _MachineLocationCard(
+                    machine: m,
+                    onOpen: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            AvailabilityScreen(machineId: m.id, title: m.name),
+                      ),
+                    ),
+                    onNavigate: () => _navigate(m.name, m.city),
+                  ),
+                  const SizedBox(height: AppSpacing.s4),
+                ],
+            ],
+          ),
+        );
+      },
     );
   }
 

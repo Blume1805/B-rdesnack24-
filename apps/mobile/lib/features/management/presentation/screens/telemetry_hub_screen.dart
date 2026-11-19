@@ -661,6 +661,7 @@ class _DeviceFormState extends ConsumerState<_DeviceForm> {
                 future: client
                     .from('machines')
                     .select('id, code, name')
+                    .isFilter('deleted_at', null)
                     .order('code')
                     .then((r) => (r as List).cast<Map<String, dynamic>>()),
                 builder: (context, snap) {
@@ -748,6 +749,7 @@ class _SlotsTabState extends ConsumerState<_SlotsTab> {
             future: client
                 .from('machines')
                 .select('id, code, name')
+                .isFilter('deleted_at', null)
                 .order('code')
                 .then((r) => (r as List).cast<Map<String, dynamic>>()),
             builder: (context, snap) {
