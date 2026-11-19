@@ -7,8 +7,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../data/approvals_remote_data_source.dart';
-import 'inventory_report_print.dart'
-    if (dart.library.html) 'inventory_report_print_web.dart';
+import 'inventory_report_pdf.dart';
 
 /// FIFO-Inventur — Bewegungen und Bewertung je Produkt (nicht mehr je
 /// Automat).  Aufbau:
@@ -186,10 +185,11 @@ class _InventoryReportScreenState extends ConsumerState<InventoryReportScreen> {
                 ),
                 HeroAction(
                   icon: Icons.picture_as_pdf,
-                  tooltip: 'Als PDF drucken',
+                  tooltip: 'PDF teilen oder drucken',
                   iconColor: AppColors.statusCritical,
                   borderColor: AppColors.statusCritical,
-                  onTap: () => printInventoryReport(
+                  onTap: () => inventurPdfAnbieten(
+                    context,
                     movements: _movements!,
                     lots: _lots ?? const [],
                     signatures: _signatures ?? const [],

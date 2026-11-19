@@ -36,6 +36,9 @@ dependencies:
 
   # PDF teilen/drucken (Export Finanzauswertung)
   printing: ^5.13.4
+  # PDF-Dateien in der App bauen (PKW-Anlage, Inventur, Rechnung). War schon
+  # über `printing` eingebunden, gleiche Version; jetzt direkt genutzt.
+  pdf: ^3.13.1
 
   # Externe Links (Navigation zu Maps, Google-Bewertung)
   url_launcher: ^6.3.1

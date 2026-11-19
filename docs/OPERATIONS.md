@@ -2178,3 +2178,53 @@ Stehen dort mehr als fünf Dateien, oder heißt der Bereich anders: nichts
 löschen, mir ein Bildschirmfoto schicken. Versehentlich in einem anderen
 Bereich gelöscht: sofort melden. Gelöschte Dateien lassen sich nicht
 wiederherstellen.
+
+## Runbook V: Push mit einer Testmitteilung prüfen (Stand 19.11.2026)
+
+**Zeitbedarf:** 1 Minute. **Eilt nicht.**
+
+### Warum
+
+Ob eine Push-Benachrichtigung wirklich auf dem Handy ankommt, merkt man sonst
+erst bei der nächsten echten Freigabe. Die Testmitteilung sieht aus wie eine
+Freigabe-Anfrage, ist aber als Test markiert. Es entsteht keine Freigabe.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: In der Benachrichtigungsliste des gewählten Kontos erscheint ein
+  Eintrag „Freigabe angefordert (Test)", und alle Geräte dieses Kontos, auf
+  denen Push eingeschaltet ist, zeigen ihn als Mitteilung.
+* Es passiert **nicht**: keine Freigabe, keine E-Mail, keine Mitteilung an
+  andere Konten. Der geheime Push-Schlüssel bleibt auf dem Server.
+
+### Schritt für Schritt
+
+Den Test löst Claude aus (zwei Datenbank-Befehle). Philipp schreibt nur:
+„Schick mir eine Testmitteilung" (oder: „… an Pia").
+
+Für Claude, zur Nachvollziehbarkeit:
+
+1. Eintrag anlegen (Konto-Kennung aus `profiles`):
+   `insert into public.notifications (user_id, title, body, data) values
+   ('<konto>', 'Freigabe angefordert (Test)', '<text>', '{"art":"probe"}');`
+2. Zustellen, innerhalb von 15 Minuten:
+   `select net.http_post('https://nnfsyuglkqycwenwxmuw.supabase.co/functions/v1/approval-notify',
+   '{"phase":"probe"}'::jsonb, '{}'::jsonb, '{"Content-Type":"application/json",
+   "Authorization":"Bearer <anon-Schlüssel>"}'::jsonb);`
+3. Antwort in `net._http_response` lesen: `probe.zugestellt` zählt die
+   Geräte, die der Push-Dienst angenommen hat. Der Eintrag trägt danach
+   `gesendet`, `zugestellt` und `geraete`.
+
+### So sieht Erfolg aus
+
+Das Handy zeigt die Mitteilung, auch bei gesperrtem Bildschirm. Tippen öffnet
+die App.
+
+### Wenn etwas schiefgeht
+
+* `zugestellt` = 0, `geraete` = 0: Auf diesem Konto ist Push nicht
+  eingeschaltet (Runbook T, Teil 2).
+* `zugestellt` ≥ 1, aber keine Mitteilung: In den iPhone-Einstellungen →
+  Mitteilungen → Bördesnack24 prüfen, ob Mitteilungen erlaubt sind; Fokus
+  „Nicht stören" aus.
+* Nichts davon eilt; der Test ändert keine Geschäftsdaten.

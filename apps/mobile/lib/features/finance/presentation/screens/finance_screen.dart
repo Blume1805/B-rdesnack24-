@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
 
+import '../../../../core/druck/pdf_ausgabe.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_tokens.dart';
@@ -88,15 +88,20 @@ class FinanceScreen extends ConsumerWidget {
   }
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
-    final bytes = await ref.read(financeActionsProvider.notifier).exportPdf();
-    if (!context.mounted) return;
-    if (bytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PDF-Export fehlgeschlagen.')),
-      );
-      return;
-    }
-    await Printing.sharePdf(bytes: bytes, filename: 'finanzauswertung.pdf');
+    // Vorher Printing.sharePdf: im Web ein Download, der die Home-
+    // Bildschirm-App auf dem iPhone festhalten kann. Jetzt dasselbe Blatt
+    // wie bei den anderen PDFs.
+    await pdfAnbieten(
+      context,
+      titel: 'Finanzauswertung',
+      dateiname: 'finanzauswertung.pdf',
+      erzeugen: () async {
+        final bytes =
+            await ref.read(financeActionsProvider.notifier).exportPdf();
+        if (bytes == null) throw Exception('PDF-Export fehlgeschlagen');
+        return bytes;
+      },
+    );
   }
 
   Future<void> _requestApproval(

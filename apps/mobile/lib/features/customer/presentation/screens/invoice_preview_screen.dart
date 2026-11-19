@@ -5,12 +5,13 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../domain/entities/invoice.dart';
-import 'invoice_print.dart' if (dart.library.html) 'invoice_print_web.dart';
+import '../../../../core/druck/pdf_ausgabe.dart';
+import 'invoice_pdf.dart';
 
 /// Rechnungsvorschau im Layout einer § 14 UStG-Rechnung. Der Kunde kann
-/// über den Aktionsknopf oben rechts die Rechnung als PDF drucken/speichern
-/// (im Web nutzt der Print-Dialog des Browsers, auf iOS/Android der System-
-/// Druckdialog). Die Rechnung wird bereits beim Kaufabschluss serverseitig
+/// über den Aktionsknopf oben rechts die Rechnung als PDF-Datei teilen,
+/// drucken oder speichern (`pdfAnbieten`; Teilen-Menü des Systems, im
+/// Browser zusätzlich „PDF öffnen"). Die Rechnung wird bereits beim Kaufabschluss serverseitig
 /// erzeugt und auch an die E-Mail-Adresse des Kunden versendet (Mock: Feld
 /// email_sent_at wird gesetzt).
 class InvoicePreviewScreen extends StatelessWidget {
@@ -24,9 +25,17 @@ class InvoicePreviewScreen extends StatelessWidget {
         title: Text('Rechnung ${invoice.invoiceNumber}'),
         actions: [
           IconButton(
-            tooltip: 'Als PDF drucken/speichern',
+            tooltip: 'PDF teilen, drucken oder speichern',
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            onPressed: () => printInvoice(invoice),
+            onPressed: () => pdfAnbieten(
+              context,
+              titel: 'Rechnung ${invoice.invoiceNumber}',
+              dateiname: 'Rechnung_${invoice.invoiceNumber}.pdf',
+              erzeugen: () async => invoicePdf(
+                invoice,
+                schriften: await pdfSchriftenLaden(),
+              ),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import '../../../../core/druck/druck_regeln.dart';
 import '../../../../core/utils/formatters.dart';
+import 'anlage_pkw_werte.dart';
 
 /// Baut die „Anlage zur Ermittlung der individuellen PKW-Kosten" als
 /// druckbares HTML (A4 hoch). Ohne Browser-Abhängigkeit, damit sie
@@ -35,20 +36,14 @@ String anlagePkwHtml({
       (daten['fahrzeuge'] as List? ?? const []).cast<Map<String, dynamic>>();
   final fahrten =
       (daten['fahrten'] as List? ?? const []).cast<Map<String, dynamic>>();
-  final einlage = _num(daten['nutzungseinlage']);
-  final ohneSatz = _num(daten['fahrten_ohne_satz']).toInt();
+  final einlage = pkwZahl(daten['nutzungseinlage']);
+  final ohneSatz = pkwZahl(daten['fahrten_ohne_satz']).toInt();
   final freigegeben = approvalDecisions != null && approvalDecisions.isNotEmpty;
 
-  double kosten(Map<String, dynamic> f, String art) =>
-      (f['kosten'] as List? ?? const [])
-          .cast<Map<String, dynamic>>()
-          .where((k) => k['kostenart'] == art)
-          .fold<double>(0, (s, k) => s + _num(k['betrag_brutto']));
-
-  final mitBetrag = _kostenarten
-      .where((a) => fahrzeuge.any((f) => kosten(f, a.key) != 0))
+  final mitBetrag = pkwKostenarten
+      .where((a) => fahrzeuge.any((f) => pkwKosten(f, a.key) != 0))
       .toList();
-  final ohneBetrag = _kostenarten
+  final ohneBetrag = pkwKostenarten
       .where((a) => !mitBetrag.contains(a))
       .map((a) => a.value)
       .toList();
@@ -103,8 +98,8 @@ String anlagePkwHtml({
   for (final art in mitBetrag) {
     p.write('<tr><td class="l">${htmlEsc(art.value)}</td>');
     for (final f in fahrzeuge) {
-      final s = kosten(f, art.key);
-      p.write('<td class="r">${s == 0 ? '—' : _eur(s)}</td>');
+      final s = pkwKosten(f, art.key);
+      p.write('<td class="r">${s == 0 ? '—' : pkwEuro(s)}</td>');
     }
     p.write('</tr>');
   }
@@ -125,17 +120,17 @@ String anlagePkwHtml({
 
   zeile(
     'Gesamtkosten (brutto)',
-    (f) => _eur(_num(f['gesamtkosten'])),
+    (f) => pkwEuro(pkwZahl(f['gesamtkosten'])),
     summe: true,
   );
   zeile(
     'Kilometerstand 01.01.',
-    (f) => _km(f['km_stand_anfang']),
+    (f) => pkwKm(f['km_stand_anfang']),
     trenner: true,
   );
-  zeile('Kilometerstand 31.12.', (f) => _km(f['km_stand_ende']));
-  zeile('Gefahrene Kilometer', (f) => _km(f['km_gefahren']));
-  zeile('Kosten je Kilometer', (f) => _satz(f['satz_je_km']), summe: true);
+  zeile('Kilometerstand 31.12.', (f) => pkwKm(f['km_stand_ende']));
+  zeile('Gefahrene Kilometer', (f) => pkwKm(f['km_gefahren']));
+  zeile('Kosten je Kilometer', (f) => pkwSatz(f['satz_je_km']), summe: true);
   p
     ..write('</tbody></table>')
     ..write('<p class="hinweis">Der Satz je Kilometer ergibt sich aus den '
@@ -183,20 +178,20 @@ String anlagePkwHtml({
     if (i == ende) p.write('</tbody><tbody class="ende">');
     p
       ..write('<tr>')
-      ..write('<td class="l">${_datum(t['fahrt_datum'])}</td>')
+      ..write('<td class="l">${pkwDatum(t['fahrt_datum'])}</td>')
       ..write('<td class="l">${htmlEsc(t['anlass'])}</td>')
-      ..write('<td class="r">${_km(t['kilometer'])}</td>');
+      ..write('<td class="r">${pkwKm(t['kilometer'])}</td>');
     // Der Satz steht in der Spalte des Fahrzeugs, mit dem gefahren wurde.
     for (final f in fahrzeuge) {
       final passt = f['id'] == t['pkw_id'];
-      p.write('<td class="r">${passt ? _satz(t['satz_je_km']) : ''}</td>');
+      p.write('<td class="r">${passt ? pkwSatz(t['satz_je_km']) : ''}</td>');
     }
-    p.write('<td class="r">${_eurOderStrich(t['betrag'])}</td></tr>');
+    p.write('<td class="r">${pkwEuroOderStrich(t['betrag'])}</td></tr>');
   }
   if (fahrten.isNotEmpty) {
     p.write('<tr class="summe"><td class="l" '
         'colspan="${3 + fahrzeuge.length}">Summe der betrieblichen Fahrten'
-        '</td><td class="r">${_eur(einlage)}</td></tr>');
+        '</td><td class="r">${pkwEuro(einlage)}</td></tr>');
   }
 
   p
@@ -204,7 +199,7 @@ String anlagePkwHtml({
     ..write('<div class="schluss">')
     ..write('<div class="ergebnis"><span class="ergebnis-label">'
         'Nutzungseinlage $jahr</span><span class="ergebnis-wert">'
-        '${_eur(einlage)}</span></div>');
+        '${pkwEuro(einlage)}</span></div>');
   if (ohneSatz > 0) {
     p.write('<p class="warnung">$ohneSatz Fahrt'
         '${ohneSatz == 1 ? '' : 'en'} ohne Kilometersatz: Für das '
@@ -215,7 +210,7 @@ String anlagePkwHtml({
   for (final s in signatures) {
     final name = '${s['full_name'] ?? ''}';
     final rolle = '${s['role_label'] ?? ''}';
-    final bild = freigegeben ? _bildAus(approvalDecisions, name) : null;
+    final bild = freigegeben ? pkwSignaturUrl(approvalDecisions, name) : null;
     // Ein Kasten mit Vorlauf statt einer nackten Linie: So bleibt Platz,
     // von Hand zu unterschreiben, wenn keine hinterlegte Signatur da ist.
     p.write('<div class="feld"><div class="sig-box">'
@@ -234,71 +229,6 @@ String anlagePkwHtml({
     ..write('</div></td></tr></tbody></table></section>')
     ..write('</body></html>');
   return p.toString();
-}
-
-/// Reihenfolge und Beschriftung der Kostenarten im PDF.
-const _kostenarten = <MapEntry<String, String>>[
-  MapEntry('tanken', 'Tanken'),
-  MapEntry('versicherung', 'Versicherung'),
-  MapEntry('kfz_steuer', 'Kfz-Steuer'),
-  MapEntry('waesche', 'Autowäsche'),
-  MapEntry('reparatur', 'Reparaturen'),
-  MapEntry('leasing', 'Leasingraten'),
-  MapEntry('abschreibung', 'Abschreibung'),
-  MapEntry('sonstiges', 'Sonstiges'),
-];
-
-String? _bildAus(List<Map<String, dynamic>>? decisions, String name) {
-  if (decisions == null) return null;
-  for (final d in decisions) {
-    if ('${d['full_name'] ?? ''}' == name) {
-      final url = '${d['signature_url'] ?? ''}';
-      if (url.isNotEmpty) return url;
-    }
-  }
-  return null;
-}
-
-double _num(dynamic v) {
-  if (v == null) return 0;
-  if (v is num) return v.toDouble();
-  return double.tryParse(v.toString()) ?? 0;
-}
-
-String _eur(double v) => Formatters.euro(v);
-
-String _eurOderStrich(dynamic v) => v == null ? '—' : Formatters.euro(_num(v));
-
-String _km(dynamic v) {
-  if (v == null) return '—';
-  final n = _num(v);
-  final ganz = n == n.roundToDouble();
-  // Tausenderpunkt wie bei Beträgen: „29.028 km" statt „29028 km".
-  final text =
-      ganz ? _tausender(n.round()) : n.toStringAsFixed(1).replaceAll('.', ',');
-  return '$text km';
-}
-
-String _tausender(int n) {
-  final s = n.abs().toString();
-  final b = StringBuffer(n < 0 ? '-' : '');
-  for (var i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write('.');
-    b.write(s[i]);
-  }
-  return b.toString();
-}
-
-String _satz(dynamic v) {
-  if (v == null) return '—';
-  // Vier Nachkommastellen, so wie die Datenbank rechnet: Bei dreistelligen
-  // Strecken verschiebt schon die dritte Stelle den Betrag um Cent.
-  return '${_num(v).toStringAsFixed(4).replaceAll('.', ',')} €';
-}
-
-String _datum(dynamic v) {
-  final d = DateTime.tryParse('${v ?? ''}');
-  return d == null ? '' : Formatters.date(d);
 }
 
 /// Hausstil der Bördesnack24-Belege, abgeleitet vom FIFO-Inventurreport

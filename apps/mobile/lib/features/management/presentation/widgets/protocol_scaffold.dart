@@ -8,10 +8,9 @@ import '../../../finance/domain/entities/finance_period.dart';
 import '../../data/approvals_remote_data_source.dart';
 import '../controllers/management_providers.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
-// Web-sichere PDF-Ausgabe: auf iOS-Web/In-App-Browser öffnet der native
-// Viewer in neuem Tab; auf Mobile/Desktop das System-Teilen-Sheet.
-import 'pdf_inline_stub.dart'
-    if (dart.library.js_interop) 'pdf_inline_web.dart';
+// PDF-Ausgabe: Blatt mit Teilen-Menü (auch in der Home-Bildschirm-App
+// auf dem iPhone), im Browser zusätzlich „PDF öffnen".
+import '../../../../core/druck/pdf_ausgabe.dart';
 
 /// Generisches Gerüst für ein revisionssicheres Protokoll:
 /// Zeitraum-Filter, Liste, optionaler PDF-Export und Anlegen-FAB.
@@ -86,17 +85,20 @@ class _ProtocolScaffoldState extends ConsumerState<ProtocolScaffold> {
   Future<void> _export() async {
     final kind = widget.exportKind;
     if (kind == null) return;
-    final bytes = await ref
-        .read(managementActionsProvider.notifier)
-        .exportProtocol(kind, _period.from, _period.to);
-    if (!mounted) return;
-    if (bytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export fehlgeschlagen.')),
-      );
-      return;
-    }
-    await sharePdfBytes(bytes, '${kind}_nachweis.pdf');
+    // Das Blatt zeigt „PDF wird erstellt …", während der Server rechnet,
+    // und bietet die Datei danach zum Teilen, Drucken oder Öffnen an.
+    await pdfAnbieten(
+      context,
+      titel: '${widget.title} — Nachweis',
+      dateiname: '${kind}_nachweis.pdf',
+      erzeugen: () async {
+        final bytes = await ref
+            .read(managementActionsProvider.notifier)
+            .exportProtocol(kind, _period.from, _period.to);
+        if (bytes == null) throw Exception('Export fehlgeschlagen');
+        return bytes;
+      },
+    );
   }
 
   Future<void> _requestApproval() async {

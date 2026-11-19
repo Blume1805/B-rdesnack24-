@@ -7,8 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../data/approvals_remote_data_source.dart';
-import 'anlage_pkw_print.dart'
-    if (dart.library.js_interop) 'anlage_pkw_print_web.dart';
+import '../../../../core/druck/pdf_ausgabe.dart';
+import 'anlage_pkw_pdf.dart';
+import 'anlage_pkw_werte.dart';
 
 /// Anlage zur Ermittlung der individuellen PKW-Kosten.
 ///
@@ -188,28 +189,46 @@ class _AnlagePkwScreenState extends ConsumerState<AnlagePkwScreen> {
             iconColor: AppColors.brand,
             onTap: _freigabeAnfordern,
           ),
-        // Auf iOS und Android gibt es den Druck noch nicht. Einen Knopf zu
-        // zeigen, der nichts tut, ist schlimmer als keiner.
-        if (anlageDruckMoeglich)
-          HeroAction(
-            icon: Icons.picture_as_pdf,
-            tooltip: 'Als PDF drucken',
-            iconColor: AppColors.statusCritical,
-            borderColor: AppColors.statusCritical,
-            onTap: () => printAnlagePkw(
-              daten: _daten!,
-              signatures: _signaturen,
-              firma: _firma,
-              steuernummer: _steuernummer,
-              ustIdNr: _ustIdNr,
-              // Ist die Anlage freigegeben, trägt das PDF den Stempel und
-              // die Unterschriften aus der Freigabe. Ohne das müsste man
-              // sich die endgültige Fassung über den Freigabe-Bildschirm
-              // zusammensuchen.
-              approvalDecisions: _unterzeichner,
-            ),
-          ),
+        // Echte PDF-Datei mit Teilen-Menü: funktioniert auch in der
+        // Home-Bildschirm-App auf dem iPhone und in der nativen App
+        // (Befund 19.11.2026: dort tat der Druckknopf nichts).
+        HeroAction(
+          icon: Icons.picture_as_pdf,
+          tooltip: 'PDF teilen oder drucken',
+          iconColor: AppColors.statusCritical,
+          borderColor: AppColors.statusCritical,
+          onTap: _pdf,
+        ),
       ],
+    );
+  }
+
+  void _pdf() {
+    final daten = _daten;
+    if (daten == null) return;
+    // Ist die Anlage freigegeben, trägt das PDF den Stempel und die
+    // Unterschriften aus der Freigabe.
+    final freigabe = _unterzeichner;
+    pdfAnbieten(
+      context,
+      titel: 'Anlage PKW-Kosten $_jahr',
+      dateiname: 'Anlage_PKW-Kosten_$_jahr.pdf',
+      erzeugen: () async => anlagePkwPdf(
+        daten: daten,
+        signatures: _signaturen,
+        firma: _firma,
+        steuernummer: _steuernummer,
+        ustIdNr: _ustIdNr,
+        approvalDecisions: freigabe,
+        schriften: await pdfSchriftenLaden(),
+        signaturBilder: freigabe == null
+            ? const {}
+            : await pdfBilderLaden({
+                for (final s in _signaturen)
+                  '${s['full_name'] ?? ''}':
+                      pkwSignaturUrl(freigabe, '${s['full_name'] ?? ''}'),
+              }),
+      ),
     );
   }
 

@@ -1691,7 +1691,12 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    Fingerabdruck unverändert. Dokumente und ihre Dateien bleiben (zwei
    Entwurfspfade zeigen auf Originale in `documents`). Die 5 unterschriebenen
    Test-PDFs in `signed-documents` löscht Philipp über den Speicherdienst
-   (Runbook U). Rechtlich: HACCP (VO (EG) 852/2004) verlangt ein angewandtes
+   (Runbook U).
+   ✅ Am 19.11.2026 mit Philipps Freigabe („löschen") eingespielt und
+   nachgemessen: 0 Freigaben, 0 Entscheidungen, 26 Dokumente, beide Originale
+   vorhanden. Speicher am 19.11.2026 nachgemessen: `signed-documents` enthält
+   weiter 5 Dateien. Löschen per Datenbank ist gesperrt (Schutzregel
+   `protect_objects_delete` von Supabase); es bleibt bei Runbook U. Rechtlich: HACCP (VO (EG) 852/2004) verlangt ein angewandtes
    Eigenkontrollkonzept, keine interne Zweitfreigabe. Die Freigabe ist eine
    freiwillige Kontrolle.
 4. ✅ Name auf der Unterschrift: „Pia Blume" (Entscheidung Philipp 18.11.2026),
@@ -1779,10 +1784,29 @@ Umsetzung (im Repository, nicht ausgeliefert):
    nicht in der Antwort. Der Fingerabdruck der Produktion ist gleich dem neuen
    Sollwert.
 2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
-   Probe.
+   Probe. Philipp: eingeschaltet am 19.11.2026 (1 Gerät gemessen). Pia: offen.
+3. **Testmitteilung** (Wunsch Philipp 19.11.2026: „eine fiktive Benachrichtigung
+   … so als wenn Pia sie mir gesendet hat"). Ohne Pias Anmeldung lässt sich keine
+   echte Anfrage in ihrem Namen auslösen, und der private Push-Schlüssel gehört
+   nicht in den Chat. Deshalb ein eigener Prüfweg in `approval-notify`
+   (`phase: "probe"`, `push.ts` → `probenZustellen`):
+   * Inhalt und Empfänger stehen in einem Eintrag der Benachrichtigungsliste
+     (`notifications`, `data.art = "probe"`). Anlegen kann ihn nur der Server
+     bzw. der Betreiber: Für anon/authenticated gibt es keine Einfüge-Regel
+     (gemessen 19.11.2026: nur `notif_read` und `notif_update`, beide auf das
+     eigene Konto beschränkt).
+   * Der Aufruf wählt weder Inhalt noch Empfänger. Zugestellt wird nur an die
+     Geräte des Kontos aus dem Eintrag, jeder Eintrag höchstens einmal
+     (atomar beansprucht) und nur bis 15 Minuten nach dem Anlegen.
+   * Missbrauch: Ein angemeldeter Nutzer kann über `notif_update` nur eigene
+     Einträge ändern, also höchstens sich selbst eine Testmitteilung schicken.
+   * Nachweis: 3 neue Tests (Empfänger nur aus dem Eintrag, nichts ohne
+     offenen Eintrag, keine Doppelzustellung), insgesamt 15/15 in
+     `approval-notify`, Typprüfung und Lint (CI-Regeln) sauber.
+   * Bedienung: Runbook V in `OPERATIONS.md`.
 
-**Status: 🔴 OFFEN** (ausgeliefert, Schlüssel vom Server erzeugt; offen: Einschalten am Handy
-und Probe, Runbook T Teil 2, verantwortlich Philipp und Pia)
+**Status: 🔴 OFFEN** (ausgeliefert, Schlüssel vom Server erzeugt; offen: Pia schaltet Push ein,
+Runbook T Teil 2; Ergebnis der Testmitteilung an Philipp siehe Runbook V)
 
 ---
 
@@ -1879,6 +1903,50 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
 3. Bereits erzeugte Freigabe-PDFs (Speicher `signed-documents`) behalten den
    alten Stand. Derzeit sind es nur die fünf Juli-Testdateien (Runbook U), die
    ohnehin gelöscht werden.
+5. **Drucken auf dem iPhone** (Befund Philipp, 19.11.2026 nachmittags): Bei
+   der PKW-Anlage ließ sich „Drucken" nicht auswählen, bei den anderen Belegen
+   passierte nach dem Tippen nichts.
+   * **Ursache:** Philipp nutzt die App jetzt vom Home-Bildschirm (nötig für
+     Push). Dort ignoriert iOS den Druckbefehl einer Webseite
+     (`window.print()`), und ein Fenster mit einer im Speicher gebauten Seite
+     (Blob) öffnet sich nicht zuverlässig. Ein Download kann die
+     Home-Bildschirm-App ab iOS 18.4 sogar festhalten (WebKit-Fehler 290847).
+     Morgens im Safari-Tab ging es deshalb noch. In der nativen App war der
+     Knopf ausgeblendet.
+   * **Korrektur:** Die Belege entstehen jetzt als echte PDF-Datei in der App
+     (`core/druck/pdf_hausstil.dart`, `anlage_pkw_pdf.dart`,
+     `inventory_report_pdf.dart`, `invoice_pdf.dart`; Bibliothek `pdf`, war
+     über `printing` schon eingebunden). Ein gemeinsames Blatt
+     (`core/druck/pdf_ausgabe.dart`) bietet „Teilen oder drucken" über das
+     Teilen-Menü des Systems an (dort: Drucken, In Dateien sichern, Mail). Im
+     Browser kommt „PDF öffnen" und „Herunterladen" dazu, in der
+     Home-Bildschirm-App nicht. Protokoll-Nachweise, Kassenbon und
+     Finanzauswertung (Server-PDFs) laufen über dasselbe Blatt.
+   * **Umbruch** wie in den HTML-Ansichten: Überschriften bleiben bei ihrer
+     ersten Zeile; der Schluss nimmt die letzten drei Fahrten mit und bekommt
+     dann einen eigenen Tabellenkopf; die Inventur hält Matrix, Bilanzwert und
+     Unterschriften zusammen. Die Bibliothek kennt das nicht. Deshalb wird
+     gebaut, gemessen, wo Merker gelandet sind, und bei Bedarf neu gebaut.
+     Gefundener Fehler beim Rendern: Eine in mehreren Tabellen geteilte
+     Kopfzeile landete über der Überschrift; Kopfzeilen werden jetzt je
+     Tabelle neu gebaut.
+   * **Nachweise:**
+     * `test/druck/pdf_dateien_test.dart` (4 Fälle) und
+       `test/druck/pdf_blatt_test.dart` (2 Fälle).
+     * Gerendert und Seite für Seite angesehen: PKW mit 0, 5, 12 und 40
+       Fahrten (1/1/2/3 Seiten); Inventur kurz, lang und großes Produkt
+       (3/6/5 Seiten); Rechnung (1 Seite).
+     * Browser-Probe der Web-Fassung in Chromium:
+       * Als iPhone-Home-Bildschirm-App erscheint nur „Teilen oder drucken".
+         Das Teilen-Menü erhält eine PDF-Datei (application/pdf, 23 KB,
+         richtiger Name) direkt aus dem Tippen heraus.
+       * Am Desktop lädt „Herunterladen" ein gültiges PDF.
+     * 259 App-Tests, Analyse sauber, Web-Fassung baut.
+   * Nicht nachweisbar ohne echtes Gerät: das Teilen-Menü von iOS selbst.
+     Sichtprüfung durch Philipp nach der Auslieferung.
+   * Die HTML-Druckansichten (`*_print_web.dart`, `*_print.dart`, `*_html.dart`)
+     werden nicht mehr aufgerufen. Sie bleiben vorerst stehen, weil Löschen von
+     Code freigabepflichtig ist (CLAUDE.md, K4). Rückfrage an Philipp.
 4. Offen, nicht Teil dieses Auftrags:
    * ✅ `merge-employee-signature`: 17 Typfehler aus der Abfrage (schon vorher
      vorhanden) behoben; sonst hätte die Typprüfung im Auslieferungs-Workflow

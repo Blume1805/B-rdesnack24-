@@ -18,7 +18,7 @@ sevDesk API ──(Edge: sevdesk-sync)──► finance_bookings ──(RPC fina
   beliebige Zeiträume; trennt Umsatz nach 7 %/19 % (§ 22 UStG), liefert Aufwand, Ergebnis,
   USt-Salden und Konten-Drilldown. Prüft `finance.view`.
 - **`finance-export-pdf`** (Edge Function): rendert die Auswertung serverseitig via `pdf-lib`,
-  liefert Base64-PDF; Client teilt/druckt es (`printing`). Prüft `finance.export`.
+  liefert Base64-PDF; der Client bietet es über `pdfAnbieten` an (Teilen-Menü; im Browser zusätzlich öffnen/herunterladen, Stand 19.11.2026). Prüft `finance.export`.
 
 ## SKR-03-Mapping (Verfahrensdokumentation 2.6 / 5.4)
 

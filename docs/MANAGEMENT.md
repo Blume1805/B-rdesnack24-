@@ -49,10 +49,18 @@ Berechtigung (nur sichtbare Zeilen landen im PDF).
 * Freitexte werden umbrochen, nie gekürzt (`_shared/pdf_format.ts`).
 * Zeilen füllen jede Seite. Der Unterschriften- bzw. Schlussblock steht nie
   allein, sondern nimmt die letzten drei Zeilen mit (`_shared/seiten.ts`).
-* Belege aus dem Browser (PKW-Anlage, FIFO-Inventur, Rechnung) folgen denselben
-  Regeln in `apps/mobile/lib/core/druck/druck_regeln.dart`.
-* Prüfen: `DRUCK_AUSGABE=<ordner> flutter test test/druck`, dann
-  `node scripts/druck_pruefen.mjs <ordner>`.
+* Belege aus der App (PKW-Anlage, FIFO-Inventur, Rechnung) entstehen seit
+  19.11.2026 als echte PDF-Datei in der App (`apps/mobile/lib/core/druck/
+  pdf_hausstil.dart` und `*_pdf.dart`) mit denselben Regeln. Grund: In der
+  Home-Bildschirm-App auf dem iPhone ignoriert iOS den Druckbefehl einer
+  Webseite (COMPLIANCE V-023, Punkt 5).
+* Ausgabe aller PDFs (auch Protokoll, Kassenbon, Finanzauswertung) über ein
+  Blatt (`core/druck/pdf_ausgabe.dart`): „Teilen oder drucken" (Teilen-Menü
+  des Systems), im Browser zusätzlich „PDF öffnen" und „Herunterladen".
+* Prüfen: `DRUCK_AUSGABE=<ordner> flutter test test/druck` legt die PDFs ab
+  (`pdftoppm` zum Ansehen). Die älteren HTML-Ansichten
+  (`druck_regeln.dart`, `node scripts/druck_pruefen.mjs <ordner>`) werden
+  nicht mehr aufgerufen.
 
 ## Secrets
 

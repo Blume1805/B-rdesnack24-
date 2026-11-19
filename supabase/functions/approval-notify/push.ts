@@ -62,3 +62,66 @@ export async function pushAnAndere(
   }
   return { empfaenger: konten.length, zugestellt, entfernt };
 }
+
+// ── Testmitteilung (Wunsch Philipp 19.11.2026) ─────────────────────────────
+// Prüft, ob Push auf einem Gerät ankommt, ohne eine echte Freigabe
+// anzulegen. Der Inhalt und der Empfänger stehen in einem Eintrag der
+// Benachrichtigungsliste (`notifications`, data.art = "probe"). Anlegen kann
+// ihn nur der Server bzw. der Betreiber in der Datenbank: Für angemeldete
+// Nutzer gibt es keine Einfüge-Regel. Der Aufruf selbst wählt weder Inhalt
+// noch Empfänger; er stellt nur zu, was ansteht, jeden Eintrag einmal und
+// nur innerhalb von 15 Minuten nach dem Anlegen.
+
+export interface Probe {
+  id: string;
+  user_id: string;
+  title: string;
+  body: string | null;
+}
+
+export interface ProbeDb {
+  /** Offene Testmitteilungen (art = probe, nicht zugestellt, < 15 Minuten). */
+  offeneProben(): Promise<Probe[]>;
+  /** Web-Abonnements dieser Konten. */
+  abos(konten: string[]): Promise<{ id: string; user_id: string; token: string }[]>;
+  /** Beansprucht einen Eintrag atomar (nur der erste Aufruf bekommt true),
+   *  damit zwei gleichzeitige Aufrufe nicht doppelt zustellen. */
+  beanspruche(probe: string): Promise<boolean>;
+  /** Vermerkt das Ergebnis der Zustellung. */
+  vermerke(probe: string, ergebnis: { zugestellt: number; geraete: number }): Promise<void>;
+  loescheAbo(id: string): Promise<void>;
+}
+
+export interface ProbeErgebnis {
+  proben: number;
+  geraete: number;
+  zugestellt: number;
+}
+
+export async function probenZustellen(db: ProbeDb, senden: Senden, appUrl: string): Promise<ProbeErgebnis> {
+  const proben = await db.offeneProben();
+  let geraete = 0;
+  let zugestellt = 0;
+  let bearbeitet = 0;
+  for (const p of proben) {
+    if (!(await db.beanspruche(p.id))) continue;
+    bearbeitet++;
+    const abos = await db.abos([p.user_id]);
+    let ok = 0;
+    for (const a of abos) {
+      const abo = leseAbo(a.token);
+      if (!abo) continue;
+      geraete++;
+      try {
+        const status = await senden(abo, { titel: p.title, text: p.body ?? "", url: appUrl, tag: `probe-${p.id}` });
+        if (status >= 200 && status < 300) ok++;
+        if (status === 404 || status === 410) await db.loescheAbo(a.id);
+      } catch (_) {
+        // weiter mit dem nächsten Gerät
+      }
+    }
+    zugestellt += ok;
+    await db.vermerke(p.id, { zugestellt: ok, geraete: abos.length });
+  }
+  return { proben: bearbeitet, geraete, zugestellt };
+}

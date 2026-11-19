@@ -9,8 +9,7 @@ import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
-import '../../../management/presentation/widgets/pdf_inline_stub.dart'
-    if (dart.library.js_interop) '../../../management/presentation/widgets/pdf_inline_web.dart';
+import '../../../../core/druck/pdf_ausgabe.dart';
 import '../../domain/entities/receipt.dart';
 import '../controllers/customer_providers.dart';
 import '../widgets/receipt_export_stub.dart'
@@ -441,25 +440,25 @@ class _ReceiptDetailSheetState extends ConsumerState<_ReceiptDetailSheet> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final res = await ref.read(supabaseClientProvider).functions.invoke(
-        'receipt-pdf',
-        body: {'purchase_id': widget.receipt.id},
-      );
-      final data = res.data;
-      if (data is! Map || data['base64'] is! String) {
-        throw Exception((data is Map ? data['error'] : null) ?? 'Kein PDF');
-      }
-      await sharePdfBytes(
-        base64Decode(data['base64'] as String),
-        (data['filename'] as String?) ?? 'kassenbon.pdf',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.statusCriticalFill,
-          content: Text('Bon konnte nicht erzeugt werden: $e'),
-        ),
+      // Das Blatt erzeugt den Bon beim Server und bietet ihn zum Teilen,
+      // Drucken oder Öffnen an (auch in der Home-Bildschirm-App).
+      await pdfAnbieten(
+        context,
+        titel: 'Kassenbon',
+        dateiname: 'kassenbon.pdf',
+        erzeugen: () async {
+          final res = await ref.read(supabaseClientProvider).functions.invoke(
+            'receipt-pdf',
+            body: {'purchase_id': widget.receipt.id},
+          );
+          final data = res.data;
+          if (data is! Map || data['base64'] is! String) {
+            throw Exception(
+              (data is Map ? data['error'] : null) ?? 'Kein PDF',
+            );
+          }
+          return base64Decode(data['base64'] as String);
+        },
       );
     } finally {
       if (mounted) setState(() => _busy = false);

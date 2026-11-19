@@ -13,8 +13,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/design_system/design_system.dart';
 import '../../data/approvals_remote_data_source.dart';
 // Für Freigabe-Tap → gleiches Layout wie im Direkt-Export der Inventur.
-import 'inventory_report_print.dart'
-    if (dart.library.html) 'inventory_report_print_web.dart';
+import 'inventory_report_pdf.dart';
 
 final _approvalsRemoteProvider = Provider<ApprovalsRemoteDataSource>(
   (ref) => ApprovalsRemoteDataSource(ref.watch(supabaseClientProvider)),
@@ -153,7 +152,7 @@ class _ApprovalCard extends ConsumerWidget {
         return;
       }
 
-      // ─── Inventur: gleicher HTML-Print wie im Direkt-Export ───────
+      // ─── Inventur: dasselbe PDF wie im Direkt-Export ─────────────
       if (documentKind == 'inventory_fifo') {
         final snap = row['snapshot'];
         if (snap is Map) {
@@ -170,9 +169,10 @@ class _ApprovalCard extends ConsumerWidget {
                   DateTime.now();
           final to = DateTime.tryParse(row['period_to']?.toString() ?? '') ??
               DateTime.now();
-          // Alles ist vorgeladen → Aufruf ist synchron in der User-Gesture,
-          // window.open wird nicht vom Popup-Blocker geblockt.
-          printInventoryReport(
+          // Echte PDF-Datei mit Teilen-Menü (auch in der Home-Bildschirm-
+          // App auf dem iPhone).
+          inventurPdfAnbieten(
+            context,
             movements: movements,
             lots: lots,
             signatures: signatures,
