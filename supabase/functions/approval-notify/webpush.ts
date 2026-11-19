@@ -9,19 +9,23 @@
 
 const te = new TextEncoder();
 
+/** Byte-Folge mit gewöhnlichem Speicher. WebCrypto und fetch nehmen seit
+ *  TypeScript 5.7 nur solche an (CI-Befund 19.11.2026). */
+export type Bytes = Uint8Array<ArrayBuffer>;
+
 export function b64u(bytes: Uint8Array): string {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export function vonB64u(s: string): Uint8Array {
+export function vonB64u(s: string): Bytes {
   const t = s.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(t + "===".slice((t.length + 3) % 4));
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
-function verbinde(...teile: Uint8Array[]): Uint8Array {
+function verbinde(...teile: Uint8Array[]): Bytes {
   const out = new Uint8Array(teile.reduce((n, t) => n + t.length, 0));
   let i = 0;
   for (const t of teile) {
@@ -31,13 +35,13 @@ function verbinde(...teile: Uint8Array[]): Uint8Array {
   return out;
 }
 
-async function hmac(schluessel: Uint8Array, daten: Uint8Array): Promise<Uint8Array> {
+async function hmac(schluessel: Bytes, daten: Bytes): Promise<Bytes> {
   const k = await crypto.subtle.importKey("raw", schluessel, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return new Uint8Array(await crypto.subtle.sign("HMAC", k, daten));
 }
 
 /** HKDF in den zwei Schritten aus RFC 5869 (Länge ≤ 32). */
-async function hkdf(salz: Uint8Array, ikm: Uint8Array, info: Uint8Array, laenge: number) {
+async function hkdf(salz: Bytes, ikm: Bytes, info: Bytes, laenge: number): Promise<Bytes> {
   const prk = await hmac(salz, ikm);
   const okm = await hmac(prk, verbinde(info, new Uint8Array([1])));
   return okm.slice(0, laenge);
@@ -81,9 +85,9 @@ async function neuesEcdhPaar(): Promise<Schluesselpaar> {
 export async function verschluessele(
   inhalt: Uint8Array,
   p256dh: Uint8Array,
-  auth: Uint8Array,
-  test?: { salz: Uint8Array; server: Schluesselpaar },
-): Promise<Uint8Array> {
+  auth: Bytes,
+  test?: { salz: Bytes; server: Schluesselpaar },
+): Promise<Bytes> {
   const salz = test?.salz ?? crypto.getRandomValues(new Uint8Array(16));
   const server = test?.server ?? await neuesEcdhPaar();
   const uaKey = await crypto.subtle.importKey("jwk", punktZuJwk(p256dh), { name: "ECDH", namedCurve: "P-256" }, false, []);
