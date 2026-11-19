@@ -2097,37 +2097,16 @@ an die Firmenadresse.
 * Es passiert **nicht**: Kunden bekommen keine solche Mitteilung. Die
   E-Mail an die Firmenadresse bleibt wie bisher.
 
-### Teil 1 — Schlüssel hinterlegen (einmalig, am Desktop, 5 Minuten)
+### Teil 1 — Schlüssel (entfällt seit 19.11.2026)
 
-Stand 19.11.2026: Die Server-Funktion `approval-notify` ist schon neu
-ausgeliefert. Es fehlen nur noch die beiden Schlüssel. Sie sind so etwas wie
-der Absenderausweis, mit dem Apple und Google eine Mitteilung als echt
-erkennen. Ich habe sie erzeugt und Dir als Datei
-`push_schluessel_eintragen.txt` in den Chat gelegt. Supabase lässt Werte für
-solche Geheimnisse nur über die eigene Oberfläche eintragen; das
-Eingabefenster im Chat erschien bei uns nicht. Deshalb trägst Du sie selbst ein:
-
-1. Im Browser <https://supabase.com/dashboard/project/nnfsyuglkqycwenwxmuw/functions/secrets>
-   öffnen und anmelden. Das ist die Seite **Edge Functions → Secrets** des
-   Projekts **boerdesnack24-app**.
-2. Im Formular zum Hinzufügen bei **Name** (bzw. „Key") genau
-   `VAPID_PUBLIC_KEY` eintragen. Bei **Value** die ganze Zeile unter „Feld 1"
-   aus der Datei einfügen.
-3. Falls es ein zweites leeres Zeilenpaar gibt, dort weitermachen, sonst
-   zuerst **Save** und dann erneut hinzufügen: **Name** `VAPID_PRIVATE_D`,
-   **Value** die ganze Zeile unter „Feld 2".
-4. **Save** klicken.
-5. Mir „Schlüssel eingetragen" schreiben. Ich prüfe dann, ob die Funktion den
-   öffentlichen Schlüssel ausgibt, und lösche die Datei bei mir.
-
-**So sieht Erfolg aus:** In der Liste stehen `VAPID_PUBLIC_KEY` und
-`VAPID_PRIVATE_D` (Supabase zeigt nur gekürzte Prüfwerte, nicht den Inhalt).
-
-**Wenn etwas schiefgeht:** Ein vertippter Wert schadet nicht. Die Funktion
-schickt dann keine Push, die E-Mail an die Firmenadresse kommt weiter. Einfach
-denselben Namen noch einmal mit dem richtigen Wert speichern; er wird
-überschrieben. Nichts eilt. Den Wert aus „Feld 2" nirgendwo sonst einfügen und
-die Datei danach löschen.
+Für Push braucht der Server einen Absenderausweis (zwei Schlüssel). Bis
+19.11.2026 sollten sie von Hand als Geheimnis eingetragen werden. Das
+Eingabefenster dafür erschien nicht, und die App meldete „Push konnte nicht
+eingeschaltet werden". Seitdem erzeugt der Server die Schlüssel beim ersten
+Einschalten selbst und legt sie im gesperrten Teil der Datenbank ab
+(Migration `20261119100000`). Niemand muss etwas eintragen, und niemand sieht
+den geheimen Teil. Die frühere Datei `push_schluessel_eintragen.txt` wird
+nicht mehr gebraucht. Bitte löschen, falls gespeichert.
 
 ### Teil 2 — jeder an seinem iPhone
 

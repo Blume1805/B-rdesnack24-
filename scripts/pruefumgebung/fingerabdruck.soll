@@ -5,4 +5,5 @@
 # Nach dem Einspielen in die Produktion muss die Produktion denselben Wert zeigen
 # (CLAUDE.md, Regel Fingerabdruck). Stand: 18.11.2026, 256 Migrationen (20261117100000, 20261117110000 und 20261118100000 ändern nur Daten; 20261117120000 fügt zwei Funktionen hinzu, 20261117130000 und 20261118090000 je eine).
 # Produktion gemessen am 19.11.2026 nach dem Einspielen aller 256 Migrationen: alle sieben Merkmale gleich.
-236:76769aa328a4866037f112b79e95cd03|291:698c4c5807aab118ddd64041b3b55849|1389:d09aa6efd31b1deebb433aa43512a169|103:7b1fc14a31e44b402270749bdddd0a3e|67:4ee7d4d20a06977860d182b47304e9f7|238:49d57759c73976c0c5b6aab82810f32d|276:f43d21ad11d29b912c204fadb7b36ae9
+# Stand 19.11.2026, 257 Migrationen: 20261119100000 fügt eine Tabelle (4 Spalten) und zwei Funktionen hinzu, Rechte von anon/authenticated unverändert.
+236:76769aa328a4866037f112b79e95cd03|293:635551463507a3660706dcd3ee749af3|1393:d05e3ff5356b4e1dd333e524d4673c14|103:7b1fc14a31e44b402270749bdddd0a3e|67:4ee7d4d20a06977860d182b47304e9f7|238:49d57759c73976c0c5b6aab82810f32d|276:f43d21ad11d29b912c204fadb7b36ae9

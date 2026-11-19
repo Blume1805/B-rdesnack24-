@@ -1743,6 +1743,22 @@ Umsetzung (im Repository, nicht ausgeliefert):
    VAPID-Schlüssel als Geheimnisse hinterlegen. Das Eingabefeld des
    Supabase-Werkzeugs erschien zweimal nicht; Philipp trägt sie selbst im
    Dashboard ein (Runbook T, Teil 1).
+   **Befund 19.11.2026, 09:28:** In der App erschien „Push konnte nicht
+   eingeschaltet werden". Das Server-Protokoll zeigt zwei Abrufe mit 503 „Push nicht
+   eingerichtet"; die Schlüssel fehlten, die App arbeitete richtig. Das
+   Eingabefenster erschien auch beim dritten Versuch nicht.
+   **Korrektur:** Der Server erzeugt das Schlüsselpaar beim ersten Bedarf selbst
+   (`approval-notify/schluessel.ts`). Er legt es in `app.web_push_schluessel` ab
+   (Migration `20261119100000`): Zeilenschutz, keine Rechte für anon/authenticated,
+   Zugriff nur über zwei Funktionen für service_role; der erste Anleger gewinnt.
+   Der private Teil verlässt den Server nie und braucht keine Handarbeit mehr. Gesetzte
+   Geheimnisse hätten Vorrang. Nachweis: Prüfskript 120 mit 14/14 (Gegenprobe: ein
+   absichtlich gewährtes anon-Recht wird erkannt); 56/56 Function-Tests mit
+   Typprüfung; Probelauf der Funktion 7/7 (erster Abruf erzeugt, zweiter liefert
+   denselben Schlüssel, Push trägt ihn). Gegenprobe gegen den alten Code: Der
+   Probelauf scheitert dort genau an der gemeldeten Stelle.
+   Die Schlüsseldatei aus dem Chat ist damit gegenstandslos: Ihr Paar wurde nie
+   hinterlegt und ist ungültig.
 2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
    Probe.
 

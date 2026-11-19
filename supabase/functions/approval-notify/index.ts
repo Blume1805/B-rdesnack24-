@@ -9,11 +9,46 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 import { type PushDb, pushAnAndere } from "./push.ts";
 import { importiere, sendeWebPush, vonB64u } from "./webpush.ts";
+import { type Paar, type SchluesselAblage, vapidPaar } from "./schluessel.ts";
 
 const APP_URL = "https://app.boerdesnack24.de/";
 const PUSH_KONTAKT = "mailto:boerdesnack24@gmail.com";
 
 const OFFICIAL_EMAIL = "boerdesnack24@gmail.com";
+
+// deno-lint-ignore no-explicit-any
+function dienstClient(supabaseUrl: string): any {
+  return createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+/** Push-Schlüssel: Geheimnisse, sonst Datenbank, sonst selbst erzeugt
+ *  (schluessel.ts, Migration 20261119100000). */
+// deno-lint-ignore no-explicit-any
+function schluesselAusDatenbank(admin: any): SchluesselAblage {
+  return {
+    async holen() {
+      const { data, error } = await admin.rpc("web_push_schluessel");
+      if (error) throw new Error(error.message);
+      return (data as Paar | null) ?? null;
+    },
+    async anlegen(p) {
+      const { data, error } = await admin.rpc("web_push_schluessel_anlegen", {
+        p_oeffentlich: p.oeffentlich, p_privat_d: p.privat_d,
+      });
+      if (error || !data) throw new Error(error?.message ?? "Schlüssel nicht gespeichert");
+      return data as Paar;
+    },
+  };
+}
+
+function pushSchluessel(supabaseUrl: string, admin = dienstClient(supabaseUrl)): Promise<Paar> {
+  return vapidPaar(
+    { oeffentlich: Deno.env.get("VAPID_PUBLIC_KEY"), privat_d: Deno.env.get("VAPID_PRIVATE_D") },
+    schluesselAusDatenbank(admin),
+  );
+}
 
 Deno.serve(async (req) => {
   // GET zusätzlich erlaubt (Push-Schlüssel); nur für diese Funktion, die
@@ -21,9 +56,15 @@ Deno.serve(async (req) => {
   const corsMitGet = { ...corsHeaders, "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsMitGet });
   // Öffentlicher Push-Schlüssel für die App (19.11.2026). Öffentlich heißt:
-  // ungefährlich; der private Teil bleibt im Geheimnis VAPID_PRIVATE_D.
+  // ungefährlich; der private Teil verlässt den Server nie. Beim ersten
+  // Abruf erzeugt der Server das Paar selbst.
   if (req.method === "GET") {
-    const k = Deno.env.get("VAPID_PUBLIC_KEY");
+    let k: string | null = null;
+    try {
+      k = (await pushSchluessel(Deno.env.get("SUPABASE_URL")!)).oeffentlich;
+    } catch (e) {
+      console.error(`[approval-notify] Schlüssel: ${String(e)}`);
+    }
     return new Response(JSON.stringify(k ? { public_key: k } : { error: "Push nicht eingerichtet" }), {
       status: k ? 200 : 503,
       headers: { ...corsMitGet, "Content-Type": "application/json" },
@@ -124,15 +165,11 @@ Deno.serve(async (req) => {
 
 // deno-lint-ignore no-explicit-any
 async function freigabePush(supabaseUrl: string, caller: any, approval: any) {
-  const pub = Deno.env.get("VAPID_PUBLIC_KEY");
-  const d = Deno.env.get("VAPID_PRIVATE_D");
-  if (!pub || !d) return { eingerichtet: false };
   const { data: wer } = await caller.auth.getUser();
   if (!wer?.user || wer.user.id !== approval.requested_by) return { erlaubt: false };
 
-  const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  const admin = dienstClient(supabaseUrl);
+  const schluessel = await pushSchluessel(supabaseUrl, admin);
   const db: PushDb = {
     async empfaenger(ausser) {
       const { data } = await admin.from("profiles").select("id")
@@ -153,6 +190,6 @@ async function freigabePush(supabaseUrl: string, caller: any, approval: any) {
       await admin.from("notifications").insert({ user_id: konto, title: titel, body: text, data: daten });
     },
   };
-  const vapid = await importiere(vonB64u(pub), d, "ecdsa");
+  const vapid = await importiere(vonB64u(schluessel.oeffentlich), schluessel.privat_d, "ecdsa");
   return await pushAnAndere(db, approval, (abo, n) => sendeWebPush(abo, n, vapid, PUSH_KONTAKT), APP_URL);
 }
