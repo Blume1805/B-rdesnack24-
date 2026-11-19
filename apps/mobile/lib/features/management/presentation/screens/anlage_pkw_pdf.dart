@@ -8,8 +8,7 @@ import '../../../../core/utils/formatters.dart';
 import 'anlage_pkw_werte.dart';
 
 /// Die „Anlage zur Ermittlung der individuellen PKW-Kosten" als PDF-Datei
-/// (A4 hoch). Inhalt und Reihenfolge wie die HTML-Druckansicht
-/// (`anlage_pkw_html.dart`): Kopf mit Stammdaten und Kopfleiste,
+/// (A4 hoch): Kopf mit Stammdaten und Kopfleiste,
 /// Fahrzeugkosten mit Satz je Kilometer, betriebliche Fahrten, Ergebnis
 /// und Unterschriften.
 ///

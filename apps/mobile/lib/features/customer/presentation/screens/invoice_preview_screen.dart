@@ -80,8 +80,8 @@ class InvoicePreviewScreen extends StatelessWidget {
   }
 }
 
-/// Wird sowohl von der Bildschirm-Vorschau als auch von der Web-Print-Route
-/// (invoice_print_web.dart) verwendet, damit der PDF-Ausdruck 1:1 aussieht.
+/// Bildschirm-Vorschau der Rechnung; die PDF-Datei baut `invoice_pdf.dart`
+/// mit denselben Angaben.
 class _InvoiceBody extends StatelessWidget {
   const _InvoiceBody({required this.invoice});
   final Invoice invoice;

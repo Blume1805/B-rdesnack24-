@@ -3,11 +3,11 @@
 // Warum echte PDF-Dateien (Befund 19.11.2026): In der Home-Bildschirm-App
 // auf dem iPhone ignoriert iOS den Druckbefehl einer Webseite, und ein
 // nachgeladenes Dokumentfenster öffnet sich dort nicht zuverlässig. Die
-// bisherigen HTML-Druckansichten funktionierten deshalb nur im Safari-Tab.
-// Eine fertige PDF-Datei lässt sich dagegen über das Teilen-Menü drucken,
-// in „Dateien" sichern oder an die Steuerberatung schicken.
+// früheren HTML-Druckansichten (gelöscht 19.11.2026) funktionierten deshalb
+// nur im Safari-Tab. Eine fertige PDF-Datei lässt sich dagegen über das
+// Teilen-Menü drucken oder in „Dateien" sichern.
 //
-// Gestaltung wie die HTML-Druckansichten: Gold-Balken, Wortmarke, dunkle
+// Gestaltung: Gold-Balken, Wortmarke, dunkle
 // Tabellenköpfe, goldener Unterstrich unter Überschriften, Beträge
 // rechtsbündig. Schrift: Hanken Grotesk aus den App-Assets (deckt €, „",
 // Umlaute, − und · ab; die PDF-Standardschriften können das nicht).

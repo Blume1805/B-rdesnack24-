@@ -58,9 +58,9 @@ Berechtigung (nur sichtbare Zeilen landen im PDF).
   Blatt (`core/druck/pdf_ausgabe.dart`): „Teilen oder drucken" (Teilen-Menü
   des Systems), im Browser zusätzlich „PDF öffnen" und „Herunterladen".
 * Prüfen: `DRUCK_AUSGABE=<ordner> flutter test test/druck` legt die PDFs ab
-  (`pdftoppm` zum Ansehen). Die älteren HTML-Ansichten
-  (`druck_regeln.dart`, `node scripts/druck_pruefen.mjs <ordner>`) werden
-  nicht mehr aufgerufen.
+  (`pdftoppm` zum Ansehen). Die früheren HTML-Druckansichten samt
+  `druck_regeln.dart` und `scripts/druck_pruefen.mjs` sind am 19.11.2026
+  gelöscht (Freigabe Philipp).
 
 ## Secrets
 

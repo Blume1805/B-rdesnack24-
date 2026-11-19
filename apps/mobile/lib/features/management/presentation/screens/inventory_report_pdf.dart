@@ -8,8 +8,7 @@ import '../../../../core/druck/pdf_ausgabe.dart';
 import '../../../../core/druck/pdf_hausstil.dart';
 import '../../../../core/utils/formatters.dart';
 
-/// Die FIFO-Inventur als PDF-Datei (A4 quer). Inhalt wie die
-/// HTML-Druckansicht (`inventory_report_html.dart`): Kopf, je Produkt die
+/// Die FIFO-Inventur als PDF-Datei (A4 quer): Kopf, je Produkt die
 /// Bewegungen im Zeitraum und die FIFO-Restlots am Stichtag, danach
 /// Bewertungsmatrix, Bilanzwert, Freigabe und Unterschriften.
 ///

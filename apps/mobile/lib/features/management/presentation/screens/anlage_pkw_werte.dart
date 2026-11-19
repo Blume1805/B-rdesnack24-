@@ -1,8 +1,7 @@
 import '../../../../core/utils/formatters.dart';
 
-// Werte und Beschriftungen der PKW-Anlage, gemeinsam für die HTML-
-// Druckansicht (`anlage_pkw_html.dart`) und die PDF-Datei
-// (`anlage_pkw_pdf.dart`), damit beide dieselben Zahlen zeigen.
+// Werte und Beschriftungen der PKW-Anlage für die PDF-Datei
+// (`anlage_pkw_pdf.dart`) und den Bildschirm.
 
 /// Reihenfolge und Beschriftung der Kostenarten.
 const pkwKostenarten = <MapEntry<String, String>>[

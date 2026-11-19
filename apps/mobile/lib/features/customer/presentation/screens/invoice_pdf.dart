@@ -7,8 +7,7 @@ import '../../../../core/druck/pdf_hausstil.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/invoice.dart';
 
-/// Die Rechnung als PDF-Datei (A4). Inhalt wie die HTML-Druckansicht
-/// (`invoice_html.dart`): Aussteller, Empfänger, Rechnungsangaben,
+/// Die Rechnung als PDF-Datei (A4): Aussteller, Empfänger, Rechnungsangaben,
 /// Positionen nach Steuersatz, Bruttobetrag und Hinweis nach § 14 UStG.
 Future<Uint8List> invoicePdf(
   Invoice invoice, {

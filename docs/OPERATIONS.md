@@ -2140,6 +2140,9 @@ Kachel eine Freigabe an; Philipps Handy zeigt innerhalb weniger Sekunden
 
 ## Runbook U: Fünf Test-PDFs aus dem Speicher löschen (Stand 19.11.2026)
 
+> ✅ **Erledigt am 19.11.2026** (Philipp), nachgemessen: Die 5 Test-PDFs sind
+> gelöscht. Übrig ist nur der leere Platzhalter `.emptyFolderPlaceholder`.
+
 **Zeitbedarf:** 3 Minuten, am Desktop. **Eilt nicht.**
 
 ### Warum

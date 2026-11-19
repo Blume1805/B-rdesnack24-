@@ -1696,7 +1696,11 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    nachgemessen: 0 Freigaben, 0 Entscheidungen, 26 Dokumente, beide Originale
    vorhanden. Speicher am 19.11.2026 nachgemessen: `signed-documents` enthält
    weiter 5 Dateien. Löschen per Datenbank ist gesperrt (Schutzregel
-   `protect_objects_delete` von Supabase); es bleibt bei Runbook U. Rechtlich: HACCP (VO (EG) 852/2004) verlangt ein angewandtes
+   `protect_objects_delete` von Supabase); es bleibt bei Runbook U.
+   ✅ Runbook U erledigt (Philipp, 19.11.2026), nachgemessen: Die 5 Test-PDFs
+   sind weg. Übrig ist nur `.emptyFolderPlaceholder` (0 Byte, legt Supabase
+   an, damit der leere Bereich sichtbar bleibt). `documents` unverändert 134
+   Dateien, keine Freigabe verweist auf ein finales PDF. Rechtlich: HACCP (VO (EG) 852/2004) verlangt ein angewandtes
    Eigenkontrollkonzept, keine interne Zweitfreigabe. Die Freigabe ist eine
    freiwillige Kontrolle.
 4. ✅ Name auf der Unterschrift: „Pia Blume" (Entscheidung Philipp 18.11.2026),
@@ -1705,8 +1709,8 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    zugeordneten Unterschrift; lokal geprüft (ändert einmal, zweiter Lauf
    nichts). ✅ Am 19.11.2026 eingespielt; der Kontoname lautet „Pia Blume".
 
-**Status: 🔴 OFFEN** (Datenbankteil erledigt 19.11.2026; Punkt 3 entfällt; offen:
-Punkt 2, echte Unterschriften, verantwortlich Philipp und Pia; dazu Runbook U)
+**Status: 🔴 OFFEN** (Datenbankteil und Runbook U erledigt 19.11.2026; Punkt 3 entfällt;
+offen: Punkt 2, echte Unterschriften, verantwortlich Philipp und Pia)
 
 ---
 
@@ -1810,11 +1814,11 @@ Umsetzung (im Repository, nicht ausgeliefert):
      an Philipp („Freigabe angefordert (Test)", Text im Namen von Pia, als Test
      gekennzeichnet): 1 Gerät, vom Apple-Push-Dienst angenommen (2xx). Der
      Eintrag trägt `gesendet`, `zugestellt: 1`, `geraete: 1`. Ein zweiter Aufruf
-     stellte nichts erneut zu. Ob die Mitteilung auf dem Sperrbildschirm
-     erschien, bestätigt Philipp.
+     stellte nichts erneut zu. ✅ Philipp bestätigt am 19.11.2026: „Push hat
+     geklappt."
 
-**Status: 🔴 OFFEN** (ausgeliefert, Schlüssel vom Server erzeugt; offen: Pia schaltet Push ein,
-Runbook T Teil 2; Ergebnis der Testmitteilung an Philipp siehe Runbook V)
+**Status: 🔴 OFFEN** (ausgeliefert, bei Philipp bestätigt; offen: Pia schaltet Push ein und
+bekommt eine Testmitteilung, Runbook T Teil 2 und Runbook V, verantwortlich Pia)
 
 ---
 
@@ -1953,8 +1957,11 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
    * Nicht nachweisbar ohne echtes Gerät: das Teilen-Menü von iOS selbst.
      Sichtprüfung durch Philipp nach der Auslieferung.
    * Die HTML-Druckansichten (`*_print_web.dart`, `*_print.dart`, `*_html.dart`)
-     werden nicht mehr aufgerufen. Sie bleiben vorerst stehen, weil Löschen von
-     Code freigabepflichtig ist (CLAUDE.md, K4). Rückfrage an Philipp.
+     wurden nicht mehr aufgerufen. ✅ Gelöscht am 19.11.2026 mit Philipps
+     Freigabe („Alte Druckansichten löschen"), dazu `druck_regeln.dart`, ihr
+     Test `druck_layout_test.dart` (13 Fälle), `scripts/druck_pruefen.mjs` und
+     das ungenutzte `sharePdfBytes`. Danach 246 App-Tests grün, Analyse sauber,
+     Web-Fassung baut.
    * ✅ Ausgeliefert am 19.11.2026 mit Philipps Freigabe („Ja, alles"): `main`
      auf `e78ce39`, „Deploy Web-Demo" Lauf 84 und CI Lauf 986 grün. Offen:
      Probe auf dem iPhone durch Philipp.
