@@ -1786,7 +1786,7 @@ und Probe, Runbook T Teil 2, verantwortlich Philipp und Pia)
 
 ---
 
-## V-023 · PDF-Belege: verstümmelte Freitexte, UTC-Zeiten, Seitenumbrüche (2026-11-19) — OFFEN (Auslieferung)
+## V-023 · PDF-Belege: verstümmelte Freitexte, UTC-Zeiten, Seitenumbrüche (2026-11-19) — OFFEN (Sichtprüfung)
 
 ### Sachverhalt
 
@@ -1863,8 +1863,19 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
      `protocol-export-pdf`.
    * **Gesamtlauf:** 253 App-Tests, 71 Function-Tests mit Typprüfung, Lint und
      Analyse sauber.
-2. 🔴 Ausliefern: App veröffentlichen und die sechs Server-Funktionen neu
-   bereitstellen, mit Philipps Freigabe.
+2. ✅ Ausgeliefert am 19.11.2026 mit Philipps Freigabe:
+   * App per `main`.
+   * Die sechs Functions über den Workflow „Edge Functions ausrollen" (Lauf 30,
+     byte-genau aus dem Repository). Dafür waren am Workflow zwei Fehler zu
+     beheben: Deno fehlte, und die neue CLI verlangt `--yes`.
+   * Live geprüft:
+     * Protokoll-PDF ohne Anmeldung: 401.
+     * Mit dem anon-Schlüssel kam ein PDF mit 0 Einträgen und ohne Namen
+       zurück (Zeilenschutz wirkt). Seitdem gilt auch hier: nur angemeldete
+       Nutzer, sonst 401.
+     * Claude-Verbindung: Entdeckung 200.
+   * Offen: Live-Probe eines echten Protokolls durch Philipp (PDF in der App
+     erzeugen und ansehen).
 3. Bereits erzeugte Freigabe-PDFs (Speicher `signed-documents`) behalten den
    alten Stand. Derzeit sind es nur die fünf Juli-Testdateien (Runbook U), die
    ohnehin gelöscht werden.
@@ -1883,5 +1894,5 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
 * `scripts/druck_pruefen.mjs` in die CI aufnehmen. Dafür ist ein Vergleich
   der Seitenzahlen nötig, kein reiner Bildvergleich.
 
-**Status: 🔴 OFFEN** (im Repository geprüft; Auslieferung ausstehend)
+**Status: 🔴 OFFEN** (ausgeliefert; Sichtprüfung eines echten Belegs durch Philipp ausstehend)
 

@@ -84,6 +84,11 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+  // Nur angemeldete Nutzer (wie finance-export-pdf). Mit dem öffentlichen
+  // anon-Schlüssel allein kam vorher ein leeres PDF mit den Firmendaten
+  // zurück (Zeilenschutz griff, Einträge 0; geprüft live 19.11.2026).
+  const { data: wer } = await caller.auth.getUser();
+  if (!wer?.user) return jsonResponse({ error: "Nicht angemeldet" }, 401);
   let kind: string, from: string, to: string;
   try {
     const body = await req.json();
