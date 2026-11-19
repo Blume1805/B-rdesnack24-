@@ -7,7 +7,7 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
-import { type PushDb, pushAnAndere } from "./push.ts";
+import { probenZustellen, type PushDb, pushAnAndere } from "./push.ts";
 import { importiere, sendeWebPush, vonB64u } from "./webpush.ts";
 import { type Paar, type SchluesselAblage, vapidPaar } from "./schluessel.ts";
 
@@ -80,9 +80,21 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   });
 
-  let body: { approval_id: string; phase: "requested" | "approved" | "rejected" };
+  let body: { approval_id: string; phase: "requested" | "approved" | "rejected" | "probe" };
   try { body = await req.json(); }
   catch { return jsonResponse({ error: "Invalid JSON" }, 400); }
+
+  // Testmitteilung (19.11.2026): stellt nur zu, was der Betreiber in der
+  // Datenbank als Probe angelegt hat (push.ts, probenZustellen). Der Aufruf
+  // bestimmt weder Inhalt noch Empfänger.
+  if (body.phase === "probe") {
+    try {
+      return jsonResponse({ ok: true, probe: await probeZustellen(supabaseUrl) });
+    } catch (e) {
+      console.error(`[approval-notify] Probe: ${String(e)}`);
+      return jsonResponse({ error: "Probe fehlgeschlagen" }, 500);
+    }
+  }
 
   const { data: approval, error: aErr } = await caller
     .from("document_approvals")
@@ -192,4 +204,41 @@ async function freigabePush(supabaseUrl: string, caller: any, approval: any) {
   };
   const vapid = await importiere(vonB64u(schluessel.oeffentlich), schluessel.privat_d, "ecdsa");
   return await pushAnAndere(db, approval, (abo, n) => sendeWebPush(abo, n, vapid, PUSH_KONTAKT), APP_URL);
+}
+
+async function probeZustellen(supabaseUrl: string) {
+  const admin = dienstClient(supabaseUrl);
+  const db = {
+    async offeneProben() {
+      const seit = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      const { data, error } = await admin.from("notifications").select("id, user_id, title, body, data")
+        .eq("data->>art", "probe").is("data->>gesendet", null).gte("sent_at", seit).limit(5);
+      if (error) throw error;
+      return data ?? [];
+    },
+    async beanspruche(id: string) {
+      // Atomar: nur wenn noch nicht vermerkt.
+      const { data: zeile } = await admin.from("notifications").select("data").eq("id", id).maybeSingle();
+      const neu = { ...(zeile?.data ?? {}), gesendet: new Date().toISOString() };
+      const { data, error } = await admin.from("notifications").update({ data: neu })
+        .eq("id", id).is("data->>gesendet", null).select("id");
+      if (error) throw error;
+      return (data ?? []).length === 1;
+    },
+    async abos(konten: string[]) {
+      const { data } = await admin.from("device_tokens").select("id, user_id, token")
+        .eq("platform", "web").in("user_id", konten);
+      return data ?? [];
+    },
+    async vermerke(id: string, e: { zugestellt: number; geraete: number }) {
+      const { data: zeile } = await admin.from("notifications").select("data").eq("id", id).maybeSingle();
+      await admin.from("notifications").update({ data: { ...(zeile?.data ?? {}), ...e } }).eq("id", id);
+    },
+    async loescheAbo(id: string) {
+      await admin.from("device_tokens").delete().eq("id", id);
+    },
+  };
+  const schluessel = await pushSchluessel(supabaseUrl, admin);
+  const vapid = await importiere(vonB64u(schluessel.oeffentlich), schluessel.privat_d, "ecdsa");
+  return await probenZustellen(db, (abo, n) => sendeWebPush(abo, n, vapid, PUSH_KONTAKT), APP_URL);
 }
