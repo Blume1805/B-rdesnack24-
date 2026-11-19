@@ -1869,8 +1869,9 @@ mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
    alten Stand. Derzeit sind es nur die fünf Juli-Testdateien (Runbook U), die
    ohnehin gelöscht werden.
 4. Offen, nicht Teil dieses Auftrags:
-   * `merge-employee-signature` hat 17 Typfehler aus der Abfrage (schon vorher
-     vorhanden, zur Laufzeit ohne Wirkung).
+   * ✅ `merge-employee-signature`: 17 Typfehler aus der Abfrage (schon vorher
+     vorhanden) behoben; sonst hätte die Typprüfung im Auslieferungs-Workflow
+     abgebrochen.
    * Die Vorlagen-PDFs (`documents-install-*`) halten Überschriften schon
      zusammen. Eine Änderung würde gespeicherte Vorlagen neu erzeugen und
      wurde deshalb nicht vorgenommen.

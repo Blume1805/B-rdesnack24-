@@ -62,12 +62,22 @@ Deno.serve(async (req) => {
   if (!body.task_id) return jsonResponse({ error: "task_id fehlt" }, 400);
 
   // Task laden (RLS via caller — Mitarbeiter darf eigene Task lesen)
-  const { data: task, error: tErr } = await caller
+  // Ausdrücklich typisiert: Den zusammengesetzten Abfragetext kann
+  // supabase-js nicht auswerten und lieferte einen Fehlertyp (17 Typfehler,
+  // `deno check` im Auslieferungs-Workflow scheiterte; behoben 19.11.2026).
+  interface SignaturAufgabe {
+    id: string; document_id: string; document_version: number; employee_id: string;
+    signature_png_path: string | null; invited_at: string | null; signed_at: string | null;
+    ip_hash: string | null; status: string;
+    employee: { full_name?: string; email?: string } | null;
+  }
+  const { data: taskRoh, error: tErr } = await caller
     .from("document_employee_signatures")
     .select("id, document_id, document_version, employee_id, signature_png_path, "
           + "invited_at, signed_at, ip_hash, status, "
           + "employee:profiles!document_employee_signatures_employee_id_fkey(full_name,email)")
     .eq("id", body.task_id).maybeSingle();
+  const task = taskRoh as unknown as SignaturAufgabe | null;
   if (tErr || !task) return jsonResponse({ error: "Task nicht gefunden" }, 404);
   if (!task.signature_png_path) {
     return jsonResponse({ error: "Signatur-PNG-Pfad fehlt" }, 400);
