@@ -1759,6 +1759,13 @@ Umsetzung (im Repository, nicht ausgeliefert):
    Probelauf scheitert dort genau an der gemeldeten Stelle.
    Die Schlüsseldatei aus dem Chat ist damit gegenstandslos: Ihr Paar wurde nie
    hinterlegt und ist ungültig.
+   **Produktion, 19.11.2026:** Migration eingespielt und nachgemessen. Zeilenschutz
+   ist an; anon und authenticated haben keine Rechte auf Tabelle und Funktionen; nur
+   service_role darf. `approval-notify` v12 ist ausgeliefert. Der erste Abruf liefert
+   200 mit einem Schlüssel von 87 Zeichen, gleich dem gespeicherten; der zweite
+   Abruf liefert denselben Schlüssel. Es gibt eine Zeile, und der geheime Teil steht
+   nicht in der Antwort. Der Fingerabdruck der Produktion ist gleich dem neuen
+   Sollwert.
 2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
    Probe.
 
