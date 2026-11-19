@@ -196,6 +196,28 @@ self.addEventListener('fetch', (event) => {
     }
   })());
 });
+// Push-Benachrichtigungen (19.11.2026): Freigabe angefordert. Der Inhalt
+// kommt verschlüsselt vom Server (approval-notify/webpush.ts).
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (_) {}
+  event.waitUntil(self.registration.showNotification(d.titel || 'Bördesnack24', {
+    body: d.text || '',
+    tag: d.tag || undefined,
+    icon: 'icons/Icon-192.png',
+    badge: 'icons/Icon-192.png',
+    data: { url: d.url || './' },
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const ziel = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil((async () => {
+    const fenster = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const f of fenster) { if ('focus' in f) return f.focus(); }
+    return self.clients.openWindow(ziel);
+  })());
+});
 JS
 echo "  ✓ generiert (Cache bs24-${TS})"
 

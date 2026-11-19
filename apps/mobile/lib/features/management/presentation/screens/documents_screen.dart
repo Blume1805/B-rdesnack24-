@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
@@ -414,9 +416,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
     if (ok != true) return;
     try {
-      await ref
-          .read(supabaseClientProvider)
+      final client = ref.read(supabaseClientProvider);
+      final id = await client
           .rpc('request_document_review', params: {'p_document': doc['id']});
+      // E-Mail und Push an die anderen Gesellschafter (19.11.2026), wie bei
+      // den übrigen Freigaben; ohne Erfolg bleibt die Anforderung bestehen.
+      unawaited(
+        client.functions.invoke(
+          'approval-notify',
+          body: {'approval_id': id.toString(), 'phase': 'requested'},
+        ).then((_) {}, onError: (_) {}),
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Freigabe angefordert.')),

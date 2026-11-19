@@ -10,6 +10,7 @@ import '../../../../core/widgets/design_system/kopf_kachel.dart';
 import '../../../../core/widgets/design_system/marken_kopf_bild.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../auth/domain/entities/app_user.dart';
+import 'push_banner.dart';
 import '../../auth/presentation/controllers/auth_providers.dart';
 import '../../customer/presentation/controllers/customer_providers.dart';
 import '../../customer/presentation/customer_screen.dart';
@@ -74,6 +75,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               : Column(
                   children: [
                     const _MfaReminderBanner(),
+                    const PushBanner(),
                     Expanded(child: tabs[safeIndex].screen),
                   ],
                 ),

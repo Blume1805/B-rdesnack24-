@@ -1675,3 +1675,55 @@ Gemessen am 18.11.2026 (nur gelesen), vor der beauftragten Löschung der Demo-Ko
    nichts). Einspielen nach `20261118090000`.
 
 **Status: 🔴 OFFEN**
+
+---
+
+## V-022 · Push-Benachrichtigung bei Freigaben (2026-11-19) — OFFEN
+
+### Sachverhalt
+
+Wunsch Philipp vom 19.11.2026: Fordert ein Gesellschafter eine Freigabe an,
+erhält der andere eine Push-Benachrichtigung. Vorher gab es nur eine E-Mail an
+die Firmenadresse. Die Push-Anbindung in der App war ein Platzhalter; in der
+Produktion waren 0 Geräte registriert.
+
+Umsetzung (im Repository, nicht ausgeliefert):
+
+* **Web-Push nach RFC 8291/8292**, ohne Fremdpaket (`approval-notify/webpush.ts`).
+  Die Verschlüsselung stimmt Byte für Byte mit dem Beispiel aus RFC 8291,
+  Anhang A überein (Test).
+* **Empfänger** (`push.ts`): aktive Admin- und Gesellschafter-Konten außer
+  dem Anfordernden. Nur der Anfordernde selbst kann die Push auslösen (Schutz
+  vor Fluten). Abgelaufene Abonnements (404/410) werden gelöscht.
+* **App:** Hinweis „Einschalten" für interne Konten. Das Abonnement wird in
+  `device_tokens` (Plattform `web`) gespeichert, eigene Zeilen per
+  Zeilenschutz.
+* **Service Worker** zeigt die Mitteilung. Browser-Test in Chromium: eine per
+  DevTools-Protokoll zugestellte Push erscheint mit Titel, Text und Kennung.
+* **Dokumentprüfung** (Dokumente → Freigabe anfordern) löst jetzt ebenfalls
+  E-Mail und Push aus.
+
+### Rechtliche Würdigung
+
+* **DSGVO:**
+  * Betroffen sind nur interne Konten.
+  * Gespeichert wird je Gerät die Abonnement-Adresse des Push-Dienstes.
+    Diese Adresse ist geräte-, nicht personenbezogen, aber dem Konto
+    zugeordnet.
+  * Die Löschung ist abgedeckt: `device_tokens` steht in den Löschregeln
+    (Prüfskript 96), und die Auskunft nennt die Geräte.
+  * Apple/Google/Mozilla sehen nur verschlüsselte Inhalte und den Zeitpunkt.
+    Sie sind Transportdienst, keine Auftragsverarbeiter für den Inhalt.
+* **Sperrbildschirm:** Er zeigt den Dokumenttitel. Deshalb keine
+  Personennamen in Titeln (wie V-019).
+* **Kundenbereich:** nicht betroffen, kein Art.-50-Hinweis nötig (keine
+  KI, keine algorithmische Auswahl).
+
+### Ergebnis / Handlungsbedarf
+
+1. VAPID-Schlüssel als Geheimnisse hinterlegen und `approval-notify`
+   ausliefern. Beides mit Philipps Bestätigung (Runbook T, Teil 1).
+2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
+   Probe.
+
+**Status: 🔴 OFFEN** (nicht ausgeliefert)

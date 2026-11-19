@@ -7,11 +7,28 @@
 // ============================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { type PushDb, pushAnAndere } from "./push.ts";
+import { importiere, sendeWebPush, vonB64u } from "./webpush.ts";
+
+const APP_URL = "https://app.boerdesnack24.de/";
+const PUSH_KONTAKT = "mailto:boerdesnack24@gmail.com";
 
 const OFFICIAL_EMAIL = "boerdesnack24@gmail.com";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  // GET zusätzlich erlaubt (Push-Schlüssel); nur für diese Funktion, die
+  // gemeinsame Regel in _shared/cors.ts bleibt bei POST.
+  const corsMitGet = { ...corsHeaders, "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsMitGet });
+  // Öffentlicher Push-Schlüssel für die App (19.11.2026). Öffentlich heißt:
+  // ungefährlich; der private Teil bleibt im Geheimnis VAPID_PRIVATE_D.
+  if (req.method === "GET") {
+    const k = Deno.env.get("VAPID_PUBLIC_KEY");
+    return new Response(JSON.stringify(k ? { public_key: k } : { error: "Push nicht eingerichtet" }), {
+      status: k ? 200 : 503,
+      headers: { ...corsMitGet, "Content-Type": "application/json" },
+    });
+  }
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return jsonResponse({ error: "Missing Authorization" }, 401);
@@ -32,6 +49,18 @@ Deno.serve(async (req) => {
     .eq("id", body.approval_id)
     .maybeSingle();
   if (aErr || !approval) return jsonResponse({ error: "Approval nicht gefunden" }, 404);
+
+  // Push an die anderen Gesellschafter (19.11.2026). Nur der Anfordernde
+  // selbst löst sie aus, damit niemand andere mit Wiederholungen flutet.
+  let push: unknown = null;
+  if (body.phase === "requested") {
+    try {
+      push = await freigabePush(supabaseUrl, caller, approval);
+    } catch (e) {
+      console.error(`[approval-notify] Push: ${String(e)}`);
+      push = { fehler: true };
+    }
+  }
 
   let recipients: string[] = [];
   if (body.phase === "requested") {
@@ -90,5 +119,40 @@ Deno.serve(async (req) => {
     body: JSON.stringify({ to: recipients, subject, html }),
   });
   const payload = await res.json();
-  return jsonResponse({ ok: res.ok, recipients, payload });
+  return jsonResponse({ ok: res.ok, recipients, payload, push });
 });
+
+// deno-lint-ignore no-explicit-any
+async function freigabePush(supabaseUrl: string, caller: any, approval: any) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY");
+  const d = Deno.env.get("VAPID_PRIVATE_D");
+  if (!pub || !d) return { eingerichtet: false };
+  const { data: wer } = await caller.auth.getUser();
+  if (!wer?.user || wer.user.id !== approval.requested_by) return { erlaubt: false };
+
+  const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const db: PushDb = {
+    async empfaenger(ausser) {
+      const { data } = await admin.from("profiles").select("id")
+        .in("role", ["system_admin", "shareholder"]).eq("status", "active")
+        .is("deleted_at", null).neq("id", ausser);
+      return (data ?? []).map((r: { id: string }) => r.id);
+    },
+    async abos(konten) {
+      if (konten.length === 0) return [];
+      const { data } = await admin.from("device_tokens").select("id, user_id, token")
+        .eq("platform", "web").in("user_id", konten);
+      return data ?? [];
+    },
+    async loescheAbo(id) {
+      await admin.from("device_tokens").delete().eq("id", id);
+    },
+    async hinweis(konto, titel, text, daten) {
+      await admin.from("notifications").insert({ user_id: konto, title: titel, body: text, data: daten });
+    },
+  };
+  const vapid = await importiere(vonB64u(pub), d, "ecdsa");
+  return await pushAnAndere(db, approval, (abo, n) => sendeWebPush(abo, n, vapid, PUSH_KONTAKT), APP_URL);
+}

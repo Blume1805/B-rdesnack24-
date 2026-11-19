@@ -2065,3 +2065,66 @@ diese Einrichtung bleibt alles wie bisher: Du holst Protokolle selbst in der App
   dann räume ich den Ordner `mcp-exporte` leer.
 * **Rückweg in der Datenbank:** steht im Kopf der Migration
   `20261117120000_claude_verbindung.sql`; nur nach Absprache.
+
+---
+
+## Runbook T: Push-Benachrichtigung bei Freigaben einschalten (Stand 19.11.2026)
+
+**Zeitbedarf:** 5 Minuten je Person (Philipp und Pia), am eigenen Handy.
+
+### Warum
+
+Wenn einer von Euch ein Dokument zur Freigabe anfordert, soll der andere es
+sofort merken, ohne in die App schauen zu müssen. Bisher kam nur eine E-Mail
+an die Firmenadresse.
+
+### Was passiert dabei — und was nicht
+
+* Es passiert: Fordert einer eine Freigabe an, bekommen **alle anderen**
+  aktiven Gesellschafter-/Admin-Konten eine Mitteilung „Freigabe angefordert
+  – <Titel> – bitte prüfen und freigeben". Der Anfordernde selbst bekommt
+  keine. Zusätzlich erscheint die Mitteilung in der App-Liste.
+* Der Inhalt ist verschlüsselt. Apple bzw. Google leiten ihn nur weiter und
+  können ihn nicht lesen. Auf dem Sperrbildschirm steht nur der
+  Dokumenttitel; deshalb keine Personennamen in Titeln.
+* Es passiert **nicht**: Kunden bekommen keine solche Mitteilung. Die
+  E-Mail an die Firmenadresse bleibt wie bisher.
+
+### Teil 1 — mit mir am Desktop (einmalig)
+
+1. Mir „nochmal" schreiben (gehört zum Durchgang mit den Datenbank-Schritten).
+2. Ich erzeuge die beiden Push-Schlüssel und hinterlege sie als Geheimnisse
+   bei den Server-Funktionen (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_D`). Du
+   bekommst eine Bestätigungsfrage → **Erlauben**. Den privaten Schlüssel
+   sieht dabei niemand im Chat.
+3. Ich liefere die Server-Funktion `approval-notify` neu aus → **Erlauben**.
+
+### Teil 2 — jeder an seinem iPhone
+
+1. Die App **vom Home-Bildschirm** öffnen (nicht aus Safari). Ist sie noch
+   nicht dort: in Safari `app.boerdesnack24.de` öffnen → unten auf das
+   Teilen-Symbol (Quadrat mit Pfeil nach oben) → **Zum Home-Bildschirm** →
+   **Hinzufügen**. Danach die App über das neue Symbol öffnen.
+2. Anmelden. Unter dem Kopf steht der goldene Hinweis „Push-Benachrichtigung
+   einschalten …" → auf **Einschalten** tippen.
+3. iPhone fragt „… möchte Mitteilungen senden" → **Erlauben**.
+
+### So sieht Erfolg aus
+
+Der goldene Hinweis verschwindet. Probe: Pia fordert in **Verwaltung →
+Reinigung** (oder einem anderen Protokoll) über das Ordner-Symbol oben in der
+Kachel eine Freigabe an; Philipps Handy zeigt innerhalb weniger Sekunden
+„Freigabe angefordert".
+
+### Wenn etwas schiefgeht
+
+* **Statt „Einschalten" steht „Teilen → Zum Home-Bildschirm …":** Die App
+  läuft im Safari-Tab. Schritt 1 von Teil 2.
+* **„Push-Benachrichtigungen sind blockiert":** iPhone → Einstellungen →
+  Mitteilungen → Bördesnack24 → Mitteilungen erlauben einschalten. Danach
+  App neu öffnen.
+* **Keine Mitteilung bei der Probe:** Mir sagen; ich sehe in der Antwort der
+  Funktion, wie viele Geräte erreicht wurden. Die E-Mail an die Firmenadresse
+  kommt in jedem Fall.
+* **Abschalten:** iPhone → Einstellungen → Mitteilungen → Bördesnack24 →
+  aus. Nichts eilt.
