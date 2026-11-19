@@ -37,3 +37,17 @@ Deno.test("Umbruch: nichts geht verloren, jede Zeile passt", async () => {
   assertEquals(umbrechen("", 60, schrift, 8), [""]);
   assertEquals(umbrechen("kurz", 60, schrift, 8), ["kurz"]);
 });
+
+Deno.test("WinAnsi: Sonderzeichen ersetzt, Umlaute und € bleiben", async () => {
+  const { winAnsi } = await import("./pdf_format.ts");
+  assertEquals(winAnsi("Temperaturkontrolle (CCP 2: ≤ 7 °C)"), "Temperaturkontrolle (CCP 2: <= 7 °C)");
+  assertEquals(winAnsi("Łukasz Wójcik"), "Lukasz Wójcik");
+  assertEquals(winAnsi("Bördesnack24 – Grüße, 5 € → ok"), "Bördesnack24 – Grüße, 5 € -> ok");
+  assertEquals(winAnsi("Emoji 😀"), "Emoji ?");
+});
+
+Deno.test("Zeit mit Sekunden für Nachweisblätter", async () => {
+  const { zeitDe } = await import("./pdf_format.ts");
+  assertEquals(zeitDe("2026-11-19T09:28:07.5+00:00", true), "19.11.2026 10:28:07");
+});
+

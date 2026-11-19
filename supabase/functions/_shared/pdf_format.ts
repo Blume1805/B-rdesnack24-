@@ -16,12 +16,18 @@ const ZEIT_DE = new Intl.DateTimeFormat("de-DE", {
   day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
 });
 
-/** „2026-10-01T00:15:00+00:00" → „01.10.2026, 02:15" (deutsche Zeit). */
-export function zeitDe(iso: string): string {
+const ZEIT_DE_SEK = new Intl.DateTimeFormat("de-DE", {
+  timeZone: "Europe/Berlin",
+  day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit",
+});
+
+/** „2026-10-01T00:15:00+00:00" → „01.10.2026 02:15" (deutsche Zeit);
+ *  mit `sekunden` → „01.10.2026 02:15:00" (für Nachweisblätter). */
+export function zeitDe(iso: string, sekunden = false): string {
   // Postgres liefert die Zone teils als „+00"; JavaScript braucht „+00:00".
   const d = new Date(iso.replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00"));
   if (isNaN(d.getTime())) return iso;
-  return ZEIT_DE.format(d).replace(",", "");
+  return (sekunden ? ZEIT_DE_SEK : ZEIT_DE).format(d).replace(",", "");
 }
 
 /** „2026-10-31" → „31.10.2026". */
@@ -77,4 +83,30 @@ export function umbrechen(text: string, breite: number, schrift: Messbar, groess
   }
   if (aktuell) zeilen.push(aktuell);
   return zeilen.length ? zeilen : [""];
+}
+
+// Die Standardschriften von pdf-lib (Helvetica) kennen nur WinAnsi. Ein
+// Zeichen außerhalb (z. B. „≤" im Titel der Temperaturkontrolle, „→" aus
+// Freitext, Namen mit „Ł") bricht die PDF-Erzeugung mit einem Fehler ab
+// (Befund 19.11.2026: Freigabe-PDF eines Temperaturprotokolls). Deshalb
+// läuft jeder gezeichnete oder gemessene Text hier durch.
+const WINANSI_ERSATZ: Record<string, string> = {
+  "→": "->", "←": "<-", "↔": "<->", "⇒": "=>", "≤": "<=", "≥": ">=",
+  "≠": "!=", "≈": "~", "×": "x", "÷": "/", "∅": "-", "™": "(TM)", "℃": "°C",
+  "Ł": "L", "ł": "l", "Ś": "S", "ś": "s", "Ż": "Z", "ż": "z", "Ź": "Z", "ź": "z",
+  "Ć": "C", "ć": "c", "Ń": "N", "ń": "n", "Ą": "A", "ą": "a", "Ę": "E", "ę": "e",
+  "Č": "C", "č": "c", "Ř": "R", "ř": "r", "Ğ": "G", "ğ": "g", "İ": "I", "ı": "i", "Ş": "S", "ş": "s",
+};
+const WINANSI_HOCH = new Set([
+  "–", "—", "‘", "’", "‚", "“", "”", "„", "•", "…", "†", "‡", "‰",
+  "‹", "›", "€", "ƒ", "ˆ", "˜", "Š", "š", "Ž", "ž", "Œ", "œ", "Ÿ",
+]);
+export function winAnsi(s: string): string {
+  let aus = "";
+  for (const z of s) {
+    if (WINANSI_ERSATZ[z] !== undefined) { aus += WINANSI_ERSATZ[z]; continue; }
+    const cp = z.codePointAt(0)!;
+    aus += cp <= 0xff || WINANSI_HOCH.has(z) ? z : "?";
+  }
+  return aus;
 }

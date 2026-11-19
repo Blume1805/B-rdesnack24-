@@ -11,7 +11,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { PDFDocument, PDFPage, StandardFonts, rgb, type PDFFont } from "https://esm.sh/pdf-lib@1.17.1";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
 import { seitenAufteilen } from "../_shared/seiten.ts";
-import { datumDe, umbrechen, zelle } from "../_shared/pdf_format.ts";
+import { datumDe, umbrechen, winAnsi, zeitDe, zelle } from "../_shared/pdf_format.ts";
 
 const ISSUER = {
   name: "Bördesnack24 GbR",
@@ -29,7 +29,7 @@ const POSITIVE = rgb(0.36, 0.60, 0.25);
 // ── Hilfsformatierer ──────────────────────────────────────────────
 // Deutsch formatiert (_shared/pdf_format.ts). Vorher wurde jeder Freitext
 // mit großem „T" als Zeitstempel verstümmelt (Befund 19.11.2026).
-const fmt = (v: unknown): string => zelle(v);
+const fmt = (v: unknown): string => winAnsi(zelle(v));
 const VORGANG: Record<string, string> = {
   refill: "Zugang", sale: "Verkauf", disposal: "Vernichtung", correction: "Korrektur",
 };
@@ -87,10 +87,10 @@ function drawPageHeader(page: PDFPage, ctx: Ctx, title: string, subtitle?: strin
   page.drawLine({ start: { x: 40, y: 842 - 82 }, end: { x: 555, y: 842 - 82 }, thickness: 0.7, color: GOLD });
 
   let ty = 842 - 104;
-  page.drawText(title, { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
+  page.drawText(winAnsi(title), { x: 40, y: ty, size: 15, font: ctx.bold, color: GOLD });
   ty -= 18;
   if (subtitle) {
-    page.drawText(subtitle, { x: 40, y: ty, size: 10, font: ctx.font, color: INK });
+    page.drawText(winAnsi(subtitle), { x: 40, y: ty, size: 10, font: ctx.font, color: INK });
     ty -= 12;
   }
   page.drawLine({
@@ -258,13 +258,15 @@ function renderInventoryFifo(ctx: Ctx): void {
   // Optionale zweite Sektion: Bewegungen im Zeitraum
   if (movements.length > 0) {
     const moveCols: TableColumn[] = [
+      // Breiten nach Inhalt (19.11.2026): „Vernichtung" brach in der alten,
+      // 42 pt schmalen Typ-Spalte mitten im Wort um.
       { label: "Zeitpunkt",   x: 40,  maxChars: 16 },
-      { label: "Produkt",     x: 140, maxChars: 20 },
-      { label: "Automat",     x: 265, maxChars: 10 },
-      { label: "Typ",         x: 335, maxChars: 8 },
-      { label: "Menge",       x: 385, maxChars: 6, align: "right" },
-      { label: "EK",          x: 425, maxChars: 8, align: "right" },
-      { label: "Rechnung",    x: 480, maxChars: 12 },
+      { label: "Produkt",     x: 125, maxChars: 24 },
+      { label: "Automat",     x: 245, maxChars: 8 },
+      { label: "Typ",         x: 290, maxChars: 11 },
+      { label: "Menge",       x: 360, maxChars: 6, align: "right" },
+      { label: "EK",          x: 410, maxChars: 8, align: "right" },
+      { label: "Rechnung",    x: 470, maxChars: 14 },
     ];
     const moveRows = movements.map((m) => [
       m.occurred_at as string ?? "",
@@ -447,13 +449,13 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
   page.drawText("Beide Gesellschafter haben nach Prüfung digital signiert.",
     { x: 55, y: y - 40, size: 9, font: ctx.font, color: INK });
 
-  const approvedAt = new Date().toISOString().substring(0, 10);
+  const approvedAt = datumDe(new Date().toISOString().substring(0, 10));
   let lineY = y - 60;
   for (const d of ctx.decisions) {
-    const name = d.approver?.full_name ?? "?";
+    const name = winAnsi(d.approver?.full_name ?? "?");
     const dec = d.decision === "approved" ? "freigegeben" : "abgelehnt";
-    const decidedAt = d.decided_at
-      ? String(d.decided_at).substring(0, 10) : approvedAt;
+    // Deutsche Zeit, deutsches Format (vorher UTC-Datum im ISO-Format).
+    const decidedAt = d.decided_at ? zeitDe(String(d.decided_at)).substring(0, 10) : approvedAt;
     page.drawText(`- ${name}: ${dec}  (${decidedAt})`,
       { x: 55, y: lineY, size: 9, font: ctx.font, color: INK });
     lineY -= 12;
@@ -473,9 +475,9 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
       sy = drawPageHeader(page, ctx, stampTitle, `${stampSubtitle} (Fortsetzung)`);
     }
 
-    const name = d.approver?.full_name ?? "?";
-    const decidedAt = d.decided_at
-      ? String(d.decided_at).substring(0, 10) : approvedAt;
+    const name = winAnsi(d.approver?.full_name ?? "?");
+    // Deutsche Zeit, deutsches Format (vorher UTC-Datum im ISO-Format).
+    const decidedAt = d.decided_at ? zeitDe(String(d.decided_at)).substring(0, 10) : approvedAt;
     const sigUrl = d.signature_url;
 
     page.drawRectangle({
@@ -519,7 +521,9 @@ async function renderApprovalStamp(ctx: Ctx): Promise<void> {
     }
 
     page.drawText(name, { x: 60, y: sy - 100, size: 10, font: ctx.bold, color: INK });
-    page.drawText(`Gesellschafter – freigegeben am ${decidedAt}`,
+    // Ohne fest eingetragene Rolle: Sie stand als „Gesellschafter" auch bei
+    // der Gesellschafterin. Der Name steht darüber.
+    page.drawText(`Freigegeben am ${decidedAt}`,
       { x: 60, y: sy - 114, size: 8, font: ctx.font, color: MUTED });
 
     sy -= CARD_GAP;

@@ -38,9 +38,21 @@ Terminal→Automat (`nayax_terminal_id`) und Produkt→SKU. Parser-Logik in `par
 
 ## PDF-Nachweise (VLÜA/GoBD)
 
-`protocol-export-pdf` rendert Temperatur-, Reinigungs-, Vernichtungs- und Schulungsnachweise
-für einen Zeitraum. Liest mit der **Aufrufer-Identität** → RLS erzwingt die Berechtigung
-(nur sichtbare Zeilen landen im PDF).
+`protocol-export-pdf` rendert die Nachweise für Temperatur, Reinigung, Vernichtung,
+Schulung, Befüllung, Wartung und Geldentnahme für einen Zeitraum (geprüft gegen
+`PROTOCOLS` im Code, 19.11.2026). Liest mit der **Aufrufer-Identität** → RLS erzwingt die
+Berechtigung (nur sichtbare Zeilen landen im PDF).
+
+**Formatierung und Seitenumbruch aller PDF-Belege (seit 19.11.2026, COMPLIANCE V-023):**
+
+* Zeiten in deutscher Zeit, Datum `TT.MM.JJJJ`, Zahlen mit Komma.
+* Freitexte werden umbrochen, nie gekürzt (`_shared/pdf_format.ts`).
+* Zeilen füllen jede Seite. Der Unterschriften- bzw. Schlussblock steht nie
+  allein, sondern nimmt die letzten drei Zeilen mit (`_shared/seiten.ts`).
+* Belege aus dem Browser (PKW-Anlage, FIFO-Inventur, Rechnung) folgen denselben
+  Regeln in `apps/mobile/lib/core/druck/druck_regeln.dart`.
+* Prüfen: `DRUCK_AUSGABE=<ordner> flutter test test/druck`, dann
+  `node scripts/druck_pruefen.mjs <ordner>`.
 
 ## Secrets
 

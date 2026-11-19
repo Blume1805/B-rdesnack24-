@@ -63,14 +63,16 @@ void main() {
       expect(schluss, contains('Philipp Blume'));
       expect(schluss, contains('class="fuss"'));
       // Nach dem Schlussblock folgt nichts mehr, was allein umbrechen könnte.
-      expect(schluss, endsWith('</div></td></tr></tbody></table></section></body></html>'));
+      expect(
+        schluss,
+        endsWith('</div></td></tr></tbody></table></section></body></html>'),
+      );
     });
 
     test('Jede Überschrift steckt in einem Abschnitt', () {
       final h = _pkw(fahrten: 3);
-      final abschnitte = RegExp(r'<section class="abschnitt[^"]*"><h2>')
-          .allMatches(h)
-          .length;
+      final abschnitte =
+          RegExp(r'<section class="abschnitt[^"]*"><h2>').allMatches(h).length;
       expect(abschnitte, RegExp('<h2>').allMatches(h).length);
     });
 
@@ -78,19 +80,26 @@ void main() {
       for (final n in [0, 1, 2, 3, 12, 40]) {
         final h = _pkw(fahrten: n);
         final ende = h.substring(h.indexOf('<tbody class="ende">'));
-        expect('<tr>'.allMatches(ende).length, n < 3 ? (n == 0 ? 1 : n) : 3,
-            reason: '$n Fahrten');
+        expect(
+          '<tr>'.allMatches(ende).length,
+          n < 3 ? (n == 0 ? 1 : n) : 3,
+          reason: '$n Fahrten',
+        );
         expect(ende, contains('class="schluss-zeile"'));
         if (n > 0) expect(ende, contains('Summe der betrieblichen Fahrten'));
         expect('<tbody class="ende">'.allMatches(h).length, 1);
       }
     });
 
-    test('Kostenarten ohne Betrag stehen im Hinweis, nicht als leere Zeile', () {
+    test('Kostenarten ohne Betrag stehen im Hinweis, nicht als leere Zeile',
+        () {
       final h = _pkw();
       expect(h, isNot(contains('<td class="l">Tanken</td>')));
-      expect(h, contains('Ohne Beträge in 2026: Tanken, Autowäsche, '
-          'Reparaturen, Abschreibung, Sonstiges.'));
+      expect(
+        h,
+        contains('Ohne Beträge in 2026: Tanken, Autowäsche, '
+            'Reparaturen, Abschreibung, Sonstiges.'),
+      );
       expect(h, contains('<td class="l">Versicherung</td>'));
     });
 
@@ -108,15 +117,23 @@ void main() {
     test('Beispiele ablegen', () {
       _ablegen('pkw_wie_bildschirmfoto', _pkw());
       _ablegen('pkw_5_fahrten', _pkw(fahrten: 5));
-      _ablegen('pkw_12_fahrten_freigegeben', _pkw(fahrten: 12, freigegeben: true));
+      _ablegen(
+        'pkw_12_fahrten_freigegeben',
+        _pkw(fahrten: 12, freigegeben: true),
+      );
       _ablegen('pkw_40_fahrten', _pkw(fahrten: 40, ohneSatz: 2));
     });
   });
 
   group('FIFO-Inventur', () {
-    String inventur({int produkte = 3, int jeProdukt = 6, bool freigegeben = false}) =>
+    String inventur({
+      int produkte = 3,
+      int jeProdukt = 6,
+      bool freigegeben = false,
+    }) =>
         inventoryReportHtml(
-          movements: inventurBewegungen(produkte: produkte, jeProdukt: jeProdukt),
+          movements:
+              inventurBewegungen(produkte: produkte, jeProdukt: jeProdukt),
           lots: inventurLots(produkte: produkte),
           signatures: pkwUnterschriften,
           from: DateTime(2026, 1, 1),
@@ -125,8 +142,16 @@ void main() {
           druckenBeimLaden: false,
           approvalDecisions: freigegeben
               ? const [
-                  {'approver_name': 'Pia Blume', 'decision': 'approved', 'decided_at': '2026-10-02'},
-                  {'approver_name': 'Philipp Blume', 'decision': 'approved', 'decided_at': '2026-10-02'},
+                  {
+                    'approver_name': 'Pia Blume',
+                    'decision': 'approved',
+                    'decided_at': '2026-10-02',
+                  },
+                  {
+                    'approver_name': 'Philipp Blume',
+                    'decision': 'approved',
+                    'decided_at': '2026-10-02',
+                  },
                 ]
               : null,
         );
@@ -147,19 +172,38 @@ void main() {
       expect(schluss, contains('Bewertungsansatz MHD-Abschlag'));
     });
 
-    test('Produkte brechen um, Restlot-Tabelle bleibt mit ihrer Überschrift', () {
+    test('Produkte brechen um, Restlot-Tabelle bleibt mit ihrer Überschrift',
+        () {
       final h = inventur(jeProdukt: 6);
-      expect('<section class="product abschnitt lang">'.allMatches(h).length, 3);
-      expect(h, contains('<div class="abschnitt"><h3>FIFO-Restlots am Stichtag</h3>'));
+      expect(
+        '<section class="product abschnitt lang">'.allMatches(h).length,
+        3,
+      );
+      expect(
+        h,
+        contains(
+          '<div class="abschnitt"><h3>FIFO-Restlots am Stichtag</h3>',
+        ),
+      );
       // Produktkopf und erste Teilüberschrift sind eine Kopfgruppe.
-      expect(RegExp(r'<div class="kopf"><div class="prod-head">.*?<h3>Bewegungen im Zeitraum</h3></div>')
-          .allMatches(h).length, 3);
+      expect(
+        RegExp(r'<div class="kopf"><div class="prod-head">.*?<h3>Bewegungen im Zeitraum</h3></div>')
+            .allMatches(h)
+            .length,
+        3,
+      );
     });
 
     test('Beispiele ablegen', () {
       _ablegen('inventur_kurz', inventur());
-      _ablegen('inventur_lang_freigegeben', inventur(produkte: 8, jeProdukt: 9, freigegeben: true));
-      _ablegen('inventur_grosses_produkt', inventur(produkte: 2, jeProdukt: 40));
+      _ablegen(
+        'inventur_lang_freigegeben',
+        inventur(produkte: 8, jeProdukt: 9, freigegeben: true),
+      );
+      _ablegen(
+        'inventur_grosses_produkt',
+        inventur(produkte: 2, jeProdukt: 40),
+      );
     });
   });
 

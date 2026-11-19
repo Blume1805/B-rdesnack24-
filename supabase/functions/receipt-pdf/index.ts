@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { winAnsi, zeitDe } from "../_shared/pdf_format.ts";
 
 const ISSUER = {
   name: "Bördesnack24 GbR",
@@ -125,14 +126,15 @@ Deno.serve(async (req) => {
     y -= 24;
 
     // Kopf-Daten (Fließtext 11 pt / Leading 14 pt lt. Skill).
-    const purchasedAt = String(purchase.purchased_at ?? "")
-      .replace("T", " ").substring(0, 16);
+    // Deutsche Zeit (vorher UTC mit dem Zusatz „Uhr": ein Kauf um 10:28 Uhr
+    // stand als 09:28 Uhr auf dem Bon; Befund 19.11.2026).
+    const purchasedAt = zeitDe(String(purchase.purchased_at ?? ""));
     const bonNo = purchaseId.substring(0, 8).toUpperCase();
     const payLabel = PAYMENT_LABELS[String(purchase.payment_method ?? "cash")] ?? "—";
     const headRows: Array<[string, string]> = [
       ["Beleg-Nr.", bonNo],
       ["Datum / Uhrzeit", `${purchasedAt} Uhr`],
-      ["Automat / Standort", machineLabel || "—"],
+      ["Automat / Standort", winAnsi(machineLabel) || "—"],
       ["Zahlungsart", payLabel],
       ["Kundennummer", String(cust?.customer_number ?? "—")],
     ];
@@ -169,7 +171,9 @@ Deno.serve(async (req) => {
         unit_deposit?: number;
         product?: { name?: string; tax_rate?: number } | null;
       };
-      const label = (it.product_label ?? it.product?.name ?? "Artikel").substring(0, 48);
+      // WinAnsi-sicher: Ein Sonderzeichen im Produktnamen brach sonst die
+      // PDF-Erzeugung ab.
+      const label = winAnsi(it.product_label ?? it.product?.name ?? "Artikel").substring(0, 48);
       const qty = Number(it.quantity ?? 1);
       const unit = Number(it.unit_price ?? 0);
       const gross = qty * unit;

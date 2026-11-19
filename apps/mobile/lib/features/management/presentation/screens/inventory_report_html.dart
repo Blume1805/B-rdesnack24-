@@ -126,7 +126,9 @@ String inventoryReportHtml({
     blocks.write('</tbody></table>');
 
     // FIFO-Lots
-    blocks.write('<div class="abschnitt${productLots.length > 15 ? ' lang' : ''}">');
+    blocks.write(
+      '<div class="abschnitt${productLots.length > 15 ? ' lang' : ''}">',
+    );
     blocks.write('<h3>FIFO-Restlots am Stichtag</h3>');
     blocks.write('<table class="pos"><thead><tr>'
         '<th>Rechnung</th><th>Rg-Datum</th>'

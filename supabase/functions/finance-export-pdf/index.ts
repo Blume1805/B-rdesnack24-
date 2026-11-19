@@ -19,6 +19,8 @@ import {
 } from "https://esm.sh/pdf-lib@1.17.1";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 import { jsonResponse, corsHeaders } from "../_shared/cors.ts";
+import { seitenAufteilen } from "../_shared/seiten.ts";
+import { datumDe } from "../_shared/pdf_format.ts";
 
 const ISSUER = {
   name: "Bördesnack24 GbR",
@@ -153,8 +155,12 @@ function h1(ctx: Ctx, text: string) {
   ctx.y -= 18;
 }
 
-function h2(ctx: Ctx, text: string) {
-  ensureSpace(ctx, 30);
+// `folgend`: Platz, den der Inhalt unter der Überschrift mindestens braucht.
+// Vorher prüfte die Überschrift nur ihren eigenen Platz (30 pt); ein
+// Diagramm danach verlangte 185 pt, und die Überschrift blieb allein am
+// Seitenfuß stehen (Befund 19.11.2026).
+function h2(ctx: Ctx, text: string, folgend = 45) {
+  ensureSpace(ctx, 30 + folgend);
   ctx.page.drawText(safe(text), {
     x: MARGIN_X, y: ctx.y, size: 13, font: ctx.bold, color: INK,
   });
@@ -198,9 +204,9 @@ function table(
   headers: string[],
   colX: number[],
   rows: string[][],
-  opts?: { alignRightCols?: number[] },
+  opts?: { alignRightCols?: number[]; platzDanach?: number },
 ) {
-  ensureSpace(ctx, 40);
+  ensureSpace(ctx, 18 + 14 * Math.min(3, Math.max(1, rows.length)));
   const drawHeadRow = () => {
     ctx.page.drawRectangle({
       x: MARGIN_X, y: ctx.y - 4, width: CONTENT_W, height: 16, color: INK,
@@ -215,9 +221,20 @@ function table(
     ctx.y -= 18;
   };
   drawHeadRow();
+  // Zeilen mit seitenAufteilen verteilen: Folgt ein Block (Unterschriften),
+  // stehen auf der letzten Seite mindestens drei Zeilen davor, statt dass
+  // der Block allein auf eine neue Seite rutscht.
+  const { seiten } = seitenAufteilen(rows.map(() => 14), {
+    platzErste: ctx.y + 4 - FOOT_LIMIT,
+    platzFolge: (PAGE_H - 40) - 18 + 4 - FOOT_LIMIT,
+    schluss: (opts?.platzDanach ?? 0) + 6,
+  });
+  const neueSeiteBei = new Set(seiten.slice(1).map((z) => z[0]).filter((i) => i !== undefined));
+  const schlussEigeneSeite = seiten.length > 1 && seiten[seiten.length - 1].length === 0;
   let zebra = false;
-  for (const r of rows) {
-    if (ctx.y - 14 < FOOT_LIMIT) {
+  for (let ri = 0; ri < rows.length; ri++) {
+    const r = rows[ri];
+    if (neueSeiteBei.has(ri)) {
       newPage(ctx);
       drawHeadRow();
       zebra = false;
@@ -237,6 +254,7 @@ function table(
     ctx.y -= 14;
     zebra = !zebra;
   }
+  if (schlussEigeneSeite) newPage(ctx);
   ctx.y -= 6;
 }
 
@@ -376,11 +394,13 @@ function barList(ctx: Ctx, rows: Array<{ label: string; value: number; text: str
         x: lx, y: axisY - 12, size: labelSize, font: ctx.font, color: MUTED,
       });
     }
-    ctx.y -= 20;
+    // Abstand Achse -> erster Name: Bei 20 pt lag die Achsenbeschriftung
+    // auf dem ersten Namen (Befund 19.11.2026, gerendert).
+    ctx.y -= 30;
   }
 
   for (const r of rows) {
-    ensureSpace(ctx, 28);
+    ensureSpace(ctx, 34);
     ctx.page.drawText(safe(r.label), {
       x: MARGIN_X, y: ctx.y, size: 10, font: ctx.bold, color: INK,
     });
@@ -396,7 +416,8 @@ function barList(ctx: Ctx, rows: Array<{ label: string; value: number; text: str
     ctx.page.drawRectangle({
       x: MARGIN_X, y: ctx.y - 6, width: CONTENT_W * wFrac, height: 6, color: GOLD,
     });
-    ctx.y -= 14;
+    // Abstand Balken -> nächster Name (vorher rund 1 pt).
+    ctx.y -= 20;
   }
 }
 
@@ -544,6 +565,7 @@ function comparisonChart(
 }
 
 // ── Unterschriftenblock der Gesellschafter (letzte Seite) ───────────────
+const UNTERSCHRIFT_H = 100;
 function signatureBlock(
   ctx: Ctx,
   sigs: Array<{ full_name?: string; role_label?: string }>,
@@ -555,7 +577,7 @@ function signatureBlock(
     x: MARGIN_X, y: ctx.y, size: 10, font: ctx.bold, color: INK,
   });
   ctx.y -= 46;
-  const today = new Date().toISOString().substring(0, 10);
+  const today = datumDe(new Date().toISOString().substring(0, 10));
   const slots = sigs.length > 0
     ? sigs
     : [
@@ -654,10 +676,10 @@ Deno.serve(async (req) => {
     // ── Seite 1: Rentabilität + Zielwerte ───────────────────────────
     h1(ctx, "Finanzauswertung");
     p(ctx, `Zeitraum: ${dateStr(from)} bis ${dateStr(to)} (${periodDays} Tage)`, { size: 11, bold: true });
-    p(ctx, `Erstellt am ${new Date().toISOString().substring(0, 10)}`, { size: 9, color: MUTED });
+    p(ctx, `Erstellt am ${datumDe(new Date().toISOString().substring(0, 10))}`, { size: 9, color: MUTED });
     ctx.y -= 14;
 
-    h2(ctx, "Rentabilität");
+    h2(ctx, "Rentabilität", 140);
     const revenue = Number(cur.revenue_net ?? 0);
     const grossMargin = Number(der.gross_margin_pct ?? 0);
     const netMargin = Number(der.net_margin_pct ?? 0);
@@ -678,7 +700,7 @@ Deno.serve(async (req) => {
     ]);
 
     ctx.y -= 16;
-    h2(ctx, "Zielwerte (Benchmarks Automaten-Business)");
+    h2(ctx, "Zielwerte (Benchmarks Automaten-Business)", 3 * 34);
     // Skill-Vorgabe: graue Zusatzinfo zu Grafiken = 9 pt, grau, kursiv.
     p(ctx, "Rot gestrichelt = Zielkorridor, rote Linie = Einzel-Zielwert, goldene Marke = Ist-Wert.",
       { size: 9, color: MUTED, italic: true });
@@ -688,7 +710,7 @@ Deno.serve(async (req) => {
     targetRow(ctx, "Rohertragsmarge", pct(grossMargin), grossMargin, 50, 70, 100, "Ziel 50 - 70 %");
     targetRow(ctx, "Umsatzrendite", pct(netMargin), netMargin, 25, 35, 100, "Ziel 25 - 35 %");
     targetRow(ctx, "Ø Warenkorb (App)", eur(avgBasket), avgBasket, 1, 3, 6, "Ziel 1 - 3 EUR");
-    targetRow(ctx, "Ø Verkäufe / Tag", salesPerDay.toFixed(1), salesPerDay, 10, 50, 80, "Ziel 10 - 50");
+    targetRow(ctx, "Ø Verkäufe / Tag", salesPerDay.toFixed(1).replace(".", ","), salesPerDay, 10, 50, 80, "Ziel 10 - 50");
     targetRow(ctx, "ROI (nach Bilanz-Sync)", "—", null, 33, null, 100, "Ziel 33 %");
     targetRow(ctx, "Amortisation (Monate)", "—", null, 12, 24, 36, "Ziel 12 - 24");
     targetRow(ctx, "Schwundquote", "—", null, null, 1, 5, "Ziel < 1 %");
@@ -697,7 +719,7 @@ Deno.serve(async (req) => {
     // ── Seite 2: Vergleich + Trend + Konten ─────────────────────────
     newPage(ctx);
     h1(ctx, "Vergleich & Cashflow-Entwicklung");
-    h2(ctx, "Aktuell / Vormonat / Vorjahr");
+    h2(ctx, "Aktuell / Vormonat / Vorjahr", 175);
     comparisonChart(ctx, [
       { label: "Aktuell",  revenue: Number(cur.revenue_net ?? 0), result: Number(cur.result_net ?? 0) },
       { label: "Vormonat", revenue: Number(pp.revenue_net ?? 0),  result: Number(pp.result_net ?? 0) },
@@ -705,11 +727,11 @@ Deno.serve(async (req) => {
     ]);
 
     ctx.y -= 14;
-    h2(ctx, "Cashflow-Entwicklung (letzte 12 Monate)");
+    h2(ctx, "Cashflow-Entwicklung (letzte 12 Monate)", 185);
     trendChart(ctx, trend);
 
     ctx.y -= 14;
-    h2(ctx, "Konten (SKR 03)");
+    h2(ctx, "Konten (SKR 03)", 18 + 3 * 14);
     // deno-lint-ignore no-explicit-any
     const accounts = (cur.accounts as Array<any>) ?? [];
     if (accounts.length === 0) {
@@ -731,7 +753,7 @@ Deno.serve(async (req) => {
     // ── Seite 3: Automaten-Business ─────────────────────────────────
     newPage(ctx);
     h1(ctx, "Automaten-Business");
-    h2(ctx, "Umsatz je Automat");
+    h2(ctx, "Umsatz je Automat", 3 * 24);
     if (machines.length === 0) {
       p(ctx, "Im Zeitraum wurden keine Umsätze je Automat erfasst.", { color: MUTED });
     } else {
@@ -746,7 +768,8 @@ Deno.serve(async (req) => {
     }
 
     ctx.y -= 14;
-    h2(ctx, "App-Kunden im Zeitraum");
+    // Ohne Top-Produkte folgen direkt die Unterschriften: Platz mit freihalten.
+    h2(ctx, "App-Kunden im Zeitraum", 4 * 16 + (products.length > 0 ? 0 : UNTERSCHRIFT_H));
     kv(ctx, "Aktive Kunden",       String(cust.active_customers ?? 0));
     kv(ctx, "Kaufanzahl",          String(cust.purchases_count  ?? 0));
     kv(ctx, "Umsatz (App brutto)", eur(cust.app_gross));
@@ -754,7 +777,7 @@ Deno.serve(async (req) => {
 
     if (products.length > 0) {
       ctx.y -= 14;
-      h2(ctx, "Top-Produkte nach Umsatz");
+      h2(ctx, "Top-Produkte nach Umsatz", 18 + 3 * 14);
       table(
         ctx,
         ["Produkt", "Menge", "Umsatz brutto"],
@@ -765,7 +788,7 @@ Deno.serve(async (req) => {
           `${tp.quantity ?? 0} Stück`,
           eur(tp.gross),
         ]),
-        { alignRightCols: [1, 2] },
+        { alignRightCols: [1, 2], platzDanach: UNTERSCHRIFT_H },
       );
     }
 

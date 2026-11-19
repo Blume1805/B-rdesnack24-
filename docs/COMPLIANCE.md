@@ -1781,4 +1781,106 @@ Umsetzung (im Repository, nicht ausgeliefert):
 2. Philipp und Pia schalten Push am Handy ein (Runbook T, Teil 2). Danach die
    Probe.
 
-**Status: 🔴 OFFEN** (ausgeliefert; Schlüssel und Einschalten am Handy ausstehend)
+**Status: 🔴 OFFEN** (ausgeliefert, Schlüssel vom Server erzeugt; offen: Einschalten am Handy
+und Probe, Runbook T Teil 2, verantwortlich Philipp und Pia)
+
+---
+
+## V-023 · PDF-Belege: verstümmelte Freitexte, UTC-Zeiten, Seitenumbrüche (2026-11-19) — OFFEN (Auslieferung)
+
+### Sachverhalt
+
+Anlass: Philipp, 19.11.2026. Die PKW-Anlage brach so um, dass auf Seite 2
+nur noch die Summenzeile und die Unterschriften standen. Auftrag: alle
+PDF-Belege auf saubere Trennung und Formatierung prüfen. Alle Belege wurden
+mit Beispieldaten als echtes PDF gerendert und Seite für Seite angesehen
+(alter und neuer Stand). Dabei kamen neben den Umbrüchen echte Fehler heraus:
+
+1. **Freitexte verstümmelt** (Protokoll-Export, Freigabe-PDF): Jeder Text,
+   der länger als 19 Zeichen war und ein großes „T" enthielt, galt als
+   Zeitstempel. Aus „Tür geschlossen, nach 30 Minuten erneut gemessen: 5,0 °C"
+   wurde „ür geschlossen,". Betroffen waren gerade die Korrekturmaßnahmen der
+   HACCP-Protokolle. Die Daten in der Datenbank sind vollständig; nur die
+   Exporte waren falsch.
+2. **Freigabe-PDF eines Temperaturprotokolls nicht erzeugbar:** Das Zeichen
+   „≤" im Titel brach die PDF-Erzeugung ab (auch im alten Stand
+   nachgestellt).
+3. **Uhrzeiten in UTC**, eine bis zwei Stunden neben der deutschen Zeit.
+   Betroffen waren Protokolle, Freigabe-PDF, das Unterschriftenblatt der
+   Beschäftigten und der **Kassenbon**: Dort stand ein Kauf um 10:28 Uhr als
+   „09:28 Uhr".
+4. **Inhalte abgeschnitten:** Tabellenzellen im Freigabe-PDF wurden nach
+   fester Zeichenzahl gekürzt (Produktnamen, Maßnahmen).
+5. **Claude-Verbindung:** Die PDF-Anfrage schickte das Feld `kind` statt
+   `protocol`; jeder PDF-Abruf über Claude wäre mit 400 gescheitert (noch
+   kein Live-Test erfolgt).
+6. **Umbrüche:**
+   * Unterschriften standen allein auf der letzten Seite (PKW-Anlage,
+     Protokolle, Finanzexport).
+   * Überschriften blieben allein am Seitenfuß (Inventur, Finanzexport).
+   * Jede Protokollseite hielt unten ein Viertel für Unterschriften frei,
+     auch Zwischenseiten.
+   * Die Inventur-Folgeseiten begannen an der Papierkante.
+   * Die Bilanz des Freigabe-PDFs stand allein auf einer fast leeren Seite.
+
+### Rechtliche Würdigung
+
+* **HACCP / VO (EG) 852/2004, Eigenkontrolle:** Die Nachweise müssen lesbar
+  und vollständig sein. Ein Export, der Korrekturmaßnahmen verstümmelt,
+  ist als Nachweis gegenüber der Lebensmittelüberwachung untauglich. Die
+  Originaldaten waren vollständig, daher liegt kein Datenverlust vor.
+* **GoBD (Rz. 58 ff., Unveränderbarkeit und Lesbarmachung):** Eine Auswertung
+  muss den gespeicherten Inhalt unverfälscht wiedergeben. Die Kürzung und
+  Verstümmelung betraf die Lesbarmachung, nicht die Speicherung.
+* **§ 146a Abs. 2 AO, § 6 KassenSichV (Beleg):** Der Beleg muss Datum und
+  Uhrzeit des Vorgangs enthalten. Eine UTC-Zeit mit dem Zusatz „Uhr" weicht
+  von der tatsächlichen Uhrzeit ab. Ob die Automaten-Belege unter die
+  Belegausgabepflicht fallen, ist hier nicht entschieden; die Korrektur ist
+  in jedem Fall richtig.
+* **Gleichbehandlung:** Das Freigabeblatt trug fest „Gesellschafter" auch bei
+  der Gesellschafterin; die Rolle steht jetzt nicht mehr fest im Text.
+
+### Ergebnis / Handlungsbedarf
+
+1. Umgesetzt im Repository (19.11.2026), Nachweise:
+   * **Browser-Belege** (PKW-Anlage, FIFO-Inventur, Rechnung):
+     * gemeinsame Umbruchregeln in `apps/mobile/lib/core/druck/druck_regeln.dart`;
+     * Schluss mit den letzten drei Zeilen als unteilbare Gruppe;
+     * Kopfgruppen;
+     * Rand auf Folgeseiten.
+     * Test `test/druck/druck_layout_test.dart`, 13 Fälle.
+     * Gerendert mit `scripts/druck_pruefen.mjs`: Der Fall aus dem
+       Bildschirmfoto passt auf eine Seite; 40 Fahrten auf 2 Seiten statt 3;
+       Inventur mit 8 Produkten auf 6 Seiten statt 9.
+   * **Server-Belege:**
+     * `_shared/seiten.ts`: Zeilen füllen jede Seite; der Schluss nimmt nie
+       weniger als drei Zeilen mit; Seite 1 bleibt nie leer (8 Tests).
+     * `_shared/pdf_format.ts`: deutsche Zeit inklusive Sommerzeit, Datum,
+       Komma, WinAnsi-Absicherung, Umbruch ohne Kürzung (6 Tests).
+     * Angewendet in `protocol-export-pdf`, `document-finalize`,
+       `finance-export-pdf`, `receipt-pdf` und `merge-employee-signature`.
+   * **Claude-Verbindung:** `pdfAnfrage()` mit Vertragstest gegen
+     `protocol-export-pdf`.
+   * **Gesamtlauf:** 253 App-Tests, 71 Function-Tests mit Typprüfung, Lint und
+     Analyse sauber.
+2. 🔴 Ausliefern: App veröffentlichen und die sechs Server-Funktionen neu
+   bereitstellen, mit Philipps Freigabe.
+3. Bereits erzeugte Freigabe-PDFs (Speicher `signed-documents`) behalten den
+   alten Stand. Derzeit sind es nur die fünf Juli-Testdateien (Runbook U), die
+   ohnehin gelöscht werden.
+4. Offen, nicht Teil dieses Auftrags:
+   * `merge-employee-signature` hat 17 Typfehler aus der Abfrage (schon vorher
+     vorhanden, zur Laufzeit ohne Wirkung).
+   * Die Vorlagen-PDFs (`documents-install-*`) halten Überschriften schon
+     zusammen. Eine Änderung würde gespeicherte Vorlagen neu erzeugen und
+     wurde deshalb nicht vorgenommen.
+
+### Optimierungsvorschläge
+
+* Hinterlegte Unterschriftsbilder der Gesellschafter auch im Protokoll-Export
+  einbetten (heute nur der Hinweis „Signaturbild hinterlegt").
+* `scripts/druck_pruefen.mjs` in die CI aufnehmen. Dafür ist ein Vergleich
+  der Seitenzahlen nötig, kein reiner Bildvergleich.
+
+**Status: 🔴 OFFEN** (im Repository geprüft; Auslieferung ausstehend)
+

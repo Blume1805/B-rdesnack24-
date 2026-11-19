@@ -108,8 +108,12 @@ String anlagePkwHtml({
     }
     p.write('</tr>');
   }
-  void zeile(String label, String Function(Map<String, dynamic>) wert,
-      {bool summe = false, bool trenner = false}) {
+  void zeile(
+    String label,
+    String Function(Map<String, dynamic>) wert, {
+    bool summe = false,
+    bool trenner = false,
+  }) {
     final klassen = [if (summe) 'summe', if (trenner) 'trenner'].join(' ');
     p.write('<tr${klassen.isEmpty ? '' : ' class="$klassen"'}>'
         '<td class="l">$label</td>');
@@ -119,10 +123,16 @@ String anlagePkwHtml({
     p.write('</tr>');
   }
 
-  zeile('Gesamtkosten (brutto)', (f) => _eur(_num(f['gesamtkosten'])),
-      summe: true);
-  zeile('Kilometerstand 01.01.', (f) => _km(f['km_stand_anfang']),
-      trenner: true);
+  zeile(
+    'Gesamtkosten (brutto)',
+    (f) => _eur(_num(f['gesamtkosten'])),
+    summe: true,
+  );
+  zeile(
+    'Kilometerstand 01.01.',
+    (f) => _km(f['km_stand_anfang']),
+    trenner: true,
+  );
   zeile('Kilometerstand 31.12.', (f) => _km(f['km_stand_ende']));
   zeile('Gefahrene Kilometer', (f) => _km(f['km_gefahren']));
   zeile('Kosten je Kilometer', (f) => _satz(f['satz_je_km']), summe: true);
@@ -264,9 +274,8 @@ String _km(dynamic v) {
   final n = _num(v);
   final ganz = n == n.roundToDouble();
   // Tausenderpunkt wie bei Beträgen: „29.028 km" statt „29028 km".
-  final text = ganz
-      ? _tausender(n.round())
-      : n.toStringAsFixed(1).replaceAll('.', ',');
+  final text =
+      ganz ? _tausender(n.round()) : n.toStringAsFixed(1).replaceAll('.', ',');
   return '$text km';
 }
 
